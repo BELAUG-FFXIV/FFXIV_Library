@@ -368,6 +368,8 @@ function cycleLang() {
   const next = cur === 'EN' ? 'JP' : cur === 'JP' ? 'ZH' : 'EN';
   localStorage.setItem(LANG_KEY, next);
   applyLangUI(next);
+  renderFeatured();   // ← 切換語言時，同步更新「推薦影片」標題
+
   // 如果你的篩選是即時的，這裡可觸發一次重新渲染：
   // applyFilters?.();
 }
