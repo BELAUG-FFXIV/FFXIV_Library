@@ -11,9 +11,9 @@ const category = document.getElementById('category');
 const featuredVideo = {
   ytId: "rSE9mxzvSg8", // ⭐ 改成你要推薦的影片 ID
   title: {
-    EN: "⭐ Featured: A New Dawn",
-    JP: "⭐ おすすめ：新たな夜明け",
-    ZH: "⭐ 推薦影片：新的黎明"
+    EN: "⭐ Featured: Relax at Sunset in Shirogane",
+    JP: "⭐ おすすめ：シロガネの夕暮れでくつろいで",
+    ZH: "⭐ 推薦影片：在 Shirogane 靜謐的海岸邊，迎接寧靜的夜晚"
   }
 };
 const expac = document.getElementById('expac');
