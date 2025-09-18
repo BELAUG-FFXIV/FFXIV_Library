@@ -15,11 +15,9 @@ const activeTags = document.getElementById('activeTags');
 const themeToggle = document.getElementById('themeToggle');
 document.getElementById('year').textContent = new Date().getFullYear();
 
-// === Theme toggle (light / dark) ===
-const themeToggle = document.getElementById('themeToggle');
 const THEME_KEY = 'ffxiv-lib-theme';
 
-// 將主題狀態套到 <html data-theme="...">，並切換按鈕圖示
+// === Theme toggle (light / dark) ===
 function applyTheme(mode){
   if(mode === 'dark'){
     document.documentElement.setAttribute('data-theme', 'dark');
