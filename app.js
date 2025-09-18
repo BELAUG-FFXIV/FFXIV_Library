@@ -92,15 +92,34 @@ function render(){
 function cardHTML(it){
   const thumb = it.thumb || `https://i.ytimg.com/vi/${it.ytId}/hqdefault.jpg`;
   const title = it.title?.en || it.title?.jp || it.title?.zh || 'Untitled';
+
   const metaL = [
     it.expac && `<span class="badge">${it.expac}</span>`,
     it.patch && `<span class="badge">${it.patch}</span>`,
     it.category && `<span class="badge">${it.category}</span>`,
   ].filter(Boolean).join('');
+
   const tags = (it.tags||[]).slice(0,6).map(t => `<span class="tag" data-tag="${t}">#${t}</span>`).join('');
-  const pLink = it.playlistUrl ? `<a class="btn ghost" href="${it.playlistUrl}" target="_blank" rel="noopener">播放清單</a>` : '';
-  const vLink = it.videoUrl ? `<a class="btn ghost" href="${it.videoUrl}" target="_blank" rel="noopener">YouTube</a>` : '';
+
+  // --- 新：三顆按鈕（Play / Playlist / YouTube-icon） ---
   const safe = s => (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+
+  const playBtn = it.ytId
+    ? `<button class="btn play" data-play="${it.ytId}" data-title="${safe(title)}">Play</button>`
+    : '';
+
+  const playlistBtn = it.playlistUrl
+    ? `<a class="btn ghost" href="${it.playlistUrl}" target="_blank" rel="noopener">Playlist</a>`
+    : '';
+
+  const youtubeBtn = it.videoUrl
+    ? `<a class="btn ghost yt-only" href="${it.videoUrl}" target="_blank" rel="noopener" aria-label="YouTube">
+         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" class="yt-icon">
+           <path d="M23.5 6.2s-.2-1.7-.8-2.5c-.8-.9-1.7-.9-2.1-1-3-.2-7.6-.2-7.6-.2h-.1s-4.6 0-7.6.2c-.4 0-1.3 0-2.1 1-.6.8-.8 2.5-.8 2.5S2 8.1 2 10v1.9c0 1.9.2 3.8.2 3.8s.2 1.7.8 2.5c.8.9 1.9.9 2.4 1 1.7.2 7.2.2 7.2.2s4.6 0 7.6-.2c.4 0 1.3 0 2.1-1 .6-.8.8-2.5.8-2.5s.2-1.9.2-3.8V10c0-1.9-.2-3.8-.2-3.8zM9.8 13.6V8.4l5.9 2.6-5.9 2.6z"/>
+         </svg>
+       </a>`
+    : '';
+
   return `
   <article class="card">
     <img class="thumb" src="${thumb}" alt="${safe(title)}" loading="lazy">
@@ -109,8 +128,9 @@ function cardHTML(it){
       <div class="meta">${metaL}</div>
       ${it.series ? `<div class="meta">系列：${safe(it.series)}</div>` : ''}
       <div class="actions">
-        ${it.ytId ? `<button class="btn play" data-play="${it.ytId}" data-title="${safe(title)}">▶ 播放</button>` : ''}
-        ${pLink}${vLink}
+        ${playBtn}
+        ${playlistBtn}
+        ${youtubeBtn}
       </div>
       <div class="tags" style="margin-top:8px">${tags}</div>
     </div>
@@ -322,3 +342,28 @@ langToggle?.addEventListener('click', cycleLang);
 // 初始化
 const BOOT_LANG = localStorage.getItem(LANG_KEY) || 'EN';
 applyLangUI(BOOT_LANG);
+
+/* 卡片按鈕排列與大小 */
+.card .actions{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.card .actions .btn{
+  font-size:.95rem;
+  padding:10px 14px;
+  white-space:nowrap;    /* Playlist 不換行 */
+}
+
+/* YouTube 紅色圖示 */
+.yt-icon path{ fill:#FF0000; }
+
+/* 只顯示 icon 的 YouTube 鈕：移除邊框底色 */
+.btn.yt-only{
+  padding:8px;
+  background:none!important;
+  border:none!important;
+  box-shadow:none!important;
+}
+.btn.yt-only:hover{ opacity:.85; }
