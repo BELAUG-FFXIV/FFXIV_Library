@@ -15,13 +15,29 @@ const activeTags = document.getElementById('activeTags');
 const themeToggle = document.getElementById('themeToggle');
 document.getElementById('year').textContent = new Date().getFullYear();
 
+// === Theme toggle (light / dark) ===
+const themeToggle = document.getElementById('themeToggle');
 const THEME_KEY = 'ffxiv-lib-theme';
-function applyTheme(mode){ document.documentElement.style.colorScheme = mode || 'normal'; }
-applyTheme(localStorage.getItem(THEME_KEY));
-themeToggle.addEventListener('click',()=>{
-  const cur = localStorage.getItem(THEME_KEY);
-  const next = cur === 'dark' ? 'light' : cur === 'light' ? null : 'dark';
-  if(next) localStorage.setItem(THEME_KEY, next); else localStorage.removeItem(THEME_KEY);
+
+// 將主題狀態套到 <html data-theme="...">，並切換按鈕圖示
+function applyTheme(mode){
+  if(mode === 'dark'){
+    document.documentElement.setAttribute('data-theme', 'dark');
+    if (themeToggle) themeToggle.textContent = '☀️'; // 深色 → 顯示太陽
+  }else{
+    document.documentElement.removeAttribute('data-theme'); // 預設 light
+    if (themeToggle) themeToggle.textContent = '🌙'; // 淺色 → 顯示月亮
+  }
+}
+
+// 初始化：讀 localStorage，預設 light
+applyTheme(localStorage.getItem(THEME_KEY) || 'light');
+
+// 點擊切換
+themeToggle?.addEventListener('click', ()=>{
+  const cur = localStorage.getItem(THEME_KEY) || 'light';
+  const next = cur === 'dark' ? 'light' : 'dark';
+  localStorage.setItem(THEME_KEY, next);
   applyTheme(next);
 });
 
