@@ -9,7 +9,7 @@ const q = document.getElementById('q');
 const category = document.getElementById('category');
 /* === 推薦影片設定 === */
 const featuredVideo = {
-  ytId: "dQw4w9WgXcQ", // ⭐ 改成你要推薦的影片 ID
+  ytId: "rSE9mxzvSg8", // ⭐ 改成你要推薦的影片 ID
   title: {
     EN: "⭐ Featured: A New Dawn",
     JP: "⭐ おすすめ：新たな夜明け",
