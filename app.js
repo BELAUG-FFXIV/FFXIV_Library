@@ -147,9 +147,110 @@ clearBtn.addEventListener('click', () => {
   applyFilters();
 });
 
-<input id="q" ... />
-<label id="sortLabel">排序：</label>
-<span id="resultCount">0</span><span id="itemsSuffix"> 項內容</span>
-<select id="category" class="select">
-  <option value="">全部分類</option>
-</select>
+/* ==============================
+   Minimal i18n + Lang Toggle (safe)
+   ============================== */
+(function(){
+  try {
+    const LANG_KEY = 'ffxiv-lib-lang';
+    const LANGS = ['EN','JP','ZH'];
+    let lang = localStorage.getItem(LANG_KEY) || 'EN';
+
+    // 介面多語字典（先做最小可用）
+    const i18n = {
+      EN: {
+        langLabel: 'EN',
+        tagline: 'Organized by series: Main Story, Raids, BGM, Jobs/Events, Tools & Collections. Supports search, tags, and quick play.',
+        searchPH: 'Search title, series, tags, chapter…',
+        sort: 'Sort by:',
+        itemsSuffix: ' items',
+        categories: [
+          { value: '',        label: 'All Categories' },
+          { value: 'MSQ',     label: 'Main Story (MSQ)' },
+          { value: 'Raid',    label: 'Raid / Alliance' },
+          { value: 'Dungeon', label: 'Dungeon / Trial' },
+          { value: 'BGM',     label: 'BGM' },
+          { value: 'Collection', label: 'Collection (Mount / Weapon / Tool)' },
+          { value: 'Feature', label: 'Feature / System / Event' },
+        ]
+      },
+      JP: {
+        langLabel: 'JP',
+        tagline: 'シリーズ別に整理：メインストーリー、レイド、BGM、ジョブ/イベント、ツール＆コレクション。検索・タグ・クイック再生に対応。',
+        searchPH: 'タイトル・シリーズ・タグ・章を検索…',
+        sort: '並び替え：',
+        itemsSuffix: ' 件',
+        categories: [
+          { value: '',        label: '全ての分類' },
+          { value: 'MSQ',     label: 'メインストーリー' },
+          { value: 'Raid',    label: 'レイド / アライアンス' },
+          { value: 'Dungeon', label: 'ダンジョン / 討伐・討滅戦' },
+          { value: 'BGM',     label: 'BGM' },
+          { value: 'Collection', label: 'コレクション（マウント / 武器 / ツール）' },
+          { value: 'Feature', label: '機能 / システム / イベント' },
+        ]
+      },
+      ZH: {
+        langLabel: 'ZH',
+        tagline: '以系列為主軸整理：主線、團本、BGM、職業/活動、工具與蒐集。支援搜尋、標籤與快速播放。',
+        searchPH: '搜尋標題、系列、標籤、章節…',
+        sort: '排序：',
+        itemsSuffix: ' 項內容',
+        categories: [
+          { value: '',        label: '全部分類' },
+          { value: 'MSQ',     label: '主線任務' },
+          { value: 'Raid',    label: '團本 / 聯盟戰' },
+          { value: 'Dungeon', label: '副本 / 討伐戰' },
+          { value: 'BGM',     label: 'BGM' },
+          { value: 'Collection', label: '蒐集（坐騎 / 武器 / 工具）' },
+          { value: 'Feature', label: '功能 / 系統 / 活動' },
+        ]
+      }
+    };
+
+    // 取 DOM（使用不同變數名，避免和你前面的 const category 衝突）
+    const langToggle    = document.getElementById('langToggle');
+    const taglineEl     = document.getElementById('tagline');
+    const searchEl      = document.getElementById('q');
+    const sortLabelEl   = document.getElementById('sortLabel');
+    const itemsSuffixEl = document.getElementById('itemsSuffix');
+    const categorySel   = document.getElementById('category');
+
+    function applyLangUI() {
+      const dict = i18n[lang];
+      if (!dict) return;
+
+      // 按鈕
+      if (langToggle) langToggle.textContent = `🌐 ${dict.langLabel}`;
+      // 說明、placeholder、排序標籤、結果單位
+      if (taglineEl)     taglineEl.textContent = dict.tagline;
+      if (searchEl)      searchEl.placeholder = dict.searchPH;
+      if (sortLabelEl)   sortLabelEl.textContent = dict.sort;
+      if (itemsSuffixEl) itemsSuffixEl.textContent = ` ${dict.itemsSuffix.trim()}`;
+
+      // 分類選單注入（保留原本 value，讓既有篩選流程不壞掉）
+      if (categorySel) {
+        const prev = categorySel.value;
+        categorySel.innerHTML = dict.categories
+          .map(o => `<option value="${o.value}">${o.label}</option>`)
+          .join('');
+        categorySel.value = dict.categories.some(o => o.value === prev) ? prev : '';
+      }
+    }
+
+    // 切換語言
+    if (langToggle) {
+      langToggle.addEventListener('click', () => {
+        const idx = LANGS.indexOf(lang);
+        lang = LANGS[(idx + 1) % LANGS.length];
+        localStorage.setItem(LANG_KEY, lang);
+        applyLangUI();
+      });
+    }
+
+    // 初始
+    applyLangUI();
+  } catch (e) {
+    console.error('[i18n init error]', e);
+  }
+})();
