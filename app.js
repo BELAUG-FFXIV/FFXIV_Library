@@ -342,28 +342,3 @@ langToggle?.addEventListener('click', cycleLang);
 // 初始化
 const BOOT_LANG = localStorage.getItem(LANG_KEY) || 'EN';
 applyLangUI(BOOT_LANG);
-
-/* 卡片按鈕排列與大小 */
-.card .actions{
-  display:flex;
-  gap:12px;
-  align-items:center;
-  flex-wrap:wrap;
-}
-.card .actions .btn{
-  font-size:.95rem;
-  padding:10px 14px;
-  white-space:nowrap;    /* Playlist 不換行 */
-}
-
-/* YouTube 紅色圖示 */
-.yt-icon path{ fill:#FF0000; }
-
-/* 只顯示 icon 的 YouTube 鈕：移除邊框底色 */
-.btn.yt-only{
-  padding:8px;
-  background:none!important;
-  border:none!important;
-  box-shadow:none!important;
-}
-.btn.yt-only:hover{ opacity:.85; }
