@@ -146,3 +146,10 @@ clearBtn.addEventListener('click', () => {
   q.value=''; category.value=''; expac.value=''; patch.value=''; sortSel.value='latest';
   applyFilters();
 });
+
+<input id="q" ... />
+<label id="sortLabel">排序：</label>
+<span id="resultCount">0</span><span id="itemsSuffix"> 項內容</span>
+<select id="category" class="select">
+  <option value="">全部分類</option>
+</select>
