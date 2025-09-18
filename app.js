@@ -133,3 +133,12 @@ clearBtn.addEventListener('click', () => {
   q.value=''; category.value=''; expac.value=''; patch.value=''; sortSel.value='latest';
   applyFilters();
 });
+// Hero 區塊的播放按鈕
+const heroBtn = document.getElementById('heroPlay');
+if (heroBtn) {
+  heroBtn.addEventListener('click', () => {
+    // 這裡放你想預設播放的影片 ID
+    const ytId = "HMf2Ldtb36Y"; 
+    openPlayer(ytId, "播放中…");
+  });
+}
