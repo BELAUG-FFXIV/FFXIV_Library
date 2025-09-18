@@ -82,7 +82,6 @@ function cardHTML(it){
     it.expac && `<span class="badge">${it.expac}</span>`,
     it.patch && `<span class="badge">${it.patch}</span>`,
     it.category && `<span class="badge">${it.category}</span>`,
-    it.date && `<span>${it.date}</span>`
   ].filter(Boolean).join('');
   const tags = (it.tags||[]).slice(0,6).map(t => `<span class="tag" data-tag="${t}">#${t}</span>`).join('');
   const pLink = it.playlistUrl ? `<a class="btn ghost" href="${it.playlistUrl}" target="_blank" rel="noopener">播放清單</a>` : '';
