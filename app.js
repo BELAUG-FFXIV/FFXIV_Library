@@ -186,6 +186,15 @@ clearBtn.addEventListener('click', () => {
   { value: 'PVP',            label: 'PVP' },
 ]
       },
+       expansions: [
+      { value: '', label: 'All Expansions' },
+      { value: 'ARR', label: 'A Realm Reborn (ARR)' },
+      { value: 'HW', label: 'Heavensward (HW)' },
+      { value: 'SB', label: 'Stormblood (SB)' },
+      { value: 'SHB', label: 'Shadowbringers (SHB)' },
+      { value: 'EW', label: 'Endwalker (EW)' },
+      { value: 'DT', label: 'Dawntrail (DT)' },
+    ]
       JP: {
         langLabel: 'JP',
         tagline: 'シリーズ別に整理：メインストーリー、レイド、BGM、ジョブ/イベント、ツール＆コレクション。検索・タグ・クイック再生に対応。',
@@ -214,6 +223,15 @@ clearBtn.addEventListener('click', () => {
   { value: 'PVP',            label: 'PVP' },
 ]
       },
+    expansions: [
+      { value: '', label: '全ての資料片' },
+      { value: 'ARR', label: '新生エオルゼア' },
+      { value: 'HW', label: '蒼天のイシュガルド' },
+      { value: 'SB', label: '紅蓮のリベレーター' },
+      { value: 'SHB', label: '漆黒のヴィランズ' },
+      { value: 'EW', label: '暁月のフィナーレ' },
+      { value: 'DT', label: '黄金のレガシー' },
+    ]
       ZH: {
         langLabel: 'ZH',
         tagline: '以系列為主軸整理：主線、團本、BGM、職業/活動、工具與蒐集。支援搜尋、標籤與快速播放。',
@@ -240,9 +258,18 @@ clearBtn.addEventListener('click', () => {
   { value: 'HighDiff',       label: '高難度內容' },
   { value: 'RelaxingBGM',    label: 'FFXIV 背景放鬆音樂' },
   { value: 'PVP',            label: 'PVP' },
-]
-      }
-    };
+ ],
+    expansions: [
+      { value: '', label: '全部資料片' },
+      { value: 'ARR', label: '重生之境' },
+      { value: 'HW', label: '蒼天之伊修加德' },
+      { value: 'SB', label: '紅蓮之解放者' },
+      { value: 'SHB', label: '漆黑的反叛者' },
+      { value: 'EW', label: '曉月之終途' },
+      { value: 'DT', label: '黃金的遺產' },
+    ]
+  }
+};
 
     // 取 DOM（使用不同變數名，避免和你前面的 const category 衝突）
     const langToggle    = document.getElementById('langToggle');
