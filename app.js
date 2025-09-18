@@ -50,7 +50,7 @@ themeToggle?.addEventListener('click', ()=>{
 
 fetch('data/library.json')
   .then(r => r.json())
-  .then(json => { state.data = json.items.map(deriveFields); applyFilters(); })
+  .then(json => { state.data = json.items.map(deriveFields); applyFilters();renderFeatured(); })
   .catch(err => { grid.innerHTML = `<p>載入資料失敗：${err?.message || err}</p>`; });
 
 function deriveFields(it){
