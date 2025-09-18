@@ -97,6 +97,33 @@ function render(){
   pager.querySelectorAll('[data-page]').forEach(b=> b.addEventListener('click', ()=>{ state.page = +b.dataset.page; render(); }));
   renderActiveTags();
 }
+// 取目前語言（沿用你先前的 localStorage key）
+function getLang(){
+  return localStorage.getItem('ffxiv-lib-lang') || 'EN';
+}
+
+// 把推薦影片塞進 #featured
+function renderFeatured(){
+  const box = document.getElementById('featured');
+  if(!box || !featuredVideo) return;
+
+  const lang = getLang();
+  const title = featuredVideo.title?.[lang] || featuredVideo.title?.EN || '⭐ Featured';
+
+  box.innerHTML = `
+    <div class="featured-card">
+      <h2 class="section-title">${title}</h2>
+      <div class="video-wrapper">
+        <iframe
+          src="https://www.youtube.com/embed/${featuredVideo.ytId}"
+          title="${title}" width="100%" height="315" frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen>
+        </iframe>
+      </div>
+    </div>
+  `;
+}
 
 function cardHTML(it){
   const thumb = it.thumb || `https://i.ytimg.com/vi/${it.ytId}/hqdefault.jpg`;
