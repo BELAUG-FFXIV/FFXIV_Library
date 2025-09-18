@@ -7,6 +7,15 @@ const pager = document.getElementById('pager');
 const resultCount = document.getElementById('resultCount');
 const q = document.getElementById('q');
 const category = document.getElementById('category');
+/* === 推薦影片設定 === */
+const featuredVideo = {
+  ytId: "dQw4w9WgXcQ", // ⭐ 改成你要推薦的影片 ID
+  title: {
+    EN: "⭐ Featured: A New Dawn",
+    JP: "⭐ おすすめ：新たな夜明け",
+    ZH: "⭐ 推薦影片：新的黎明"
+  }
+};
 const expac = document.getElementById('expac');
 const patch = document.getElementById('patch');
 const clearBtn = document.getElementById('clear');
