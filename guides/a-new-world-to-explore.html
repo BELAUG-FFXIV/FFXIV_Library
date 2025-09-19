@@ -1,200 +1,238 @@
-<!-- === Quest Page Mini-Module (drop-in) === -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>A New World to Explore | FFXIV Library</title>
 <style>
-  /* 淺色、乾淨一點的版面（不動到全站） */
-  .quest-page { --muted: #667085; --accent:#2b6cb0; --bg:#fffaf0; }
-  .quest-head {
-    background: var(--bg);
-    border: 1px solid #f1e8c9;
-    padding: 16px 18px; border-radius: 14px; display:flex; gap:12px; align-items:center;
+  :root{
+    --bg-egg:#FFF7E6;
+    --bg:#fafafa;
+    --text:#111;
+    --muted:#666;
+    --accent:#0f7bff;
+    --ring:#e6e6e6;
+    --chip:#f2f2f2;
+    --chip-text:#222;
   }
-  .quest-head h1 { margin:0; font-size:1.6rem; line-height:1.2; }
-  .quest-tools { margin-left:auto; display:flex; gap:8px; align-items:center; }
-  .quest-btn { padding:8px 12px; border-radius:10px; border:1px solid #e6e6e6; background:#fff; cursor:pointer; }
-  .quest-btn:hover{border-color:#dadada}
-  .tabs { margin-top:16px; display:flex; gap:8px; flex-wrap:wrap; }
-  .tab-btn { padding:8px 12px; border-radius: 999px; border:1px solid #e6e6e6; background:#fff; cursor:pointer; }
-  .tab-btn.active { background:#111; color:#fff; border-color:#111; }
-  .tab { display:none; margin-top:18px;}
-  .tab.show { display:block;}
-  .section { margin-top:24px; }
-  .section h2 { font-size:1.1rem; margin:0 0 12px; }
-  .kv { list-style:none; margin:0; padding:0; }
-  .kv li { display:flex; gap:16px; padding:10px 12px; border:1px solid #efefef; border-radius:12px; margin-bottom:8px; background:#fff; }
-  .kv .k { min-width:12rem; color:var(--muted); }
-  .kv .v a { color: var(--accent); text-decoration: none; }
-  .kv .v a:hover { text-decoration: underline; }
-  .links { list-style: none; padding:0; margin:0; display:grid; gap:8px; }
-  .links a{ display:inline-block; padding:10px 12px; border:1px solid #efefef; border-radius:12px; background:#fff; text-decoration:none; }
-  .links a:hover{ border-color:#ddd }
-  .lang-badge { font-weight:600; }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:#fff;color:var(--text);font:16px/1.6 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans",Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji"}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  /* Header */
+  .hero{
+    position:sticky; top:0; z-index:50;
+    background:var(--bg-egg);
+    border-bottom:1px solid #f0e8d6;
+  }
+  .hero-inner{
+    max-width:1200px;margin:0 auto;padding:18px 16px;
+    display:flex;align-items:center;gap:16px;
+  }
+  .title{font-size:28px;font-weight:800;letter-spacing:.3px;flex:1}
+  .lang{display:flex;gap:8px}
+  .pill{
+    border:1px solid var(--ring);background:#fff;color:var(--chip-text);
+    border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:700
+  }
+  .pill.active{background:#111;color:#fff;border-color:#111}
+  /* Layout */
+  .wrap{max-width:1200px;margin:16px auto;padding:0 16px}
+  .grid{display:grid;grid-template-columns:minmax(320px,1fr) 1.5fr;gap:24px}
+  @media (max-width:980px){
+    .grid{grid-template-columns:1fr}
+  }
+  /* Sticky video */
+  .video-wrap{position:sticky;top:88px}
+  .card{
+    border:1px solid var(--ring);border-radius:16px;background:#fff;overflow:hidden
+  }
+  .card .body{padding:16px}
+  iframe{display:block;width:100%;aspect-ratio:16/9;border:0}
+  /* Tabs */
+  .tabs{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px}
+  .tab-btn{
+    background:var(--chip);border:1px solid var(--ring);color:var(--chip-text);
+    padding:8px 14px;border-radius:999px;cursor:pointer;font-weight:700
+  }
+  .tab-btn.active{background:#111;color:#fff;border-color:#111}
+  .panel{display:none}
+  .panel.active{display:block}
+  .section{border:1px solid var(--ring);border-radius:14px;padding:16px;background:#fff}
+  .kv{display:flex;gap:12px;align-items:center;margin:10px 0}
+  .kv .k{min-width:140px;color:#444;font-weight:700}
+  .list{margin:6px 0 0 0;padding-left:18px}
+  .badge{display:inline-block;padding:4px 10px;border-radius:999px;background:var(--chip);border:1px solid var(--ring);color:#333;font-weight:700}
+  .small{color:var(--muted);font-size:13px}
 </style>
+</head>
+<body>
 
-<div class="quest-page">
-  <!-- 頁首：標題 + 語言切換 -->
-  <div class="quest-head">
-    <h1 id="questTitle"
-        data-en="A New World to Explore"
-        data-jp="新たなる冒険の世界"
-        data-zh="嶄新的冒險"></h1>
-
-    <div class="quest-tools">
-      <button id="langToggle" class="quest-btn">🌐 EN</button>
+<!-- Header -->
+<header class="hero">
+  <div class="hero-inner">
+    <h1 id="pageTitle" class="title">A New World to Explore</h1>
+    <div class="lang">
+      <button class="pill active" data-lang="EN">EN</button>
+      <button class="pill" data-lang="JP">JP</button>
+      <button class="pill" data-lang="ZH">ZH</button>
     </div>
   </div>
+</header>
 
-  <!-- Tabs：Details / Acquisition / Requirements / Unlocks -->
-  <div class="tabs" role="tablist" aria-label="Quest Tabs">
-    <button class="tab-btn active" data-tab="details"
-            data-en="Details" data-jp="詳細" data-zh="詳細"></button>
-    <button class="tab-btn" data-tab="acq"
-            data-en="Acquisition" data-jp="取得方法" data-zh="取得方式"></button>
-    <button class="tab-btn" data-tab="req"
-            data-en="Requirements" data-jp="参加条件" data-zh="需求條件"></button>
-    <button class="tab-btn" data-tab="unlock"
-            data-en="Unlocks / Leads To" data-jp="解放 / 次のクエスト" data-zh="解鎖 / 後續任務"></button>
+<!-- Main -->
+<main class="wrap">
+  <div class="grid">
+
+    <!-- Left: sticky video -->
+    <aside class="video-wrap">
+      <div class="card">
+        <iframe id="yt" src="https://www.youtube.com/embed/HMf2Ldtb36Y"
+          title="A New World to Explore"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen></iframe>
+        <div class="body small">
+          <span class="badge">MSQ</span>
+          <span class="badge">DT</span>
+          <span class="badge">7.0</span>
+          &nbsp;&nbsp;系列：Main Story (Dawntrail)
+        </div>
+      </div>
+    </aside>
+
+    <!-- Right: tabs/content -->
+    <section>
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="details">Details</button>
+        <button class="tab-btn" data-tab="acq">Acquisition</button>
+        <button class="tab-btn" data-tab="req">Requirements</button>
+        <button class="tab-btn" data-tab="unlock">Unlocks</button>
+      </div>
+
+      <!-- Details -->
+      <div id="panel-details" class="panel active">
+        <div class="section" id="detailsText">
+          <!-- 由 JS 依語言注入 -->
+        </div>
+      </div>
+
+      <!-- Acquisition -->
+      <div id="panel-acq" class="panel">
+        <div class="section">
+          <div class="kv">
+            <div class="k">Quest Giver</div>
+            <div>Ojika Tsunjika（Old Sharlayan → The Baldesion Annex）</div>
+          </div>
+          <div class="kv">
+            <div class="k">Location</div>
+            <div>Old Sharlayan → The Baldesion Annex <span class="small">(x: 9.2, y: 11.3)</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Requirements -->
+      <div id="panel-req" class="panel">
+        <div class="section">
+          <div class="kv">
+            <div class="k">Prerequisite Quest</div>
+            <div>
+              <a href="#" id="linkPrereq">The Coming Dawn</a>
+              <span class="small">(Lv. 90)</span>
+            </div>
+          </div>
+          <div class="kv">
+            <div class="k">Job</div>
+            <div>Any Disciple of War or Magic <span class="small">(excluding limited jobs, Lv. 90)</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Unlocks -->
+      <div id="panel-unlock" class="panel">
+        <div class="section">
+          <div class="kv">
+            <div class="k">Leads to</div>
+            <div><a href="#" id="linkNext">The Nation of Tuliyollal</a></div>
+          </div>
+        </div>
+      </div>
+
+    </section>
   </div>
-
-  <!-- Tab Panels -->
-  <section id="tab-details" class="tab show" role="tabpanel" aria-labelledby="tab-details">
-    <!-- 你的影片嵌入：直接沿用你的 YouTube ID -->
-    <div style="margin-top:12px; border-radius:12px; overflow:hidden; border:1px solid #efefef;">
-      <iframe width="100%" height="360"
-        src="https://www.youtube.com/embed/HMf2Ldtb36Y"
-        title="A New World to Explore"
-        frameborder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        allowfullscreen></iframe>
-    </div>
-
-    <!-- 三語敘述 -->
-    <div class="section">
-      <p class="lang-badge" data-en="📘 EN" data-jp="📘 英語" data-zh="📘 英文"></p>
-      <div id="desc-en" class="desc">
-        <p>The journey begins anew at the main hall of the Baldesion Annex, where Ojika Tsunjika shares news that Erenville has secured passage to Tural aboard a gleaners’ guildship. As you wait, Wuk Lamat gathers her companions and revisits the mission ahead: the rite of succession in Tuliyollal, where she will contend for the title of Dawnservant. Alphinaud and Alisaie speak of their diplomatic goals, Krile shares the mystery of her grandfather’s vanished expedition, and even Erenville—reluctantly—admits his role as the Third Promise’s guide.</p>
-        <p>Boarding the vessel, the group sets off across the sea. What begins as a hopeful voyage soon descends into chaos as a violent storm strikes mid-journey. Lightning flashes across the sky, and the wind tears through the sails. A sailor is thrown from the mast, panic spreads, and only swift action from you and your comrades keeps disaster at bay. In the aftermath, Erenville quietly reflects on the ordeal, seeing in it a fitting prelude to the trials ahead.</p>
-        <p>As seabirds signal landfall, the travelers finally arrive in Tuliyollal. Amid its vibrant streets and unfamiliar sights, Wuk Lamat receives greetings from startled but respectful guards. Her companions marvel at the diversity of culture, while traders and adventurers aboard the ship hint at the complexities of life in Tural. With the journey behind them and the rite ahead, Wuk Lamat turns to you with pride. Thus begins your exploration of the New World.</p>
-      </div>
-
-      <p class="lang-badge" style="margin-top:12px" data-en="📗 JP" data-jp="📗 日本語" data-zh="📗 日文"></p>
-      <div id="desc-jp" class="desc">
-        <p>旅の再始動は、バルデシオン分館の大広間から始まる。オジカ・ツンジカが、エレンヴィルがギャザラーズギルドの船を手配したとの報せを届けると、ウク・ラマットは仲間を集め、目的を再確認する。即位の儀を控えたトゥラルでの挑戦──自らが次代のドーンサーヴァントとなる覚悟。アルフィノとアリゼーは復興と交流を目的に、クルルは祖父の謎を追い、そしてエレンヴィルもまた、第三の誓約としての役割を受け入れる。</p>
-        <p>出航した一行を待ち受けていたのは、突如として海を襲う嵐だった。雷鳴が空を裂き、強風が帆を引き裂く中、甲板では船員が転落し、混乱が広がる。そんな中、あなたと仲間たちは素早く動き、負傷者の救助や防御装置の展開に奔走。嵐の終息後、エレンヴィルは静かに語る──あの試練こそが、これから始まる戦いの序章にふさわしかったと。</p>
-        <p>やがて海鳥の声が届き、一行はついにトゥラルの地へと辿り着く。色とりどりの風景と多様な文化に迎えられ、ウク・ラマットの正体に驚く衛兵たちも、すぐに敬意をもって迎え入れる。交易商や冒険者たちの会話から垣間見える、トゥラルという世界の広がり。ウク・ラマットは風を感じ、故郷に立つ喜びを噛み締めながら、あなたにほほえむ。「新世界」への探求が、今ここから始まる。</p>
-      </div>
-
-      <p class="lang-badge" style="margin-top:12px" data-en="📕 ZH-TW" data-jp="📕 繁体中文" data-zh="📕 繁體中文"></p>
-      <div id="desc-zh" class="desc">
-        <p>旅程自 Baldesion Annex 的大廳再次啟程。Ojika Tsunjika 傳來好消息：Erenville 已為眾人取得前往 Tural 的公會船位。等待啟航之際，Wuk Lamat 集合所有夥伴，重申她將挑戰 Tuliyollal 王位繼承儀式、爭取成為新任 Dawnservant 的決心。Alphinaud 與 Alisaie 表示將以外交交流為使命，Krile 則提及祖父失落的黃金都市調查，而 Erenville 雖語氣冷淡，卻仍承認自己是為第三誓約而來。</p>
-        <p>船隻啟航，穿越大海之旅正式展開。不久後，狂風驟雨席捲而至，掀起洶湧巨浪與驚雷閃電。船員從桅桿墜落，甲板騷動不安，你與夥伴們即刻行動，協助傷者、啟動護罩魔裝，全力穩住航行。待風暴平息，Erenville 淡然一語，道出這場危機正象徵著未來將面對的考驗。</p>
-        <p>終於，海鷗鳴聲傳來，前方現出陸地。當眾人踏上 Tuliyollal 的碼頭，迎接他們的是鮮明文化與好奇目光。守衛對 Wuk Lamat 的身份驚愕後轉而致敬，商人與旅人亦分享關於 Tural 的風土人情。在這片嶄新的土地上，Wuk Lamat 回頭向你一笑。探尋「新世界」的旅程，於焉展開。</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- Acquisition -->
-  <section id="tab-acq" class="tab" role="tabpanel">
-    <div class="section">
-      <h2 data-en="Acquisition" data-jp="取得方法" data-zh="取得方式"></h2>
-      <ul class="kv">
-        <li>
-          <div class="k" data-en="Quest Giver" data-jp="依頼主" data-zh="任務發布者"></div>
-          <div class="v">
-            <a href="#">Ojika Tsunjika</a> — 
-            <a href="#">Old Sharlayan</a> → <a href="#">The Baldesion Annex</a>
-          </div>
-        </li>
-        <li>
-          <div class="k" data-en="Location" data-jp="場所" data-zh="地點"></div>
-          <div class="v">
-            Old Sharlayan → The Baldesion Annex <span class="coord">(x: 9.2, y: 11.3)</span>
-          </div>
-        </li>
-      </ul>
-    </div>
-  </section>
-
-  <!-- Requirements -->
-  <section id="tab-req" class="tab" role="tabpanel">
-    <div class="section">
-      <h2 data-en="Requirements" data-jp="参加条件" data-zh="需求條件"></h2>
-      <ul class="kv">
-        <li>
-          <div class="k" data-en="Prerequisite Quest" data-jp="前提クエスト" data-zh="前置任務"></div>
-          <div class="v">
-            <a href="/FFXIV_Library/guides/the-coming-dawn.html">The Coming Dawn</a> (Lv. 90)
-          </div>
-        </li>
-        <li>
-          <div class="k" data-en="Job" data-jp="クラス/ジョブ" data-zh="職業"></div>
-          <div class="v">
-            Any Disciple of War or Magic <small data-en="(excluding limited jobs, Lv. 90)"
-              data-jp="（リミテッドジョブを除く／Lv.90）"
-              data-zh="（不含限定職業，Lv.90）"></small>
-          </div>
-        </li>
-      </ul>
-    </div>
-  </section>
-
-  <!-- Unlocks / Leads To -->
-  <section id="tab-unlock" class="tab" role="tabpanel">
-    <div class="section">
-      <h2 data-en="Unlocks / Leads To" data-jp="解放 / 次のクエスト" data-zh="解鎖 / 後續任務"></h2>
-      <ul class="links">
-        <li><a href="/FFXIV_Library/guides/the-nation-of-tuliyollal.html">The Nation of Tuliyollal</a></li>
-      </ul>
-    </div>
-  </section>
-</div>
+</main>
 
 <script>
-(() => {
-  // === i18n & language toggle ===
-  const LANG_KEY = 'ffxiv-lib-lang';
-  const map = { EN:'en', JP:'jp', ZH:'zh' };
-  const lang = localStorage.getItem(LANG_KEY) || 'EN';
-
-  function applyI18N() {
-    document.querySelectorAll('[data-en]').forEach(el => {
-      const key = map[lang] || 'en';
-      el.textContent = el.dataset[key] || el.dataset.en || el.textContent;
-    });
-    // H1 -> <title>
-    const h1 = document.getElementById('questTitle');
-    if (h1) document.title = h1.textContent + ' | FFXIV Library';
-    // 按鈕標籤
-    const toggle = document.getElementById('langToggle');
-    if (toggle) toggle.textContent = '🌐 ' + lang;
+/* ---------- i18n 文案 ---------- */
+const i18n = {
+  EN:{
+    title:"A New World to Explore",
+    details: `
+<p>The journey begins anew at the main hall of the Baldesion Annex, where Ojika Tsunjika shares news that Erenville has secured passage to Tural aboard a gleaners’ guildship. As you wait, Wuk Lamat gathers her companions and revisits the mission ahead: the rite of succession in Tuliyollal, where she will contend for the title of Dawnservant. Alphinaud and Alisaie speak of their diplomatic goals, Krile shares the mystery of her grandfather’s vanished expedition, and even Erenville—reluctantly—admits his role as the Third Promise’s guide.</p>
+<p>Boarding the vessel, the group sets off across the sea. What begins as a hopeful voyage soon descends into chaos as a violent storm strikes mid-journey. Lightning flashes across the sky, and the wind tears through the sails. A sailor is thrown from the mast, panic spreads, and only swift action from you and your comrades keeps disaster at bay. In the aftermath, Erenville quietly reflects on the ordeal, seeing in it a fitting prelude to the trials ahead.</p>
+<p>As seabirds signal landfall, the travelers finally arrive in Tuliyollal. Amid its vibrant streets and unfamiliar sights, Wuk Lamat receives greetings from startled but respectful guards. Her companions marvel at the diversity of culture, while traders and adventurers aboard the ship hint at the complexities of life in Tural. With the journey behind them and the rite ahead, Wuk Lamat turns to you with pride. Thus begins your exploration of the New World.</p>
+`
+  },
+  JP:{
+    title:"新たなる冒険の世界",
+    details: `
+<p>旅の再始動は、バルデシオン分館の大広間から始まる。オジカ・ツンジカが、エレンヴィルがギャザラーズギルドの船を手配したとの報せを届けると、ウク・ラマットは仲間を集め、目的を再確認する。即位の儀を控えたトゥラルでの挑戦──自らが次代のドーンサーヴァントとなる覚悟。アルフィノとアリゼーは復興と交流を目的に、クルルは祖父の謎を追い、そしてエレンヴィルもまた、第三の誓約としての役割を受け入れる。</p>
+<p>出航した一行を待ち受けていたのは、突如として海を襲う嵐だった。雷鳴が空を裂き、強風が帆を引き裂く中、甲板では船員が転落し、混乱が広がる。そんな中、あなたと仲間たちは素早く動き、負傷者の救助や防御装置の展開に奔走。嵐の終息後、エレンヴィルは静かに語る──あの試練こそが、これから始まる戦いの序章にふさわしかったと。</p>
+<p>やがて海鳥の声が届き、一行はついにトゥラルの地へと辿り着く。色とりどりの風景と多様な文化に迎えられ、ウク・ラマットの正体に驚く衛兵たちも、すぐに敬意をもって迎え入れる。交易商や冒険者たちの会話から垣間見える、トゥラルという世界の広がり。ウク・ラマットは風を感じ、故郷に立つ喜びを噛み締めながら、あなたにほほえむ。「新世界」への探求が、今ここから始まる。</p>
+`
+  },
+  ZH:{
+    title:"嶄新的冒險",
+    details: `
+<p>旅程自 Baldesion Annex 的大廳再次啟程。Ojika Tsunjika 傳來好消息：Erenville 已為眾人取得前往 Tural 的公會船位。等待啟航之際，Wuk Lamat 集合所有夥伴，重申她將挑戰 Tuliyollal 王位繼承儀式、爭取成為新任 Dawnservant 的決心。Alphinaud 與 Alisaie 表示將以外交交流為使命，Krile 則提及祖父失落的黃金都市調查，而 Erenville 雖語氣冷淡，卻仍承認自己是為第三誓約而來。</p>
+<p>船隻啟航，穿越大海之旅正式展開。不久後，狂風驟雨席捲而至，掀起洶湧巨浪與驚雷閃電。船員從桅桿墜落，甲板騷動不安，你與夥伴們即刻行動，協助傷者、啟動護罩魔裝，全力穩住航行。待風暴平息，Erenville 淡然一語，道出這場危機正象徵著未來將面對的考驗。</p>
+<p>終於，海鷗鳴聲傳來，前方現出陸地。當眾人踏上 Tuliyollal 的碼頭，迎接他們的是鮮明文化與好奇目光。守衛對 Wuk Lamat 的身份驚愕後轉而致敬，商人與旅人亦分享關於 Tural 的風土人情。在這片嶄新的土地上，Wuk Lamat 回頭向你一笑。探尋「新世界」的旅程，於焉展開。</p>
+`
   }
-  applyI18N();
+};
 
-  document.getElementById('langToggle')?.addEventListener('click', () => {
-    const cur = localStorage.getItem(LANG_KEY) || 'EN';
-    const next = cur === 'EN' ? 'JP' : (cur === 'JP' ? 'ZH' : 'EN');
-    localStorage.setItem(LANG_KEY, next);
-    location.reload(); // 簡單可靠：重整以套用所有文字
+const titleEl   = document.getElementById('pageTitle');
+const detailsEl = document.getElementById('detailsText');
+const langBtns  = document.querySelectorAll('.pill');
+
+function setLang(code){
+  const dict = i18n[code] || i18n.EN;
+  titleEl.textContent = dict.title;
+  detailsEl.innerHTML = dict.details;
+  langBtns.forEach(b => b.classList.toggle('active', b.dataset.lang===code));
+  // 也把 <title> 同步
+  document.title = `${dict.title} | FFXIV Library`;
+}
+
+// 初始語言：依 localStorage 或預設 EN
+const INIT = localStorage.getItem('ffxiv-lib-lang') || 'EN';
+setLang(INIT);
+langBtns.forEach(b=>{
+  b.addEventListener('click', ()=>{
+    localStorage.setItem('ffxiv-lib-lang', b.dataset.lang);
+    setLang(b.dataset.lang);
   });
+});
 
-  // === Tabs ===
-  const btns = [...document.querySelectorAll('.tab-btn')];
-  const tabs = {
-    details: document.getElementById('tab-details'),
-    acq:     document.getElementById('tab-acq'),
-    req:     document.getElementById('tab-req'),
-    unlock:  document.getElementById('tab-unlock'),
-  };
-  btns.forEach(b=>{
-    // 先將按鈕也套 i18n
-    const key = map[lang] || 'en';
-    b.textContent = b.dataset[key] || b.dataset.en;
-
-    b.addEventListener('click', ()=>{
-      btns.forEach(x=>x.classList.remove('active'));
-      Object.values(tabs).forEach(p=>p.classList.remove('show'));
-      b.classList.add('active');
-      tabs[b.dataset.tab]?.classList.add('show');
-    });
+/* Tabs */
+const tabBtns = document.querySelectorAll('.tab-btn');
+const panels = {
+  details: document.getElementById('panel-details'),
+  acq:     document.getElementById('panel-acq'),
+  req:     document.getElementById('panel-req'),
+  unlock:  document.getElementById('panel-unlock')
+};
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const id = btn.dataset.tab;
+    Object.entries(panels).forEach(([k,v])=> v.classList.toggle('active', k===id));
   });
-})();
+});
+
+/* 可自訂：把連結換成你的實際頁面 */
+document.getElementById('linkPrereq').href = "#"; // e.g. /guides/the-coming-dawn.html
+document.getElementById('linkNext').href   = "#"; // e.g. /guides/the-nation-of-tuliyollal.html
 </script>
-<!-- === / Quest Page Mini-Module === -->
+</body>
+</html>
