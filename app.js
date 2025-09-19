@@ -105,44 +105,49 @@ function render(){
   resultCount.textContent = state.filtered.length;
   const start = (state.page - 1) * state.perPage;
   const view = state.filtered.slice(start, start + state.perPage);
+
   grid.innerHTML = view.map(cardHTML).join('') || `<p>沒有符合的內容。</p>`;
+
   const pages = Math.ceil(state.filtered.length / state.perPage);
   pager.innerHTML = pages > 1 ? Array.from({length: pages}, (_,i)=>{
-    const p = i+1; return `<button class="pagebtn ${p===state.page?'active':''}" data-page="${p}">${p}</button>`;
+    const p = i+1; 
+    return `<button class="pagebtn ${p===state.page?'active':''}" data-page="${p}">${p}</button>`;
   }).join('') : '';
+
+  // ▶ 播放按鈕：維持原本 openPlayer，但多送 GA 事件（若 gtag 存在才送）
   grid.querySelectorAll('[data-play]').forEach(btn=>{
-    btn.addEventListener('click', ()=> openPlayer(btn.dataset.play, btn.dataset.title));
+    btn.addEventListener('click', ()=>{
+      const ytId  = btn.dataset.play;
+      const title = btn.dataset.title;
+
+      // 原本的行為
+      openPlayer(ytId, title);
+
+      // 新增：GA 事件（安全檢查，沒載入 gtag 就略過）
+      if (typeof window.gtag === 'function') {
+        window.gtag('event', 'play_button_click', {
+          event_category: 'Video',
+          event_label: title,
+          video_id: ytId
+        });
+      }
+    });
   });
-  grid.querySelectorAll('[data-tag]').forEach(t=> t.addEventListener('click', ()=> addTag(t.dataset.tag)));
-  pager.querySelectorAll('[data-page]').forEach(b=> b.addEventListener('click', ()=>{ state.page = +b.dataset.page; render(); }));
+
+  // Tag 點擊（原樣）
+  grid.querySelectorAll('[data-tag]').forEach(t=> 
+    t.addEventListener('click', ()=> addTag(t.dataset.tag))
+  );
+
+  // 分頁（原樣）
+  pager.querySelectorAll('[data-page]').forEach(b=> 
+    b.addEventListener('click', ()=>{
+      state.page = +b.dataset.page; 
+      render(); 
+    })
+  );
+
   renderActiveTags();
-}
-// 取目前語言（沿用你先前的 localStorage key）
-function getLang(){
-  return localStorage.getItem('ffxiv-lib-lang') || 'EN';
-}
-
-// 把推薦影片塞進 #featured
-function renderFeatured(){
-  const box = document.getElementById('featured');
-  if(!box || !featuredVideo) return;
-
-  const lang = getLang();
-  const title = featuredVideo.title?.[lang] || featuredVideo.title?.EN || '⭐ Featured';
-
-  box.innerHTML = `
-    <div class="featured-card">
-      <h2 class="section-title">${title}</h2>
-      <div class="video-wrapper">
-        <iframe
-          src="https://www.youtube.com/embed/${featuredVideo.ytId}"
-          title="${title}" width="100%" height="315" frameborder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowfullscreen>
-        </iframe>
-      </div>
-    </div>
-  `;
 }
 
 function cardHTML(it){
