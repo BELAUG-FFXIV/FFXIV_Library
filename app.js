@@ -197,7 +197,9 @@ function getPageHref(it){
 function cardHTML(it){
   const thumb = it.thumb || `https://i.ytimg.com/vi/${it.ytId}/hqdefault.jpg`;
   const lang  = getLang();
-  const safe = s => (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  const safe = s => (s||'').replace(/[&<>"']/g, m => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[m]));
   const title = it.title?.[lang] || it.title?.EN || it.title?.JP || it.title?.ZH || 'Untitled';
 
   const metaL = [
@@ -206,16 +208,18 @@ function cardHTML(it){
     it.category&& `<span class="badge">${it.category}</span>`,
   ].filter(Boolean).join('');
 
-  const tags = (it.tags||[]).slice(0,6).map(t => `<span class="tag" data-tag="${t}">#${t}</span>`).join('');
+  const tags = (it.tags||[]).slice(0,6)
+    .map(t => `<span class="tag" data-tag="${t}">#${t}</span>`).join('');
 
-  // 原本的 Play / Playlist / YouTube；新增「Detail」（slug 或 pageUrl 任一存在才顯示）
+  // Detail：優先使用 slug，否則 fallback 到舊的 pageUrl
+  const detailHref = it.slug ? `guides/${it.slug}.html` : it.pageUrl;
+
   const playBtn = it.ytId
     ? `<button class="btn play" data-play="${it.ytId}" data-title="${safe(title)}">Play</button>`
     : '';
 
-  const pageHref = getPageHref(it);
-  const detailBtn = pageHref
-    ? `<a class="btn btn-detail" href="${pageHref}" rel="noopener">Detail</a>`
+  const detailBtn = detailHref
+    ? `<a class="btn btn-detail" href="${detailHref}" rel="noopener">Detail</a>`
     : '';
 
   const playlistBtn = it.playlistUrl
