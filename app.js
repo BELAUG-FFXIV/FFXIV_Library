@@ -298,7 +298,7 @@ categorySel?.addEventListener('change', e => { state.category = e.target.value; 
 expacSel?.addEventListener('change', e => { state.expac = e.target.value; applyFilters(); });
 patchSel?.addEventListener('change', e => { state.patch = e.target.value; applyFilters(); });
 sortSel?.addEventListener('change', e => { state.sort = e.target.value; applyFilters(); });
-clearBtn?.addEventListener('click', () => {
+clearBtnEl?.addEventListener('click', () => {
   state.query=''; state.category=''; state.expac=''; state.patch='';
   state.tags=[]; state.sort='latest';
   if(q) q.value=''; if(categorySel) categorySel.value='';
@@ -352,17 +352,16 @@ const i18n = {
       { value: 'EW',  label: 'Endwalker (EW)' },
       { value: 'DT',  label: 'Dawntrail (DT)' },
     ],
-     // EN
-patches: [
-  { value: '',    label: 'All Patch' },
-  { value: '7.x', label: '7.x' },
-  { value: '6.x', label: '6.x' },
-  { value: '5.x', label: '5.x' },
-  { value: '4.x', label: '4.x' },
-  { value: '3.x', label: '3.x' },
-  { value: '2.x', label: '2.x' },
-],
-clear: 'Clear filters',
+    patches: [
+      { value: '',    label: 'All Patch' },
+      { value: '7.x', label: '7.x' },
+      { value: '6.x', label: '6.x' },
+      { value: '5.x', label: '5.x' },
+      { value: '4.x', label: '4.x' },
+      { value: '3.x', label: '3.x' },
+      { value: '2.x', label: '2.x' },
+    ],
+    clear: 'Clear filters',
   },
   JP: {
     langLabel: 'JP',
@@ -400,17 +399,16 @@ clear: 'Clear filters',
       { value: 'EW',  label: '暁月のフィナーレ' },
       { value: 'DT',  label: '黄金のレガシー' },
     ],
-     // JP
-patches: [
-  { value: '',    label: '全てのPatch' },
-  { value: '7.x', label: '7.x' },
-  { value: '6.x', label: '6.x' },
-  { value: '5.x', label: '5.x' },
-  { value: '4.x', label: '4.x' },
-  { value: '3.x', label: '3.x' },
-  { value: '2.x', label: '2.x' },
-],
-clear: '条件をクリア',
+    patches: [
+      { value: '',    label: '全てのPatch' },
+      { value: '7.x', label: '7.x' },
+      { value: '6.x', label: '6.x' },
+      { value: '5.x', label: '5.x' },
+      { value: '4.x', label: '4.x' },
+      { value: '3.x', label: '3.x' },
+      { value: '2.x', label: '2.x' },
+    ],
+    clear: '条件をクリア',
   },
   ZH: {
     langLabel: 'ZH',
@@ -448,17 +446,16 @@ clear: '条件をクリア',
       { value: 'EW',  label: '曉月的終焉' },
       { value: 'DT',  label: '黃金的遺產' },
     ],
-     // ZH
-patches: [
-  { value: '',    label: '全部 Patch' },
-  { value: '7.x', label: '7.x' },
-  { value: '6.x', label: '6.x' },
-  { value: '5.x', label: '5.x' },
-  { value: '4.x', label: '4.x' },
-  { value: '3.x', label: '3.x' },
-  { value: '2.x', label: '2.x' },
-],
-clear: '清除條件',
+    patches: [
+      { value: '',    label: '全部 Patch' },
+      { value: '7.x', label: '7.x' },
+      { value: '6.x', label: '6.x' },
+      { value: '5.x', label: '5.x' },
+      { value: '4.x', label: '4.x' },
+      { value: '3.x', label: '3.x' },
+      { value: '2.x', label: '2.x' },
+    ],
+    clear: '清除條件',
   }
 };
 
@@ -479,7 +476,7 @@ function applyLangUI(lang) {
 
   // 文案
   if (taglineEl)   taglineEl.textContent   = dict.tagline;
-  if (searchEl)    searchEl.placeholder    = dict.searchPH;
+  if (q)           q.placeholder           = dict.searchPH;     // ← 用 q（你的搜尋 input）
   if (sortLabelEl) sortLabelEl.textContent = dict.sort;
   if (itemsSuffixEl && dict.itemsSuffix) itemsSuffixEl.textContent = ` ${dict.itemsSuffix}`;
 
@@ -502,7 +499,7 @@ function cycleLang() {
   localStorage.setItem(LANG_KEY, next);
   applyLangUI(next);
   renderFeatured();        // 切換語言時更新推薦影片標題
-  // 若需立即影響篩選標籤文案，可視需要呼叫 applyFilters();
+  // 如需立即重算篩選(僅文案無需)可視需要呼叫 applyFilters();
 }
 
 langToggle?.addEventListener('click', cycleLang);
