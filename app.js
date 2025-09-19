@@ -202,8 +202,8 @@ function cardHTML(it){
     : '';
 
   const detailBtn = it.pageUrl
-    ? `<a class="btn ghost" href="${it.pageUrl}" rel="noopener">Detail</a>`
-    : '';
+  ? `<a class="btn btn-detail" href="${it.pageUrl}" rel="noopener">Detail</a>`
+  : '';
 
   const playlistBtn = it.playlistUrl
     ? `<a class="btn ghost" href="${it.playlistUrl}" target="_blank" rel="noopener">Playlist</a>`
