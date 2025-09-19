@@ -185,6 +185,7 @@ function render(){
 function cardHTML(it){
   const thumb = it.thumb || `https://i.ytimg.com/vi/${it.ytId}/hqdefault.jpg`;
   const lang  = getLang();
+  const safe = s => (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   const title = it.title?.[lang] || it.title?.EN || it.title?.JP || it.title?.ZH || 'Untitled';
 
   const metaL = [
@@ -195,10 +196,13 @@ function cardHTML(it){
 
   const tags = (it.tags||[]).slice(0,6).map(t => `<span class="tag" data-tag="${t}">#${t}</span>`).join('');
 
-  const safe = s => (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-
+  // 原本的 Play / Playlist / YouTube；新增「Detail」(有 pageUrl 才顯示)
   const playBtn = it.ytId
     ? `<button class="btn play" data-play="${it.ytId}" data-title="${safe(title)}">Play</button>`
+    : '';
+
+  const detailBtn = it.pageUrl
+    ? `<a class="btn ghost" href="${it.pageUrl}" rel="noopener">Detail</a>`
     : '';
 
   const playlistBtn = it.playlistUrl
@@ -222,6 +226,7 @@ function cardHTML(it){
       ${it.series ? `<div class="meta">系列：${safe(it.series)}</div>` : ''}
       <div class="actions">
         ${playBtn}
+        ${detailBtn}
         ${playlistBtn}
         ${youtubeBtn}
       </div>
