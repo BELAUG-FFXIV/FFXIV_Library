@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Go Forth, Brave Explorers | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Go Forth, Brave Explorers（DT 7.31）— 三語故事簡介、取得/條件/出現地點，附影片。">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif; background:var(--bg); color:var(--fg);}
+    .container{max-width:1080px; margin:0 auto; padding:0 16px}
+
+    /* header */
+    .site-header{border-bottom:1px solid var(--border); background:#fff9edb3; backdrop-filter:saturate(120%) blur(6px); position:sticky; top:0; z-index:10}
+    .nav{display:flex; align-items:center; justify-content:space-between; height:60px}
+    .left{display:flex; align-items:center; gap:12px}
+    .home{border:1px solid var(--border); background:#fff; padding:4px 8px; border-radius:8px; text-decoration:none; color:var(--fg); font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex; align-items:center; gap:8px}
+    .icon-btn{background:none; border:none; cursor:pointer; font-size:14px; padding:6px 10px; border-radius:8px}
+    .icon-btn:hover{background:#fff; border:1px solid var(--border)}
+
+    /* main */
+    .main{padding:20px 0 40px}
+    .grid{display:grid; grid-template-columns:1.1fr 1fr; gap:20px; align-items:start;}
+    @media (max-width: 900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative; padding-top:56.25%}
+      .video-wrap iframe{position:absolute; inset:0; width:100%; height:100%}
+    }
+    .card{background:var(--card); border:1px solid var(--border); border-radius:16px; box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px; border-bottom:1px solid var(--border); font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%; height:420px; border:0; display:block; border-radius:16px}
+
+    /* tabs */
+    .tabs{display:flex; gap:8px; padding:12px 12px 0; flex-wrap:wrap}
+    .tab-btn{background:#fff; border:1px solid var(--border); color:var(--fg); border-radius:999px; padding:8px 14px; cursor:pointer; font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent); color:#fff; background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex; flex-direction:column; gap:10px}
+    .stack .row{padding:12px 14px; border:1px dashed var(--border); border-radius:12px; background:#fffdf6}
+    .row b{display:inline-block; min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8; text-decoration:none}
+    .link:hover{text-decoration:underline}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片（固定不動） -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <!-- ⚠️ 影片 ID：49Nc7vgywHc，如要換影片只改這個 ID -->
+            <iframe id="ytFrame"
+              src="https://www.youtube.com/embed/49Nc7vgywHc"
+              title="Go Forth, Brave Explorers" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs（隨語言切換） -->
+      <section class="card">
+        <!-- ⚠️ 標題：跟語言同步 -->
+        <div class="hd" id="pageTitle">Go Forth, Brave Explorers</div>
+
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="req">Requirements</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlock">Appears</button>
+        </div>
+
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-req"     class="tab-panel"></div>
+          <div id="panel-unlock"  class="tab-panel"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const LANG_KEY = 'ffxiv-guide-lang';
+
+    /* ======================
+       ⚠️ 三語內容（可改）
+       ====================== */
+    const i18n = {
+      EN:{
+        langLabel:'EN',
+        pageTitle:'Go Forth, Brave Explorers',
+        tabs:{story:'Story', acq:'Acquisition', req:'Requirements', unlock:'Appears'},
+        story: `
+          <p>At the Moongate Hub, Searchingway announces that the Galactic Way’s maiden voyage has succeeded—an unmanned craft and now a full starship have both touched down on a new world. Though its clinical designation is UL 9-6, Namingway insists that such a wondrous discovery deserves a more poetic name. With theatrical flair, he vows to christen this world in style.</p>
+          <p>Captain Cruisingway welcomes you aboard, and with a surge of thrusters, the ship hurtles across the stellar current. Through the glassy prism of the atmosphere, a breathtaking vista unfolds. Namingway declares the star’s true name: <b>Phaenna</b>.</p>
+          <p>Upon arrival, Searchingway cautions that Phaenna is beautiful but perilous—a realm of silicon, prismatic light, and storms of razor-edged glass. Its location, however, makes it a crucial stepping stone for future voyages. As artisans and adventurers are called to aid in the settlement, Namingway busies himself with bestowing names upon every wonder.</p>
+        `,
+        acq: `
+          <div class="stack">
+            <div class="row"><b>Location</b> Moongate Hub</div>
+            <div class="row"><b>Key NPCs</b> Searchingway / Namingway / Captain Cruisingway</div>
+          </div>
+        `,
+        req: `
+          <div class="stack">
+            <div class="row"><b>Prerequisites</b> —</div>
+          </div>
+        `,
+        unlock: `
+          <div class="stack">
+            <div class="row"><b>Appears</b> Phaenna (UL 9-6), departure from Moongate Hub</div>
+          </div>
+        `
+      },
+
+      JP:{
+        langLabel:'JP',
+        pageTitle:'新たなる未知へ！',
+        tabs:{story:'ストーリー', acq:'入手', req:'条件', unlock:'登場'},
+        story: `
+          <p>ムーングレート・ハブにて、サーチングウェイは「ギャラクティック・ウェイ」の有人初航行が成功したことを告げる。無人機に続き、星船が新たな世界に降り立ったのだ。その名は UL 9-6──しかし、ネーミングウェイは無味乾燥な番号に憤り、詩情あふれる呼び名を与えると高らかに宣言する。</p>
+          <p>クルージングウェイ船長に迎えられ、星船は反重力スラスターを噴かして星の潮流へ。虹のように屈折する光の大地が広がり、ネーミングウェイはその星を <b>パエンナ</b> と命名する。</p>
+          <p>やがて到着した星は美しくも危険だった。豊富なシリコンが生み出す硝子質の景観、そして鋭利な破片が嵐のように吹き荒れる大気。だがその戦略的な位置と資源は、さらなる航海の礎となる。仲間たちが開拓に取りかかる中、ネーミングウェイは新たな命名に胸を躍らせていた。</p>
+        `,
+        acq: `
+          <div class="stack">
+            <div class="row"><b>場所</b> ムーングレート・ハブ</div>
+            <div class="row"><b>主要NPC</b> サーチングウェイ／ネーミングウェイ／クルージングウェイ船長</div>
+          </div>
+        `,
+        req: `
+          <div class="stack">
+            <div class="row"><b>前提条件</b> ー</div>
+          </div>
+        `,
+        unlock: `
+          <div class="stack">
+            <div class="row"><b>登場</b> パエンナ（UL 9-6）、出発地：ムーングレート・ハブ</div>
+          </div>
+        `
+      },
+
+      ZH:{
+        langLabel:'ZH',
+        pageTitle:'啟程吧，勇敢的探索者們！',
+        tabs:{story:'故事', acq:'取得', req:'需求', unlock:'出現'},
+        story: `
+          <p>在月門樞紐，Searchingway 宣布「Galactic Way」的首次載人航行成功了——繼無人測試之後，真正的星艦也成功降落於一顆新星球。雖然編號是 UL 9-6，但 Namingway 認為如此壯麗的發現不該以冰冷的數字稱呼，於是立誓要為這個世界賦予詩意的名字。</p>
+          <p>在 Cruisingway 船長的引領下，星艦啟動推進器，沿著星流疾馳。當虹彩般的地貌展現眼前，Namingway 興奮地宣布：這顆星球將被命名為 <b>Phaenna</b>。</p>
+          <p>然而，Phaenna 雖然絢麗，卻潛藏危機。富含矽質的地表造就玻璃般的景觀，也伴隨著銳利碎片組成的暴風。正因如此，這裡成為探索更遙遠群星的踏腳石。當工匠與冒險者被召集投入建設時，Namingway 也開始為眼前的一切命名，延續他文字的使命。</p>
+        `,
+        acq: `
+          <div class="stack">
+            <div class="row"><b>地點</b> 月門樞紐（Moongate Hub）</div>
+            <div class="row"><b>主要 NPC</b> Searchingway／Namingway／Cruisingway 船長</div>
+          </div>
+        `,
+        req: `
+          <div class="stack">
+            <div class="row"><b>需求</b> —</div>
+          </div>
+        `,
+        unlock: `
+          <div class="stack">
+            <div class="row"><b>出現</b> Phaenna（UL 9-6），出發自月門樞紐</div>
+          </div>
+        `
+      }
+    };
+
+    /* ======================
+       i18n + tabs（勿動）
+       ====================== */
+    const langToggle=document.getElementById('langToggle');
+    const pageTitle=document.getElementById('pageTitle');
+    const tabBtns=[...document.querySelectorAll('.tab-btn')];
+    const panels={
+      story:document.getElementById('panel-story'),
+      acq:document.getElementById('panel-acq'),
+      req:document.getElementById('panel-req'),
+      unlock:document.getElementById('panel-unlock')
+    };
+
+    function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+    function applyLang(lang){
+      const t=i18n[lang]||i18n.EN;
+      pageTitle.textContent=t.pageTitle;
+      langToggle.textContent=`🌐 ${t.langLabel}`;
+      tabBtns.forEach(btn=>{ btn.textContent=t.tabs[btn.dataset.tab] });
+      const activeBtn=tabBtns.find(b=>b.getAttribute('aria-selected')==='true')||tabBtns[0];
+      renderPanel(activeBtn.dataset.tab,lang);
+    }
+    function renderPanel(key,lang){
+      const t=i18n[lang]||i18n.EN;
+      Object.keys(panels).forEach(k=>panels[k].classList.remove('active'));
+      panels[key].classList.add('active');
+      panels[key].innerHTML=t[key];
+    }
+    tabBtns.forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+        btn.setAttribute('aria-selected','true');
+        renderPanel(btn.dataset.tab,getLang());
+      });
+    });
+    langToggle.addEventListener('click',()=>{
+      const cur=getLang();
+      const next=cur==='EN'?'JP':(cur==='JP'?'ZH':'EN');
+      localStorage.setItem(LANG_KEY,next);
+      applyLang(next);
+    });
+    applyLang(getLang());
+  </script>
+</body>
+</html>
