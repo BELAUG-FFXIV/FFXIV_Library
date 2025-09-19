@@ -474,14 +474,22 @@ function applyLangUI(lang) {
   const dict = i18n[lang];
   if (!dict) return;
 
-  if (langToggle)   langToggle.textContent    = `🌐 ${dict.langLabel}`;
-  if (taglineEl)    taglineEl.textContent     = dict.tagline;
-  if (q)            q.placeholder             = dict.searchPH;
-  if (sortLabelEl)  sortLabelEl.textContent   = dict.sort;
+  // 🌐 按鈕文字
+  if (langToggle) langToggle.textContent = `🌐 ${dict.langLabel}`;
+
+  // 文案
+  if (taglineEl)   taglineEl.textContent   = dict.tagline;
+  if (searchEl)    searchEl.placeholder    = dict.searchPH;
+  if (sortLabelEl) sortLabelEl.textContent = dict.sort;
   if (itemsSuffixEl && dict.itemsSuffix) itemsSuffixEl.textContent = ` ${dict.itemsSuffix}`;
 
+  // 下拉：分類、資料片、Patch
   refillSelect(categorySel, dict.categories, true);
   refillSelect(expacSel,    dict.expansions, true);
+  refillSelect(patchSel,    dict.patches,    true);
+
+  // 按鈕：清除條件
+  if (clearBtnEl) clearBtnEl.textContent = dict.clear;
 }
 
 function getLang(){
