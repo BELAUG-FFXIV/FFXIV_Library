@@ -351,7 +351,18 @@ const i18n = {
       { value: 'SHB', label: 'Shadowbringers (SHB)' },
       { value: 'EW',  label: 'Endwalker (EW)' },
       { value: 'DT',  label: 'Dawntrail (DT)' },
-    ]
+    ],
+     // EN
+patches: [
+  { value: '',    label: 'All Patch' },
+  { value: '7.x', label: '7.x' },
+  { value: '6.x', label: '6.x' },
+  { value: '5.x', label: '5.x' },
+  { value: '4.x', label: '4.x' },
+  { value: '3.x', label: '3.x' },
+  { value: '2.x', label: '2.x' },
+],
+clear: 'Clear filters',
   },
   JP: {
     langLabel: 'JP',
@@ -388,7 +399,18 @@ const i18n = {
       { value: 'SHB', label: '漆黒のヴィランズ' },
       { value: 'EW',  label: '暁月のフィナーレ' },
       { value: 'DT',  label: '黄金のレガシー' },
-    ]
+    ],
+     // JP
+patches: [
+  { value: '',    label: '全てのPatch' },
+  { value: '7.x', label: '7.x' },
+  { value: '6.x', label: '6.x' },
+  { value: '5.x', label: '5.x' },
+  { value: '4.x', label: '4.x' },
+  { value: '3.x', label: '3.x' },
+  { value: '2.x', label: '2.x' },
+],
+clear: '条件をクリア',
   },
   ZH: {
     langLabel: 'ZH',
@@ -425,7 +447,18 @@ const i18n = {
       { value: 'SHB', label: '漆黑的反叛者' },
       { value: 'EW',  label: '曉月的終焉' },
       { value: 'DT',  label: '黃金的遺產' },
-    ]
+    ],
+     // ZH
+patches: [
+  { value: '',    label: '全部 Patch' },
+  { value: '7.x', label: '7.x' },
+  { value: '6.x', label: '6.x' },
+  { value: '5.x', label: '5.x' },
+  { value: '4.x', label: '4.x' },
+  { value: '3.x', label: '3.x' },
+  { value: '2.x', label: '2.x' },
+],
+clear: '清除條件',
   }
 };
 
