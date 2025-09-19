@@ -26,7 +26,7 @@ const sortSel      = document.getElementById('sort');
 const activeTags   = document.getElementById('activeTags');
 const themeToggle  = document.getElementById('themeToggle');
 const langToggle   = document.getElementById('langToggle');
-document.getElementById('year').textContent = new Date().getFullYear();
+// （依你的要求：不自動寫年份到頁尾）
 
 /* =========================
    推薦影片設定
@@ -109,11 +109,10 @@ function applyFilters(){
     const byTags = state.tags.length ? state.tags.every(t => it.tags?.includes(t)) : true;
 
     const byQuery = qstr ? [
-      it.title?.en, it.title?.jp, it.title?.zh,
+      it.title?.EN, it.title?.JP, it.title?.ZH,
       it.series, it.category, it.expac, it.patch, ...(it.tags||[])
     ].filter(Boolean).join(' ').toLowerCase().includes(qstr) : true;
 
-    // 可選：publish/hidden 控制
     const visible = !(it.hidden === true || it.publish === false);
 
     return byCat && byExp && byPatch && byTags && byQuery && visible;
@@ -121,7 +120,7 @@ function applyFilters(){
 
   arr.sort((a,b)=>{
     if(state.sort === 'latest') return b._dateNum - a._dateNum;
-    if(state.sort === 'title')  return (a.title?.en || '').localeCompare(b.title?.en || '');
+    if(state.sort === 'title')  return (a.title?.EN || '').localeCompare(b.title?.EN || '');
     if(state.sort === 'patch')  return b._patchNum - a._patchNum;
     return 0;
   });
@@ -181,11 +180,11 @@ function render(){
 }
 
 /* =========================
-   卡片 HTML
+   卡片 HTML（標題隨語言切換）
    ========================= */
 function cardHTML(it){
   const thumb = it.thumb || `https://i.ytimg.com/vi/${it.ytId}/hqdefault.jpg`;
-  const lang  = getLang();  // 🔑 取得目前語言
+  const lang  = getLang();
   const title = it.title?.[lang] || it.title?.EN || it.title?.JP || it.title?.ZH || 'Untitled';
 
   const metaL = [
@@ -232,7 +231,7 @@ function cardHTML(it){
 }
 
 /* =========================
-   推薦影片渲染
+   推薦影片渲染（跟語言同步）
    ========================= */
 function renderFeatured(){
   const box = document.getElementById('featured');
