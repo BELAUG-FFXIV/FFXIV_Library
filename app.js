@@ -180,6 +180,18 @@ function render(){
 }
 
 /* =========================
+   工具：產生單頁連結（新增）
+   ========================= */
+function getPageHref(it){
+  // 優先使用 slug → /guides/<slug>.html
+  if (it.slug) return `guides/${it.slug}.html`;
+  // 次選：舊欄位 pageUrl
+  if (it.pageUrl) return it.pageUrl;
+  // 都沒有就回傳空字串
+  return '';
+}
+
+/* =========================
    卡片 HTML（標題隨語言切換）
    ========================= */
 function cardHTML(it){
@@ -196,14 +208,15 @@ function cardHTML(it){
 
   const tags = (it.tags||[]).slice(0,6).map(t => `<span class="tag" data-tag="${t}">#${t}</span>`).join('');
 
-  // 原本的 Play / Playlist / YouTube；新增「Detail」(有 pageUrl 才顯示)
+  // 原本的 Play / Playlist / YouTube；新增「Detail」（slug 或 pageUrl 任一存在才顯示）
   const playBtn = it.ytId
     ? `<button class="btn play" data-play="${it.ytId}" data-title="${safe(title)}">Play</button>`
     : '';
 
-  const detailBtn = it.pageUrl
-  ? `<a class="btn btn-detail" href="${it.pageUrl}" rel="noopener">Detail</a>`
-  : '';
+  const pageHref = getPageHref(it);
+  const detailBtn = pageHref
+    ? `<a class="btn btn-detail" href="${pageHref}" rel="noopener">Detail</a>`
+    : '';
 
   const playlistBtn = it.playlistUrl
     ? `<a class="btn ghost" href="${it.playlistUrl}" target="_blank" rel="noopener">Playlist</a>`
