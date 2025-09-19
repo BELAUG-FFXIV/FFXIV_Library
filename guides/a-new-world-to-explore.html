@@ -1,165 +1,166 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>FFXIV Quest Viewer</title>
+  <meta charset="UTF-8">
+  <title>FFXIV Quest</title>
   <style>
-    :root {
-      --bg: #fff8e6;
-      --card: #fff;
-      --border: #e5e1d8;
-      --accent: #e11d48;
-      --muted: #666;
-    }
     body {
-      margin:0; font-family: system-ui, sans-serif;
-      background: var(--bg); color:#222;
+      margin: 0;
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      background-color: #fff9ed;
     }
     header {
-      background:#fff9edb3; border-bottom:1px solid var(--border);
-      backdrop-filter: saturate(120%) blur(6px);
-      position:sticky; top:0; z-index:10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background-color: #fff3d9;
     }
-    .nav {
-      display:flex; justify-content:space-between; align-items:center;
-      max-width:1080px; margin:0 auto; padding:10px 16px;
+    header .left {
+      display: flex;
+      align-items: center;
+      font-weight: bold;
     }
-    .left { display:flex; gap:12px; align-items:center }
-    .home { text-decoration:none; font-weight:700; color:#222 }
-    .title { font-weight:700 }
-    .lang-btn {
-      background:none; border:none; font-size:15px; cursor:pointer;
+    header .left span {
+      margin-left: 8px;
     }
-    .main { max-width:1080px; margin:20px auto; padding:0 16px;
-      display:grid; grid-template-columns:1.1fr 1fr; gap:20px;
+    header .right button {
+      background: none;
+      border: none;
+      font-size: 14px;
+      margin-left: 10px;
+      cursor: pointer;
     }
-    .card {
-      background:var(--card); border:1px solid var(--border);
-      border-radius:16px; overflow:hidden;
+    .container {
+      display: flex;
+      padding: 20px;
+      gap: 20px;
     }
-    iframe { width:100%; height:420px; border:0; display:block }
-    @media(max-width:900px){
-      .main{grid-template-columns:1fr}
-      iframe{height:240px}
+    .video {
+      flex: 2;
     }
-    .tabs { display:flex; gap:8px; padding:12px 16px 0 16px }
-    .tab-btn {
-      background:#fff; border:1px solid var(--border); border-radius:999px;
-      padding:6px 14px; cursor:pointer; font-weight:600;
+    iframe {
+      width: 100%;
+      height: 400px;
+      border: none;
+      border-radius: 8px;
     }
-    .tab-btn[aria-selected="true"] {
-      background:var(--accent); color:#fff; border-color:var(--accent);
+    .details {
+      flex: 1.5;
+      background: white;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
-    .tab-panel { display:none; padding:16px }
-    .tab-panel.active { display:block }
-    .row { padding:10px; border:1px dashed var(--border); border-radius:10px; background:#fffdf6; margin-bottom:10px }
-    .row b { min-width:130px; display:inline-block }
-    .muted { color:var(--muted) }
+    .quest-title {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .tabs button {
+      flex: 1;
+      padding: 8px;
+      border-radius: 20px;
+      border: 1px solid #ddd;
+      background: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .tabs button.active {
+      background: #e03131;
+      color: white;
+      border: none;
+    }
+    .tab-content {
+      background: #fffdf8;
+      padding: 15px;
+      border-radius: 10px;
+      min-height: 120px;
+    }
+    a {
+      color: #0077cc;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
-<header>
-  <div class="nav">
-    <div class="left">
-      <a class="home" href="#">🏠 Home</a>
-      <span class="title" id="pageTitle">A New World to Explore</span>
+  <header>
+    <div class="left">🏠 <span id="home-title">Home</span></div>
+    <div class="right">
+      <button onclick="setLang('EN')">🌐 EN</button>
+      <button onclick="setLang('JP')">🌐 JP</button>
+      <button onclick="setLang('ZH')">🌐 ZH</button>
     </div>
-    <button id="langToggle" class="lang-btn">🌐 EN</button>
+  </header>
+
+  <div class="container">
+    <div class="video">
+      <iframe src="https://www.youtube.com/embed/E7boRq7evu5gHc5Y" allowfullscreen></iframe>
+    </div>
+    <div class="details">
+      <div class="quest-title" id="quest-title"></div>
+      <div class="tabs">
+        <button class="active" onclick="switchTab('story')">Story</button>
+        <button onclick="switchTab('acq')">Acquisition</button>
+        <button onclick="switchTab('req')">Requirements</button>
+        <button onclick="switchTab('unlock')">Unlocks</button>
+      </div>
+      <div class="tab-content" id="tab-content"></div>
+    </div>
   </div>
-</header>
 
-<main class="main">
-  <section class="card">
-    <iframe src="https://www.youtube.com/embed/HMf2Ldtb36Y"
-      title="A New World to Explore"
-      allowfullscreen></iframe>
-  </section>
+  <script>
+    const data = {
+      EN: {
+        title: "A New World to Explore",
+        story: "The journey begins anew at the Baldesion Annex...",
+        acquisition: "<b>Quest Giver:</b> Ojika Tsunjika, The Baldesion Annex (x:9.2, y:11.3)",
+        requirements: "<b>Prerequisite:</b> <a href='#'>The Coming Dawn</a> (Level 90)<br><b>Class/Job:</b> Any Disciple of War or Magic (excluding limited jobs) (Level 90)",
+        unlock: "<b>Leads To:</b> <a href='#'>The Nation of Tuliyollal</a> (Level 90)"
+      },
+      JP: {
+        title: "新たなる世界へ",
+        story: "旅程はバルデシオン・アネックスから再び始まる...",
+        acquisition: "<b>クエスト受注:</b> オジカ・ツンジカ、バルデシオン・アネックス (x:9.2, y:11.3)",
+        requirements: "<b>前提クエスト:</b> <a href='#'>夜明けの訪れ</a> (Lv90)<br><b>クラス/ジョブ:</b> ファイター／ソーサラー（リミテッドジョブを除く） (Lv90)",
+        unlock: "<b>派生:</b> <a href='#'>トゥリヨラルの国</a> (Lv90)"
+      },
+      ZH: {
+        title: "新世界之旅",
+        story: "旅程自巴德西恩別館再次展開...",
+        acquisition: "<b>任務發布者:</b> Ojika Tsunjika，巴德西恩別館 (x:9.2, y:11.3)",
+        requirements: "<b>前置任務:</b> <a href='#'>The Coming Dawn</a> (等級 90)<br><b>職業/任務:</b> 任何戰鬥精修職 (不含限定職) (等級 90)",
+        unlock: "<b>解鎖:</b> <a href='#'>The Nation of Tuliyollal</a> (等級 90)"
+      }
+    };
 
-  <section class="card">
-    <div class="tabs">
-      <button class="tab-btn" data-tab="story" aria-selected="true">Story</button>
-      <button class="tab-btn" data-tab="acq">Acquisition</button>
-      <button class="tab-btn" data-tab="req">Requirements</button>
-      <button class="tab-btn" data-tab="unlock">Unlocks</button>
-    </div>
-    <div class="tab-panel active" id="panel-story"></div>
-    <div class="tab-panel" id="panel-acq"></div>
-    <div class="tab-panel" id="panel-req"></div>
-    <div class="tab-panel" id="panel-unlock"></div>
-  </section>
-</main>
+    let currentLang = "EN";
+    let currentTab = "story";
 
-<script>
-const LANG_KEY='ffxiv-lang';
-const i18n={
-  EN:{
-    pageTitle:'A New World to Explore',
-    tabs:{story:'Story',acq:'Acquisition',req:'Requirements',unlock:'Unlocks'},
-    story:`<p>The journey begins anew at the Baldesion Annex ...</p>`,
-    acq:`<div class="row"><b>Quest Giver</b> Ojika Tsunjika <small class="muted">(Old Sharlayan → The Baldesion Annex)</small></div>`,
-    req:`<div class="row"><b>Prerequisite Quest</b> The Coming Dawn</div>`,
-    unlock:`<div class="row"><b>Leads To</b> The Nation of Tuliyollal</div>`
-  },
-  JP:{
-    pageTitle:'新たなる冒険の世界',
-    tabs:{story:'ストーリー',acq:'入手',req:'条件',unlock:'派生'},
-    story:`<p>旅の再始動はバルデシオン分館から ...</p>`,
-    acq:`<div class="row"><b>依頼人</b> オジカ・ツンジカ <small class="muted">（オールド・シャーレアン → バルデシオン分館）</small></div>`,
-    req:`<div class="row"><b>前提クエスト</b> 夜明けの訪れ</div>`,
-    unlock:`<div class="row"><b>派生</b> トゥルヨラルの国</div>`
-  },
-  ZH:{
-    pageTitle:'嶄新的冒險',
-    tabs:{story:'故事',acq:'取得',req:'需求',unlock:'後續'},
-    story:`<p>旅程自 Baldesion Annex 的大廳再次啟程 ...</p>`,
-    acq:`<div class="row"><b>任務發放</b> Ojika Tsunjika <small class="muted">（Old Sharlayan → The Baldesion Annex）</small></div>`,
-    req:`<div class="row"><b>前置任務</b> The Coming Dawn</div>`,
-    unlock:`<div class="row"><b>後續任務</b> The Nation of Tuliyollal</div>`
-  }
-};
+    function setLang(lang) {
+      currentLang = lang;
+      document.getElementById("quest-title").innerText = data[lang].title;
+      switchTab(currentTab);
+    }
 
-const pageTitle=document.getElementById('pageTitle');
-const langToggle=document.getElementById('langToggle');
-const tabBtns=[...document.querySelectorAll('.tab-btn')];
-const panels={
-  story:document.getElementById('panel-story'),
-  acq:document.getElementById('panel-acq'),
-  req:document.getElementById('panel-req'),
-  unlock:document.getElementById('panel-unlock')
-};
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll(".tabs button").forEach(btn => btn.classList.remove("active"));
+      const index = {story:0, acq:1, req:2, unlock:3}[tab];
+      document.querySelectorAll(".tabs button")[index].classList.add("active");
+      document.getElementById("tab-content").innerHTML = data[currentLang][tab];
+    }
 
-function getLang(){return localStorage.getItem(LANG_KEY)||'EN';}
-function applyLang(lang){
-  const t=i18n[lang]; if(!t) return;
-  pageTitle.textContent=t.pageTitle;
-  langToggle.textContent='🌐 '+lang;
-  tabBtns.forEach(btn=>{
-    btn.textContent=t.tabs[btn.dataset.tab];
-  });
-  const active=tabBtns.find(b=>b.getAttribute('aria-selected')==='true');
-  renderPanel(active.dataset.tab,lang);
-}
-function renderPanel(key,lang){
-  Object.values(panels).forEach(p=>p.classList.remove('active'));
-  panels[key].classList.add('active');
-  panels[key].innerHTML=i18n[lang][key];
-}
-tabBtns.forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
-    btn.setAttribute('aria-selected','true');
-    renderPanel(btn.dataset.tab,getLang());
-  });
-});
-langToggle.addEventListener('click',()=>{
-  const cur=getLang();
-  const next=cur==='EN'?'JP':(cur==='JP'?'ZH':'EN');
-  localStorage.setItem(LANG_KEY,next);
-  applyLang(next);
-});
-if(!localStorage.getItem(LANG_KEY)) localStorage.setItem(LANG_KEY,'ZH');
-applyLang(getLang());
-</script>
+    // 初始化
+    setLang("EN");
+  </script>
 </body>
 </html>
