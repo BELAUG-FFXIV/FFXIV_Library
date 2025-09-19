@@ -186,7 +186,7 @@ function render(){
 function cardHTML(it){
   const thumb = it.thumb || `https://i.ytimg.com/vi/${it.ytId}/hqdefault.jpg`;
   const lang  = getLang();  // 🔑 取得目前語言
-  const title = it.title?.en || it.title?.jp || it.title?.zh || 'Untitled';
+  const title = it.title?.[lang] || it.title?.EN || it.title?.JP || it.title?.ZH || 'Untitled';
 
   const metaL = [
     it.expac   && `<span class="badge">${it.expac}</span>`,
