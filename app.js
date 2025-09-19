@@ -498,8 +498,8 @@ function cycleLang() {
   const next = cur === 'EN' ? 'JP' : (cur === 'JP' ? 'ZH' : 'EN');
   localStorage.setItem(LANG_KEY, next);
   applyLangUI(next);
-  renderFeatured();        // 切換語言時更新推薦影片標題
-  // 如需立即重算篩選(僅文案無需)可視需要呼叫 applyFilters();
+  renderFeatured();        // 更新推薦影片
+  render();                // 🔑 更新卡片標題
 }
 
 langToggle?.addEventListener('click', cycleLang);
