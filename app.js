@@ -64,21 +64,41 @@ function applyFilters(){
   let arr = state.data.filter(it => {
     const byCat = state.category ? it.category === state.category : true;
     const byExp = state.expac ? it.expac === state.expac : true;
-    const byPatch = state.patch ? (it.patch || '').startsWith(state.patch) : true;
+
+    // ← 這段替換掉你原本的 byPatch 寫法
+    let byPatch = true;
+    if (state.patch) {
+      const itemPatch = (it.patch || '');
+      if (state.patch.endsWith('.x')) {
+        // 例如 7.x、6.x：只比對主版本（7、6）
+        const major = state.patch.split('.')[0];   // '7.x' -> '7'
+        byPatch = itemPatch.startsWith(major + '.'); // '7.0'、'7.1'…都會通過
+      } else {
+        // 精確比對（例如選 7.0）
+        byPatch = itemPatch === state.patch || itemPatch.startsWith(state.patch);
+      }
+    }
+
     const byTags = state.tags.length ? state.tags.every(t => it.tags?.includes(t)) : true;
+
     const byQuery = qstr ? [
       it.title?.en, it.title?.jp, it.title?.zh,
       it.series, it.category, it.expac, it.patch, ...(it.tags||[])
     ].filter(Boolean).join(' ').toLowerCase().includes(qstr) : true;
+
     return byCat && byExp && byPatch && byTags && byQuery;
   });
+
   arr.sort((a,b)=>{
     if(state.sort === 'latest') return b._dateNum - a._dateNum;
-    if(state.sort === 'title') return (a.title?.en || '').localeCompare(b.title?.en || '');
-    if(state.sort === 'patch') return b._patchNum - a._patchNum;
+    if(state.sort === 'title')  return (a.title?.en || '').localeCompare(b.title?.en || '');
+    if(state.sort === 'patch')  return b._patchNum - a._patchNum;
     return 0;
   });
-  state.filtered = arr; state.page = 1; render();
+
+  state.filtered = arr; 
+  state.page = 1; 
+  render();
 }
 
 function render(){
