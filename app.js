@@ -419,11 +419,11 @@ const i18n = {
     ],
     expansions: [
       { value: '',   label: '全部資料片' },
-      { value: 'ARR', label: '重生之境' },
-      { value: 'HW',  label: '蒼天之伊修加德' },
-      { value: 'SB',  label: '紅蓮之解放者' },
+      { value: 'ARR', label: '新生艾奧傑亞' },
+      { value: 'HW',  label: '蒼天的伊修加德' },
+      { value: 'SB',  label: '紅蓮的解放者' },
       { value: 'SHB', label: '漆黑的反叛者' },
-      { value: 'EW',  label: '曉月之終途' },
+      { value: 'EW',  label: '曉月的終焉' },
       { value: 'DT',  label: '黃金的遺產' },
     ]
   }
