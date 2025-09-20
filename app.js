@@ -448,7 +448,7 @@ const i18n = {
       { value: 'JobQuests',      label: '職業任務' },
       { value: 'RoleQuests',     label: '角色職業任務' },
       { value: 'AlliedSociety',  label: '友好部族任務' },
-      { value: 'SideFeature',    label: '支線 / 解除任務' },
+      { value: 'SideFeature',    label: '支線 / 內容開放任務' },
       { value: 'Seasonal',       label: '季節 / 特別活動' },
       { value: 'GoldSaucer',     label: '金碟遊樂場' },
       { value: 'BGM',            label: 'BGM' },
