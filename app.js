@@ -68,8 +68,11 @@ themeToggle?.addEventListener('click', ()=>{
 fetch('data/library.json')
   .then(r => r.json())
   .then(json => {
-    state.data = (json.items || []).map(deriveFields);
-    applyFilters();
+state.data = (json.items || [])
+  .slice()          // 複製一份
+  .reverse()        // 最新的排前面
+  .map(deriveFields);
+     applyFilters();
     renderFeatured();
   })
   .catch(err => {
