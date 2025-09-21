@@ -22,7 +22,7 @@ const categorySel  = document.getElementById('category');
 const expacSel     = document.getElementById('expac');
 const patchSel     = document.getElementById('patch');
 const clearBtnEl   = document.getElementById('clear');
-const sortSel      = document.getElementById('sort');   // ⬅️ 你在 HTML 已加
+const sortSel      = document.getElementById('sort');   // ← 你在 HTML 已加
 const activeTags   = document.getElementById('activeTags');
 const themeToggle  = document.getElementById('themeToggle');
 const langToggle   = document.getElementById('langToggle');
@@ -68,7 +68,7 @@ themeToggle?.addEventListener('click', ()=>{
 fetch('data/library.json')
   .then(r => r.json())
   .then(json => {
-    state.data = (json.items || []).map(deriveFields);
+    state.data = (json.items || []).map((it, i) => deriveFields(it, i)); // 傳入 index
     applyFilters();
     renderFeatured();
   })
@@ -76,10 +76,14 @@ fetch('data/library.json')
     grid.innerHTML = `<p>載入資料失敗：${err?.message || err}</p>`;
   });
 
-function deriveFields(it){
+// 只計算 patch 數字，並存出現順序 _addedIdx（越大越新）
+function deriveFields(it, idx){
   const patchNum = parseFloat((it.patch || '0').replace(/[^\d.]/g,'') || 0);
-  const dateNum  = it.date ? +new Date(it.date) : 0; // 用於「最後加入」
-  return {...it, _patchNum: patchNum, _dateNum: dateNum};
+  return {
+    ...it,
+    _patchNum: patchNum,
+    _addedIdx: idx,
+  };
 }
 
 /* =========================
@@ -116,7 +120,6 @@ function applyFilters(){
     return byCat && byExp && byPatch && byTags && byQuery && visible;
   });
 
-  // 依 UI 選擇排序
   arr = sortArray(arr, state.sort);
 
   state.filtered = arr;
@@ -124,27 +127,28 @@ function applyFilters(){
   render();
 }
 
-// 共用排序：
-// - newest/oldest：用 _patchNum
-// - titleAZ/titleZA：用目前語言標題
-// - added：用 _dateNum（最新加入在前）
 function sortArray(arr, mode){
   const lang = getLang();
   return arr.slice().sort((a,b)=>{
-    if(mode === 'oldest')  return (a._patchNum||0) - (b._patchNum||0) || (b._dateNum - a._dateNum);
-    if(mode === 'titleAZ'){
+    if (mode === 'oldest') {
+      return (a._patchNum||0) - (b._patchNum||0);
+    }
+    if (mode === 'titleAZ') {
       const ta = (a.title?.[lang] || a.title?.EN || '').toLowerCase();
       const tb = (b.title?.[lang] || b.title?.EN || '').toLowerCase();
-      return ta.localeCompare(tb) || (b._dateNum - a._dateNum);
+      return ta.localeCompare(tb);
     }
-    if(mode === 'titleZA'){
+    if (mode === 'titleZA') {
       const ta = (a.title?.[lang] || a.title?.EN || '').toLowerCase();
       const tb = (b.title?.[lang] || b.title?.EN || '').toLowerCase();
-      return tb.localeCompare(ta) || (b._dateNum - a._dateNum);
+      return tb.localeCompare(ta);
     }
-    if(mode === 'added')   return (b._dateNum||0) - (a._dateNum||0);
-    // default newest by patch
-    return (b._patchNum||0) - (a._patchNum||0) || (b._dateNum - a._dateNum);
+    if (mode === 'added') {
+      // 只看 JSON 出現順序：越後面越新
+      return (b._addedIdx ?? 0) - (a._addedIdx ?? 0);
+    }
+    // default: newest（Patch 新→舊）
+    return (b._patchNum||0) - (a._patchNum||0);
   });
 }
 
@@ -248,7 +252,6 @@ function cardHTML(it){
        </a>`
     : '';
 
-  // 也把目前語言的標題與 patch 寫進 data-*（如果之後需要 DOM 排序）
   return `
   <article class="card" data-title="${safe(title)}" data-patch="${safe(it.patch || '')}">
     <img class="thumb" src="${thumb}" alt="${safe(title)}" loading="lazy">
@@ -347,7 +350,7 @@ clearBtnEl?.addEventListener('click', () => {
   state.tags=[];
   if(q) q.value=''; if(categorySel) categorySel.value='';
   if(expacSel) expacSel.value=''; if(patchSel) patchSel.value='';
-  applyFilters(); // 會沿用目前 state.sort
+  applyFilters(); // 保留目前排序模式
 });
 
 /* =========================
@@ -403,7 +406,6 @@ const i18n = {
       { value: '2.x', label: '2.x' },
     ],
     clear: 'Clear filters',
-    // 🔤 排序文案
     sort: {
       newest:  'Sort: Patch (new → old)',
       oldest:  'Sort: Patch (old → new)',
@@ -462,7 +464,7 @@ const i18n = {
       oldest:  '並び替え：パッチ（旧→新）',
       titleAZ: '並び替え：タイトル（A→Z）',
       titleZA: '並び替え：タイトル（Z→A）',
-      added:   '並び替え：追加日（新→旧）'
+      added:   '並び替え：追加順（新→旧）'
     }
   },
   ZH: {
@@ -528,7 +530,6 @@ function refillSelect(selectEl, options, keepValue=true) {
   selectEl.value = exists ? prev : (options[0]?.value ?? '');
 }
 
-// 依語言重建排序選單
 function refillSortOptions(dict){
   if(!sortSel || !dict?.sort) return;
   const keep = sortSel.value || state.sort || 'newest';
@@ -547,6 +548,8 @@ function applyLangUI(lang) {
   if (!dict) return;
 
   if (langToggle) langToggle.textContent = `🌐 ${dict.langLabel}`;
+  const taglineEl = document.getElementById('tagline');
+  const itemsSuffixEl = document.getElementById('itemsSuffix');
   if (taglineEl)   taglineEl.textContent   = dict.tagline;
   if (q)           q.placeholder           = dict.searchPH;
   if (itemsSuffixEl && dict.itemsSuffix) itemsSuffixEl.textContent = ` ${dict.itemsSuffix}`;
@@ -556,27 +559,30 @@ function applyLangUI(lang) {
   refillSelect(patchSel,    dict.patches,    true);
   if (clearBtnEl) clearBtnEl.textContent = dict.clear;
 
-  // 排序選單三語化
   refillSortOptions(dict);
 }
 
 function getLang(){
-  return localStorage.getItem(LANG_KEY) || 'EN';
+  return localStorage.getItem('ffxiv-lib-lang') || 'EN';
 }
 
 function cycleLang() {
   const cur = getLang();
   const next = cur === 'EN' ? 'JP' : (cur === 'JP' ? 'ZH' : 'EN');
-  localStorage.setItem(LANG_KEY, next);
+  localStorage.setItem('ffxiv-lib-lang', next);
   applyLangUI(next);
   renderFeatured();
-  // 切語言後，標題會變；重新排序以維持語意（特別是 titleAZ/ZA）
+  // 切語言後標題會變，若使用 titleAZ/ZA，需重新排序
   state.filtered = sortArray(state.filtered, state.sort);
   render();
 }
 
 langToggle?.addEventListener('click', cycleLang);
 
-// 初始化語言
+// 初始化語言 & 排序 UI
 applyLangUI(getLang());
-if (sortSel) sortSel.dispatchEvent(new Event('change')); // 讓排序 UI 狀態與資料一致
+if (sortSel) {
+  // 保持 state.sort 與 UI 一致
+  if (!sortSel.value) sortSel.value = state.sort;
+  sortSel.dispatchEvent(new Event('change'));
+}
