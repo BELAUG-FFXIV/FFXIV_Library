@@ -11,7 +11,7 @@ const state = {
   category: '',
   expac: '',
   patch: '',
-  sort: 'newest', // newest | oldest | titleAZ | titleZA | added
+  sort: 'added', // 預設：最後加入（依 JSON 出現順序）
 };
 
 const grid         = document.getElementById('grid');
@@ -22,7 +22,7 @@ const categorySel  = document.getElementById('category');
 const expacSel     = document.getElementById('expac');
 const patchSel     = document.getElementById('patch');
 const clearBtnEl   = document.getElementById('clear');
-const sortSel      = document.getElementById('sort');   // ← 你在 HTML 已加
+const sortSel      = document.getElementById('sort');   // ★ 排序下拉
 const activeTags   = document.getElementById('activeTags');
 const themeToggle  = document.getElementById('themeToggle');
 const langToggle   = document.getElementById('langToggle');
@@ -43,7 +43,6 @@ const featuredVideo = {
    主題切換（亮/暗）
    ========================= */
 const THEME_KEY = 'ffxiv-lib-theme';
-
 function applyTheme(mode){
   if(mode === 'dark'){
     document.documentElement.setAttribute('data-theme', 'dark');
@@ -54,7 +53,6 @@ function applyTheme(mode){
   }
 }
 applyTheme(localStorage.getItem(THEME_KEY) || 'light');
-
 themeToggle?.addEventListener('click', ()=>{
   const cur = localStorage.getItem(THEME_KEY) || 'light';
   const next = (cur === 'dark') ? 'light' : 'dark';
@@ -63,27 +61,55 @@ themeToggle?.addEventListener('click', ()=>{
 });
 
 /* =========================
-   載入資料
+   載入資料（附「加入順序」）
    ========================= */
+const SORT_KEY = 'ffxiv-lib-sort';
+
 fetch('data/library.json')
   .then(r => r.json())
   .then(json => {
-    state.data = (json.items || []).map((it, i) => deriveFields(it, i)); // 傳入 index
+    state.data = (json.items || []).map((it, i) => deriveFields(it, i));
+    state.sort = localStorage.getItem(SORT_KEY) || 'added'; // 預設「最後加入」
     applyFilters();
     renderFeatured();
+    if (sortSel) sortSel.value = state.sort; // UI 同步
   })
   .catch(err => {
     grid.innerHTML = `<p>載入資料失敗：${err?.message || err}</p>`;
   });
 
-// 只計算 patch 數字，並存出現順序 _addedIdx（越大越新）
 function deriveFields(it, idx){
   const patchNum = parseFloat((it.patch || '0').replace(/[^\d.]/g,'') || 0);
-  return {
-    ...it,
-    _patchNum: patchNum,
-    _addedIdx: idx,
-  };
+  const dateNum  = it.date ? +new Date(it.date) : 0;
+  return {...it, _patchNum: patchNum, _dateNum: dateNum, _addedIdx: idx};
+}
+
+/* =========================
+   排序函式
+   ========================= */
+function sortArray(arr, mode){
+  const lang = getLang();
+  return arr.slice().sort((a,b)=>{
+    if (mode === 'added') {
+      // 只看 JSON 出現順序：越後面越新
+      return (b._addedIdx ?? 0) - (a._addedIdx ?? 0);
+    }
+    if (mode === 'oldest') {
+      return (a._patchNum||0) - (b._patchNum||0);
+    }
+    if (mode === 'titleAZ') {
+      const ta = (a.title?.[lang] || a.title?.EN || '').toLowerCase();
+      const tb = (b.title?.[lang] || b.title?.EN || '').toLowerCase();
+      return ta.localeCompare(tb);
+    }
+    if (mode === 'titleZA') {
+      const ta = (a.title?.[lang] || a.title?.EN || '').toLowerCase();
+      const tb = (b.title?.[lang] || b.title?.EN || '').toLowerCase();
+      return tb.localeCompare(ta);
+    }
+    // default: newest（Patch 新→舊）
+    return (b._patchNum||0) - (a._patchNum||0);
+  });
 }
 
 /* =========================
@@ -120,36 +146,12 @@ function applyFilters(){
     return byCat && byExp && byPatch && byTags && byQuery && visible;
   });
 
+  // ★ 依當前排序模式排序
   arr = sortArray(arr, state.sort);
 
   state.filtered = arr;
   state.page = 1;
   render();
-}
-
-function sortArray(arr, mode){
-  const lang = getLang();
-  return arr.slice().sort((a,b)=>{
-    if (mode === 'oldest') {
-      return (a._patchNum||0) - (b._patchNum||0);
-    }
-    if (mode === 'titleAZ') {
-      const ta = (a.title?.[lang] || a.title?.EN || '').toLowerCase();
-      const tb = (b.title?.[lang] || b.title?.EN || '').toLowerCase();
-      return ta.localeCompare(tb);
-    }
-    if (mode === 'titleZA') {
-      const ta = (a.title?.[lang] || a.title?.EN || '').toLowerCase();
-      const tb = (b.title?.[lang] || b.title?.EN || '').toLowerCase();
-      return tb.localeCompare(ta);
-    }
-    if (mode === 'added') {
-      // 只看 JSON 出現順序：越後面越新
-      return (b._addedIdx ?? 0) - (a._addedIdx ?? 0);
-    }
-    // default: newest（Patch 新→舊）
-    return (b._patchNum||0) - (a._patchNum||0);
-  });
 }
 
 function render(){
@@ -253,7 +255,7 @@ function cardHTML(it){
     : '';
 
   return `
-  <article class="card" data-title="${safe(title)}" data-patch="${safe(it.patch || '')}">
+  <article class="card">
     <img class="thumb" src="${thumb}" alt="${safe(title)}" loading="lazy">
     <div class="body">
       <h3 class="title">${safe(title)}</h3>
@@ -302,7 +304,6 @@ const modalTitle = document.getElementById('modalTitle');
 const ytFrame    = document.getElementById('ytFrame');
 document.getElementById('modalClose')?.addEventListener('click', closePlayer);
 modal?.addEventListener('close', ()=>{ ytFrame.src=''; });
-
 function openPlayer(ytId, title){
   if (modalTitle) modalTitle.textContent = title || '播放中…';
   if (ytFrame) ytFrame.src = `https://www.youtube.com/embed/${ytId}?autoplay=1`;
@@ -339,10 +340,9 @@ expacSel?.addEventListener('change', e => { state.expac = e.target.value; applyF
 patchSel?.addEventListener('change', e => { state.patch = e.target.value; applyFilters(); });
 
 sortSel?.addEventListener('change', e => {
-  state.sort = e.target.value || 'newest';
-  state.filtered = sortArray(state.filtered, state.sort);
-  state.page = 1;
-  render();
+  state.sort = e.target.value || 'added';
+  localStorage.setItem(SORT_KEY, state.sort);
+  applyFilters();
 });
 
 clearBtnEl?.addEventListener('click', () => {
@@ -350,15 +350,16 @@ clearBtnEl?.addEventListener('click', () => {
   state.tags=[];
   if(q) q.value=''; if(categorySel) categorySel.value='';
   if(expacSel) expacSel.value=''; if(patchSel) patchSel.value='';
-  applyFilters(); // 保留目前排序模式
+  // 保留當前排序；如果也想重設排序，可在此把 sortSel.value = 'added' 並存入 localStorage
+  applyFilters();
 });
 
 /* =========================
    I18N + LANGUAGE SWITCH
    ========================= */
 const LANG_KEY = 'ffxiv-lib-lang';
-const taglineEl    = document.getElementById('tagline');
-const itemsSuffixEl= document.getElementById('itemsSuffix');
+const taglineEl     = document.getElementById('tagline');
+const itemsSuffixEl = document.getElementById('itemsSuffix');
 
 const i18n = {
   EN: {
@@ -366,6 +367,13 @@ const i18n = {
     tagline: 'Organized by series: Main Story, Raids, BGM, Jobs/Events, Tools & Collections. Supports search, tags, and quick play.',
     searchPH: 'Search title, series, tags, chapter…',
     itemsSuffix: 'items',
+    sortOptions: {
+      newest: "Sort: Patch (new → old)",
+      oldest: "Sort: Patch (old → new)",
+      titleAZ: "Sort: Title (A→Z)",
+      titleZA: "Sort: Title (Z→A)",
+      added:  "Sort: Last Added"
+    },
     categories: [
       { value: '',               label: 'All Categories' },
       { value: 'MSQ',            label: 'Main Story (MSQ)' },
@@ -406,19 +414,19 @@ const i18n = {
       { value: '2.x', label: '2.x' },
     ],
     clear: 'Clear filters',
-    sort: {
-      newest:  'Sort: Patch (new → old)',
-      oldest:  'Sort: Patch (old → new)',
-      titleAZ: 'Sort: Title (A→Z)',
-      titleZA: 'Sort: Title (Z→A)',
-      added:   'Sort: Last Added'
-    }
   },
   JP: {
     langLabel: 'JP',
     tagline: 'シリーズ別に整理：メインストーリー、レイド、BGM、ジョブ/イベント、ツール＆コレクション。検索・タグ・クイック再生に対応。',
     searchPH: 'タイトル・シリーズ・タグ・章… を検索',
     itemsSuffix: '件',
+    sortOptions: {
+      newest: "ソート：パッチ（新→旧）",
+      oldest: "ソート：パッチ（旧→新）",
+      titleAZ: "ソート：タイトル（A→Z）",
+      titleZA: "ソート：タイトル（Z→A）",
+      added:  "ソート：最後に追加"
+    },
     categories: [
       { value: '',               label: '全ての分類' },
       { value: 'MSQ',            label: 'メインストーリー' },
@@ -459,19 +467,19 @@ const i18n = {
       { value: '2.x', label: '2.x' },
     ],
     clear: '条件をクリア',
-    sort: {
-      newest:  '並び替え：パッチ（新→旧）',
-      oldest:  '並び替え：パッチ（旧→新）',
-      titleAZ: '並び替え：タイトル（A→Z）',
-      titleZA: '並び替え：タイトル（Z→A）',
-      added:   '並び替え：追加順（新→旧）'
-    }
   },
   ZH: {
     langLabel: 'ZH',
     tagline: '以系列為主軸整理：主線、團本、BGM、職業/活動、工具與蒐集。支援搜尋、標籤與快速播放。',
     searchPH: '搜尋標題、系列、標籤、章節…',
     itemsSuffix: '項內容',
+    sortOptions: {
+      newest: "排序：版本（新→舊）",
+      oldest: "排序：版本（舊→新）",
+      titleAZ: "排序：標題（A→Z）",
+      titleZA: "排序：標題（Z→A）",
+      added:  "排序：最後加入"
+    },
     categories: [
       { value: '',               label: '全部分類' },
       { value: 'MSQ',            label: '主線任務' },
@@ -512,13 +520,6 @@ const i18n = {
       { value: '2.x', label: '2.x' },
     ],
     clear: '清除條件',
-    sort: {
-      newest:  '排序：Patch（新→舊）',
-      oldest:  '排序：Patch（舊→新）',
-      titleAZ: '排序：標題（A→Z）',
-      titleZA: '排序：標題（Z→A）',
-      added:   '排序：最後加入（新→舊）'
-    }
   }
 };
 
@@ -530,26 +531,11 @@ function refillSelect(selectEl, options, keepValue=true) {
   selectEl.value = exists ? prev : (options[0]?.value ?? '');
 }
 
-function refillSortOptions(dict){
-  if(!sortSel || !dict?.sort) return;
-  const keep = sortSel.value || state.sort || 'newest';
-  sortSel.innerHTML = `
-    <option value="newest">${dict.sort.newest}</option>
-    <option value="oldest">${dict.sort.oldest}</option>
-    <option value="titleAZ">${dict.sort.titleAZ}</option>
-    <option value="titleZA">${dict.sort.titleZA}</option>
-    <option value="added">${dict.sort.added}</option>
-  `;
-  sortSel.value = ['newest','oldest','titleAZ','titleZA','added'].includes(keep) ? keep : 'newest';
-}
-
 function applyLangUI(lang) {
   const dict = i18n[lang];
   if (!dict) return;
 
   if (langToggle) langToggle.textContent = `🌐 ${dict.langLabel}`;
-  const taglineEl = document.getElementById('tagline');
-  const itemsSuffixEl = document.getElementById('itemsSuffix');
   if (taglineEl)   taglineEl.textContent   = dict.tagline;
   if (q)           q.placeholder           = dict.searchPH;
   if (itemsSuffixEl && dict.itemsSuffix) itemsSuffixEl.textContent = ` ${dict.itemsSuffix}`;
@@ -557,32 +543,31 @@ function applyLangUI(lang) {
   refillSelect(categorySel, dict.categories, true);
   refillSelect(expacSel,    dict.expansions, true);
   refillSelect(patchSel,    dict.patches,    true);
+
   if (clearBtnEl) clearBtnEl.textContent = dict.clear;
 
-  refillSortOptions(dict);
+  // ★ 同步排序下拉的顯示文字
+  if (sortSel && dict.sortOptions) {
+    Array.from(sortSel.options).forEach(opt => {
+      if (dict.sortOptions[opt.value]) {
+        opt.textContent = dict.sortOptions[opt.value];
+      }
+    });
+  }
 }
 
 function getLang(){
-  return localStorage.getItem('ffxiv-lib-lang') || 'EN';
+  return localStorage.getItem(LANG_KEY) || 'EN';
 }
-
 function cycleLang() {
   const cur = getLang();
   const next = cur === 'EN' ? 'JP' : (cur === 'JP' ? 'ZH' : 'EN');
-  localStorage.setItem('ffxiv-lib-lang', next);
+  localStorage.setItem(LANG_KEY, next);
   applyLangUI(next);
   renderFeatured();
-  // 切語言後標題會變，若使用 titleAZ/ZA，需重新排序
-  state.filtered = sortArray(state.filtered, state.sort);
   render();
 }
-
 langToggle?.addEventListener('click', cycleLang);
 
-// 初始化語言 & 排序 UI
+// 初始化語言
 applyLangUI(getLang());
-if (sortSel) {
-  // 保持 state.sort 與 UI 一致
-  if (!sortSel.value) sortSel.value = state.sort;
-  sortSel.dispatchEvent(new Event('change'));
-}
