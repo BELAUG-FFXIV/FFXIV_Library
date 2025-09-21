@@ -11,7 +11,7 @@ const state = {
   category: '',
   expac: '',
   patch: '',
-  sort: 'latest', // 固定用最新，無 UI
+  sort: 'newest', // 🔄 改用 UI 控制（newest/oldest/titleAZ/titleZA）
 };
 
 const grid         = document.getElementById('grid');
@@ -22,7 +22,7 @@ const categorySel  = document.getElementById('category');
 const expacSel     = document.getElementById('expac');
 const patchSel     = document.getElementById('patch');
 const clearBtnEl   = document.getElementById('clear');
-// ⚠️ 移除 sortSel
+const sortSel      = document.getElementById('sort');   // ✅ 新增：排序下拉
 const activeTags   = document.getElementById('activeTags');
 const themeToggle  = document.getElementById('themeToggle');
 const langToggle   = document.getElementById('langToggle');
@@ -116,12 +116,32 @@ function applyFilters(){
     return byCat && byExp && byPatch && byTags && byQuery && visible;
   });
 
-  // 固定以「最新」排序（依 date）
-  arr.sort((a,b)=> b._dateNum - a._dateNum);
+  // ✅ 依 UI 選擇排序
+  arr = sortArray(arr, state.sort);
 
   state.filtered = arr;
   state.page = 1;
   render();
+}
+
+// 共用排序：newest/oldest 用 patch；titleAZ/titleZA 用目前語言的標題
+function sortArray(arr, mode){
+  const lang = getLang();
+  return arr.slice().sort((a,b)=>{
+    if(mode === 'oldest') return (a._patchNum||0) - (b._patchNum||0) || (b._dateNum - a._dateNum);
+    if(mode === 'titleAZ'){
+      const ta = (a.title?.[lang] || a.title?.EN || '').toLowerCase();
+      const tb = (b.title?.[lang] || b.title?.EN || '').toLowerCase();
+      return ta.localeCompare(tb) || (b._dateNum - a._dateNum);
+    }
+    if(mode === 'titleZA'){
+      const ta = (a.title?.[lang] || a.title?.EN || '').toLowerCase();
+      const tb = (b.title?.[lang] || b.title?.EN || '').toLowerCase();
+      return tb.localeCompare(ta) || (b._dateNum - a._dateNum);
+    }
+    // default: newest
+    return (b._patchNum||0) - (a._patchNum||0) || (b._dateNum - a._dateNum);
+  });
 }
 
 function render(){
@@ -224,8 +244,9 @@ function cardHTML(it){
        </a>`
     : '';
 
+  // ✅ 把目前語言的標題與 patch 寫進 data-*，給排序/DOM 使用
   return `
-  <article class="card">
+  <article class="card" data-title="${safe(title)}" data-patch="${safe(it.patch || '')}">
     <img class="thumb" src="${thumb}" alt="${safe(title)}" loading="lazy">
     <div class="body">
       <h3 class="title">${safe(title)}</h3>
@@ -309,12 +330,22 @@ q?.addEventListener('input', e => { state.query = e.target.value; applyFilters()
 categorySel?.addEventListener('change', e => { state.category = e.target.value; applyFilters(); });
 expacSel?.addEventListener('change', e => { state.expac = e.target.value; applyFilters(); });
 patchSel?.addEventListener('change', e => { state.patch = e.target.value; applyFilters(); });
-// ⚠️ 已移除 sortSel 監聽
+
+// ✅ 排序選單事件
+sortSel?.addEventListener('change', e => {
+  state.sort = e.target.value || 'newest';
+  // 只改排序、保留目前的 filter/page；這裡重排 filtered 再 re-render
+  state.filtered = sortArray(state.filtered, state.sort);
+  state.page = 1;
+  render();
+});
+
 clearBtnEl?.addEventListener('click', () => {
   state.query=''; state.category=''; state.expac=''; state.patch='';
   state.tags=[];
   if(q) q.value=''; if(categorySel) categorySel.value='';
   if(expacSel) expacSel.value=''; if(patchSel) patchSel.value='';
+  // 清除後維持目前的排序選項
   applyFilters();
 });
 
@@ -323,7 +354,6 @@ clearBtnEl?.addEventListener('click', () => {
    ========================= */
 const LANG_KEY = 'ffxiv-lib-lang';
 const taglineEl    = document.getElementById('tagline');
-// ⚠️ 已移除 sortLabelEl
 const itemsSuffixEl= document.getElementById('itemsSuffix');
 
 const i18n = {
@@ -501,7 +531,7 @@ function cycleLang() {
   localStorage.setItem(LANG_KEY, next);
   applyLangUI(next);
   renderFeatured();
-  render();
+  render(); // ✅ 切換語言後會重畫卡片（data-title 也更新），排序仍適用
 }
 
 langToggle?.addEventListener('click', cycleLang);
