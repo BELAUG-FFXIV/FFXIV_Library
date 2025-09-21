@@ -288,13 +288,31 @@ const modal      = document.getElementById('playerModal');
 const modalTitle = document.getElementById('modalTitle');
 const ytFrame    = document.getElementById('ytFrame');
 
-if (modal?.hasAttribute('open')) {
-  try { modal.close(); } catch { modal.removeAttribute('open'); }
+// 預設隱藏，避免一開始就擋住按鈕
+if (modal) {
+  modal.close?.();
+  modal.style.display = 'none';
 }
 if (ytFrame) ytFrame.src = '';
 
+// 關閉按鈕
 document.getElementById('modalClose')?.addEventListener('click', closePlayer);
+
+// 當對話框關閉 → 清空影片
 modal?.addEventListener('close', ()=>{ ytFrame.src=''; });
+
+function openPlayer(ytId, title){
+  if (modalTitle) modalTitle.textContent = title || '播放中…';
+  if (ytFrame) ytFrame.src = `https://www.youtube.com/embed/${ytId}?autoplay=1`;
+  modal.style.display = 'block';
+  modal.showModal?.();
+}
+
+function closePlayer(){
+  if (ytFrame) ytFrame.src = '';
+  modal.style.display = 'none';
+  modal.close?.();
+}
 
 function openPlayer(ytId, title){
   if (modalTitle) modalTitle.textContent = title || '播放中…';
