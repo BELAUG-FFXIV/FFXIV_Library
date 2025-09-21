@@ -1,5 +1,5 @@
 /* =========================
-   基本狀態 & DOM 參照
+   狀態 & DOM
    ========================= */
 const state = {
   data: [],
@@ -11,7 +11,7 @@ const state = {
   category: '',
   expac: '',
   patch: '',
-  sort: 'newest', // 預設
+  sort: 'newest',
 };
 
 const grid         = document.getElementById('grid');
@@ -28,7 +28,7 @@ const themeToggle  = document.getElementById('themeToggle');
 const langToggle   = document.getElementById('langToggle');
 
 /* =========================
-   推薦影片設定
+   Featured
    ========================= */
 const featuredVideo = {
   ytId: "rSE9mxzvSg8",
@@ -40,21 +40,19 @@ const featuredVideo = {
 };
 
 /* =========================
-   主題切換
+   Theme
    ========================= */
 const THEME_KEY = 'ffxiv-lib-theme';
-
 function applyTheme(mode){
   if(mode === 'dark'){
     document.documentElement.setAttribute('data-theme', 'dark');
-    if (themeToggle) themeToggle.textContent = '☀️';
+    themeToggle.textContent = '☀️';
   }else{
     document.documentElement.removeAttribute('data-theme');
-    if (themeToggle) themeToggle.textContent = '🌙';
+    themeToggle.textContent = '🌙';
   }
 }
 applyTheme(localStorage.getItem(THEME_KEY) || 'light');
-
 themeToggle?.addEventListener('click', ()=>{
   const cur = localStorage.getItem(THEME_KEY) || 'light';
   const next = (cur === 'dark') ? 'light' : 'dark';
@@ -83,7 +81,7 @@ function deriveFields(it, idx){
 }
 
 /* =========================
-   篩選 / 排序 / 分頁
+   篩選 & 排序
    ========================= */
 function applyFilters(){
   const qstr = state.query.trim().toLowerCase();
@@ -92,7 +90,7 @@ function applyFilters(){
     const byCat  = state.category ? it.category === state.category : true;
     const byExp  = state.expac ? it.expac === state.expac : true;
 
-    // Patch 篩選：支援 7.x
+    // Patch 篩選
     let byPatch = true;
     if (state.patch) {
       const itemPatch = (it.patch || '');
@@ -117,10 +115,10 @@ function applyFilters(){
 
   // 排序
   switch(state.sort){
-    case 'newest': // Patch 新 → 舊
+    case 'newest':
       arr.sort((a,b)=> b._patchNum - a._patchNum);
       break;
-    case 'oldest': // Patch 舊 → 新
+    case 'oldest':
       arr.sort((a,b)=> a._patchNum - b._patchNum);
       break;
     case 'titleAZ':
@@ -129,7 +127,7 @@ function applyFilters(){
     case 'titleZA':
       arr.sort((a,b)=>(b.title?.EN||'').localeCompare(a.title?.EN||''));
       break;
-    case 'added': // 最後加入：有 date 用 date，否則用 index
+    case 'added':
       arr.sort((a,b)=>{
         const aKey = a._dateNum || a._addedIndex;
         const bKey = b._dateNum || b._addedIndex;
@@ -143,6 +141,9 @@ function applyFilters(){
   render();
 }
 
+/* =========================
+   Render
+   ========================= */
 function render(){
   resultCount.textContent = state.filtered.length;
 
@@ -165,18 +166,10 @@ function render(){
       const ytId  = btn.dataset.play;
       const title = btn.dataset.title;
       openPlayer(ytId, title);
-
-      if (typeof window.gtag === 'function') {
-        window.gtag('event', 'play_button_click', {
-          event_category: 'Video',
-          event_label: title,
-          video_id: ytId
-        });
-      }
     });
   });
 
-  // Tag 點擊
+  // Tag
   grid.querySelectorAll('[data-tag]').forEach(t =>
     t.addEventListener('click', ()=> addTag(t.dataset.tag))
   );
@@ -193,16 +186,7 @@ function render(){
 }
 
 /* =========================
-   工具：產生單頁連結
-   ========================= */
-function getPageHref(it){
-  if (it.slug) return `guides/${it.slug}.html`;
-  if (it.pageUrl) return it.pageUrl;
-  return '';
-}
-
-/* =========================
-   卡片 HTML
+   卡片
    ========================= */
 function cardHTML(it){
   const thumb = it.thumb || `https://i.ytimg.com/vi/${it.ytId}/hqdefault.jpg`;
@@ -231,14 +215,6 @@ function cardHTML(it){
     ? `<a class="btn btn-detail" href="${detailHref}" rel="noopener">Detail</a>`
     : '';
 
-  const playlistBtn = it.playlistUrl
-    ? `<a class="btn ghost" href="${it.playlistUrl}" target="_blank" rel="noopener">Playlist</a>`
-    : '';
-
-  const youtubeBtn = it.videoUrl
-    ? `<a class="btn ghost yt-only" href="${it.videoUrl}" target="_blank" rel="noopener" aria-label="YouTube">YT</a>`
-    : '';
-
   return `
   <article class="card">
     <img class="thumb" src="${thumb}" alt="${safe(title)}" loading="lazy">
@@ -249,8 +225,6 @@ function cardHTML(it){
       <div class="actions">
         ${playBtn}
         ${detailBtn}
-        ${playlistBtn}
-        ${youtubeBtn}
       </div>
       <div class="tags" style="margin-top:8px">${tags}</div>
     </div>
@@ -258,7 +232,7 @@ function cardHTML(it){
 }
 
 /* =========================
-   推薦影片渲染
+   Featured
    ========================= */
 function renderFeatured(){
   const box = document.getElementById('featured');
@@ -282,7 +256,7 @@ function renderFeatured(){
 }
 
 /* =========================
-   播放器 Modal
+   Modal (dialog)
    ========================= */
 const modal      = document.getElementById('playerModal');
 const modalTitle = document.getElementById('modalTitle');
@@ -295,14 +269,13 @@ function openPlayer(ytId, title){
   if (ytFrame) ytFrame.src = `https://www.youtube.com/embed/${ytId}?autoplay=1`;
   modal?.showModal();
 }
-
 function closePlayer(){
   if (ytFrame) ytFrame.src = '';
   modal?.close();
 }
 
 /* =========================
-   Tag 操作
+   Tag
    ========================= */
 function addTag(tag){
   if(!state.tags.includes(tag)){
@@ -322,7 +295,7 @@ function renderActiveTags(){
 }
 
 /* =========================
-   事件綁定
+   事件
    ========================= */
 q?.addEventListener('input', e => { state.query = e.target.value; applyFilters(); });
 categorySel?.addEventListener('change', e => { state.category = e.target.value; applyFilters(); });
@@ -341,13 +314,13 @@ clearBtnEl?.addEventListener('click', () => {
 });
 
 /* =========================
-   I18N + LANGUAGE SWITCH
+   語言
    ========================= */
 const LANG_KEY = 'ffxiv-lib-lang';
-const i18n = {
-  EN: { clear: 'Clear filters' },
-  JP: { clear: '条件をクリア' },
-  ZH: { clear: '清除條件' }
+const clearI18N = {
+  EN: 'Clear filters',
+  JP: '条件をクリア',
+  ZH: '清除條件'
 };
 function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
 function cycleLang(){
@@ -357,7 +330,7 @@ function cycleLang(){
   applyLangUI(next); renderFeatured(); render();
 }
 function applyLangUI(lang){
-  if(clearBtnEl) clearBtnEl.textContent = i18n[lang]?.clear || 'Clear filters';
+  if(clearBtnEl) clearBtnEl.textContent = clearI18N[lang] || 'Clear filters';
 }
 langToggle?.addEventListener('click', cycleLang);
 applyLangUI(getLang());
