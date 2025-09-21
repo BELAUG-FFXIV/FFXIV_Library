@@ -11,7 +11,7 @@ const state = {
   category: '',
   expac: '',
   patch: '',
-  sort: 'latest',
+  sort: 'latest', // 固定用最新，無 UI
 };
 
 const grid         = document.getElementById('grid');
@@ -22,17 +22,16 @@ const categorySel  = document.getElementById('category');
 const expacSel     = document.getElementById('expac');
 const patchSel     = document.getElementById('patch');
 const clearBtnEl   = document.getElementById('clear');
-const sortSel      = document.getElementById('sort');
+// ⚠️ 移除 sortSel
 const activeTags   = document.getElementById('activeTags');
 const themeToggle  = document.getElementById('themeToggle');
 const langToggle   = document.getElementById('langToggle');
-// （依你的要求：不自動寫年份到頁尾）
 
 /* =========================
    推薦影片設定
    ========================= */
 const featuredVideo = {
-  ytId: "rSE9mxzvSg8", // ← 換成你要推薦的 YouTube 影片 ID
+  ytId: "rSE9mxzvSg8",
   title: {
     EN: "⭐ Featured: Relax at Sunset in Shirogane",
     JP: "⭐ おすすめ：シロガネの夕暮れでくつろいで",
@@ -98,10 +97,9 @@ function applyFilters(){
     if (state.patch) {
       const itemPatch = (it.patch || '');
       if (state.patch.endsWith('.x')) {
-        const major = state.patch.split('.')[0]; // '7.x' -> '7'
-        byPatch = itemPatch.startsWith(major + '.'); // '7.0'、'7.1'…都通過
+        const major = state.patch.split('.')[0];
+        byPatch = itemPatch.startsWith(major + '.');
       } else {
-        // 精確或前綴（7.0 也會包含 7.0.1 等）
         byPatch = itemPatch === state.patch || itemPatch.startsWith(state.patch);
       }
     }
@@ -118,12 +116,8 @@ function applyFilters(){
     return byCat && byExp && byPatch && byTags && byQuery && visible;
   });
 
-  arr.sort((a,b)=>{
-    if(state.sort === 'latest') return b._dateNum - a._dateNum;
-    if(state.sort === 'title')  return (a.title?.EN || '').localeCompare(b.title?.EN || '');
-    if(state.sort === 'patch')  return b._patchNum - a._patchNum;
-    return 0;
-  });
+  // 固定以「最新」排序（依 date）
+  arr.sort((a,b)=> b._dateNum - a._dateNum);
 
   state.filtered = arr;
   state.page = 1;
@@ -180,14 +174,11 @@ function render(){
 }
 
 /* =========================
-   工具：產生單頁連結（新增）
+   工具：產生單頁連結
    ========================= */
 function getPageHref(it){
-  // 優先使用 slug → /guides/<slug>.html
   if (it.slug) return `guides/${it.slug}.html`;
-  // 次選：舊欄位 pageUrl
   if (it.pageUrl) return it.pageUrl;
-  // 都沒有就回傳空字串
   return '';
 }
 
@@ -211,7 +202,6 @@ function cardHTML(it){
   const tags = (it.tags||[]).slice(0,6)
     .map(t => `<span class="tag" data-tag="${t}">#${t}</span>`).join('');
 
-  // Detail：優先使用 slug，否則 fallback 到舊的 pageUrl
   const detailHref = it.slug ? `guides/${it.slug}.html` : it.pageUrl;
 
   const playBtn = it.ytId
@@ -229,7 +219,7 @@ function cardHTML(it){
   const youtubeBtn = it.videoUrl
     ? `<a class="btn ghost yt-only" href="${it.videoUrl}" target="_blank" rel="noopener" aria-label="YouTube">
          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" class="yt-icon">
-           <path d="M23.5 6.2s-.2-1.7-.8-2.5c-.8-.9-1.7-.9-2.1-1-3-.2-7.6-.2-7.6-.2h-.1s-4.6 0-7.6.2c-.4 0-1.3 0-2.1 1-.6.8-.8 2.5-.8 2.5S2 8.1 2 10v1.9c0 1.9.2 3.8.2 3.8s.2 1.7.8 2.5c.8.9 1.9.9 2.4 1 1.7.2 7.2.2 7.2.2s4.6 0 7.6-.2c.4 0 1.3 0 2.1-1 .6-.8.8-2.5.8-2.5s.2-1.9.2-3.8V10c0-1.9-.2-3.8-.2-3.8zM9.8 13.6V8.4l5.9 2.6-5.9 2.6z"/>
+           <path d="M23.5 6.2s-.2-1.7-.8-2.5c-.8-.9-1.7-.9-2.1-1-3-.2-7.6-.2-7.6-.2h-.1s-4.6 0-7.6.2c-.4 0-1.3 0-2.1-1-.6.8-.8 2.5-.8 2.5S2 8.1 2 10v1.9c0 1.9.2 3.8.2 3.8s.2 1.7.8 2.5c.8.9 1.9.9 2.4 1 1.7.2 7.2.2 7.2.2s4.6 0 7.6-.2c.4 0 1.3 0 2.1-1 .6-.8.8-2.5.8-2.5s.2-1.9.2-3.8V10c0-1.9-.2-3.8-.2-3.8zM9.8 13.6V8.4l5.9 2.6-5.9 2.6z"/>
          </svg>
        </a>`
     : '';
@@ -319,13 +309,12 @@ q?.addEventListener('input', e => { state.query = e.target.value; applyFilters()
 categorySel?.addEventListener('change', e => { state.category = e.target.value; applyFilters(); });
 expacSel?.addEventListener('change', e => { state.expac = e.target.value; applyFilters(); });
 patchSel?.addEventListener('change', e => { state.patch = e.target.value; applyFilters(); });
-sortSel?.addEventListener('change', e => { state.sort = e.target.value; applyFilters(); });
+// ⚠️ 已移除 sortSel 監聽
 clearBtnEl?.addEventListener('click', () => {
   state.query=''; state.category=''; state.expac=''; state.patch='';
-  state.tags=[]; state.sort='latest';
+  state.tags=[];
   if(q) q.value=''; if(categorySel) categorySel.value='';
   if(expacSel) expacSel.value=''; if(patchSel) patchSel.value='';
-  if(sortSel) sortSel.value='latest';
   applyFilters();
 });
 
@@ -334,7 +323,7 @@ clearBtnEl?.addEventListener('click', () => {
    ========================= */
 const LANG_KEY = 'ffxiv-lib-lang';
 const taglineEl    = document.getElementById('tagline');
-const sortLabelEl  = document.querySelector('.toolbar label');
+// ⚠️ 已移除 sortLabelEl
 const itemsSuffixEl= document.getElementById('itemsSuffix');
 
 const i18n = {
@@ -342,7 +331,6 @@ const i18n = {
     langLabel: 'EN',
     tagline: 'Organized by series: Main Story, Raids, BGM, Jobs/Events, Tools & Collections. Supports search, tags, and quick play.',
     searchPH: 'Search title, series, tags, chapter…',
-    sort: 'Sort:',
     itemsSuffix: 'items',
     categories: [
       { value: '',               label: 'All Categories' },
@@ -389,7 +377,6 @@ const i18n = {
     langLabel: 'JP',
     tagline: 'シリーズ別に整理：メインストーリー、レイド、BGM、ジョブ/イベント、ツール＆コレクション。検索・タグ・クイック再生に対応。',
     searchPH: 'タイトル・シリーズ・タグ・章… を検索',
-    sort: '並び替え：',
     itemsSuffix: '件',
     categories: [
       { value: '',               label: '全ての分類' },
@@ -436,7 +423,6 @@ const i18n = {
     langLabel: 'ZH',
     tagline: '以系列為主軸整理：主線、團本、BGM、職業/活動、工具與蒐集。支援搜尋、標籤與快速播放。',
     searchPH: '搜尋標題、系列、標籤、章節…',
-    sort: '排序：',
     itemsSuffix: '項內容',
     categories: [
       { value: '',               label: '全部分類' },
@@ -493,21 +479,15 @@ function applyLangUI(lang) {
   const dict = i18n[lang];
   if (!dict) return;
 
-  // 🌐 按鈕文字
   if (langToggle) langToggle.textContent = `🌐 ${dict.langLabel}`;
-
-  // 文案
   if (taglineEl)   taglineEl.textContent   = dict.tagline;
-  if (q)           q.placeholder           = dict.searchPH;     // ← 用 q（你的搜尋 input）
-  if (sortLabelEl) sortLabelEl.textContent = dict.sort;
+  if (q)           q.placeholder           = dict.searchPH;
   if (itemsSuffixEl && dict.itemsSuffix) itemsSuffixEl.textContent = ` ${dict.itemsSuffix}`;
 
-  // 下拉：分類、資料片、Patch
   refillSelect(categorySel, dict.categories, true);
   refillSelect(expacSel,    dict.expansions, true);
   refillSelect(patchSel,    dict.patches,    true);
 
-  // 按鈕：清除條件
   if (clearBtnEl) clearBtnEl.textContent = dict.clear;
 }
 
@@ -520,8 +500,8 @@ function cycleLang() {
   const next = cur === 'EN' ? 'JP' : (cur === 'JP' ? 'ZH' : 'EN');
   localStorage.setItem(LANG_KEY, next);
   applyLangUI(next);
-  renderFeatured();        // 更新推薦影片
-  render();                // 🔑 更新卡片標題
+  renderFeatured();
+  render();
 }
 
 langToggle?.addEventListener('click', cycleLang);
