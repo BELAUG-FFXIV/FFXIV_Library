@@ -11,7 +11,7 @@ const state = {
   category: '',
   expac: '',
   patch: '',
-  sort: 'newest', // 預設
+  sort: 'newest', // 預設排序
 };
 
 const grid         = document.getElementById('grid');
@@ -69,6 +69,14 @@ fetch('data/library.json')
   .then(r => r.json())
   .then(json => {
     state.data = (json.items || []).map((it, idx) => deriveFields(it, idx));
+    // URL 中帶 sort 參數時，套進狀態
+    try {
+      const s = new URL(location.href).searchParams.get('sort');
+      if (s) {
+        state.sort = s;
+        if (sortSel) sortSel.value = s;
+      }
+    } catch (e) {}
     applyFilters();
     renderFeatured();
   })
@@ -159,7 +167,7 @@ function render(){
       }).join('')
     : '';
 
-  // ▶ 播放按鈕
+  // ▶ 播放按鈕（同時送 GA 事件，若 gtag 存在）
   grid.querySelectorAll('[data-play]').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       const ytId  = btn.dataset.play;
@@ -282,44 +290,52 @@ function renderFeatured(){
 }
 
 /* =========================
-   播放器 Modal（修正版）
+   播放器 Modal（最終版：支援 <dialog> 與 <div>，無重覆宣告）
    ========================= */
 const modal      = document.getElementById('playerModal');
 const modalTitle = document.getElementById('modalTitle');
 const ytFrame    = document.getElementById('ytFrame');
 
-// 預設隱藏，避免一開始就擋住按鈕
-if (modal) {
-  modal.close?.();
+const isDialog = modal && modal.tagName === 'DIALOG';
+
+function hideModal() {
+  if (!modal) return;
+  if (isDialog && typeof modal.close === 'function') {
+    try { modal.close(); } catch {}
+  }
   modal.style.display = 'none';
 }
+function showModal() {
+  if (!modal) return;
+  if (isDialog && typeof modal.showModal === 'function') {
+    modal.showModal();
+  } else {
+    modal.style.display = 'block';
+  }
+}
+
+// 初始化：確保隱藏並清空
+hideModal();
 if (ytFrame) ytFrame.src = '';
 
 // 關閉按鈕
 document.getElementById('modalClose')?.addEventListener('click', closePlayer);
 
-// 當對話框關閉 → 清空影片
-modal?.addEventListener('close', ()=>{ ytFrame.src=''; });
+// <dialog> 關閉時清空
+if (isDialog) {
+  modal.addEventListener('close', () => { if (ytFrame) ytFrame.src = ''; });
+}
 
 function openPlayer(ytId, title){
   if (modalTitle) modalTitle.textContent = title || '播放中…';
   if (ytFrame) ytFrame.src = `https://www.youtube.com/embed/${ytId}?autoplay=1`;
-  modal.style.display = 'block';
-  modal.showModal?.();
+  showModal();
 }
 
 function closePlayer(){
   if (ytFrame) ytFrame.src = '';
-  modal.style.display = 'none';
-  modal.close?.();
+  hideModal();
 }
-
-function openPlayer(ytId, title){
-  if (modalTitle) modalTitle.textContent = title || '播放中…';
-  if (ytFrame) ytFrame.src = `https://www.youtube.com/embed/${ytId}?autoplay=1`;
-  modal?.showModal();
-}
-function closePlayer(){ modal?.close(); }
 
 /* =========================
    Tag 操作
@@ -348,7 +364,17 @@ q?.addEventListener('input', e => { state.query = e.target.value; applyFilters()
 categorySel?.addEventListener('change', e => { state.category = e.target.value; applyFilters(); });
 expacSel?.addEventListener('change', e => { state.expac = e.target.value; applyFilters(); });
 patchSel?.addEventListener('change', e => { state.patch = e.target.value; applyFilters(); });
-sortSel?.addEventListener('change', e => { state.sort = e.target.value; applyFilters(); });
+sortSel?.addEventListener('change', e => {
+  state.sort = e.target.value;
+  // 更新網址參數（可分享）
+  try {
+    const u = new URL(location.href);
+    if (state.sort && state.sort !== 'newest') u.searchParams.set('sort', state.sort);
+    else u.searchParams.delete('sort');
+    history.replaceState(null,'',u);
+  } catch(e) {}
+  applyFilters();
+});
 
 clearBtnEl?.addEventListener('click', () => {
   state.query=''; state.category=''; state.expac=''; state.patch='';
@@ -357,20 +383,26 @@ clearBtnEl?.addEventListener('click', () => {
   if(expacSel) expacSel.value=''; if(patchSel) patchSel.value='';
   if(sortSel) sortSel.value='newest';
   state.sort='newest';
+  // 清掉 URL 參數
+  try {
+    const u = new URL(location.href);
+    u.searchParams.delete('sort');
+    history.replaceState(null,'',u);
+  } catch(e) {}
   applyFilters();
 });
 
 /* =========================
-   I18N + LANGUAGE SWITCH
+   I18N + LANGUAGE SWITCH（精簡版）
    ========================= */
 const LANG_KEY = 'ffxiv-lib-lang';
 const taglineEl    = document.getElementById('tagline');
 const itemsSuffixEl= document.getElementById('itemsSuffix');
 
 const i18n = {
-  EN: { clear: 'Clear filters' },
-  JP: { clear: '条件をクリア' },
-  ZH: { clear: '清除條件' }
+  EN: { clear: 'Clear filters', itemsSuffix: 'items' },
+  JP: { clear: '条件をクリア', itemsSuffix: '件' },
+  ZH: { clear: '清除條件', itemsSuffix: '項內容' }
 };
 function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
 function cycleLang(){
@@ -381,6 +413,7 @@ function cycleLang(){
 }
 function applyLangUI(lang){
   if(clearBtnEl) clearBtnEl.textContent = i18n[lang]?.clear || 'Clear filters';
+  if(itemsSuffixEl && i18n[lang]?.itemsSuffix) itemsSuffixEl.textContent = ` ${i18n[lang].itemsSuffix}`;
 }
 langToggle?.addEventListener('click', cycleLang);
 applyLangUI(getLang());
