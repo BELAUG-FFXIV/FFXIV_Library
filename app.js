@@ -11,7 +11,7 @@ const state = {
   category: '',
   expac: '',
   patch: '',
-  sort: 'newest', // 🔄 改用 UI 控制（newest/oldest/titleAZ/titleZA）
+  sort: 'newest', // newest | oldest | titleAZ | titleZA | added
 };
 
 const grid         = document.getElementById('grid');
@@ -22,7 +22,7 @@ const categorySel  = document.getElementById('category');
 const expacSel     = document.getElementById('expac');
 const patchSel     = document.getElementById('patch');
 const clearBtnEl   = document.getElementById('clear');
-const sortSel      = document.getElementById('sort');   // ✅ 新增：排序下拉
+const sortSel      = document.getElementById('sort');   // ⬅️ 你在 HTML 已加
 const activeTags   = document.getElementById('activeTags');
 const themeToggle  = document.getElementById('themeToggle');
 const langToggle   = document.getElementById('langToggle');
@@ -78,7 +78,7 @@ fetch('data/library.json')
 
 function deriveFields(it){
   const patchNum = parseFloat((it.patch || '0').replace(/[^\d.]/g,'') || 0);
-  const dateNum  = it.date ? +new Date(it.date) : 0;
+  const dateNum  = it.date ? +new Date(it.date) : 0; // 用於「最後加入」
   return {...it, _patchNum: patchNum, _dateNum: dateNum};
 }
 
@@ -116,7 +116,7 @@ function applyFilters(){
     return byCat && byExp && byPatch && byTags && byQuery && visible;
   });
 
-  // ✅ 依 UI 選擇排序
+  // 依 UI 選擇排序
   arr = sortArray(arr, state.sort);
 
   state.filtered = arr;
@@ -124,11 +124,14 @@ function applyFilters(){
   render();
 }
 
-// 共用排序：newest/oldest 用 patch；titleAZ/titleZA 用目前語言的標題
+// 共用排序：
+// - newest/oldest：用 _patchNum
+// - titleAZ/titleZA：用目前語言標題
+// - added：用 _dateNum（最新加入在前）
 function sortArray(arr, mode){
   const lang = getLang();
   return arr.slice().sort((a,b)=>{
-    if(mode === 'oldest') return (a._patchNum||0) - (b._patchNum||0) || (b._dateNum - a._dateNum);
+    if(mode === 'oldest')  return (a._patchNum||0) - (b._patchNum||0) || (b._dateNum - a._dateNum);
     if(mode === 'titleAZ'){
       const ta = (a.title?.[lang] || a.title?.EN || '').toLowerCase();
       const tb = (b.title?.[lang] || b.title?.EN || '').toLowerCase();
@@ -139,7 +142,8 @@ function sortArray(arr, mode){
       const tb = (b.title?.[lang] || b.title?.EN || '').toLowerCase();
       return tb.localeCompare(ta) || (b._dateNum - a._dateNum);
     }
-    // default: newest
+    if(mode === 'added')   return (b._dateNum||0) - (a._dateNum||0);
+    // default newest by patch
     return (b._patchNum||0) - (a._patchNum||0) || (b._dateNum - a._dateNum);
   });
 }
@@ -244,7 +248,7 @@ function cardHTML(it){
        </a>`
     : '';
 
-  // ✅ 把目前語言的標題與 patch 寫進 data-*，給排序/DOM 使用
+  // 也把目前語言的標題與 patch 寫進 data-*（如果之後需要 DOM 排序）
   return `
   <article class="card" data-title="${safe(title)}" data-patch="${safe(it.patch || '')}">
     <img class="thumb" src="${thumb}" alt="${safe(title)}" loading="lazy">
@@ -331,10 +335,8 @@ categorySel?.addEventListener('change', e => { state.category = e.target.value; 
 expacSel?.addEventListener('change', e => { state.expac = e.target.value; applyFilters(); });
 patchSel?.addEventListener('change', e => { state.patch = e.target.value; applyFilters(); });
 
-// ✅ 排序選單事件
 sortSel?.addEventListener('change', e => {
   state.sort = e.target.value || 'newest';
-  // 只改排序、保留目前的 filter/page；這裡重排 filtered 再 re-render
   state.filtered = sortArray(state.filtered, state.sort);
   state.page = 1;
   render();
@@ -345,8 +347,7 @@ clearBtnEl?.addEventListener('click', () => {
   state.tags=[];
   if(q) q.value=''; if(categorySel) categorySel.value='';
   if(expacSel) expacSel.value=''; if(patchSel) patchSel.value='';
-  // 清除後維持目前的排序選項
-  applyFilters();
+  applyFilters(); // 會沿用目前 state.sort
 });
 
 /* =========================
@@ -402,6 +403,14 @@ const i18n = {
       { value: '2.x', label: '2.x' },
     ],
     clear: 'Clear filters',
+    // 🔤 排序文案
+    sort: {
+      newest:  'Sort: Patch (new → old)',
+      oldest:  'Sort: Patch (old → new)',
+      titleAZ: 'Sort: Title (A→Z)',
+      titleZA: 'Sort: Title (Z→A)',
+      added:   'Sort: Last Added'
+    }
   },
   JP: {
     langLabel: 'JP',
@@ -448,6 +457,13 @@ const i18n = {
       { value: '2.x', label: '2.x' },
     ],
     clear: '条件をクリア',
+    sort: {
+      newest:  '並び替え：パッチ（新→旧）',
+      oldest:  '並び替え：パッチ（旧→新）',
+      titleAZ: '並び替え：タイトル（A→Z）',
+      titleZA: '並び替え：タイトル（Z→A）',
+      added:   '並び替え：追加日（新→旧）'
+    }
   },
   ZH: {
     langLabel: 'ZH',
@@ -494,6 +510,13 @@ const i18n = {
       { value: '2.x', label: '2.x' },
     ],
     clear: '清除條件',
+    sort: {
+      newest:  '排序：Patch（新→舊）',
+      oldest:  '排序：Patch（舊→新）',
+      titleAZ: '排序：標題（A→Z）',
+      titleZA: '排序：標題（Z→A）',
+      added:   '排序：最後加入（新→舊）'
+    }
   }
 };
 
@@ -503,6 +526,20 @@ function refillSelect(selectEl, options, keepValue=true) {
   selectEl.innerHTML = options.map(o => `<option value="${o.value}">${o.label}</option>`).join('');
   const exists = options.some(o => String(o.value) === String(prev));
   selectEl.value = exists ? prev : (options[0]?.value ?? '');
+}
+
+// 依語言重建排序選單
+function refillSortOptions(dict){
+  if(!sortSel || !dict?.sort) return;
+  const keep = sortSel.value || state.sort || 'newest';
+  sortSel.innerHTML = `
+    <option value="newest">${dict.sort.newest}</option>
+    <option value="oldest">${dict.sort.oldest}</option>
+    <option value="titleAZ">${dict.sort.titleAZ}</option>
+    <option value="titleZA">${dict.sort.titleZA}</option>
+    <option value="added">${dict.sort.added}</option>
+  `;
+  sortSel.value = ['newest','oldest','titleAZ','titleZA','added'].includes(keep) ? keep : 'newest';
 }
 
 function applyLangUI(lang) {
@@ -517,8 +554,10 @@ function applyLangUI(lang) {
   refillSelect(categorySel, dict.categories, true);
   refillSelect(expacSel,    dict.expansions, true);
   refillSelect(patchSel,    dict.patches,    true);
-
   if (clearBtnEl) clearBtnEl.textContent = dict.clear;
+
+  // 排序選單三語化
+  refillSortOptions(dict);
 }
 
 function getLang(){
@@ -531,10 +570,13 @@ function cycleLang() {
   localStorage.setItem(LANG_KEY, next);
   applyLangUI(next);
   renderFeatured();
-  render(); // ✅ 切換語言後會重畫卡片（data-title 也更新），排序仍適用
+  // 切語言後，標題會變；重新排序以維持語意（特別是 titleAZ/ZA）
+  state.filtered = sortArray(state.filtered, state.sort);
+  render();
 }
 
 langToggle?.addEventListener('click', cycleLang);
 
 // 初始化語言
 applyLangUI(getLang());
+if (sortSel) sortSel.dispatchEvent(new Event('change')); // 讓排序 UI 狀態與資料一致
