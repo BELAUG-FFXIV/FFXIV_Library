@@ -11,7 +11,7 @@ const state = {
   category: '',
   expac: '',
   patch: '',
-  sort: 'added', // 預設：最後加入（依 JSON 出現順序）
+  sort: 'newest', // 預設
 };
 
 const grid         = document.getElementById('grid');
@@ -21,8 +21,8 @@ const q            = document.getElementById('q');
 const categorySel  = document.getElementById('category');
 const expacSel     = document.getElementById('expac');
 const patchSel     = document.getElementById('patch');
+const sortSel      = document.getElementById('sort');
 const clearBtnEl   = document.getElementById('clear');
-const sortSel      = document.getElementById('sort');   // ★ 排序下拉
 const activeTags   = document.getElementById('activeTags');
 const themeToggle  = document.getElementById('themeToggle');
 const langToggle   = document.getElementById('langToggle');
@@ -40,9 +40,10 @@ const featuredVideo = {
 };
 
 /* =========================
-   主題切換（亮/暗）
+   主題切換
    ========================= */
 const THEME_KEY = 'ffxiv-lib-theme';
+
 function applyTheme(mode){
   if(mode === 'dark'){
     document.documentElement.setAttribute('data-theme', 'dark');
@@ -53,6 +54,7 @@ function applyTheme(mode){
   }
 }
 applyTheme(localStorage.getItem(THEME_KEY) || 'light');
+
 themeToggle?.addEventListener('click', ()=>{
   const cur = localStorage.getItem(THEME_KEY) || 'light';
   const next = (cur === 'dark') ? 'light' : 'dark';
@@ -61,18 +63,14 @@ themeToggle?.addEventListener('click', ()=>{
 });
 
 /* =========================
-   載入資料（附「加入順序」）
+   載入資料
    ========================= */
-const SORT_KEY = 'ffxiv-lib-sort';
-
 fetch('data/library.json')
   .then(r => r.json())
   .then(json => {
-    state.data = (json.items || []).map((it, i) => deriveFields(it, i));
-    state.sort = localStorage.getItem(SORT_KEY) || 'added'; // 預設「最後加入」
+    state.data = (json.items || []).map((it, idx) => deriveFields(it, idx));
     applyFilters();
     renderFeatured();
-    if (sortSel) sortSel.value = state.sort; // UI 同步
   })
   .catch(err => {
     grid.innerHTML = `<p>載入資料失敗：${err?.message || err}</p>`;
@@ -81,35 +79,7 @@ fetch('data/library.json')
 function deriveFields(it, idx){
   const patchNum = parseFloat((it.patch || '0').replace(/[^\d.]/g,'') || 0);
   const dateNum  = it.date ? +new Date(it.date) : 0;
-  return {...it, _patchNum: patchNum, _dateNum: dateNum, _addedIdx: idx};
-}
-
-/* =========================
-   排序函式
-   ========================= */
-function sortArray(arr, mode){
-  const lang = getLang();
-  return arr.slice().sort((a,b)=>{
-    if (mode === 'added') {
-      // 只看 JSON 出現順序：越後面越新
-      return (b._addedIdx ?? 0) - (a._addedIdx ?? 0);
-    }
-    if (mode === 'oldest') {
-      return (a._patchNum||0) - (b._patchNum||0);
-    }
-    if (mode === 'titleAZ') {
-      const ta = (a.title?.[lang] || a.title?.EN || '').toLowerCase();
-      const tb = (b.title?.[lang] || b.title?.EN || '').toLowerCase();
-      return ta.localeCompare(tb);
-    }
-    if (mode === 'titleZA') {
-      const ta = (a.title?.[lang] || a.title?.EN || '').toLowerCase();
-      const tb = (b.title?.[lang] || b.title?.EN || '').toLowerCase();
-      return tb.localeCompare(ta);
-    }
-    // default: newest（Patch 新→舊）
-    return (b._patchNum||0) - (a._patchNum||0);
-  });
+  return {...it, _patchNum: patchNum, _dateNum: dateNum, _addedIndex: idx};
 }
 
 /* =========================
@@ -122,7 +92,7 @@ function applyFilters(){
     const byCat  = state.category ? it.category === state.category : true;
     const byExp  = state.expac ? it.expac === state.expac : true;
 
-    // Patch 篩選：支援 7.x 這種大版本
+    // Patch 篩選：支援 7.x
     let byPatch = true;
     if (state.patch) {
       const itemPatch = (it.patch || '');
@@ -135,7 +105,6 @@ function applyFilters(){
     }
 
     const byTags = state.tags.length ? state.tags.every(t => it.tags?.includes(t)) : true;
-
     const byQuery = qstr ? [
       it.title?.EN, it.title?.JP, it.title?.ZH,
       it.series, it.category, it.expac, it.patch, ...(it.tags||[])
@@ -146,8 +115,28 @@ function applyFilters(){
     return byCat && byExp && byPatch && byTags && byQuery && visible;
   });
 
-  // ★ 依當前排序模式排序
-  arr = sortArray(arr, state.sort);
+  // 排序
+  switch(state.sort){
+    case 'newest': // Patch 新 → 舊
+      arr.sort((a,b)=> b._patchNum - a._patchNum);
+      break;
+    case 'oldest': // Patch 舊 → 新
+      arr.sort((a,b)=> a._patchNum - b._patchNum);
+      break;
+    case 'titleAZ':
+      arr.sort((a,b)=>(a.title?.EN||'').localeCompare(b.title?.EN||''));
+      break;
+    case 'titleZA':
+      arr.sort((a,b)=>(b.title?.EN||'').localeCompare(a.title?.EN||''));
+      break;
+    case 'added': // 最後加入：有 date 用 date，否則用 index
+      arr.sort((a,b)=>{
+        const aKey = a._dateNum || a._addedIndex;
+        const bKey = b._dateNum || b._addedIndex;
+        return bKey - aKey;
+      });
+      break;
+  }
 
   state.filtered = arr;
   state.page = 1;
@@ -170,7 +159,7 @@ function render(){
       }).join('')
     : '';
 
-  // ▶ 播放按鈕（同時送 GA 事件，若 gtag 存在）
+  // ▶ 播放按鈕
   grid.querySelectorAll('[data-play]').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       const ytId  = btn.dataset.play;
@@ -213,7 +202,7 @@ function getPageHref(it){
 }
 
 /* =========================
-   卡片 HTML（標題隨語言切換）
+   卡片 HTML
    ========================= */
 function cardHTML(it){
   const thumb = it.thumb || `https://i.ytimg.com/vi/${it.ytId}/hqdefault.jpg`;
@@ -247,11 +236,7 @@ function cardHTML(it){
     : '';
 
   const youtubeBtn = it.videoUrl
-    ? `<a class="btn ghost yt-only" href="${it.videoUrl}" target="_blank" rel="noopener" aria-label="YouTube">
-         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" class="yt-icon">
-           <path d="M23.5 6.2s-.2-1.7-.8-2.5c-.8-.9-1.7-.9-2.1-1-3-.2-7.6-.2-7.6-.2h-.1s-4.6 0-7.6.2c-.4 0-1.3 0-2.1-1-.6.8-.8 2.5-.8 2.5S2 8.1 2 10v1.9c0 1.9.2 3.8.2 3.8s.2 1.7.8 2.5c.8.9 1.9.9 2.4 1 1.7.2 7.2.2 7.2.2s4.6 0 7.6-.2c.4 0 1.3 0 2.1-1 .6-.8.8-2.5.8-2.5s.2-1.9.2-3.8V10c0-1.9-.2-3.8-.2-3.8zM9.8 13.6V8.4l5.9 2.6-5.9 2.6z"/>
-         </svg>
-       </a>`
+    ? `<a class="btn ghost yt-only" href="${it.videoUrl}" target="_blank" rel="noopener" aria-label="YouTube">YT</a>`
     : '';
 
   return `
@@ -273,7 +258,7 @@ function cardHTML(it){
 }
 
 /* =========================
-   推薦影片渲染（跟語言同步）
+   推薦影片渲染
    ========================= */
 function renderFeatured(){
   const box = document.getElementById('featured');
@@ -297,13 +282,20 @@ function renderFeatured(){
 }
 
 /* =========================
-   播放器 Modal
+   播放器 Modal（修正版）
    ========================= */
 const modal      = document.getElementById('playerModal');
 const modalTitle = document.getElementById('modalTitle');
 const ytFrame    = document.getElementById('ytFrame');
+
+if (modal?.hasAttribute('open')) {
+  try { modal.close(); } catch { modal.removeAttribute('open'); }
+}
+if (ytFrame) ytFrame.src = '';
+
 document.getElementById('modalClose')?.addEventListener('click', closePlayer);
 modal?.addEventListener('close', ()=>{ ytFrame.src=''; });
+
 function openPlayer(ytId, title){
   if (modalTitle) modalTitle.textContent = title || '播放中…';
   if (ytFrame) ytFrame.src = `https://www.youtube.com/embed/${ytId}?autoplay=1`;
@@ -338,19 +330,15 @@ q?.addEventListener('input', e => { state.query = e.target.value; applyFilters()
 categorySel?.addEventListener('change', e => { state.category = e.target.value; applyFilters(); });
 expacSel?.addEventListener('change', e => { state.expac = e.target.value; applyFilters(); });
 patchSel?.addEventListener('change', e => { state.patch = e.target.value; applyFilters(); });
-
-sortSel?.addEventListener('change', e => {
-  state.sort = e.target.value || 'added';
-  localStorage.setItem(SORT_KEY, state.sort);
-  applyFilters();
-});
+sortSel?.addEventListener('change', e => { state.sort = e.target.value; applyFilters(); });
 
 clearBtnEl?.addEventListener('click', () => {
   state.query=''; state.category=''; state.expac=''; state.patch='';
   state.tags=[];
   if(q) q.value=''; if(categorySel) categorySel.value='';
   if(expacSel) expacSel.value=''; if(patchSel) patchSel.value='';
-  // 保留當前排序；如果也想重設排序，可在此把 sortSel.value = 'added' 並存入 localStorage
+  if(sortSel) sortSel.value='newest';
+  state.sort='newest';
   applyFilters();
 });
 
@@ -358,216 +346,23 @@ clearBtnEl?.addEventListener('click', () => {
    I18N + LANGUAGE SWITCH
    ========================= */
 const LANG_KEY = 'ffxiv-lib-lang';
-const taglineEl     = document.getElementById('tagline');
-const itemsSuffixEl = document.getElementById('itemsSuffix');
+const taglineEl    = document.getElementById('tagline');
+const itemsSuffixEl= document.getElementById('itemsSuffix');
 
 const i18n = {
-  EN: {
-    langLabel: 'EN',
-    tagline: 'Organized by series: Main Story, Raids, BGM, Jobs/Events, Tools & Collections. Supports search, tags, and quick play.',
-    searchPH: 'Search title, series, tags, chapter…',
-    itemsSuffix: 'items',
-    sortOptions: {
-      newest: "Sort: Patch (new → old)",
-      oldest: "Sort: Patch (old → new)",
-      titleAZ: "Sort: Title (A→Z)",
-      titleZA: "Sort: Title (Z→A)",
-      added:  "Sort: Last Added"
-    },
-    categories: [
-      { value: '',               label: 'All Categories' },
-      { value: 'MSQ',            label: 'Main Story (MSQ)' },
-      { value: 'AllianceRaid24', label: 'Alliance Raid (24ppl)' },
-      { value: 'Raid8',          label: 'Raid (8ppl)' },
-      { value: 'Dungeon',        label: 'Dungeon' },
-      { value: 'Trial',          label: 'Trial' },
-      { value: 'JobQuests',      label: 'Job Quests' },
-      { value: 'RoleQuests',     label: 'Role Quests' },
-      { value: 'AlliedSociety',  label: 'Allied Society Quests' },
-      { value: 'SideFeature',    label: 'Side / Feature Quests' },
-      { value: 'Seasonal',       label: 'Seasonal / Special Events' },
-      { value: 'GoldSaucer',     label: 'Gold Saucer' },
-      { value: 'BGM',            label: 'BGM' },
-      { value: 'CollMount',      label: 'Collection (Mount)' },
-      { value: 'CollWeapon',     label: 'Collection (Weapon)' },
-      { value: 'CollTool',       label: 'Collection (DOH/DOL Tool)' },
-      { value: 'HighDiff',       label: 'High-difficulty Content' },
-      { value: 'RelaxingBGM',    label: 'Relaxing Background Vibes' },
-      { value: 'PVP',            label: 'PVP' },
-    ],
-    expansions: [
-      { value: '',   label: 'All Expansions' },
-      { value: 'ARR', label: 'A Realm Reborn (ARR)' },
-      { value: 'HW',  label: 'Heavensward (HW)' },
-      { value: 'SB',  label: 'Stormblood (SB)' },
-      { value: 'SHB', label: 'Shadowbringers (SHB)' },
-      { value: 'EW',  label: 'Endwalker (EW)' },
-      { value: 'DT',  label: 'Dawntrail (DT)' },
-    ],
-    patches: [
-      { value: '',    label: 'All Patch' },
-      { value: '7.x', label: '7.x' },
-      { value: '6.x', label: '6.x' },
-      { value: '5.x', label: '5.x' },
-      { value: '4.x', label: '4.x' },
-      { value: '3.x', label: '3.x' },
-      { value: '2.x', label: '2.x' },
-    ],
-    clear: 'Clear filters',
-  },
-  JP: {
-    langLabel: 'JP',
-    tagline: 'シリーズ別に整理：メインストーリー、レイド、BGM、ジョブ/イベント、ツール＆コレクション。検索・タグ・クイック再生に対応。',
-    searchPH: 'タイトル・シリーズ・タグ・章… を検索',
-    itemsSuffix: '件',
-    sortOptions: {
-      newest: "ソート：パッチ（新→旧）",
-      oldest: "ソート：パッチ（旧→新）",
-      titleAZ: "ソート：タイトル（A→Z）",
-      titleZA: "ソート：タイトル（Z→A）",
-      added:  "ソート：最後に追加"
-    },
-    categories: [
-      { value: '',               label: '全ての分類' },
-      { value: 'MSQ',            label: 'メインストーリー' },
-      { value: 'AllianceRaid24', label: 'アライアンス（24人）' },
-      { value: 'Raid8',          label: 'レイド（8人）' },
-      { value: 'Dungeon',        label: 'ダンジョン' },
-      { value: 'Trial',          label: '討伐・討滅戦' },
-      { value: 'JobQuests',      label: 'ジョブクエスト' },
-      { value: 'RoleQuests',     label: 'ロールクエスト' },
-      { value: 'AlliedSociety',  label: '友好部族クエスト' },
-      { value: 'SideFeature',    label: 'サブクエスト / コンテンツ開放クエスト' },
-      { value: 'Seasonal',       label: 'シーズナルイベント / スペシャルイベント' },
-      { value: 'GoldSaucer',     label: 'ゴールドソーサー' },
-      { value: 'BGM',            label: 'BGM' },
-      { value: 'CollMount',      label: 'マウントコレクション' },
-      { value: 'CollWeapon',     label: '武器コレクション' },
-      { value: 'CollTool',       label: 'クラフター/ギャザラーツールコレクション' },
-      { value: 'HighDiff',       label: '高難度コンテンツ' },
-      { value: 'RelaxingBGM',    label: 'リラックスできるFFXIVの風景と音楽' },
-      { value: 'PVP',            label: 'PVP' },
-    ],
-    expansions: [
-      { value: '',   label: '全ての資料片' },
-      { value: 'ARR', label: '新生エオルゼア' },
-      { value: 'HW',  label: '蒼天のイシュガルド' },
-      { value: 'SB',  label: '紅蓮のリベレーター' },
-      { value: 'SHB', label: '漆黒のヴィランズ' },
-      { value: 'EW',  label: '暁月のフィナーレ' },
-      { value: 'DT',  label: '黄金のレガシー' },
-    ],
-    patches: [
-      { value: '',    label: '全てのPatch' },
-      { value: '7.x', label: '7.x' },
-      { value: '6.x', label: '6.x' },
-      { value: '5.x', label: '5.x' },
-      { value: '4.x', label: '4.x' },
-      { value: '3.x', label: '3.x' },
-      { value: '2.x', label: '2.x' },
-    ],
-    clear: '条件をクリア',
-  },
-  ZH: {
-    langLabel: 'ZH',
-    tagline: '以系列為主軸整理：主線、團本、BGM、職業/活動、工具與蒐集。支援搜尋、標籤與快速播放。',
-    searchPH: '搜尋標題、系列、標籤、章節…',
-    itemsSuffix: '項內容',
-    sortOptions: {
-      newest: "排序：版本（新→舊）",
-      oldest: "排序：版本（舊→新）",
-      titleAZ: "排序：標題（A→Z）",
-      titleZA: "排序：標題（Z→A）",
-      added:  "排序：最後加入"
-    },
-    categories: [
-      { value: '',               label: '全部分類' },
-      { value: 'MSQ',            label: '主線任務' },
-      { value: 'AllianceRaid24', label: '聯盟戰（24人）' },
-      { value: 'Raid8',          label: '團本（8人）' },
-      { value: 'Dungeon',        label: '副本' },
-      { value: 'Trial',          label: '討伐戰' },
-      { value: 'JobQuests',      label: '職業任務' },
-      { value: 'RoleQuests',     label: '角色職業任務' },
-      { value: 'AlliedSociety',  label: '友好部族任務' },
-      { value: 'SideFeature',    label: '支線 / 內容開放任務' },
-      { value: 'Seasonal',       label: '季節 / 特別活動' },
-      { value: 'GoldSaucer',     label: '金碟遊樂場' },
-      { value: 'BGM',            label: 'BGM' },
-      { value: 'CollMount',      label: '蒐集 - 坐騎' },
-      { value: 'CollWeapon',     label: '蒐集 - 武器' },
-      { value: 'CollTool',       label: '蒐集 - 製作/採集用工具' },
-      { value: 'HighDiff',       label: '高難度內容' },
-      { value: 'RelaxingBGM',    label: 'FFXIV 背景放鬆音樂' },
-      { value: 'PVP',            label: 'PVP' },
-    ],
-    expansions: [
-      { value: '',   label: '全部資料片' },
-      { value: 'ARR', label: '新生艾奧傑亞' },
-      { value: 'HW',  label: '蒼天的伊修加德' },
-      { value: 'SB',  label: '紅蓮的解放者' },
-      { value: 'SHB', label: '漆黑的反叛者' },
-      { value: 'EW',  label: '曉月的終焉' },
-      { value: 'DT',  label: '黃金的遺產' },
-    ],
-    patches: [
-      { value: '',    label: '全部 Patch' },
-      { value: '7.x', label: '7.x' },
-      { value: '6.x', label: '6.x' },
-      { value: '5.x', label: '5.x' },
-      { value: '4.x', label: '4.x' },
-      { value: '3.x', label: '3.x' },
-      { value: '2.x', label: '2.x' },
-    ],
-    clear: '清除條件',
-  }
+  EN: { clear: 'Clear filters' },
+  JP: { clear: '条件をクリア' },
+  ZH: { clear: '清除條件' }
 };
-
-function refillSelect(selectEl, options, keepValue=true) {
-  if (!selectEl) return;
-  const prev = keepValue ? selectEl.value : '';
-  selectEl.innerHTML = options.map(o => `<option value="${o.value}">${o.label}</option>`).join('');
-  const exists = options.some(o => String(o.value) === String(prev));
-  selectEl.value = exists ? prev : (options[0]?.value ?? '');
-}
-
-function applyLangUI(lang) {
-  const dict = i18n[lang];
-  if (!dict) return;
-
-  if (langToggle) langToggle.textContent = `🌐 ${dict.langLabel}`;
-  if (taglineEl)   taglineEl.textContent   = dict.tagline;
-  if (q)           q.placeholder           = dict.searchPH;
-  if (itemsSuffixEl && dict.itemsSuffix) itemsSuffixEl.textContent = ` ${dict.itemsSuffix}`;
-
-  refillSelect(categorySel, dict.categories, true);
-  refillSelect(expacSel,    dict.expansions, true);
-  refillSelect(patchSel,    dict.patches,    true);
-
-  if (clearBtnEl) clearBtnEl.textContent = dict.clear;
-
-  // ★ 同步排序下拉的顯示文字
-  if (sortSel && dict.sortOptions) {
-    Array.from(sortSel.options).forEach(opt => {
-      if (dict.sortOptions[opt.value]) {
-        opt.textContent = dict.sortOptions[opt.value];
-      }
-    });
-  }
-}
-
-function getLang(){
-  return localStorage.getItem(LANG_KEY) || 'EN';
-}
-function cycleLang() {
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function cycleLang(){
   const cur = getLang();
   const next = cur === 'EN' ? 'JP' : (cur === 'JP' ? 'ZH' : 'EN');
   localStorage.setItem(LANG_KEY, next);
-  applyLangUI(next);
-  renderFeatured();
-  render();
+  applyLangUI(next); renderFeatured(); render();
+}
+function applyLangUI(lang){
+  if(clearBtnEl) clearBtnEl.textContent = i18n[lang]?.clear || 'Clear filters';
 }
 langToggle?.addEventListener('click', cycleLang);
-
-// 初始化語言
 applyLangUI(getLang());
