@@ -81,15 +81,7 @@
             <option value="6.x">6.x</option>
             <option value="7.x">7.x</option>
           </select>
-          
-<select id="sort" class="select">
-  <option value="newest">Sort: Patch (new → old)</option>
-  <option value="oldest">Sort: Patch (old → new)</option>
-  <option value="titleAZ">Sort: Title (A→Z)</option>
-  <option value="titleZA">Sort: Title (Z→A)</option>
-  <option value="added">Sort: Last Added</option>
-</select>
-          
+
           <button id="clear" class="btn">清除條件</button>
         </div>
 
@@ -103,7 +95,7 @@
         <div class="count">
           <span id="resultCount">0</span><span id="itemsSuffix"> 項內容</span>
         </div>
-      </div>
+    </div>
       
       <!-- ⭐ 推薦影片：JS 會自動填內容 -->
       <div id="featured" class="featured-slot"></div>
@@ -114,18 +106,17 @@
     </section>
   </main>
 
-<!-- 播放器：使用 <dialog> -->
-<dialog id="playerModal">
-  <div class="modal-head">
-    <h3 id="modalTitle">播放中…</h3>
-    <button id="modalClose" class="btn ghost" aria-label="關閉">✕</button>
-  </div>
-  <div class="modal-body" style="height:min(70vh,600px); background:#000;">
-    <iframe id="ytFrame" width="100%" height="100%" frameborder="0"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-      allowfullscreen></iframe>
-  </div>
-</dialog>
+  <dialog id="playerModal">
+    <div class="modal-head">
+      <h3 id="modalTitle">播放中…</h3>
+      <button id="modalClose" class="btn ghost" aria-label="關閉">✕</button>
+    </div>
+    <div class="modal-body" style="height:min(70vh,600px)">
+      <iframe id="ytFrame" width="100%" height="100%" frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen></iframe>
+    </div>
+  </dialog>
 
   <footer class="site-footer">
     <div class="container foot">
@@ -133,72 +124,5 @@
       <a href="#top" class="backtop" aria-label="回到頂端">↑</a>
     </div>
   </footer>
-
-  <!-- 🔽 排序功能腳本放在這裡 -->
-  <script>
-  (function(){
-    const grid = document.getElementById('grid');      
-    const sortSelect = document.getElementById('sort'); 
-    const clearBtn = document.getElementById('clear');  
-    if(!grid || !sortSelect) return;
-
-    function parsePatch(val){
-      const m = (val ?? '').toString().match(/\d+(\.\d+)?/);
-      return m ? parseFloat(m[0]) : NaN;
-    }
-
-    function sortGrid(mode){
-      const rows = [...grid.querySelectorAll('.card')].map(el => ({
-        el,
-        title: (el.dataset.title || '').toLowerCase(),
-        patch: parsePatch(el.dataset.patch)
-      }));
-      rows.sort((a,b)=>{
-        switch(mode){
-          case 'oldest':  return (a.patch||0) - (b.patch||0);
-          case 'titleAZ': return a.title.localeCompare(b.title);
-          case 'titleZA': return b.title.localeCompare(a.title);
-          case 'newest':
-          default:        return (b.patch||0) - (a.patch||0);
-        }
-      });
-      rows.forEach(({el})=>grid.appendChild(el));
-    }
-
-    function applySort(){
-      const mode = sortSelect.value || 'newest';
-      sortGrid(mode);
-      try{
-        const u = new URL(location.href);
-        if(mode && mode!=='newest') u.searchParams.set('sort', mode);
-        else u.searchParams.delete('sort');
-        history.replaceState(null,'',u);
-      }catch(e){}
-    }
-
-    try{
-      const s = new URL(location.href).searchParams.get('sort');
-      if(s) sortSelect.value = s;
-    }catch(e){}
-
-    sortSelect.addEventListener('change', applySort);
-    if(clearBtn){
-      clearBtn.addEventListener('click', ()=> {
-        requestAnimationFrame(applySort);
-      });
-    }
-
-    const mo = new MutationObserver(()=>{
-      clearTimeout(applySort._t);
-      applySort._t = setTimeout(applySort, 50);
-    });
-    mo.observe(grid, { childList: true });
-
-    applySort();
-  })();
-  </script>
-</body>
-</html>
-  
 </body>
 </html>
