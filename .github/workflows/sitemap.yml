@@ -28,17 +28,26 @@ jobs:
         with:
           node-version: 20
 
-      # 若無 package-lock.json，這步會自動略過，不影響
       - run: npm ci || true
 
-      # 產生 sitemap（會輸出 sitemap.xml、sitemap_index.xml、sitemaps/*.xml）
-      - run: node generate-sitemap.mjs
+      # 產生 sitemap 檔案
+      - name: Generate sitemap
+        run: node generate-sitemap.mjs
 
-      # 把所有 sitemap 檔案 commit 回 repo（關鍵修正：抓到資料夾裡的新檔）
+      # （新增）列出根目錄與 sitemaps 夾內容，確認檔案存在
+      - name: Show generated files
+        run: |
+          echo "== ls -la =="
+          ls -la
+          echo "== ls -la sitemaps =="
+          ls -la sitemaps || echo "no sitemaps dir"
+
+      # 提交 sitemap（關鍵：add_options: -A 會把新檔也加入）
       - name: Commit sitemap
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: update sitemap"
+          add_options: "-A"
           file_pattern: |
             sitemap.xml
             sitemap_index.xml
