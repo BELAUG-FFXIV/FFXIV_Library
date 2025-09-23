@@ -1,48 +1,31 @@
 name: Build sitemap
 
-# 觸發條件：push、手動、（可選）每天定時
 on:
   push:
     branches: [ main ]
   workflow_dispatch:
-  # 若你想每天自動跑，打開下面兩行（移除 #）
-  # schedule:
-  #   - cron: "17 3 * * *"   # 每天 03:17 UTC
 
-# 防止重複併發
-concurrency:
-  group: sitemap
-  cancel-in-progress: true
-
-# 允許把生成的檔案 commit 回 repo（很重要）
 permissions:
   contents: write
 
 jobs:
-  gen:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: 18
 
-      - run: npm ci || true
+      - name: Install dependencies
+        run: npm install
 
-      # 產生 sitemap 檔案
       - name: Generate sitemap
         run: node generate-sitemap.mjs
 
-      # （新增）列出根目錄與 sitemaps 夾內容，確認檔案存在
-      - name: Show generated files
-        run: |
-          echo "== ls -la =="
-          ls -la
-          echo "== ls -la sitemaps =="
-          ls -la sitemaps || echo "no sitemaps dir"
-
-      # 提交 sitemap（關鍵：add_options: -A 會把新檔也加入）
       - name: Commit sitemap
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
