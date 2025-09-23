@@ -1,12 +1,20 @@
 name: Build sitemap
 
+# 觸發條件：push、手動、（可選）每天定時
 on:
   push:
     branches: [ main ]
   workflow_dispatch:
-  schedule:
-    - cron: "17 3 * * *"   # 每天 03:17 UTC 跑一次
+  # 若你想每天自動跑，打開下面兩行（移除 #）
+  # schedule:
+  #   - cron: "17 3 * * *"   # 每天 03:17 UTC
 
+# 防止重複併發
+concurrency:
+  group: sitemap
+  cancel-in-progress: true
+
+# 允許把生成的檔案 commit 回 repo（很重要）
 permissions:
   contents: write
 
@@ -15,11 +23,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+
+      # 若無 package-lock.json，這步會自動略過，不影響
       - run: npm ci || true
-      - run: npm run build:sitemap
+
+      # 產生 sitemap（會輸出 sitemap.xml、sitemap_index.xml、sitemaps/*.xml）
+      - run: node generate-sitemap.mjs
+
+      # 把所有 sitemap 檔案 commit 回 repo（關鍵修正：抓到資料夾裡的新檔）
       - name: Commit sitemap
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
