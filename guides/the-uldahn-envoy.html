@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Ul'dahn Envoy | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – The Ul'dahn Envoy (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+
+    /* 長文自動收合 */
+    .story-collapsible{position:relative;max-height:380px;overflow:hidden}
+    .story-collapsible::after{
+      content:"";position:absolute;inset:auto 0 0 0;height:72px;
+      background:linear-gradient(to bottom, rgba(255,248,230,0), var(--card));
+    }
+    .story-toggle{display:inline-block;margin-top:10px;padding:8px 14px;border:1px solid var(--border);
+      border-radius:999px;background:#fff;cursor:pointer;font-weight:600}
+    .story-expanded{max-height:none}
+    .story-expanded::after{display:none}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/6rOy5-qa7cU"
+              title="The Ul'dahn Envoy" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">The Ul'dahn Envoy</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:"The Ul'dahn Envoy",
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
+    story:`<p>At the Hall of Flames, Raubahn bids you listen closely. He has prepared letters for his counterparts in the Eorzean Alliance. Five years have passed since Carteneau—first the Garleans, then the primal born of treachery. He still thinks of his fallen comrades, and of the Warriors of Light whose traces remain lost. The realm must remember, so he will mark the fifth anniversary with a memorial service, and asks the other leaders to do the same. He chooses you as his personal envoy—closest in deed to a Warrior of Light—and grants you an airship pass, rarely issued in these perilous times. Go forth in the sultana’s name, he says: see the realm the Warriors of Light died to protect, rise to your calling, strike fast and true should any bar your path, and heed the Crystal’s guidance if you lose your way.</p>
+<p>You return to the Quicksand. Momodi beams at the news—Ul’dah’s envoy by airship! She’s proud, but warns you to be careful: Limsa and Gridania have troubles of their own. Still, she insists this is what you’re made for—curiosity, compassion, and a nose for other people’s business. At the airship landing, Elyenora recognizes you as the Flame General’s envoy and readies your passage. As the vessel departs for Limsa Lominsa, Nanamo and Momodi bid you godspeed.</p>
+<p>Far away, in Castrum Occidens, Gaius van Baelsar recalls fifteen bitter years—from Mor Dhona and Midgardsormr to Meteor’s failure—and vows that only Garlean rule can save Eorzea. Under Nero tol Scaeva’s cold eye, doubt is silenced and magitek advances.</p>
+<p>You arrive in Limsa Lominsa. Escorted through Bulwark Hall, you present Raubahn’s sealed letter. Admiral Merlwyb Bloefhiswyn receives you, sharp and cordial. She listens: a remembrance service for the fallen. She recounts the Empire, Nael van Darnus, Dalamud, Bahamut, and the blinding light that spared a few when the world burned. With primals rising and Garleans at the borders, unity is needful; she accepts Raubahn’s proposal and sends her reply. “Give my regards to the Elder Seedseer,” she adds—with a private jest about a wolf at the stables.</p>
+<p>You fly on to Gridania. At Nophica’s Altar you’re admitted to the Lotus Stand. Kan-E-Senna welcomes you and peers at your face—reminded of one once known—then speaks of Garlemald: magitek’s rise, Solus zos Galvus’s long reign and frailty, succession strains, and Gaius van Baelsar commanding the XIVth Legion. With each nation beset by primals, none can think only within their borders. A storm gathers; unity must return. She approves the memorial service and will dispatch her reply at once. Your duty here done, she prays the Twelve see you safely home.</p>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Raubahn <small class="muted">(Ul’dah - Steps of Nald, X: 8.4, Y: 8.9)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="#">A Royal Reception</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">Call of the Sea</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'海都と森都と',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
+    story:`<p>「炎の間」で、ラウバーンはあなたに長話を許してくれと言う。彼はエオルゼア同盟の要人宛てに書簡を用意していた。カルテノーから五年──ガレマール帝国の侵攻、そして裏切りによって呼び出された蛮神。彼は今も戦友と「光の戦士」たちを忘れない。だからこそ、第五周年の追悼式を提案し、同盟各国にも同様の式典を求めるという。特使に指名されたのはあなた──光の戦士に最も近い働きを成した者として。彼は空路通行証を授け、女王の名において「行け」と送り出す。見るべき世界を見よ、務めを果たせ、行く手を阻む者あらば速やかに打ち払え、そして道を失えばクリスタルの導きに従え、と。</p>
+<p>クイックサンドに戻ると、モモディは満面の笑み。空路での特使とは大した栄誉だと言い、同時に「外の国にも問題はある」と釘を刺す。だが彼女は知っている──あなたが放っておけない性分であることを。飛空艇発着所ではエリエノラが特使としての乗船を手配。出発の刻、ナナモとモモディはあなたの門出に祈りを捧げる。</p>
+<p>一方、カストルム・オクシデンスでは、ガイウス・ヴァン・バエサルが十五年の悔恨を語り、ネロ・トル・スカエウァは疑念を摘み取り、魔導技術の進軍を誓う。</p>
+<p>リムサ・ロミンサに到着。城門をくぐり、書簡の封印を確かめられたのち、提督メルウィブ・ブルーフィスウィンの執務室へ。あなたの報せに彼女は頷き、帝国、ナール・ヴァン・ダーナス、ダラガブ、そしてバハムート──燃え落ちる世界と、白光に包まれ一命を取り留めた奇跡を語る。蛮神と帝国の二重の脅威に対抗するには、再び結束が必要だ。彼女は提案を受諾し、返信を託す。「グリダニアの長老にもよろしく──厩舎に狼がうろついているとな」と冗談交じりに。</p>
+<p>さらに飛空艇でグリダニアへ。ノフィカ大樹の祭壇からロータススタンドに案内され、カヌ・エ・センナがあなたを迎える。彼女はあなたの顔に「かつての誰か」を重ねつつ、ガレマールの興亡、ソルス・ゾス・ガルヴァスの長期統治と老い、継承問題、ガイウス率いる第XIV軍団の脅威を語る。各国は蛮神問題に追われ、内向きに陥っているが、今こそ再結束が必要だ。彼女は追悼式に賛同し、即時返信を送ると約し、あなたの任務完了を労う。</p>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> ラウバーン <small class="muted">（ウルダハ：ナル回廊, X: 8.4, Y: 8.9）</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="#">王宮の晩餐会</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">海都で待つ仕事</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'來自烏爾達哈的特使',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
+    story:`<p>在 Hall of Flames，Raubahn 要你仔細聽。他已為 Eorzean Alliance 的各位領袖準備好親筆書信。自 Carteneau 以來的五年——先是 Garlemald 的入侵，後又是背叛召來的 primal——他從未忘記殞落的同袍，也從未忘記「Warriors of Light」。為了讓眾人記得，他決意在五週年舉行追悼儀式，並請各國一同舉辦。他任命你為個人特使，因為你的作為最接近一位 Warrior of Light；同時授予你難得的飛空艇通行證。他以 sultana 之名送你啟程：去看見那片為之犧牲的土地，回應你的召喚；若有人或魔物擋路，就迅捷而果斷地出手；若迷失方向，就聽從 Crystal 的指引。</p>
+<p>你回到 Quicksand。Momodi 得知你將以空路出使，既自豪又叮嚀——Limsa 與 Gridania 自有其難處。這也正是她認識的你：總會把別人的事當成自己的事。於是你前往飛空艇發著，Elyenora 核對身分後為你安排航班。飛船啟航時，Nanamo 與 Momodi 為你祝禱。</p>
+<p>遠在 Castrum Occidens，Gaius van Baelsar 回望十五年的敗北與執念，Nero tol Scaeva 以冷酷手段清除疑慮，誓以 magitek 展現真正的力量。</p>
+<p>抵達 Limsa Lominsa。你在 Bulwark Hall 出示帶封印的書信，隨後面見 Admiral Merlwyb Bloefhiswyn。她聽完你的提案，回顧帝國的威脅、Nael van Darnus 的瘋狂、Dalamud 的隕落與 Bahamut 的肆虐，以及那道拯救少數人的白光。如今 primals 再起，帝國仍在邊境伺機，各國必須再度團結。她同意追悼儀式，立即回信，並讓你代帶一句玩笑式的暗語給 Kan-E-Senna——「狼在馬廄附近嗅來嗅去」。</p>
+<p>你再飛往 Gridania。於 Nophica’s Altar 出示文書後，被引至 Lotus Stand。Kan-E-Senna 歡迎你，盯著你的臉，彷彿想起了某個高潔之人；旋即談到 Garlemald：五十年前以 magitek 崛起、Solus zos Galvus 的長治與衰老、繼承動盪與 XIVth Imperial Legion 的虎視眈眈。Calamity 後國力凋敝，各國又受各自的 primal 困擾，無力他顧。但風暴已在地平線聚集，必須重新團結。她完全贊同追悼儀式，立即致函回覆，並祝你平安返程。</p>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> Raubahn <small class="muted">（烏爾達哈 - 納爾回廊, X: 8.4, Y: 8.9）</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="#">王宮的晚宴</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">海都的委託</a></div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  panels[key].innerHTML = t[key];
+}
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+/* —— 長文自動收合（依字數自動出現） —— */
+const readMoreLabels = {
+  EN: {more:'Read more', less:'Show less'},
+  JP: {more:'続きを読む',   less:'折りたたむ'},
+  ZH: {more:'展開全文',     less:'收合內容'}
+};
+function makeStoryCollapsible(lang){
+  const panel = document.getElementById('panel-story');
+  if(!panel) return;
+  const textLen = panel.textContent.trim().length;
+  if(textLen < 800) return;
+  const inner = panel.innerHTML.trim();
+  const wrap = document.createElement('div');
+  wrap.className = 'story-collapsible';
+  wrap.innerHTML = inner;
+  const btn = document.createElement('button');
+  const L = readMoreLabels[lang] || readMoreLabels.EN;
+  btn.className = 'story-toggle';
+  btn.textContent = L.more;
+  btn.addEventListener('click', ()=>{
+    const on = wrap.classList.toggle('story-expanded');
+    btn.textContent = on ? L.less : L.more;
+  });
+  panel.innerHTML = '';
+  panel.appendChild(wrap);
+  panel.appendChild(btn);
+}
+/* 掛鉤 renderPanel：切到 Story 時套用收合 */
+const _origRenderPanel = renderPanel;
+renderPanel = function(key, lang){
+  _origRenderPanel(key, lang);
+  if(key==='story') makeStoryCollapsible(lang);
+};
+
+applyLang(getLang());
+</script>
+</body>
+</html>
