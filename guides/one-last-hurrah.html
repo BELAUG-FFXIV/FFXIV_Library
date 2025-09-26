@@ -45,6 +45,20 @@
     .muted{color:var(--muted)}
     .link{color:#0b60d8; text-decoration:none}
     .link:hover{text-decoration:underline}
+
+    /* —— 長文收合 —— */
+    .story-collapsible{position:relative; max-height:380px; overflow:hidden}
+    .story-collapsible::after{
+      content:""; position:absolute; inset:auto 0 0 0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,248,230,0), var(--card));
+    }
+    .story-toggle{
+      display:inline-block; margin-top:10px; padding:8px 14px;
+      border:1px solid var(--border); border-radius:999px; background:#fff;
+      cursor:pointer; font-weight:600
+    }
+    .story-expanded{max-height:none}
+    .story-expanded::after{display:none}
   </style>
 </head>
 <body>
@@ -100,11 +114,9 @@
         story:`<p>At Tuliyollal’s harbor, a messenger finds you and hurriedly explains that Ketenramm wishes to speak. The old explorer soon appears, apologizing for stopping you, but his eyes shine with resolve. He speaks of Shades’ Triangle, a cursed stretch of sea where ships vanished and whispers told of a crescent-shaped isle. Though life kept him ashore, the mystery has haunted him for years. With Koana’s reason and Wuk Lamat’s blessing, he asks you to join him on one final voyage.</p>
         <p>You accept, and soon a ship from Limsa Lominsa carries you into the Northern Empty. Ofangeim, the navigator, notes the rare calm of these seas, while the crew shares their stories — a surveyor who once glimpsed the isle, a secretary whose grandfather sailed with Ketenramm, a prospector dreaming of trade, and a provisioner lamenting a drunken fool locked away. Their hopes and fears mingle as the horizon shifts.</p>
         <p>Then the lookout cries out: land ahead. A crescent isle flickers in and out of sight, mocking your eyes. A strange voice whispers in your mind alone, and suddenly the ship lurches, seized by unseen force. Helpless, you are drawn forward, docking without a scratch before a phantom village. Ketenramm hands you a weathered journal — the Occult Record — and entrusts you to record what lies ahead. Thus begins the tale of the Occult Crescent.</p>`,
-        /* Acquisition：只保留 Quest Giver */
         acq:`<div class="stack">
           <div class="row"><b>Quest Giver</b> Expedition Messenger <small class="muted">(Tuliyollal, X:17.1, Y:11.8)</small></div>
         </div>`,
-        /* 內文不重複 tab 名稱：只放連結 */
         unlockq:`<div class="stack">
           <div class="row"><a class="link" href="#">Dawntrail</a></div>
         </div>`,
@@ -157,7 +169,48 @@
       unlockq:document.getElementById('panel-unlockq'),
       followq:document.getElementById('panel-followq')
     };
+
     function getLang(){return localStorage.getItem(LANG_KEY)||'EN';}
+    function _renderPanel(key,lang){
+      const t=i18n[lang]||i18n.EN;
+      Object.keys(panels).forEach(k=>panels[k].classList.remove('active'));
+      panels[key].classList.add('active');
+      panels[key].innerHTML=t[key];
+    }
+
+    // —— 長文自動收合（>800 字時加入按鈕，依語言顯示文案）
+    const readMoreLabels = {
+      EN:{more:'Read more', less:'Show less'},
+      JP:{more:'続きを読む',  less:'折りたたむ'},
+      ZH:{more:'展開全文',    less:'收合內容'}
+    };
+    function makeStoryCollapsible(lang){
+      const panel = panels.story;
+      if(!panel) return;
+      const textLen = panel.textContent.trim().length;
+      if(textLen < 800) return; // 只在長文時啟用
+      const inner = panel.innerHTML.trim();
+      const wrap = document.createElement('div');
+      wrap.className = 'story-collapsible';
+      wrap.innerHTML = inner;
+      const btn = document.createElement('button');
+      const L = readMoreLabels[lang] || readMoreLabels.EN;
+      btn.className = 'story-toggle';
+      btn.textContent = L.more;
+      btn.addEventListener('click', ()=>{
+        const on = wrap.classList.toggle('story-expanded');
+        btn.textContent = on ? L.less : L.more;
+      });
+      panel.innerHTML = '';
+      panel.appendChild(wrap);
+      panel.appendChild(btn);
+    }
+
+    function renderPanel(key,lang){
+      _renderPanel(key,lang);
+      if(key==='story') makeStoryCollapsible(lang);
+    }
+
     function applyLang(lang){
       const t=i18n[lang]||i18n.EN;
       pageTitle.textContent=t.pageTitle;
@@ -166,12 +219,7 @@
       const activeBtn=tabBtns.find(b=>b.getAttribute('aria-selected')==='true')||tabBtns[0];
       renderPanel(activeBtn.dataset.tab,lang);
     }
-    function renderPanel(key,lang){
-      const t=i18n[lang]||i18n.EN;
-      Object.keys(panels).forEach(k=>panels[k].classList.remove('active'));
-      panels[key].classList.add('active');
-      panels[key].innerHTML=t[key];
-    }
+
     tabBtns.forEach(btn=>{
       btn.addEventListener('click',()=>{
         tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
@@ -185,6 +233,7 @@
       localStorage.setItem(LANG_KEY,next);
       applyLang(next);
     });
+
     applyLang(getLang());
   </script>
 </body>
