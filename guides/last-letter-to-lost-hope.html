@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Last Letter to Lost Hope | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Last Letter to Lost Hope (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:#222;border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+
+    /* 長文自動收合（若內文過長） */
+    .story-collapsible{position:relative;max-height:380px;overflow:hidden}
+    .story-collapsible::after{
+      content:"";position:absolute;inset:auto 0 0 0;height:72px;
+      background:linear-gradient(to bottom, rgba(255,248,230,0), var(--card));
+    }
+    .story-toggle{display:inline-block;margin-top:10px;padding:8px 14px;border:1px solid var(--border);
+      border-radius:999px;background:#fff;cursor:pointer;font-weight:600}
+    .story-expanded{max-height:none}
+    .story-expanded::after{display:none}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/rZq0KpWr8ik"
+              title="Last Letter to Lost Hope" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Last Letter to Lost Hope</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:"Last Letter to Lost Hope",
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
+    story:`<p>Fufulupa approaches you with a rare sense of urgency. A letter he sent to Captain Leofric in Lost Hope has gone unanswered—far longer than usual. He worries the courier may have run into trouble along the road, and asks you to investigate.</p>
+<p>You follow the path toward Black Brush Station and soon find the courier, Seseli. She’s safe—but her chocobo is injured. The letter is intact, but she can’t continue. She hands it over and asks you to finish the delivery.</p>
+<p>When you arrive at Lost Hope, Captain Leofric receives the missive with a weary sigh. He remarks that Fufulupa still calls him “Captain,” as if nothing had changed. But things have changed—badly. Lost Hope is forsaken by both Ul’dah and the Brass Blades, and so are the people who live there. He warns you not to linger. Just delivering a letter here is enough to get you marked.</p>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Fufulupa <small class="muted">(Western Thanalan, X: 22.6, Y: 17.1)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-perfect-swarm.html">The Perfect Swarm</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">Heir Today, Gone Tomorrow</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'貧民街の連隊長',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
+    story:`<p>フフルパが、珍しく焦った様子であなたに声をかける。彼が「ロストホープ」にいるレオフリック元隊長へ送った手紙が、いつまで経っても返ってこないという。彼は心配し、配達人の身に何かあったのではと、あなたに調査を依頼する。</p>
+<p>あなたは中央ザナラーンの街道を進み、やがて配達人セセリを見つける。彼女自身は無事だったが、チョコボが足を痛めて動けないという。手紙は手元にあるが、自分では届けられない。彼女はそれをあなたに託す。</p>
+<p>「ロストホープ」に到着すると、レオフリックは手紙を静かに受け取り、深いため息をつく。フフルパがいまだに「隊長」と呼んでくることに、少しばかりの寂しさと諦めが混じる。彼は言う──この場所はウルダハからも、不滅隊からも見捨てられた。ここに関われば、あなたも同じ目で見られるかもしれない、と。</p>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> フフルパ <small class="muted">（西ザナラーン, X: 22.6, Y: 17.1）</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-perfect-swarm.html">五月蝿いヤツら</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">その男、サー・キヴロン</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'給無望鎮的最後一封信',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
+    story:`<p>Fufulupa 帶著罕見的急切向你求助。他寫給 Lost Hope 的 Leofric 隊長的信件遲遲未有回音──這在他們之間從未發生過。他擔心信差在途中遭遇不測，請你前往調查。</p>
+<p>你踏上前往 Black Brush Station 的道路，途中找到了信差 Seseli。她人沒事，但她的 chocobo 腿部受傷，無法繼續前行。她將信交給你，拜託你代為完成遞送。</p>
+<p>你抵達 Lost Hope，將信交給 Leofric。他收下後只是輕歎。他說 Fufulupa 仍稱他為「隊長」，彷彿一切未曾改變。但他明白──事情早已不同。Lost Hope 被 Ul’dah 與 Brass Blades 遺忘，連難民與護衛都成了邊緣人。他提醒你，不要待太久。哪怕只是送信，也足以讓你被貼上標籤。</p>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> Fufulupa <small class="muted">（薩納蘭西部, X: 22.6, Y: 17.1）</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-perfect-swarm.html">擾人的一群傢伙</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">繼承人轉瞬即逝</a></div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  panels[key].innerHTML = t[key];
+}
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+/* —— 長文自動收合（依字數自動出現） —— */
+const readMoreLabels = {
+  EN: {more:'Read more', less:'Show less'},
+  JP: {more:'続きを読む',   less:'折りたたむ'},
+  ZH: {more:'展開全文',     less:'收合內容'}
+};
+function makeStoryCollapsible(lang){
+  const panel = document.getElementById('panel-story');
+  if(!panel) return;
+  const textLen = panel.textContent.trim().length;
+  if(textLen < 800) return;
+  const inner = panel.innerHTML.trim();
+  const wrap = document.createElement('div');
+  wrap.className = 'story-collapsible';
+  wrap.innerHTML = inner;
+  const btn = document.createElement('button');
+  const L = readMoreLabels[lang] || readMoreLabels.EN;
+  btn.className = 'story-toggle';
+  btn.textContent = L.more;
+  btn.addEventListener('click', ()=>{
+    const on = wrap.classList.toggle('story-expanded');
+    btn.textContent = on ? L.less : L.more;
+  });
+  panel.innerHTML = '';
+  panel.appendChild(wrap);
+  panel.appendChild(btn);
+}
+/* 掛鉤 renderPanel：切到 Story 時套用收合 */
+const _origRenderPanel = renderPanel;
+renderPanel = function(key, lang){
+  _origRenderPanel(key, lang);
+  if(key==='story') makeStoryCollapsible(lang);
+};
+
+applyLang(getLang());
+</script>
+</body>
+</html>
