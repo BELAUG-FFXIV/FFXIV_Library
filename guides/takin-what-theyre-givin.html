@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Takin’ What They’re Givin’ | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Takin’ What They’re Givin’ (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+
+    /* 長文自動收合 */
+    .story-collapsible{position:relative;max-height:380px;overflow:hidden}
+    .story-collapsible::after{
+      content:"";position:absolute;inset:auto 0 0 0;height:72px;
+      background:linear-gradient(to bottom, rgba(255,248,230,0), var(--card));
+    }
+    .story-toggle{display:inline-block;margin-top:10px;padding:8px 14px;border:1px solid var(--border);
+      border-radius:999px;background:#fff;cursor:pointer;font-weight:600}
+    .story-expanded{max-height:none}
+    .story-expanded::after{display:none}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/PfwoQzGEfwg"
+              title="Takin’ What They’re Givin’" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Takin’ What They’re Givin’</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:"Takin’ What They’re Givin’",
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
+    story:`<p>You return to the Quicksand, and Momodi greets you with her usual blend of sarcasm and warmth. She doesn’t wait for questions—she already knows why you’ve come. A lead, perhaps. Or just the hope that something might shake loose in Ul’dah’s tangled web.</p>
+<p>She sends you to Horizon, a busy trading post in western Thanalan, where a gemstone merchant named Dadanen is looking for help. There’s coin to be made, maybe gossip to be heard—especially the kind that brushes shoulders with the royal family. Momodi even suggests taking a chocobo porter to make the journey quicker, if you’ve got the gil.</p>
+<p>At Horizon, Dadanen welcomes you like he’s been expecting you. He talks of shipments, merchants, and the wear on his legs. There’s plenty to be done, he says—and you’ve just arrived in time.</p>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Momodi <small class="muted">(Ul’dah - Steps of Nald, X: 11.6, Y: 9.6)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="#">Way Down in the Hole</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">Supply and Demands</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'ホライズンへ',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
+    story:`<p>クイックサンドに戻ったあなたを、モモディがいつものように皮肉と愛想半分で迎えてくれる。何を求めてきたかなんて、わざわざ聞かなくてもわかっているという様子だ。王家に関する情報か、それともウルダハの絡まった陰謀の糸をほぐす糸口か。</p>
+<p>彼女はあなたを「ホライズン」に送る。西ザナラーンにあるその交易拠点には、宝石商のダダネンがおり、手伝ってくれる人間を探しているという。金になる話か、あるいは王室に近い噂話が聞けるかもしれない。ギルに余裕があるなら、チョコボポーターで向かうといいとモモディは勧める。</p>
+<p>ホライズンに到着すると、ダダネンはあなたを歓迎する。まるで最初から来るのがわかっていたかのように。彼は日々の商取引の忙しさを語り、「チョコボの脚が欲しい」と笑う。そして、あなたが来たことを心底喜んでいる──ここには、やるべきことが山ほどあるのだ。</p>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> モモディ <small class="muted">（ウルダハ：ナル回廊, X: 11.6, Y: 9.6）</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="#">成功の表と裏</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">宝石商の憂鬱</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'奔向地平線',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
+    story:`<p>你回到 Quicksand，Momodi 依舊用她特有的嘲諷與溫暖迎接你。她根本不需要問你來的理由──你自己也知道，總是在找線索，也許是與王室有關的動靜，也許只是希望能攪動 Ul’dah 這座城的沉寂。</p>
+<p>她叫你去西邊的 Horizon，那裡是一個熱鬧的交易站，有位名叫 Dadanen 的寶石商正尋找幫手。那裡不僅有工作機會，也許還有一些與王族相關的耳語等著你。Momodi 還建議你搭乘 chocobo porter，以節省體力和時間，只要你負擔得起那點費用。</p>
+<p>你抵達 Horizon，Dadanen 像早就知道你會來一樣迎接你。他談起貨運、商隊、還有雙腿的疲憊。他說，這裡的工作永遠做不完，而你，來得正是時候。</p>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> Momodi <small class="muted">（烏爾達哈 - 納爾回廊, X: 11.6, Y: 9.6）</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="#">成功背後的真相</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">供需與煩憂</a></div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  panels[key].innerHTML = t[key];
+}
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+/* —— 長文自動收合（依字數自動出現） —— */
+const readMoreLabels = {
+  EN: {more:'Read more', less:'Show less'},
+  JP: {more:'続きを読む',   less:'折りたたむ'},
+  ZH: {more:'展開全文',     less:'收合內容'}
+};
+function makeStoryCollapsible(lang){
+  const panel = document.getElementById('panel-story');
+  if(!panel) return;
+  const textLen = panel.textContent.trim().length;
+  if(textLen < 800) return;
+  const inner = panel.innerHTML.trim();
+  const wrap = document.createElement('div');
+  wrap.className = 'story-collapsible';
+  wrap.innerHTML = inner;
+  const btn = document.createElement('button');
+  const L = readMoreLabels[lang] || readMoreLabels.EN;
+  btn.className = 'story-toggle';
+  btn.textContent = L.more;
+  btn.addEventListener('click', ()=>{
+    const on = wrap.classList.toggle('story-expanded');
+    btn.textContent = on ? L.less : L.more;
+  });
+  panel.innerHTML = '';
+  panel.appendChild(wrap);
+  panel.appendChild(btn);
+}
+/* 掛鉤 renderPanel：切到 Story 時套用收合 */
+const _origRenderPanel = renderPanel;
+renderPanel = function(key, lang){
+  _origRenderPanel(key, lang);
+  if(key==='story') makeStoryCollapsible(lang);
+};
+
+applyLang(getLang());
+</script>
+</body>
+</html>
