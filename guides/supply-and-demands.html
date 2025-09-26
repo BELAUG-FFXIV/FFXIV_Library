@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Supply and Demands | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Supply and Demands (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+
+    /* 長文自動收合 */
+    .story-collapsible{position:relative;max-height:380px;overflow:hidden}
+    .story-collapsible::after{
+      content:"";position:absolute;inset:auto 0 0 0;height:72px;
+      background:linear-gradient(to bottom, rgba(255,248,230,0), var(--card));
+    }
+    .story-toggle{display:inline-block;margin-top:10px;padding:8px 14px;border:1px solid var(--border);
+      border-radius:999px;background:#fff;cursor:pointer;font-weight:600}
+    .story-expanded{max-height:none}
+    .story-expanded::after{display:none}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/MpHy9ySvhYE"
+              title="Supply and Demands" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Supply and Demands</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:"Supply and Demands",
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
+    story:`<p>Dadanen grows frantic. His latest shipment of precious stones is missing, and his clients are growing impatient. He paid in advance—generously, at that—but his courier has vanished without a word. The order was supposed to be routine, a simple pickup from Copperbell Mines. It’s now a race against time to save his reputation.</p>
+<p>He sends you with a written notice and little else. At Horizon’s Edge, you find the courier: Drunken Stag, slouched and bitter. He doesn’t bother with excuses. The Concern has shut down Copperbell Mines—something went wrong deep inside.</p>
+<p>You realize this isn’t just a late delivery. There’s something buried beneath the surface—dangerous, disruptive. And now, your steps lead toward the darkness within the mines.</p>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Dadanen <small class="muted">(Western Thanalan, X: 22.6, Y: 17.3)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="#">Takin’ What They’re Givin’</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">The Perfect Swarm</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'宝石商の憂鬱',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
+    story:`<p>ダダネンは焦っていた。宝石の最新入荷が届かず、客たちからの催促は強まるばかり。報酬はすでに前払いで済ませており、配達は単純なはずだった──だが、運び人は消息を絶ったまま。取引先との信頼も、時と共に崩れ始めている。</p>
+<p>あなたは書状を託され、ホライズン郊外へと向かう。そこで出会ったのは、酔いどれの男──「ドランカン・スタッグ」。弁解することもなく、彼は淡々と告げる。コッパーベル銅山は事故により封鎖され、採掘も物資の受け渡しも停止中だという。</p>
+<p>遅延ではない。問題は、もっと深いところにある。坑道の奥に何かが起きている──あなたの足取りは、やがてその闇の中へ向かっていく。</p>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> ダダネン <small class="muted">（西ザナラーン, X: 22.6, Y: 17.3）</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="#">ホライズンへ</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">五月蝿いヤツら</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'供需與煩憂',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
+    story:`<p>Dadanen 顯得異常焦急。他最重要的一批寶石貨品遲遲未到，客戶已經開始不耐。他早已提前付款，對方保證這只是簡單的任務——卻從出發前往 Copperbell Mines 後便音訊全無。若再拖延下去，他的名聲將付之一炬。</p>
+<p>他交給你一封催函，請你盡速尋回送貨人。在 Horizon’s Edge，你找到了那位使者──名叫 Drunken Stag 的男子，語氣冷淡又無奈。他說得直白：Copperbell Mines 發生了意外，Concern 已全面封鎖礦坑，進出皆不得其門而入。</p>
+<p>你這才明白，事情不是單純的延遲。那礦坑深處，似乎潛藏著更大的異變，而你的腳步，也正一步步走向那片尚未揭開的黑暗。</p>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> Dadanen <small class="muted">（薩納蘭西部, X: 22.6, Y: 17.3）</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="#">奔向地平線</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">擾人的一群傢伙</a></div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  panels[key].innerHTML = t[key];
+}
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+/* —— 長文自動收合（依字數自動出現） —— */
+const readMoreLabels = {
+  EN: {more:'Read more', less:'Show less'},
+  JP: {more:'続きを読む',   less:'折りたたむ'},
+  ZH: {more:'展開全文',     less:'收合內容'}
+};
+function makeStoryCollapsible(lang){
+  const panel = document.getElementById('panel-story');
+  if(!panel) return;
+  const textLen = panel.textContent.trim().length;
+  if(textLen < 800) return;
+  const inner = panel.innerHTML.trim();
+  const wrap = document.createElement('div');
+  wrap.className = 'story-collapsible';
+  wrap.innerHTML = inner;
+  const btn = document.createElement('button');
+  const L = readMoreLabels[lang] || readMoreLabels.EN;
+  btn.className = 'story-toggle';
+  btn.textContent = L.more;
+  btn.addEventListener('click', ()=>{
+    const on = wrap.classList.toggle('story-expanded');
+    btn.textContent = on ? L.less : L.more;
+  });
+  panel.innerHTML = '';
+  panel.appendChild(wrap);
+  panel.appendChild(btn);
+}
+/* 掛鉤 renderPanel：切到 Story 時套用收合 */
+const _origRenderPanel = renderPanel;
+renderPanel = function(key, lang){
+  _origRenderPanel(key, lang);
+  if(key==='story') makeStoryCollapsible(lang);
+};
+
+applyLang(getLang());
+</script>
+</body>
+</html>
