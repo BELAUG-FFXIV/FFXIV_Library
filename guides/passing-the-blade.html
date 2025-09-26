@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Passing the Blade | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Passing the Blade (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:#222;border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+
+    /* 長文自動收合（若內文過長才會生效） */
+    .story-collapsible{position:relative;max-height:380px;overflow:hidden}
+    .story-collapsible::after{
+      content:"";position:absolute;inset:auto 0 0 0;height:72px;
+      background:linear-gradient(to bottom, rgba(255,248,230,0), var(--card));
+    }
+    .story-toggle{display:inline-block;margin-top:10px;padding:8px 14px;border:1px solid var(--border);
+      border-radius:999px;background:#fff;cursor:pointer;font-weight:600}
+    .story-expanded{max-height:none}
+    .story-expanded::after{display:none}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/WkSTRIbq53I"
+              title="Passing the Blade" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Passing the Blade</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:"Passing the Blade",
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
+    story:`<p>Leofric hands you a dagger—old, ornamental, and symbolic. He cannot leave Lost Hope, so he entrusts you with it. This blade once belonged to the Brass Blades of the Rose… and now, he says, it should go to Fufulupa.</p>
+<p>You return to Horizon. Fufulupa greets you with his usual enthusiasm, but freezes the moment he sees the dagger. To him, it’s not a trinket—it’s a badge of command. Only a captain may bear it.</p>
+<p>At first, he refuses to believe it. Surely, he isn’t worthy. Surely, Leofric isn’t stepping away… But he takes the dagger anyway, holding it not with pride, but reverence. Until the day his captain returns.</p>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Leofric <small class="muted">(Central Thanalan, X: 23.3, Y: 16.0)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="heir-today-gone-tomorrow.html">Heir Today, Gone Tomorrow</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">Following Footfalls</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'受け継がれる護身刀',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
+    story:`<p>レオフリックは、あなたに1本の装飾用短剣を託す。彼自身はロストホープを離れられない。だからこそ、ブラッドブレード・オブ・ザ・ローズに属するその象徴を、フフルパに届けてほしいのだという。</p>
+<p>あなたはホライズンに戻り、フフルパに短剣を渡す。彼は最初、感謝の言葉を口にするが、短剣を見るや顔色が変わる。それは、隊長だけが持つことを許された証。</p>
+<p>彼は動揺し、信じようとしない。自分がふさわしいはずがない、レオフリックが退こうとしているなどありえない──そう自分に言い聞かせる。</p>
+<p>それでも彼は、尊敬と決意を込めて短剣を受け取る。これは誇りの証ではなく、約束の預かり物。隊長が戻るその日まで、彼はそれを守り続ける。</p>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> レオフリック <small class="muted">（中央ザナラーン, X: 23.3, Y: 16.0）</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="heir-today-gone-tomorrow.html">その男、サー・キヴロン</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">足跡の谷へ</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'傳承之刃',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
+    story:`<p>Leofric 將一把短劍交到你手中。那只是件舊式的裝飾品，卻代表著某段過去。他不能離開 Lost Hope，只能託你將它交還給 Fufulupa──這把劍屬於 Brass Blades of the Rose。</p>
+<p>你回到 Horizon，Fufulupa 熱情地迎接你，但當他看到那把劍時，整個人瞬間僵住。那不是普通的武器，而是象徵隊長身分的信物。</p>
+<p>他一時無法接受。他不認為自己配得上，也不敢相信 Leofric 是真的要退下了。但最終，他還是雙手接過這把短劍。不是作為榮耀，而是作為託付──直到那位他尊敬的隊長回來的那一天。</p>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> Leofric <small class="muted">（薩納蘭中部, X: 23.3, Y: 16.0）</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="heir-today-gone-tomorrow.html">繼承人轉瞬即逝</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">踏尋足跡之谷</a></div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  panels[key].innerHTML = t[key];
+}
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+/* —— 長文自動收合（依字數自動出現） —— */
+const readMoreLabels = {
+  EN: {more:'Read more', less:'Show less'},
+  JP: {more:'続きを読む',   less:'折りたたむ'},
+  ZH: {more:'展開全文',     less:'收合內容'}
+};
+function makeStoryCollapsible(lang){
+  const panel = document.getElementById('panel-story');
+  if(!panel) return;
+  const textLen = panel.textContent.trim().length;
+  if(textLen < 800) return;
+  const inner = panel.innerHTML.trim();
+  const wrap = document.createElement('div');
+  wrap.className = 'story-collapsible';
+  wrap.innerHTML = inner;
+  const btn = document.createElement('button');
+  const L = readMoreLabels[lang] || readMoreLabels.EN;
+  btn.className = 'story-toggle';
+  btn.textContent = L.more;
+  btn.addEventListener('click', ()=>{
+    const on = wrap.classList.toggle('story-expanded');
+    btn.textContent = on ? L.less : L.more;
+  });
+  panel.innerHTML = '';
+  panel.appendChild(wrap);
+  panel.appendChild(btn);
+}
+/* 掛鉤 renderPanel：切到 Story 時套用收合 */
+const _origRenderPanel = renderPanel;
+renderPanel = function(key, lang){
+  _origRenderPanel(key, lang);
+  if(key==='story') makeStoryCollapsible(lang);
+};
+
+applyLang(getLang());
+</script>
+</body>
+</html>
