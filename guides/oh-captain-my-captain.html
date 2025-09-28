@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Oh Captain, My Captain | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Oh Captain, My Captain (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:#222;border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    /* 長文自動收合 */
+    .story-collapsible{position:relative;max-height:380px;overflow:hidden}
+    .story-collapsible::after{
+      content:"";position:absolute;inset:auto 0 0 0;height:72px;
+      background:linear-gradient(to bottom, rgba(255,248,230,0), var(--card));
+    }
+    .story-toggle{display:inline-block;margin-top:10px;padding:8px 14px;border:1px solid var(--border);
+      border-radius:999px;background:#fff;cursor:pointer;font-weight:600}
+    .story-expanded{max-height:none}
+    .story-expanded::after{display:none}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/6iM9HbftHeI"
+              title="Oh Captain, My Captain" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Oh Captain, My Captain</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:"Oh Captain, My Captain",
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
+    story:`<p>What begins as a routine errand turns into something far darker. A frightened villager whispers of stolen gemstones and a secret deal at the Footfalls. Fufulupa, ever vigilant, overhears and immediately rushes to inform Captain Baldewyn—unaware that he’s running straight into the arms of betrayal.</p>
+<p>You chase after him, but too late. At the Footfalls, Fufulupa accuses the wrong man—only to discover that the accusation was more accurate than he ever imagined. Baldewyn, in league with the bandits of Quiveron Manse, lashes out. And worse still, he claims he acts under Lord Lolorito’s name.</p>
+<p>The confrontation explodes into violence. As you and Fufulupa fight for your lives, Leofric appears and exposes the lie. Baldewyn was never authorized—just another petty man abusing power and dragging others down with him.</p>
+<p>When it’s over, Baldewyn is defeated, his schemes unraveled. Leofric turns to Fufulupa—not just with thanks, but with recognition. He entrusts him with the future of the Brass Blades of the Rose. And you? You’ve witnessed how corruption hides behind ceremony, and how truth shines brightest when the innocent stand their ground.</p>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Merilda <small class="muted">(Western Thanalan, X:14.9, Y:18.9)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="storms-on-the-horizon.html">Storms on the Horizon</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">Secrets and Lies</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'正義を銅の刃に宿し',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
+    story:`<p>一見平穏な任務の背後に、陰謀の影が忍び寄る──村人メリルダの告白により、フフルパは密輸の疑惑を知る。正義感から彼はバルドウィン隊長に急報しようとするが、まさにそれこそが罠だった。</p>
+<p>あなたは慌ててフットフォールズへ向かう。フフルパは、クイヴェロンの盗賊団と共にいた男を非難するが──驚くことに、それは事実だった。バルドウィン隊長自身が黒幕だったのだ。しかも、彼は自らの行動を「ロロリト卿の命」とまで語る。</p>
+<p>事態は激化し、戦闘が始まる。あなたとフフルパは死闘を繰り広げるが、そこへレオフリックが現れ、真実を暴く。ロロリト卿は関与しておらず、バルドウィンの全ては私利私欲に基づくものでしかなかった。</p>
+<p>戦いが終わり、バルドウィンは拘束される。レオフリックはフフルパに短剣を託し、「誇りある者が、組織を導くべきだ」と語る。フフルパは涙ながらにその責務を受け入れ、あなたに深く感謝する。こうして、ホライズンの未来は新たな光を得たのだった。</p>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> メリルダ <small class="muted">（西ザナラーン, X:14.9, Y:18.9）</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="storms-on-the-horizon.html">酒のサカナ求む</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">落日の銀冑団</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'正義託付於銅之刃',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
+    story:`<p>你原以為只是普通的任務，卻從 Merilda 那裡聽聞驚人的密謀──Quiveron 的盜賊準備交易從 Copperbell Mines 偷來的寶石。Fufulupa 無意間聽見，立即衝向 Captain Baldewyn 彙報，卻不知道這正把他推入危險之中。</p>
+<p>你急忙追上，但一切已經太遲。Footfalls 的對峙揭露真相：Baldewyn 不僅包庇罪犯，更聲稱自己是奉 Lord Lolorito 之命。Fufulupa 難以置信，卻又不得不接受眼前的背叛。</p>
+<p>戰鬥爆發，你與 Fufulupa 一同迎戰 Quiveron 殘黨。千鈞一髮之際，Leofric 現身揭露真相：這一切都是 Baldewyn 藉權謀私，根本未得任何上層授意。名號之下，是假面背後的貪婪。</p>
+<p>最終，Baldewyn 落敗，被捕。Leofric 將 Brass Blades of the Rose 的榮耀交託給 Fufulupa──這個他曾視為小弟的新兵，如今展現出真正的堅毅與榮譽。而你，則在這場政變之中，見證了正直如何在腐敗中綻放光芒。</p>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 梅莉爾達 <small class="muted">（薩納蘭西部, X:14.9, Y:18.9）</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="storms-on-the-horizon.html">風暴前的酒宴</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">祕密與謊言</a></div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  panels[key].innerHTML = t[key];
+}
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+/* —— 長文自動收合（依字數自動出現） —— */
+const readMoreLabels = {
+  EN: {more:'Read more', less:'Show less'},
+  JP: {more:'続きを読む',   less:'折りたたむ'},
+  ZH: {more:'展開全文',     less:'收合內容'}
+};
+function makeStoryCollapsible(lang){
+  const panel = document.getElementById('panel-story');
+  if(!panel) return;
+  const textLen = panel.textContent.trim().length;
+  if(textLen < 800) return;
+  const inner = panel.innerHTML.trim();
+  const wrap = document.createElement('div');
+  wrap.className = 'story-collapsible';
+  wrap.innerHTML = inner;
+  const btn = document.createElement('button');
+  const L = readMoreLabels[lang] || readMoreLabels.EN;
+  btn.className = 'story-toggle';
+  btn.textContent = L.more;
+  btn.addEventListener('click', ()=>{
+    const on = wrap.classList.toggle('story-expanded');
+    btn.textContent = on ? L.less : L.more;
+  });
+  panel.innerHTML = '';
+  panel.appendChild(wrap);
+  panel.appendChild(btn);
+}
+/* 掛鉤 renderPanel：切到 Story 時套用收合 */
+const _origRenderPanel = renderPanel;
+renderPanel = function(key, lang){
+  _origRenderPanel(key, lang);
+  if(key==='story') makeStoryCollapsible(lang);
+};
+
+applyLang(getLang());
+</script>
+</body>
+</html>
