@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Duty, Honor, Country | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Duty, Honor, Country (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:#222;border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    /* 長文自動收合 */
+    .story-collapsible{position:relative;max-height:380px;overflow:hidden}
+    .story-collapsible::after{
+      content:"";position:absolute;inset:auto 0 0 0;height:72px;
+      background:linear-gradient(to bottom, rgba(255,248,230,0), var(--card));
+    }
+    .story-toggle{display:inline-block;margin-top:10px;padding:8px 14px;border:1px solid var(--border);
+      border-radius:999px;background:#fff;cursor:pointer;font-weight:600}
+    .story-expanded{max-height:none}
+    .story-expanded::after{display:none}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/4uNwmboameU"
+              title="Duty, Honor, Country" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Duty, Honor, Country</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Duty, Honor, Country',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
+    story:`<p>The Sultansworn have long searched for the royal crown, a symbol of Ul’dah’s legacy—only for it to fall into the hands of criminals. When you deliver a suspicious letter to Owyne, the truth comes out: the crown was stolen under his watch, and the ransom exchange may be the only way to reclaim it.</p>
+<p>You accompany Owyne to the Unholy Heir, but the exchange is a trap. The criminals take not only the payment but also unleash a greater threat—the Traders’ Spurn, a relic capable of raising an undead army. Just as all seems lost, Papashan leads the Sultansworn to your aid.</p>
+<p>But the danger doesn’t end there. A Masked Mage appears, summoning voidsent in a final attempt to destroy you. With the unexpected arrival of Thancred, you fight back and triumph, uncovering the unmistakable hand of the Ascians behind the chaos.</p>
+<p>In the aftermath, Papashan dons his old armor to thank you, and you’re summoned to the royal court. There, Queen Nanamo Ul Namo bestows a gift of honor, and Raubahn Aldynn personally welcomes you to the banquet hall. You are no longer just an adventurer—Ul’dah now recognizes you as a hero.</p>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Momodi <small class="muted">(Ul’dah - Steps of Nald, X:11.6, Y:9.6)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="secrets-and-lies.html">Secrets and Lies</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">A Matter of Tradition</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'至宝の影で蠢く闇',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
+    story:`<p>ウルダハ王家の象徴である王冠の行方を追い、サルタンスウォーンたちは調査を続けていた──だが、その王冠は盗賊の手に落ちていた。あなたが持ち込んだ一通の不審な手紙によって、すべてが明らかになる。王冠はオワインの警備中に盗まれ、贖いの交渉こそが唯一の手がかりとなる。</p>
+<p>あなたはオワインと共に「アンホーリーエア」に向かい、取引に臨む。しかし、それは罠だった。犯人たちは報酬とともに、「死者の軍勢」を呼び起こす禁断の遺物「トレーダーズ・スパーン」を手に入れてしまう。窮地に陥ったその時、パパシャーン率いるサルタンスウォーンが現れ、反撃を開始する。</p>
+<p>だが、戦いはそれで終わらない。仮面をつけた魔道士が現れ、虚無の魔物を召喚し、あなたに襲いかかる。そこへサンクレッドが駆けつけ、共に戦い、ついに撃破。混乱の背後には、やはりアシエンの存在があった。</p>
+<p>戦いの後、パパシャーンはかつての甲冑をまとい、あなたに心からの感謝を伝える。そしてあなたは王宮へと招かれ、ナナモ・ウル・ナモ女王から名誉ある贈り物を受ける。ラウバーン・アルディンもまたあなたに敬意を示し、宴の場へと迎え入れる。あなたは、もはやただの冒険者ではない。ウルダハの真なる英雄として認められたのだ。</p>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> モモディ <small class="muted">（ウルダハ：ナル回廊, X:11.6, Y:9.6）</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="secrets-and-lies.html">落日の銀冑団</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">晩餐会に備えて</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'責任、榮耀與祖國',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
+    story:`<p>Ul’dah 王室象徵──王冠遭竊，而這一切正發生在 Owyne 的守衛之下。當你將那封來自 Horizon 案件餘波中的信件交給他，他的愧疚與責任感使他決定親自前往 The Unholy Heir 與竊賊交易。</p>
+<p>你陪同 Owyne 前往，但現場早已佈下陷阱。竊賊奪走贖金之餘，更取走被稱為 The Traders’ Spurn 的禁忌遺物，意圖喚起亡者之軍。危急之際，Papashan 率領 Sultansworn 出現，阻止了更大的災難。</p>
+<p>然而危機尚未結束。一名 Masked Mage 現身，召喚虛無生物對你發動攻擊。就在生死一線間，Thancred 趕到支援，與你合力將敵擊退，並確認這場騷亂背後，正是 Ascians 的陰影。</p>
+<p>戰後，Papashan 穿回十五年前的鎧甲，親自向你致謝。你也因此被召見至王宮──由 Nanamo Ul Namo 親自頒贈榮譽，Raubahn Aldynn 亦盛讚你的勇氣與功績。你從此不再只是無名的冒險者──Ul’dah 已將你視為真正的英雄。</p>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 莫莫迪 <small class="muted">（烏爾達哈 - 納爾回廊, X:11.6, Y:9.6）</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="secrets-and-lies.html">祕密與謊言</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">備宴的傳統</a></div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+function _renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  panels[key].innerHTML = t[key];
+}
+function makeStoryCollapsible(lang){
+  const panel = document.getElementById('panel-story');
+  if(!panel) return;
+  const textLen = panel.textContent.trim().length;
+  if(textLen < 800) return;
+  const inner = panel.innerHTML.trim();
+  const wrap = document.createElement('div');
+  wrap.className = 'story-collapsible';
+  wrap.innerHTML = inner;
+  const btn = document.createElement('button');
+  const labels = {
+    EN:{more:'Read more', less:'Show less'},
+    JP:{more:'続きを読む', less:'折りたたむ'},
+    ZH:{more:'展開全文',   less:'收合內容'}
+  }[lang] || {more:'Read more', less:'Show less'};
+  btn.className = 'story-toggle';
+  btn.textContent = labels.more;
+  btn.addEventListener('click', ()=>{
+    const on = wrap.classList.toggle('story-expanded');
+    btn.textContent = on ? labels.less : labels.more;
+  });
+  panel.innerHTML = '';
+  panel.appendChild(wrap);
+  panel.appendChild(btn);
+}
+function renderPanel(key, lang){
+  _renderPanel(key, lang);
+  if(key==='story') makeStoryCollapsible(lang);
+}
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+applyLang(getLang());
+</script>
+</body>
+</html>
