@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Call of the Sea | BELAUG · FFXIV Library</title>
+  <meta name="description" content="ARR 2.0 MSQ — Call of the Sea（海都的委託）：故事概要、取得方式與任務銜接。">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:1px solid transparent;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border-color:var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    /* Story clamp + button */
+    .story-wrap{position:relative}
+    .story-content{max-height:360px;overflow:hidden;position:relative}
+    .story-content::after{content:"";position:absolute;inset:auto 0 0 0;height:64px;background:linear-gradient(to top,var(--card),transparent)}
+    .story-expanded{max-height:none!important}
+    .story-expanded::after{display:none}
+    .expand-btn{margin-top:8px;background:none;border:1px solid var(--border);padding:6px 10px;border-radius:8px;cursor:pointer;font-weight:600}
+    @media (max-width:600px){ .story-content{max-height:260px} }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/ku3ANBnEU9Y"
+              title="Call of the Sea" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Call of the Sea</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Call of the Sea',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
+    story:`<div class="story-wrap"><div class="story-content">
+      <p>The Serpent Officer greets you and hopes your audience with Kan-E-Senna went well. He notes you also bore words to Admiral Merlwyb Bloefhiswyn in Limsa Lominsa—and asks if you met Baderon, the gregarious proprietor of the Drowning Wench. Word is, Baderon has a task fit for a capable adventurer, and the Flame General’s personal envoy would be an excellent candidate. If you’re interested, you should seek him at his establishment.</p>
+      <p>You make for the Drowning Wench. Baderon looks up from a bustling floor—welcoming you in, then narrowing his eyes with a grin when you ask for him by name. Yes, he’s Baderon. Yes, there’s a job. But he warns you straight: this isn’t work for the faint of heart. Things may get downright hairy. If you’re still keen, he’ll share the details.</p>
+    </div><button class="expand-btn" data-i18n="expand">Read more</button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Serpent Officer <small class="muted">(Old Gridania, X:8.0, Y:11.1)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-uldahn-envoy.html">The Ul’dahn Envoy</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">It’s Probably Pirates</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'海都で待つ仕事',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
+    story:`<div class="story-wrap"><div class="story-content">
+      <p>双蛇党の士官は、カヌ・エ・センナとの会談がうまくいったかと気遣い、さらにあなたがリムサ・ロミンサの提督 Merlwyb Bloefhiswyn にも伝令を果たしたと聞いた、と続ける。そこで問いかける──酒場「The Drowning Wench」の店主 Baderon に会ったか、と。世話好きで頼りになる人物で、ちょうど有能な冒険者に頼みたい用件があるらしい。興味があるなら、店に赴いて話を聞け、と。</p>
+      <p>あなたは「The Drowning Wench」へ向かう。賑わう店内で、Baderon は手を動かしながらあなたを迎え、名を呼ぶあなたに顔を上げる──そう、自分が Baderon だ。用件も確かにある。ただし、弱気な者には務まらない仕事だと、先に釘を刺す。かなり“毛の生えた”厄介事になるかもしれない。それでもやる気があるなら、詳しい話をしよう、と。</p>
+    </div><button class="expand-btn" data-i18n="expand">続きを読む</button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> 双蛇党の将校 <small class="muted">（グリダニア：旧市街, X:8.0, Y:11.1）</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-uldahn-envoy.html">海都と森都と</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">サスタシャに挑む者</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'海都的委託',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
+    story:`<div class="story-wrap"><div class="story-content">
+      <p>Serpent Officer 先向你致意，盼你與 Kan-E-Senna 的會面順利。他提到你也已向 Limsa Lominsa 的 Admiral Merlwyb Bloefhiswyn 傳達訊息，隨即問你是否認識 The Drowning Wench 的老闆 Baderon——那位熱心健談、樂於幫助人的店主。據說他正需要一位能幹的冒險者；以你這位 Flame General 的個人特使來說，正是合適人選。若有興趣，就去店裡找他談談。</p>
+      <p>你來到 The Drowning Wench。Baderon 忙中抬頭，先讓你隨意入座；當你直呼其名，他笑著點頭承認。沒錯，他就是 Baderon，也確實有一份差事。不過他先丟下警告：這不是給膽小鬼的工作，情勢可能會變得相當棘手。若你仍然有意接下，他就把細節全數告訴你。</p>
+    </div><button class="expand-btn" data-i18n="expand">展開全文</button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 雙蛇黨軍官 <small class="muted">（格里達尼亞舊城, X:8.0, Y:11.1）</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-uldahn-envoy.html">烏爾達哈的使節</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">大概是海盜吧</a></div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function setLang(lang){ localStorage.setItem(LANG_KEY, lang); }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  panels[key].innerHTML = t[key];
+  if (key === 'story') makeStoryCollapsible(panels[key], lang);
+}
+
+function makeStoryCollapsible(panel, lang){
+  const wrap = panel.querySelector('.story-wrap');
+  if(!wrap) return;
+  const content = wrap.querySelector('.story-content');
+  const btn = wrap.querySelector('.expand-btn');
+  const MAX = window.matchMedia('(max-width:600px)').matches ? 260 : 360;
+  const needClamp = content.scrollHeight > MAX + 8;
+  if(needClamp){
+    btn.style.display = 'inline-block';
+    btn.textContent = label(lang, true);
+    btn.onclick = ()=>{
+      content.classList.toggle('story-expanded');
+      const expanded = content.classList.contains('story-expanded');
+      btn.textContent = label(lang, !expanded);
+    };
+  }else{
+    content.classList.add('story-expanded');
+    btn.style.display = 'none';
+  }
+}
+function label(lang, expand){
+  if(lang==='EN') return expand ? 'Read more' : 'Show less';
+  if(lang==='JP') return expand ? '続きを読む' : '折りたたむ';
+  return expand ? '展開全文' : '收合內容';
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  setLang(next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+</script>
+</body>
+</html>
