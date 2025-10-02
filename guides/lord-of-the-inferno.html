@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lord of the Inferno | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Lord of the Inferno (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:#222;border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+
+    /* Story 展開 / 收合 */
+    .clamp{ position:relative; max-height:360px; overflow:hidden; }
+    .clamp[data-collapsed="false"]{ max-height:none; }
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/smOCKpuoqHE"
+              title="Lord of the Inferno" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Lord of the Inferno</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Lord of the Inferno',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Thancred’s ruse seemed foolproof: Ungust, the false priest, would serve as bait to lure the Amalj’aa into a trap. You traveled to the Invisible City with the Immortal Flames, lying in wait for the enemy. At first, the plan unfolded as expected—until Ungust revealed his true allegiance. A traitor among the Flames had been feeding him information all along, turning the ambush against you.</p>
+      <p>Dragged into captivity, you and the soldiers were marched toward Zanr’ak, the Amalj’aa stronghold. Whispers of sacrifice hung heavy in the air—their god Ifrit awaited. Fear gripped the prisoners, yet you steeled yourself. In the chamber of flame, Ungust’s betrayal reached its peak as the beast tribe offered you and the others to their Primal.</p>
+      <p>Then came the test of fire. Ifrit loomed, his gaze burning into mortal souls, bending them to his will. One by one, your companions succumbed, their minds shackled in thrall. But you—shielded by the Echo—stood unbroken. Steel in hand, you fought the Lord of the Inferno and struck him down.</p>
+      <p>Shaken but alive, you returned to the Scions. Thancred lamented his late arrival and the lives lost, yet hailed your deed. Minfilia explained what few could grasp: the Echo alone had spared you from tempering. Though Ifrit was slain, the truth weighed heavy—those tempered could never be freed, and the rescued captives would be put to death. With grim resolve, the Scions vowed to press on, and you stood ready to walk the path beside them.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Minfilia <small class="muted">(The Waking Sands, X:6.9, Y:6.1)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="life-materia-and-everything.html">Life, Materia and Everything</a></div>
+      <div class="row"><b>Unlock Trial</b> <a class="link" href="the-bowl-of-embers.html">The Bowl of Embers</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">A Hero in the Making</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'猛る焔神イフリート',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>偽りの神官アングストを囮にしてアマルジャを捕らえる――サンクレッドの策は万全に思えた。インヴィジブルシティに潜み、不滅隊とともに機を窺うあなた。しかし、仕掛けは無惨にも覆される。アングストは裏切り者であり、不滅隊の中にも内通者がいたのだ。</p>
+      <p>捕らえられたあなたと兵士たちは、アマルジャの本拠ザンラクへと連行される。そこに待つは炎の蛮神イフリート。囚われ人の心を蝕む恐怖と絶望が漂う中、あなたは覚悟を決める。炎に満ちた祭壇で、裏切りの真実が暴かれ、アマルジャはあなたたちを生贄として蛮神に捧げた。</p>
+      <p>試練の火が襲いかかる。イフリートの眼光が魂を焼き、仲間たちは次々に魅了され、心を奪われていく。だが、あなたは違った。エコーの加護により、精神は揺るがず、イフリートに抗う力を保っていた。剣を手に取り、熾烈なる炎神を討ち果たしたのだ。</p>
+      <p>帰還したあなたを迎えたのは後悔に沈むサンクレッドだった。到着が遅れたこと、仲間を救えなかったことを悔やみつつも、彼はあなたの偉業を称える。ミンフィリアは明かす――エコーを持つ者のみが「魅了」から逃れられるのだと。だが救出された者たちは救えぬまま、処刑される運命にある。重苦しい現実を前に、暁の血盟は戦いを続ける決意を新たにし、あなたもまたその歩みに加わるのだった。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> ミンフィリア <small class="muted">（西ザナラーン：砂の家, X:6.9, Y:6.1）</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="life-materia-and-everything.html">生命、マテリア、すべての答え</a></div>
+      <div class="row"><b>討伐戦開放</b> <a class="link" href="the-bowl-of-embers.html">イフリート討伐戦</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">英雄の卵</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'地獄之火伊弗利特',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Thancred 的計畫看似天衣無縫──以假神父 Ungust 為餌，引 Amalj’aa 入局。你與 Immortal Flames 一同潛伏在 Invisible City，靜候時機。然而，計策在瞬間崩解──Ungust 暴露其真面目，甚至 Flames 中亦有內鬼早已暗中通風報信。</p>
+      <p>你與士兵們被俘虜，押往 Amalj’aa 的要塞 Zanr’ak。空氣中瀰漫著不祥低語──他們將以眾人為祭，獻予火焰之神 Ifrit。恐懼與絕望籠罩著俘虜，但你心中只有決意。於烈焰祭壇之上，背叛達至最高潮，Amalj’aa 將你們推向 Primal 的獻祭。</p>
+      <p>試煉的火焰降臨。Ifrit 的目光如烈焰般灼燒靈魂，俘虜們一個接一個被奪去意志，化為祂的傀儡。然而你與眾不同──因 Echo 的庇護，你未被蠱惑。你舉起武器，與熾烈的炎神激戰，最終將其斬落。</p>
+      <p>歸來之時，Thancred 懊悔自己姍姍來遲，未能救回更多性命，卻也由衷讚許你的偉業。Minfilia 則道出真相──唯有擁有 Echo 之人能免於被蠱惑。然而，那些已被 Ifrit 奪去心智的人卻無法得救，只能迎向死亡。殘酷的真相壓在眾人心頭，但 Scions 仍誓要奮戰，以免更多無辜犧牲。而你，也決心與他們並肩前行。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 明菲利亞 <small class="muted">（薩納蘭西部 ‧ 覺醒沙之家, X:6.9, Y:6.1）</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="life-materia-and-everything.html">魔晶石與生命的奧秘</a></div>
+      <div class="row"><b>解鎖試煉</b> <a class="link" href="the-bowl-of-embers.html">伊弗利特討伐戰</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">初露頭角的英雄</a></div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  panels[key].innerHTML = t[key];
+  if(key === 'story') wireClamp(panels[key], t);
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+</script>
+</body>
+</html>
