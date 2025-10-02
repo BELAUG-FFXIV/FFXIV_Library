@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A Proper Burial | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – A Proper Burial (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+
+    /* Story 展開 / 收合 */
+    .clamp{ position:relative; max-height:360px; overflow:hidden; }
+    .clamp[data-collapsed="false"]{ max-height:none; }
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/085UY4MefYQ"
+              title="A Proper Burial" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">A Proper Burial</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'A Proper Burial',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Carrying Isembard’s embalmed corpse to the Church of Saint Adama Landama, you move through the dusty roads northwest of Camp Drybone. The small, humble church stands silent under the sun, its lichyard filled with fresh graves. Marques greets you, his voice weary and faltering from handling so many dead. He directs you to an empty grave atop the ridge, and you lay the body to rest, packing the earth tightly to protect it from scavengers.</p>
+      <p>When you return, Marques mutters prayers to Thal but gives little help about the missing villagers. He seems haunted, his mind slipping toward the dead rather than the living. Yet he mentions Sister Ourcen, who has been kind to him and is closer to the people than anyone else. Inside the church, Sister Ourcen thanks you for the burial and promises to share anything she learns. She speaks gently of Marques’s scars from the Calamity, worried that his conduct has begun to offend even visitors—one of whom she names as Thancred.</p>
+      <p>Back at Camp Drybone, Isembard thanks you for your grim duty, but before you can speak further, Thancred arrives. Smooth and watchful, he confides that he too has questioned Ungust, and suspects the disappearances may be linked to confessions made at the church. Prayer, penance, and secrets whispered out of sight… Who better to take advantage of such vulnerability than the one receiving confessions? He names Sister Ourcen herself. Isembard recoils at the thought, but Thancred warns him: even the most beautiful rose has thorns. And as for Marques, Thancred swears he’s seen that face somewhere before…</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Isembard <small class="muted">(Eastern Thanalan, X:13.9, Y:23.6)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="what-poor-people-think.html">What Poor People Think</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">For the Children</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'すがりし光は',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>イセンバードの頼みを受け、あなたは防腐処理を施された遺体を抱え、キャンプ・ドライボーン北西の「聖アダマ・ランダマ教会」へ向かう。小さく質素な教会と墓地は、太陽の下で静まり返り、新たな墓穴が並んでいる。墓守マルケスは、あまりに多くの死者を扱ってきた疲れを滲ませながら、丘の上にある空き墓へ遺体を埋めるよう指示する。あなたは土を固く詰め、野犬に荒らされぬように祈りを捧げる。</p>
+      <p>戻ってきたあなたに、マルケスはタル神への祈りを口にしながらも、行方不明者の件については何も答えられないと言う。彼の心は生者より死者に向かっているようだった。ただ、彼に優しく接してきた修道女オーセンなら何か知っているかもしれないと告げる。教会の中で、オーセンはあなたに感謝を述べ、もし有益な情報があれば必ず知らせると約束する。彼女はカラミティで傷ついたマルケスを案じ、ついには来訪者の一人、サンクレッドを怒らせたと話す。</p>
+      <p>キャンプ・ドライボーンに戻ると、イセンバードがあなたに感謝を述べる。そこへサンクレッドが現れ、同じく失踪事件を追っていると明かす。彼はアンガストに何度も話を聞いたが、やはり人々が神への祈りや告解の中で秘密を打ち明けていると推測する。そして、その弱みを握るのに最も適しているのは──告解を受ける修道女オーセン自身ではないかと名指しする。イセンバードは信じられないと首を振るが、サンクレッドは警告する。「美しい薔薇にも棘がある」と。そして墓守マルケスの顔にも、どこか見覚えがあると呟くのだった。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> イセンバード <small class="muted">（東ザナラーン, X:13.9, Y:23.6）</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="what-poor-people-think.html">貧しき者の考え</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">共謀者の影</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'在光中得以安息',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>你依 Isembard 所託，帶著那具經過防腐處理的屍體前往位於 Camp Drybone 西北的「聖阿達瑪・蘭達瑪教會」。這座小小而樸素的教堂在陽光下顯得寂靜，墓地裡多了許多新墳。守墓人 Marques 神情疲憊，聲音顫抖，指引你將遺體葬在山脊上的空墓裡。你按他的囑咐，把泥土壓得緊實，祈願亡魂得以安息，免遭野狗褻瀆。</p>
+      <p>回來時，Marques 嘴裡喃喃著向 Thal 禱告，卻對失蹤村民一事毫無所知。他像是被過去所困，心早已離開活人，只剩死者的影子。他提到一位曾對他親切相待的修女──Ourcen，或許她知道些什麼。你進入教堂，Ourcen 感謝你的埋葬之舉，並承諾若有線索必會告知。她憂心 Marques 在天災後的精神創傷，甚至已惹怒過訪客──其中之一就是名叫 Thancred 的男子。</p>
+      <p>回到 Camp Drybone，Isembard 感謝你的辛勞。這時 Thancred 現身，坦言自己也多次向 Ungust 打聽，懷疑這些失蹤事件可能與教會中的懺悔有關。禱告、贖罪、秘密都在看不見的地方進行──最能利用這種脆弱的，莫過於接受告解的人。他直指 Ourcen，Isembard 聽後大驚失色，堅稱不可能。但 Thancred 低聲警告：「最美的玫瑰也有刺。」而守墓人 Marques，那張臉……他發誓在某處見過。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 伊森巴德 <small class="muted">（薩納蘭東部, X:13.9, Y:23.6）</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="what-poor-people-think.html">貧民的心聲</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">為了孩子們</a></div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  panels[key].innerHTML = t[key];
+  if(key === 'story') wireClamp(panels[key], t);
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+</script>
+</body>
+</html>
