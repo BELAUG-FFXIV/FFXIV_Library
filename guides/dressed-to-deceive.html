@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dressed to Deceive | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Dressed to Deceive (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:#222;border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    /* Story 展開 / 收合 */
+    .clamp{ position:relative; max-height:360px; overflow:hidden; }
+    .clamp[data-collapsed="false"]{ max-height:none; }
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/pI6e8iZw28E"
+              title="Dressed to Deceive" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Dressed to Deceive</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Dressed to Deceive',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Isembard breathes easier now that Sister Ourcen has lodgings, but he has little patience for delay—more innocents may yet vanish if you tarry. Thancred, meanwhile, has a plan of his own: since the culprit poses as a priest to lure the poor, you and he will answer deception with deception. Isembard supplies you with stained tunics and threadbare slops; you wrap yourself in them, tumble the dirt into your hair, and take your place among the camp’s desperate.</p>
+      <p>You beg for work, you scrounge for coin, you play the part of a down-on-his-luck vagrant until the camp’s gossip swells. At length a smooth voice approaches and a pamphlet changes hands—a crude tract peddling false charity in the name of Nald’thal. Thancred watches from the shadows while you feign need; when the false priest reveals himself, it is Ungust, the Golden Bazaar merchant whose leer hardly disguises his guilt. Under pressure he breaks: Amalj’aa demanded shipment schedules, and people to be handed over. He lied at first, then confessed that he’d taken the vile bargain for coin.</p>
+      <p>Thancred’s contempt is cold and precise; your priority, he reminds you, is the living—those still held by the Amalj’aa. You carry the confession to Minfilia at the Waking Sands. She receives you solemnly, thanks you for the work, and warns that none but the Amalj’aa know where the missing are held. The road ahead will be bloody, she says, but now you have a lead to follow.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Isembard <small class="muted">(Eastern Thanalan, X:13.9, Y:23.6)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="amaljaa-wrong-places.html">Amalj’aa Wrong Places</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">Life, Materia and Everything</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'消えた者たちの行方',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>シスター・アウルセンが宿を確保したことで一息つけたイセンバードだが、事態は急を要する──これ以上罪なき者が消える前に手を打たねばならぬ。サンクレッドは奇抜な策を提案する。偽の司祭が困窮する者を誘い出すのなら、こちらも似た格好で――欺瞞に欺瞞を以て対抗しようと。イセンバードは汚れたチュニックと粗末な衣を渡し、あなたは身をやつしてキャンプの困窮者の一人に混じる。</p>
+      <p>仕事を乞い、小銭を懇願し、哀願の芝居を続けるうち、噂が広がり、ついに声をかけられる。手渡されたのは、ナルザルの名を騙る稚拙なビラだ。サンクレッドは影から見守り、あなたは貧しげに身を寄せる。偽司祭の素顔が明らかになると、それはゴールデンバザーの商人アングストであった。追及されれば彼は崩れ、やがて告白する──アマルジャ族との取り引き、運搬スケジュールの漏えい、そして人々を引き渡していたことを。金がよかった、と彼は白状する。</p>
+      <p>サンクレッドは冷ややかに憤りを示す。だが最優先は囚われた人々の救出だと告げ、あなたはその証言を携えて砂の家のミンフィリアのもとへ戻る。彼女は厳粛に感謝し、失踪者の居所を知るのはアマルジャ族のみであることを告げる。先は血生臭いものとなるだろうが、少なくとも今や追うべき手掛かりを得たのだ。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> イセンバード <small class="muted">（東ザナラーン, X:13.9, Y:23.6）</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="amaljaa-wrong-places.html">虚ろな富の行方</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">生命、マテリア、すべての答え</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'偽裝的真相',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Isembard 為 Sister Ourcen 預訂旅店房間使他稍寬心，但他也警告你不可拖延──若不盡速查明，仍有無辜者會遭害。Thancred 提出一計：既然幕後之人冒充祭司，以假慈悲引誘貧苦者，你與他便用同樣的偽裝去誘出真相。Isembard 借給你髒兮兮的舊外衣與褲裙，你披上它們，把自己打扮成營地裡的流浪者，混入乞討的人群。</p>
+      <p>你乞討、你裝窮、你在營地邊緣賣難，看似無助但暗中等待。消息果然傳開，不久一人前來遞上傳單──假借 Nald’thal 之名的劣質傳單。Thancred 隱於暗處，你演出得天衣無縫；當那位「慈善的司祭」現身時，真面目是 Ungust──那位 Golden Bazaar 的商人。經過逼問，他崩潰了：他向 Amalj’aa 提供了運送時程與人員名單，並坦承為了金錢交易而出賣鄉里。</p>
+      <p>Thancred 冷峻斥責，但仍提醒最優先目標是營救尚在人間的受害者。你帶著供述回到 Waking Sands 向 Minfilia 報告。她鄭重致謝，並警告唯有 Amalj’aa 知曉被擄者下落。未來的路勢必血腥，但好歹已有線索可追。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 伊森巴德 <small class="muted">（薩納蘭東部, X:13.9, Y:23.6）</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="amaljaa-wrong-places.html">失落之財的去向</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">魔晶石與生命的奧秘</a></div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  panels[key].innerHTML = t[key];
+  if(key === 'story') wireClamp(panels[key], t);
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+</script>
+</body>
+</html>
