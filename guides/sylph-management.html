@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sylph-management | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Sylph-management (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:#222;border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    /* Story 展開 / 收合 */
+    .clamp{ position:relative; max-height:360px; overflow:hidden; }
+    .clamp[data-collapsed="false"]{ max-height:none; }
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/ItihiCD_l28"
+              title="Sylph-management" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Sylph-management</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Sylph-management',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Having formally completed your enlistment, Minfilia sets aside ceremony and turns to you with a request. At the behest of the Order of the Twin Adder, the Scions have been studying the sylphs—an enigmatic beast tribe dwelling in the Twelveswood, known to worship the Primal Ramuh.</p>
+      <p>Urianger confirms that documents from the Students of Baldesion have just arrived. Papalymo and Yda summarize: though the sylphs possess a gentle nature that allows for peaceful communication, their customs are unusual, and the risk of Ramuh’s summoning cannot yet be dismissed. Gridania, already struggling against Garuda, fears the possibility of another primal threat.</p>
+      <p>Thus, Minfilia entrusts you with a mission: approach the sylphs with diplomacy, using the Echo to bridge understanding, and secure their trust. Yda and Papalymo will accompany you, while Thancred bows out, claiming he would be “a babe in the woods” amidst Gridania’s forests.</p>
+      <p>Your task is clear—seek a peaceful resolution with the sylphs, and uncover what they may know of the Primal Ramuh.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Minfilia <small class="muted">(The Waking Sands, X:6.9, Y:6.1)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="till-sea-swallows-all.html">Till Sea Swallows All</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">We Come in Peace</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'青葉の思惑',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>正式な手続きを終えた ミンフィリア は、改まった口調を解き、あなたに頼みごとを切り出す。双蛇党の依頼により、暁の血盟はシルフ族についての調査を行っていた。彼らは黒衣森に住まう蛮族であり、雷の蛮神「ラムウ」を信仰している。</p>
+      <p>ウリエンジェ が報告書の到着を確認し、パパリモ と イダ が調査の概要を説明する。シルフ族は蛮族でありながら比較的友好的な気質を持ち、平和的な対話も可能だという。しかし、今もラムウ召喚の危険性が残されており、ガルーダへの対処に追われる グリダニア にとっては重大な懸念となっている。</p>
+      <p>ミンフィリア はあなたに使命を託す。外交的にシルフ族と接触し、誤解を避けるためには「エコー」を用いて意志を伝えるべきだ、と。彼らの信頼を得ることが、蛮神脅威の軽減につながるのだ。同行するのは イダ と パパリモ。サンクレッド は「森の中では赤子同然」と笑って辞退する。</p>
+      <p>こうしてあなたは、シルフ族と平和的な関係を築き、雷の蛮神「ラムウ」にまつわる真実を探る任務へと旅立つ。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> ミンフィリア <small class="muted">（西ザナラーン：砂の家, X:6.9, Y:6.1）</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="till-sea-swallows-all.html">海が全てを呑み込むまで</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">蜜の道を辿って</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'森靈的意圖',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>在完成正式的入伍手續後，Minfilia 收起禮節，語氣變得鄭重。她告訴你，因應 Twin Adder 的委託，Scions 已著手研究棲息於黑衣森林的神秘族群──Sylph。他們信奉雷之 Primal「Ramuh」，外表飄忽如浮動的蔬草，性情卻相對和善，具備溝通的可能性。</p>
+      <p>Urianger 確認來自 Students of Baldesion 的文件已送達，Papalymo 與 Yda 簡要說明了調查結果：雖然 Sylph 一時無法再度召喚 Ramuh，但威脅仍無法排除。對於已經焦頭爛額對抗 Garuda 的 Gridania 而言，這份不確定性更加沉重。</p>
+      <p>因此，Minfilia 將任務交託給你──以外交手段接觸 Sylph，並運用 Echo 避免誤解，爭取他們的信任。這或許能讓對 Primal 的危機有所緩解。Yda 與 Papalymo 將同行，而 Thancred 則半開玩笑地說自己在森林裡就像「嬰兒般無助」，婉拒了同行。</p>
+      <p>你的使命十分明確：與 Sylph 建立和平的對話，並找出關於 Ramuh 的真相。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 明菲利亞 <small class="muted">（薩納蘭西部 ‧ 覺醒沙之家, X:6.9, Y:6.1）</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="till-sea-swallows-all.html">直至大海吞沒一切</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">沿著蜜徑而來</a></div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  panels[key].innerHTML = t[key];
+  if(key === 'story') wireClamp(panels[key], t);
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+</script>
+</body>
+</html>
