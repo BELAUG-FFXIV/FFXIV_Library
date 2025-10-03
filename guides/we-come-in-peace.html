@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>We Come in Peace | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – We Come in Peace (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:#222;border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    /* Story 展開 / 收合 */
+    .clamp{ position:relative; max-height:360px; overflow:hidden; }
+    .clamp[data-collapsed="false"]{ max-height:none; }
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/dz0Nj-TMlcI"
+              title="We Come in Peace" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">We Come in Peace</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'We Come in Peace',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>At the Adders’ Nest, Commander Vorsaile Heuloix greets you warmly, though Yda quickly explains that you come not to enlist but on behalf of the Scions. The commander shares Gridania’s concerns: the sylphs of the Twelveswood, though peaceable in nature, worship the Primal Ramuh. Even if they seem friendly, the possibility that Ramuh could be summoned threatens to destabilize the forest.</p>
+      <p>Lacking the knowledge to decide whether to strike or negotiate, Vorsaile seeks the counsel of the Scions. He asks you to approach the untempered sylphs of Little Solace and hear their thoughts on their brethren. He stresses caution—sylph customs differ greatly from those of men, and a single misstep could undo any chance at diplomacy.</p>
+      <p>Your path leads first to the Hawthorne Hut, where officers of the Twin Adder can advise you on earning the sylphs’ trust. With Yda’s enthusiasm and Papalymo’s measured caution, you set out toward East Shroud, ferrying from Westshore Pier. At the Hawthorne Hut, Amelain greets you, confirming that though the sylphs are whimsical and wary—especially after imperial incursions—they can befriend those who win their trust. She directs you to Rolfe, the hut master, who knows more of their ways than anyone.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Vorsaile Heuloix <small class="muted">(New Gridania, X:9.7, Y:11.1)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="sylph-management.html">Sylph-management</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">Sylphic Studies</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'蜜の道を辿って',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>双蛇党本部「双蛇党本部」にて、指揮官 ヴォルサイル・ユーロクス はあなたを歓迎する。だが イダ が「入隊のためではなく、暁の血盟の任務で来た」と説明すると、司令官は森の現状を語り始めた。黒衣森に住まう シルフ族 は一見友好的ではあるが、雷の蛮神「ラムウ」を信仰しており、その召喚の可能性が グリダニア にとって大きな脅威となっているのだ。</p>
+      <p>「攻撃すべきか、静観すべきか判断できるだけの知識が足りない」と司令官は語り、暁の血盟に仲介役を依頼する。未だ「テンパード」となっていない リトルソルス のシルフ族 と接触し、彼らの率直な意見を聞いてほしいと。そして、シルフ族 の風習は人とは大きく異なるため、外交においては細心の注意が必要だと警告する。</p>
+      <p>まずは 東部森林 の「ホーソーン家の小屋」へ向かい、シルフ族 と信頼を築く方法を学ぶよう指示される。イダ は陽気に「楽しい対話になるはず！」と胸を躍らせ、パパリモ は「油断は禁物だ」と釘を刺す。ウェストショア桟橋 から渡し船に乗り、あなたは仲間と共にシルフの里へと歩み出す。到着した ホーソーン家の小屋 では、双蛇党の アメライン が迎え、シルフ族 は気まぐれで警戒心が強いが、信頼を得れば誰よりも友好的になれると教えてくれる。そして彼女は、シルフ族 に最も詳しい小屋の主 ロルフ・ホーソーン に会うよう勧めた。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> ボルセル大牙佐 <small class="muted">（グリダニア：新市街, X:9.7, Y:11.1）</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="sylph-management.html">青葉の思惑</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">変わり者の挨拶</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'沿著蜜徑而來',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>在 Adders’ Nest，指揮官 Vorsaile Heuloix 熱情地迎接了你。但 Yda 很快便解釋，你並非來此入伍，而是代表 Scions 而來。指揮官隨即說明 Gridania 的隱憂：棲息於黑衣森林的 Sylph 雖大多性情溫和，卻信奉雷之 Primal「Ramuh」。即便表面友善，一旦召喚成功，將可能徹底破壞與森林的平衡。</p>
+      <p>「我們缺乏足夠的情報，無法斷定該出兵還是靜觀其變。」因此，他懇請 Scions 居中協調，與仍未被「Tempered」的 Little Solace Sylph 接觸，傾聽他們對同胞的真實想法。他特別提醒：Sylph 的傳統與人族迥異，稍有冒犯便可能使談判破裂。</p>
+      <p>你的任務首站是 East Shroud 的 Hawthorne Hut，Twin Adder 的駐守軍官能指點如何贏得 Sylph 的信任。Yda 迫不及待地期待這場「友好的對話」，而 Papalymo 則提醒不可掉以輕心。你與他們一同從 Westshore Pier 搭乘渡船，踏上前往森林深處的道路。</p>
+      <p>在 Hawthorne Hut，軍官 Amelain 迎接了你。她坦言 Sylph 雖顯得詭譎多變，且因帝國入侵而更為警惕，但只要贏得他們的信任，他們就能成為可靠的盟友。最後，她建議你去找小屋的主人 Rolfe——一位對 Sylph 了解最深的人。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 波爾塞爾大牙佐 <small class="muted">（新格里達尼亞, X:9.7, Y:11.1）</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="sylph-management.html">森靈的意圖</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">探索森靈之道</a></div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  panels[key].innerHTML = t[key];
+  if(key === 'story') wireClamp(panels[key], t);
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+</script>
+</body>
+</html>
