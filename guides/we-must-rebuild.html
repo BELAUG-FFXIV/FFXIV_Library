@@ -76,12 +76,18 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <!-- 新增：Comments 分頁 -->
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
           <div id="panel-story"   class="tab-panel active"></div>
           <div id="panel-acq"     class="tab-panel"></div>
           <div id="panel-unlockq" class="tab-panel"></div>
           <div id="panel-followq" class="tab-panel"></div>
+          <!-- 新增：Comments 掛載面板（只留容器，不放佔位字） -->
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -93,7 +99,7 @@ const i18n = {
   EN:{
     langLabel:'EN',
     pageTitle:'We Must Rebuild',
-    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
     story:`<p>At Momodi’s suggestion, the Warrior of Light steps beyond the gates of Ul’dah and into the wilds of Thanalan. There, at the Ul’dah Dispatch Yard, they meet Papashan—the humble stationmaster who recalls the devastation of the Calamity and the years of rebuilding that followed.</p>
     <p>Though Ul’dah has regained its splendor through unity and toil, many remote regions still lie in ruin. Papashan entrusts the adventurer with the first of many tasks, calling on their strength to bring relief to a world still healing.</p>`,
     acq:`<div class="stack">
@@ -110,7 +116,7 @@ const i18n = {
   JP:{
     langLabel:'JP',
     pageTitle:'ウルダハ操車庫へ',
-    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
     story:`<p>モモディの助言を受け、冒険者はウルダハの門を越え、サザンザナラーンの荒野へと足を踏み出す。そこで出会ったのは、操車庫を預かる老ララフェル、パパシャン。彼は天災「カルテノーの戦い」の傷跡と、その後の復興の歳月を静かに語る。</p>
     <p>ウルダハは人々の努力で再び繁栄を取り戻したが、未だ救いを待つ辺境の地は多い。そんな彼の想いを託され、冒険者は新たなる使命へと歩み出す。</p>`,
     acq:`<div class="stack">
@@ -127,7 +133,7 @@ const i18n = {
   ZH:{
     langLabel:'ZH',
     pageTitle:'重建之路',
-    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
     story:`<p>在 Momodi 的引導下，光之戰士踏出 Ul’dah 的城門，來到 Thanalan 的荒野地帶。在 Ul’dah Dispatch Yard，迎接他的是年邁的站長 Papashan。</p>
     <p>這位曾歷經天災後重建歲月的 Lalafell，靜靜訴說著過去的創傷與人民不懈的努力。雖然 Ul’dah 已恢復繁華，邊境地區仍有諸多苦難未解。如今，他將希望寄託於這位冒險者，期望能為這片尚在療傷的大地帶來新生。</p>`,
     acq:`<div class="stack">
@@ -150,24 +156,33 @@ const panels = {
   story:  document.getElementById('panel-story'),
   acq:    document.getElementById('panel-acq'),
   unlockq:document.getElementById('panel-unlockq'),
-  followq:document.getElementById('panel-followq')
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments') // 新增
 };
 
 function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+
 function applyLang(lang){
   const t = i18n[lang] || i18n.EN;
   pageTitle.textContent = t.pageTitle;
   langToggle.textContent = `🌐 ${t.langLabel}`;
-  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  tabBtns.forEach(btn => { if (t.tabs[btn.dataset.tab]) btn.textContent = t.tabs[btn.dataset.tab]; });
   const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
   renderPanel(activeBtn.dataset.tab, lang);
+  // 若正在 comments，語言切換後重載一次 giscus
+  if (activeBtn && activeBtn.dataset.tab === 'comments') loadGiscusForCurrentLang();
 }
+
 function renderPanel(key, lang){
   const t = i18n[lang] || i18n.EN;
   Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
   panels[key].classList.add('active');
-  panels[key].innerHTML = t[key];
+  // 避免洗掉留言容器
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  // 進入留言分頁時載入 giscus
+  if (key === 'comments') loadGiscusForCurrentLang();
 }
+
 tabBtns.forEach(btn=>{
   btn.addEventListener('click', ()=>{
     tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
@@ -175,13 +190,47 @@ tabBtns.forEach(btn=>{
     renderPanel(btn.dataset.tab, getLang());
   });
 });
+
 langToggle.addEventListener('click', ()=>{
   const cur = getLang();
   const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
   localStorage.setItem(LANG_KEY, next);
   applyLang(next);
 });
+
 applyLang(getLang());
+
+/* === Giscus：單一 Comments 分頁，語言切換（各語言各自獨立串） === */
+const GISCUS_CFG = {
+  repo: 'belaug-ffxiv/FFXIV_Library',
+  repoId: 'R_kgD0Pyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+  theme: 'preferred_color_scheme' // 要固定亮色可改 'light'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang(); // EN / JP / ZH
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');                          // 固定 term
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);    // 每語言一串
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
 </script>
 </body>
 </html>
