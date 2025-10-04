@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Ageless Necropolis | BELAUG · FFXIV Library</title>
+  <meta name="description" content="FFXIV DT 7.3 Trial — The Ageless Necropolis（永遠の闇討滅戦ノーマル / 不朽墓所）：故事概要、需求條件、解鎖任務與後續任務，附影片。">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#ffffff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif; background:var(--bg); color:var(--fg);}
+    .container{max-width:1080px; margin:0 auto; padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border); background:#fff9edb3; backdrop-filter:saturate(120%) blur(6px); position:sticky; top:0; z-index:10}
+    .nav{display:flex; align-items:center; justify-content:space-between; height:60px}
+    .left{display:flex; align-items:center; gap:12px}
+    .home{border:1px solid var(--border); background:#fff; padding:4px 8px; border-radius:8px; text-decoration:none; color:var(--fg); font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex; align-items:center; gap:8px}
+    .icon-btn{background:none; border:none; cursor:pointer; font-size:14px; padding:6px 10px; border-radius:8px}
+    .icon-btn:hover{background:#fff; border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid; grid-template-columns:1.1fr 1fr; gap:20px; align-items:start;}
+    @media (max-width:900px){ .grid{grid-template-columns:1fr} .video-wrap{position:relative; padding-top:56.25%} .video-wrap iframe{position:absolute; inset:0; width:100%; height:100%} }
+    .card{background:var(--card); border:1px solid var(--border); border-radius:16px; box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px; border-bottom:1px solid var(--border); font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%; height:420px; border:0; display:block; border-radius:16px}
+    .tabs{display:flex; gap:8px; padding:12px 12px 0; flex-wrap:wrap}
+    .tab-btn{background:#fff; border:1px solid var(--border); color:var(--fg); border-radius:999px; padding:8px 14px; cursor:pointer; font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent); color:#fff; background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex; flex-direction:column; gap:10px}
+    .stack .row{padding:12px 14px; border:1px dashed var(--border); border-radius:12px; background:#fffdf6}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8; text-decoration:none}
+    .link:hover{text-decoration:underline}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/dKkweG1J4LY" title="The Ageless Necropolis" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">The Ageless Necropolis</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true" data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="req">Requirements</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlock">Follow-Up Quest</button>
+          <!-- 新增：Comments 分頁按鈕 -->
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story" class="tab-panel active"></div>
+          <div id="panel-acq" class="tab-panel"></div>
+          <div id="panel-req" class="tab-panel"></div>
+          <div id="panel-unlock" class="tab-panel"></div>
+          <!-- 新增：留言面板 -->
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const LANG_KEY = 'ffxiv-guide-lang';
+
+    const i18n = {
+      EN:{
+        langLabel:'EN',
+        pageTitle:'The Ageless Necropolis',
+        // 新增 comments 標籤
+        tabs:{story:'Story', req:'Requirements', acq:'Unlock Quest', unlock:'Follow-Up Quest', comments:'Comments'},
+        story:`<p>By entrusting their memories of departed loved ones to the cloud, Alexandrians have long escaped the grief of separation. But when forced to confront the realities of death, their hearts were consumed by a dark and unreasoning terror. A genius of a forgotten age now twists that fear and desperation into a new primal form—one born of sorrow, sustained by denial. And so the Warrior of Light must stand unshaken before this embodiment of fear, and face down the eternal darkness.</p>`,
+        req:`<div class="stack">
+          <div class="row"><strong>Players:</strong> 1–8 players (2 Tanks, 2 Healers, 4 DPS)</div>
+          <div class="row">Unrestricted Parties Not Allowed</div>
+          <div class="row"><strong>Class/Job:</strong> Disciples of War or Magic</div>
+          <div class="row">※ Limited jobs can participate only in a preformed party meeting party size requirements or an unrestricted party, and if duty rules allow.</div>
+          <div class="row"><strong>Level:</strong> 100 (Sync from 100)</div>
+          <div class="row">※ While synced, all item stats are adjusted.</div>
+          <div class="row">※ Role and item level restrictions are lifted for parties meeting minimum size requirements.</div>
+        </div>`,
+        acq:`<div class="stack">
+          <!-- 依你規則：HTML 內連結改為 # 佔位 -->
+          <div class="row"><a class="link" href="#">A Terminal Invitation</a></div>
+        </div>`,
+        unlock:`<div class="stack">
+          <div class="row"><a class="link" href="#">Blades in Waiting</a></div>
+        </div>`
+      },
+
+      JP:{
+        langLabel:'JP',
+        pageTitle:'永遠の闇討滅戦ノーマル',
+        // 新增 comments 標籤
+        tabs:{story:'ストーリー', req:'必要条件', acq:'開放クエスト', unlock:'後続クエスト', comments:'コメント'},
+        story:`<p>アレクサンドリアの人々は、死別の悲しみから逃れるため、故人の記憶をクラウドに託してきた。だが、死という現実に向き合わざるを得なくなったとき、彼らの心を支配したのは、理性を超えた深い恐怖だった。その恐怖と祈りを糧に、古の天才が新たな蛮神の顕現を導く。恐怖が具現化した「永遠の闇」に対し、光の戦士は怯むことなく立ち向かう。</p>`,
+        req:`<div class="stack">
+          <div class="row"><strong>プレイヤー数：</strong>1～8人（タンク2／ヒーラー2／DPS4）</div>
+          <div class="row">制限解除パーティ不可</div>
+          <div class="row"><strong>クラス／ジョブ：</strong>ファイター／ソーサラー</div>
+          <div class="row">※ リミテッドジョブは、規定人数の事前結成パーティまたは制限解除パーティかつ規定が許可する場合のみ参加可。</div>
+          <div class="row"><strong>レベル：</strong>100（シンク：100）</div>
+          <div class="row">※ シンク中は全装備ステータスが調整されます。</div>
+          <div class="row">※ 最低人数を満たすパーティではロール／IL制限が解除されます。</div>
+        </div>`,
+        acq:`<div class="stack">
+          <!-- 依你規則：HTML 內連結改為 # 佔位 -->
+          <div class="row"><a class="link" href="#">約束のとき</a></div>
+        </div>`,
+        unlock:`<div class="stack">
+          <div class="row"><a class="link" href="#">ふたりの剣</a></div>
+        </div>`
+      },
+
+      ZH:{
+        langLabel:'ZH-TW',
+        pageTitle:'不朽墓所',
+        // 新增 comments 標籤
+        tabs:{story:'故事概要', req:'需求條件', acq:'解鎖任務', unlock:'後續任務', comments:'留言'},
+        story:`<p>為了逃避失去摯愛之人的痛苦，Alexandria 的人民選擇將記憶寄託於雲端，遠離死亡的現實。然而當他們終於不得不直面生死時，迎來的卻是深不見底的恐懼。一位來自古代的天才將這份恐懼與祈求扭曲為新的召喚實體——以否認與悲傷為核心的原初存在。面對這具現化的「永遠の闇」，光之戰士挺身而出，無懼挑戰無盡黑暗。</p>`,
+        req:`<div class="stack">
+          <div class="row"><strong>人數：</strong>1–8 人（2 坦克／2 治療／4 輸出）</div>
+          <div class="row">不可使用無限制規則</div>
+          <div class="row"><strong>職業：</strong>戰鬥職業／魔法職業</div>
+          <div class="row">※ 限定職業僅能在事先組成符合人數條件的隊伍，或以無限制規則參加，且需符合任務規則允許的情況。</div>
+          <div class="row"><strong>等級：</strong>100（同步至 100）</div>
+          <div class="row">※ 同步時，所有裝備數值將自動調整。</div>
+          <div class="row">※ 當隊伍僅達最低人數時，角色定位與裝備品級限制將解除。</div>
+        </div>`,
+        acq:`<div class="stack">
+          <!-- 依你規則：HTML 內連結改為 # 佔位 -->
+          <div class="row"><a class="link" href="#">終焉之約</a></div>
+        </div>`,
+        unlock:`<div class="stack">
+          <div class="row"><a class="link" href="#">並肩之刃</a></div>
+        </div>`
+      }
+    };
+
+    const langToggle = document.getElementById('langToggle');
+    const pageTitle  = document.getElementById('pageTitle');
+    const tabBtns    = [...document.querySelectorAll('.tab-btn')];
+    const panels = {
+      story : document.getElementById('panel-story'),
+      acq   : document.getElementById('panel-acq'),
+      req   : document.getElementById('panel-req'),
+      unlock: document.getElementById('panel-unlock'),
+      comments: document.getElementById('panel-comments') // 新增
+    };
+
+    function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+
+    // 取代為新版：切換分頁時，不覆寫 comments 內容；進入 comments 才載入 giscus
+    function renderPanel(key, lang){
+      const t = i18n[lang] || i18n.EN;
+      Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+      panels[key].classList.add('active');
+
+      if (key !== 'comments') {
+        panels[key].innerHTML = t[key];
+      } else {
+        loadGiscusForCurrentLang();
+      }
+    }
+
+    tabBtns.forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+        btn.setAttribute('aria-selected','true');
+        renderPanel(btn.dataset.tab, getLang());
+      });
+    });
+
+    langToggle.addEventListener('click',()=>{
+      const cur=getLang();
+      const next=cur==='EN'?'JP':(cur==='JP'?'ZH':'EN');
+      localStorage.setItem(LANG_KEY,next);
+      applyLang(next);
+    });
+
+    function applyLang(lang){
+      const t = i18n[lang] || i18n.EN;
+      pageTitle.textContent = t.pageTitle;
+      const label = t.langLabel || 'EN';
+      document.getElementById('langToggle').textContent = `🌐 ${label}`;
+      tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+      const activeBtn = tabBtns.find(b=>b.getAttribute('aria-selected')==='true') || tabBtns[0];
+      renderPanel(activeBtn.dataset.tab, lang);
+      // 如果目前就在留言分頁，切語言後重載 giscus
+      if (activeBtn && activeBtn.dataset.tab === 'comments') loadGiscusForCurrentLang();
+    }
+
+    applyLang(getLang());
+
+    /* === Giscus：單一 Comments 分頁，隨語言切換 === */
+    const GISCUS_CFG = {
+      repo: 'belaug-ffxiv/FFXIV_Library',
+      repoId: 'R_kgD0Pyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+      theme: 'preferred_color_scheme' // 可改 'light' 固定亮色
+    };
+    function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+    function loadGiscusForCurrentLang(){
+      const mount = document.getElementById('giscus_container');
+      if (!mount) return;
+      mount.innerHTML = ''; // 清掉舊 iframe/script
+      const langCode = getLang(); // EN / JP / ZH
+      const s = document.createElement('script');
+      s.src = 'https://giscus.app/client.js';
+      s.setAttribute('data-repo', GISCUS_CFG.repo);
+      s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+      s.setAttribute('data-category', GISCUS_CFG.category);
+      s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+      s.setAttribute('data-mapping', 'specific');                   // 使用固定 term
+      s.setAttribute('data-term', location.pathname + '｜' + langCode); // 每語言各自一串
+      s.setAttribute('data-reactions-enabled', '1');
+      s.setAttribute('data-emit-metadata', '0');
+      s.setAttribute('data-input-position', 'bottom');
+      s.setAttribute('data-lang', uiLang(langCode));
+      s.setAttribute('data-theme', GISCUS_CFG.theme);
+      s.setAttribute('crossorigin', 'anonymous');
+      s.async = true;
+      mount.appendChild(s);
+    }
+  </script>
+</body>
+</html>
