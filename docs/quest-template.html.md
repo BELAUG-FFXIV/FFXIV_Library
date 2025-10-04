@@ -1,66 +1,48 @@
-完美 👍 那我幫你升級成「正式開發指南版 Quest Template」，
-也就是可以直接放進 /docs/quest-template.html.md 當開發文件用，
-裡面會包含：
+# 📘 Quest Page Template · BELAUG · FFXIV Library（含 Comments 分頁）
 
-✅ 全結構範例
-✅ 各區段完整註解（HTML comment）
-✅ JSON 對應說明
-✅ tab 說明表
-✅ 語言切換邏輯
-✅ 開發時注意事項（包括 link 未建立時使用 #、YouTube iframe、翻譯欄位等）
-
-⸻
-
-以下是最終正式版（可直接整份貼進 repo）👇
-
-⸻
-
-
-# 📘 Quest Page Template · BELAUG · FFXIV Library
-
-This document defines the **official HTML structure and implementation guide** for all Quest-type pages in the BELAUG · FFXIV Library.  
-It applies to **Main Story (MSQ), Side Quests, Role Quests, Job Quests, and Allied Society Quests.**
+這份文件是 **Quest 類頁面（MSQ / Side / Role / Job / Allied Society）** 的官方模板與實作指南。  
+✅ 已內建三語切換  
+✅ 內建 **Comments／コメント／留言** 分頁（使用 Giscus）  
+✅ 留言串會依語言分流（同一頁 URL，不同語言各自獨立討論串）
 
 ---
 
-## 🧱 File Naming & Location
+## 🧱 檔名與位置
 
-- **Path:** `/guides/quests/`
-- **File Format:** `.html`
-- **JSON Data (optional):** `/data/[slug].json`
+- HTML 放在：`/guides/quests/`
+- 檔名：`[slug].html`
+- （可選）對應 JSON：`/data/[slug].json`
 
-**Example**
+**範例**
 
 /guides/quests/we-come-in-peace.html
 /data/we-come-in-peace.json
 
 ---
 
-## 🧩 HTML Structure (With Comments)
+## 🧩 標準 HTML 範本（含註解 & Comments 分頁）
 
-Below is the **standard HTML template** for Quest pages.  
-Every section includes inline developer comments (`<!-- ... -->`) describing its purpose.
+> 直接複製整段，替換中括號內容即可（如 `[EN Title]`、`[ytId]`）。
 
 ```html
 <!doctype html>
 <html lang="zh-Hant">
 <head>
-  <!-- 🔹 Basic Meta -->
+  <!-- 🔹 Meta -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- 🔹 Title & Description -->
+  <!-- 🔹 Title / Description -->
   <title>[EN Title] | BELAUG · FFXIV Library</title>
   <meta name="description" content="FFXIV [Expac] Quest — [EN Title]：故事概要、任務需求、解鎖內容與後續任務，附影片。">
 
   <link rel="icon" href="../img/favicon.ico" />
 
-  <!-- 🔹 Base Styling -->
+  <!-- 🔹 Base Styles（維持你現有的鵝黃色系） -->
   <style>
     :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
     *{box-sizing:border-box}
-    body{margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;
-         background:var(--bg); color:var(--fg)}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
     .container{max-width:1080px;margin:0 auto;padding:0 16px}
     .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
     .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
@@ -70,7 +52,11 @@ Every section includes inline developer comments (`<!-- ... -->`) describing its
     .icon-btn:hover{background:#fff;border:1px solid var(--border)}
     .main{padding:20px 0 40px}
     .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
-    @media(max-width:900px){.grid{grid-template-columns:1fr}.video-wrap{position:relative;padding-top:56.25%}.video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
     .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
     .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
     .card .bd{padding:16px}
@@ -90,8 +76,7 @@ Every section includes inline developer comments (`<!-- ... -->`) describing its
 </head>
 
 <body>
-
-  <!-- 🌐 HEADER: Site Navigation -->
+  <!-- 🌐 Header -->
   <header class="site-header">
     <nav class="container nav">
       <a class="home" href="../index.html">🏠 Home</a>
@@ -99,52 +84,60 @@ Every section includes inline developer comments (`<!-- ... -->`) describing its
     </nav>
   </header>
 
-  <!-- 🧭 MAIN CONTENT AREA -->
+  <!-- 🧭 Main -->
   <main class="container main">
     <div class="grid">
 
-      <!-- 🎥 LEFT COLUMN: YouTube Video -->
+      <!-- 🎥 Left: YouTube -->
       <section class="card video-card">
         <div class="bd">
           <div class="video-wrap">
-            <!-- ⚠️ Replace ytId with actual video ID -->
+            <!-- ⚠️ 替換 [ytId] -->
             <iframe id="ytFrame" src="https://www.youtube.com/embed/[ytId]" title="[EN Title]" allowfullscreen></iframe>
           </div>
         </div>
       </section>
 
-      <!-- 📑 RIGHT COLUMN: Tabs & Content -->
+      <!-- 📑 Right: Tabs -->
       <section class="card">
         <div class="hd" id="pageTitle">[EN Title]</div>
 
-        <!-- 🔸 TAB BUTTONS -->
+        <!-- 🔸 Tab buttons：最後一顆為 Comments -->
         <div class="tabs" role="tablist">
           <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="req">Requirements</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlock">Unlocks</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
 
-        <!-- 🔸 TAB PANELS -->
+        <!-- 🔸 Panels：最下面多一個 Comments 容器 -->
         <div class="bd">
-          <div id="panel-story" class="tab-panel active"></div>
-          <div id="panel-acq" class="tab-panel"></div>
-          <div id="panel-req" class="tab-panel"></div>
-          <div id="panel-unlock" class="tab-panel"></div>
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-req"      class="tab-panel"></div>
+          <div id="panel-unlock"   class="tab-panel"></div>
+
+          <!-- 💬 Comments 面板：只放容器，由 JS 動態載入 giscus -->
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
   </main>
 
-  <!-- ⚙️ LANGUAGE SWITCH LOGIC -->
+  <!-- ⚙️ i18n + Tab + Giscus（留言） -->
   <script>
     const LANG_KEY = 'ffxiv-guide-lang';
+
+    /* 🔤 三語文案：只在 tabs 裡加 comments 的標籤，不要添加 comments 內容 */
     const i18n = {
       EN:{
         langLabel:'EN',
         pageTitle:'[EN Title]',
-        tabs:{ story:'Story', acq:'Acquisition', req:'Requirements', unlock:'Unlocks' },
-        story:`<p>[Full English Story Text]</p>`,
+        tabs:{ story:'Story', acq:'Acquisition', req:'Requirements', unlock:'Unlocks', comments:'Comments' },
+        story:`<p>[Full English Story]</p>`,
         acq:`<div class="stack"><div class="row"><b>Quest Giver:</b> [Name], [Location] (X: , Y: )</div></div>`,
         req:`<div class="stack"><div class="row"><b>Preceding Quest:</b> <a class="link" href="#">[Quest Name]</a></div></div>`,
         unlock:`<div class="stack"><div class="row"><b>Follow-Up Quest:</b> <a class="link" href="#">[Quest Name]</a></div></div>`
@@ -152,7 +145,7 @@ Every section includes inline developer comments (`<!-- ... -->`) describing its
       JP:{
         langLabel:'JP',
         pageTitle:'[JP Title]',
-        tabs:{ story:'ストーリー', acq:'入手方法', req:'前提条件', unlock:'開放内容' },
+        tabs:{ story:'ストーリー', acq:'入手方法', req:'前提条件', unlock:'開放内容', comments:'コメント' },
         story:`<p>[日本語ストーリー本文]</p>`,
         acq:`<div class="stack"><div class="row"><b>依頼人：</b>[JP Name]　[JP Location] (X: , Y: )</div></div>`,
         req:`<div class="stack"><div class="row"><b>前提クエスト：</b><a class="link" href="#">[JP Quest]</a></div></div>`,
@@ -161,7 +154,7 @@ Every section includes inline developer comments (`<!-- ... -->`) describing its
       ZH:{
         langLabel:'ZH',
         pageTitle:'[ZH Title]',
-        tabs:{ story:'故事概要', acq:'取得方式', req:'需求條件', unlock:'解鎖內容' },
+        tabs:{ story:'故事概要', acq:'取得方式', req:'需求條件', unlock:'解鎖內容', comments:'留言' },
         story:`<p>[繁體中文故事內容]</p>`,
         acq:`<div class="stack"><div class="row"><b>任務發布者：</b>[Name]，[Location] (X: , Y: )</div></div>`,
         req:`<div class="stack"><div class="row"><b>前置任務：</b><a class="link" href="#">[Quest Name]</a></div></div>`,
@@ -169,71 +162,126 @@ Every section includes inline developer comments (`<!-- ... -->`) describing its
       }
     };
 
-    // 🔁 Common Language Switch Handler
+    /* 🧠 通用 Tab / 語言切換 */
     const langToggle = document.getElementById('langToggle');
     const pageTitle  = document.getElementById('pageTitle');
     const tabBtns    = [...document.querySelectorAll('.tab-btn')];
-    const panels = { story:panel('story'), acq:panel('acq'), req:panel('req'), unlock:panel('unlock') };
+    const panels = {
+      story   : document.getElementById('panel-story'),
+      acq     : document.getElementById('panel-acq'),
+      req     : document.getElementById('panel-req'),
+      unlock  : document.getElementById('panel-unlock'),
+      comments: document.getElementById('panel-comments') // 新增
+    };
 
-    function panel(id){ return document.getElementById('panel-'+id); }
-    function getLang(){ return localStorage.getItem(LANG_KEY)||'EN'; }
+    function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+    function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+
     function applyLang(lang){
-      const t=i18n[lang]||i18n.EN;
-      pageTitle.textContent=t.pageTitle;
-      langToggle.textContent=`🌐 ${t.langLabel}`;
-      tabBtns.forEach(b=>{ b.textContent=t.tabs[b.dataset.tab]; });
-      const active=tabBtns.find(b=>b.getAttribute('aria-selected')==='true')||tabBtns[0];
-      renderPanel(active.dataset.tab,lang);
+      const t = i18n[lang] || i18n.EN;
+      pageTitle.textContent = t.pageTitle;
+      langToggle.textContent = `🌐 ${t.langLabel}`;
+      tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+      const activeBtn = tabBtns.find(b=>b.getAttribute('aria-selected')==='true') || tabBtns[0];
+      renderPanel(activeBtn.dataset.tab, lang);
+
+      // 若目前停在留言分頁，切語言後重載 giscus
+      if (activeBtn && activeBtn.dataset.tab === 'comments') loadGiscusForCurrentLang();
     }
-    function renderPanel(key,lang){
-      const t=i18n[lang]||i18n.EN;
-      Object.keys(panels).forEach(k=>panels[k].classList.remove('active'));
+
+    function renderPanel(key, lang){
+      const t = i18n[lang] || i18n.EN;
+      Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
       panels[key].classList.add('active');
-      panels[key].innerHTML=t[key];
+
+      if (key !== 'comments') {
+        panels[key].innerHTML = t[key];
+      } else {
+        loadGiscusForCurrentLang();
+      }
     }
+
     tabBtns.forEach(btn=>{
-      btn.addEventListener('click',()=>{
+      btn.addEventListener('click', ()=>{
         tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
         btn.setAttribute('aria-selected','true');
-        renderPanel(btn.dataset.tab,getLang());
+        renderPanel(btn.dataset.tab, getLang());
       });
     });
-    langToggle.addEventListener('click',()=>{
-      const cur=getLang(); const next=cur==='EN'?'JP':(cur==='JP'?'ZH':'EN');
-      localStorage.setItem(LANG_KEY,next); applyLang(next);
+
+    langToggle.addEventListener('click', ()=>{
+      const cur = getLang();
+      const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+      localStorage.setItem(LANG_KEY, next);
+      applyLang(next);
     });
+
+    /* 💬 Giscus：依語言分流的留言串 */
+    const GISCUS_CFG = {
+      // 👉 把下面四個值換成你的實際值（giscus.app 產生）
+      repo:      'belaug-ffxiv/FFXIV_Library',
+      repoId:    'REPO_ID_HERE',
+      category:  'General',
+      categoryId:'CATEGORY_ID_HERE',
+      // 留言配色：固定亮色以符合目前頁面色調；若要跟隨系統改 'preferred_color_scheme'
+      theme:     'light'
+    };
+
+    function loadGiscusForCurrentLang(){
+      const mount = document.getElementById('giscus_container');
+      if (!mount) return;
+      mount.innerHTML = ''; // 清掉舊的 iframe/script
+
+      const langCode = getLang(); // EN / JP / ZH
+      const s = document.createElement('script');
+      s.src = 'https://giscus.app/client.js';
+      s.setAttribute('data-repo', GISCUS_CFG.repo);
+      s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+      s.setAttribute('data-category', GISCUS_CFG.category);
+      s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+
+      // 用 'specific' + term，把「同一頁、不同語言」分成不同串
+      s.setAttribute('data-mapping', 'specific');
+      s.setAttribute('data-term', location.pathname + '｜' + langCode);
+
+      s.setAttribute('data-reactions-enabled', '1');
+      s.setAttribute('data-emit-metadata', '0');
+      s.setAttribute('data-input-position', 'bottom');
+      s.setAttribute('data-lang', uiLang(langCode));
+      s.setAttribute('data-theme', GISCUS_CFG.theme);
+      s.setAttribute('crossorigin', 'anonymous');
+      s.async = true;
+
+      mount.appendChild(s);
+    }
+
+    // 初始
     applyLang(getLang());
   </script>
-
 </body>
 </html>
 
 
 ⸻
 
-🗂 Tab Definition Table
+🗂 分頁鍵一覽（Quest）
 
-Tab ID	EN	JP	ZH-TW	Description
-story	Story	ストーリー	故事概要	Full narrative (multi-paragraph)
-acq	Acquisition	入手方法	取得方式	Quest giver and location
-req	Requirements	前提条件	需求條件	Prerequisite quests or conditions
-unlock	Unlocks	開放内容	解鎖內容	Follow-up quests or unlocks
+Tab ID	EN	JP	ZH-TW	用途
+story	Story	ストーリー	故事概要	任務敘事（多段 <p>）
+acq	Acquisition	入手方法	取得方式	任務發布者與座標
+req	Requirements	前提条件	需求條件	前置任務、等級、職業
+unlock	Unlocks	開放内容	解鎖內容	後續任務或功能
+comments	Comments	コメント	留言	Giscus 留言面板（語言分流）
 
 
 ⸻
 
-🧾 JSON Structure Example
-
-Each Quest HTML page can reference a JSON file (optional) for global indexing.
+🧾（可選）對應 JSON 範例
 
 {
   "ytId": "dz0Nj-TMlcI",
   "slug": "we-come-in-peace",
-  "title": {
-    "EN": "We Come in Peace",
-    "JP": "蜜の道を辿って",
-    "ZH": "沿著蜜徑而來"
-  },
+  "title": { "EN": "We Come in Peace", "JP": "蜜の道を辿って", "ZH": "沿著蜜徑而來" },
   "category": "MSQ",
   "expac": "ARR",
   "patch": "2.0",
@@ -244,20 +292,14 @@ Each Quest HTML page can reference a JSON file (optional) for global indexing.
 
 ⸻
 
-🧩 Development Notes
-	•	Always use official English/Japanese quest titles.
-	•	If the corresponding HTML does not exist, use href="#" temporarily.
-	•	Use <p> for story paragraphs.
-	•	Maintain consistent formatting across all expansions.
-	•	Keep filenames lowercase with hyphens (-), never spaces.
-	•	Match ytId in both HTML and JSON.
+✅ 開發注意
+	•	不要在 i18n 裡增加 comments: 內容（只需要 tabs.comments 的文字）。
+	•	renderPanel() 內 comments 面板不可覆寫 innerHTML；改用 loadGiscusForCurrentLang()。
+	•	語言切換時若停在留言分頁，要重載 giscus（範本已處理）。
+	•	若你的站點之後有全站主題切換（暗/亮），把 GISCUS_CFG.theme 換成 'preferred_color_scheme'。
+	•	連結未建好時，暫時用 href="#"；建好後再改。
+	•	檔名一律小寫、使用連字號（we-come-in-peace.html）。
 
 ⸻
 
-📄 File name: quest-template.html.md
-📍 Location: /docs/quest-template.html.md
 
-⸻
-
-是否要我接著幫你寫同一套格式的 fight-template.html.md？
-會同樣包含註解、tab 表、JSON 範例與開發說明。
