@@ -45,6 +45,36 @@
     .muted{color:var(--muted)}
     .link{color:#0b60d8; text-decoration:none}
     .link:hover{text-decoration:underline}
+
+    /* 折疊（details/summary） */
+    details.fold{
+      border:1px solid var(--border);
+      border-radius:12px;
+      background:#fffdf6;
+      padding:6px 10px;
+    }
+    details.fold + details.fold{ margin-top:10px; }
+    .fold-summary{
+      list-style:none;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      cursor:pointer;
+      font-weight:700;
+      user-select:none;
+    }
+    .fold-summary::-webkit-details-marker{display:none}
+    .chev{
+      width:0; height:0;
+      border-left:6px solid transparent;
+      border-right:6px solid transparent;
+      border-top:8px solid var(--fg);
+      transform:rotate(-90deg);
+      transition:transform .18s ease;
+      margin-right:2px;
+    }
+    details[open] .chev{ transform:rotate(0deg); }
+    .fold-content{ margin-top:8px; }
   </style>
 </head>
 <body>
@@ -95,6 +125,7 @@
 
   <script>
     const LANG_KEY = 'ffxiv-guide-lang';
+    const FOLD_PREFIX = 'ffxiv-fold:';
     const i18n = {
       EN:{
         langLabel:'EN',
@@ -159,7 +190,20 @@
       followq:document.getElementById('panel-followq'),
       comments: document.getElementById('panel-comments')
     };
+
     function getLang(){return localStorage.getItem(LANG_KEY)||'EN';}
+    function setLang(v){ localStorage.setItem(LANG_KEY,v); }
+
+    /* 折疊狀態儲存 */
+    function foldKey(lang, tab){ return `${FOLD_PREFIX}${lang}:${tab}`; }
+    function isFoldOpen(lang, tab){
+      const v = localStorage.getItem(foldKey(lang, tab));
+      return v === null ? true : v === '1';
+    }
+    function saveFold(lang, tab, isOpen){
+      localStorage.setItem(foldKey(lang, tab), isOpen ? '1' : '0');
+    }
+
     function applyLang(lang){
       const t=i18n[lang]||i18n.EN;
       pageTitle.textContent=t.pageTitle;
@@ -168,13 +212,40 @@
       const activeBtn=tabBtns.find(b=>b.getAttribute('aria-selected')==='true')||tabBtns[0];
       renderPanel(activeBtn.dataset.tab,lang);
     }
+
+    function wrapWithFold(title, innerHTML, lang, tabKey){
+      const openAttr = isFoldOpen(lang, tabKey) ? 'open' : '';
+      return `
+        <details class="fold" ${openAttr} data-tab="${tabKey}">
+          <summary class="fold-summary"><span class="chev"></span>${title}</summary>
+          <div class="fold-content">${innerHTML}</div>
+        </details>
+      `;
+    }
+
     function renderPanel(key,lang){
       const t=i18n[lang]||i18n.EN;
       Object.keys(panels).forEach(k=>panels[k].classList.remove('active'));
       panels[key].classList.add('active');
-      if (key !== 'comments') panels[key].innerHTML=t[key];
-      if (key === 'comments') loadGiscusForCurrentLang();
+
+      if (key === 'comments') {
+        // 留言分頁不包折疊
+        loadGiscusForCurrentLang();
+        return;
+      }
+
+      // 其他分頁：內容包在可折疊 details 中
+      const html = wrapWithFold(t.tabs[key], t[key], lang, key);
+      panels[key].innerHTML = html;
+
+      const det = panels[key].querySelector('details.fold');
+      if (det) {
+        det.addEventListener('toggle', () => {
+          saveFold(lang, key, det.open);
+        });
+      }
     }
+
     tabBtns.forEach(btn=>{
       btn.addEventListener('click',()=>{
         tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
@@ -182,12 +253,14 @@
         renderPanel(btn.dataset.tab,getLang());
       });
     });
+
     langToggle.addEventListener('click',()=>{
       const cur=getLang();
       const next=cur==='EN'?'JP':(cur==='JP'?'ZH':'EN');
-      localStorage.setItem(LANG_KEY,next);
+      setLang(next);
       applyLang(next);
     });
+
     applyLang(getLang());
 
     /* === Giscus：Comments 分頁 === */
