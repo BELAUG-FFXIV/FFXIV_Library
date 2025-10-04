@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Wailers and Waterwheels | BELAUG · FFXIV Library</title>
+  <meta name="description" content="FFXIV BGM — Wailers and Waterwheels：主題、取得方式、補充說明與歌詞，附影片。">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root{
+      --bg:#fff8e6; --card:#fff;
+      --fg:#222; --muted:#666; --border:#e5e1d8;
+      --accent:#e11d48;
+    }
+    *{box-sizing:border-box}
+    body{margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif; background:var(--bg); color:var(--fg)}
+    .container{max-width:1080px; margin:0 auto; padding:0 16px}
+
+    /* Header */
+    .site-header{border-bottom:1px solid var(--border); background:#fff9edb3; backdrop-filter:saturate(120%) blur(6px); position:sticky; top:0; z-index:10}
+    .nav{display:flex; align-items:center; justify-content:space-between; height:60px}
+    .home{border:1px solid var(--border); background:#fff; padding:4px 8px; border-radius:8px; text-decoration:none; color:var(--fg); font-weight:800}
+    .home:hover{background:#fffef8}
+    .icon-btn{background:none; border:none; cursor:pointer; font-size:14px; padding:6px 10px; border-radius:8px}
+    .icon-btn:hover{background:#fff; border:1px solid var(--border)}
+
+    /* Layout */
+    .main{padding:20px 0 40px}
+    .grid{display:grid; grid-template-columns:1.1fr 1fr; gap:20px; align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative; padding-top:56.25%}
+      .video-wrap iframe{position:absolute; inset:0; width:100%; height:100%}
+    }
+    .card{background:var(--card); border:1px solid var(--border); border-radius:16px; box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px; border-bottom:1px solid var(--border); font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%; height:420px; border:0; display:block; border-radius:16px}
+
+    /* Tabs */
+    .tabs{display:flex; gap:8px; padding:12px 12px 0; flex-wrap:wrap}
+    .tab-btn{background:#fff; border:1px solid var(--border); color:var(--fg); border-radius:999px; padding:8px 14px; cursor:pointer; font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent); color:#fff; background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+
+    /* Content blocks */
+    .stack{display:flex; flex-direction:column; gap:10px}
+    .row{padding:12px 14px; border:1px dashed var(--border); border-radius:12px; background:#fffdf6}
+    .row b{display:inline-block; min-width:120px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8; text-decoration:none}
+    .link:hover{text-decoration:underline}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <a class="home" href="../index.html">🏠 Home</a>
+      <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片（尺寸固定；右側內容自適應高度） -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/5BV4KcEKQNM"
+              title="Wailers and Waterwheels" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Wailers and Waterwheels</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true" data-tab="theme">Theme</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="notes">Additional Notes</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="lyrics">Lyrics</button>
+          <!-- 新增：Comments 分頁 -->
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-theme"  class="tab-panel active"></div>
+          <div id="panel-acq"    class="tab-panel"></div>
+          <div id="panel-notes"  class="tab-panel"></div>
+          <div id="panel-lyrics" class="tab-panel"></div>
+          <!-- 新增：留言面板 -->
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // 語言 key（BGM 專用）
+    const LANG_KEY = 'ffxiv-bgm-lang';
+
+    // 三語文案（BGM 固定四分頁：Theme / Acquisition / Additional Notes / Lyrics）
+    const i18n = {
+      EN: {
+        langLabel: 'EN',
+        pageTitle: 'Wailers and Waterwheels',
+        tabs: { theme:'Theme', acq:'Acquisition', notes:'Additional Notes', lyrics:'Lyrics', comments:'Comments' },
+        theme: `
+          <div class="stack">
+            <div class="row"><b>Theme</b> Gridania Theme</div>
+          </div>
+        `,
+        acq: `
+          <div class="stack">
+            <div class="row">Available for purchase in Gridania.</div>
+          </div>
+        `,
+        notes: `
+          <div class="stack">
+            <div class="row">Purchased from Maisenta in New Gridania <small>(X:11.5, Y:11.2)</small> for 5,000 gil.</div>
+          </div>
+        `,
+        lyrics: `
+          <div class="stack"><div class="row">N/A</div></div>
+        `
+      },
+      JP: {
+        langLabel: 'JP',
+        pageTitle: '水車の調べ',
+        tabs: { theme:'テーマ', acq:'入手方法', notes:'補足', lyrics:'歌詞', comments:'コメント' },
+        theme: `
+          <div class="stack">
+            <div class="row"><b>テーマ</b> グリダニアのテーマ</div>
+          </div>
+        `,
+        acq: `
+          <div class="stack">
+            <div class="row">グリダニアで購入可能。</div>
+          </div>
+        `,
+        notes: `
+          <div class="stack">
+            <div class="row">グリダニア新市街 <small>(X:11.5, Y:11.2)</small> にいる メイセンタ から 5,000ギル で購入。</div>
+          </div>
+        `,
+        lyrics: `
+          <div class="stack"><div class="row">N/A</div></div>
+        `
+      },
+      ZH: {
+        langLabel: 'ZH',
+        pageTitle: '水車之調',
+        tabs: { theme:'主題', acq:'取得方式', notes:'補充說明', lyrics:'歌詞', comments:'留言' },
+        theme: `
+          <div class="stack">
+            <div class="row"><b>主題</b> 格里達尼亞主題曲</div>
+          </div>
+        `,
+        acq: `
+          <div class="stack">
+            <div class="row">可於格里達尼亞購買。</div>
+          </div>
+        `,
+        notes: `
+          <div class="stack">
+            <div class="row">可於新格里達尼亞 <small>(X:11.5, Y:11.2)</small> 的 Maisenta 處購買，價格 5,000 金幣。</div>
+          </div>
+        `,
+        lyrics: `
+          <div class="stack"><div class="row">N/A</div></div>
+        `
+      }
+    };
+
+    const langToggle = document.getElementById('langToggle');
+    const pageTitle  = document.getElementById('pageTitle');
+    const tabBtns    = [...document.querySelectorAll('.tab-btn')];
+    const panels     = {
+      theme:  document.getElementById('panel-theme'),
+      acq:    document.getElementById('panel-acq'),
+      notes:  document.getElementById('panel-notes'),
+      lyrics: document.getElementById('panel-lyrics'),
+      comments: document.getElementById('panel-comments') // 新增
+    };
+
+    function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+
+    function applyLang(lang){
+      const t = i18n[lang] || i18n.EN;
+      pageTitle.textContent = t.pageTitle;
+      langToggle.textContent = `🌐 ${t.langLabel}`;
+      tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+      const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected') === 'true') || tabBtns[0];
+      renderPanel(activeBtn.dataset.tab, lang);
+      // 如果目前就在留言分頁，切語言後重載 giscus
+      if (activeBtn && activeBtn.dataset.tab === 'comments') loadGiscusForCurrentLang();
+    }
+
+    // 不覆寫留言容器；進入 comments 才載入 giscus
+    function renderPanel(key, lang){
+      const t = i18n[lang] || i18n.EN;
+      Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+      panels[key].classList.add('active');
+
+      if (key !== 'comments') {
+        panels[key].innerHTML = t[key];
+      } else {
+        loadGiscusForCurrentLang();
+      }
+    }
+
+    tabBtns.forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+        btn.setAttribute('aria-selected','true');
+        renderPanel(btn.dataset.tab, getLang());
+      });
+    });
+
+    langToggle.addEventListener('click', ()=>{
+      const cur  = getLang();
+      const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+      localStorage.setItem(LANG_KEY, next);
+      applyLang(next);
+    });
+
+    applyLang(getLang());
+
+    /* === Giscus：單一 Comments 分頁，隨語言切換 === */
+    const GISCUS_CFG = {
+      repo: 'belaug-ffxiv/FFXIV_Library',
+      repoId: 'R_kgD0Pyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+    };
+    function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+    function loadGiscusForCurrentLang(){
+      const mount = document.getElementById('giscus_container');
+      if (!mount) return;
+      mount.innerHTML = ''; // 清掉舊的 iframe/script
+      const langCode = getLang(); // EN / JP / ZH
+      const s = document.createElement('script');
+      s.src = 'https://giscus.app/client.js';
+      s.setAttribute('data-repo', GISCUS_CFG.repo);
+      s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+      s.setAttribute('data-category', GISCUS_CFG.category);
+      s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+      s.setAttribute('data-mapping', 'specific');
+      s.setAttribute('data-term', location.pathname + '｜' + langCode);
+      s.setAttribute('data-reactions-enabled', '1');
+      s.setAttribute('data-emit-metadata', '0');
+      s.setAttribute('data-input-position', 'bottom');
+      s.setAttribute('data-lang', uiLang(langCode));
+      s.setAttribute('data-theme', GISCUS_CFG.theme);
+      s.setAttribute('crossorigin', 'anonymous');
+      s.async = true;
+      mount.appendChild(s);
+    }
+  </script>
+</body>
+</html>
