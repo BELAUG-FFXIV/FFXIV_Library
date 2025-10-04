@@ -46,29 +46,19 @@
     .link{color:#0b60d8; text-decoration:none}
     .link:hover{text-decoration:underline}
 
-    /* ========== Story 收合 ========== */
-    .collapsible{position:relative}
-    .collapsible .content{
-      max-height: 380px;              /* 折疊時高度（和你之前的視覺接近） */
-      overflow: hidden;
-      mask-image: linear-gradient(#000 70%, rgba(0,0,0,0));
-      -webkit-mask-image: linear-gradient(#000 70%, rgba(0,0,0,0));
-      transition:max-height .25s ease;
+    /* 展開／收合 */
+    .clamp{max-height:320px; overflow:hidden}
+    .fadeout{
+      position:relative;
+      mask-image: linear-gradient(to bottom, #000 70%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to bottom, #000 70%, transparent 100%);
     }
-    .collapsible.expanded .content{
-      max-height: 9999px;
-      mask-image: none;
-      -webkit-mask-image: none;
+    .toggle-wrap{margin-top:16px}
+    .toggle-btn{
+      background:#fff; border:2px solid #efc7a3; color:#222; border-radius:12px;
+      padding:10px 16px; font-weight:700; cursor:pointer
     }
-    .showmore-wrap{margin-top:12px}
-    .showmore-btn{
-      appearance:none; border:1px solid var(--border); background:#fff;
-      padding:10px 14px; border-radius:12px; cursor:pointer; font-weight:700;
-    }
-    .showmore-btn:hover{background:#fffdf6}
-
-    /* Comments panel min height */
-    #giscus_container{min-height:320px}
+    .toggle-btn:hover{background:#fffaf3}
   </style>
 </head>
 <body>
@@ -102,6 +92,7 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <!-- 新增：Comments 分頁 -->
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
@@ -109,8 +100,9 @@
           <div id="panel-acq"     class="tab-panel"></div>
           <div id="panel-unlockq" class="tab-panel"></div>
           <div id="panel-followq" class="tab-panel"></div>
+          <!-- 新增：Comments 面板 -->
           <div id="panel-comments" class="tab-panel">
-            <div id="giscus_container"></div>
+            <div id="giscus_container" style="min-height:320px;"></div>
           </div>
         </div>
       </section>
@@ -120,12 +112,14 @@
   <script>
     const LANG_KEY = 'ffxiv-guide-lang';
 
+    const SHOW_MORE = { EN:'Show more', JP:'全文を表示', ZH:'展開全文' };
+    const SHOW_LESS = { EN:'Show less', JP:'折りたたむ', ZH:'收合內容' };
+
     const i18n = {
       EN:{
         langLabel:'EN',
         pageTitle:'A New World to Explore',
         tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
-        more:'Show more', less:'Show less',
         story:`<p>The journey begins anew at the main hall of the Baldesion Annex, where Ojika Tsunjika shares news that Erenville has secured passage to Tural aboard a gleaners’ guildship. As you wait, Wuk Lamat gathers her companions and revisits the mission ahead: the rite of succession in Tuliyollal, where she will contend for the title of Dawnservant. Alphinaud and Alisaie speak of their diplomatic goals, Krile shares the mystery of her grandfather’s vanished expedition, and even Erenville—reluctantly—admits his role as the Third Promise’s guide.</p>
         <p>Boarding the vessel, the group sets off across the sea. What begins as a hopeful voyage soon descends into chaos as a violent storm strikes mid-journey. Lightning flashes across the sky, and the wind tears through the sails. A sailor is thrown from the mast, panic spreads, and only swift action from you and your comrades keeps disaster at bay. In the aftermath, Erenville quietly reflects on the ordeal, seeing in it a fitting prelude to the trials ahead.</p>
         <p>As seabirds signal landfall, the travelers finally arrive in Tuliyollal. Amid its vibrant streets and unfamiliar sights, Wuk Lamat receives greetings from startled but respectful guards. Her companions marvel at the diversity of culture, while traders and adventurers aboard the ship hint at the complexities of life in Tural. With the journey behind them and the rite ahead, Wuk Lamat turns to you with pride. Thus begins your exploration of the New World.</p>`,
@@ -143,7 +137,6 @@
         langLabel:'JP',
         pageTitle:'新たなる冒険の世界',
         tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
-        more:'もっと見る', less:'閉じる',
         story:`<p>旅の再始動は、バルデシオン分館の大広間から始まる。オジカ・ツンジカが、エレンヴィルがギャザラーズギルドの船を手配したとの報せを届けると、ウク・ラマットは仲間を集め、目的を再確認する。即位の儀を控えたトゥラルでの挑戦──自らが次代のドーンサーヴァントとなる覚悟。アルフィノとアリゼーは復興と交流を目的に、クルルは祖父の謎を追い、そしてエレンヴィルもまた、第三の誓約としての役割を受け入れる。</p>
         <p>出航した一行を待ち受けていたのは、突如として海を襲う嵐だった。雷鳴が空を裂き、強風が帆を引き裂く中、甲板では船員が転落し、混乱が広がる。そんな中、あなたと仲間たちは素早く動き、負傷者の救助や防御装置の展開に奔走。嵐の終息後、エレンヴィルは静かに語る──あの試練こそが、これから始まる戦いの序章にふさわしかったと。</p>
         <p>やがて海鳥の声が届き、一行はついにトゥラルの地へと辿り着く。色とりどりの風景と多様な文化に迎えられ、ウク・ラマットの正体に驚く衛兵たちも、すぐに敬意をもって迎え入れる。交易商や冒険者たちの会話から垣間見える、トゥラルという世界の広がり。ウク・ラマットは風を感じ、故郷に立つ喜びを噛み締めながら、あなたにほほえむ。「新世界」への探求が、今ここから始まる。</p>`,
@@ -161,7 +154,6 @@
         langLabel:'ZH',
         pageTitle:'嶄新的冒險',
         tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
-        more:'展開全文', less:'收合內容',
         story:`<p>旅程自 Baldesion Annex 的大廳再次啟程。Ojika Tsunjika 傳來好消息：Erenville 已為眾人取得前往 Tural 的公會船位。等待啟航之際，Wuk Lamat 集合所有夥伴，重申她將挑戰 Tuliyollal 王位繼承儀式、爭取成為新任 Dawnservant 的決心。Alphinaud 與 Alisaie 表示將以外交交流為使命，Krile 則提及祖父失落的黃金都市調查，而 Erenville 雖語氣冷淡，卻仍承認自己是為第三誓約而來。</p>
         <p>船隻啟航，穿越大海之旅正式展開。不久後，狂風驟雨席捲而至，掀起洶湧巨浪與驚雷閃電。船員從桅桿墜落，甲板騷動不安，你與夥伴們即刻行動，協助傷者、啟動護罩魔裝，全力穩住航行。待風暴平息，Erenville 淡然一語，道出這場危機正象徵著未來將面對的考驗。</p>
         <p>終於，海鷗鳴聲傳來，前方現出陸地。當眾人踏上 Tuliyollal 的碼頭，迎接他們的是鮮明文化與好奇目光。守衛對 Wuk Lamat 的身份驚愕後轉而致敬，商人與旅人亦分享關於 Tural 的風土人情。在這片嶄新的土地上，Wuk Lamat 回頭向你一笑。探尋「新世界」的旅程，於焉展開。</p>`,
@@ -177,53 +169,51 @@
       }
     };
 
-    /* ===== 元素參照 ===== */
     const langToggle = document.getElementById('langToggle');
     const pageTitle  = document.getElementById('pageTitle');
     const tabBtns    = [...document.querySelectorAll('.tab-btn')];
     const panels = {
-      story:   document.getElementById('panel-story'),
-      acq:     document.getElementById('panel-acq'),
-      unlockq: document.getElementById('panel-unlockq'),
-      followq: document.getElementById('panel-followq'),
+      story:document.getElementById('panel-story'),
+      acq:document.getElementById('panel-acq'),
+      unlockq:document.getElementById('panel-unlockq'),
+      followq:document.getElementById('panel-followq'),
       comments:document.getElementById('panel-comments'),
     };
 
-    /* ===== 語言控制 ===== */
     function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
-    function uiLang(code){ return code==='JP'?'ja':(code==='ZH'?'zh-TW':'en'); }
 
     function applyLang(lang){
       const t = i18n[lang] || i18n.EN;
       pageTitle.textContent = t.pageTitle;
       langToggle.textContent = `🌐 ${t.langLabel}`;
       tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
-
-      // 重新渲染目前分頁
       const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
       renderPanel(activeBtn.dataset.tab, lang);
     }
 
-    /* ===== Story 收合：把內容包進 .collapsible，按鈕切換 ===== */
-    function mountCollapsible(panel, lang){
-      const t = i18n[lang] || i18n.EN;
-      const html = panel.innerHTML;  // 保留原三語內容
-      panel.innerHTML = `
-        <div class="collapsible" id="storyCollapse">
-          <div class="content">${html}</div>
-          <div class="showmore-wrap">
-            <button type="button" class="showmore-btn" id="showmoreBtn">${t.more}</button>
-          </div>
-        </div>`;
-      const box = panel.querySelector('#storyCollapse');
-      const btn = panel.querySelector('#showmoreBtn');
+    // ---- 展開／收合 功能 ----
+    function mountShowMore(container, langCode){
+      const maxH = 320; // 與 .clamp 一致
+      // 若內容高度不超過，不顯示按鈕
+      if (container.scrollHeight <= maxH + 10) return;
+
+      container.classList.add('clamp','fadeout');
+
+      const wrap = document.createElement('div');
+      wrap.className = 'toggle-wrap';
+      const btn = document.createElement('button');
+      btn.className = 'toggle-btn';
+      btn.textContent = SHOW_MORE[langCode] || SHOW_MORE.EN;
       btn.addEventListener('click', ()=>{
-        const expanded = box.classList.toggle('expanded');
-        btn.textContent = expanded ? t.less : t.more;
+        const expanded = container.classList.toggle('clamp');
+        container.classList.toggle('fadeout', expanded);
+        btn.textContent = expanded ? (SHOW_MORE[langCode]||SHOW_MORE.EN) : (SHOW_LESS[langCode]||SHOW_LESS.EN);
       });
+      wrap.appendChild(btn);
+      container.parentNode.appendChild(wrap);
     }
 
-    /* ===== Giscus：Comments 分頁 ===== */
+    // ---- Giscus：Comments ----
     const GISCUS_CFG = {
       repo: 'belaug-ffxiv/FFXIV_Library',
       repoId: 'R_kgD0Pyh4Kw',
@@ -231,6 +221,7 @@
       categoryId: 'DIC_kwD0Pyh4K84CwPjL',
       theme: 'preferred_color_scheme'
     };
+    function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
     function loadGiscusForCurrentLang(){
       const mount = document.getElementById('giscus_container');
       if (!mount) return;
@@ -254,24 +245,28 @@
       mount.appendChild(s);
     }
 
-    /* ===== 渲染每個分頁 ===== */
     function renderPanel(key, lang){
       const t = i18n[lang] || i18n.EN;
       Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
       panels[key].classList.add('active');
 
-      if (key === 'comments'){
+      if (key === 'comments') {
         loadGiscusForCurrentLang();
         return;
       }
 
+      // 一般面板內容
       panels[key].innerHTML = t[key];
 
-      // Story 分頁：加回你原本的 Show more/less
-      if (key === 'story') mountCollapsible(panels[key], lang);
+      // 只有 Story 面板套用「收合／展開」
+      if (key === 'story') {
+        // 可能在切換語言／分頁時重複掛載，先移除同層的舊按鈕
+        const old = panels[key].parentNode.querySelector('.toggle-wrap');
+        if (old) old.remove();
+        mountShowMore(panels[key], lang);
+      }
     }
 
-    /* ===== 事件 ===== */
     tabBtns.forEach(btn=>{
       btn.addEventListener('click', ()=>{
         tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
@@ -287,7 +282,6 @@
       applyLang(next);
     });
 
-    /* 初始化 */
     applyLang(getLang());
   </script>
 </body>
