@@ -42,6 +42,20 @@
     .muted{color:var(--muted)}
     .link{color:#0b60d8;text-decoration:none}
     .link:hover{text-decoration:underline}
+
+    /* 展開/收合 */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
   </style>
 </head>
 <body>
@@ -76,12 +90,16 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
           <div id="panel-story"   class="tab-panel active"></div>
           <div id="panel-acq"     class="tab-panel"></div>
           <div id="panel-unlockq" class="tab-panel"></div>
           <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -93,13 +111,18 @@ const i18n = {
   EN:{
     langLabel:'EN',
     pageTitle:'The Syrcus Trench',
-    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
-    story:`<p>Tataru greets you with welcome news: the combined efforts of the Ironworks and the Sons of Saint Coinach have uncovered a hidden path at the base of the Crystal Tower. With many eyes now scouring the hollows, the search for the beacon that calls you presses forward. Resolute, you join the expedition, and before long, a strange device is found—its activation pulling you from the Source into an unfamiliar world.</p>
-    <p>You awaken beneath skies of unbroken light, guided east to a towering city that gleams like crystal. At its gates, suspicion nearly bars your way, until the enigmatic Crystal Exarch arrives, claiming you as his guest. Within the Crystarium, he explains: this realm is the First, a reflection consumed by primordial radiance.</p>
-    <p>A century past, a flood of Light swept across the land, birthing sin eaters that still torment its survivors. The Exarch reveals his purpose—to summon you, the champion of another world, in hope that by saving the First, salvation may also be secured for the Source. As you gaze upon the Crystarium, a proud sanctuary defying despair, you sense that your journey here is but the beginning of a greater struggle—between Light and Dark, hope and oblivion.</p>`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Tataru greets you with welcome news: the combined efforts of the Ironworks and the Sons of Saint Coinach have uncovered a hidden path at the base of the Crystal Tower. With many eyes now scouring the hollows, the search for the beacon that calls you presses forward. Resolute, you join the expedition, and before long, a strange device is found—its activation pulling you from the Source into an unfamiliar world.</p>
+      <p>You awaken beneath skies of unbroken light, guided east to a towering city that gleams like crystal. At its gates, suspicion nearly bars your way, until the enigmatic Crystal Exarch arrives, claiming you as his guest. Within the Crystarium, he explains: this realm is the First, a reflection consumed by primordial radiance.</p>
+      <p>A century past, a flood of Light swept across the land, birthing sin eaters that still torment its survivors. The Exarch reveals his purpose—to summon you, the champion of another world, in hope that by saving the First, salvation may also be secured for the Source. As you gaze upon the Crystarium, a proud sanctuary defying despair, you sense that your journey here is but the beginning of a greater struggle—between Light and Dark, hope and oblivion.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>Quest Giver</b> Tataru <small class="muted">(The Rising Stones, X: 6.0, Y: 5.9)</small></div>
     </div>`,
+    /* 只有你提供的連結才用實連結，其餘用 # */
     unlockq:`<div class="stack">
       <div class="row"><a class="link" href="#">A Requiem for Heroes</a></div>
     </div>`,
@@ -110,10 +133,14 @@ const i18n = {
   JP:{
     langLabel:'JP',
     pageTitle:'予感',
-    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
-    story:`<p>タタルからもたらされた朗報──それは、クリスタルタワーの基部に隠された道が発見されたというものだった。サンクレッドたち仲間の協力で、多くの目がその深淵を探り、ついに謎の装置が見つかる。起動した瞬間、あなたは光に包まれ、見知らぬ世界へと引き込まれていった。</p>
-    <p>目を覚ましたのは、闇を失った空の下。眩いばかりの光に覆われた大地を進み、辿り着いたのは水晶の如く輝く都──クリスタリウム。その門で訝しげに迎えられるも、正体不明の男「水晶公」が現れ、あなたを客人として導く。 彼の語るところによれば、ここは「第一世界」。</p>
-    <p>百年前に「光の氾濫」が起こり、大地の大半が失われ、残された者たちは「シナイター」と呼ばれる怪物に脅かされ続けてきた。世界を救うため、彼は次元の狭間を越える術を学び、あなたを召喚したのだという。 希望を胸に築かれた都クリスタリウム。その姿は、滅びに抗う人々の象徴であった。光と闇、救済と破滅──その狭間で、あなたの新たな戦いが幕を開ける。</p>`,
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>タタルからもたらされた朗報──それは、クリスタルタワーの基部に隠された道が発見されたというものだった。サンクレッドたち仲間の協力で、多くの目がその深淵を探り、ついに謎の装置が見つかる。起動した瞬間、あなたは光に包まれ、見知らぬ世界へと引き込まれていった。</p>
+      <p>目を覚ましたのは、闇を失った空の下。眩いばかりの光に覆われた大地を進み、辿り着いたのは水晶の如く輝く都──クリスタリウム。その門で訝しげに迎えられるも、正体不明の男「水晶公」が現れ、あなたを客人として導く。 彼の語るところによれば、ここは「第一世界」。</p>
+      <p>百年前に「光の氾濫」が起こり、大地の大半が失われ、残された者たちは「シナイター」と呼ばれる怪物に脅かされ続けてきた。世界を救うため、彼は次元の狭間を越える術を学び、あなたを召喚したのだという。 希望を胸に築かれた都クリスタリウム。その姿は、滅びに抗う人々の象徴であった。光と闇、救済と破滅──その狭間で、あなたの新たな戦いが幕を開ける。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>クエスト発行</b> タタル <small class="muted">（モードゥナ：石の家, X:6.0, Y:5.9）</small></div>
     </div>`,
@@ -127,9 +154,12 @@ const i18n = {
   ZH:{
     langLabel:'ZH',
     pageTitle:'預兆',
-    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
-    story:`<p>Tataru 帶來的好消息，讓人精神一振──在 Crystal Tower 的基部發現了一條隱藏通路。隨著 Ironworks 與 Saint Coinach 之子的協助，眾人齊心搜尋，終於找到了一件奇異的裝置。當它啟動的瞬間，你被耀眼的光芒吞沒，意識被拋往另一個未知的世界。 甦醒之處，是無盡光芒籠罩的天空。沿著陌生的道路前行，你抵達了一座宛如水晶鑄就的城邦──Crystarium。</p>
-    <p>雖在城門遭受懷疑與盤問，卻因 Crystal Exarch 的現身而被接納為貴客。 他的解釋揭開真相：這裡是「第一世界」，是十三個鏡像中的一個。百年前的「光之泛濫」吞沒了九成以上的大地，留下的倖存者至今仍受名為 sin eater 的怪物威脅。為了拯救這個世界，他冒險跨越次元，將你召來──因為拯救第一世界，亦意味著能拯救原初之源。 Crystarium，高聳而耀眼，象徵著不向滅亡屈服的意志。在這裡，你踏出了全新旅程的第一步──在光與暗、希望與虛無之間，真正的戰鬥即將展開。</p>`,
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Tataru 帶來的好消息，讓人精神一振──在 Crystal Tower 的基部發現了一條隱藏通路。隨著 Ironworks 與 Saint Coinach 之子的協助，眾人齊心搜尋，終於找到了一件奇異的裝置。當它啟動的瞬間，你被耀眼的光芒吞沒，意識被拋往另一個未知的世界。 甦醒之處，是無盡光芒籠罩的天空。沿著陌生的道路前行，你抵達了一座宛如水晶鑄就的城邦──Crystarium。</p>
+      <p>雖在城門遭受懷疑與盤問，卻因 Crystal Exarch 的現身而被接納為貴客。 他的解釋揭開真相：這裡是「第一世界」，是十三個鏡像中的一個。百年前的「光之泛濫」吞沒了九成以上的大地，留下的倖存者至今仍受名為 sin eater 的怪物威脅。為了拯救這個世界，他冒險跨越次元，將你召來──因為拯救第一世界，亦意味著能拯救原初之源。 Crystarium，高聳而耀眼，象徵著不向滅亡屈服的意志。在這裡，你踏出了全新旅程的第一步──在光與暗、希望與虛無之間，真正的戰鬥即將展開。</p>`,
+    /* 這段中文比較短，不加按鈕也可，如需同樣收合可把上面包成 clamp + expand-wrap 結構 */
     acq:`<div class="stack">
       <div class="row"><b>任務發布</b> 塔塔露 <small class="muted">（石之家, X:6.0, Y:5.9）</small></div>
     </div>`,
@@ -149,7 +179,8 @@ const panels = {
   story:  document.getElementById('panel-story'),
   acq:    document.getElementById('panel-acq'),
   unlockq:document.getElementById('panel-unlockq'),
-  followq:document.getElementById('panel-followq')
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
 };
 
 function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
@@ -161,12 +192,32 @@ function applyLang(lang){
   const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
   renderPanel(activeBtn.dataset.tab, lang);
 }
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
 function renderPanel(key, lang){
   const t = i18n[lang] || i18n.EN;
   Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
   panels[key].classList.add('active');
-  panels[key].innerHTML = t[key];
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
 }
+
 tabBtns.forEach(btn=>{
   btn.addEventListener('click', ()=>{
     tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
@@ -174,13 +225,47 @@ tabBtns.forEach(btn=>{
     renderPanel(btn.dataset.tab, getLang());
   });
 });
+
 langToggle.addEventListener('click', ()=>{
   const cur = getLang();
   const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
   localStorage.setItem(LANG_KEY, next);
   applyLang(next);
 });
+
 applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'belaug-ffxiv/FFXIV_Library',
+  repoId: 'R_kgD0Pyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
 </script>
 </body>
 </html>
