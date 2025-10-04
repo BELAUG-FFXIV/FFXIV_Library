@@ -70,12 +70,18 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="req">Requirements</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlock">Follow-Up Quest</button>
+          <!-- 新增：Comments 分頁按鈕 -->
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
           <div id="panel-story" class="tab-panel active"></div>
           <div id="panel-acq" class="tab-panel"></div>
           <div id="panel-req" class="tab-panel"></div>
           <div id="panel-unlock" class="tab-panel"></div>
+          <!-- 新增：留言面板 -->
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -88,7 +94,7 @@
       EN:{
         langLabel:'EN',
         pageTitle:'The Dancing Plague',
-        tabs:{story:'Story', req:'Requirements', acq:'Unlock Quest', unlock:'Follow-Up Quest'},
+        tabs:{story:'Story', req:'Requirements', acq:'Unlock Quest', unlock:'Follow-Up Quest', comments:'Comments'},
         story:`<p>The white dress, the shell crown, the stone scepter, the crystal shoes… Having acquired the four fae relics through considerable effort, you now stand ready to break the seal over Lyhe Ghiah and confront the Lightwarden of Il Mheg─the fallen faerie king, Titania.</p>
         <p>Yet even as you prepare to challenge the sin eater within, your party is being hunted from without. The forces of Eulmore, throwing all caution to the wind, march relentlessly upon the faerie kingdom. Time is short, and your resolve must be unshakable—for the fate of Il Mheg and its people hangs in the balance.</p>`,
         req:`<div class="stack">
@@ -110,7 +116,7 @@
       JP:{
         langLabel:'JP',
         pageTitle:'ティターニア討滅戦',
-        tabs:{story:'ストーリー', req:'必要条件', acq:'開放クエスト', unlock:'後続クエスト'},
+        tabs:{story:'ストーリー', req:'必要条件', acq:'開放クエスト', unlock:'後続クエスト', comments:'コメント'},
         story:`<p>白のドレス、貝殻の冠、石の王笏、水晶の靴……四つの妖精の秘宝を手に入れ、今まさに「リェー・ギア城」の封印を解かんとしている。</p>
         <p>そこに待ち受けるのは、イル・メグの大罪喰いであり、堕ちた妖精王「ティターニア」。しかし、あなたたちが内なる脅威に立ち向かうその時、ユールモア軍が外から迫る。ためらいもなく、妖精王国を滅ぼすべく進軍しているのだ。</p>
         <p>刻一刻と迫る危機。いまこそ、揺るがぬ覚悟を胸に……イル・メグの命運を賭けた戦いが始まる。</p>`,
@@ -133,7 +139,7 @@
       ZH:{
         langLabel:'ZH-TW',
         pageTitle:'泰坦妮雅討滅戰',
-        tabs:{story:'故事概要', req:'需求條件', acq:'解鎖任務', unlock:'後續任務'},
+        tabs:{story:'故事概要', req:'需求條件', acq:'解鎖任務', unlock:'後續任務', comments:'留言'},
         story:`<p>白色長裙、貝殼皇冠、石之權杖、水晶鞋──歷經艱辛，你終於集齊四件妖精遺物，即將解開 Lyhe Ghiah 的封印，面對 Il Mheg 的光之巢穴──墮落的妖精王 Titania。</p>
         <p>然而，就在你準備進入封印之地之際，來自 Eulmore 的軍勢已經席捲而來，不顧一切地進軍妖精之鄉。內外夾擊，情勢萬分危急。</p>
         <p>你必須堅定信念，因為 Il Mheg 的命運、這群天真的妖精們的未來，全都系於這場決戰之中。</p>`,
@@ -161,24 +167,23 @@
       story : document.getElementById('panel-story'),
       acq   : document.getElementById('panel-acq'),
       req   : document.getElementById('panel-req'),
-      unlock: document.getElementById('panel-unlock')
+      unlock: document.getElementById('panel-unlock'),
+      comments: document.getElementById('panel-comments') // 新增
     };
 
     function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
-    function applyLang(lang){
-      const t = i18n[lang] || i18n.EN;
-      pageTitle.textContent = t.pageTitle;
-      langToggle.textContent = `🌐 ${t.langLabel}`;
-      tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
-      const activeBtn = tabBtns.find(b=>b.getAttribute('aria-selected')==='true') || tabBtns[0];
-      renderPanel(activeBtn.dataset.tab, lang);
-    }
 
+    // 取代：進入 comments 才載入 giscus；不要覆寫留言容器
     function renderPanel(key, lang){
       const t = i18n[lang] || i18n.EN;
       Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
       panels[key].classList.add('active');
-      panels[key].innerHTML = t[key];
+
+      if (key !== 'comments') {
+        panels[key].innerHTML = t[key];
+      } else {
+        loadGiscusForCurrentLang();
+      }
     }
 
     tabBtns.forEach(btn=>{
@@ -196,7 +201,50 @@
       applyLang(next);
     });
 
+    function applyLang(lang){
+      const t = i18n[lang] || i18n.EN;
+      pageTitle.textContent = t.pageTitle;
+      langToggle.textContent = `🌐 ${t.langLabel}`;
+      tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+      const activeBtn = tabBtns.find(b=>b.getAttribute('aria-selected')==='true') || tabBtns[0];
+      renderPanel(activeBtn.dataset.tab, lang);
+      // 若停在留言分頁，切語言後重載 giscus
+      if (activeBtn && activeBtn.dataset.tab === 'comments') loadGiscusForCurrentLang();
+    }
+
     applyLang(getLang());
+
+    /* === Giscus：單一 Comments 分頁，隨語言切換 === */
+    const GISCUS_CFG = {
+      repo: 'belaug-ffxiv/FFXIV_Library',
+      repoId: 'R_kgD0Pyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+    };
+    function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+    function loadGiscusForCurrentLang(){
+      const mount = document.getElementById('giscus_container');
+      if (!mount) return;
+      mount.innerHTML = '';
+      const langCode = getLang(); // EN / JP / ZH
+      const s = document.createElement('script');
+      s.src = 'https://giscus.app/client.js';
+      s.setAttribute('data-repo', GISCUS_CFG.repo);
+      s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+      s.setAttribute('data-category', GISCUS_CFG.category);
+      s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+      s.setAttribute('data-mapping', 'specific');
+      s.setAttribute('data-term', location.pathname + '｜' + langCode);
+      s.setAttribute('data-reactions-enabled', '1');
+      s.setAttribute('data-emit-metadata', '0');
+      s.setAttribute('data-input-position', 'bottom');
+      s.setAttribute('data-lang', uiLang(langCode));
+      s.setAttribute('data-theme', GISCUS_CFG.theme);
+      s.setAttribute('crossorigin', 'anonymous');
+      s.async = true;
+      mount.appendChild(s);
+    }
   </script>
 </body>
 </html>
