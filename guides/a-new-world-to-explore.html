@@ -18,8 +18,8 @@
     .home{border:1px solid var(--border); background:#fff; padding:4px 8px; border-radius:8px; text-decoration:none; color:var(--fg); font-weight:800}
     .home:hover{background:#fffef8}
     .right{display:flex; align-items:center; gap:8px}
-    .icon-btn{background:none; border:1px solid transparent; cursor:pointer; font-size:14px; padding:6px 10px; border-radius:8px}
-    .icon-btn:hover{border-color:var(--border); background:#fff}
+    .icon-btn{background:none; border:none; cursor:pointer; font-size:14px; padding:6px 10px; border-radius:8px}
+    .icon-btn:hover{background:#fff; border:1px solid var(--border)}
     /* 主體 */
     .main{padding:20px 0 40px}
     .grid{display:grid; grid-template-columns:1.1fr 1fr; gap:20px; align-items:start;}
@@ -46,22 +46,15 @@
     .link{color:#0b60d8; text-decoration:none}
     .link:hover{text-decoration:underline}
 
-    /* ——— Story 展開/收合 ——— */
-    .story-wrapper{position:relative}
-    .story-content{max-height:360px; overflow:hidden}
-    .story-mask{
-      content:""; position:absolute; left:0; right:0; bottom:64px; height:96px;
-      background:linear-gradient(to bottom, rgba(255,255,255,0), #fff);
-      pointer-events:none; display:block;
-    }
-    .story-expanded .story-content{max-height:none}
-    .story-expanded .story-mask{display:none}
-    .more-wrap{display:flex; justify-content:flex-start}
-    .more-btn{
-      background:#fff; color:var(--fg); border:1px solid var(--border);
-      padding:10px 16px; border-radius:12px; font-weight:700; cursor:pointer;
-    }
-    .more-btn:focus{outline:none}
+    /* ====== Story 展開／收合（與你原本樣式一致：白底灰框、無陰影） ====== */
+    .story-wrap{position:relative}
+    .story-body{transition:max-height .2s ease}
+    .story-body.clamped{max-height:420px; overflow:hidden;}
+    .fade-bottom{display:none; position:relative; height:48px; margin-top:-48px; pointer-events:none;
+      background:linear-gradient(180deg, rgba(255,255,255,0) 0%, #ffffff 70%);}
+    .fade-bottom.on{display:block;}
+    .sh-toggle{margin-top:12px; background:#fff; border:1px solid var(--border); color:#111;
+      border-radius:12px; padding:10px 16px; font-weight:800; cursor:pointer; display:inline-block}
   </style>
 </head>
 <body>
@@ -95,16 +88,18 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <!-- 新增 Comments 分頁 -->
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
-          <div id="panel-story"   class="tab-panel active">
-            <!-- 由 JS 注入（含展開收合） -->
-          </div>
+          <div id="panel-story"   class="tab-panel active"></div>
           <div id="panel-acq"     class="tab-panel"></div>
           <div id="panel-unlockq" class="tab-panel"></div>
           <div id="panel-followq" class="tab-panel"></div>
-          <div id="panel-comments" class="tab-panel"><div id="giscus_container" style="min-height:320px;"></div></div>
+          <!-- Comments 面板 -->
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -112,6 +107,7 @@
 
   <script>
     const LANG_KEY = 'ffxiv-guide-lang';
+
     const i18n = {
       EN:{
         langLabel:'EN',
@@ -169,16 +165,18 @@
       }
     };
 
-    const langToggle=document.getElementById('langToggle');
-    const pageTitle=document.getElementById('pageTitle');
-    const tabBtns=[...document.querySelectorAll('.tab-btn')];
-    const panels={
-      story:document.getElementById('panel-story'),
-      acq:document.getElementById('panel-acq'),
-      unlockq:document.getElementById('panel-unlockq'),
-      followq:document.getElementById('panel-followq'),
+    const langToggle = document.getElementById('langToggle');
+    const pageTitle  = document.getElementById('pageTitle');
+    const tabBtns    = [...document.querySelectorAll('.tab-btn')];
+    const panels = {
+      story:   document.getElementById('panel-story'),
+      acq:     document.getElementById('panel-acq'),
+      unlockq: document.getElementById('panel-unlockq'),
+      followq: document.getElementById('panel-followq'),
       comments:document.getElementById('panel-comments')
     };
+
+    function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
 
     /* === Giscus：Comments 分頁 === */
     const GISCUS_CFG = {
@@ -191,7 +189,7 @@
     function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
     function loadGiscusForCurrentLang(){
       const mount = document.getElementById('giscus_container');
-      if (!mount) return;
+      if(!mount) return;
       mount.innerHTML = '';
       const langCode = getLang();
       const s = document.createElement('script');
@@ -212,61 +210,108 @@
       mount.appendChild(s);
     }
 
-    function getLang(){return localStorage.getItem(LANG_KEY)||'EN';}
+    /* === Story：掛上固定高度的收合／展開 === */
+    function mountStoryWithToggle(html, lang){
+      const t = i18n[lang] || i18n.EN;
+      const wrap = document.createElement('div');
+      wrap.className = 'story-wrap';
 
-    function renderStoryWithClamp(lang){
-      const t=i18n[lang]||i18n.EN;
-      const html = `
-        <div class="story-wrapper" id="storyWrap">
-          <div class="story-content" id="storyContent">${t.story}</div>
-          <div class="story-mask" id="storyMask"></div>
-          <div class="more-wrap"><button id="moreBtn" class="more-btn">${t.showMore}</button></div>
-        </div>`;
-      panels.story.innerHTML = html;
+      const body = document.createElement('div');
+      body.className = 'story-body';
+      body.innerHTML = html;
 
-      const wrap = document.getElementById('storyWrap');
-      const btn = document.getElementById('moreBtn');
+      const fade = document.createElement('div');
+      fade.className = 'fade-bottom';
+
+      const btn = document.createElement('button');
+      btn.className = 'sh-toggle';
+      btn.type = 'button';
+
+      wrap.appendChild(body);
+      wrap.appendChild(fade);
+      wrap.appendChild(btn);
+
+      // 先放入面板，再量高度
+      panels.story.innerHTML = '';
+      panels.story.appendChild(wrap);
+
+      const CLAMP = 420; // 固定高度，與你原本效果一致
+      function applyClamp(){
+        // 需要收合才顯示按鈕
+        if (body.scrollHeight > CLAMP + 10) {
+          if (!body.classList.contains('clamped')) {
+            body.classList.add('clamped');
+            fade.classList.add('on');
+          }
+          btn.style.display = 'inline-block';
+          btn.textContent = t.showMore;
+        } else {
+          body.classList.remove('clamped');
+          fade.classList.remove('on');
+          btn.style.display = 'none';
+        }
+      }
+      applyClamp();
+
       btn.addEventListener('click', ()=>{
-        const expanded = wrap.classList.toggle('story-expanded');
-        btn.textContent = expanded ? t.showLess : t.showMore;
+        const isClamped = body.classList.contains('clamped');
+        if (isClamped){
+          body.classList.remove('clamped');
+          fade.classList.remove('on');
+          btn.textContent = t.showLess;
+        } else {
+          body.classList.add('clamped');
+          fade.classList.add('on');
+          btn.textContent = t.showMore;
+          // 回到按鈕位置，避免展開後頁面偏移
+          btn.scrollIntoView({block:'nearest', behavior:'smooth'});
+        }
       });
+
+      // 語言切換或視窗尺寸變化時重新判斷
+      window.addEventListener('resize', applyClamp, { passive:true });
     }
 
     function applyLang(lang){
-      const t=i18n[lang]||i18n.EN;
-      pageTitle.textContent=t.pageTitle;
-      langToggle.textContent=`🌐 ${t.langLabel}`;
-      tabBtns.forEach(btn=>{btn.textContent=t.tabs[btn.dataset.tab]});
-      // 重新渲染目前選中的面板
-      const activeBtn=tabBtns.find(b=>b.getAttribute('aria-selected')==='true')||tabBtns[0];
-      renderPanel(activeBtn.dataset.tab,lang);
+      const t = i18n[lang] || i18n.EN;
+      pageTitle.textContent = t.pageTitle;
+      langToggle.textContent = `🌐 ${t.langLabel}`;
+      tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+      const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+      renderPanel(activeBtn.dataset.tab, lang);
     }
 
-    function renderPanel(key,lang){
-      const t=i18n[lang]||i18n.EN;
-      Object.keys(panels).forEach(k=>panels[k].classList.remove('active'));
+    function renderPanel(key, lang){
+      const t = i18n[lang] || i18n.EN;
+      Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
       panels[key].classList.add('active');
 
-      if(key==='story'){ renderStoryWithClamp(lang); return; }
-      if(key==='comments'){ loadGiscusForCurrentLang(); return; }
-      panels[key].innerHTML = t[key];
+      if (key === 'story') {
+        // 用 Story 的掛載函式（含收合／展開）
+        mountStoryWithToggle(t.story, lang);
+      } else if (key === 'comments') {
+        loadGiscusForCurrentLang();
+      } else {
+        panels[key].innerHTML = t[key];
+      }
     }
 
     tabBtns.forEach(btn=>{
-      btn.addEventListener('click',()=>{
+      btn.addEventListener('click', ()=>{
         tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
         btn.setAttribute('aria-selected','true');
-        renderPanel(btn.dataset.tab,getLang());
+        renderPanel(btn.dataset.tab, getLang());
       });
     });
 
-    langToggle.addEventListener('click',()=>{
-      const cur=getLang();
-      const next=cur==='EN'?'JP':(cur==='JP'?'ZH':'EN');
-      localStorage.setItem(LANG_KEY,next);
+    langToggle.addEventListener('click', ()=>{
+      const cur = getLang();
+      const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+      localStorage.setItem(LANG_KEY, next);
       applyLang(next);
     });
 
+    // 初始化
     applyLang(getLang());
   </script>
 </body>
