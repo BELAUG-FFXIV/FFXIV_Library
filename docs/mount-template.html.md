@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Company Chocobo | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Summon your Grand Company-issued battle chocobo.">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){ .grid{grid-template-columns:1fr} .video-wrap{position:relative;padding-top:56.25%} .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%} }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left"><a class="home" href="../index.html">🏠 Home</a></div>
+      <div class="right"><button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button></div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/vpb8GjBTqTM" title="Company Chocobo" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs（About / Acquisition / Seats / Comments） -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Company Chocobo</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="about">About</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="seats">Seats</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-about" class="tab-panel active"></div>
+          <div id="panel-acq"   class="tab-panel"></div>
+          <div id="panel-seats" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const LANG_KEY='ffxiv-guide-lang';
+    const i18n={
+      EN:{
+        langLabel:'EN',
+        pageTitle:'Company Chocobo',
+        tabs:{ about:'About', acq:'Acquisition', seats:'Seats', comments:'Comments' },
+        about:`<div class="stack">
+          <div class="row">Summon your Grand Company-issued battle chocobo.</div>
+          <div class="row">Born and bred in the city–state of Ishgard, the majority of company chocobos are geldings of the rouncey variety; however, massive destriers and miniature Belah’dian jennets are also raised to accommodate the builds of Roegadyn and Lalafellin riders respectively.</div>
+        </div>`,
+        acq:`<div class="stack">
+          <div class="row">Reward for completing the Feature Quest <a class="link" href="#">My Little Chocobo</a> after joining one of the Grand Companies, which is required by Main Scenario Quest <a class="link" href="#">Operation Archon</a>.</div>
+        </div>`,
+        seats:`<div class="stack"><div class="row">1</div></div>`
+      },
+      JP:{
+        langLabel:'JP',
+        pageTitle:'マイチョコボ',
+        tabs:{ about:'紹介', acq:'入手方法', seats:'座席数', comments:'コメント' },
+        about:`<div class="stack">
+          <div class="row">グランドカンパニー支給のコンパニオンチョコボを呼び出す。</div>
+          <div class="row">都市国家イシュガルドで生まれ育ったこのチョコボたちは、多くが「ロンシー種」の去勢牡鳥である。ただし、ルガディンのような大柄な騎手に合わせて巨大な「デストリア種」が、ララフェル族に合わせて小柄な「ベラフディアン・ジェネット種」も飼育されている。</div>
+        </div>`,
+        acq:`<div class="stack">
+          <div class="row">いずれかのグランドカンパニーに所属後に発生するコンテンツ開放クエスト「<a class="link" href="#">マイリトルチョコボ</a>」の報酬。「メインクエスト：<a class="link" href="#">作戦名アークオン</a>」の受注に必要。</div>
+        </div>`,
+        seats:`<div class="stack"><div class="row">1</div></div>`
+      },
+      ZH:{
+        langLabel:'ZH',
+        pageTitle:'我的陸行鳥！',
+        tabs:{ about:'簡介', acq:'取得方式', seats:'可乘人數', comments:'留言' },
+        about:`<div class="stack">
+          <div class="row">召喚由 Grand Company 發放的戰鬥陸行鳥。</div>
+          <div class="row">這些陸行鳥大多出生並飼養於 Ishgard 城邦，其中多數屬於「rouncey」品系的閹公鳥。不過，為了因應不同體格的騎乘者，也同樣培育了龐大的「destrier」以承載 Roegadyn，以及小巧的「Belah’dian jennet」以適合 Lalafellin。</div>
+        </div>`,
+        acq:`<div class="stack">
+          <div class="row">在加入任一大國防聯軍後可接取的功能解鎖任務「<a class="link" href="#">我的小陸行鳥</a>」之獎勵，並且是主線任務「<a class="link" href="#">行動代號：方舟</a>」的前置需求。</div>
+        </div>`,
+        seats:`<div class="stack"><div class="row">1</div></div>`
+      }
+    };
+
+    const langToggle=document.getElementById('langToggle');
+    const pageTitle=document.getElementById('pageTitle');
+    const tabBtns=[...document.querySelectorAll('.tab-btn')];
+    const panels={ about:panel('about'), acq:panel('acq'), seats:panel('seats'), comments:panel('comments') };
+
+    function panel(id){ return document.getElementById('panel-'+id); }
+    function getLang(){ return localStorage.getItem(LANG_KEY)||'EN'; }
+
+    function applyLang(lang){
+      const t=i18n[lang]||i18n.EN;
+      pageTitle.textContent=t.pageTitle;
+      langToggle.textContent='🌐 '+t.langLabel;
+      tabBtns.forEach(b=>{ if(t.tabs[b.dataset.tab]) b.textContent=t.tabs[b.dataset.tab]; });
+      const active=tabBtns.find(b=>b.getAttribute('aria-selected')==='true')||tabBtns[0];
+      renderPanel(active.dataset.tab,lang);
+      if(active.dataset.tab==='comments'){ loadGiscusForCurrentLang(); }
+    }
+
+    function renderPanel(key,lang){
+      const t=i18n[lang]||i18n.EN;
+      Object.keys(panels).forEach(k=>panels[k].classList.remove('active'));
+      panels[key].classList.add('active');
+      if(key!=='comments'){ panels[key].innerHTML=t[key]; }
+      if(key==='comments'){ loadGiscusForCurrentLang(); }
+    }
+
+    tabBtns.forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+        btn.setAttribute('aria-selected','true');
+        renderPanel(btn.dataset.tab,getLang());
+      });
+    });
+
+    langToggle.addEventListener('click',()=>{
+      const cur=getLang(); const next=cur==='EN'?'JP':(cur==='JP'?'ZH':'EN');
+      localStorage.setItem(LANG_KEY,next); applyLang(next);
+    });
+
+    applyLang(getLang());
+
+    /* Giscus 留言模組 */
+    const GISCUS_CFG={
+      repo:'belaug-ffxiv/FFXIV_Library',
+      repoId:'R_kgD0Pyh4Kw',
+      category:'General',
+      categoryId:'DIC_kwD0Pyh4K84CwPjL',
+      theme:'preferred_color_scheme'
+    };
+    function uiLang(code){ return code==='JP'?'ja':(code==='ZH'?'zh-TW':'en'); }
+    function loadGiscusForCurrentLang(){
+      const mount=document.getElementById('giscus_container');
+      if(!mount) return;
+      mount.innerHTML='';
+      const langCode=getLang();
+      const s=document.createElement('script');
+      s.src='https://giscus.app/client.js';
+      s.setAttribute('data-repo',GISCUS_CFG.repo);
+      s.setAttribute('data-repo-id',GISCUS_CFG.repoId);
+      s.setAttribute('data-category',GISCUS_CFG.category);
+      s.setAttribute('data-category-id',GISCUS_CFG.categoryId);
+      s.setAttribute('data-mapping','specific');
+      s.setAttribute('data-term',location.pathname+'｜'+langCode);
+      s.setAttribute('data-reactions-enabled','1');
+      s.setAttribute('data-emit-metadata','0');
+      s.setAttribute('data-input-position','bottom');
+      s.setAttribute('data-lang',uiLang(langCode));
+      s.setAttribute('data-theme',GISCUS_CFG.theme);
+      s.setAttribute('crossorigin','anonymous');
+      s.async=true;
+      mount.appendChild(s);
+    }
+  </script>
+</body>
+</html>
