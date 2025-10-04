@@ -66,11 +66,17 @@
           <button class="tab-btn" role="tab" aria-selected="true"  data-tab="about">About</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="seats">Seats</button>
+          <!-- 新增：Comments 分頁 -->
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
           <div id="panel-about" class="tab-panel active"></div>
           <div id="panel-acq"   class="tab-panel"></div>
           <div id="panel-seats" class="tab-panel"></div>
+          <!-- 新增：Comments 掛載面板 -->
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -82,7 +88,7 @@
       EN:{
         langLabel:'EN',
         pageTitle:'Coeurl',
-        tabs:{ about:'About', acq:'Acquisition', seats:'Seats' },
+        tabs:{ about:'About', acq:'Acquisition', seats:'Seats', comments:'Comments' },
         about:`<div class="stack">
           <div class="row">Summon your fleet-footed battle coeurl, trained from a pup to recognize you as a friend…not food.</div>
           <div class="row">Native to the jungles of the Near East, coeurls were only recently introduced to Eorzea, brought over from faraway lands such as Thavnair by Ul’dahn nobles who thought to breed them as pets. Now, but a handful of skilled tamers living in recluse on the Pearl are said to be able to train them.</div>
@@ -95,7 +101,7 @@
       JP:{
         langLabel:'JP',
         pageTitle:'クァール',
-        tabs:{ about:'紹介', acq:'入手方法', seats:'座席数' },
+        tabs:{ about:'紹介', acq:'入手方法', seats:'座席数', comments:'コメント' },
         about:`<div class="stack">
           <div class="row">俊敏なる戦闘用のコeルを呼び寄せよう。幼き頃より調教を施され、あなたを「獲物」ではなく「友」として認識している。</div>
           <div class="row">Coeurl は東方近海の密林地帯を原産とする猛獣で、元来エオルゼアには存在しなかった。その後、Thavnair などの遠方より連れ帰った Ul’dah の貴族たちが、愛玩目的で繁殖させようと持ち込んだのが始まりとされる。現在では、Pearl 島に隠棲するわずかな熟練調教師のみが、この獣を従わせる術を有していると言われている。</div>
@@ -108,7 +114,7 @@
       ZH:{
         langLabel:'ZH',
         pageTitle:'庫爾獸',
-        tabs:{ about:'簡介', acq:'取得方式', seats:'可乘人數' },
+        tabs:{ about:'簡介', acq:'取得方式', seats:'可乘人數', comments:'留言' },
         about:`<div class="stack">
           <div class="row">召喚這隻腳程飛快的戰鬥用 Coeurl，自幼便接受訓練，學會將你視為朋友──而非食物。</div>
           <div class="row">這種猛獸原生於東方近海的叢林地帶，最初並不見於 Eorzea，是由 Ul’dah 貴族自 Thavnair 等遙遠之地引進，原打算培育為寵物。如今，據說僅有極少數隱居在 Pearl 島上的熟練馴獸師，才有能力將其馴服並作為坐騎使用。</div>
@@ -123,24 +129,36 @@
     const langToggle=document.getElementById('langToggle');
     const pageTitle=document.getElementById('pageTitle');
     const tabBtns=[...document.querySelectorAll('.tab-btn')];
-    const panels={ about:panel('about'), acq:panel('acq'), seats:panel('seats') };
+    const panels={
+      about:panel('about'),
+      acq:panel('acq'),
+      seats:panel('seats'),
+      comments: panel('comments') // 新增
+    };
 
     function panel(id){ return document.getElementById('panel-'+id); }
     function getLang(){ return localStorage.getItem(LANG_KEY)||'EN'; }
+
     function applyLang(lang){
       const t=i18n[lang]||i18n.EN;
       pageTitle.textContent=t.pageTitle;
       langToggle.textContent=`🌐 ${t.langLabel}`;
-      tabBtns.forEach(b=>{ b.textContent=t.tabs[b.dataset.tab]; });
+      tabBtns.forEach(b=>{ if (t.tabs[b.dataset.tab]) b.textContent=t.tabs[b.dataset.tab]; });
       const active=tabBtns.find(b=>b.getAttribute('aria-selected')==='true')||tabBtns[0];
       renderPanel(active.dataset.tab,lang);
+      // 若正在留言分頁，語言切換時要重載 giscus
+      if (active && active.dataset.tab === 'comments') loadGiscusForCurrentLang();
     }
+
     function renderPanel(key,lang){
       const t=i18n[lang]||i18n.EN;
       Object.keys(panels).forEach(k=>panels[k].classList.remove('active'));
       panels[key].classList.add('active');
-      panels[key].innerHTML=t[key];
+      // 不覆寫留言容器；其它面板照原樣塞內容
+      if (key !== 'comments') panels[key].innerHTML=t[key];
+      if (key === 'comments') loadGiscusForCurrentLang();
     }
+
     tabBtns.forEach(btn=>{
       btn.addEventListener('click',()=>{
         tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
@@ -148,11 +166,45 @@
         renderPanel(btn.dataset.tab,getLang());
       });
     });
+
     langToggle.addEventListener('click',()=>{
       const cur=getLang(); const next=cur==='EN'?'JP':(cur==='JP'?'ZH':'EN');
       localStorage.setItem(LANG_KEY,next); applyLang(next);
     });
+
     applyLang(getLang());
+
+    /* === Giscus：單一 Comments 分頁，語言切換（各語言各自一串） === */
+    const GISCUS_CFG = {
+      repo: 'belaug-ffxiv/FFXIV_Library',
+      repoId: 'R_kgD0Pyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+    };
+    function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+    function loadGiscusForCurrentLang(){
+      const mount = document.getElementById('giscus_container');
+      if (!mount) return;
+      mount.innerHTML = '';
+      const langCode = getLang(); // EN / JP / ZH
+      const s = document.createElement('script');
+      s.src = 'https://giscus.app/client.js';
+      s.setAttribute('data-repo', GISCUS_CFG.repo);
+      s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+      s.setAttribute('data-category', GISCUS_CFG.category);
+      s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+      s.setAttribute('data-mapping', 'specific');
+      s.setAttribute('data-term', location.pathname + '｜' + langCode);
+      s.setAttribute('data-reactions-enabled', '1');
+      s.setAttribute('data-emit-metadata', '0');
+      s.setAttribute('data-input-position', 'bottom');
+      s.setAttribute('data-lang', uiLang(langCode));
+      s.setAttribute('data-theme', GISCUS_CFG.theme);
+      s.setAttribute('crossorigin', 'anonymous');
+      s.async = true;
+      mount.appendChild(s);
+    }
   </script>
 </body>
 </html>
