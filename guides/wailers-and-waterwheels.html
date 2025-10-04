@@ -82,12 +82,18 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="notes">Additional Notes</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="lyrics">Lyrics</button>
+          <!-- 新增：Comments 分頁 -->
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
           <div id="panel-theme"  class="tab-panel active"></div>
           <div id="panel-acq"    class="tab-panel"></div>
           <div id="panel-notes"  class="tab-panel"></div>
           <div id="panel-lyrics" class="tab-panel"></div>
+          <!-- 新增：留言面板 -->
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -102,7 +108,7 @@
       EN: {
         langLabel: 'EN',
         pageTitle: 'Wailers and Waterwheels',
-        tabs: { theme:'Theme', acq:'Acquisition', notes:'Additional Notes', lyrics:'Lyrics' },
+        tabs: { theme:'Theme', acq:'Acquisition', notes:'Additional Notes', lyrics:'Lyrics', comments:'Comments' },
         theme: `
           <div class="stack">
             <div class="row"><b>Theme</b> Gridania Theme</div>
@@ -115,7 +121,8 @@
         `,
         notes: `
           <div class="stack">
-            <div class="row">Purchased from Maisenta in New Gridania <small>(X:11.5, Y:11.2)</small> for <b> 5,000 gil</b>.</div>
+            <div class="row">Purchased from Maisenta in New Gridania <small>(X:11.5, Y:11.2)</small> for 5,000 gil.</div>
+          </div>
         `,
         lyrics: `
           <div class="stack"><div class="row">N/A</div></div>
@@ -124,7 +131,7 @@
       JP: {
         langLabel: 'JP',
         pageTitle: '水車の調べ',
-        tabs: { theme:'テーマ', acq:'入手方法', notes:'補足', lyrics:'歌詞' },
+        tabs: { theme:'テーマ', acq:'入手方法', notes:'補足', lyrics:'歌詞', comments:'コメント' },
         theme: `
           <div class="stack">
             <div class="row"><b>テーマ</b> グリダニアのテーマ</div>
@@ -138,6 +145,7 @@
         notes: `
           <div class="stack">
             <div class="row">グリダニア新市街 <small>(X:11.5, Y:11.2)</small> にいる メイセンタ から 5,000ギル で購入。</div>
+          </div>
         `,
         lyrics: `
           <div class="stack"><div class="row">N/A</div></div>
@@ -146,7 +154,7 @@
       ZH: {
         langLabel: 'ZH',
         pageTitle: '水車之調',
-        tabs: { theme:'主題', acq:'取得方式', notes:'補充說明', lyrics:'歌詞' },
+        tabs: { theme:'主題', acq:'取得方式', notes:'補充說明', lyrics:'歌詞', comments:'留言' },
         theme: `
           <div class="stack">
             <div class="row"><b>主題</b> 格里達尼亞主題曲</div>
@@ -160,6 +168,7 @@
         notes: `
           <div class="stack">
             <div class="row">可於新格里達尼亞 <small>(X:11.5, Y:11.2)</small> 的 Maisenta 處購買，價格 5,000 金幣。</div>
+          </div>
         `,
         lyrics: `
           <div class="stack"><div class="row">N/A</div></div>
@@ -174,7 +183,8 @@
       theme:  document.getElementById('panel-theme'),
       acq:    document.getElementById('panel-acq'),
       notes:  document.getElementById('panel-notes'),
-      lyrics: document.getElementById('panel-lyrics')
+      lyrics: document.getElementById('panel-lyrics'),
+      comments: document.getElementById('panel-comments') // 新增
     };
 
     function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
@@ -186,13 +196,21 @@
       tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
       const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected') === 'true') || tabBtns[0];
       renderPanel(activeBtn.dataset.tab, lang);
+      // 如果目前就在留言分頁，切語言後重載 giscus
+      if (activeBtn && activeBtn.dataset.tab === 'comments') loadGiscusForCurrentLang();
     }
 
+    // 不覆寫留言容器；進入 comments 才載入 giscus
     function renderPanel(key, lang){
       const t = i18n[lang] || i18n.EN;
       Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
       panels[key].classList.add('active');
-      panels[key].innerHTML = t[key];
+
+      if (key !== 'comments') {
+        panels[key].innerHTML = t[key];
+      } else {
+        loadGiscusForCurrentLang();
+      }
     }
 
     tabBtns.forEach(btn=>{
@@ -211,6 +229,38 @@
     });
 
     applyLang(getLang());
+
+    /* === Giscus：單一 Comments 分頁，隨語言切換 === */
+    const GISCUS_CFG = {
+      repo: 'belaug-ffxiv/FFXIV_Library',
+      repoId: 'R_kgD0Pyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+    };
+    function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+    function loadGiscusForCurrentLang(){
+      const mount = document.getElementById('giscus_container');
+      if (!mount) return;
+      mount.innerHTML = ''; // 清掉舊的 iframe/script
+      const langCode = getLang(); // EN / JP / ZH
+      const s = document.createElement('script');
+      s.src = 'https://giscus.app/client.js';
+      s.setAttribute('data-repo', GISCUS_CFG.repo);
+      s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+      s.setAttribute('data-category', GISCUS_CFG.category);
+      s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+      s.setAttribute('data-mapping', 'specific');
+      s.setAttribute('data-term', location.pathname + '｜' + langCode);
+      s.setAttribute('data-reactions-enabled', '1');
+      s.setAttribute('data-emit-metadata', '0');
+      s.setAttribute('data-input-position', 'bottom');
+      s.setAttribute('data-lang', uiLang(langCode));
+      s.setAttribute('data-theme', GISCUS_CFG.theme);
+      s.setAttribute('crossorigin', 'anonymous');
+      s.async = true;
+      mount.appendChild(s);
+    }
   </script>
 </body>
 </html>
