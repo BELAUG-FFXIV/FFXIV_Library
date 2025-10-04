@@ -70,12 +70,18 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="req">Requirements</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlock">Follow-Up Quest</button>
+          <!-- 新增：Comments 分頁按鈕 -->
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
           <div id="panel-story" class="tab-panel active"></div>
           <div id="panel-acq" class="tab-panel"></div>
           <div id="panel-req" class="tab-panel"></div>
           <div id="panel-unlock" class="tab-panel"></div>
+          <!-- 新增：留言面板 -->
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -88,7 +94,8 @@
       EN:{
         langLabel:'EN',
         pageTitle:'The Ageless Necropolis',
-        tabs:{story:'Story', req:'Requirements', acq:'Unlock Quest', unlock:'Follow-Up Quest'},
+        // 新增 comments 標籤
+        tabs:{story:'Story', req:'Requirements', acq:'Unlock Quest', unlock:'Follow-Up Quest', comments:'Comments'},
         story:`<p>By entrusting their memories of departed loved ones to the cloud, Alexandrians have long escaped the grief of separation. But when forced to confront the realities of death, their hearts were consumed by a dark and unreasoning terror. A genius of a forgotten age now twists that fear and desperation into a new primal form—one born of sorrow, sustained by denial. And so the Warrior of Light must stand unshaken before this embodiment of fear, and face down the eternal darkness.</p>`,
         req:`<div class="stack">
           <div class="row"><strong>Players:</strong> 1–8 players (2 Tanks, 2 Healers, 4 DPS)</div>
@@ -100,6 +107,7 @@
           <div class="row">※ Role and item level restrictions are lifted for parties meeting minimum size requirements.</div>
         </div>`,
         acq:`<div class="stack">
+          <!-- 依你規則：HTML 內連結改為 # 佔位 -->
           <div class="row"><a class="link" href="#">A Terminal Invitation</a></div>
         </div>`,
         unlock:`<div class="stack">
@@ -110,7 +118,8 @@
       JP:{
         langLabel:'JP',
         pageTitle:'永遠の闇討滅戦ノーマル',
-        tabs:{story:'ストーリー', req:'必要条件', acq:'開放クエスト', unlock:'後続クエスト'},
+        // 新增 comments 標籤
+        tabs:{story:'ストーリー', req:'必要条件', acq:'開放クエスト', unlock:'後続クエスト', comments:'コメント'},
         story:`<p>アレクサンドリアの人々は、死別の悲しみから逃れるため、故人の記憶をクラウドに託してきた。だが、死という現実に向き合わざるを得なくなったとき、彼らの心を支配したのは、理性を超えた深い恐怖だった。その恐怖と祈りを糧に、古の天才が新たな蛮神の顕現を導く。恐怖が具現化した「永遠の闇」に対し、光の戦士は怯むことなく立ち向かう。</p>`,
         req:`<div class="stack">
           <div class="row"><strong>プレイヤー数：</strong>1～8人（タンク2／ヒーラー2／DPS4）</div>
@@ -122,6 +131,7 @@
           <div class="row">※ 最低人数を満たすパーティではロール／IL制限が解除されます。</div>
         </div>`,
         acq:`<div class="stack">
+          <!-- 依你規則：HTML 內連結改為 # 佔位 -->
           <div class="row"><a class="link" href="#">約束のとき</a></div>
         </div>`,
         unlock:`<div class="stack">
@@ -132,7 +142,8 @@
       ZH:{
         langLabel:'ZH-TW',
         pageTitle:'不朽墓所',
-        tabs:{story:'故事概要', req:'需求條件', acq:'解鎖任務', unlock:'後續任務'},
+        // 新增 comments 標籤
+        tabs:{story:'故事概要', req:'需求條件', acq:'解鎖任務', unlock:'後續任務', comments:'留言'},
         story:`<p>為了逃避失去摯愛之人的痛苦，Alexandria 的人民選擇將記憶寄託於雲端，遠離死亡的現實。然而當他們終於不得不直面生死時，迎來的卻是深不見底的恐懼。一位來自古代的天才將這份恐懼與祈求扭曲為新的召喚實體——以否認與悲傷為核心的原初存在。面對這具現化的「永遠の闇」，光之戰士挺身而出，無懼挑戰無盡黑暗。</p>`,
         req:`<div class="stack">
           <div class="row"><strong>人數：</strong>1–8 人（2 坦克／2 治療／4 輸出）</div>
@@ -144,6 +155,7 @@
           <div class="row">※ 當隊伍僅達最低人數時，角色定位與裝備品級限制將解除。</div>
         </div>`,
         acq:`<div class="stack">
+          <!-- 依你規則：HTML 內連結改為 # 佔位 -->
           <div class="row"><a class="link" href="#">終焉之約</a></div>
         </div>`,
         unlock:`<div class="stack">
@@ -159,24 +171,23 @@
       story : document.getElementById('panel-story'),
       acq   : document.getElementById('panel-acq'),
       req   : document.getElementById('panel-req'),
-      unlock: document.getElementById('panel-unlock')
+      unlock: document.getElementById('panel-unlock'),
+      comments: document.getElementById('panel-comments') // 新增
     };
 
     function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
-    function applyLang(lang){
-      const t = i18n[lang] || i18n.EN;
-      pageTitle.textContent = t.pageTitle;
-      langToggle.textContent = `🌐 ${t.langLabel}`;
-      tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
-      const activeBtn = tabBtns.find(b=>b.getAttribute('aria-selected')==='true') || tabBtns[0];
-      renderPanel(activeBtn.dataset.tab, lang);
-    }
 
+    // 取代為新版：切換分頁時，不覆寫 comments 內容；進入 comments 才載入 giscus
     function renderPanel(key, lang){
       const t = i18n[lang] || i18n.EN;
       Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
       panels[key].classList.add('active');
-      panels[key].innerHTML = t[key];
+
+      if (key !== 'comments') {
+        panels[key].innerHTML = t[key];
+      } else {
+        loadGiscusForCurrentLang();
+      }
     }
 
     tabBtns.forEach(btn=>{
@@ -194,7 +205,51 @@
       applyLang(next);
     });
 
+    function applyLang(lang){
+      const t = i18n[lang] || i18n.EN;
+      pageTitle.textContent = t.pageTitle;
+      const label = t.langLabel || 'EN';
+      document.getElementById('langToggle').textContent = `🌐 ${label}`;
+      tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+      const activeBtn = tabBtns.find(b=>b.getAttribute('aria-selected')==='true') || tabBtns[0];
+      renderPanel(activeBtn.dataset.tab, lang);
+      // 如果目前就在留言分頁，切語言後重載 giscus
+      if (activeBtn && activeBtn.dataset.tab === 'comments') loadGiscusForCurrentLang();
+    }
+
     applyLang(getLang());
+
+    /* === Giscus：單一 Comments 分頁，隨語言切換 === */
+    const GISCUS_CFG = {
+      repo: 'belaug-ffxiv/FFXIV_Library',
+      repoId: 'R_kgD0Pyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+      theme: 'preferred_color_scheme' // 可改 'light' 固定亮色
+    };
+    function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+    function loadGiscusForCurrentLang(){
+      const mount = document.getElementById('giscus_container');
+      if (!mount) return;
+      mount.innerHTML = ''; // 清掉舊 iframe/script
+      const langCode = getLang(); // EN / JP / ZH
+      const s = document.createElement('script');
+      s.src = 'https://giscus.app/client.js';
+      s.setAttribute('data-repo', GISCUS_CFG.repo);
+      s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+      s.setAttribute('data-category', GISCUS_CFG.category);
+      s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+      s.setAttribute('data-mapping', 'specific');                   // 使用固定 term
+      s.setAttribute('data-term', location.pathname + '｜' + langCode); // 每語言各自一串
+      s.setAttribute('data-reactions-enabled', '1');
+      s.setAttribute('data-emit-metadata', '0');
+      s.setAttribute('data-input-position', 'bottom');
+      s.setAttribute('data-lang', uiLang(langCode));
+      s.setAttribute('data-theme', GISCUS_CFG.theme);
+      s.setAttribute('crossorigin', 'anonymous');
+      s.async = true;
+      mount.appendChild(s);
+    }
   </script>
 </body>
 </html>
