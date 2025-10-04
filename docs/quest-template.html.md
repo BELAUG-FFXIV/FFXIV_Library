@@ -28,97 +28,107 @@
 <!doctype html>
 <html lang="zh-Hant">
 <head>
-  <!-- 🔹 Meta -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <!-- 🔹 Title / Description -->
-  <title>[EN Title] | BELAUG · FFXIV Library</title>
-  <meta name="description" content="FFXIV [Expac] Quest — [EN Title]：故事概要、任務需求、解鎖內容與後續任務，附影片。">
-
+  <title>A New World to Explore | BELAUG · FFXIV Library</title>
+  <meta name="description" content="FFXIV MSQ Dawntrail — A New World to Explore：故事摘要、取得方式、前置與後續任務，附影片。">
   <link rel="icon" href="../img/favicon.ico" />
-
-  <!-- 🔹 Base Styles（維持你現有的鵝黃色系） -->
   <style>
-    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    :root { --bg:#fff8e6; --card:#ffffff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
     *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
-    .container{max-width:1080px;margin:0 auto;padding:0 16px}
-    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
-    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
-    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    body{margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif; background:var(--bg); color:var(--fg);}
+    .container{max-width:1080px; margin:0 auto; padding:0 16px}
+
+    /* Header */
+    .site-header{border-bottom:1px solid var(--border); background:#fff9edb3; backdrop-filter:saturate(120%) blur(6px); position:sticky; top:0; z-index:10}
+    .nav{display:flex; align-items:center; justify-content:space-between; height:60px}
+    .left{display:flex; align-items:center; gap:12px}
+    .home{border:1px solid var(--border); background:#fff; padding:4px 8px; border-radius:8px; text-decoration:none; color:var(--fg); font-weight:800}
     .home:hover{background:#fffef8}
-    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
-    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .right{display:flex; align-items:center; gap:8px}
+    .icon-btn{background:none; border:none; cursor:pointer; font-size:14px; padding:6px 10px; border-radius:8px}
+    .icon-btn:hover{background:#fff; border:1px solid var(--border)}
+
+    /* Main */
     .main{padding:20px 0 40px}
-    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
-    @media (max-width:900px){
+    .grid{display:grid; grid-template-columns:1.1fr 1fr; gap:20px; align-items:start;}
+    @media (max-width: 900px){
       .grid{grid-template-columns:1fr}
-      .video-wrap{position:relative;padding-top:56.25%}
-      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+      .video-wrap{position:relative; padding-top:56.25%}
+      .video-wrap iframe{position:absolute; inset:0; width:100%; height:100%}
     }
-    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
-    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card{background:var(--card); border:1px solid var(--border); border-radius:16px; box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px; border-bottom:1px solid var(--border); font-weight:700}
     .card .bd{padding:16px}
     .video-card .bd{padding:0}
-    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
-    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
-    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
-    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .video-card iframe{width:100%; height:420px; border:0; display:block; border-radius:16px}
+
+    /* Tabs */
+    .tabs{display:flex; gap:8px; padding:12px 12px 0; flex-wrap:wrap}
+    .tab-btn{background:#fff; border:1px solid var(--border); color:var(--fg); border-radius:999px; padding:8px 14px; cursor:pointer; font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent); color:#fff; background:var(--accent)}
     .tab-panel{display:none}
     .tab-panel.active{display:block}
-    .stack{display:flex;flex-direction:column;gap:10px}
-    .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .stack{display:flex; flex-direction:column; gap:10px}
+    .stack .row{padding:12px 14px; border:1px dashed var(--border); border-radius:12px; background:#fffdf6}
+    .row b{display:inline-block; min-width:130px}
     .muted{color:var(--muted)}
-    .link{color:#0b60d8;text-decoration:none}
+    .link{color:#0b60d8; text-decoration:none}
     .link:hover{text-decoration:underline}
+
+    /* Story 展開 / 收合（漸層夾層） */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
   </style>
 </head>
-
 <body>
-  <!-- 🌐 Header -->
   <header class="site-header">
     <nav class="container nav">
-      <a class="home" href="../index.html">🏠 Home</a>
-      <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
     </nav>
   </header>
 
-  <!-- 🧭 Main -->
   <main class="container main">
     <div class="grid">
-
-      <!-- 🎥 Left: YouTube -->
+      <!-- 左：影片 -->
       <section class="card video-card">
         <div class="bd">
           <div class="video-wrap">
-            <!-- ⚠️ 替換 [ytId] -->
-            <iframe id="ytFrame" src="https://www.youtube.com/embed/[ytId]" title="[EN Title]" allowfullscreen></iframe>
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/HMf2Ldtb36Y" title="A New World to Explore" allowfullscreen></iframe>
           </div>
         </div>
       </section>
 
-      <!-- 📑 Right: Tabs -->
+      <!-- 右：標題 + Tabs -->
       <section class="card">
-        <div class="hd" id="pageTitle">[EN Title]</div>
-
-        <!-- 🔸 Tab buttons：最後一顆為 Comments -->
+        <div class="hd" id="pageTitle">A New World to Explore</div>
         <div class="tabs" role="tablist">
           <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
-          <button class="tab-btn" role="tab" aria-selected="false" data-tab="req">Requirements</button>
-          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlock">Unlocks</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
-
-        <!-- 🔸 Panels：最下面多一個 Comments 容器 -->
         <div class="bd">
-          <div id="panel-story"    class="tab-panel active"></div>
-          <div id="panel-acq"      class="tab-panel"></div>
-          <div id="panel-req"      class="tab-panel"></div>
-          <div id="panel-unlock"   class="tab-panel"></div>
-
-          <!-- 💬 Comments 面板：只放容器，由 JS 動態載入 giscus -->
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
           <div id="panel-comments" class="tab-panel">
             <div id="giscus_container" style="min-height:320px;"></div>
           </div>
@@ -127,78 +137,119 @@
     </div>
   </main>
 
-  <!-- ⚙️ i18n + Tab + Giscus（留言） -->
   <script>
     const LANG_KEY = 'ffxiv-guide-lang';
-
-    /* 🔤 三語文案：只在 tabs 裡加 comments 的標籤，不要添加 comments 內容 */
     const i18n = {
       EN:{
         langLabel:'EN',
-        pageTitle:'[EN Title]',
-        tabs:{ story:'Story', acq:'Acquisition', req:'Requirements', unlock:'Unlocks', comments:'Comments' },
-        story:`<p>[Full English Story]</p>`,
-        acq:`<div class="stack"><div class="row"><b>Quest Giver:</b> [Name], [Location] (X: , Y: )</div></div>`,
-        req:`<div class="stack"><div class="row"><b>Preceding Quest:</b> <a class="link" href="#">[Quest Name]</a></div></div>`,
-        unlock:`<div class="stack"><div class="row"><b>Follow-Up Quest:</b> <a class="link" href="#">[Quest Name]</a></div></div>`
+        pageTitle:'A New World to Explore',
+        tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+        readMore:'Show more', readLess:'Show less',
+        story:`<div class="clamp" data-collapsed="true">
+          <p>The journey begins anew at the main hall of the Baldesion Annex, where Ojika Tsunjika shares news that Erenville has secured passage to Tural aboard a gleaners’ guildship. As you wait, Wuk Lamat gathers her companions and revisits the mission ahead: the rite of succession in Tuliyollal, where she will contend for the title of Dawnservant. Alphinaud and Alisaie speak of their diplomatic goals, Krile shares the mystery of her grandfather’s vanished expedition, and even Erenville—reluctantly—admits his role as the Third Promise’s guide.</p>
+          <p>Boarding the vessel, the group sets off across the sea. What begins as a hopeful voyage soon descends into chaos as a violent storm strikes mid-journey. Lightning flashes across the sky, and the wind tears through the sails. A sailor is thrown from the mast, panic spreads, and only swift action from you and your comrades keeps disaster at bay. In the aftermath, Erenville quietly reflects on the ordeal, seeing in it a fitting prelude to the trials ahead.</p>
+          <p>As seabirds signal landfall, the travelers finally arrive in Tuliyollal. Amid its vibrant streets and unfamiliar sights, Wuk Lamat receives greetings from startled but respectful guards. Her companions marvel at the diversity of culture, while traders and adventurers aboard the ship hint at the complexities of life in Tural. With the journey behind them and the rite ahead, Wuk Lamat turns to you with pride. Thus begins your exploration of the New World.</p>
+        </div>
+        <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+        acq:`<div class="stack">
+          <div class="row"><b>Quest Giver</b> Ojika Tsunjika <small class="muted">(Old Sharlayan, X:9.2, Y:11.2)</small></div>
+        </div>`,
+        unlockq:`<div class="stack">
+          <div class="row"><a class="link" href="#">The Coming Dawn</a></div>
+        </div>`,
+        followq:`<div class="stack">
+          <div class="row"><a class="link" href="the-nation-of-tuliyollal.html">The Nation of Tuliyollal</a></div>
+        </div>`
       },
       JP:{
         langLabel:'JP',
-        pageTitle:'[JP Title]',
-        tabs:{ story:'ストーリー', acq:'入手方法', req:'前提条件', unlock:'開放内容', comments:'コメント' },
-        story:`<p>[日本語ストーリー本文]</p>`,
-        acq:`<div class="stack"><div class="row"><b>依頼人：</b>[JP Name]　[JP Location] (X: , Y: )</div></div>`,
-        req:`<div class="stack"><div class="row"><b>前提クエスト：</b><a class="link" href="#">[JP Quest]</a></div></div>`,
-        unlock:`<div class="stack"><div class="row"><b>開放クエスト：</b><a class="link" href="#">[JP Quest]</a></div></div>`
+        pageTitle:'新たなる冒険の世界',
+        tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+        readMore:'全文を表示', readLess:'折りたたむ',
+        story:`<div class="clamp" data-collapsed="true">
+          <p>旅の再始動は、バルデシオン分館の大広間から始まる。オジカ・ツンジカが、エレンヴィルがギャザラーズギルドの船を手配したとの報せを届けると、ウク・ラマットは仲間を集め、目的を再確認する。即位の儀を控えたトゥラルでの挑戦──自らが次代のドーンサーヴァントとなる覚悟。アルフィノとアリゼーは復興と交流を目的に、クルルは祖父の謎を追い、そしてエレンヴィルもまた、第三の誓約としての役割を受け入れる。</p>
+          <p>出航した一行を待ち受けていたのは、突如として海を襲う嵐だった。雷鳴が空を裂き、強風が帆を引き裂く中、甲板では船員が転落し、混乱が広がる。そんな中、あなたと仲間たちは素早く動き、負傷者の救助や防御装置の展開に奔走。嵐の終息後、エレンヴィルは静かに語る──あの試練こそが、これから始まる戦いの序章にふさわしかったと。</p>
+          <p>やがて海鳥の声が届き、一行はついにトゥラルの地へと辿り着く。色とりどりの風景と多様な文化に迎えられ、ウク・ラマットの正体に驚く衛兵たちも、すぐに敬意をもって迎え入れる。交易商や冒険者たちの会話から垣間見える、トゥラルという世界の広がり。ウク・ラマットは風を感じ、故郷に立つ喜びを噛み締めながら、あなたにほほえむ。「新世界」への探求が、今ここから始まる。</p>
+        </div>
+        <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+        acq:`<div class="stack">
+          <div class="row"><b>クエスト発行</b> オジカ・ツンジカ <small class="muted">（オールド・シャーレアン, X:9.2, Y:11.2）</small></div>
+        </div>`,
+        unlockq:`<div class="stack">
+          <div class="row"><a class="link" href="#">明日への一歩</a></div>
+        </div>`,
+        followq:`<div class="stack">
+          <div class="row"><a class="link" href="the-nation-of-tuliyollal.html">トライヨラ連王国</a></div>
+        </div>`
       },
       ZH:{
         langLabel:'ZH',
-        pageTitle:'[ZH Title]',
-        tabs:{ story:'故事概要', acq:'取得方式', req:'需求條件', unlock:'解鎖內容', comments:'留言' },
-        story:`<p>[繁體中文故事內容]</p>`,
-        acq:`<div class="stack"><div class="row"><b>任務發布者：</b>[Name]，[Location] (X: , Y: )</div></div>`,
-        req:`<div class="stack"><div class="row"><b>前置任務：</b><a class="link" href="#">[Quest Name]</a></div></div>`,
-        unlock:`<div class="stack"><div class="row"><b>後續任務：</b><a class="link" href="#">[Quest Name]</a></div></div>`
+        pageTitle:'嶄新的冒險',
+        tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+        readMore:'展開全文', readLess:'收合內容',
+        story:`<div class="clamp" data-collapsed="true">
+          <p>旅程自 Baldesion Annex 的大廳再次啟程。Ojika Tsunjika 傳來好消息：Erenville 已為眾人取得前往 Tural 的公會船位。等待啟航之際，Wuk Lamat 集合所有夥伴，重申她將挑戰 Tuliyollal 王位繼承儀式、爭取成為新任 Dawnservant 的決心。Alphinaud 與 Alisaie 表示將以外交交流為使命，Krile 則提及祖父失落的黃金都市調查，而 Erenville 雖語氣冷淡，卻仍承認自己是為第三誓約而來。</p>
+          <p>船隻啟航，穿越大海之旅正式展開。不久後，狂風驟雨席捲而至，掀起洶湧巨浪與驚雷閃電。船員從桅桿墜落，甲板騷動不安，你與夥伴們即刻行動，協助傷者、啟動護罩魔裝，全力穩住航行。待風暴平息，Erenville 淡然一語，道出這場危機正象徵著未來將面對的考驗。</p>
+          <p>終於，海鷗鳴聲傳來，前方現出陸地。當眾人踏上 Tuliyollal 的碼頭，迎接他們的是鮮明文化與好奇目光。守衛對 Wuk Lamat 的身份驚愕後轉而致敬，商人與旅人亦分享關於 Tural 的風土人情。在這片嶄新的土地上，Wuk Lamat 回頭向你一笑。探尋「新世界」的旅程，於焉展開。</p>
+        </div>
+        <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+        acq:`<div class="stack">
+          <div class="row"><b>任務發布</b> Ojika Tsunjika <small class="muted">（The Baldesion Annex, X:9.2, Y:11.3）</small></div>
+        </div>`,
+        unlockq:`<div class="stack">
+          <div class="row"><a class="link" href="#">破曉的前行</a></div>
+        </div>`,
+        followq:`<div class="stack">
+          <div class="row"><a class="link" href="the-nation-of-tuliyollal.html">圖利約拉爾聯邦王國</a></div>
+        </div>`
       }
     };
 
-    /* 🧠 通用 Tab / 語言切換 */
-    const langToggle = document.getElementById('langToggle');
-    const pageTitle  = document.getElementById('pageTitle');
-    const tabBtns    = [...document.querySelectorAll('.tab-btn')];
+    const langToggle  = document.getElementById('langToggle');
+    const pageTitle   = document.getElementById('pageTitle');
+    const tabBtns     = [...document.querySelectorAll('.tab-btn')];
     const panels = {
-      story   : document.getElementById('panel-story'),
-      acq     : document.getElementById('panel-acq'),
-      req     : document.getElementById('panel-req'),
-      unlock  : document.getElementById('panel-unlock'),
-      comments: document.getElementById('panel-comments') // 新增
+      story:  document.getElementById('panel-story'),
+      acq:    document.getElementById('panel-acq'),
+      unlockq:document.getElementById('panel-unlockq'),
+      followq:document.getElementById('panel-followq'),
+      comments: document.getElementById('panel-comments')
     };
 
     function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
-    function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
 
     function applyLang(lang){
       const t = i18n[lang] || i18n.EN;
       pageTitle.textContent = t.pageTitle;
       langToggle.textContent = `🌐 ${t.langLabel}`;
       tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
-      const activeBtn = tabBtns.find(b=>b.getAttribute('aria-selected')==='true') || tabBtns[0];
+      const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
       renderPanel(activeBtn.dataset.tab, lang);
+    }
 
-      // 若目前停在留言分頁，切語言後重載 giscus
-      if (activeBtn && activeBtn.dataset.tab === 'comments') loadGiscusForCurrentLang();
+    function wireClamp(panelEl, t){
+      const clamp = panelEl.querySelector('.clamp');
+      const btn = panelEl.querySelector('[data-role="expand"]');
+      if(!clamp || !btn) return;
+      function setLabel(){
+        const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+        btn.textContent = collapsed ? t.readMore : t.readLess;
+      }
+      setLabel();
+      btn.addEventListener('click', ()=>{
+        const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+        clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+        setLabel();
+      });
     }
 
     function renderPanel(key, lang){
       const t = i18n[lang] || i18n.EN;
       Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
       panels[key].classList.add('active');
-
-      if (key !== 'comments') {
-        panels[key].innerHTML = t[key];
-      } else {
-        loadGiscusForCurrentLang();
-      }
+      if (key !== 'comments') panels[key].innerHTML = t[key];
+      if (key === 'story') wireClamp(panels[key], t);
+      if (key === 'comments') loadGiscusForCurrentLang();
     }
 
     tabBtns.forEach(btn=>{
@@ -216,34 +267,30 @@
       applyLang(next);
     });
 
-    /* 💬 Giscus：依語言分流的留言串 */
-    const GISCUS_CFG = {
-      // 👉 把下面四個值換成你的實際值（giscus.app 產生）
-      repo:      'belaug-ffxiv/FFXIV_Library',
-      repoId:    'REPO_ID_HERE',
-      category:  'General',
-      categoryId:'CATEGORY_ID_HERE',
-      // 留言配色：固定亮色以符合目前頁面色調；若要跟隨系統改 'preferred_color_scheme'
-      theme:     'light'
-    };
+    applyLang(getLang());
 
+    /* === Giscus：Comments 分頁 === */
+    const GISCUS_CFG = {
+      repo: 'belaug-ffxiv/FFXIV_Library',
+      repoId: 'R_kgD0Pyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+    };
+    function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
     function loadGiscusForCurrentLang(){
       const mount = document.getElementById('giscus_container');
       if (!mount) return;
-      mount.innerHTML = ''; // 清掉舊的 iframe/script
-
-      const langCode = getLang(); // EN / JP / ZH
+      mount.innerHTML = '';
+      const langCode = getLang();
       const s = document.createElement('script');
       s.src = 'https://giscus.app/client.js';
       s.setAttribute('data-repo', GISCUS_CFG.repo);
       s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
       s.setAttribute('data-category', GISCUS_CFG.category);
       s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
-
-      // 用 'specific' + term，把「同一頁、不同語言」分成不同串
       s.setAttribute('data-mapping', 'specific');
       s.setAttribute('data-term', location.pathname + '｜' + langCode);
-
       s.setAttribute('data-reactions-enabled', '1');
       s.setAttribute('data-emit-metadata', '0');
       s.setAttribute('data-input-position', 'bottom');
@@ -251,12 +298,8 @@
       s.setAttribute('data-theme', GISCUS_CFG.theme);
       s.setAttribute('crossorigin', 'anonymous');
       s.async = true;
-
       mount.appendChild(s);
     }
-
-    // 初始
-    applyLang(getLang());
   </script>
 </body>
 </html>
