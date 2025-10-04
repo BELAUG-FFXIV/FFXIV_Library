@@ -18,8 +18,8 @@
     .home{border:1px solid var(--border); background:#fff; padding:4px 8px; border-radius:8px; text-decoration:none; color:var(--fg); font-weight:800}
     .home:hover{background:#fffef8}
     .right{display:flex; align-items:center; gap:8px}
-    .icon-btn{background:none; border:1px solid transparent; cursor:pointer; font-size:14px; padding:6px 10px; border-radius:8px}
-    .icon-btn:hover{background:#fff; border-color:var(--border)}
+    .icon-btn{background:none; border:none; cursor:pointer; font-size:14px; padding:6px 10px; border-radius:8px}
+    .icon-btn:hover{background:#fff; border:1px solid var(--border)}
     /* 主體 */
     .main{padding:20px 0 40px}
     .grid{display:grid; grid-template-columns:1.1fr 1fr; gap:20px; align-items:start;}
@@ -37,8 +37,6 @@
     .tabs{display:flex; gap:8px; padding:12px 12px 0; flex-wrap:wrap}
     .tab-btn{background:#fff; border:1px solid var(--border); color:var(--fg); border-radius:999px; padding:8px 14px; cursor:pointer; font-weight:600}
     .tab-btn[aria-selected="true"]{border-color:var(--accent); color:#fff; background:var(--accent)}
-    .toolbar{display:flex; gap:8px; padding:8px 12px 0; flex-wrap:wrap}
-    .tool-btn{background:#fff; border:1px dashed var(--border); color:var(--fg); border-radius:8px; padding:6px 10px; cursor:pointer; font-weight:600}
     .tab-panel{display:none}
     .tab-panel.active{display:block}
     .stack{display:flex; flex-direction:column; gap:10px}
@@ -47,10 +45,30 @@
     .muted{color:var(--muted)}
     .link{color:#0b60d8; text-decoration:none}
     .link:hover{text-decoration:underline}
-    /* details/summary：與你舊版一致的樣式 */
-    details{margin:0 0 10px}
-    summary{cursor:pointer; font-weight:700; padding:10px 12px; background:#fdfaf3; border:1px solid var(--border); border-radius:8px;}
-    details > div{padding:10px 16px; border-left:1px solid var(--border); border-right:1px solid var(--border); border-bottom:1px solid var(--border); border-radius:0 0 8px 8px; background:#fff;}
+
+    /* ========== Story 收合 ========== */
+    .collapsible{position:relative}
+    .collapsible .content{
+      max-height: 380px;              /* 折疊時高度（和你之前的視覺接近） */
+      overflow: hidden;
+      mask-image: linear-gradient(#000 70%, rgba(0,0,0,0));
+      -webkit-mask-image: linear-gradient(#000 70%, rgba(0,0,0,0));
+      transition:max-height .25s ease;
+    }
+    .collapsible.expanded .content{
+      max-height: 9999px;
+      mask-image: none;
+      -webkit-mask-image: none;
+    }
+    .showmore-wrap{margin-top:12px}
+    .showmore-btn{
+      appearance:none; border:1px solid var(--border); background:#fff;
+      padding:10px 14px; border-radius:12px; cursor:pointer; font-weight:700;
+    }
+    .showmore-btn:hover{background:#fffdf6}
+
+    /* Comments panel min height */
+    #giscus_container{min-height:320px}
   </style>
 </head>
 <body>
@@ -86,20 +104,13 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
-
-        <!-- 舊版一樣：tab 列下方顯示全域展開/收合 -->
-        <div class="toolbar">
-          <button id="expandAll"  class="tool-btn" type="button">▼ Expand All</button>
-          <button id="collapseAll" class="tool-btn" type="button">▲ Collapse All</button>
-        </div>
-
         <div class="bd">
           <div id="panel-story"   class="tab-panel active"></div>
           <div id="panel-acq"     class="tab-panel"></div>
           <div id="panel-unlockq" class="tab-panel"></div>
           <div id="panel-followq" class="tab-panel"></div>
           <div id="panel-comments" class="tab-panel">
-            <div id="giscus_container" style="min-height:320px;"></div>
+            <div id="giscus_container"></div>
           </div>
         </div>
       </section>
@@ -108,101 +119,111 @@
 
   <script>
     const LANG_KEY = 'ffxiv-guide-lang';
+
     const i18n = {
       EN:{
         langLabel:'EN',
         pageTitle:'A New World to Explore',
         tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
-        tools:{ expand:'▼ Expand All', collapse:'▲ Collapse All' },
-        story:`<details open><summary>Story</summary><div>
-<p>The journey begins anew at the main hall of the Baldesion Annex, where Ojika Tsunjika shares news that Erenville has secured passage to Tural aboard a gleaners’ guildship. As you wait, Wuk Lamat gathers her companions and revisits the mission ahead: the rite of succession in Tuliyollal, where she will contend for the title of Dawnservant. Alphinaud and Alisaie speak of their diplomatic goals, Krile shares the mystery of her grandfather’s vanished expedition, and even Erenville—reluctantly—admits his role as the Third Promise’s guide.</p>
-<p>Boarding the vessel, the group sets off across the sea. What begins as a hopeful voyage soon descends into chaos as a violent storm strikes mid-journey. Lightning flashes across the sky, and the wind tears through the sails. A sailor is thrown from the mast, panic spreads, and only swift action from you and your comrades keeps disaster at bay. In the aftermath, Erenville quietly reflects on the ordeal, seeing in it a fitting prelude to the trials ahead.</p>
-<p>As seabirds signal landfall, the travelers finally arrive in Tuliyollal. Amid its vibrant streets and unfamiliar sights, Wuk Lamat receives greetings from startled but respectful guards. Her companions marvel at the diversity of culture, while traders and adventurers aboard the ship hint at the complexities of life in Tural. With the journey behind them and the rite ahead, Wuk Lamat turns to you with pride. Thus begins your exploration of the New World.</p>
-</div></details>`,
-        acq:`<details open><summary>Acquisition</summary><div>
-<div class="stack">
-  <div class="row"><b>Quest Giver</b> Ojika Tsunjika <small class="muted">(Old Sharlayan, X:9.2, Y:11.2)</small></div>
-</div>
-</div></details>`,
-        unlockq:`<details open><summary>Unlock Quest</summary><div>
-<div class="stack">
-  <div class="row"><a class="link" href="#">The Coming Dawn</a></div>
-</div>
-</div></details>`,
-        followq:`<details open><summary>Follow-Up Quest</summary><div>
-<div class="stack">
-  <div class="row"><a class="link" href="the-nation-of-tuliyollal.html">The Nation of Tuliyollal</a></div>
-</div>
-</div></details>`
+        more:'Show more', less:'Show less',
+        story:`<p>The journey begins anew at the main hall of the Baldesion Annex, where Ojika Tsunjika shares news that Erenville has secured passage to Tural aboard a gleaners’ guildship. As you wait, Wuk Lamat gathers her companions and revisits the mission ahead: the rite of succession in Tuliyollal, where she will contend for the title of Dawnservant. Alphinaud and Alisaie speak of their diplomatic goals, Krile shares the mystery of her grandfather’s vanished expedition, and even Erenville—reluctantly—admits his role as the Third Promise’s guide.</p>
+        <p>Boarding the vessel, the group sets off across the sea. What begins as a hopeful voyage soon descends into chaos as a violent storm strikes mid-journey. Lightning flashes across the sky, and the wind tears through the sails. A sailor is thrown from the mast, panic spreads, and only swift action from you and your comrades keeps disaster at bay. In the aftermath, Erenville quietly reflects on the ordeal, seeing in it a fitting prelude to the trials ahead.</p>
+        <p>As seabirds signal landfall, the travelers finally arrive in Tuliyollal. Amid its vibrant streets and unfamiliar sights, Wuk Lamat receives greetings from startled but respectful guards. Her companions marvel at the diversity of culture, while traders and adventurers aboard the ship hint at the complexities of life in Tural. With the journey behind them and the rite ahead, Wuk Lamat turns to you with pride. Thus begins your exploration of the New World.</p>`,
+        acq:`<div class="stack">
+          <div class="row"><b>Quest Giver</b> Ojika Tsunjika <small class="muted">(Old Sharlayan, X:9.2, Y:11.2)</small></div>
+        </div>`,
+        unlockq:`<div class="stack">
+          <div class="row"><a class="link" href="#">The Coming Dawn</a></div>
+        </div>`,
+        followq:`<div class="stack">
+          <div class="row"><a class="link" href="the-nation-of-tuliyollal.html">The Nation of Tuliyollal</a></div>
+        </div>`
       },
       JP:{
         langLabel:'JP',
         pageTitle:'新たなる冒険の世界',
         tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
-        tools:{ expand:'▼ すべて展開', collapse:'▲ すべて折りたたむ' },
-        story:`<details open><summary>ストーリー</summary><div>
-<p>旅の再始動は、バルデシオン分館の大広間から始まる。オジカ・ツンジカが、エレンヴィルがギャザラーズギルドの船を手配したとの報せを届けると、ウク・ラマットは仲間を集め、目的を再確認する。即位の儀を控えたトゥラルでの挑戦──自らが次代のドーンサーヴァントとなる覚悟。アルフィノとアリゼーは復興と交流を目的に、クルルは祖父の謎を追い、そしてエレンヴィルもまた、第三の誓約としての役割を受け入れる。</p>
-<p>出航した一行を待ち受けていたのは、突如として海を襲う嵐だった。雷鳴が空を裂き、強風が帆を引き裂く中、甲板では船員が転落し、混乱が広がる。そんな中、あなたと仲間たちは素早く動き、負傷者の救助や防御装置の展開に奔走。嵐の終息後、エレンヴィルは静かに語る──あの試練こそが、これから始まる戦いの序章にふさわしかったと。</p>
-<p>やがて海鳥の声が届き、一行はついにトゥラルの地へと辿り着く。色とりどりの風景と多様な文化に迎えられ、ウク・ラマットの正体に驚く衛兵たちも、すぐに敬意をもって迎え入れる。交易商や冒険者たちの会話から垣間見える、トゥラルという世界の広がり。ウク・ラマットは風を感じ、故郷に立つ喜びを噛み締めながら、あなたにほほえむ。「新世界」への探求が、今ここから始まる。</p>
-</div></details>`,
-        acq:`<details open><summary>入手方法</summary><div>
-<div class="stack">
-  <div class="row"><b>クエスト発行</b> オジカ・ツンジカ <small class="muted">（オールド・シャーレアン, X:9.2, Y:11.2）</small></div>
-</div>
-</div></details>`,
-        unlockq:`<details open><summary>開放クエスト</summary><div>
-<div class="stack">
-  <div class="row"><a class="link" href="#">明日への一歩</a></div>
-</div>
-</div></details>`,
-        followq:`<details open><summary>後続クエスト</summary><div>
-<div class="stack">
-  <div class="row"><a class="link" href="the-nation-of-tuliyollal.html">トライヨラ連王国</a></div>
-</div>
-</div></details>`
+        more:'もっと見る', less:'閉じる',
+        story:`<p>旅の再始動は、バルデシオン分館の大広間から始まる。オジカ・ツンジカが、エレンヴィルがギャザラーズギルドの船を手配したとの報せを届けると、ウク・ラマットは仲間を集め、目的を再確認する。即位の儀を控えたトゥラルでの挑戦──自らが次代のドーンサーヴァントとなる覚悟。アルフィノとアリゼーは復興と交流を目的に、クルルは祖父の謎を追い、そしてエレンヴィルもまた、第三の誓約としての役割を受け入れる。</p>
+        <p>出航した一行を待ち受けていたのは、突如として海を襲う嵐だった。雷鳴が空を裂き、強風が帆を引き裂く中、甲板では船員が転落し、混乱が広がる。そんな中、あなたと仲間たちは素早く動き、負傷者の救助や防御装置の展開に奔走。嵐の終息後、エレンヴィルは静かに語る──あの試練こそが、これから始まる戦いの序章にふさわしかったと。</p>
+        <p>やがて海鳥の声が届き、一行はついにトゥラルの地へと辿り着く。色とりどりの風景と多様な文化に迎えられ、ウク・ラマットの正体に驚く衛兵たちも、すぐに敬意をもって迎え入れる。交易商や冒険者たちの会話から垣間見える、トゥラルという世界の広がり。ウク・ラマットは風を感じ、故郷に立つ喜びを噛み締めながら、あなたにほほえむ。「新世界」への探求が、今ここから始まる。</p>`,
+        acq:`<div class="stack">
+          <div class="row"><b>クエスト発行</b> オジカ・ツンジカ <small class="muted">（オールド・シャーレアン, X:9.2, Y:11.2）</small></div>
+        </div>`,
+        unlockq:`<div class="stack">
+          <div class="row"><a class="link" href="#">明日への一歩</a></div>
+        </div>`,
+        followq:`<div class="stack">
+          <div class="row"><a class="link" href="the-nation-of-tuliyollal.html">トライヨラ連王国</a></div>
+        </div>`
       },
       ZH:{
         langLabel:'ZH',
         pageTitle:'嶄新的冒險',
         tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
-        tools:{ expand:'▼ 全部展開', collapse:'▲ 全部收合' },
-        story:`<details open><summary>故事概要</summary><div>
-<p>旅程自 Baldesion Annex 的大廳再次啟程。Ojika Tsunjika 傳來好消息：Erenville 已為眾人取得前往 Tural 的公會船位。等待啟航之際，Wuk Lamat 集合所有夥伴，重申她將挑戰 Tuliyollal 王位繼承儀式、爭取成為新任 Dawnservant 的決心。Alphinaud 與 Alisaie 表示將以外交交流為使命，Krile 則提及祖父失落的黃金都市調查，而 Erenville 雖語氣冷淡，卻仍承認自己是為第三誓約而來。</p>
-<p>船隻啟航，穿越大海之旅正式展開。不久後，狂風驟雨席捲而至，掀起洶湧巨浪與驚雷閃電。船員從桅桿墜落，甲板騷動不安，你與夥伴們即刻行動，協助傷者、啟動護罩魔裝，全力穩住航行。待風暴平息，Erenville 淡然一語，道出這場危機正象徵著未來將面對的考驗。</p>
-<p>終於，海鷗鳴聲傳來，前方現出陸地。當眾人踏上 Tuliyollal 的碼頭，迎接他們的是鮮明文化與好奇目光。守衛對 Wuk Lamat 的身份驚愕後轉而致敬，商人與旅人亦分享關於 Tural 的風土人情。在這片嶄新的土地上，Wuk Lamat 回頭向你一笑。探尋「新世界」的旅程，於焉展開。</p>
-</div></details>`,
-        acq:`<details open><summary>取得方式</summary><div>
-<div class="stack">
-  <div class="row"><b>任務發布</b> Ojika Tsunjika <small class="muted">（The Baldesion Annex, X:9.2, Y:11.3）</small></div>
-</div>
-</div></details>`,
-        unlockq:`<details open><summary>解鎖任務</summary><div>
-<div class="stack">
-  <div class="row"><a class="link" href="#">破曉的前行</a></div>
-</div>
-</div></details>`,
-        followq:`<details open><summary>後續任務</summary><div>
-<div class="stack">
-  <div class="row"><a class="link" href="the-nation-of-tuliyollal.html">圖利約拉爾聯邦王國</a></div>
-</div>
-</div></details>`
+        more:'展開全文', less:'收合內容',
+        story:`<p>旅程自 Baldesion Annex 的大廳再次啟程。Ojika Tsunjika 傳來好消息：Erenville 已為眾人取得前往 Tural 的公會船位。等待啟航之際，Wuk Lamat 集合所有夥伴，重申她將挑戰 Tuliyollal 王位繼承儀式、爭取成為新任 Dawnservant 的決心。Alphinaud 與 Alisaie 表示將以外交交流為使命，Krile 則提及祖父失落的黃金都市調查，而 Erenville 雖語氣冷淡，卻仍承認自己是為第三誓約而來。</p>
+        <p>船隻啟航，穿越大海之旅正式展開。不久後，狂風驟雨席捲而至，掀起洶湧巨浪與驚雷閃電。船員從桅桿墜落，甲板騷動不安，你與夥伴們即刻行動，協助傷者、啟動護罩魔裝，全力穩住航行。待風暴平息，Erenville 淡然一語，道出這場危機正象徵著未來將面對的考驗。</p>
+        <p>終於，海鷗鳴聲傳來，前方現出陸地。當眾人踏上 Tuliyollal 的碼頭，迎接他們的是鮮明文化與好奇目光。守衛對 Wuk Lamat 的身份驚愕後轉而致敬，商人與旅人亦分享關於 Tural 的風土人情。在這片嶄新的土地上，Wuk Lamat 回頭向你一笑。探尋「新世界」的旅程，於焉展開。</p>`,
+        acq:`<div class="stack">
+          <div class="row"><b>任務發布</b> Ojika Tsunjika <small class="muted">（The Baldesion Annex, X:9.2, Y:11.3）</small></div>
+        </div>`,
+        unlockq:`<div class="stack">
+          <div class="row"><a class="link" href="#">破曉的前行</a></div>
+        </div>`,
+        followq:`<div class="stack">
+          <div class="row"><a class="link" href="the-nation-of-tuliyollal.html">圖利約拉爾聯邦王國</a></div>
+        </div>`
       }
     };
 
-    const langToggle  = document.getElementById('langToggle');
-    const pageTitle   = document.getElementById('pageTitle');
-    const tabBtns     = [...document.querySelectorAll('.tab-btn')];
-    const expandBtn   = document.getElementById('expandAll');
-    const collapseBtn = document.getElementById('collapseAll');
+    /* ===== 元素參照 ===== */
+    const langToggle = document.getElementById('langToggle');
+    const pageTitle  = document.getElementById('pageTitle');
+    const tabBtns    = [...document.querySelectorAll('.tab-btn')];
     const panels = {
-      story:  document.getElementById('panel-story'),
-      acq:    document.getElementById('panel-acq'),
-      unlockq:document.getElementById('panel-unlockq'),
-      followq:document.getElementById('panel-followq'),
-      comments: document.getElementById('panel-comments')
+      story:   document.getElementById('panel-story'),
+      acq:     document.getElementById('panel-acq'),
+      unlockq: document.getElementById('panel-unlockq'),
+      followq: document.getElementById('panel-followq'),
+      comments:document.getElementById('panel-comments'),
     };
 
-    /* === Giscus：Comments 分頁 === */
+    /* ===== 語言控制 ===== */
+    function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+    function uiLang(code){ return code==='JP'?'ja':(code==='ZH'?'zh-TW':'en'); }
+
+    function applyLang(lang){
+      const t = i18n[lang] || i18n.EN;
+      pageTitle.textContent = t.pageTitle;
+      langToggle.textContent = `🌐 ${t.langLabel}`;
+      tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+
+      // 重新渲染目前分頁
+      const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+      renderPanel(activeBtn.dataset.tab, lang);
+    }
+
+    /* ===== Story 收合：把內容包進 .collapsible，按鈕切換 ===== */
+    function mountCollapsible(panel, lang){
+      const t = i18n[lang] || i18n.EN;
+      const html = panel.innerHTML;  // 保留原三語內容
+      panel.innerHTML = `
+        <div class="collapsible" id="storyCollapse">
+          <div class="content">${html}</div>
+          <div class="showmore-wrap">
+            <button type="button" class="showmore-btn" id="showmoreBtn">${t.more}</button>
+          </div>
+        </div>`;
+      const box = panel.querySelector('#storyCollapse');
+      const btn = panel.querySelector('#showmoreBtn');
+      btn.addEventListener('click', ()=>{
+        const expanded = box.classList.toggle('expanded');
+        btn.textContent = expanded ? t.less : t.more;
+      });
+    }
+
+    /* ===== Giscus：Comments 分頁 ===== */
     const GISCUS_CFG = {
       repo: 'belaug-ffxiv/FFXIV_Library',
       repoId: 'R_kgD0Pyh4Kw',
@@ -210,8 +231,6 @@
       categoryId: 'DIC_kwD0Pyh4K84CwPjL',
       theme: 'preferred_color_scheme'
     };
-    function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
-    function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
     function loadGiscusForCurrentLang(){
       const mount = document.getElementById('giscus_container');
       if (!mount) return;
@@ -235,32 +254,24 @@
       mount.appendChild(s);
     }
 
-    function applyLang(lang){
-      const t = i18n[lang] || i18n.EN;
-      pageTitle.textContent = t.pageTitle;
-      langToggle.textContent = `🌐 ${t.langLabel}`;
-      // tabs 標籤
-      tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
-      // 展開/收合按鈕
-      expandBtn.textContent  = t.tools.expand;
-      collapseBtn.textContent= t.tools.collapse;
-      // 仍維持目前選取的 tab
-      const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
-      renderPanel(activeBtn.dataset.tab, lang);
-    }
-
+    /* ===== 渲染每個分頁 ===== */
     function renderPanel(key, lang){
       const t = i18n[lang] || i18n.EN;
       Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
       panels[key].classList.add('active');
-      if (key !== 'comments') {
-        panels[key].innerHTML = t[key];
-      } else {
+
+      if (key === 'comments'){
         loadGiscusForCurrentLang();
+        return;
       }
+
+      panels[key].innerHTML = t[key];
+
+      // Story 分頁：加回你原本的 Show more/less
+      if (key === 'story') mountCollapsible(panels[key], lang);
     }
 
-    // Tabs 切換
+    /* ===== 事件 ===== */
     tabBtns.forEach(btn=>{
       btn.addEventListener('click', ()=>{
         tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
@@ -269,7 +280,6 @@
       });
     });
 
-    // 語言切換
     langToggle.addEventListener('click', ()=>{
       const cur = getLang();
       const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
@@ -277,14 +287,7 @@
       applyLang(next);
     });
 
-    // 全域展開/收合（不限目前分頁，對整頁所有 details 作用）
-    function setAllDetails(open){
-      document.querySelectorAll('details').forEach(d => d.open = open);
-    }
-    expandBtn.addEventListener('click', ()=> setAllDetails(true));
-    collapseBtn.addEventListener('click', ()=> setAllDetails(false));
-
-    // 初始化
+    /* 初始化 */
     applyLang(getLang());
   </script>
 </body>
