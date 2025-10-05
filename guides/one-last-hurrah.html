@@ -46,19 +46,19 @@
     .link{color:#0b60d8; text-decoration:none}
     .link:hover{text-decoration:underline}
 
-    /* —— 長文收合 —— */
-    .story-collapsible{position:relative; max-height:380px; overflow:hidden}
-    .story-collapsible::after{
-      content:""; position:absolute; inset:auto 0 0 0; height:72px;
-      background:linear-gradient(to bottom, rgba(255,248,230,0), var(--card));
+    /* 展開/收合（統一模板） */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
     }
-    .story-toggle{
-      display:inline-block; margin-top:10px; padding:8px 14px;
-      border:1px solid var(--border); border-radius:999px; background:#fff;
-      cursor:pointer; font-weight:600
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
     }
-    .story-expanded{max-height:none}
-    .story-expanded::after{display:none}
+    .expand-btn:hover{ background:#fffef8; }
   </style>
 </head>
 <body>
@@ -93,148 +93,184 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
           <div id="panel-story"   class="tab-panel active"></div>
           <div id="panel-acq"     class="tab-panel"></div>
           <div id="panel-unlockq" class="tab-panel"></div>
           <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
   </main>
 
-  <script>
-    const LANG_KEY = 'ffxiv-guide-lang';
-    const i18n = {
-      EN:{
-        langLabel:'EN',
-        pageTitle:'One Last Hurrah',
-        tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
-        story:`<p>At Tuliyollal’s harbor, a messenger finds you and hurriedly explains that Ketenramm wishes to speak. The old explorer soon appears, apologizing for stopping you, but his eyes shine with resolve. He speaks of Shades’ Triangle, a cursed stretch of sea where ships vanished and whispers told of a crescent-shaped isle. Though life kept him ashore, the mystery has haunted him for years. With Koana’s reason and Wuk Lamat’s blessing, he asks you to join him on one final voyage.</p>
-        <p>You accept, and soon a ship from Limsa Lominsa carries you into the Northern Empty. Ofangeim, the navigator, notes the rare calm of these seas, while the crew shares their stories — a surveyor who once glimpsed the isle, a secretary whose grandfather sailed with Ketenramm, a prospector dreaming of trade, and a provisioner lamenting a drunken fool locked away. Their hopes and fears mingle as the horizon shifts.</p>
-        <p>Then the lookout cries out: land ahead. A crescent isle flickers in and out of sight, mocking your eyes. A strange voice whispers in your mind alone, and suddenly the ship lurches, seized by unseen force. Helpless, you are drawn forward, docking without a scratch before a phantom village. Ketenramm hands you a weathered journal — the Occult Record — and entrusts you to record what lies ahead. Thus begins the tale of the Occult Crescent.</p>`,
-        acq:`<div class="stack">
-          <div class="row"><b>Quest Giver</b> Expedition Messenger <small class="muted">(Tuliyollal, X:17.1, Y:11.8)</small></div>
-        </div>`,
-        unlockq:`<div class="stack">
-          <div class="row"><a class="link" href="#">Dawntrail</a></div>
-        </div>`,
-        followq:`<div class="stack">
-          <div class="row"><a class="link" href="#">The Phantom Village</a></div>
-        </div>`
-      },
-      JP:{
-        langLabel:'JP',
-        pageTitle:'ケテンラム、最後の冒険',
-        tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
-        story:`<p>トゥルヤロルの港で、伝令があなたを見つけ、ケテンラムが話したがっていると急ぎ伝える。やがて現れた老探検家は、立ち止めたことを詫びながらも、その瞳に揺るぎない決意を宿していた。彼が語るのは「影の三角海域」──数多の船が消息を絶ち、三日月の島影が囁かれる呪われた海域だ。陸での務めに追われながらも、この謎は彼の心を離れなかった。コアナの理とウクラマートの励ましを受け、彼は最後の航海へとあなたを誘う。</p>
-        <p>あなたは頷き、リムサ・ロミンサから運ばれた船で北洋へと漕ぎ出す。航海士オファンゲイムは珍しい凪を指摘し、船員たちはそれぞれの物語を語る。島を遠望した測量士、ケテンラムと共に初めてトゥルヤロルに上陸した祖父を持つ書記官、交易の夢を見る鑑定士、そして酔って樽に押し込まれた厄介者を嘆く物資係……。彼らの期待と不安が、水平線の向こうへと混じり合う。</p>
-        <p>やがて見張りの叫びが響く。「陸影！」　三日月の島が現れては消え、視線を嘲笑うように揺らめく。奇妙な声があなたの心にだけ囁き、次の瞬間、船は見えざる力に捕らわれた。抗うことなく引き寄せられ、傷一つなく幻の村へと接岸する。ケテンラムは風化した記録帳をあなたに手渡し、それに旅のすべてを書き留めてほしいと託す。こうして「蜃気楼の三日月」の物語が幕を開けた。</p>`,
-        acq:`<div class="stack">
-          <div class="row"><b>クエスト発行</b> 探査隊の連絡員 <small class="muted">（トライヨラ, X:17.1, Y:11.8）</small></div>
-        </div>`,
-        unlockq:`<div class="stack">
-          <div class="row"><a class="link" href="#">黄金のレガシ</a></div>
-        </div>`,
-        followq:`<div class="stack">
-          <div class="row"><a class="link" href="#">無人の町</a></div>
-        </div>`
-      },
-      ZH:{
-        langLabel:'ZH',
-        pageTitle:'最後的冒險',
-        tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
-        story:`<p>在 Tuliyollal 的港口，一名信使急切找到你，說 Ketenramm 想與你談話。很快，這位老探險家出現，雖然為攔住你而致歉，但眼神中閃爍著堅定的光芒。他開口談起「Shades’ Triangle」——那片無數船隻消失、傳說中有新月島影的詛咒之海。多年來，他雖被陸上的責任綁住，卻始終無法忘懷這個謎團。在 Koana 的理性支持與 Wuk Lamat 的鼓勵下，他請你陪伴他完成最後的航程。</p>
-        <p>你答應了，隨即登上一艘從 Limsa Lominsa 調來的船，駛向 Northern Empty。航海士 Ofangeim 提到此海域難得的平靜，船員們也各自分享心聲——曾遠遠望見島嶼的測量員、以祖父的冒險為榮的書記官、懷抱貿易夢想的鑑定師，以及抱怨那位被綁進酒桶的醉漢的物資官。希望與不安交織在一起，隨著船身一同推向未知。</p>
-        <p>不久後，瞭望手的喊聲劃破寧靜：「陸地！」　一座新月狀的島嶼忽隱忽現，彷彿嘲弄著眾人的視線。就在此時，一個神秘的聲音只在你心中低語，隨即船身猛然一震，被無形的力量拉扯前進。船毫髮無損，卻被完美地停泊在一座幻影般的村落前。Ketenramm 將一本風化的日誌交到你手中——「Occult Record」。他要你記錄這段旅程。於是，Occult Crescent 的傳說自此展開。</p>`,
-        acq:`<div class="stack">
-          <div class="row"><b>任務發布</b> 探險隊傳令 <small class="muted">（Tuliyollal, X:17.1, Y:11.8）</small></div>
-        </div>`,
-        unlockq:`<div class="stack">
-          <div class="row"><a class="link" href="#">黃金的遺產</a></div>
-        </div>`,
-        followq:`<div class="stack">
-          <div class="row"><a class="link" href="#">幻影之村</a></div>
-        </div>`
-      }
-    };
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
 
-    const langToggle=document.getElementById('langToggle');
-    const pageTitle=document.getElementById('pageTitle');
-    const tabBtns=[...document.querySelectorAll('.tab-btn')];
-    const panels={
-      story:document.getElementById('panel-story'),
-      acq:document.getElementById('panel-acq'),
-      unlockq:document.getElementById('panel-unlockq'),
-      followq:document.getElementById('panel-followq')
-    };
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'One Last Hurrah',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>At Tuliyollal’s harbor, a messenger finds you and hurriedly explains that Ketenramm wishes to speak. The old explorer soon appears, apologizing for stopping you, but his eyes shine with resolve. He speaks of Shades’ Triangle, a cursed stretch of sea where ships vanished and whispers told of a crescent-shaped isle. Though life kept him ashore, the mystery has haunted him for years. With Koana’s reason and Wuk Lamat’s blessing, he asks you to join him on one final voyage.</p>
+      <p>You accept, and soon a ship from Limsa Lominsa carries you into the Northern Empty. Ofangeim, the navigator, notes the rare calm of these seas, while the crew shares their stories — a surveyor who once glimpsed the isle, a secretary whose grandfather sailed with Ketenramm, a prospector dreaming of trade, and a provisioner lamenting a drunken fool locked away. Their hopes and fears mingle as the horizon shifts.</p>
+      <p>Then the lookout cries out: land ahead. A crescent isle flickers in and out of sight, mocking your eyes. A strange voice whispers in your mind alone, and suddenly the ship lurches, seized by unseen force. Helpless, you are drawn forward, docking without a scratch before a phantom village. Ketenramm hands you a weathered journal — the Occult Record — and entrusts you to record what lies ahead. Thus begins the tale of the Occult Crescent.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Expedition Messenger <small class="muted">(Tuliyollal, X:17.1, Y:11.8)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="#">Dawntrail</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">The Phantom Village</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'ケテンラム、最後の冒険',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>トゥルヤロルの港で、伝令があなたを見つけ、ケテンラムが話したがっていると急ぎ伝える。やがて現れた老探検家は、立ち止めたことを詫びながらも、その瞳に揺るぎない決意を宿していた。彼が語るのは「影の三角海域」──数多の船が消息を絶ち、三日月の島影が囁かれる呪われた海域だ。陸での務めに追われながらも、この謎は彼の心を離れなかった。コアナの理とウクラマートの励ましを受け、彼は最後の航海へとあなたを誘う。</p>
+      <p>あなたは頷き、リムサ・ロミンサから運ばれた船で北洋へと漕ぎ出す。航海士オファンゲイムは珍しい凪を指摘し、船員たちはそれぞれの物語を語る。島を遠望した測量士、ケテンラムと共に初めてトゥルヤロルに上陸した祖父を持つ書記官、交易の夢を見る鑑定士、そして酔って樽に押し込まれた厄介者を嘆く物資係……。彼らの期待と不安が、水平線の向こうへと混じり合う。</p>
+      <p>やがて見張りの叫びが響く。「陸影！」　三日月の島が現れては消え、視線を嘲笑うように揺らめく。奇妙な声があなたの心にだけ囁き、次の瞬間、船は見えざる力に捕らわれた。抗うことなく引き寄せられ、傷一つなく幻の村へと接岸する。ケテンラムは風化した記録帳をあなたに手渡し、それに旅のすべてを書き留めてほしいと託す。こうして「蜃気楼の三日月」の物語が幕を開けた。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> 探査隊の連絡員 <small class="muted">（トライヨラ, X:17.1, Y:11.8）</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="#">黄金のレガシ</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">無人の町</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'最後的冒險',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>在 Tuliyollal 的港口，一名信使急切找到你，說 Ketenramm 想與你談話。很快，這位老探險家出現，雖然為攔住你而致歉，但眼神中閃爍著堅定的光芒。他開口談起「Shades’ Triangle」——那片無數船隻消失、傳說中有新月島影的詛咒之海。多年來，他雖被陸上的責任綁住，卻始終無法忘懷這個謎團。在 Koana 的理性支持與 Wuk Lamat 的鼓勵下，他請你陪伴他完成最後的航程。</p>
+      <p>你答應了，隨即登上一艘從 Limsa Lominsa 調來的船，駛向 Northern Empty。航海士 Ofangeim 提到此海域難得的平靜，船員們也各自分享心聲——曾遠遠望見島嶼的測量員、以祖父的冒險為榮的書記官、懷抱貿易夢想的鑑定師，以及抱怨那位被綁進酒桶的醉漢的物資官。希望與不安交織在一起，隨著船身一同推向未知。</p>
+      <p>不久後，瞭望手的喊聲劃破寧靜：「陸地！」　一座新月狀的島嶼忽隱忽現，彷彿嘲弄著眾人的視線。就在此時，一個神秘的聲音只在你心中低語，隨即船身猛然一震，被無形的力量拉扯前進。船毫髮無損，卻被完美地停泊在一座幻影般的村落前。Ketenramm 將一本風化的日誌交到你手中——「Occult Record」。他要你記錄這段旅程。於是，Occult Crescent 的傳說自此展開。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 探險隊傳令 <small class="muted">（Tuliyollal, X:17.1, Y:11.8）</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="#">黃金的遺產</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="#">幻影之村</a></div>
+    </div>`
+  }
+};
 
-    function getLang(){return localStorage.getItem(LANG_KEY)||'EN';}
-    function _renderPanel(key,lang){
-      const t=i18n[lang]||i18n.EN;
-      Object.keys(panels).forEach(k=>panels[k].classList.remove('active'));
-      panels[key].classList.add('active');
-      panels[key].innerHTML=t[key];
-    }
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
 
-    // —— 長文自動收合（>800 字時加入按鈕，依語言顯示文案）
-    const readMoreLabels = {
-      EN:{more:'Read more', less:'Show less'},
-      JP:{more:'続きを読む',  less:'折りたたむ'},
-      ZH:{more:'展開全文',    less:'收合內容'}
-    };
-    function makeStoryCollapsible(lang){
-      const panel = panels.story;
-      if(!panel) return;
-      const textLen = panel.textContent.trim().length;
-      if(textLen < 800) return; // 只在長文時啟用
-      const inner = panel.innerHTML.trim();
-      const wrap = document.createElement('div');
-      wrap.className = 'story-collapsible';
-      wrap.innerHTML = inner;
-      const btn = document.createElement('button');
-      const L = readMoreLabels[lang] || readMoreLabels.EN;
-      btn.className = 'story-toggle';
-      btn.textContent = L.more;
-      btn.addEventListener('click', ()=>{
-        const on = wrap.classList.toggle('story-expanded');
-        btn.textContent = on ? L.less : L.more;
-      });
-      panel.innerHTML = '';
-      panel.appendChild(wrap);
-      panel.appendChild(btn);
-    }
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
 
-    function renderPanel(key,lang){
-      _renderPanel(key,lang);
-      if(key==='story') makeStoryCollapsible(lang);
-    }
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
 
-    function applyLang(lang){
-      const t=i18n[lang]||i18n.EN;
-      pageTitle.textContent=t.pageTitle;
-      langToggle.textContent=`🌐 ${t.langLabel}`;
-      tabBtns.forEach(btn=>{btn.textContent=t.tabs[btn.dataset.tab]});
-      const activeBtn=tabBtns.find(b=>b.getAttribute('aria-selected')==='true')||tabBtns[0];
-      renderPanel(activeBtn.dataset.tab,lang);
-    }
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
 
-    tabBtns.forEach(btn=>{
-      btn.addEventListener('click',()=>{
-        tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
-        btn.setAttribute('aria-selected','true');
-        renderPanel(btn.dataset.tab,getLang());
-      });
-    });
-    langToggle.addEventListener('click',()=>{
-      const cur=getLang();
-      const next=cur==='EN'?'JP':(cur==='JP'?'ZH':'EN');
-      localStorage.setItem(LANG_KEY,next);
-      applyLang(next);
-    });
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
 
-    applyLang(getLang());
-  </script>
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'belaug-ffxiv/FFXIV_Library',
+  repoId: 'R_kgD0Pyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
 </body>
 </html>
