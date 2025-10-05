@@ -43,16 +43,17 @@
     .link{color:#0b60d8;text-decoration:none}
     .link:hover{text-decoration:underline}
 
-    /* 長文自動收合（若內文過長才會生效） */
-    .story-collapsible{position:relative;max-height:380px;overflow:hidden}
-    .story-collapsible::after{
-      content:"";position:absolute;inset:auto 0 0 0;height:72px;
+    /* —— 展開/收合（手動按鈕，避免依賴字數閾值） —— */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
       background:linear-gradient(to bottom, rgba(255,248,230,0), var(--card));
+      pointer-events:none;
     }
-    .story-toggle{display:inline-block;margin-top:10px;padding:8px 14px;border:1px solid var(--border);
-      border-radius:999px;background:#fff;cursor:pointer;font-weight:600}
-    .story-expanded{max-height:none}
-    .story-expanded::after{display:none}
+    .expand-wrap{margin-top:10px}
+    .expand-btn{display:inline-block;padding:8px 14px;border:1px solid var(--border);border-radius:999px;background:#fff;cursor:pointer;font-weight:600}
+    .expand-btn:hover{background:#fffef8}
   </style>
 </head>
 <body>
@@ -87,12 +88,16 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
-          <div id="panel-story"   class="tab-panel active"></div>
-          <div id="panel-acq"     class="tab-panel"></div>
-          <div id="panel-unlockq" class="tab-panel"></div>
-          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -104,10 +109,14 @@ const i18n = {
   EN:{
     langLabel:'EN',
     pageTitle:"Passing the Blade",
-    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
-    story:`<p>Leofric hands you a dagger—old, ornamental, and symbolic. He cannot leave Lost Hope, so he entrusts you with it. This blade once belonged to the Brass Blades of the Rose… and now, he says, it should go to Fufulupa.</p>
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+<p>Leofric hands you a dagger—old, ornamental, and symbolic. He cannot leave Lost Hope, so he entrusts you with it. This blade once belonged to the Brass Blades of the Rose… and now, he says, it should go to Fufulupa.</p>
 <p>You return to Horizon. Fufulupa greets you with his usual enthusiasm, but freezes the moment he sees the dagger. To him, it’s not a trinket—it’s a badge of command. Only a captain may bear it.</p>
-<p>At first, he refuses to believe it. Surely, he isn’t worthy. Surely, Leofric isn’t stepping away… But he takes the dagger anyway, holding it not with pride, but reverence. Until the day his captain returns.</p>`,
+<p>At first, he refuses to believe it. Surely, he isn’t worthy. Surely, Leofric isn’t stepping away… But he takes the dagger anyway, holding it not with pride, but reverence. Until the day his captain returns.</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>Quest Giver</b> Leofric <small class="muted">(Central Thanalan, X: 23.3, Y: 16.0)</small></div>
     </div>`,
@@ -121,11 +130,15 @@ const i18n = {
   JP:{
     langLabel:'JP',
     pageTitle:'受け継がれる護身刀',
-    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
-    story:`<p>レオフリックは、あなたに1本の装飾用短剣を託す。彼自身はロストホープを離れられない。だからこそ、ブラッドブレード・オブ・ザ・ローズに属するその象徴を、フフルパに届けてほしいのだという。</p>
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+<p>レオフリックは、あなたに1本の装飾用短剣を託す。彼自身はロストホープを離れられない。だからこそ、ブラッドブレード・オブ・ザ・ローズに属するその象徴を、フフルパに届けてほしいのだという。</p>
 <p>あなたはホライズンに戻り、フフルパに短剣を渡す。彼は最初、感謝の言葉を口にするが、短剣を見るや顔色が変わる。それは、隊長だけが持つことを許された証。</p>
 <p>彼は動揺し、信じようとしない。自分がふさわしいはずがない、レオフリックが退こうとしているなどありえない──そう自分に言い聞かせる。</p>
-<p>それでも彼は、尊敬と決意を込めて短剣を受け取る。これは誇りの証ではなく、約束の預かり物。隊長が戻るその日まで、彼はそれを守り続ける。</p>`,
+<p>それでも彼は、尊敬と決意を込めて短剣を受け取る。これは誇りの証ではなく、約束の預かり物。隊長が戻るその日まで、彼はそれを守り続ける。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>クエスト発行</b> レオフリック <small class="muted">（中央ザナラーン, X: 23.3, Y: 16.0）</small></div>
     </div>`,
@@ -139,10 +152,14 @@ const i18n = {
   ZH:{
     langLabel:'ZH',
     pageTitle:'傳承之刃',
-    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
-    story:`<p>Leofric 將一把短劍交到你手中。那只是件舊式的裝飾品，卻代表著某段過去。他不能離開 Lost Hope，只能託你將它交還給 Fufulupa──這把劍屬於 Brass Blades of the Rose。</p>
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+<p>Leofric 將一把短劍交到你手中。那只是件舊式的裝飾品，卻代表著某段過去。他不能離開 Lost Hope，只能託你將它交還給 Fufulupa──這把劍屬於 Brass Blades of the Rose。</p>
 <p>你回到 Horizon，Fufulupa 熱情地迎接你，但當他看到那把劍時，整個人瞬間僵住。那不是普通的武器，而是象徵隊長身分的信物。</p>
-<p>他一時無法接受。他不認為自己配得上，也不敢相信 Leofric 是真的要退下了。但最終，他還是雙手接過這把短劍。不是作為榮耀，而是作為託付──直到那位他尊敬的隊長回來的那一天。</p>`,
+<p>他一時無法接受。他不認為自己配得上，也不敢相信 Leofric 是真的要退下了。但最終，他還是雙手接過這把短劍。不是作為榮耀，而是作為託付──直到那位他尊敬的隊長回來的那一天。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>任務發布</b> Leofric <small class="muted">（薩納蘭中部, X: 23.3, Y: 16.0）</small></div>
     </div>`,
@@ -162,7 +179,8 @@ const panels = {
   story:  document.getElementById('panel-story'),
   acq:    document.getElementById('panel-acq'),
   unlockq:document.getElementById('panel-unlockq'),
-  followq:document.getElementById('panel-followq')
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
 };
 
 function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
@@ -174,12 +192,32 @@ function applyLang(lang){
   const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
   renderPanel(activeBtn.dataset.tab, lang);
 }
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
 function renderPanel(key, lang){
   const t = i18n[lang] || i18n.EN;
   Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
   panels[key].classList.add('active');
-  panels[key].innerHTML = t[key];
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
 }
+
 tabBtns.forEach(btn=>{
   btn.addEventListener('click', ()=>{
     tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
@@ -194,41 +232,39 @@ langToggle.addEventListener('click', ()=>{
   applyLang(next);
 });
 
-/* —— 長文自動收合（依字數自動出現） —— */
-const readMoreLabels = {
-  EN: {more:'Read more', less:'Show less'},
-  JP: {more:'続きを読む',   less:'折りたたむ'},
-  ZH: {more:'展開全文',     less:'收合內容'}
-};
-function makeStoryCollapsible(lang){
-  const panel = document.getElementById('panel-story');
-  if(!panel) return;
-  const textLen = panel.textContent.trim().length;
-  if(textLen < 800) return;
-  const inner = panel.innerHTML.trim();
-  const wrap = document.createElement('div');
-  wrap.className = 'story-collapsible';
-  wrap.innerHTML = inner;
-  const btn = document.createElement('button');
-  const L = readMoreLabels[lang] || readMoreLabels.EN;
-  btn.className = 'story-toggle';
-  btn.textContent = L.more;
-  btn.addEventListener('click', ()=>{
-    const on = wrap.classList.toggle('story-expanded');
-    btn.textContent = on ? L.less : L.more;
-  });
-  panel.innerHTML = '';
-  panel.appendChild(wrap);
-  panel.appendChild(btn);
-}
-/* 掛鉤 renderPanel：切到 Story 時套用收合 */
-const _origRenderPanel = renderPanel;
-renderPanel = function(key, lang){
-  _origRenderPanel(key, lang);
-  if(key==='story') makeStoryCollapsible(lang);
-};
-
 applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'belaug-ffxiv/FFXIV_Library',
+  repoId: 'R_kgD0Pyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
 </script>
 </body>
 </html>
