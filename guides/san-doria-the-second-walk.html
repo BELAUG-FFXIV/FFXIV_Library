@@ -70,12 +70,18 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="req">Requirements</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlock">Follow-Up Quest</button>
+          <!-- 新增：Comments 分頁按鈕 -->
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
           <div id="panel-story" class="tab-panel active"></div>
           <div id="panel-acq" class="tab-panel"></div>
           <div id="panel-req" class="tab-panel"></div>
           <div id="panel-unlock" class="tab-panel"></div>
+          <!-- 新增：留言面板 -->
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -88,7 +94,7 @@
       EN:{
         langLabel:'EN',
         pageTitle:'San d’Oria: The Second Walk',
-        tabs:{story:'Story', req:'Requirements', acq:'Unlock Quest', unlock:'Follow-Up Quest'},
+        tabs:{story:'Story', req:'Requirements', acq:'Unlock Quest', unlock:'Follow-Up Quest', comments:'Comments'},
         story:`<p>Sareel Ja remains determined to fashion a figure he believes worthy of ruling Tural. Confident he has found a champion that proves your match, he has extended you an invitation to return to Jeuno. There, you come face to face with none other than Kam’lanaut─Archduke of Jeuno, and one of the last survivors of an ancient race known as the Zilart. Kam’lanaut soon departs for the battlefield, eager to meet you in combat. Refuse Sareel Ja’s hospitality, and he has promised to unleash a horde of echoes upon the people of Yak T’el. With little choice but to accept, you steel yourself for another journey down the Walk of Echoes.</p>`,
         req:`<div class="stack">
           <div class="row"><strong>Players:</strong> 1–8 players (3 parties of 1 Tank, 2 Healers, 5 DPS)</div>
@@ -112,7 +118,7 @@
       JP:{
         langLabel:'JP',
         pageTitle:'サンドリア・ザ・セカンドウォーク',
-        tabs:{story:'ストーリー', req:'必要条件', acq:'開放クエスト', unlock:'後続クエスト'},
+        tabs:{story:'ストーリー', req:'必要条件', acq:'開放クエスト', unlock:'後続クエスト', comments:'コメント'},
         story:`<p>サリール・ジャは依然として、トゥルヤロルを統べるにふさわしい存在を作り上げようと固執していた。ついにあなたに匹敵する者を見つけたと確信した彼は、ジュノへ戻るよう招待状を差し出す。そこであなたを待ち受けていたのは、ジュノ大公にして、古代の民「ジラート」の末裔カムラナートであった。カムラナートは戦場で相まみえることを心待ちにし、すぐさま戦いへと向かう。もしサリール・ジャの厚意を拒めば、ヤク・テルの民に「エコーズ」の大群を解き放つと彼は脅す。選択の余地はなく、あなたは再び「ウォーク・オブ・エコーズ」への旅路に心を固めるのだった。</p>`,
         req:`<div class="stack">
           <div class="row"><strong>プレイヤー数：</strong>1～8人（1パーティ3組：タンク1／ヒーラー2／DPS5）</div>
@@ -136,7 +142,7 @@
       ZH:{
         langLabel:'ZH-TW',
         pageTitle:'聖多利亞：第二試煉',
-        tabs:{story:'故事概要', req:'需求條件', acq:'解鎖任務', unlock:'後續任務'},
+        tabs:{story:'故事概要', req:'需求條件', acq:'解鎖任務', unlock:'後續任務', comments:'留言'},
         story:`<p>Sareel Ja 依舊執著於塑造一位他認為足以統治 Tural 的存在。他篤定自己已找到能與你匹敵的勇者，於是向你發出返回 Jeuno 的邀請。在那裡，等候你的是 Kam’lanaut──Jeuno 的大公，同時也是古老種族 Zilart 的最後倖存者之一。Kam’lanaut 很快便動身前往戰場，滿心期待與你一決高下。若你拒絕 Sareel Ja 的「款待」，他便揚言要將大批 echoes 釋放至 Yak T’el 的人民之間。幾乎別無選擇，你只得振作精神，再度踏上 Walk of Echoes 的道路。</p>`,
         req:`<div class="stack">
           <div class="row"><strong>人數：</strong>1–8 人（3 隊伍，每隊 1 坦克／2 治療／5 輸出）</div>
@@ -165,7 +171,8 @@
       story : document.getElementById('panel-story'),
       acq   : document.getElementById('panel-acq'),
       req   : document.getElementById('panel-req'),
-      unlock: document.getElementById('panel-unlock')
+      unlock: document.getElementById('panel-unlock'),
+      comments: document.getElementById('panel-comments') // 新增
     };
 
     function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
@@ -176,13 +183,20 @@
       tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
       const activeBtn = tabBtns.find(b=>b.getAttribute('aria-selected')==='true') || tabBtns[0];
       renderPanel(activeBtn.dataset.tab, lang);
+      // 若停在留言分頁，切語言後重載 giscus
+      if (activeBtn && activeBtn.dataset.tab === 'comments') loadGiscusForCurrentLang();
     }
 
+    // 不要覆寫留言容器；進入留言分頁時才載入 giscus
     function renderPanel(key, lang){
       const t = i18n[lang] || i18n.EN;
       Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
       panels[key].classList.add('active');
-      panels[key].innerHTML = t[key];
+      if (key !== 'comments') {
+        panels[key].innerHTML = t[key];
+      } else {
+        loadGiscusForCurrentLang();
+      }
     }
 
     tabBtns.forEach(btn=>{
@@ -201,6 +215,38 @@
     });
 
     applyLang(getLang());
+
+    /* === Giscus：單一 Comments 分頁，隨語言切換 === */
+    const GISCUS_CFG = {
+      repo: 'belaug-ffxiv/FFXIV_Library',
+      repoId: 'R_kgD0Pyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+    };
+    function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+    function loadGiscusForCurrentLang(){
+      const mount = document.getElementById('giscus_container');
+      if (!mount) return;
+      mount.innerHTML = ''; // 清掉舊 iframe/script
+      const langCode = getLang(); // EN / JP / ZH
+      const s = document.createElement('script');
+      s.src = 'https://giscus.app/client.js';
+      s.setAttribute('data-repo', GISCUS_CFG.repo);
+      s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+      s.setAttribute('data-category', GISCUS_CFG.category);
+      s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+      s.setAttribute('data-mapping', 'specific');                   
+      s.setAttribute('data-term', location.pathname + '｜' + langCode); 
+      s.setAttribute('data-reactions-enabled', '1');
+      s.setAttribute('data-emit-metadata', '0');
+      s.setAttribute('data-input-position', 'bottom');
+      s.setAttribute('data-lang', uiLang(langCode));
+      s.setAttribute('data-theme', GISCUS_CFG.theme);
+      s.setAttribute('crossorigin', 'anonymous');
+      s.async = true;
+      mount.appendChild(s);
+    }
   </script>
 </body>
 </html>
