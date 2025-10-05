@@ -42,6 +42,20 @@
     .muted{color:var(--muted)}
     .link{color:#0b60d8;text-decoration:none}
     .link:hover{text-decoration:underline}
+
+    /* 展開/收合 */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
   </style>
 </head>
 <body>
@@ -76,12 +90,16 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
-          <div id="panel-story"   class="tab-panel active"></div>
-          <div id="panel-acq"     class="tab-panel"></div>
-          <div id="panel-unlockq" class="tab-panel"></div>
-          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -93,10 +111,14 @@ const i18n = {
   EN:{
     langLabel:'EN',
     pageTitle:'Way Down in the Hole',
-    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
-    story:`<p>You hear a rumor—there’s an untouched vein of ore hidden beneath the ruins of Sil’dih. Wystan, a young merchant from Stonesthrow, dares to claim it for himself, hoping to use the wealth to challenge Ul’dah’s corrupt order. You meet him at the Coffer & Coffin, where he entrusts you with a small but heartfelt task: delivering cookies to the children he looks after.</p>
-    <p>As Wystan presses on with his ambitions, he is betrayed. Brass Blades—men he thought loyal—turn on him. At the excavation site, you fight to protect him, facing a masked mage who animates a golem with dark magic. When the battle ends, Thancred arrives and reveals that this was no simple betrayal—it was a message from Lord Lolorito himself.</p>
-    <p>You return to Ul’dah. Wystan, now a marked man, decides to flee for the sake of the children. Momodi assures you that your role in the incident remains hidden—for now. Though you risked your life for a stranger, she sees your heart. Ul’dah is a city of shadows, but she reminds you there is still kindness within it. And with Thancred watching from afar, your path quietly begins to entwine with that of the Scions.</p>`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>You hear a rumor—there’s an untouched vein of ore hidden beneath the ruins of Sil’dih. Wystan, a young merchant from Stonesthrow, dares to claim it for himself, hoping to use the wealth to challenge Ul’dah’s corrupt order. You meet him at the Coffer & Coffin, where he entrusts you with a small but heartfelt task: delivering cookies to the children he looks after.</p>
+      <p>As Wystan presses on with his ambitions, he is betrayed. Brass Blades—men he thought loyal—turn on him. At the excavation site, you fight to protect him, facing a masked mage who animates a golem with dark magic. When the battle ends, Thancred arrives and reveals that this was no simple betrayal—it was a message from Lord Lolorito himself.</p>
+      <p>You return to Ul’dah. Wystan, now a marked man, decides to flee for the sake of the children. Momodi assures you that your role in the incident remains hidden—for now. Though you risked your life for a stranger, she sees your heart. Ul’dah is a city of shadows, but she reminds you there is still kindness within it. And with Thancred watching from afar, your path quietly begins to entwine with that of the Scions.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>Quest Giver</b> Zuzumeda <small class="muted">(Central Thanalan, X:20.7, Y:18.3)</small></div>
     </div>`,
@@ -110,10 +132,14 @@ const i18n = {
   JP:{
     langLabel:'JP',
     pageTitle:'成功の表と裏',
-    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
-    story:`<p>あなたは耳にする。シラディハ遺跡の地下に、未発掘の鉱脈が眠っていると──。ストーンズスロウ出身の若き商人ウィスタンは、それを自らの手で掘り起こし、得た富でウルダハの腐敗に立ち向かおうとしていた。彼は「コファー＆コフィン」であなたと出会い、孤児たちにジンジャークッキーを届けてほしいと頼む。</p>
-    <p>しかし、その理想は裏切りによって潰えようとしていた。忠義を誓っていたはずのブラスブレードたちが牙を剥き、遺跡では謎の仮面の男が魔力でゴーレムを呼び覚ます。あなたは剣を取り、彼らを守るために戦う。戦いのあと、サンクレッドが現れ、これはロロリト卿による明確な警告であると告げる。</p>
-    <p>あなたはウルダハに戻る。ウィスタンは命を守るため、街を去る決意をする。モモディはあなたの関与を隠してくれたが、この街の闇はあまりにも深い。だが、彼女は言う──この街には、まだ優しさも残っているのだと。そして、サンクレッドの視線の先で、あなたの運命は静かに「スコーンズ」たちと交わり始める。</p>`,
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>あなたは耳にする。シラディハ遺跡の地下に、未発掘の鉱脈が眠っていると──。ストーンズスロウ出身の若き商人ウィスタンは、それを自らの手で掘り起こし、得た富でウルダハの腐敗に立ち向かおうとしていた。彼は「コファー＆コフィン」であなたと出会い、孤児たちにジンジャークッキーを届けてほしいと頼む。</p>
+      <p>しかし、その理想は裏切りによって潰えようとしていた。忠義を誓っていたはずのブラスブレードたちが牙を剥き、遺跡では謎の仮面の男が魔力でゴーレムを呼び覚ます。あなたは剣を取り、彼らを守るために戦う。戦いのあと、サンクレッドが現れ、これはロロリト卿による明確な警告であると告げる。</p>
+      <p>あなたはウルダハに戻る。ウィスタンは命を守るため、街を去る決意をする。モモディはあなたの関与を隠してくれたが、この街の闇はあまりにも深い。だが、彼女は言う──この街には、まだ優しさも残っているのだと。そして、サンクレッドの視線の先で、あなたの運命は静かに「スコーンズ」たちと交わり始める。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>クエスト発行</b> ヅヅメダ <small class="muted">（中央ザナラーン, X:20.7, Y:18.3）</small></div>
     </div>`,
@@ -127,10 +153,14 @@ const i18n = {
   ZH:{
     langLabel:'ZH',
     pageTitle:'成功背後的真相',
-    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
-    story:`<p>你聽聞一則傳言：在 Sil’dih 廢墟之下藏有尚未開採的巨大礦脈。來自 Stonesthrow 的青年商人 Wystan 準備搶先探勘，想藉此獲取財富並挑戰 Ul’dah 腐敗的體系。在 Coffer & Coffin，你與他相遇，他請你代為照顧幾名總是黏著他的孩子，幫他們送上薑餅乾並勸他們回家。</p>
-    <p>然而這份理想很快被現實粉碎。Wystan 所信任的 Brass Blades 出賣了他。當你趕到遺跡時，場面已失控──一名蒙面男子以魔法喚醒石像魔像。你挺身而戰，保護 Wystan 的夢想不至破滅。戰後，Thancred 現身，揭示這場危機實為 Lord Lolorito 精心設下的警告。</p>
-    <p>你回到 Ul’dah。Wystan 決定離開，以免牽連無辜。Momodi 向你保證，沒人知道你涉入其中。雖然你為一個陌生人冒險，她卻看見了你的真心。Ul’dah 的黑暗仍在，但她提醒你，這城市中仍有人願意守護微光。而 Thancred 遠遠注視著你，你的命運也正悄悄走向 Scions 的世界。</p>`,
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>你聽聞一則傳言：在 Sil’dih 廢墟之下藏有尚未開採的巨大礦脈。來自 Stonesthrow 的青年商人 Wystan 準備搶先探勘，想藉此獲取財富並挑戰 Ul’dah 腐敗的體系。在 Coffer & Coffin，你與他相遇，他請你代為照顧幾名總是黏著他的孩子，幫他們送上薑餅乾並勸他們回家。</p>
+      <p>然而這份理想很快被現實粉碎。Wystan 所信任的 Brass Blades 出賣了他。當你趕到遺跡時，場面已失控──一名蒙面男子以魔法喚醒石像魔像。你挺身而戰，保護 Wystan 的夢想不至破滅。戰後，Thancred 現身，揭示這場危機實為 Lord Lolorito 精心設下的警告。</p>
+      <p>你回到 Ul’dah。Wystan 決定離開，以免牽連無辜。Momodi 向你保證，沒人知道你涉入其中。雖然你為一個陌生人冒險，她卻看見了你的真心。Ul’dah 的黑暗仍在，但她提醒你，這城市中仍有人願意守護微光。而 Thancred 遠遠注視著你，你的命運也正悄悄走向 Scions 的世界。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>任務發布</b> 祖祖梅達 <small class="muted">（薩納蘭中部, X:20.7, Y:18.3）</small></div>
     </div>`,
@@ -150,7 +180,8 @@ const panels = {
   story:  document.getElementById('panel-story'),
   acq:    document.getElementById('panel-acq'),
   unlockq:document.getElementById('panel-unlockq'),
-  followq:document.getElementById('panel-followq')
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
 };
 
 function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
@@ -162,12 +193,32 @@ function applyLang(lang){
   const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
   renderPanel(activeBtn.dataset.tab, lang);
 }
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
 function renderPanel(key, lang){
   const t = i18n[lang] || i18n.EN;
   Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
   panels[key].classList.add('active');
-  panels[key].innerHTML = t[key];
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
 }
+
 tabBtns.forEach(btn=>{
   btn.addEventListener('click', ()=>{
     tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
@@ -175,13 +226,47 @@ tabBtns.forEach(btn=>{
     renderPanel(btn.dataset.tab, getLang());
   });
 });
+
 langToggle.addEventListener('click', ()=>{
   const cur = getLang();
   const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
   localStorage.setItem(LANG_KEY, next);
   applyLang(next);
 });
+
 applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'belaug-ffxiv/FFXIV_Library',
+  repoId: 'R_kgD0Pyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
 </script>
 </body>
 </html>
