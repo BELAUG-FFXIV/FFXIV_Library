@@ -66,11 +66,15 @@
           <button class="tab-btn" role="tab" aria-selected="true"  data-tab="about">About</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="seats">Seats</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
           <div id="panel-about" class="tab-panel active"></div>
           <div id="panel-acq"   class="tab-panel"></div>
           <div id="panel-seats" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -82,7 +86,7 @@
       EN:{
         langLabel:'EN',
         pageTitle:'Behemoth',
-        tabs:{ about:'About', acq:'Acquisition', seats:'Seats' },
+        tabs:{ about:'About', acq:'Acquisition', seats:'Seats', comments:'Comments' },
         about:`<div class="stack">
           <div class="row">Summon your mighty behemoth, trained from birth to carry you…not trample you underfoot like an ant.</div>
           <div class="row">Immediately following the Calamity, an adventurer returning to Gridania from Falcon’s Nest in Coerthas claims to have happened upon a den of baby behemoths who had lost their mother. Despite objections from friends and family alike, she kept the beasts, eventually training them to serve as mounts.</div>
@@ -95,7 +99,7 @@
       JP:{
         langLabel:'JP',
         pageTitle:'ベヒーモス',
-        tabs:{ about:'紹介', acq:'入手方法', seats:'座席数' },
+        tabs:{ about:'紹介', acq:'入手方法', seats:'座席数', comments:'コメント' },
         about:`<div class="stack">
           <div class="row">生まれたときから調教されてきた強大な Behemoth を召喚しよう──あなたを踏み潰すのではなく、背に乗せるために。</div>
           <div class="row">第七霊災直後、Coerthas の Falcon’s Nest から Gridania に帰還したある冒険者が、母親を失った Behemoth の幼獣たちの巣を偶然見つけたという。友人や家族の反対を押し切り、彼女はその獣たちを保護し、ついには乗騎として育て上げた。</div>
@@ -108,7 +112,7 @@
       ZH:{
         langLabel:'ZH',
         pageTitle:'貝希摩斯',
-        tabs:{ about:'簡介', acq:'取得方式', seats:'可乘人數' },
+        tabs:{ about:'簡介', acq:'取得方式', seats:'可乘人數', comments:'留言' },
         about:`<div class="stack">
           <div class="row">召喚這隻自幼便接受訓練的強大 Behemoth 坐騎──牠如今馴服於你座下，而非將你如螞蟻般踩扁。</div>
           <div class="row">在 Calamity 剛過不久，一位從 Coerthas 的 Falcon’s Nest 返回 Gridania 的冒險者，聲稱偶然發現一群失去母親的小 Behemoth。儘管遭到親友強烈反對，她仍決定收養牠們，最終成功將牠們訓練為可供騎乘的忠實坐騎。</div>
@@ -123,24 +127,34 @@
     const langToggle=document.getElementById('langToggle');
     const pageTitle=document.getElementById('pageTitle');
     const tabBtns=[...document.querySelectorAll('.tab-btn')];
-    const panels={ about:panel('about'), acq:panel('acq'), seats:panel('seats') };
+    const panels={
+      about:panel('about'),
+      acq:panel('acq'),
+      seats:panel('seats'),
+      comments:panel('comments')
+    };
 
     function panel(id){ return document.getElementById('panel-'+id); }
     function getLang(){ return localStorage.getItem(LANG_KEY)||'EN'; }
+
     function applyLang(lang){
       const t=i18n[lang]||i18n.EN;
       pageTitle.textContent=t.pageTitle;
-      langToggle.textContent=`🌐 ${t.langLabel}`;
-      tabBtns.forEach(b=>{ b.textContent=t.tabs[b.dataset.tab]; });
+      langToggle.textContent='🌐 ' + t.langLabel;
+      tabBtns.forEach(b=>{ if(t.tabs[b.dataset.tab]) b.textContent=t.tabs[b.dataset.tab]; });
       const active=tabBtns.find(b=>b.getAttribute('aria-selected')==='true')||tabBtns[0];
       renderPanel(active.dataset.tab,lang);
+      if(active && active.dataset.tab==='comments'){ loadGiscusForCurrentLang(); }
     }
+
     function renderPanel(key,lang){
       const t=i18n[lang]||i18n.EN;
       Object.keys(panels).forEach(k=>panels[k].classList.remove('active'));
       panels[key].classList.add('active');
-      panels[key].innerHTML=t[key];
+      if(key!=='comments'){ panels[key].innerHTML=t[key]; }
+      if(key==='comments'){ loadGiscusForCurrentLang(); }
     }
+
     tabBtns.forEach(btn=>{
       btn.addEventListener('click',()=>{
         tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
@@ -148,11 +162,45 @@
         renderPanel(btn.dataset.tab,getLang());
       });
     });
+
     langToggle.addEventListener('click',()=>{
       const cur=getLang(); const next=cur==='EN'?'JP':(cur==='JP'?'ZH':'EN');
       localStorage.setItem(LANG_KEY,next); applyLang(next);
     });
+
     applyLang(getLang());
+
+    /* === Giscus：單一 Comments 分頁，語言切換 === */
+    const GISCUS_CFG = {
+      repo: 'belaug-ffxiv/FFXIV_Library',
+      repoId: 'R_kgD0Pyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+    };
+    function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+    function loadGiscusForCurrentLang(){
+      const mount=document.getElementById('giscus_container');
+      if(!mount) return;
+      mount.innerHTML='';
+      const langCode=getLang();
+      const s=document.createElement('script');
+      s.src='https://giscus.app/client.js';
+      s.setAttribute('data-repo',GISCUS_CFG.repo);
+      s.setAttribute('data-repo-id',GISCUS_CFG.repoId);
+      s.setAttribute('data-category',GISCUS_CFG.category);
+      s.setAttribute('data-category-id',GISCUS_CFG.categoryId);
+      s.setAttribute('data-mapping','specific');
+      s.setAttribute('data-term',location.pathname+'｜'+langCode);
+      s.setAttribute('data-reactions-enabled','1');
+      s.setAttribute('data-emit-metadata','0');
+      s.setAttribute('data-input-position','bottom');
+      s.setAttribute('data-lang',uiLang(langCode));
+      s.setAttribute('data-theme',GISCUS_CFG.theme);
+      s.setAttribute('crossorigin','anonymous');
+      s.async=true;
+      mount.appendChild(s);
+    }
   </script>
 </body>
 </html>
