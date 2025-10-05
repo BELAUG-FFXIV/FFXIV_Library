@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Duty, Honor, Country | BELAUG · FFXIV Library</title>
-  <meta name="description" content="ARR 2.0 MSQ — Duty, Honor, Country（責任、榮耀與祖國）：故事概要、取得方式與任務銜接。">
+  <meta name="description" content="ARR 2.0 MSQ — Duty, Honor, Country（責任、榮耀與祖國）：故事概要、取得方式、開放與後續任務。">
   <link rel="icon" href="../img/favicon.ico" />
   <style>
     :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
@@ -76,7 +76,7 @@
         <div class="bd">
           <div class="video-wrap">
             <iframe id="ytFrame" src="https://www.youtube.com/embed/4uNwmboameU"
-              title="Duty, Honor, Country" allowfullscreen></iframe>
+              title="Duty, Honor, Country" loading="lazy" allowfullscreen></iframe>
           </div>
         </div>
       </section>
@@ -84,17 +84,21 @@
       <!-- 右：標題 + Tabs -->
       <section class="card">
         <div class="hd" id="pageTitle">Duty, Honor, Country</div>
-        <div class="tabs" role="tablist">
-          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
-          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
-          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
-          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+        <div class="tabs" role="tablist" aria-label="Page sections">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story"    aria-controls="panel-story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq"      aria-controls="panel-acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq"  aria-controls="panel-unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq"  aria-controls="panel-followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments" aria-controls="panel-comments">Comments</button>
         </div>
         <div class="bd">
-          <div id="panel-story"   class="tab-panel active"></div>
-          <div id="panel-acq"     class="tab-panel"></div>
-          <div id="panel-unlockq" class="tab-panel"></div>
-          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -106,7 +110,7 @@
     EN:{
       langLabel:'EN',
       pageTitle:'Duty, Honor, Country',
-      tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
+      tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
       story:`<div class="story-wrap">
         <div class="story-content">
           <p>The Sultansworn have long searched for the royal crown, a symbol of Ul’dah’s legacy—only for it to fall into the hands of criminals. When you deliver a suspicious letter to Owyne, the truth comes out: the crown was stolen under his watch, and the ransom exchange may be the only way to reclaim it.</p>
@@ -129,7 +133,7 @@
     JP:{
       langLabel:'JP',
       pageTitle:'至宝の影で蠢く闇',
-      tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
+      tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
       story:`<div class="story-wrap">
         <div class="story-content">
           <p>ウルダハ王家の象徴である王冠の行方を追い、サルタンスウォーンたちは調査を続けていた──だが、その王冠は盗賊の手に落ちていた。あなたが持ち込んだ一通の不審な手紙によって、すべてが明らかになる。王冠はオワインの警備中に盗まれ、贖いの交渉こそが唯一の手がかりとなる。</p>
@@ -152,7 +156,7 @@
     ZH:{
       langLabel:'ZH',
       pageTitle:'責任、榮耀與祖國',
-      tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
+      tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
       story:`<div class="story-wrap">
         <div class="story-content">
           <p>Ul’dah 王室象徵──王冠遭竊，而這一切正發生在 Owyne 的守衛之下。當你將那封來自 Horizon 案件餘波中的信件交給他，他的愧疚與責任感使他決定親自前往 The Unholy Heir 與竊賊交易。</p>
@@ -181,17 +185,18 @@
     story:  document.getElementById('panel-story'),
     acq:    document.getElementById('panel-acq'),
     unlockq:document.getElementById('panel-unlockq'),
-    followq:document.getElementById('panel-followq')
+    followq:document.getElementById('panel-followq'),
+    comments: document.getElementById('panel-comments')
   };
 
   function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
   function setLang(lang){ localStorage.setItem(LANG_KEY, lang); }
+
   function applyLang(lang){
     const t = i18n[lang] || i18n.EN;
     pageTitle.textContent = t.pageTitle;
     langToggle.textContent = `🌐 ${t.langLabel}`;
     tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
-    // Render current active tab
     const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
     renderPanel(activeBtn.dataset.tab, lang);
   }
@@ -200,8 +205,9 @@
     const t = i18n[lang] || i18n.EN;
     Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
     panels[key].classList.add('active');
-    panels[key].innerHTML = t[key];
+    if (key !== 'comments') panels[key].innerHTML = t[key];
     if (key === 'story') makeStoryCollapsible(panels[key], lang);
+    if (key === 'comments') loadGiscusForCurrentLang();
   }
 
   // 收合/展開：超過門檻才顯示按鈕；否則直接全展開不顯示按鈕
@@ -212,22 +218,22 @@
     const btn = wrap.querySelector('.expand-btn');
     const MAX = window.matchMedia('(max-width:600px)').matches ? 260 : 360;
 
-    // 強制計算一次高度
-    const needClamp = content.scrollHeight > MAX + 8; // +8 給字體抖動緩衝
-    if(needClamp){
-      // 初始為收合狀態（已在 CSS 設 max-height）
-      btn.style.display = 'inline-block';
-      btn.textContent = label(lang, true);
-      btn.onclick = ()=>{
-        content.classList.toggle('story-expanded');
-        const expanded = content.classList.contains('story-expanded');
-        btn.textContent = label(lang, !expanded);
-      };
-    }else{
-      // 不需要收合：直接展開，隱藏按鈕與漸層
-      content.classList.add('story-expanded');
-      btn.style.display = 'none';
-    }
+    // 先讓瀏覽器排版以取得實際高度
+    requestAnimationFrame(()=>{
+      const needClamp = content.scrollHeight > MAX + 8; // +8 給字體抖動緩衝
+      if(needClamp){
+        btn.style.display = 'inline-block';
+        btn.textContent = label(lang, true);
+        btn.onclick = ()=>{
+          content.classList.toggle('story-expanded');
+          const expanded = content.classList.contains('story-expanded');
+          btn.textContent = label(lang, !expanded);
+        };
+      }else{
+        content.classList.add('story-expanded');
+        btn.style.display = 'none';
+      }
+    });
   }
 
   function label(lang, expand){
@@ -252,6 +258,39 @@
     setLang(next);
     applyLang(next);
   });
+
+  /* === Giscus：Comments 分頁 ===
+     ⚠️ 請將 repo/repoId/categoryId 替換為你的實際值 */
+  const GISCUS_CFG = {
+    repo: 'belaug-ffxiv/FFXIV_Library',
+    repoId: 'R_kgD0Pyh4Kw',
+    category: 'General',
+    categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+    theme: 'preferred_color_scheme'
+  };
+  function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+  function loadGiscusForCurrentLang(){
+    const mount = document.getElementById('giscus_container');
+    if (!mount) return;
+    mount.innerHTML = '';
+    const langCode = getLang();
+    const s = document.createElement('script');
+    s.src = 'https://giscus.app/client.js';
+    s.setAttribute('data-repo', GISCUS_CFG.repo);
+    s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+    s.setAttribute('data-category', GISCUS_CFG.category);
+    s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+    s.setAttribute('data-mapping', 'specific');
+    s.setAttribute('data-term', location.pathname + '｜' + langCode);
+    s.setAttribute('data-reactions-enabled', '1');
+    s.setAttribute('data-emit-metadata', '0');
+    s.setAttribute('data-input-position', 'bottom');
+    s.setAttribute('data-lang', uiLang(langCode));
+    s.setAttribute('data-theme', GISCUS_CFG.theme);
+    s.setAttribute('crossorigin', 'anonymous');
+    s.async = true;
+    mount.appendChild(s);
+  }
 
   applyLang(getLang());
   </script>
