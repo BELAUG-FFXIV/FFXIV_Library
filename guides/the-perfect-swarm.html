@@ -32,7 +32,7 @@
     .video-card .bd{padding:0}
     .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
     .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
-    .tab-btn{background:#fff;border:1px solid var(--border);color:#222;border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
     .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
     .tab-panel{display:none}
     .tab-panel.active{display:block}
@@ -43,16 +43,19 @@
     .link{color:#0b60d8;text-decoration:none}
     .link:hover{text-decoration:underline}
 
-    /* 長文自動收合（若內文過長） */
-    .story-collapsible{position:relative;max-height:380px;overflow:hidden}
-    .story-collapsible::after{
-      content:"";position:absolute;inset:auto 0 0 0;height:72px;
-      background:linear-gradient(to bottom, rgba(255,248,230,0), var(--card));
+    /* 展開/收合 */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
     }
-    .story-toggle{display:inline-block;margin-top:10px;padding:8px 14px;border:1px solid var(--border);
-      border-radius:999px;background:#fff;cursor:pointer;font-weight:600}
-    .story-expanded{max-height:none}
-    .story-expanded::after{display:none}
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
   </style>
 </head>
 <body>
@@ -87,12 +90,16 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
-          <div id="panel-story"   class="tab-panel active"></div>
-          <div id="panel-acq"     class="tab-panel"></div>
-          <div id="panel-unlockq" class="tab-panel"></div>
-          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -104,10 +111,14 @@ const i18n = {
   EN:{
     langLabel:'EN',
     pageTitle:"The Perfect Swarm",
-    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
-    story:`<p>After your last errand, Drunken Stag offers a new opportunity—one that might earn you some gil while helping keep the roads safe. Swarms of sun midges have become a menace between Horizon and Black Brush Station, even sending chocobos into frenzies and causing accidents.</p>
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+<p>After your last errand, Drunken Stag offers a new opportunity—one that might earn you some gil while helping keep the roads safe. Swarms of sun midges have become a menace between Horizon and Black Brush Station, even sending chocobos into frenzies and causing accidents.</p>
 <p>You take up the task, stepping onto the sun-baked roads to thin the swarms. It doesn’t take long before the hum of wings is replaced with silence.</p>
-<p>At Horizon, you report to Fufulupa, a young Brass Blade with a formal tone and wide eyes. He thanks you profusely—their ranks are stretched thin, and your help is more than welcome. He hints there’s more work to come, should you choose to stay awhile.</p>`,
+<p>At Horizon, you report to Fufulupa, a young Brass Blade with a formal tone and wide eyes. He thanks you profusely—their ranks are stretched thin, and your help is more than welcome. He hints there’s more work to come, should you choose to stay awhile.</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>Quest Giver</b> Drunken Stag <small class="muted">(Western Thanalan, X: 26.2, Y: 18.2)</small></div>
     </div>`,
@@ -121,10 +132,14 @@ const i18n = {
   JP:{
     langLabel:'JP',
     pageTitle:'五月蝿いヤツら',
-    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
-    story:`<p>先の任務の礼として、「ドランカン・スタッグ」は次なる仕事を持ちかけてくる。ホライズンとブラックブラッシュ停留所の間に、サンミッジという虫の群れが発生し、通行人やチョコボまでもが被害を受けているという。事故も相次ぎ、事態は深刻だった。</p>
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+<p>先の任務の礼として、「ドランカン・スタッグ」は次なる仕事を持ちかけてくる。ホライズンとブラックブラッシュ停留所の間に、サンミッジという虫の群れが発生し、通行人やチョコボまでもが被害を受けているという。事故も相次ぎ、事態は深刻だった。</p>
 <p>あなたは依頼を受け、照りつける日差しの下で虫の群れを討伐する。空を満たしていた羽音が消え、道に平穏が戻る。</p>
-<p>ホライズンに戻り、「フフルパ」に報告する。礼儀正しい口調で彼は深く感謝し、ブラッドブレードの人手不足のなか、あなたの助けがどれほど貴重かを語る。そして彼は続ける──まだまだ力を貸してほしい、と。</p>`,
+<p>ホライズンに戻り、「フフルパ」に報告する。礼儀正しい口調で彼は深く感謝し、ブラッドブレードの人手不足のなか、あなたの助けがどれほど貴重かを語る。そして彼は続ける──まだまだ力を貸してほしい、と。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>クエスト発行</b> ドランク・スタッグ <small class="muted">（西ザナラーン, X: 26.2, Y: 18.2）</small></div>
     </div>`,
@@ -138,10 +153,14 @@ const i18n = {
   ZH:{
     langLabel:'ZH',
     pageTitle:'擾人的一群傢伙',
-    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
-    story:`<p>完成前一項任務後，Drunken Stag 提出另一個能賺點外快的請託。他說，從 Horizon 通往 Black Brush Station 的路上滿是 sun midges，這些小小的蟲群不但讓旅人困擾，甚至還曾讓 chocobo 發狂導致事故。</p>
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+<p>完成前一項任務後，Drunken Stag 提出另一個能賺點外快的請託。他說，從 Horizon 通往 Black Brush Station 的路上滿是 sun midges，這些小小的蟲群不但讓旅人困擾，甚至還曾讓 chocobo 發狂導致事故。</p>
 <p>你決定出手，踏上滿是陽光與塵土的道路，將蟲群一一清除。空中嗡嗡聲漸漸歇止，空氣終於恢復寧靜。</p>
-<p>回到 Horizon，你向年輕的 Brass Blade 衛兵 Fufulupa 報告成果。他態度恭敬，真誠地感謝你伸出援手──他們人手不足，急需像你這樣的冒險者。他也暗示，這裡還有更多工作在等你。</p>`,
+<p>回到 Horizon，你向年輕的 Brass Blade 衛兵 Fufulupa 報告成果。他態度恭敬，真誠地感謝你伸出援手──他們人手不足，急需像你這樣的冒險者。他也暗示，這裡還有更多工作在等你。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>任務發布</b> Drunken Stag <small class="muted">（薩納蘭西部, X: 26.2, Y: 18.2）</small></div>
     </div>`,
@@ -161,7 +180,8 @@ const panels = {
   story:  document.getElementById('panel-story'),
   acq:    document.getElementById('panel-acq'),
   unlockq:document.getElementById('panel-unlockq'),
-  followq:document.getElementById('panel-followq')
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
 };
 
 function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
@@ -173,12 +193,32 @@ function applyLang(lang){
   const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
   renderPanel(activeBtn.dataset.tab, lang);
 }
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
 function renderPanel(key, lang){
   const t = i18n[lang] || i18n.EN;
   Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
   panels[key].classList.add('active');
-  panels[key].innerHTML = t[key];
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
 }
+
 tabBtns.forEach(btn=>{
   btn.addEventListener('click', ()=>{
     tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
@@ -193,41 +233,39 @@ langToggle.addEventListener('click', ()=>{
   applyLang(next);
 });
 
-/* —— 長文自動收合（依字數自動出現） —— */
-const readMoreLabels = {
-  EN: {more:'Read more', less:'Show less'},
-  JP: {more:'続きを読む',   less:'折りたたむ'},
-  ZH: {more:'展開全文',     less:'收合內容'}
-};
-function makeStoryCollapsible(lang){
-  const panel = document.getElementById('panel-story');
-  if(!panel) return;
-  const textLen = panel.textContent.trim().length;
-  if(textLen < 800) return;
-  const inner = panel.innerHTML.trim();
-  const wrap = document.createElement('div');
-  wrap.className = 'story-collapsible';
-  wrap.innerHTML = inner;
-  const btn = document.createElement('button');
-  const L = readMoreLabels[lang] || readMoreLabels.EN;
-  btn.className = 'story-toggle';
-  btn.textContent = L.more;
-  btn.addEventListener('click', ()=>{
-    const on = wrap.classList.toggle('story-expanded');
-    btn.textContent = on ? L.less : L.more;
-  });
-  panel.innerHTML = '';
-  panel.appendChild(wrap);
-  panel.appendChild(btn);
-}
-/* 掛鉤 renderPanel：切到 Story 時套用收合 */
-const _origRenderPanel = renderPanel;
-renderPanel = function(key, lang){
-  _origRenderPanel(key, lang);
-  if(key==='story') makeStoryCollapsible(lang);
-};
-
 applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'belaug-ffxiv/FFXIV_Library',
+  repoId: 'R_kgD0Pyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
 </script>
 </body>
 </html>
