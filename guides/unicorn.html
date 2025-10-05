@@ -66,11 +66,17 @@
           <button class="tab-btn" role="tab" aria-selected="true"  data-tab="about">About</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="seats">Seats</button>
+          <!-- 新增：Comments -->
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
           <div id="panel-about" class="tab-panel active"></div>
           <div id="panel-acq"   class="tab-panel"></div>
           <div id="panel-seats" class="tab-panel"></div>
+          <!-- Comments 面板 -->
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -82,7 +88,7 @@
       EN:{
         langLabel:'EN',
         pageTitle:'Unicorn',
-        tabs:{ about:'About', acq:'Acquisition', seats:'Seats' },
+        tabs:{ about:'About', acq:'Acquisition', seats:'Seats', comments:'Comments' },
         about:`<div class="stack">
           <div class="row">Summon forth the single-horned steed you befriended deep within the Black Shroud.</div>
           <div class="row">Once, herds of unicorns roamed Coerthas in their thousands, their snowy forms blanketing the highlands in breathtaking majesty. But poaching and strife reduced their numbers to the brink of disappearance.</div>
@@ -96,7 +102,7 @@
       JP:{
         langLabel:'JP',
         pageTitle:'ユニコーン',
-        tabs:{ about:'紹介', acq:'入手方法', seats:'座席数' },
+        tabs:{ about:'紹介', acq:'入手方法', seats:'座席数', comments:'コメント' },
         about:`<div class="stack">
           <div class="row">黒衣森で出会い、心を通わせた一角獣を呼び寄せる。</div>
           <div class="row">かつてエオルゼアのユニコーンは数千頭もの群れをなし、クルザスの高地を白銀に染めるほどであった。しかし乱獲と戦乱により、その数は激減してしまった。</div>
@@ -110,7 +116,7 @@
       ZH:{
         langLabel:'ZH',
         pageTitle:'獨角獸',
-        tabs:{ about:'簡介', acq:'取得方式', seats:'可乘人數' },
+        tabs:{ about:'簡介', acq:'取得方式', seats:'可乘人數', comments:'留言' },
         about:`<div class="stack">
           <div class="row">召喚你在黑衣森林結識的獨角獸。</div>
           <div class="row">過去的 Eorzea，獨角獸族群多達數千，常在 Coerthas 高地成群奔馳，宛如白雪覆蓋群山的壯麗景象。</div>
@@ -126,24 +132,34 @@
     const langToggle=document.getElementById('langToggle');
     const pageTitle=document.getElementById('pageTitle');
     const tabBtns=[...document.querySelectorAll('.tab-btn')];
-    const panels={ about:panel('about'), acq:panel('acq'), seats:panel('seats') };
+    const panels={
+      about:panel('about'),
+      acq:panel('acq'),
+      seats:panel('seats'),
+      comments:panel('comments') // 新增
+    };
 
     function panel(id){ return document.getElementById('panel-'+id); }
     function getLang(){ return localStorage.getItem(LANG_KEY)||'EN'; }
+
     function applyLang(lang){
       const t=i18n[lang]||i18n.EN;
       pageTitle.textContent=t.pageTitle;
-      langToggle.textContent=`🌐 ${t.langLabel}`;
-      tabBtns.forEach(b=>{ b.textContent=t.tabs[b.dataset.tab]; });
+      langToggle.textContent='🌐 ' + t.langLabel; // 安全寫法
+      tabBtns.forEach(b=>{ if(t.tabs[b.dataset.tab]) b.textContent=t.tabs[b.dataset.tab]; });
       const active=tabBtns.find(b=>b.getAttribute('aria-selected')==='true')||tabBtns[0];
       renderPanel(active.dataset.tab,lang);
+      if(active && active.dataset.tab==='comments'){ loadGiscusForCurrentLang(); }
     }
+
     function renderPanel(key,lang){
       const t=i18n[lang]||i18n.EN;
       Object.keys(panels).forEach(k=>panels[k].classList.remove('active'));
       panels[key].classList.add('active');
-      panels[key].innerHTML=t[key];
+      if(key!=='comments'){ panels[key].innerHTML=t[key]; }
+      if(key==='comments'){ loadGiscusForCurrentLang(); }
     }
+
     tabBtns.forEach(btn=>{
       btn.addEventListener('click',()=>{
         tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
@@ -151,11 +167,45 @@
         renderPanel(btn.dataset.tab,getLang());
       });
     });
+
     langToggle.addEventListener('click',()=>{
       const cur=getLang(); const next=cur==='EN'?'JP':(cur==='JP'?'ZH':'EN');
       localStorage.setItem(LANG_KEY,next); applyLang(next);
     });
+
     applyLang(getLang());
+
+    /* === Giscus：單一 Comments 分頁，語言切換 === */
+    const GISCUS_CFG = {
+      repo: 'belaug-ffxiv/FFXIV_Library',
+      repoId: 'R_kgD0Pyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+    };
+    function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+    function loadGiscusForCurrentLang(){
+      const mount = document.getElementById('giscus_container');
+      if (!mount) return;
+      mount.innerHTML = '';
+      const langCode = getLang(); // EN / JP / ZH
+      const s = document.createElement('script');
+      s.src = 'https://giscus.app/client.js';
+      s.setAttribute('data-repo', GISCUS_CFG.repo);
+      s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+      s.setAttribute('data-category', GISCUS_CFG.category);
+      s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+      s.setAttribute('data-mapping', 'specific');
+      s.setAttribute('data-term', location.pathname + '｜' + langCode);
+      s.setAttribute('data-reactions-enabled', '1');
+      s.setAttribute('data-emit-metadata', '0');
+      s.setAttribute('data-input-position', 'bottom');
+      s.setAttribute('data-lang', uiLang(langCode));
+      s.setAttribute('data-theme', GISCUS_CFG.theme);
+      s.setAttribute('crossorigin', 'anonymous');
+      s.async = true;
+      mount.appendChild(s);
+    }
   </script>
 </body>
 </html>
