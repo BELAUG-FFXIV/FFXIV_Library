@@ -43,27 +43,19 @@
     .link{color:#0b60d8;text-decoration:none}
     .link:hover{text-decoration:underline}
 
-    /* ==== Story 展開 / 收合（不改版面結構） ==== */
-    .clamp{
-      position:relative;
-      max-height:360px;       /* 預設收合高度，可調 */
-      overflow:hidden;
-    }
-    .clamp[data-collapsed="false"]{ max-height:none; }
+    /* ==== Story 展開 / 收合（統一模板） ==== */
+    .clamp{ position:relative; max-height:360px; overflow:hidden }
+    .clamp[data-collapsed="false"]{ max-height:none }
     .clamp[data-collapsed="true"]::after{
-      content:"";
-      position:absolute; left:0; right:0; bottom:0;
-      height:72px;
-      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card));
-      pointer-events:none;
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
     }
-    .expand-wrap{ margin-top:12px; }
+    .expand-wrap{ margin-top:12px }
     .expand-btn{
       display:inline-block; padding:8px 14px; border-radius:10px;
-      background:var(--card); border:1px solid var(--border); cursor:pointer;
-      font-weight:600;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
     }
-    .expand-btn:hover{ background:#fffef8; }
+    .expand-btn:hover{ background:#fffef8 }
   </style>
 </head>
 <body>
@@ -98,12 +90,16 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
           <div id="panel-story"   class="tab-panel active"></div>
           <div id="panel-acq"     class="tab-panel"></div>
           <div id="panel-unlockq" class="tab-panel"></div>
           <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -115,7 +111,7 @@ const i18n = {
   EN:{
     langLabel:'EN',
     pageTitle:'A Wild Rose by Any Other Name',
-    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
     readMore:'Show more', readLess:'Show less',
     story:`<div class="clamp" data-collapsed="true">
       <p>Within the halls of the Waking Sands, the Scions reveal their true purpose. Thancred warns of the terrible might of the primals, whose insatiable hunger for aether threatens to drain the very land. Y’shtola recounts how the Scions came to be—the Circle of Knowing and the Path of the Twelve, now united as one order standing against calamity.</p>
@@ -137,7 +133,7 @@ const i18n = {
   JP:{
     langLabel:'JP',
     pageTitle:'キャンプ・ドライボーンへ',
-    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
     readMore:'全文を表示', readLess:'折りたたむ',
     story:`<div class="clamp" data-collapsed="true">
       <p>砂の家の奥、暁の血盟の真の使命が語られる。サンクレッドは、クリスタルを求めて蛮族が呼び降ろす蛮神の恐ろしさを説き、その際限なきエーテル渇望が大地を枯らす危険を告げる。ヤ・シュトラは、シャーレアン出身者が集った「知のサークル」と、エコーの力を持つ者たちの集団「十二の道」が一つとなり、暁の血盟が生まれた経緯を語る。</p>
@@ -159,7 +155,7 @@ const i18n = {
   ZH:{
     langLabel:'ZH',
     pageTitle:'野薔薇之誓',
-    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
     readMore:'展開全文', readLess:'收合內容',
     story:`<div class="clamp" data-collapsed="true">
       <p>在 Waking Sands 的大廳裡，Scions of the Seventh Dawn 向你揭示了真正的使命。Thancred 談及 Primals 的威脅——牠們召喚時所需龐大的以太，以及顯化之後永無止境的貪婪，足以將大地榨乾。Y’shtola 則回顧了組織的起源——由 Sharlayan 學者組成的 Circle of Knowing 與擁有 Echo 的 Path of the Twelve 結合，才有了今日的 Scions。</p>
@@ -187,19 +183,11 @@ const panels = {
   story:  document.getElementById('panel-story'),
   acq:    document.getElementById('panel-acq'),
   unlockq:document.getElementById('panel-unlockq'),
-  followq:document.getElementById('panel-followq')
+  followq:document.getElementById('panel-followq'),
+  comments:document.getElementById('panel-comments')
 };
 
 function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
-
-function applyLang(lang){
-  const t = i18n[lang] || i18n.EN;
-  pageTitle.textContent = t.pageTitle;
-  langToggle.textContent = `🌐 ${t.langLabel}`;
-  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
-  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
-  renderPanel(activeBtn.dataset.tab, lang);
-}
 
 function wireClamp(panelEl, t){
   const clamp = panelEl.querySelector('.clamp');
@@ -221,8 +209,18 @@ function renderPanel(key, lang){
   const t = i18n[lang] || i18n.EN;
   Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
   panels[key].classList.add('active');
-  panels[key].innerHTML = t[key];
-  if(key === 'story') wireClamp(panels[key], t);  // 啟用展開/收合
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
 }
 
 tabBtns.forEach(btn=>{
@@ -241,6 +239,38 @@ langToggle.addEventListener('click', ()=>{
 });
 
 applyLang(getLang());
+
+/* === Giscus：Comments 分頁（與其他頁一致） === */
+const GISCUS_CFG = {
+  repo: 'belaug-ffxiv/FFXIV_Library',
+  repoId: 'R_kgD0Pyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
 </script>
 </body>
 </html>
