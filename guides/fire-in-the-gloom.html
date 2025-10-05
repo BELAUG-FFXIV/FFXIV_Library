@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Fire in the Gloom | BELAUG · FFXIV Library</title>
-  <meta name="description" content="ARR 2.0 MSQ — Fire in the Gloom（幽暗深處的火焰）：故事概要、取得方式與任務解鎖。">
+  <meta name="description" content="MSQ – Fire in the Gloom (ARR Patch 2.0)">
   <link rel="icon" href="../img/favicon.ico" />
   <style>
     :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
@@ -17,8 +17,8 @@
     .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
     .home:hover{background:#fffef8}
     .right{display:flex;align-items:center;gap:8px}
-    .icon-btn{background:none;border:1px solid transparent;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
-    .icon-btn:hover{background:#fff;border-color:var(--border)}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
     .main{padding:20px 0 40px}
     .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
     @media (max-width:900px){
@@ -42,13 +42,20 @@
     .muted{color:var(--muted)}
     .link{color:#0b60d8;text-decoration:none}
     .link:hover{text-decoration:underline}
-    .story-wrap{position:relative}
-    .story-content{max-height:360px;overflow:hidden;position:relative}
-    .story-content::after{content:"";position:absolute;inset:auto 0 0 0;height:64px;background:linear-gradient(to top,var(--card),transparent)}
-    .story-expanded{max-height:none!important}
-    .story-expanded::after{display:none}
-    .expand-btn{margin-top:8px;background:none;border:1px solid var(--border);padding:6px 10px;border-radius:8px;cursor:pointer;font-weight:600}
-    @media (max-width:600px){ .story-content{max-height:260px} }
+
+    /* 展開/收合 */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
   </style>
 </head>
 <body>
@@ -83,12 +90,16 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
           <div id="panel-story"   class="tab-panel active"></div>
           <div id="panel-acq"     class="tab-panel"></div>
           <div id="panel-unlockq" class="tab-panel"></div>
           <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -100,8 +111,9 @@ const i18n = {
   EN:{
     langLabel:'EN',
     pageTitle:'Fire in the Gloom',
-    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
-    story:`<div class="story-wrap"><div class="story-content">
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
 <p>At the Carline Canopy, Mother Miounne greets you warmly, but her expression soon hardens. A grave matter weighs upon Gridania. Before she can explain, Bowlord Lewin himself arrives, urgent and impatient. Their forces are stretched thin by the constant harassment of the Ixal, and yet a new threat has emerged.</p>
 <p>Beneath the Central Shroud lies the Tam-Tara Deepcroft, once a Gelmorran settlement, now a burial ground for Gridania’s dead. Disturbing reports speak of hooded figures entering the crypt—fanatics known as the Lambs of Dalamud. Once they worshiped the lesser moon, believing its fall would bring salvation. Even after Dalamud’s fiery ruin, they cling to their madness, vowing vengeance upon all “heretics” who denied their god.</p>
 <p>Ordinarily, Lewin would send his best soldiers to purge the place, but the Calamity and the Ixal’s relentless assaults have left him with few to spare. Thus, he turns to you. “Forename—can we rely on you to stop them?” Without hesitation, you accept.</p>
@@ -109,7 +121,8 @@ const i18n = {
 <p>The Deepcroft proves as harrowing as foretold. Fanatics chant in the dark, zealotry twisting their every word. Among the adventurers you encounter, discord brews—companions quarrel, one collapses, and a conjurer named Edda clutches the severed head of her fallen beloved, her tears echoing in the gloom. Yet you press forward, striking down the cult and breaking their ritual.</p>
 <p>Returning to Gridania, Miounne welcomes you back, relief plain in her voice. She praises your skill, and passes along Bowlord Lewin’s gratitude. Yet her smile fades as another scene of grief unfolds before her: Edda is abandoned by her surviving comrades, accused of failing her duty, left alone to weep over Avere’s death. Such tragedies, Miounne laments, are far too common of late.</p>
 <p>Still, she steadies herself and turns to you once more. “Another request has come—this time from Ul’dah,” she says softly. And so, your journey continues.</p>
-</div><button class="expand-btn" data-more="Read more" data-less="Show less">Read more</button></div>`,
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>Quest Giver</b> Mother Miounne <small class="muted">(New Gridania, X:11.7, Y:13.5)</small></div>
     </div>`,
@@ -123,15 +136,17 @@ const i18n = {
   JP:{
     langLabel:'JP',
     pageTitle:'タムタラの仄暗い底で',
-    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
-    story:`<div class="story-wrap"><div class="story-content">
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
 <p>カーラインカフェに戻ったあなたを、ミューヌが迎える。その顔には安堵と同時に深刻な影が差していた。説明を始めようとした矢先、弓兵隊長ルウェンが現れ、焦燥を隠さず告げる。イクサル族の襲撃で兵力が分散するなか、新たな脅威が発生したのだ。</p>
 <p>中央森林の地下に眠る「タムタラの墓所」。かつてゲルモラ人の集落であり、いまはグリダニアの墓地。しかし、最近になってそこに現れたのは、邪教集団「ダラガブの落胤」だった。月が砕け散ってもなお狂信を深め、異端者への復讐を誓う彼ら。</p>
 <p>本来なら精鋭を送るべき任務だが、大震災とイクサルの圧力で手が回らない。だからこそ、ルウェンは真っ直ぐにあなたを見つめ、託すのだった。「奴らを止めてくれないか？」 あなたが頷くと、ミューヌは祈るように声をかける。「クリスタルの導きがありますように。」</p>
 <p>墓所の入口で弓兵に状況を確認し、ついに暗き地下へ。儀式を進める狂信者たち、仲間割れする冒険者たち。そして幻術士エッダは、最愛のアヴェールを失い、その首を抱きしめ涙する……。凄惨な光景の中で、あなたはひとり進み、儀式を打ち砕いた。</p>
 <p>帰還後、ミューヌは誇らしげに「成功ね」と告げるが、そこに響くのは若き冒険者たちの悲嘆。仲間に責められ、孤独に取り残されたエッダの嗚咽が、場を痛ましく包む。ミューヌは重く息を吐き、「こうした悲劇はもう珍しくない」と嘆きつつも、あなたへの感謝を改めて告げる。</p>
 <p>そして声を落とし、新たな依頼を伝える。「今度はウルダハからよ。」冒険はさらに続いていく。</p>
-</div><button class="expand-btn" data-more="続きを読む" data-less="折りたたむ">続きを読む</button></div>`,
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>クエスト発行</b> ミューヌ <small class="muted">（グリダニア：新市街, X:11.7, Y:13.5）</small></div>
     </div>`,
@@ -145,15 +160,17 @@ const i18n = {
   ZH:{
     langLabel:'ZH',
     pageTitle:'幽暗深處的火焰',
-    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
-    story:`<div class="story-wrap"><div class="story-content">
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
 <p>你回到 Carline Canopy，Miounne 迎上前來，神色嚴肅。她正要說明情況，卻被 Bowlord Lewin 打斷。他語帶急切，透露出嚴重的憂患。Ixal 的騷擾使防線緊繃，而如今，新的威脅出現了。</p>
 <p>在 Central Shroud 地底，Tam-Tara Deepcroft 曾是 Gelmorra 的聚落，如今則是 Gridania 的墓所。然而，近來卻有身影頻頻出沒──「Dalamud 落胤」的狂信者。他們曾信奉那顆墜落的月亮，以為能迎來救贖。即使 Dalamud 已化為火焰殞落，他們仍執迷不悟，誓言要對「異端者」復仇。</p>
-<p>原該由精銳小隊鎮壓，但大災變後兵力損耗，Ixal 又持續侵擾，使 Lewin 不得不將此重任交給你。「Forename，我能把這任務託付給你嗎？」你毫不犹豫地應下。Miounne 為你祈願：「願水晶庇佑你。」</p>
+<p>原該由精銳小隊鎮壓，但大災變後兵力損耗，Ixal 又持續侵擾，使 Lewin 不得不將此重任交給你。「Forename，我能把這任務託付給你嗎？」你毫不猶豫地應下。Miounne 為你祈願：「願水晶庇佑你。」</p>
 <p>在墓所入口，弓兵士兵再度強調危險性──這群狂徒只會帶來毀滅，必須阻止。於是，你踏入幽暗的墓穴。裡頭，教徒喃喃誦唱，瘋狂不斷。冒險者間的嫌隙逐漸浮現，幻術士 Edda 抱著已逝戀人 Avere 的首級，哭聲迴盪。雖然慘烈，你依然挺進，最終粉碎了他們的邪儀。</p>
 <p>返回 Gridania 後，Miounne 帶著驕傲與欣慰迎接你，並轉述了 Lewin 的感謝。但她的話音剛落，便見證到另一幕──Edda 的同伴憤然離去，責怪她無力救回 Avere，只留她孤身在淚水中哀號。這樣的悲劇，Miounne 無奈地說，已經越來越常見。</p>
 <p>然而她仍鎮定下來，再次望向你。「下一個委託，來自 Ul’dah。」於是，新的旅程即將展開。</p>
-</div><button class="expand-btn" data-more="展開全文" data-less="收合內文">展開全文</button></div>`,
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>任務發布</b> 妙恩 <small class="muted">（新格里達尼亞, X:11.7, Y:13.5）</small></div>
     </div>`,
@@ -173,32 +190,11 @@ const panels = {
   story:  document.getElementById('panel-story'),
   acq:    document.getElementById('panel-acq'),
   unlockq:document.getElementById('panel-unlockq'),
-  followq:document.getElementById('panel-followq')
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
 };
 
 function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
-
-function wireStoryToggler(root){
-  const btn = root.querySelector('.expand-btn');
-  const content = root.querySelector('.story-content');
-  if(!btn || !content) return;
-  const more = btn.getAttribute('data-more'), less = btn.getAttribute('data-less');
-  btn.onclick = ()=>{
-    const expanded = content.classList.toggle('story-expanded');
-    btn.textContent = expanded ? less : more;
-  };
-}
-
-function renderPanel(key, lang){
-  const t = i18n[lang] || i18n.EN;
-  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
-  panels[key].classList.add('active');
-  panels[key].innerHTML = t[key];
-  if(key==='story'){
-    wireStoryToggler(panels[key]);
-  }
-}
-
 function applyLang(lang){
   const t = i18n[lang] || i18n.EN;
   pageTitle.textContent = t.pageTitle;
@@ -206,6 +202,31 @@ function applyLang(lang){
   tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
   const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
   renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
 }
 
 tabBtns.forEach(btn=>{
@@ -224,6 +245,38 @@ langToggle.addEventListener('click', ()=>{
 });
 
 applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'belaug-ffxiv/FFXIV_Library',
+  repoId: 'R_kgD0Pyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
 </script>
 </body>
 </html>
