@@ -42,16 +42,18 @@
     .muted{color:var(--muted)}
     .link{color:#0b60d8;text-decoration:none}
     .link:hover{text-decoration:underline}
-    /* 長文自動收合 */
-    .story-collapsible{position:relative;max-height:380px;overflow:hidden}
-    .story-collapsible::after{
-      content:"";position:absolute;inset:auto 0 0 0;height:72px;
+
+    /* —— 手動展開/收合（固定提供按鈕） —— */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
       background:linear-gradient(to bottom, rgba(255,248,230,0), var(--card));
+      pointer-events:none;
     }
-    .story-toggle{display:inline-block;margin-top:10px;padding:8px 14px;border:1px solid var(--border);
-      border-radius:999px;background:#fff;cursor:pointer;font-weight:600}
-    .story-expanded{max-height:none}
-    .story-expanded::after{display:none}
+    .expand-wrap{margin-top:10px}
+    .expand-btn{display:inline-block;padding:8px 14px;border:1px solid var(--border);border-radius:999px;background:#fff;cursor:pointer;font-weight:600}
+    .expand-btn:hover{background:#fffef8}
   </style>
 </head>
 <body>
@@ -86,12 +88,16 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
-          <div id="panel-story"   class="tab-panel active"></div>
-          <div id="panel-acq"     class="tab-panel"></div>
-          <div id="panel-unlockq" class="tab-panel"></div>
-          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -103,11 +109,15 @@ const i18n = {
   EN:{
     langLabel:'EN',
     pageTitle:"Oh Captain, My Captain",
-    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
-    story:`<p>What begins as a routine errand turns into something far darker. A frightened villager whispers of stolen gemstones and a secret deal at the Footfalls. Fufulupa, ever vigilant, overhears and immediately rushes to inform Captain Baldewyn—unaware that he’s running straight into the arms of betrayal.</p>
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+<p>What begins as a routine errand turns into something far darker. A frightened villager whispers of stolen gemstones and a secret deal at the Footfalls. Fufulupa, ever vigilant, overhears and immediately rushes to inform Captain Baldewyn—unaware that he’s running straight into the arms of betrayal.</p>
 <p>You chase after him, but too late. At the Footfalls, Fufulupa accuses the wrong man—only to discover that the accusation was more accurate than he ever imagined. Baldewyn, in league with the bandits of Quiveron Manse, lashes out. And worse still, he claims he acts under Lord Lolorito’s name.</p>
 <p>The confrontation explodes into violence. As you and Fufulupa fight for your lives, Leofric appears and exposes the lie. Baldewyn was never authorized—just another petty man abusing power and dragging others down with him.</p>
-<p>When it’s over, Baldewyn is defeated, his schemes unraveled. Leofric turns to Fufulupa—not just with thanks, but with recognition. He entrusts him with the future of the Brass Blades of the Rose. And you? You’ve witnessed how corruption hides behind ceremony, and how truth shines brightest when the innocent stand their ground.</p>`,
+<p>When it’s over, Baldewyn is defeated, his schemes unraveled. Leofric turns to Fufulupa—not just with thanks, but with recognition. He entrusts him with the future of the Brass Blades of the Rose. And you? You’ve witnessed how corruption hides behind ceremony, and how truth shines brightest when the innocent stand their ground.</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>Quest Giver</b> Merilda <small class="muted">(Western Thanalan, X:14.9, Y:18.9)</small></div>
     </div>`,
@@ -121,11 +131,15 @@ const i18n = {
   JP:{
     langLabel:'JP',
     pageTitle:'正義を銅の刃に宿し',
-    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
-    story:`<p>一見平穏な任務の背後に、陰謀の影が忍び寄る──村人メリルダの告白により、フフルパは密輸の疑惑を知る。正義感から彼はバルドウィン隊長に急報しようとするが、まさにそれこそが罠だった。</p>
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+<p>一見平穏な任務の背後に、陰謀の影が忍び寄る──村人メリルダの告白により、フフルパは密輸の疑惑を知る。正義感から彼はバルドウィン隊長に急報しようとするが、まさにそれこそが罠だった。</p>
 <p>あなたは慌ててフットフォールズへ向かう。フフルパは、クイヴェロンの盗賊団と共にいた男を非難するが──驚くことに、それは事実だった。バルドウィン隊長自身が黒幕だったのだ。しかも、彼は自らの行動を「ロロリト卿の命」とまで語る。</p>
 <p>事態は激化し、戦闘が始まる。あなたとフフルパは死闘を繰り広げるが、そこへレオフリックが現れ、真実を暴く。ロロリト卿は関与しておらず、バルドウィンの全ては私利私欲に基づくものでしかなかった。</p>
-<p>戦いが終わり、バルドウィンは拘束される。レオフリックはフフルパに短剣を託し、「誇りある者が、組織を導くべきだ」と語る。フフルパは涙ながらにその責務を受け入れ、あなたに深く感謝する。こうして、ホライズンの未来は新たな光を得たのだった。</p>`,
+<p>戦いが終わり、バルドウィンは拘束される。レオフリックはフフルパに短剣を託し、「誇りある者が、組織を導くべきだ」と語る。フフルパは涙ながらにその責務を受け入れ、あなたに深く感謝する。こうして、ホライズンの未来は新たな光を得たのだった。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>クエスト発行</b> メリルダ <small class="muted">（西ザナラーン, X:14.9, Y:18.9）</small></div>
     </div>`,
@@ -139,11 +153,15 @@ const i18n = {
   ZH:{
     langLabel:'ZH',
     pageTitle:'正義託付於銅之刃',
-    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
-    story:`<p>你原以為只是普通的任務，卻從 Merilda 那裡聽聞驚人的密謀──Quiveron 的盜賊準備交易從 Copperbell Mines 偷來的寶石。Fufulupa 無意間聽見，立即衝向 Captain Baldewyn 彙報，卻不知道這正把他推入危險之中。</p>
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+<p>你原以為只是普通的任務，卻從 Merilda 那裡聽聞驚人的密謀──Quiveron 的盜賊準備交易從 Copperbell Mines 偷來的寶石。Fufulupa 無意間聽見，立即衝向 Captain Baldewyn 彙報，卻不知道這正把他推入危險之中。</p>
 <p>你急忙追上，但一切已經太遲。Footfalls 的對峙揭露真相：Baldewyn 不僅包庇罪犯，更聲稱自己是奉 Lord Lolorito 之命。Fufulupa 難以置信，卻又不得不接受眼前的背叛。</p>
 <p>戰鬥爆發，你與 Fufulupa 一同迎戰 Quiveron 殘黨。千鈞一髮之際，Leofric 現身揭露真相：這一切都是 Baldewyn 藉權謀私，根本未得任何上層授意。名號之下，是假面背後的貪婪。</p>
-<p>最終，Baldewyn 落敗，被捕。Leofric 將 Brass Blades of the Rose 的榮耀交託給 Fufulupa──這個他曾視為小弟的新兵，如今展現出真正的堅毅與榮譽。而你，則在這場政變之中，見證了正直如何在腐敗中綻放光芒。</p>`,
+<p>最終，Baldewyn 落敗，被捕。Leofric 將 Brass Blades of the Rose 的榮耀交託給 Fufulupa──這個他曾視為小弟的新兵，如今展現出真正的堅毅與榮譽。而你，則在這場政變之中，見證了正直如何在腐敗中綻放光芒。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>任務發布</b> 梅莉爾達 <small class="muted">（薩納蘭西部, X:14.9, Y:18.9）</small></div>
     </div>`,
@@ -163,7 +181,8 @@ const panels = {
   story:  document.getElementById('panel-story'),
   acq:    document.getElementById('panel-acq'),
   unlockq:document.getElementById('panel-unlockq'),
-  followq:document.getElementById('panel-followq')
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
 };
 
 function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
@@ -175,12 +194,33 @@ function applyLang(lang){
   const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
   renderPanel(activeBtn.dataset.tab, lang);
 }
+
+/* 展開/收合：固定提供按鈕，無字數門檻 */
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
 function renderPanel(key, lang){
   const t = i18n[lang] || i18n.EN;
   Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
   panels[key].classList.add('active');
-  panels[key].innerHTML = t[key];
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
 }
+
 tabBtns.forEach(btn=>{
   btn.addEventListener('click', ()=>{
     tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
@@ -195,41 +235,40 @@ langToggle.addEventListener('click', ()=>{
   applyLang(next);
 });
 
-/* —— 長文自動收合（依字數自動出現） —— */
-const readMoreLabels = {
-  EN: {more:'Read more', less:'Show less'},
-  JP: {more:'続きを読む',   less:'折りたたむ'},
-  ZH: {more:'展開全文',     less:'收合內容'}
-};
-function makeStoryCollapsible(lang){
-  const panel = document.getElementById('panel-story');
-  if(!panel) return;
-  const textLen = panel.textContent.trim().length;
-  if(textLen < 800) return;
-  const inner = panel.innerHTML.trim();
-  const wrap = document.createElement('div');
-  wrap.className = 'story-collapsible';
-  wrap.innerHTML = inner;
-  const btn = document.createElement('button');
-  const L = readMoreLabels[lang] || readMoreLabels.EN;
-  btn.className = 'story-toggle';
-  btn.textContent = L.more;
-  btn.addEventListener('click', ()=>{
-    const on = wrap.classList.toggle('story-expanded');
-    btn.textContent = on ? L.less : L.more;
-  });
-  panel.innerHTML = '';
-  panel.appendChild(wrap);
-  panel.appendChild(btn);
-}
-/* 掛鉤 renderPanel：切到 Story 時套用收合 */
-const _origRenderPanel = renderPanel;
-renderPanel = function(key, lang){
-  _origRenderPanel(key, lang);
-  if(key==='story') makeStoryCollapsible(lang);
-};
-
 applyLang(getLang());
+
+/* === Giscus：Comments 分頁 ===
+   ⚠️ 將下方 repo/repoId/categoryId 替換成實際值 */
+const GISCUS_CFG = {
+  repo: 'belaug-ffxiv/FFXIV_Library',
+  repoId: 'R_kgD0Pyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
 </script>
 </body>
 </html>
