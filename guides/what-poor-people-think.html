@@ -90,12 +90,16 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
-          <div id="panel-story"   class="tab-panel active"></div>
-          <div id="panel-acq"     class="tab-panel"></div>
-          <div id="panel-unlockq" class="tab-panel"></div>
-          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-story"     class="tab-panel active"></div>
+          <div id="panel-acq"       class="tab-panel"></div>
+          <div id="panel-unlockq"   class="tab-panel"></div>
+          <div id="panel-followq"   class="tab-panel"></div>
+          <div id="panel-comments"  class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -107,7 +111,7 @@ const i18n = {
   EN:{
     langLabel:'EN',
     pageTitle:'What Poor People Think',
-    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
     readMore:'Show more', readLess:'Show less',
     story:`<div class="clamp" data-collapsed="true">
       <p>Isembard suggests that answers may lie among the commonfolk themselves, though he prays it is not so. He directs you to Ungust, a merchant born in Drybone and raised in the Golden Bazaar—rough, untrustworthy, yet knowing the people better than most. With a written note in hand, you find him at the inn, half-drunk on his day’s earnings.</p>
@@ -129,7 +133,7 @@ const i18n = {
   JP:{
     langLabel:'JP',
     pageTitle:'貧しき者の考え',
-    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
     readMore:'全文を表示', readLess:'折りたたむ',
     story:`<div class="clamp" data-collapsed="true">
       <p>イセンバードは、答えは一般民衆の中にあるかもしれないと告げる。そうでないことを祈りながらも、彼はあなたにアンガストという商人を紹介する。ドライボーンに生まれ、ゴールドバザーで育った彼は粗暴な性格だが、この地の人々を誰よりも知っている。イセンバードの手紙を持って宿屋へ行くと、アンガストは酔いどれ姿で現れた。</p>
@@ -151,7 +155,7 @@ const i18n = {
   ZH:{
     langLabel:'ZH',
     pageTitle:'貧民的心聲',
-    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
     readMore:'展開全文', readLess:'收合內容',
     story:`<div class="clamp" data-collapsed="true">
       <p>Isembard 認為答案或許隱藏在百姓之間，雖然他寧願不是如此。他介紹了 Ungust──一名出生於 Drybone、成長於 Golden Bazaar 的商人。這人粗鄙不堪，但比任何人都熟悉當地居民。他寫下一封短箋，交給你作為信物。</p>
@@ -179,7 +183,8 @@ const panels = {
   story:  document.getElementById('panel-story'),
   acq:    document.getElementById('panel-acq'),
   unlockq:document.getElementById('panel-unlockq'),
-  followq:document.getElementById('panel-followq')
+  followq:document.getElementById('panel-followq'),
+  comments:document.getElementById('panel-comments')
 };
 
 function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
@@ -197,10 +202,10 @@ function wireClamp(panelEl, t){
   const clamp = panelEl.querySelector('.clamp');
   const btn = panelEl.querySelector('[data-role="expand"]');
   if(!clamp || !btn) return;
-  function setLabel(){
+  const setLabel = ()=>{
     const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
     btn.textContent = collapsed ? t.readMore : t.readLess;
-  }
+  };
   setLabel();
   btn.addEventListener('click', ()=>{
     const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
@@ -213,8 +218,9 @@ function renderPanel(key, lang){
   const t = i18n[lang] || i18n.EN;
   Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
   panels[key].classList.add('active');
-  panels[key].innerHTML = t[key];
-  if(key === 'story') wireClamp(panels[key], t);
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
 }
 
 tabBtns.forEach(btn=>{
@@ -233,6 +239,38 @@ langToggle.addEventListener('click', ()=>{
 });
 
 applyLang(getLang());
+
+/* === Giscus：Comments 分頁（與其他頁一致） === */
+const GISCUS_CFG = {
+  repo: 'belaug-ffxiv/FFXIV_Library',
+  repoId: 'R_kgD0Pyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
 </script>
 </body>
 </html>
