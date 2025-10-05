@@ -42,6 +42,20 @@
     .muted{color:var(--muted)}
     .link{color:#0b60d8;text-decoration:none}
     .link:hover{text-decoration:underline}
+
+    /* 展開/收合 */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
   </style>
 </head>
 <body>
@@ -76,12 +90,16 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
-          <div id="panel-story"   class="tab-panel active"></div>
-          <div id="panel-acq"     class="tab-panel"></div>
-          <div id="panel-unlockq" class="tab-panel"></div>
-          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -93,10 +111,14 @@ const i18n = {
   EN:{
     langLabel:'EN',
     pageTitle:'Prudence at This Junction',
-    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
-    story:`<p>At Roger’s suggestion, you make your way to Black Brush Station, where the Stone Torches are short on hands. Warin greets you with a straightforward offer—he needs help clearing pests from the rail lines, but he won’t send anyone unprepared to their death.</p>
-    <p>You learn that these guards are not soldiers of Ul’dah, but hired swords protecting the Mineral Concern’s interests. And with every job comes risk—Warin makes it clear: ill-fitting armor has cost lives. His words are blunt, but not unkind. He’s seen too many fall from negligence.</p>
-    <p>You take the time to check your gear, understanding now that even a single cracked helm could mean the end. When you return, Warin inspects you once more. The real test lies ahead, but you’ve taken your first step—not just as an adventurer, but as someone ready to survive.</p>`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>At Roger’s suggestion, you make your way to Black Brush Station, where the Stone Torches are short on hands. Warin greets you with a straightforward offer—he needs help clearing pests from the rail lines, but he won’t send anyone unprepared to their death.</p>
+      <p>You learn that these guards are not soldiers of Ul’dah, but hired swords protecting the Mineral Concern’s interests. And with every job comes risk—Warin makes it clear: ill-fitting armor has cost lives. His words are blunt, but not unkind. He’s seen too many fall from negligence.</p>
+      <p>You take the time to check your gear, understanding now that even a single cracked helm could mean the end. When you return, Warin inspects you once more. The real test lies ahead, but you’ve taken your first step—not just as an adventurer, but as someone ready to survive.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>Quest Giver</b> Roger <small class="muted">(Central Thanalan, X:19.4, Y:20.6)</small></div>
     </div>`,
@@ -110,10 +132,14 @@ const i18n = {
   JP:{
     langLabel:'JP',
     pageTitle:'戦場の備え',
-    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
-    story:`<p>ロジャーの助言を受け、あなたは「ブラックブラッシュ停留所」へと向かう。そこでは「ストーントーチ」と呼ばれる傭兵たちが、人手不足に悩まされていた。迎えてくれたワリンは、害虫駆除の依頼を持ちかける──だが、装備が整っていなければ、任務に出すことはできないと釘を刺す。</p>
-    <p>彼らは都市の兵ではなく、アマジナ鉱山社に雇われた用心棒。危険は常に付きまとう。ワリンの語る言葉には、戦場で仲間を失った重みがある。わずかな装備不備が命取りになる──それが彼の現実だった。</p>
-    <p>あなたは装備を整え、再び彼の前に立つ。検分を終えたワリンは、静かに頷く。真の試練はこれからだが、今この瞬間、あなたは冒険者としての第一歩を、確かに踏み出したのだった。</p>`,
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>ロジャーの助言を受け、あなたは「ブラックブラッシュ停留所」へと向かう。そこでは「ストーントーチ」と呼ばれる傭兵たちが、人手不足に悩まされていた。迎えてくれたワリンは、害虫駆除の依頼を持ちかける──だが、装備が整っていなければ、任務に出すことはできないと釘を刺す。</p>
+      <p>彼らは都市の兵ではなく、アマジナ鉱山社に雇われた用心棒。危険は常に付きまとう。ワリンの語る言葉には、戦場で仲間を失った重みがある。わずかな装備不備が命取りになる──それが彼の現実だった。</p>
+      <p>あなたは装備を整え、再び彼の前に立つ。検分を終えたワリンは、静かに頷く。真の試練はこれからだが、今この瞬間、あなたは冒険者としての第一歩を、確かに踏み出したのだった。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>クエスト発行</b> ロジェ <small class="muted">（中央ザナラーン, X:19.4, Y:20.6）</small></div>
     </div>`,
@@ -127,10 +153,14 @@ const i18n = {
   ZH:{
     langLabel:'ZH',
     pageTitle:'臨戰的戒備',
-    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
-    story:`<p>你依照 Roger 的建議，來到 Black Brush Station。這裡的 Stone Torches 僱傭兵人手嚴重不足。負責人 Warin 向你說明狀況：他們受僱於 Amajina & Sons Mineral Concern，專責守護鐵道與採礦區，但這項工作比你想像的還危險。</p>
-    <p>他拒絕讓裝備不全的冒險者送死。他語氣冷硬，卻不是冷酷——他見過太多戰友因為破盔裂甲而倒下。他堅持：裝備是否完備，往往就是生與死的分界線。</p>
-    <p>你聽從忠告，仔細檢查身上的每一件裝備。當你再度面對 Warin，他終於放行。真正的挑戰仍在前方，但你已做好準備，踏出了屬於冒險者的堅實一步。</p>`,
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>你依照 Roger 的建議，來到 Black Brush Station。這裡的 Stone Torches 僱傭兵人手嚴重不足。負責人 Warin 向你說明狀況：他們受僱於 Amajina & Sons Mineral Concern，專責守護鐵道與採礦區，但這項工作比你想像的還危險。</p>
+      <p>他拒絕讓裝備不全的冒險者送死。他語氣冷硬，卻不是冷酷——他見過太多戰友因為破盔裂甲而倒下。他堅持：裝備是否完備，往往就是生與死的分界線。</p>
+      <p>你聽從忠告，仔細檢查身上的每一件裝備。當你再度面對 Warin，他終於放行。真正的挑戰仍在前方，但你已做好準備，踏出了屬於冒險者的堅實一步。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>任務發布</b> 羅傑 <small class="muted">（薩納蘭中部, X:19.4, Y:20.6）</small></div>
     </div>`,
@@ -150,7 +180,8 @@ const panels = {
   story:  document.getElementById('panel-story'),
   acq:    document.getElementById('panel-acq'),
   unlockq:document.getElementById('panel-unlockq'),
-  followq:document.getElementById('panel-followq')
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
 };
 
 function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
@@ -162,12 +193,32 @@ function applyLang(lang){
   const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
   renderPanel(activeBtn.dataset.tab, lang);
 }
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
 function renderPanel(key, lang){
   const t = i18n[lang] || i18n.EN;
   Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
   panels[key].classList.add('active');
-  panels[key].innerHTML = t[key];
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
 }
+
 tabBtns.forEach(btn=>{
   btn.addEventListener('click', ()=>{
     tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
@@ -175,13 +226,47 @@ tabBtns.forEach(btn=>{
     renderPanel(btn.dataset.tab, getLang());
   });
 });
+
 langToggle.addEventListener('click', ()=>{
   const cur = getLang();
   const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
   localStorage.setItem(LANG_KEY, next);
   applyLang(next);
 });
+
 applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'belaug-ffxiv/FFXIV_Library',
+  repoId: 'R_kgD0Pyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
 </script>
 </body>
 </html>
