@@ -43,16 +43,17 @@
     .link{color:#0b60d8;text-decoration:none}
     .link:hover{text-decoration:underline}
 
-    /* 長文自動收合 */
-    .story-collapsible{position:relative;max-height:380px;overflow:hidden}
-    .story-collapsible::after{
-      content:"";position:absolute;inset:auto 0 0 0;height:72px;
+    /* —— 手動展開/收合（固定提供按鈕） —— */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
       background:linear-gradient(to bottom, rgba(255,248,230,0), var(--card));
+      pointer-events:none;
     }
-    .story-toggle{display:inline-block;margin-top:10px;padding:8px 14px;border:1px solid var(--border);
-      border-radius:999px;background:#fff;cursor:pointer;font-weight:600}
-    .story-expanded{max-height:none}
-    .story-expanded::after{display:none}
+    .expand-wrap{margin-top:10px}
+    .expand-btn{display:inline-block;padding:8px 14px;border:1px solid var(--border);border-radius:999px;background:#fff;cursor:pointer;font-weight:600}
+    .expand-btn:hover{background:#fffef8}
   </style>
 </head>
 <body>
@@ -87,12 +88,16 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
-          <div id="panel-story"   class="tab-panel active"></div>
-          <div id="panel-acq"     class="tab-panel"></div>
-          <div id="panel-unlockq" class="tab-panel"></div>
-          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -104,10 +109,14 @@ const i18n = {
   EN:{
     langLabel:'EN',
     pageTitle:"Storms on the Horizon",
-    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
-    story:`<p>You’re approached with a light-hearted errand: Captain Baldewyn is planning a feast for the thaumaturges at Horizon, and fresh fish is on the menu. You’re sent south to Crescent Cove to ensure the village fulfills the request.</p>
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+<p>You’re approached with a light-hearted errand: Captain Baldewyn is planning a feast for the thaumaturges at Horizon, and fresh fish is on the menu. You’re sent south to Crescent Cove to ensure the village fulfills the request.</p>
 <p>At the cove, you find Raffe flustered. The seas have been rough, and the day’s catch is lacking. Still, he nods and swears that the captain will have his fish—no matter what. Behind his nervous words, you sense the pressure weighing on this small coastal outpost.</p>
-<p>What was framed as a simple message reveals the strain between command and those expected to serve it.</p>`,
+<p>What was framed as a simple message reveals the strain between command and those expected to serve it.</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>Quest Giver</b> Nunuzofu <small class="muted">(Western Thanalan, X:17.9, Y:16.0)</small></div>
     </div>`,
@@ -121,10 +130,14 @@ const i18n = {
   JP:{
     langLabel:'JP',
     pageTitle:'酒のサカナ求む',
-    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
-    story:`<p>あなたはささいな伝令役を頼まれる。バルドウィン隊長が、ホライズンにて呪術士たちのための宴を企画しており、最高の料理を振る舞うという。その目玉は「新鮮な魚」。あなたは南の「クレセントコーヴ」に向かい、漁村に調達を依頼する。</p>
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+<p>あなたはささいな伝令役を頼まれる。バルドウィン隊長が、ホライズンにて呪術士たちのための宴を企画しており、最高の料理を振る舞うという。その目玉は「新鮮な魚」。あなたは南の「クレセントコーヴ」に向かい、漁村に調達を依頼する。</p>
 <p>到着すると、ラッフは戸惑いながら応じる。最近の荒天のせいで漁獲は少なく、満足いく供給ができるか不安を隠せない。それでも、彼は「隊長の魚は必ず届ける」と誓う。</p>
-<p>一見軽い命令の裏には、小さな村の漁師たちにかかる重圧と、従属する者たちの現実が垣間見えた。</p>`,
+<p>一見軽い命令の裏には、小さな村の漁師たちにかかる重圧と、従属する者たちの現実が垣間見えた。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>クエスト発行</b> ヌヌゾフ <small class="muted">（西ザナラーン, X:17.9, Y:16.0）</small></div>
     </div>`,
@@ -138,10 +151,14 @@ const i18n = {
   ZH:{
     langLabel:'ZH',
     pageTitle:'風暴前的酒宴',
-    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
-    story:`<p>你接下了一項看似簡單的任務──Baldewyn 隊長要為 Horizon 的 thaumaturges 籌辦宴會，食材中少不了最上等的鮮魚。你受命前往西南方的 Crescent Cove，向村裡傳達命令。</p>
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+<p>你接下了一項看似簡單的任務──Baldewyn 隊長要為 Horizon 的 thaumaturges 籌辦宴會，食材中少不了最上等的鮮魚。你受命前往西南方的 Crescent Cove，向村裡傳達命令。</p>
 <p>在那裡，你遇見了神情緊張的 Raffe。他說近來海象不佳，漁獲不多，無法保證能捕到足夠的好魚。但他還是重重點頭，保證「隊長的魚一定會到」。</p>
-<p>一項輕描淡寫的差事，背後卻藏著層層壓力與責任。小村落默默承受上層命令的重量，而你，恰巧見證了這其中的裂縫。</p>`,
+<p>一項輕描淡寫的差事，背後卻藏著層層壓力與責任。小村落默默承受上層命令的重量，而你，恰巧見證了這其中的裂縫。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>任務發布</b> 努努佐夫 <small class="muted">（薩納蘭西部, X:17.9, Y:16.0）</small></div>
     </div>`,
@@ -161,7 +178,8 @@ const panels = {
   story:  document.getElementById('panel-story'),
   acq:    document.getElementById('panel-acq'),
   unlockq:document.getElementById('panel-unlockq'),
-  followq:document.getElementById('panel-followq')
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
 };
 
 function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
@@ -173,12 +191,33 @@ function applyLang(lang){
   const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
   renderPanel(activeBtn.dataset.tab, lang);
 }
+
+/* 展開/收合與 Comments 載入 */
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
 function renderPanel(key, lang){
   const t = i18n[lang] || i18n.EN;
   Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
   panels[key].classList.add('active');
-  panels[key].innerHTML = t[key];
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
 }
+
 tabBtns.forEach(btn=>{
   btn.addEventListener('click', ()=>{
     tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
@@ -193,41 +232,39 @@ langToggle.addEventListener('click', ()=>{
   applyLang(next);
 });
 
-/* —— 長文自動收合（依字數自動出現） —— */
-const readMoreLabels = {
-  EN: {more:'Read more', less:'Show less'},
-  JP: {more:'続きを読む',   less:'折りたたむ'},
-  ZH: {more:'展開全文',     less:'收合內容'}
-};
-function makeStoryCollapsible(lang){
-  const panel = document.getElementById('panel-story');
-  if(!panel) return;
-  const textLen = panel.textContent.trim().length;
-  if(textLen < 800) return;
-  const inner = panel.innerHTML.trim();
-  const wrap = document.createElement('div');
-  wrap.className = 'story-collapsible';
-  wrap.innerHTML = inner;
-  const btn = document.createElement('button');
-  const L = readMoreLabels[lang] || readMoreLabels.EN;
-  btn.className = 'story-toggle';
-  btn.textContent = L.more;
-  btn.addEventListener('click', ()=>{
-    const on = wrap.classList.toggle('story-expanded');
-    btn.textContent = on ? L.less : L.more;
-  });
-  panel.innerHTML = '';
-  panel.appendChild(wrap);
-  panel.appendChild(btn);
-}
-/* 掛鉤 renderPanel：切到 Story 時套用收合 */
-const _origRenderPanel = renderPanel;
-renderPanel = function(key, lang){
-  _origRenderPanel(key, lang);
-  if(key==='story') makeStoryCollapsible(lang);
-};
-
 applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'belaug-ffxiv/FFXIV_Library',
+  repoId: 'R_kgD0Pyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
 </script>
 </body>
 </html>
