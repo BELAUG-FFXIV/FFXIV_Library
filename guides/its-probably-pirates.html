@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>It’s Probably Pirates | BELAUG · FFXIV Library</title>
-  <meta name="description" content="ARR 2.0 MSQ — It’s Probably Pirates（大概是海盜吧）：故事概要、取得方式與任務/地城解鎖。">
+  <meta name="description" content="MSQ – It’s Probably Pirates (ARR Patch 2.0)">
   <link rel="icon" href="../img/favicon.ico" />
   <style>
     :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
@@ -17,8 +17,8 @@
     .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
     .home:hover{background:#fffef8}
     .right{display:flex;align-items:center;gap:8px}
-    .icon-btn{background:none;border:1px solid transparent;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
-    .icon-btn:hover{background:#fff;border-color:var(--border)}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
     .main{padding:20px 0 40px}
     .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
     @media (max-width:900px){
@@ -42,14 +42,20 @@
     .muted{color:var(--muted)}
     .link{color:#0b60d8;text-decoration:none}
     .link:hover{text-decoration:underline}
-    /* Story clamp + button */
-    .story-wrap{position:relative}
-    .story-content{max-height:360px;overflow:hidden;position:relative}
-    .story-content::after{content:"";position:absolute;inset:auto 0 0 0;height:64px;background:linear-gradient(to top,var(--card),transparent)}
-    .story-expanded{max-height:none!important}
-    .story-expanded::after{display:none}
-    .expand-btn{margin-top:8px;background:none;border:1px solid var(--border);padding:6px 10px;border-radius:8px;cursor:pointer;font-weight:600}
-    @media (max-width:600px){ .story-content{max-height:260px} }
+
+    /* 展開/收合 */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
   </style>
 </head>
 <body>
@@ -84,12 +90,16 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
           <div id="panel-story"   class="tab-panel active"></div>
           <div id="panel-acq"     class="tab-panel"></div>
           <div id="panel-unlockq" class="tab-panel"></div>
           <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -101,13 +111,15 @@ const i18n = {
   EN:{
     langLabel:'EN',
     pageTitle:'It’s Probably Pirates',
-    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
-    story:`<div class="story-wrap"><div class="story-content">
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
       <p>Whispers of unease spread through Limsa Lominsa. Suspicious figures had been seen slipping in and out of the Sastasha Seagrot, their movements too deliberate to ignore. Baderon, ever watchful for the safety of his patrons, entrusted you with the task of investigation. Commodore Reyner confirmed the danger—an unfamiliar ship lurked near the Isles of Umbra, and with the Yellowjackets stretched thin, the burden fell upon you.</p>
       <p>At the ferry docks, V’mellpa urged you to prepare at the Hall of the Novice before entering the cavern. There, seasoned adventurers reminded you that Sastasha’s depths would devour any lone wanderer—only through comradeship and training could one hope to survive.</p>
       <p>Near the Seagrot’s entrance, you encountered others drawn by the promise of glory. Avere barked harshly at his timid conjurer, Edda, while Liavinne and Paiyo Reiyo laughed at her faltering efforts. Their party was eager for fame, yet divided in spirit. By contrast, Isildaure and Alianne stood as living testaments to adventure’s truer calling: a journey not for riches, but for discovery and wonder.</p>
       <p>With the Yellowjackets’ charge echoing in your ears, you stepped forward. The tide-worn tunnels of Sastasha awaited, hiding secrets that could change Limsa’s fate.</p>
-    </div><button class="expand-btn" data-i18n="expand">Read more</button></div>`,
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>Quest Giver</b> Baderon <small class="muted">(Limsa Lominsa Upper Decks, X:11.6, Y:11.1)</small></div>
     </div>`,
@@ -122,20 +134,21 @@ const i18n = {
   JP:{
     langLabel:'JP',
     pageTitle:'サスタシャに挑む者',
-    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
-    story:`<div class="story-wrap"><div class="story-content">
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
       <p>リムサ・ロミンサには不穏な噂が広がっていた。サスタシャ浸食洞に怪しい者たちが出入りしているというのだ。酒場の主バデロンは、街の安寧を守るため君に調査を託した。提督レイナーも危機を認め、ウンブラ諸島付近に正体不明の船が現れたと告げる。だが、イエロージャケットの兵は日々の防衛で手一杯――ゆえに任務は君の肩にかかっていた。</p>
       <p>船着場ではヴメルパが君を制し、洞窟に挑む前に「初心者の館」での研鑽を勧める。そこで歴戦の冒険者たちは説いた――サスタシャの奥は孤独な者を呑み込む。仲間と共に学び、磨かれた技でこそ生き残れるのだと。</p>
       <p>やがて洞窟の入口で出会ったのは、栄光を求める別の若き一団。苛烈なアヴェールは、臆病な幻術士エッダを叱りつけ、リャヴィンヌとパイヨ・レイヨは彼女を嘲笑う。野心はあれど心は一つになっていない。対照的に、老冒険者イシルドールと孫娘アリアーヌは、財宝ではなく未知への渇望こそが冒険の真髄だと示していた。</p>
       <p>イエロージャケットの任務を胸に刻み、君は前へ進む。潮に削られたサスタシャの闇が、その行く手を待ち構えていた。</p>
-    </div><button class="expand-btn" data-i18n="expand">続きを読む</button></div>`,
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>クエスト発行</b> バデロン <small class="muted">（リムサ・ロミンサ：上甲板層, X:11.6, Y:11.1）</small></div>
     </div>`,
     unlockq:`<div class="stack">
       <div class="row"><a class="link" href="call-of-the-sea.html">海都で待つ仕事</a></div>
-      <div class="row"><b>ダンジョン開放</b> <a class="link" href="sastasha.html">天然要害 サスタシャ浸食洞
-</a></div>
+      <div class="row"><b>ダンジョン開放</b> <a class="link" href="sastasha.html">天然要害 サスタシャ浸食洞</a></div>
     </div>`,
     followq:`<div class="stack">
       <div class="row"><a class="link" href="call-of-the-forest.html">森都で待つ仕事</a></div>
@@ -144,20 +157,21 @@ const i18n = {
   ZH:{
     langLabel:'ZH',
     pageTitle:'大概是海盜吧',
-    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
-    story:`<div class="story-wrap"><div class="story-content">
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
       <p>不安的耳語瀰漫在利姆薩・羅敏薩。有人目擊陌生的身影進出於 Sastasha 海蝕洞，行跡可疑。酒館老闆 Baderon 將調查的重責交付於你，而 Reyner 提督則證實了危機：一艘陌生的船隻曾徘徊於 Umbra 群島近海。黃衫隊兵力緊縮，唯有你能承擔這份使命。</p>
       <p>在渡船口，V’mellpa 勸你先前往「新人訓練館」，習得在洞窟中生存所需的基礎。館內的老練冒險者提醒──Sastasha 的黑暗不容孤身踏入，唯有藉由夥伴的協力與訓練，才能在其中存活。</p>
       <p>在洞窟入口，你遇見另一隊追逐榮光的年輕人。Avere 對膽怯的幻術師 Edda 嚴厲斥責，Liavinne 與 Paiyo Reiyo 則冷笑相加。他們雖渴望名聲，卻缺乏真正的團結。與之相對，老冒險者 Isildaure 與孫女 Alianne 卻展現了另一種精神──冒險不是為了財寶，而是為了發現未知、體驗世界的奇蹟。</p>
       <p>黃衫隊的託付仍迴盪在耳邊。你邁步向前，潮水侵蝕的 Sastasha 深處正靜靜等待著揭示的秘密。</p>
-    </div><button class="expand-btn" data-i18n="expand">展開全文</button></div>`,
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>任務發布</b> 巴德隆 <small class="muted">（利姆薩．羅敏薩 上層甲板, X:11.6, Y:11.1）</small></div>
     </div>`,
     unlockq:`<div class="stack">
       <div class="row"><a class="link" href="call-of-the-sea.html">海都的委託</a></div>
-      <div class="row"><b>解鎖地城</b> <a class="link" href="sastasha.html">薩斯塔夏洞窟
-</a></div>
+      <div class="row"><b>解鎖地城</b> <a class="link" href="sastasha.html">薩斯塔夏洞窟</a></div>
     </div>`,
     followq:`<div class="stack">
       <div class="row"><a class="link" href="call-of-the-forest.html">森林的召喚</a></div>
@@ -172,11 +186,11 @@ const panels = {
   story:  document.getElementById('panel-story'),
   acq:    document.getElementById('panel-acq'),
   unlockq:document.getElementById('panel-unlockq'),
-  followq:document.getElementById('panel-followq')
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
 };
 
 function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
-function setLang(lang){ localStorage.setItem(LANG_KEY, lang); }
 function applyLang(lang){
   const t = i18n[lang] || i18n.EN;
   pageTitle.textContent = t.pageTitle;
@@ -186,38 +200,29 @@ function applyLang(lang){
   renderPanel(activeBtn.dataset.tab, lang);
 }
 
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
 function renderPanel(key, lang){
   const t = i18n[lang] || i18n.EN;
   Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
   panels[key].classList.add('active');
-  panels[key].innerHTML = t[key];
-  if (key === 'story') makeStoryCollapsible(panels[key], lang);
-}
-
-function makeStoryCollapsible(panel, lang){
-  const wrap = panel.querySelector('.story-wrap');
-  if(!wrap) return;
-  const content = wrap.querySelector('.story-content');
-  const btn = wrap.querySelector('.expand-btn');
-  const MAX = window.matchMedia('(max-width:600px)').matches ? 260 : 360;
-  const needClamp = content.scrollHeight > MAX + 8;
-  if(needClamp){
-    btn.style.display = 'inline-block';
-    btn.textContent = label(lang, true);
-    btn.onclick = ()=>{
-      content.classList.toggle('story-expanded');
-      const expanded = content.classList.contains('story-expanded');
-      btn.textContent = label(lang, !expanded);
-    };
-  }else{
-    content.classList.add('story-expanded');
-    btn.style.display = 'none';
-  }
-}
-function label(lang, expand){
-  if(lang==='EN') return expand ? 'Read more' : 'Show less';
-  if(lang==='JP') return expand ? '続きを読む' : '折りたたむ';
-  return expand ? '展開全文' : '收合內容';
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
 }
 
 tabBtns.forEach(btn=>{
@@ -231,11 +236,43 @@ tabBtns.forEach(btn=>{
 langToggle.addEventListener('click', ()=>{
   const cur = getLang();
   const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
-  setLang(next);
+  localStorage.setItem(LANG_KEY, next);
   applyLang(next);
 });
 
 applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'belaug-ffxiv/FFXIV_Library',
+  repoId: 'R_kgD0Pyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
 </script>
 </body>
 </html>
