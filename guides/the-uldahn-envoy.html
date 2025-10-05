@@ -43,16 +43,19 @@
     .link{color:#0b60d8;text-decoration:none}
     .link:hover{text-decoration:underline}
 
-    /* 長文自動收合 */
-    .story-collapsible{position:relative;max-height:380px;overflow:hidden}
-    .story-collapsible::after{
-      content:"";position:absolute;inset:auto 0 0 0;height:72px;
-      background:linear-gradient(to bottom, rgba(255,248,230,0), var(--card));
+    /* 展開/收合 */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
     }
-    .story-toggle{display:inline-block;margin-top:10px;padding:8px 14px;border:1px solid var(--border);
-      border-radius:999px;background:#fff;cursor:pointer;font-weight:600}
-    .story-expanded{max-height:none}
-    .story-expanded::after{display:none}
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
   </style>
 </head>
 <body>
@@ -87,12 +90,16 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
-          <div id="panel-story"   class="tab-panel active"></div>
-          <div id="panel-acq"     class="tab-panel"></div>
-          <div id="panel-unlockq" class="tab-panel"></div>
-          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -104,12 +111,16 @@ const i18n = {
   EN:{
     langLabel:'EN',
     pageTitle:"The Ul'dahn Envoy",
-    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
-    story:`<p>At the Hall of Flames, Raubahn bids you listen closely. He has prepared letters for his counterparts in the Eorzean Alliance. Five years have passed since Carteneau—first the Garleans, then the primal born of treachery. He still thinks of his fallen comrades, and of the Warriors of Light whose traces remain lost. The realm must remember, so he will mark the fifth anniversary with a memorial service, and asks the other leaders to do the same. He chooses you as his personal envoy—closest in deed to a Warrior of Light—and grants you an airship pass, rarely issued in these perilous times. Go forth in the sultana’s name, he says: see the realm the Warriors of Light died to protect, rise to your calling, strike fast and true should any bar your path, and heed the Crystal’s guidance if you lose your way.</p>
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+<p>At the Hall of Flames, Raubahn bids you listen closely. He has prepared letters for his counterparts in the Eorzean Alliance. Five years have passed since Carteneau—first the Garleans, then the primal born of treachery. He still thinks of his fallen comrades, and of the Warriors of Light whose traces remain lost. The realm must remember, so he will mark the fifth anniversary with a memorial service, and asks the other leaders to do the same. He chooses you as his personal envoy—closest in deed to a Warrior of Light—and grants you an airship pass, rarely issued in these perilous times. Go forth in the sultana’s name, he says: see the realm the Warriors of Light died to protect, rise to your calling, strike fast and true should any bar your path, and heed the Crystal’s guidance if you lose your way.</p>
 <p>You return to the Quicksand. Momodi beams at the news—Ul’dah’s envoy by airship! She’s proud, but warns you to be careful: Limsa and Gridania have troubles of their own. Still, she insists this is what you’re made for—curiosity, compassion, and a nose for other people’s business. At the airship landing, Elyenora recognizes you as the Flame General’s envoy and readies your passage. As the vessel departs for Limsa Lominsa, Nanamo and Momodi bid you godspeed.</p>
 <p>Far away, in Castrum Occidens, Gaius van Baelsar recalls fifteen bitter years—from Mor Dhona and Midgardsormr to Meteor’s failure—and vows that only Garlean rule can save Eorzea. Under Nero tol Scaeva’s cold eye, doubt is silenced and magitek advances.</p>
 <p>You arrive in Limsa Lominsa. Escorted through Bulwark Hall, you present Raubahn’s sealed letter. Admiral Merlwyb Bloefhiswyn receives you, sharp and cordial. She listens: a remembrance service for the fallen. She recounts the Empire, Nael van Darnus, Dalamud, Bahamut, and the blinding light that spared a few when the world burned. With primals rising and Garleans at the borders, unity is needful; she accepts Raubahn’s proposal and sends her reply. “Give my regards to the Elder Seedseer,” she adds—with a private jest about a wolf at the stables.</p>
-<p>You fly on to Gridania. At Nophica’s Altar you’re admitted to the Lotus Stand. Kan-E-Senna welcomes you and peers at your face—reminded of one once known—then speaks of Garlemald: magitek’s rise, Solus zos Galvus’s long reign and frailty, succession strains, and Gaius van Baelsar commanding the XIVth Legion. With each nation beset by primals, none can think only within their borders. A storm gathers; unity must return. She approves the memorial service and will dispatch her reply at once. Your duty here done, she prays the Twelve see you safely home.</p>`,
+<p>You fly on to Gridania. At Nophica’s Altar you’re admitted to the Lotus Stand. Kan-E-Senna welcomes you and peers at your face—reminded of one once known—then speaks of Garlemald: magitek’s rise, Solus zos Galvus’s long reign and frailty, succession strains, and Gaius van Baelsar commanding the XIVth Legion. With each nation beset by primals, none can think only within their borders. A storm gathers; unity must return. She approves the memorial service and will dispatch her reply at once. Your duty here done, she prays the Twelve see you safely home.</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>Quest Giver</b> Raubahn <small class="muted">(Ul’dah - Steps of Nald, X: 8.4, Y: 8.9)</small></div>
     </div>`,
@@ -123,12 +134,16 @@ const i18n = {
   JP:{
     langLabel:'JP',
     pageTitle:'海都と森都と',
-    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
-    story:`<p>「炎の間」で、ラウバーンはあなたに長話を許してくれと言う。彼はエオルゼア同盟の要人宛てに書簡を用意していた。カルテノーから五年──ガレマール帝国の侵攻、そして裏切りによって呼び出された蛮神。彼は今も戦友と「光の戦士」たちを忘れない。だからこそ、第五周年の追悼式を提案し、同盟各国にも同様の式典を求めるという。特使に指名されたのはあなた──光の戦士に最も近い働きを成した者として。彼は空路通行証を授け、女王の名において「行け」と送り出す。見るべき世界を見よ、務めを果たせ、行く手を阻む者あらば速やかに打ち払え、そして道を失えばクリスタルの導きに従え、と。</p>
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+<p>「炎の間」で、ラウバーンはあなたに長話を許してくれと言う。彼はエオルゼア同盟の要人宛てに書簡を用意していた。カルテノーから五年──ガレマール帝国の侵攻、そして裏切りによって呼び出された蛮神。彼は今も戦友と「光の戦士」たちを忘れない。だからこそ、第五周年の追悼式を提案し、同盟各国にも同様の式典を求めるという。特使に指名されたのはあなた──光の戦士に最も近い働きを成した者として。彼は空路通行証を授け、女王の名において「行け」と送り出す。見るべき世界を見よ、務めを果たせ、行く手を阻む者あらば速やかに打ち払え、そして道を失えばクリスタルの導きに従え、と。</p>
 <p>クイックサンドに戻ると、モモディは満面の笑み。空路での特使とは大した栄誉だと言い、同時に「外の国にも問題はある」と釘を刺す。だが彼女は知っている──あなたが放っておけない性分であることを。飛空艇発着所ではエリエノラが特使としての乗船を手配。出発の刻、ナナモとモモディはあなたの門出に祈りを捧げる。</p>
 <p>一方、カストルム・オクシデンスでは、ガイウス・ヴァン・バエサルが十五年の悔恨を語り、ネロ・トル・スカエウァは疑念を摘み取り、魔導技術の進軍を誓う。</p>
 <p>リムサ・ロミンサに到着。城門をくぐり、書簡の封印を確かめられたのち、提督メルウィブ・ブルーフィスウィンの執務室へ。あなたの報せに彼女は頷き、帝国、ナール・ヴァン・ダーナス、ダラガブ、そしてバハムート──燃え落ちる世界と、白光に包まれ一命を取り留めた奇跡を語る。蛮神と帝国の二重の脅威に対抗するには、再び結束が必要だ。彼女は提案を受諾し、返信を託す。「グリダニアの長老にもよろしく──厩舎に狼がうろついているとな」と冗談交じりに。</p>
-<p>さらに飛空艇でグリダニアへ。ノフィカ大樹の祭壇からロータススタンドに案内され、カヌ・エ・センナがあなたを迎える。彼女はあなたの顔に「かつての誰か」を重ねつつ、ガレマールの興亡、ソルス・ゾス・ガルヴァスの長期統治と老い、継承問題、ガイウス率いる第XIV軍団の脅威を語る。各国は蛮神問題に追われ、内向きに陥っているが、今こそ再結束が必要だ。彼女は追悼式に賛同し、即時返信を送ると約し、あなたの任務完了を労う。</p>`,
+<p>さらに飛空艇でグリダニアへ。ノフィカ大樹の祭壇からロータススタンドに案内され、カヌ・エ・センナがあなたを迎える。彼女はあなたの顔に「かつての誰か」を重ねつつ、ガレマールの興亡、ソルス・ゾス・ガルヴァスの長期統治と老い、継承問題、ガイウス率いる第XIV軍団の脅威を語る。各国は蛮神問題に追われ、内向きに陥っているが、今こそ再結束が必要だ。彼女は追悼式に賛同し、即時返信を送ると約し、あなたの任務完了を労う。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>クエスト発行</b> ラウバーン <small class="muted">（ウルダハ：ナル回廊, X: 8.4, Y: 8.9）</small></div>
     </div>`,
@@ -142,12 +157,16 @@ const i18n = {
   ZH:{
     langLabel:'ZH',
     pageTitle:'烏爾達哈的使節',
-    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
-    story:`<p>在 Hall of Flames，Raubahn 要你仔細聽。他已為 Eorzean Alliance 的各位領袖準備好親筆書信。自 Carteneau 以來的五年——先是 Garlemald 的入侵，後又是背叛召來的 primal——他從未忘記殞落的同袍，也從未忘記「Warriors of Light」。為了讓眾人記得，他決意在五週年舉行追悼儀式，並請各國一同舉辦。他任命你為個人特使，因為你的作為最接近一位 Warrior of Light；同時授予你難得的飛空艇通行證。他以 sultana 之名送你啟程：去看見那片為之犧牲的土地，回應你的召喚；若有人或魔物擋路，就迅捷而果斷地出手；若迷失方向，就聽從 Crystal 的指引。</p>
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+<p>在 Hall of Flames，Raubahn 要你仔細聽。他已為 Eorzean Alliance 的各位領袖準備好親筆書信。自 Carteneau 以來的五年——先是 Garlemald 的入侵，後又是背叛召來的 primal——他從未忘記殞落的同袍，也從未忘記「Warriors of Light」。為了讓眾人記得，他決意在五週年舉行追悼儀式，並請各國一同舉辦。他任命你為個人特使，因為你的作為最接近一位 Warrior of Light；同時授予你難得的飛空艇通行證。他以 sultana 之名送你啟程：去看見那片為之犧牲的土地，回應你的召喚；若有人或魔物擋路，就迅捷而果斷地出手；若迷失方向，就聽從 Crystal 的指引。</p>
 <p>你回到 Quicksand。Momodi 得知你將以空路出使，既自豪又叮嚀——Limsa 與 Gridania 自有其難處。這也正是她認識的你：總會把別人的事當成自己的事。於是你前往飛空艇發著，Elyenora 核對身分後為你安排航班。飛船啟航時，Nanamo 與 Momodi 為你祝禱。</p>
 <p>遠在 Castrum Occidens，Gaius van Baelsar 回望十五年的敗北與執念，Nero tol Scaeva 以冷酷手段清除疑慮，誓以 magitek 展現真正的力量。</p>
 <p>抵達 Limsa Lominsa。你在 Bulwark Hall 出示帶封印的書信，隨後面見 Admiral Merlwyb Bloefhiswyn。她聽完你的提案，回顧帝國的威脅、Nael van Darnus 的瘋狂、Dalamud 的隕落與 Bahamut 的肆虐，以及那道拯救少數人的白光。如今 primals 再起，帝國仍在邊境伺機，各國必須再度團結。她同意追悼儀式，立即回信，並讓你代帶一句玩笑式的暗語給 Kan-E-Senna——「狼在馬廄附近嗅來嗅去」。</p>
-<p>你再飛往 Gridania。於 Nophica’s Altar 出示文書後，被引至 Lotus Stand。Kan-E-Senna 歡迎你，盯著你的臉，彷彿想起了某個高潔之人；旋即談到 Garlemald：五十年前以 magitek 崛起、Solus zos Galvus 的長治與衰老、繼承動盪與 XIVth Imperial Legion 的虎視眈眈。Calamity 後國力凋敝，各國又受各自的 primal 困擾，無力他顧。但風暴已在地平線聚集，必須重新團結。她完全贊同追悼儀式，立即致函回覆，並祝你平安返程。</p>`,
+<p>你再飛往 Gridania。於 Nophica’s Altar 出示文書後，被引至 Lotus Stand。Kan-E-Senna 歡迎你，盯著你的臉，彷彿想起了某個高潔之人；旋即談到 Garlemald：五十年前以 magitek 崛起、Solus zos Galvus 的長治與衰老、繼承動盪與 XIVth Imperial Legion 的虎視眈眈。Calamity 後國力凋敝，各國又受各自的 primal 困擾，無力他顧。但風暴已在地平線聚集，必須重新團結。她完全贊同追悼儀式，立即致函回覆，並祝你平安返程。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>任務發布</b> Raubahn <small class="muted">（烏爾達哈 - 納爾回廊, X: 8.4, Y: 8.9）</small></div>
     </div>`,
@@ -167,7 +186,8 @@ const panels = {
   story:  document.getElementById('panel-story'),
   acq:    document.getElementById('panel-acq'),
   unlockq:document.getElementById('panel-unlockq'),
-  followq:document.getElementById('panel-followq')
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
 };
 
 function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
@@ -179,12 +199,32 @@ function applyLang(lang){
   const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
   renderPanel(activeBtn.dataset.tab, lang);
 }
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
 function renderPanel(key, lang){
   const t = i18n[lang] || i18n.EN;
   Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
   panels[key].classList.add('active');
-  panels[key].innerHTML = t[key];
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
 }
+
 tabBtns.forEach(btn=>{
   btn.addEventListener('click', ()=>{
     tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
@@ -192,6 +232,7 @@ tabBtns.forEach(btn=>{
     renderPanel(btn.dataset.tab, getLang());
   });
 });
+
 langToggle.addEventListener('click', ()=>{
   const cur = getLang();
   const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
@@ -199,41 +240,39 @@ langToggle.addEventListener('click', ()=>{
   applyLang(next);
 });
 
-/* —— 長文自動收合（依字數自動出現） —— */
-const readMoreLabels = {
-  EN: {more:'Read more', less:'Show less'},
-  JP: {more:'続きを読む',   less:'折りたたむ'},
-  ZH: {more:'展開全文',     less:'收合內容'}
-};
-function makeStoryCollapsible(lang){
-  const panel = document.getElementById('panel-story');
-  if(!panel) return;
-  const textLen = panel.textContent.trim().length;
-  if(textLen < 800) return;
-  const inner = panel.innerHTML.trim();
-  const wrap = document.createElement('div');
-  wrap.className = 'story-collapsible';
-  wrap.innerHTML = inner;
-  const btn = document.createElement('button');
-  const L = readMoreLabels[lang] || readMoreLabels.EN;
-  btn.className = 'story-toggle';
-  btn.textContent = L.more;
-  btn.addEventListener('click', ()=>{
-    const on = wrap.classList.toggle('story-expanded');
-    btn.textContent = on ? L.less : L.more;
-  });
-  panel.innerHTML = '';
-  panel.appendChild(wrap);
-  panel.appendChild(btn);
-}
-/* 掛鉤 renderPanel：切到 Story 時套用收合 */
-const _origRenderPanel = renderPanel;
-renderPanel = function(key, lang){
-  _origRenderPanel(key, lang);
-  if(key==='story') makeStoryCollapsible(lang);
-};
-
 applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'belaug-ffxiv/FFXIV_Library',
+  repoId: 'R_kgD0Pyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
 </script>
 </body>
 </html>
