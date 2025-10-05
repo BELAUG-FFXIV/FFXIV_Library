@@ -45,6 +45,20 @@
     .muted{color:var(--muted)}
     .link{color:#0b60d8; text-decoration:none}
     .link:hover{text-decoration:underline}
+
+    /* 展開/收合（統一模板） */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
   </style>
 </head>
 <body>
@@ -77,12 +91,16 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
           <div id="panel-story"   class="tab-panel active"></div>
           <div id="panel-acq"     class="tab-panel"></div>
           <div id="panel-unlockq" class="tab-panel"></div>
           <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -95,19 +113,21 @@
       EN: {
         langLabel: 'EN',
         pageTitle: 'Go Forth, Brave Explorers',
-        tabs: { story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
+        tabs: { story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+        readMore:'Show more', readLess:'Show less',
         story: `
-          <p>At the Moongate Hub, Searchingway announces that the Galactic Way’s maiden voyage has succeeded—an unmanned craft and now a full starship have both touched down on a new world. Though its clinical designation is UL 9-6, Namingway insists that such a wondrous discovery deserves a more poetic name. With theatrical flair, he vows to christen this world in style.</p>
-          <p>Captain Cruisingway welcomes you aboard, and with a surge of thrusters, the ship hurtles across the stellar current. Through the glassy prism of the atmosphere, a breathtaking vista unfolds. Namingway declares the star’s true name: <b>Phaenna</b>.</p>
-          <p>Upon arrival, Searchingway cautions that Phaenna is beautiful but perilous—a realm of silicon, prismatic light, and storms of razor-edged glass. Its location, however, makes it a crucial stepping stone for future voyages. As artisans and adventurers are called to aid in the settlement, Namingway busies himself with bestowing names upon every wonder.</p>
+          <div class="clamp" data-collapsed="true">
+            <p>At the Moongate Hub, Searchingway announces that the Galactic Way’s maiden voyage has succeeded—an unmanned craft and now a full starship have both touched down on a new world. Though its clinical designation is UL 9-6, Namingway insists that such a wondrous discovery deserves a more poetic name. With theatrical flair, he vows to christen this world in style.</p>
+            <p>Captain Cruisingway welcomes you aboard, and with a surge of thrusters, the ship hurtles across the stellar current. Through the glassy prism of the atmosphere, a breathtaking vista unfolds. Namingway declares the star’s true name: <b>Phaenna</b>.</p>
+            <p>Upon arrival, Searchingway cautions that Phaenna is beautiful but perilous—a realm of silicon, prismatic light, and storms of razor-edged glass. Its location, however, makes it a crucial stepping stone for future voyages. As artisans and adventurers are called to aid in the settlement, Namingway busies himself with bestowing names upon every wonder.</p>
+          </div>
+          <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>
         `,
-        /* Acquisition：只保留 Quest Giver */
         acq: `
           <div class="stack">
             <div class="row"><b>Quest Giver</b> Searchingway <small class="muted">(Sinus Ardorum, X:20.3, Y:20.0)</small></div>
           </div>
         `,
-        /* 不重複 tab 名稱：只放連結 */
         unlockq: `
           <div class="stack">
             <div class="row"><a class="link" href="#">Passion, Thy Name Is Ardorum</a></div>
@@ -122,11 +142,15 @@
       JP: {
         langLabel: 'JP',
         pageTitle: '新たなる未知へ！',
-        tabs: { story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
+        tabs: { story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+        readMore:'全文を表示', readLess:'折りたたむ',
         story: `
-          <p>ムーングレート・ハブにて、サーチングウェイは「ギャラクティック・ウェイ」の有人初航行が成功したことを告げる。無人機に続き、星船が新たな世界に降り立ったのだ。その名は UL 9-6──しかし、ネーミングウェイは無味乾燥な番号に憤り、詩情あふれる呼び名を与えると高らかに宣言する。</p>
-          <p>クルージングウェイ船長に迎えられ、星船はスラスターを噴かして星の潮流へ。虹のように屈折する光の大地が広がり、ネーミングウェイはその星を<b>パエンナ</b>と命名する。</p>
-          <p>やがて到着した星は美しくも危険だった。豊富なシリコンが生み出す硝子質の景観、鋭利な破片が嵐のように吹き荒れる大気。しかしその戦略的な位置は、さらなる航海の礎となる。開拓に向けて職人や冒険者が招集される中、ネーミングウェイは新たな命名に胸を躍らせていた。</p>
+          <div class="clamp" data-collapsed="true">
+            <p>ムーングレート・ハブにて、サーチングウェイは「ギャラクティック・ウェイ」の有人初航行が成功したことを告げる。無人機に続き、星船が新たな世界に降り立ったのだ。その名は UL 9-6──しかし、ネーミングウェイは無味乾燥な番号に憤り、詩情あふれる呼び名を与えると高らかに宣言する。</p>
+            <p>クルージングウェイ船長に迎えられ、星船はスラスターを噴かして星の潮流へ。虹のように屈折する光の大地が広がり、ネーミングウェイはその星を<b>パエンナ</b>と命名する。</p>
+            <p>やがて到着した星は美しくも危険だった。豊富なシリコンが生み出す硝子質の景観、鋭利な破片が嵐のように吹き荒れる大気。しかしその戦略的な位置は、さらなる航海の礎となる。開拓に向けて職人や冒険者が招集される中、ネーミングウェイは新たな命名に胸を躍らせていた。</p>
+          </div>
+          <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>
         `,
         acq: `
           <div class="stack">
@@ -147,11 +171,15 @@
       ZH: {
         langLabel: 'ZH',
         pageTitle: '啟程吧，勇敢的探索者們！',
-        tabs: { story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
+        tabs: { story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+        readMore:'展開全文', readLess:'收合內容',
         story: `
-          <p>在月門樞紐，Searchingway 宣布「Galactic Way」的首次載人航行成功——在無人測試之後，真正的星艦也成功降落於新世界。雖有編號 UL 9-6，但 Namingway 認為這樣的發現不該只以冷冰冰的數字稱呼，並發誓要給它更具詩意的名字。</p>
-          <p>在 Cruisingway 船長的引領下，星艦啟動推進器，沿著星流疾馳。當虹彩般的地貌自窗外展開，Namingway 宣告其名：<b>Phaenna</b>。</p>
-          <p>抵達後，Searchingway 警示此地雖華美卻險惡——矽質造就玻璃般的景觀，也帶來鋒利碎片的風暴。但其地理位置將成為通往群星的重要踏腳石。隨著工匠與冒險者受召參與建設，Namingway 也忙於為眼前萬物命名。</p>
+          <div class="clamp" data-collapsed="true">
+            <p>在月門樞紐，Searchingway 宣布「Galactic Way」的首次載人航行成功——在無人測試之後，真正的星艦也成功降落於新世界。雖有編號 UL 9-6，但 Namingway 認為這樣的發現不該只以冷冰冰的數字稱呼，並發誓要給它更具詩意的名字。</p>
+            <p>在 Cruisingway 船長的引領下，星艦啟動推進器，沿著星流疾馳。當虹彩般的地貌自窗外展開，Namingway 宣告其名：<b>Phaenna</b>。</p>
+            <p>抵達後，Searchingway 警示此地雖華美卻險惡——矽質造就玻璃般的景觀，也帶來鋒利碎片的風暴。但其地理位置將成為通往群星的重要踏腳石。隨著工匠與冒險者受召參與建設，Namingway 也忙於為眼前萬物命名。</p>
+          </div>
+          <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>
         `,
         acq: `
           <div class="stack">
@@ -178,7 +206,8 @@
       story:  document.getElementById('panel-story'),
       acq:    document.getElementById('panel-acq'),
       unlockq:document.getElementById('panel-unlockq'),
-      followq:document.getElementById('panel-followq')
+      followq:document.getElementById('panel-followq'),
+      comments: document.getElementById('panel-comments')
     };
 
     function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
@@ -190,12 +219,32 @@
       const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected') === 'true') || tabBtns[0];
       renderPanel(activeBtn.dataset.tab, lang);
     }
+
+    function wireClamp(panelEl, t){
+      const clamp = panelEl.querySelector('.clamp');
+      const btn = panelEl.querySelector('[data-role="expand"]');
+      if(!clamp || !btn) return;
+      function setLabel(){
+        const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+        btn.textContent = collapsed ? t.readMore : t.readLess;
+      }
+      setLabel();
+      btn.addEventListener('click', ()=>{
+        const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+        clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+        setLabel();
+      });
+    }
+
     function renderPanel(key, lang){
       const t = i18n[lang] || i18n.EN;
       Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
       panels[key].classList.add('active');
-      panels[key].innerHTML = t[key];
+      if (key !== 'comments') panels[key].innerHTML = t[key];
+      if (key === 'story') wireClamp(panels[key], t);
+      if (key === 'comments') loadGiscusForCurrentLang();
     }
+
     tabBtns.forEach(btn=>{
       btn.addEventListener('click', ()=>{
         tabBtns.forEach(b => b.setAttribute('aria-selected','false'));
@@ -203,13 +252,47 @@
         renderPanel(btn.dataset.tab, getLang());
       });
     });
+
     langToggle.addEventListener('click', ()=>{
       const cur = getLang();
       const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
       localStorage.setItem(LANG_KEY, next);
       applyLang(next);
     });
+
     applyLang(getLang());
+
+    /* === Giscus：Comments 分頁 === */
+    const GISCUS_CFG = {
+      repo: 'belaug-ffxiv/FFXIV_Library',
+      repoId: 'R_kgD0Pyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+    };
+    function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+    function loadGiscusForCurrentLang(){
+      const mount = document.getElementById('giscus_container');
+      if (!mount) return;
+      mount.innerHTML = '';
+      const langCode = getLang();
+      const s = document.createElement('script');
+      s.src = 'https://giscus.app/client.js';
+      s.setAttribute('data-repo', GISCUS_CFG.repo);
+      s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+      s.setAttribute('data-category', GISCUS_CFG.category);
+      s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+      s.setAttribute('data-mapping', 'specific');
+      s.setAttribute('data-term', location.pathname + '｜' + langCode);
+      s.setAttribute('data-reactions-enabled', '1');
+      s.setAttribute('data-emit-metadata', '0');
+      s.setAttribute('data-input-position', 'bottom');
+      s.setAttribute('data-lang', uiLang(langCode));
+      s.setAttribute('data-theme', GISCUS_CFG.theme);
+      s.setAttribute('crossorigin', 'anonymous');
+      s.async = true;
+      mount.appendChild(s);
+    }
   </script>
 </body>
 </html>
