@@ -42,7 +42,8 @@
     .muted{color:var(--muted)}
     .link{color:#0b60d8;text-decoration:none}
     .link:hover{text-decoration:underline}
-    /* Story 展開 / 收合 */
+
+    /* 展開/收合 */
     .clamp{ position:relative; max-height:360px; overflow:hidden; }
     .clamp[data-collapsed="false"]{ max-height:none; }
     .clamp[data-collapsed="true"]::after{
@@ -89,12 +90,16 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
           <div id="panel-story"   class="tab-panel active"></div>
           <div id="panel-acq"     class="tab-panel"></div>
           <div id="panel-unlockq" class="tab-panel"></div>
           <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -106,7 +111,7 @@ const i18n = {
   EN:{
     langLabel:'EN',
     pageTitle:'Life, Materia and Everything',
-    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
     readMore:'Show more', readLess:'Show less',
     story:`<div class="clamp" data-collapsed="true">
       <p>Though the Scions strive for peaceful solutions against the primals, Minfilia knows war may be unavoidable. She entrusts you with a task to visit her goblin acquaintance, Mutamix Bubblypots, a master who revealed to Eorzea the art of materia. At his camp in the Bonfire of Central Thanalan, Mutamix demonstrates the bonding of crystals to weapons, unlocking hidden strength. His disciples explain how spiritbonded equipment gives birth to materia, and how attaching it grants new power. You return to the Waking Sands with this newfound knowledge, where Minfilia reminds you that mastery of equipment may decide the fate of battles to come.</p>
@@ -125,7 +130,7 @@ const i18n = {
   JP:{
     langLabel:'JP',
     pageTitle:'生命、マテリア、すべての答え',
-    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
     readMore:'全文を表示', readLess:'折りたたむ',
     story:`<div class="clamp" data-collapsed="true">
       <p>暁の血盟は蛮神に対して平和的な解決を望みながらも、戦いを避けられぬ時が来るとミンフィリアは覚悟していた。彼女はあなたに、ゴブリンの友ムタミクス・バブリーポッツを訪ねるよう命じる。彼はマテリアの秘術をエオルゼアに広めた学者として知られ、中央ザナラーンの「ボンファイア」に住まう。そこでムタミクスは武器にクリスタルを融合させ、秘められた力を呼び覚ます様を実演してみせた。弟子たちは、装備と魂が深く結びつくことでマテリアが生まれ、それを装着することで力を得られると説明する。</p>
@@ -145,7 +150,7 @@ const i18n = {
   ZH:{
     langLabel:'ZH',
     pageTitle:'魔晶石與生命的奧秘',
-    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
     readMore:'展開全文', readLess:'收合內容',
     story:`<div class="clamp" data-collapsed="true">
       <p>雖然 Scions 一直追求與蛮神之間的和平解決之道，但 Minfilia 也深知戰鬥遲早無法避免。她託付給你任務，要你前往中央 Thanalan 的 Bonfire，尋找她的哥布林友人 Mutamix Bubblypots。這位學者首次將「魔晶石」之術傳入 Eorzea。你在營地中見證了 Mutamix 將結晶與武器結合，釋放潛藏力量的演示。弟子們則解釋，裝備與靈魂產生深厚羈絆時會孕育出 materia，而將其鑲嵌便能賦予新力量。帶著這份全新知識，你返回 Waking Sands，Minfilia 提醒你：在未來的戰場上，裝備的強弱將決定生死。</p>
@@ -170,11 +175,11 @@ const panels = {
   story:  document.getElementById('panel-story'),
   acq:    document.getElementById('panel-acq'),
   unlockq:document.getElementById('panel-unlockq'),
-  followq:document.getElementById('panel-followq')
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
 };
 
 function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
-
 function applyLang(lang){
   const t = i18n[lang] || i18n.EN;
   pageTitle.textContent = t.pageTitle;
@@ -204,8 +209,9 @@ function renderPanel(key, lang){
   const t = i18n[lang] || i18n.EN;
   Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
   panels[key].classList.add('active');
-  panels[key].innerHTML = t[key];
-  if(key === 'story') wireClamp(panels[key], t);
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
 }
 
 tabBtns.forEach(btn=>{
@@ -224,6 +230,38 @@ langToggle.addEventListener('click', ()=>{
 });
 
 applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'belaug-ffxiv/FFXIV_Library',
+  repoId: 'R_kgD0Pyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
 </script>
 </body>
 </html>
