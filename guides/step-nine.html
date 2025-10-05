@@ -42,6 +42,20 @@
     .muted{color:var(--muted)}
     .link{color:#0b60d8;text-decoration:none}
     .link:hover{text-decoration:underline}
+
+    /* 展開/收合 */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
   </style>
 </head>
 <body>
@@ -76,12 +90,16 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
-          <div id="panel-story"   class="tab-panel active"></div>
-          <div id="panel-acq"     class="tab-panel"></div>
-          <div id="panel-unlockq" class="tab-panel"></div>
-          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -93,10 +111,14 @@ const i18n = {
   EN:{
     langLabel:'EN',
     pageTitle:'Step Nine',
-    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
-    story:`<p>You’re approached by Cicidoa, a man eager to repay an old favor. He’s purchased a plump pumpkin from the Royal Plantations—no ordinary fruit, but a prized harvest grown for the city’s elite. Yet, duty holds him in place, and so he asks you to retrieve it and deliver it to Roger, owner of the Coffer & Coffin.</p>
-    <p>At the Royal Plantations, Gagari entrusts you with the grand gourd, praising its quality and freshness. With pumpkin in hand, you make your way westward, crossing the bridge to where miners and laborers take their rest.</p>
-    <p>Roger receives it with unexpected warmth. Cicidoa’s gesture clearly stirs a memory—one of loyalty, drink, and past regrets. More than that, the pumpkin promises a change in diet for his hard-working patrons. In your hands, a simple vegetable becomes a bridge—between friends, between past and present.</p>`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>You’re approached by Cicidoa, a man eager to repay an old favor. He’s purchased a plump pumpkin from the Royal Plantations—no ordinary fruit, but a prized harvest grown for the city’s elite. Yet, duty holds him in place, and so he asks you to retrieve it and deliver it to Roger, owner of the Coffer & Coffin.</p>
+      <p>At the Royal Plantations, Gagari entrusts you with the grand gourd, praising its quality and freshness. With pumpkin in hand, you make your way westward, crossing the bridge to where miners and laborers take their rest.</p>
+      <p>Roger receives it with unexpected warmth. Cicidoa’s gesture clearly stirs a memory—one of loyalty, drink, and past regrets. More than that, the pumpkin promises a change in diet for his hard-working patrons. In your hands, a simple vegetable becomes a bridge—between friends, between past and present.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>Quest Giver</b> Cicidoa <small class="muted">(Central Thanalan, X:23.1, Y:27.7)</small></div>
     </div>`,
@@ -110,10 +132,14 @@ const i18n = {
   JP:{
     langLabel:'JP',
     pageTitle:'御礼品は予約品',
-    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
-    story:`<p>あなたに声をかけてきたのは、チシドアという男だった。彼は「コファー＆コフィン」の店主に恩返しをしたいと言い、王室農場から特別に育てられた立派なカボチャを購入したという。しかし、鉱山からの荷の到着を待っていて、身動きが取れないため、代わりに届けてほしいと頼まれる。</p>
-    <p>王室農場に赴くと、ガガリがあなたに立派なカボチャを手渡す。その鮮度と品質は折り紙付きだ。あなたは西へ向かい、橋を越えて、労働者たちが休息をとる「コファー＆コフィン」へと向かう。</p>
-    <p>店主ロジャーは驚きつつも、カボチャを受け取る。チシドアの名を聞くと、どうやら昔の酒の席での恩を思い出したらしい。そして、この野菜が、肉ばかり食べて不健康になりがちな店の常連たちに、少しでも健康的な食事をもたらすことを期待しているようだ。あなたの手を通じて届けられた一つのカボチャが、友情と変化の兆しを運んだのだった。</p>`,
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>あなたに声をかけてきたのは、チシドアという男だった。彼は「コファー＆コフィン」の店主に恩返しをしたいと言い、王室農場から特別に育てられた立派なカボチャを購入したという。しかし、鉱山からの荷の到着を待っていて、身動きが取れないため、代わりに届けてほしいと頼まれる。</p>
+      <p>王室農場に赴くと、ガガリがあなたに立派なカボチャを手渡す。その鮮度と品質は折り紙付きだ。あなたは西へ向かい、橋を越えて、労働者たちが休息をとる「コファー＆コフィン」へと向かう。</p>
+      <p>店主ロジャーは驚きつつも、カボチャを受け取る。チシドアの名を聞くと、どうやら昔の酒の席での恩を思い出したらしい。そして、この野菜が、肉ばかり食べて不健康になりがちな店の常連たちに、少しでも健康的な食事をもたらすことを期待しているようだ。あなたの手を通じて届けられた一つのカボチャが、友情と変化の兆しを運んだのだった。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>クエスト発行</b> シシドア <small class="muted">（中央ザナラーン, X:23.1, Y:27.7）</small></div>
     </div>`,
@@ -127,10 +153,14 @@ const i18n = {
   ZH:{
     langLabel:'ZH',
     pageTitle:'預約中的謝禮',
-    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
-    story:`<p>Cicidoa 找上了你，一名誠心想要報恩的男子。他特地從 Royal Plantations 購買了一顆頂級南瓜，準備送給 Coffer & Coffin 的老闆 Roger，以答謝他過去的恩情。但礙於他必須等候來自 Nanawa Mines 的延遲貨物，只能請你代為取貨與轉交。</p>
-    <p>你來到 Royal Plantations，Gagari 欣然將南瓜交給你。這顆南瓜可不是尋常作物，而是連饕客都會讚嘆的珍品。帶著南瓜，你踏上前往 Coffer & Coffin 的路途，穿過橋梁，來到勞工聚集之地。</p>
-    <p>Roger 收下南瓜後露出難得的笑容。他提起 Cicidoa 曾因喝醉被他送回家的往事，語氣中既有懷念，也有感慨。而這顆南瓜，不只是感恩的象徵，也成了他為顧客改善飲食的一線希望。你默默完成了任務，卻也讓一段友情與健康的新起點悄然展開。</p>`,
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Cicidoa 找上了你，一名誠心想要報恩的男子。他特地從 Royal Plantations 購買了一顆頂級南瓜，準備送給 Coffer & Coffin 的老闆 Roger，以答謝他過去的恩情。但礙於他必須等候來自 Nanawa Mines 的延遲貨物，只能請你代為取貨與轉交。</p>
+      <p>你來到 Royal Plantations，Gagari 欣然將南瓜交給你。這顆南瓜可不是尋常作物，而是連饕客都會讚嘆的珍品。帶著南瓜，你踏上前往 Coffer & Coffin 的路途，穿過橋梁，來到勞工聚集之地。</p>
+      <p>Roger 收下南瓜後露出難得的笑容。他提起 Cicidoa 曾因喝醉被他送回家的往事，語氣中既有懷念，也有感慨。而這顆南瓜，不只是感恩的象徵，也成了他為顧客改善飲食的一線希望。你默默完成了任務，卻也讓一段友情與健康的新起點悄然展開。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>任務發布</b> 西西多亞 <small class="muted">（薩納蘭中部, X:23.1, Y:27.7）</small></div>
     </div>`,
@@ -150,7 +180,8 @@ const panels = {
   story:  document.getElementById('panel-story'),
   acq:    document.getElementById('panel-acq'),
   unlockq:document.getElementById('panel-unlockq'),
-  followq:document.getElementById('panel-followq')
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
 };
 
 function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
@@ -162,12 +193,32 @@ function applyLang(lang){
   const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
   renderPanel(activeBtn.dataset.tab, lang);
 }
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
 function renderPanel(key, lang){
   const t = i18n[lang] || i18n.EN;
   Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
   panels[key].classList.add('active');
-  panels[key].innerHTML = t[key];
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
 }
+
 tabBtns.forEach(btn=>{
   btn.addEventListener('click', ()=>{
     tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
@@ -175,13 +226,47 @@ tabBtns.forEach(btn=>{
     renderPanel(btn.dataset.tab, getLang());
   });
 });
+
 langToggle.addEventListener('click', ()=>{
   const cur = getLang();
   const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
   localStorage.setItem(LANG_KEY, next);
   applyLang(next);
 });
+
 applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'belaug-ffxiv/FFXIV_Library',
+  repoId: 'R_kgD0Pyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
 </script>
 </body>
 </html>
