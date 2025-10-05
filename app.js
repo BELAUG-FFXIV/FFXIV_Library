@@ -492,8 +492,8 @@ function applyLangUI(lang) {
   if (!dict) return;
 
   if (langToggle) langToggle.textContent = `🌐 ${dict.langLabel}`;
-  if (taglineEl)   taglineEl.textContent   = dict.tagline;
-  if (q)           q.placeholder           = dict.searchPH;
+if (taglineEl)   taglineEl.innerHTML   = dict.tagline;
+   if (q)           q.placeholder           = dict.searchPH;
   if (itemsSuffixEl && dict.itemsSuffix) itemsSuffixEl.textContent = ` ${dict.itemsSuffix}`;
 
   refillSelect(categorySel, dict.categories, true);
