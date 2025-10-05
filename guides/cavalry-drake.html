@@ -66,11 +66,15 @@
           <button class="tab-btn" role="tab" aria-selected="true"  data-tab="about">About</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="seats">Seats</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
           <div id="panel-about" class="tab-panel active"></div>
           <div id="panel-acq"   class="tab-panel"></div>
           <div id="panel-seats" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -82,7 +86,7 @@
       EN:{
         langLabel:'EN',
         pageTitle:'Cavalry Drake',
-        tabs:{ about:'About', acq:'Acquisition', seats:'Seats' },
+        tabs:{ about:'About', acq:'Acquisition', seats:'Seats', comments:'Comments' },
         about:`<div class="stack">
           <div class="row">Summon your cavalry drake, trained by the drake whisperer of the Brotherhood of Ash.</div>
           <div class="row">Training a cavalry drake is a long and arduous process that begins the moment the scalekin hatches. Never allowed to see its mother, the creature is raised solely in the presence of a drake whisperer while being weaned on the incendiary glands of aged battle drakes to ensure it is both submissive and deadly.</div>
@@ -95,7 +99,7 @@
       JP:{
         langLabel:'JP',
         pageTitle:'キャバルリー・ドレイク',
-        tabs:{ about:'紹介', acq:'入手方法', seats:'座席数' },
+        tabs:{ about:'紹介', acq:'入手方法', seats:'座席数', comments:'コメント' },
         about:`<div class="stack">
           <div class="row">Ash 同盟に所属する drake whisperer によって調教された、戦闘用の Cavalry Drake を召喚しよう。</div>
           <div class="row">この竜族の調教は、生まれた瞬間から始まる過酷な訓練だ。孵化後、母親の姿を一度も見せず、常に drake whisperer の手元で育てられる。さらに老いた戦闘用ドレイクの発火腺を与えられながら成長することで、従順でありながらも極めて危険な存在へと仕上げられる。</div>
@@ -108,7 +112,7 @@
       ZH:{
         langLabel:'ZH',
         pageTitle:'騎兵飛龍',
-        tabs:{ about:'簡介', acq:'取得方式', seats:'可乘人數' },
+        tabs:{ about:'簡介', acq:'取得方式', seats:'可乘人數', comments:'留言' },
         about:`<div class="stack">
           <div class="row">召喚這隻由 Ash 同盟的 drake whisperer 親自調教的 Cavalry Drake 戰鬥坐騎。</div>
           <div class="row">牠的訓練自孵化那刻起便展開，過程極其艱辛。為了塑造出絕對服從又充滿殺意的特性，這種幼龍自出生起便無法見到母親，只能在 drake whisperer 身邊成長，並以老年戰鬥龍的發火腺為食，鍛造出無比兇猛又絕對服從的戰鬥本能。</div>
@@ -123,24 +127,34 @@
     const langToggle=document.getElementById('langToggle');
     const pageTitle=document.getElementById('pageTitle');
     const tabBtns=[...document.querySelectorAll('.tab-btn')];
-    const panels={ about:panel('about'), acq:panel('acq'), seats:panel('seats') };
+    const panels={
+      about:panel('about'),
+      acq:panel('acq'),
+      seats:panel('seats'),
+      comments:panel('comments')
+    };
 
     function panel(id){ return document.getElementById('panel-'+id); }
     function getLang(){ return localStorage.getItem(LANG_KEY)||'EN'; }
+
     function applyLang(lang){
       const t=i18n[lang]||i18n.EN;
       pageTitle.textContent=t.pageTitle;
-      langToggle.textContent=`🌐 ${t.langLabel}`;
-      tabBtns.forEach(b=>{ b.textContent=t.tabs[b.dataset.tab]; });
+      langToggle.textContent='🌐 ' + t.langLabel;
+      tabBtns.forEach(b=>{ if(t.tabs[b.dataset.tab]) b.textContent=t.tabs[b.dataset.tab]; });
       const active=tabBtns.find(b=>b.getAttribute('aria-selected')==='true')||tabBtns[0];
       renderPanel(active.dataset.tab,lang);
+      if(active && active.dataset.tab==='comments'){ loadGiscusForCurrentLang(); }
     }
+
     function renderPanel(key,lang){
       const t=i18n[lang]||i18n.EN;
       Object.keys(panels).forEach(k=>panels[k].classList.remove('active'));
       panels[key].classList.add('active');
-      panels[key].innerHTML=t[key];
+      if(key!=='comments'){ panels[key].innerHTML=t[key]; }
+      if(key==='comments'){ loadGiscusForCurrentLang(); }
     }
+
     tabBtns.forEach(btn=>{
       btn.addEventListener('click',()=>{
         tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
@@ -148,11 +162,45 @@
         renderPanel(btn.dataset.tab,getLang());
       });
     });
+
     langToggle.addEventListener('click',()=>{
       const cur=getLang(); const next=cur==='EN'?'JP':(cur==='JP'?'ZH':'EN');
       localStorage.setItem(LANG_KEY,next); applyLang(next);
     });
+
     applyLang(getLang());
+
+    /* === Giscus：單一 Comments 分頁，語言切換 === */
+    const GISCUS_CFG = {
+      repo: 'belaug-ffxiv/FFXIV_Library',
+      repoId: 'R_kgD0Pyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+    };
+    function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+    function loadGiscusForCurrentLang(){
+      const mount=document.getElementById('giscus_container');
+      if(!mount) return;
+      mount.innerHTML='';
+      const langCode=getLang();
+      const s=document.createElement('script');
+      s.src='https://giscus.app/client.js';
+      s.setAttribute('data-repo',GISCUS_CFG.repo);
+      s.setAttribute('data-repo-id',GISCUS_CFG.repoId);
+      s.setAttribute('data-category',GISCUS_CFG.category);
+      s.setAttribute('data-category-id',GISCUS_CFG.categoryId);
+      s.setAttribute('data-mapping','specific');
+      s.setAttribute('data-term',location.pathname+'｜'+langCode);
+      s.setAttribute('data-reactions-enabled','1');
+      s.setAttribute('data-emit-metadata','0');
+      s.setAttribute('data-input-position','bottom');
+      s.setAttribute('data-lang',uiLang(langCode));
+      s.setAttribute('data-theme',GISCUS_CFG.theme);
+      s.setAttribute('crossorigin','anonymous');
+      s.async=true;
+      mount.appendChild(s);
+    }
   </script>
 </body>
 </html>
