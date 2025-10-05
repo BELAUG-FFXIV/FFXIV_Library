@@ -42,6 +42,20 @@
     .muted{color:var(--muted)}
     .link{color:#0b60d8;text-decoration:none}
     .link:hover{text-decoration:underline}
+
+    /* 展開/收合 */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
   </style>
 </head>
 <body>
@@ -76,7 +90,6 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
-          <!-- 新增：Comments -->
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
@@ -84,7 +97,6 @@
           <div id="panel-acq"      class="tab-panel"></div>
           <div id="panel-unlockq"  class="tab-panel"></div>
           <div id="panel-followq"  class="tab-panel"></div>
-          <!-- 新增：Comments 面板 -->
           <div id="panel-comments" class="tab-panel">
             <div id="giscus_container" style="min-height:320px;"></div>
           </div>
@@ -100,9 +112,13 @@ const i18n = {
     langLabel:'EN',
     pageTitle:'A Bad Bladder',
     tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
-    story:`<p>Lieutenant Scarlet briefs you: scouts at E–Tatt’s Spire report the Ixal are attacking, their war balloon having strafed the garrison and caused heavy casualties. You hurry north into the North Shroud and reach E–Tatt’s, where Captain Guithrit thanks Nophica that the worst has passed—though the tower’s defenders are wounded and weary. A private’s arrow punched the balloon’s bladder and brought the beastmen craft down into the trees, but Guithrit fears the Ixal may yet press the attack. He sends you to Peacegarden to inspect the crash site and search for any signs of the enemy.</p>
-    <p>At the wreck you encounter a squawking, unruly band of Ixal. Their chief, Sezul Totoloc, stops the bickering and speaks to you: these are not the tower-raiding sort, he says, and he proposes a bargain—bring him the balloon part you found, and he will show you his people’s work inside the gate. His hunters warn that betrayal will be met with violence, but Sezul’s tone is oddly proud rather than hostile. You accept and follow him into the camp.</p>
-    <p>Sezul greets you as one who has braved the Ixal den and thanks you for the balloon fragment. He shows you a special stone—rare Xelphatol material used to make wind gauges—and explains that his group calls themselves the Ehcatl Nine, outcasts who do not fight forest folk but dream only of flying free like the wind. They are not here for war with the Twelveswood; their focus lies in the heavens. With this uneasy understanding, you leave the camp mindful that not all beastmen share the same purpose—and that E–Tatt’s Spire still needs your aid.</p>`,
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Lieutenant Scarlet briefs you: scouts at E–Tatt’s Spire report the Ixal are attacking, their war balloon having strafed the garrison and caused heavy casualties. You hurry north into the North Shroud and reach E–Tatt’s, where Captain Guithrit thanks Nophica that the worst has passed—though the tower’s defenders are wounded and weary. A private’s arrow punched the balloon’s bladder and brought the beastmen craft down into the trees, but Guithrit fears the Ixal may yet press the attack. He sends you to Peacegarden to inspect the crash site and search for any signs of the enemy.</p>
+      <p>At the wreck you encounter a squawking, unruly band of Ixal. Their chief, Sezul Totoloc, stops the bickering and speaks to you: these are not the tower-raiding sort, he says, and he proposes a bargain—bring him the balloon part you found, and he will show you his people’s work inside the gate. His hunters warn that betrayal will be met with violence, but Sezul’s tone is oddly proud rather than hostile. You accept and follow him into the camp.</p>
+      <p>Sezul greets you as one who has braved the Ixal den and thanks you for the balloon fragment. He shows you a special stone—rare Xelphatol material used to make wind gauges—and explains that his group calls themselves the Ehcatl Nine, outcasts who do not fight forest folk but dream only of flying free like the wind. They are not here for war with the Twelveswood; their focus lies in the heavens. With this uneasy understanding, you leave the camp mindful that not all beastmen share the same purpose—and that E–Tatt’s Spire still needs your aid.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>Quest Giver</b> Scarlet <small class="muted">(New Gridania, X:9.9, Y:11.4)</small></div>
     </div>`,
@@ -117,9 +133,13 @@ const i18n = {
     langLabel:'JP',
     pageTitle:'雷雨来たりなば',
     tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
-    story:`<p>スカーレット中尉はあなたに告げる。E–Tatt’s Spire の哨戒隊から、イクサルが襲撃しており、戦闘気球による編隊射撃で守備隊に多数の被害が出たという。あなたは北の North Shroud へ急行し、E–Tatt’s に到着する。ギュイトリット隊長は最悪は免れたと安堵しつつも、負傷者は疲弊している。ある一兵の矢が気球を貫いて機体を木立に落としたが、なお敵の増勢を懸念し、あなたに Peacegarden の墜落地点の捜索を命じる。</p>
-    <p>墜落現場で、あなたは喧嘩腰のイクサル一団に出くわす。族長のセズル・トトロクが仲裁に入り、彼らは塔を襲う者たちとは別種であると告げる。セズルは取引を持ちかける──あなたが見つけた気球の部品を渡せば、彼らの働きを門の内側で見せようと。仲間たちは裏切れば暴力で報いると警告するが、セズルの口ぶりは敵意よりも誇りに満ちている。あなたは承諾し、彼の後についてキャンプの中へ入る。</p>
-    <p>セズルは、イクサルの巣へ足を踏み入れた勇敢さを称え、気球の断片に感謝する。彼は Xelphatol 産の稀少な石を示し、それが風速計を作る材料だと説明する。彼らは自らを「Ehcatl Nine」と名乗る流浪の者たちで、森の民と争うことを望まず、ただ風のように自由に飛ぶことを夢見ているという。彼らは Twelveswood と戦うためにここにいるのではない──その言葉を胸にあなたはキャンプを後にし、E–Tatt’s Spire の防衛がなおもあなたの助けを必要としていることを改めて心に刻む。</p>`,
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>スカーレット中尉はあなたに告げる。E–Tatt’s Spire の哨戒隊から、イクサルが襲撃しており、戦闘気球による編隊射撃で守備隊に多数の被害が出たという。あなたは北の North Shroud へ急行し、E–Tatt’s に到着する。ギュイトリット隊長は最悪は免れたと安堵しつつも、負傷者は疲弊している。ある一兵の矢が気球を貫いて機体を木立に落としたが、なお敵の増勢を懸念し、あなたに Peacegarden の墜落地点の捜索を命じる。</p>
+      <p>墜落現場で、あなたは喧嘩腰のイクサル一団に出くわす。族長のセズル・トトロクが仲裁に入り、彼らは塔を襲う者たちとは別種であると告げる。セズルは取引を持ちかける──あなたが見つけた気球の部品を渡せば、彼らの働きを門の内側で見せようと。仲間たちは裏切れば暴力で報いると警告するが、セズルの口ぶりは敵意よりも誇りに満ちている。あなたは承諾し、彼の後についてキャンプの中へ入る。</p>
+      <p>セズルは、イクサルの巣へ足を踏み入れた勇敢さを称え、気球の断片に感謝する。彼は Xelphatol 産の稀少な石を示し、それが風速計を作る材料だと説明する。彼らは自らを「Ehcatl Nine」と名乗る流浪の者たちで、森の民と争うことを望まず、ただ風のように自由に飛ぶことを夢見ているという。彼らは Twelveswood と戦うためにここにいるのではない──その言葉を胸にあなたはキャンプを後にし、E–Tatt’s Spire の防衛がなおもあなたの助けを必要としていることを改めて心に刻む。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>クエスト発行</b> スカーレット少牙士 <small class="muted">（グリダニア：新市街, X:9.9, Y:11.4）</small></div>
     </div>`,
@@ -134,9 +154,13 @@ const i18n = {
     langLabel:'ZH',
     pageTitle:'狂雨將至',
     tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
-    story:`<p>Scarlet 中尉向你報告：駐紮於 E–Tatt’s Spire 的偵查隊傳回消息，Ixal 正在發動攻擊，一隻戰鬥氣球對守軍進行掃射，造成大量傷亡。你立刻北行進入 North Shroud 抵達 E–Tatt’s，隊長 Guithrit 感謝諸神庇佑雖渡險境，守軍卻已疲憊不堪。一名士兵的箭正中浮囊，使鳥人飛船墜入樹梢，但他仍憂心敵軍再犯，囑你前往 Peacegarden 勘察墜落點並搜尋敵跡。</p>
-    <p>殘骸處，你撞見一群吵鬧的 Ixal。首領 Sezul Totoloc 平息爭執，表示他們並非襲塔之輩，並提議交易：將你撿到的氣球零件交給他，他便帶你入營見識他們的工藝。獵人們警告若背信必遭報復，然而 Sezul 的語氣更多是自傲而非敵意。你於是隨他入營。</p>
-    <p>Sezul 稱讚你膽識過人，感謝你帶來碎片。他展示稀有的 Xelphatol 石，說是製作風速儀的材料，並表明他們自稱「Ehcatl Nine」，是不與森林之民為敵的放逐者，只盼如風般自由飛翔。他們非為戰事而來，而是為了天空。你帶著這份理解離開營地，心知並非所有獸族都抱持同一目的，而 E–Tatt’s Spire 仍需你的協助。</p>`,
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Scarlet 中尉向你報告：駐紮於 E–Tatt’s Spire 的偵查隊傳回消息，Ixal 正在發動攻擊，一隻戰鬥氣球對守軍進行掃射，造成大量傷亡。你立刻北行進入 North Shroud 抵達 E–Tatt’s，隊長 Guithrit 感謝諸神庇佑雖渡險境，守軍卻已疲憊不堪。一名士兵的箭正中浮囊，使鳥人飛船墜入樹梢，但他仍憂心敵軍再犯，囑你前往 Peacegarden 勘察墜落點並搜尋敵跡。</p>
+      <p>殘骸處，你撞見一群吵鬧的 Ixal。首領 Sezul Totoloc 平息爭執，表示他們並非襲塔之輩，並提議交易：將你撿到的氣球零件交給他，他便帶你入營見識他們的工藝。獵人們警告若背信必遭報復，然而 Sezul 的語氣更多是自傲而非敵意。你於是隨他入營。</p>
+      <p>Sezul 稱讚你膽識過人，感謝你帶來碎片。他展示稀有的 Xelphatol 石，說是製作風速儀的材料，並表明他們自稱「Ehcatl Nine」，是不與森林之民為敵的放逐者，只盼如風般自由飛翔。他們非為戰事而來，而是為了天空。你帶著這份理解離開營地，心知並非所有獸族都抱持同一目的，而 E–Tatt’s Spire 仍需你的協助。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>任務發布</b> Scarlet <small class="muted">（新格里達尼亞, X:9.9, Y:11.4）</small></div>
     </div>`,
@@ -169,16 +193,32 @@ function applyLang(lang){
   const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
   renderPanel(activeBtn.dataset.tab, lang);
 }
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
 function renderPanel(key, lang){
   const t = i18n[lang] || i18n.EN;
   Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
   panels[key].classList.add('active');
-  if(key !== 'comments'){
-    panels[key].innerHTML = t[key];
-  }else{
-    loadGiscusForCurrentLang();
-  }
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
 }
+
 tabBtns.forEach(btn=>{
   btn.addEventListener('click', ()=>{
     tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
@@ -186,12 +226,15 @@ tabBtns.forEach(btn=>{
     renderPanel(btn.dataset.tab, getLang());
   });
 });
+
 langToggle.addEventListener('click', ()=>{
   const cur = getLang();
   const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
   localStorage.setItem(LANG_KEY, next);
   applyLang(next);
 });
+
+applyLang(getLang());
 
 /* === Giscus：Comments 分頁 === */
 const GISCUS_CFG = {
@@ -224,8 +267,6 @@ function loadGiscusForCurrentLang(){
   s.async = true;
   mount.appendChild(s);
 }
-
-applyLang(getLang());
 </script>
 </body>
 </html>
