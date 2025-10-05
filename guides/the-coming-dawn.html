@@ -42,6 +42,20 @@
     .muted{color:var(--muted)}
     .link{color:#0b60d8;text-decoration:none}
     .link:hover{text-decoration:underline}
+
+    /* 展開/收合 */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
   </style>
 </head>
 <body>
@@ -76,12 +90,16 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
-          <div id="panel-story"   class="tab-panel active"></div>
-          <div id="panel-acq"     class="tab-panel"></div>
-          <div id="panel-unlockq" class="tab-panel"></div>
-          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -93,10 +111,14 @@ const i18n = {
   EN:{
     langLabel:'EN',
     pageTitle:'The Coming Dawn',
-    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
-    story:`<p>With Wuk Lamat’s offer still lingering in the air, you and G’raha Tia head to Noumenon to seek a deeper understanding of Tural. Among shelves of forgotten tomes, you uncover fragments of the continent’s mysteries—its unique geography, diverse wildlife, and rich culinary legacy brought across the Indigo Deep by the famed explorer Ketenramm.</p>
-    <p>You learn of the Mamool Ja’s unified rule, the sacred blue magic of the Whalaqee, and whispers of a golden city veiled in legend. Though incomplete, these insights awaken a quiet excitement within you—Tural is not just a faraway land, but a realm of stories waiting to be written. As you share your findings with G’raha, familiar voices join the scene—Alisaie and Alphinaud, drawn by curiosity and the promise of new purpose. Inspired by Tuliyollal’s ideals of unity, the twins too pledge themselves to Wuk Lamat’s cause.</p>
-    <p>One by one, your companions gather—Krile, chasing echoes of her grandfather’s past; Erenville, ever the cautious guide; and G’raha, ever the dreamer. Their resolve mirrors your own. When the moment comes to give your answer, you speak from the heart: you will go. To step into the unknown, to fight, to learn, to grow—this is the calling of an adventurer. With the latest map of the world unfurled before you, and Tural shining on the western horizon, you stand on the threshold of a new journey. The dawn has come, and with it, the road ahead.</p>`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>With Wuk Lamat’s offer still lingering in the air, you and G’raha Tia head to Noumenon to seek a deeper understanding of Tural. Among shelves of forgotten tomes, you uncover fragments of the continent’s mysteries—its unique geography, diverse wildlife, and rich culinary legacy brought across the Indigo Deep by the famed explorer Ketenramm.</p>
+      <p>You learn of the Mamool Ja’s unified rule, the sacred blue magic of the Whalaqee, and whispers of a golden city veiled in legend. Though incomplete, these insights awaken a quiet excitement within you—Tural is not just a faraway land, but a realm of stories waiting to be written. As you share your findings with G’raha, familiar voices join the scene—Alisaie and Alphinaud, drawn by curiosity and the promise of new purpose. Inspired by Tuliyollal’s ideals of unity, the twins too pledge themselves to Wuk Lamat’s cause.</p>
+      <p>One by one, your companions gather—Krile, chasing echoes of her grandfather’s past; Erenville, ever the cautious guide; and G’raha, ever the dreamer. Their resolve mirrors your own. When the moment comes to give your answer, you speak from the heart: you will go. To step into the unknown, to fight, to learn, to grow—this is the calling of an adventurer. With the latest map of the world unfurled before you, and Tural shining on the western horizon, you stand on the threshold of a new journey. The dawn has come, and with it, the road ahead.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>Quest Giver</b> G’raha Tia <small class="muted">(Old Sharlayan, X:10.0, Y:14.0)</small></div>
     </div>`,
@@ -110,11 +132,14 @@ const i18n = {
   JP:{
     langLabel:'JP',
     pageTitle:'明日への一歩',
-    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
-    story:`<p>ワクラマトの申し出を胸に、より多くを知るべく、グ・ラハ・ティアと共に「ノウメノン」へ向かう。書架の奥深く、数々の古書に埋もれたトゥラルの断片──ケテンラムによる探検の記録、マムージャの統一、ホワラキ族の青魔法、そして黄金の都市をめぐる伝説──が静かに語られていく。</p>
-    <p>そこに綴られた物語は未完成ながら、心の奥に新たな冒険への予感を灯す。遠く離れた大陸が、今や手の届く物語の舞台となりつつあった。ノウメノンで得た知見をグ・ラハと語り合う中、懐かしい声が響く。アリゼーとアルフィノ──彼らもまた、トゥラルに心を動かされた者たちだ。</p>
-    <p>トゥリヨラルの理念に共鳴し、ワクラマトのため力を貸すと誓うふたり。さらに、祖父の足跡を追うクルル、冷静な道案内役のエレンヴィル、そして夢を語るグ・ラハが次々と集い、思いはひとつに重なる。そして、ついにその時が訪れる。あなたは自らの言葉で答える──行こう、と。</p>
-    <p>未知を越え、試練に挑み、仲間と共に歩む──それが冒険者の道。新たに描かれた世界地図に刻まれた「トゥラル」の名。その西方に、あなたの次なる旅路が広がっている。夜明けは訪れ、物語は動き出す。</p>`,
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>ワクラマトの申し出を胸に、より多くを知るべく、グ・ラハ・ティアと共に「ノウメノン」へ向かう。書架の奥深く、数々の古書に埋もれたトゥラルの断片──ケテンラムによる探検の記録、マムージャの統一、ホワラキ族の青魔法、そして黄金の都市をめぐる伝説──が静かに語られていく。</p>
+      <p>そこに綴られた物語は未完成ながら、心の奥に新たな冒険への予感を灯す。遠く離れた大陸が、今や手の届く物語の舞台となりつつあった。ノウメノンで得た知見をグ・ラハと語り合う中、懐かしい声が響く。アリゼーとアルフィノ──彼らもまた、トゥラルに心を動かされた者たちだ。</p>
+      <p>トゥリヨラルの理念に共鳴し、ワクラマトのため力を貸すと誓うふたり。さらに、祖父の足跡を追うクルル、冷静な道案内役のエレンヴィル、そして夢を語るグ・ラハが次々と集い、思いはひとつに重なる。そして、ついにその時が訪れる。あなたは自らの言葉で答える──行こう、と。未知を越え、試練に挑み、仲間と共に歩む──それが冒険者の道。新たに描かれた世界地図に刻まれた「トゥラル」の名。その西方に、あなたの次なる旅路が広がっている。夜明けは訪れ、物語は動き出す。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>クエスト発行</b> グ・ラハ・ティア <small class="muted">（オールド・シャーレアン, X:10.0, Y:14.0）</small></div>
     </div>`,
@@ -128,11 +153,14 @@ const i18n = {
   ZH:{
     langLabel:'ZH',
     pageTitle:'邁向明日',
-    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
-    story:`<p>面對 Wuk Lamat 的邀約，你與 G’raha Tia 前往 Noumenon，試圖深入了解 Tural。藏書中記錄著遠方大陸的軌跡——著名航海家 Ketenramm 首次橫渡 Indigo Deep 所帶回的作物與傳說、Mamool Ja 完成統一的歷史、Whalaqee 部族所傳承的神聖青魔法，以及那座只存在於傳說中的黃金之城。</p>
-    <p>儘管資訊零碎，你的心卻已悄然被那片未知之地所吸引，那是一段等待展開的新冒險。當你與 G’raha 交流所見所感時，熟悉的聲音響起──Alisaie 與 Alphinaud 也因被 Tuliyollal 所代表的理想吸引而決定加入。他們的決心與你如出一轍。</p>
-    <p>Krile 也因祖父遺留的信件踏上這段旅程，Erenville 默默守護眾人，而 G’raha，始終是那位渴望探索世界的追夢者。在眾人的陪伴下，你終於做出選擇──啟程吧！向著未知、向著挑戰、向著冒險的本質。</p>
-    <p>當全新的世界地圖在你眼前展開，西方的 Tural 彷彿正閃耀著晨曦。黎明已至，而你，正站在下一段旅程的起點。</p>`,
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>面對 Wuk Lamat 的邀約，你與 G’raha Tia 前往 Noumenon，試圖深入了解 Tural。藏書中記錄著遠方大陸的軌跡——著名航海家 Ketenramm 首次橫渡 Indigo Deep 所帶回的作物與傳說、Mamool Ja 完成統一的歷史、Whalaqee 部族所傳承的神聖青魔法，以及那座只存在於傳說中的黃金之城。</p>
+      <p>儘管資訊零碎，你的心卻已悄然被那片未知之地所吸引，那是一段等待展開的新冒險。當你與 G’raha 交流所見所感時，熟悉的聲音響起──Alisaie 與 Alphinaud 也因被 Tuliyollal 所代表的理想吸引而決定加入。他們的決心與你如出一轍。</p>
+      <p>Krile 也因祖父遺留的信件踏上這段旅程，Erenville 默默守護眾人，而 G’raha，始終是那位渴望探索世界的追夢者。在眾人的陪伴下，你終於做出選擇──啟程吧！向著未知、向著挑戰、向著冒險的本質。當全新的世界地圖在你眼前展開，西方的 Tural 彷彿正閃耀著晨曦。黎明已至，而你，正站在下一段旅程的起點。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>任務發布</b> G’raha Tia <small class="muted">（古薩雷安, X:10.0, Y:14.0）</small></div>
     </div>`,
@@ -152,7 +180,8 @@ const panels = {
   story:  document.getElementById('panel-story'),
   acq:    document.getElementById('panel-acq'),
   unlockq:document.getElementById('panel-unlockq'),
-  followq:document.getElementById('panel-followq')
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
 };
 
 function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
@@ -164,12 +193,32 @@ function applyLang(lang){
   const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
   renderPanel(activeBtn.dataset.tab, lang);
 }
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
 function renderPanel(key, lang){
   const t = i18n[lang] || i18n.EN;
   Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
   panels[key].classList.add('active');
-  panels[key].innerHTML = t[key];
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
 }
+
 tabBtns.forEach(btn=>{
   btn.addEventListener('click', ()=>{
     tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
@@ -177,13 +226,47 @@ tabBtns.forEach(btn=>{
     renderPanel(btn.dataset.tab, getLang());
   });
 });
+
 langToggle.addEventListener('click', ()=>{
   const cur = getLang();
   const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
   localStorage.setItem(LANG_KEY, next);
   applyLang(next);
 });
+
 applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'belaug-ffxiv/FFXIV_Library',
+  repoId: 'R_kgD0Pyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
 </script>
 </body>
 </html>
