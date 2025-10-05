@@ -70,12 +70,18 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="req">Requirements</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlock">Follow-Up Quest</button>
+          <!-- 新增：Comments -->
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
           <div id="panel-story" class="tab-panel active"></div>
           <div id="panel-acq" class="tab-panel"></div>
           <div id="panel-req" class="tab-panel"></div>
           <div id="panel-unlock" class="tab-panel"></div>
+          <!-- 新增：留言面板 -->
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -88,7 +94,7 @@
       EN:{
         langLabel:'EN',
         pageTitle:'Copperbell Mines',
-        tabs:{story:'Story', req:'Requirements', acq:'Unlock Quest', unlock:'Follow-Up Quest'},
+        tabs:{story:'Story', req:'Requirements', acq:'Unlock Quest', unlock:'Follow-Up Quest', comments:'Comments'},
         story:`<p>Abandoned once purged of ore, the Copperbell Mines laid abandoned for nigh on three centuries until Amajina and Sons Mineral Concern reclaimed the shafts – the guild’s sights set on expanding the mines downward in an attempt to tap yet undiscovered veins of valuable metal.</p>
         <p>Unfortunately, it was not riches the powder kegs uncovered, but sheer terror, for when the smoke cleared, out poured an army of raging giants from the darkest recesses of the mines. The hecatoncheires – thralls of the lost Thorne dynasty – were, at last, free from their lightless prison; three hundred years of hate fueling their madness.</p>`,
         req:`<div class="stack">
@@ -110,7 +116,7 @@
       JP:{
         langLabel:'JP',
         pageTitle:'封鎖坑道 カッパーベル銅山',
-        tabs:{story:'ストーリー', req:'必要条件', acq:'開放クエスト', unlock:'後続クエスト'},
+        tabs:{story:'ストーリー', req:'必要条件', acq:'開放クエスト', unlock:'後続クエスト', comments:'コメント'},
         story:`<p>かつて鉱石が掘り尽くされた後、カッパーベル銅山は約三世紀にわたり放棄されていた。だが、アマジナ鉱山社が坑道の再開発に乗り出し、未発見の鉱脈を求めて更なる掘削を試みた。</p>
         <p>しかし、火薬で掘り進んだ先にあったのは、財宝ではなく恐怖だった。爆煙の向こうから現れたのは、怒りに満ちた巨人の軍勢──カッパーベルの最奥に封じられていたヘカトンケイレスたちであった。彼らは滅びたソーン王朝に仕えた奴隷であり、光なき監獄から三百年の憎しみを抱いて解き放たれたのだった。</p>`,
         req:`<div class="stack">
@@ -132,7 +138,7 @@
       ZH:{
         langLabel:'ZH-TW',
         pageTitle:'封鎖的銅鈴礦坑',
-        tabs:{story:'故事概要', req:'需求條件', acq:'解鎖任務', unlock:'後續任務'},
+        tabs:{story:'故事概要', req:'需求條件', acq:'解鎖任務', unlock:'後續任務', comments:'留言'},
         story:`<p>在礦藏被開採殆盡後，Copperbell Mines 被棄置近三百年，直到 Amajina and Sons Mineral Concern 決定重新開發此地，打算向更深處開挖，探索尚未發現的貴金屬礦脈。</p>
         <p>然而炸藥揭開的，不是黃金寶藏，而是可怕的夢魘──從礦坑最深處湧出的，是一群狂怒不已的巨人。這些 hecatoncheires，正是過去效忠 Thorne 王朝的奴隸，受困黑暗深淵整整三百年，如今滿懷憤怒與仇恨地重獲自由。</p>`,
         req:`<div class="stack">
@@ -159,7 +165,8 @@
       story : document.getElementById('panel-story'),
       acq   : document.getElementById('panel-acq'),
       req   : document.getElementById('panel-req'),
-      unlock: document.getElementById('panel-unlock')
+      unlock: document.getElementById('panel-unlock'),
+      comments: document.getElementById('panel-comments') // 新增
     };
 
     function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
@@ -170,13 +177,21 @@
       tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
       const activeBtn = tabBtns.find(b=>b.getAttribute('aria-selected')==='true') || tabBtns[0];
       renderPanel(activeBtn.dataset.tab, lang);
+      // 若目前在留言分頁，切語言後重載 giscus
+      if (activeBtn && activeBtn.dataset.tab === 'comments') loadGiscusForCurrentLang();
     }
 
+    // 不覆寫留言容器；進入留言分頁時載入 giscus
     function renderPanel(key, lang){
       const t = i18n[lang] || i18n.EN;
       Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
       panels[key].classList.add('active');
-      panels[key].innerHTML = t[key];
+
+      if (key !== 'comments') {
+        panels[key].innerHTML = t[key];
+      } else {
+        loadGiscusForCurrentLang();
+      }
     }
 
     tabBtns.forEach(btn=>{
@@ -195,6 +210,38 @@
     });
 
     applyLang(getLang());
+
+    /* === Giscus：單一 Comments 分頁，隨語言切換 === */
+    const GISCUS_CFG = {
+      repo: 'belaug-ffxiv/FFXIV_Library',
+      repoId: 'R_kgD0Pyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+    };
+    function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+    function loadGiscusForCurrentLang(){
+      const mount = document.getElementById('giscus_container');
+      if (!mount) return;
+      mount.innerHTML = '';
+      const langCode = getLang();
+      const s = document.createElement('script');
+      s.src = 'https://giscus.app/client.js';
+      s.setAttribute('data-repo', GISCUS_CFG.repo);
+      s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+      s.setAttribute('data-category', GISCUS_CFG.category);
+      s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+      s.setAttribute('data-mapping', 'specific');
+      s.setAttribute('data-term', location.pathname + '｜' + langCode);
+      s.setAttribute('data-reactions-enabled', '1');
+      s.setAttribute('data-emit-metadata', '0');
+      s.setAttribute('data-input-position', 'bottom');
+      s.setAttribute('data-lang', uiLang(langCode));
+      s.setAttribute('data-theme', GISCUS_CFG.theme);
+      s.setAttribute('crossorigin', 'anonymous');
+      s.async = true;
+      mount.appendChild(s);
+    }
   </script>
 </body>
 </html>
