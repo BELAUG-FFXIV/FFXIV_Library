@@ -70,12 +70,18 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="req">Requirements</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlock">Follow-Up Quest</button>
+          <!-- 新增：Comments -->
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
           <div id="panel-story" class="tab-panel active"></div>
           <div id="panel-acq" class="tab-panel"></div>
-          <div id="panel-req" class="tab-panel"></"></div>
+          <div id="panel-req" class="tab-panel"></div> <!-- 修正結構 -->
           <div id="panel-unlock" class="tab-panel"></div>
+          <!-- 新增：留言面板 -->
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -88,7 +94,7 @@
       EN:{
         langLabel:'EN',
         pageTitle:'The Dusk Vigil',
-        tabs:{story:'Story', req:'Requirements', acq:'Unlock Quest', unlock:'Follow-Up Quest'},
+        tabs:{story:'Story', req:'Requirements', acq:'Unlock Quest', unlock:'Follow-Up Quest', comments:'Comments'},
         story:`<p>In the days following the Calamity, western Coerthas was abandoned by the knights of Ishgard, save for the Dusk Vigil, whose defenders refused to withdraw. Since then, the fortress has only fallen further into disrepair, and her garrison has long since been presumed dead.</p>
         <p>Unlike most Ishgardians, who would sooner put the tragic episode behind them, Father Wealdtheow would have you enter the forsaken fortress and reclaim a priceless treasure: an ice rondel set in the helm of a sculpture within the Vigil’s chapel. A simple request, perhaps, but if experience has taught you anything, such tasks are anything but…</p>`,
         req:`<div class="stack">
@@ -111,7 +117,7 @@
       JP:{
         langLabel:'JP',
         pageTitle:'廃砦捜索 ダスクヴィジル',
-        tabs:{story:'ストーリー', req:'必要条件', acq:'開放クエスト', unlock:'後続クエスト'},
+        tabs:{story:'ストーリー', req:'必要条件', acq:'開放クエスト', unlock:'後続クエスト', comments:'コメント'},
         story:`<p>第七霊災によって、クルザス西部は厳しい寒冷地へと変貌し、イシュガルドの騎士たちによって放棄された。しかし、「ダスクヴィジル」の守備隊だけは撤退を拒み、要塞に留まったのだった。</p>
         <p>あれから時が流れ、要塞は朽ち果て、駐屯していた兵もすでに全滅したと見なされている。多くのイシュガルド市民がこの悲劇に蓋をして生きるなか、神父ウィールドセオは、礼拝堂の彫像に収められた「氷のロンドレット」という宝を取り戻してほしいと願い出る。一見単純な頼みだが、幾多の経験が語る通り、簡単な仕事ほど……裏があるものだ。</p>`,
         req:`<div class="stack">
@@ -134,7 +140,7 @@
       ZH:{
         langLabel:'ZH-TW',
         pageTitle:'暮衛堡',
-        tabs:{story:'故事概要', req:'需求條件', acq:'解鎖任務', unlock:'後續任務'},
+        tabs:{story:'故事概要', req:'需求條件', acq:'解鎖任務', unlock:'後續任務', comments:'留言'},
         story:`<p>第七靈災過後，Ishgard 的騎士團撤離了整個 Coerthas 西部，唯獨 The Dusk Vigil 的守軍拒絕撤出，選擇孤身堅守。此後，這座堡壘逐漸荒廢，駐軍也早被視為全數喪生。</p>
         <p>多數 Ishgard 人寧可遺忘這段傷痛往事，但 Father Wealdtheow 卻希望你深入這座被遺棄的要塞，取回一件無價之寶——一顆鑲嵌於禮拜堂雕像頭盔中的「冰之圓徽」。表面上只是個簡單的請託，但正如歷次經驗所示，越是看似簡單的任務，往往隱藏著難以預測的危機……</p>`,
         req:`<div class="stack">
@@ -162,7 +168,8 @@
       story : document.getElementById('panel-story'),
       acq   : document.getElementById('panel-acq'),
       req   : document.getElementById('panel-req'),
-      unlock: document.getElementById('panel-unlock')
+      unlock: document.getElementById('panel-unlock'),
+      comments: document.getElementById('panel-comments') // 新增
     };
 
     function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
@@ -173,13 +180,21 @@
       tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
       const activeBtn = tabBtns.find(b=>b.getAttribute('aria-selected')==='true') || tabBtns[0];
       renderPanel(activeBtn.dataset.tab, lang);
+      // 若目前就在留言分頁，切語言後重載 giscus
+      if (activeBtn && activeBtn.dataset.tab === 'comments') loadGiscusForCurrentLang();
     }
 
+    // 不覆寫留言容器；進入留言分頁時載入 giscus
     function renderPanel(key, lang){
       const t = i18n[lang] || i18n.EN;
       Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
       panels[key].classList.add('active');
-      panels[key].innerHTML = t[key];
+
+      if (key !== 'comments') {
+        panels[key].innerHTML = t[key];
+      } else {
+        loadGiscusForCurrentLang();
+      }
     }
 
     tabBtns.forEach(btn=>{
@@ -198,6 +213,38 @@
     });
 
     applyLang(getLang());
+
+    /* === Giscus：單一 Comments 分頁，隨語言切換 === */
+    const GISCUS_CFG = {
+      repo: 'belaug-ffxiv/FFXIV_Library',
+      repoId: 'R_kgD0Pyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+    };
+    function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+    function loadGiscusForCurrentLang(){
+      const mount = document.getElementById('giscus_container');
+      if (!mount) return;
+      mount.innerHTML = ''; // 清掉舊 iframe/script
+      const langCode = getLang(); // EN / JP / ZH
+      const s = document.createElement('script');
+      s.src = 'https://giscus.app/client.js';
+      s.setAttribute('data-repo', GISCUS_CFG.repo);
+      s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+      s.setAttribute('data-category', GISCUS_CFG.category);
+      s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+      s.setAttribute('data-mapping', 'specific');                   // 使用固定 term
+      s.setAttribute('data-term', location.pathname + '｜' + langCode); // 每語言各自一串
+      s.setAttribute('data-reactions-enabled', '1');
+      s.setAttribute('data-emit-metadata', '0');
+      s.setAttribute('data-input-position', 'bottom');
+      s.setAttribute('data-lang', uiLang(langCode));
+      s.setAttribute('data-theme', GISCUS_CFG.theme);
+      s.setAttribute('crossorigin', 'anonymous');
+      s.async = true;
+      mount.appendChild(s);
+    }
   </script>
 </body>
 </html>
