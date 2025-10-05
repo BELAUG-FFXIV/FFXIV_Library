@@ -70,12 +70,18 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="req">Requirements</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlock">Follow-Up Quest</button>
+          <!-- 新增：Comments 分頁按鈕 -->
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
           <div id="panel-story" class="tab-panel active"></div>
           <div id="panel-acq" class="tab-panel"></div>
           <div id="panel-req" class="tab-panel"></div>
           <div id="panel-unlock" class="tab-panel"></div>
+          <!-- 新增：留言面板 -->
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -88,7 +94,7 @@
       EN: {
         langLabel: 'EN',
         pageTitle: 'The Dark Inside',
-        tabs: { story:'Story', req:'Requirements', acq:'Unlock Quest', unlock:'Follow-Up Quest' },
+        tabs: { story:'Story', req:'Requirements', acq:'Unlock Quest', unlock:'Follow-Up Quest', comments:'Comments' },
         story: `<p>Zodiark’s shackles have finally been broken, bringing His millennia-long imprisonment to an end. This premature awakening is the work of Fandaniel, who has cast aside his duty as an Ascian to turn the god of Darkness against the very star He was created to protect. With Zodiark’s unfathomable power at his disposal, Fandaniel has selected his first victim─the Warrior of Light, who has ever been a thorn in the Ascian’s side.</p>`,
         req: `<div class="stack">
           <div class="row">1 to 8 players (2 Tanks, 2 Healers, 4 DPS)</div>
@@ -110,7 +116,7 @@
       JP: {
         langLabel: 'JP',
         pageTitle: 'ゾディアーク討滅戦',
-        tabs: { story:'ストーリー', req:'必要条件', acq:'開放クエスト', unlock:'後続クエスト' },
+        tabs: { story:'ストーリー', req:'必要条件', acq:'開放クエスト', unlock:'後続クエスト', comments:'コメント' },
         story: `<p>ついにゾディアークの枷が破られ、幾千年に及ぶ幽閉が終わりを告げた。この早すぎる覚醒を引き起こしたのはファダニエルである。彼はアシエンとしての使命を捨て去り、闇の神を本来守るべき星に牙を剥かせようとしたのだ。計り知れぬ力を手中に収めたファダニエルが最初の獲物に選んだのは、常にアシエンの脅威であり続けた「光の戦士」──あなたであった。</p>`,
         req: `<div class="stack">
           <div class="row">1～8人用（タンク2／ヒーラー2／DPS4）</div>
@@ -132,7 +138,7 @@
       ZH: {
         langLabel: 'ZH',
         pageTitle: '黑暗深淵：佐迪亞克',
-        tabs: { story:'故事概要', req:'需求條件', acq:'解鎖任務', unlock:'後續任務' },
+        tabs: { story:'故事概要', req:'需求條件', acq:'解鎖任務', unlock:'後續任務', comments:'留言' },
         story: `<p>Zodiark 的枷鎖終於被打破，結束了祂長達千年的囚禁。這場過早的甦醒正是 Fandaniel 的所作所為──他拋棄了 Ascian 的使命，反將這位黑暗之神引向本應守護的星球。如今，掌握了 Zodiark 無可測度力量的 Fandaniel，將目光投向了他的首個獵物──那個始終如刺般令 Ascian 危機四伏的存在，也就是你，「Warrior of Light」。</p>`,
         req: `<div class="stack">
           <div class="row">1–8 人（2 坦克、2 治療、4 輸出）</div>
@@ -159,24 +165,23 @@
       story : document.getElementById('panel-story'),
       acq   : document.getElementById('panel-acq'),
       req   : document.getElementById('panel-req'),
-      unlock: document.getElementById('panel-unlock')
+      unlock: document.getElementById('panel-unlock'),
+      comments: document.getElementById('panel-comments') // 新增
     };
 
     function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
-    function applyLang(lang){
-      const t = i18n[lang] || i18n.EN;
-      pageTitle.textContent = t.pageTitle;
-      langToggle.textContent = `🌐 ${t.langLabel}`;
-      tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
-      const activeBtn = tabBtns.find(b=>b.getAttribute('aria-selected')==='true') || tabBtns[0];
-      renderPanel(activeBtn.dataset.tab, lang);
-    }
 
+    // 取代：進入 comments 才載入 giscus；不要覆寫留言容器
     function renderPanel(key, lang){
       const t = i18n[lang] || i18n.EN;
       Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
       panels[key].classList.add('active');
-      panels[key].innerHTML = t[key];
+
+      if (key !== 'comments') {
+        panels[key].innerHTML = t[key];
+      } else {
+        loadGiscusForCurrentLang();
+      }
     }
 
     tabBtns.forEach(btn=>{
@@ -194,7 +199,50 @@
       applyLang(next);
     });
 
+    function applyLang(lang){
+      const t = i18n[lang] || i18n.EN;
+      pageTitle.textContent = t.pageTitle;
+      langToggle.textContent = `🌐 ${t.langLabel}`;
+      tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+      const activeBtn = tabBtns.find(b=>b.getAttribute('aria-selected')==='true') || tabBtns[0];
+      renderPanel(activeBtn.dataset.tab, lang);
+      // 若正停在留言分頁，切語言後重載 giscus
+      if (activeBtn && activeBtn.dataset.tab === 'comments') loadGiscusForCurrentLang();
+    }
+
     applyLang(getLang());
+
+    /* === Giscus：單一 Comments 分頁，隨語言切換 === */
+    const GISCUS_CFG = {
+      repo: 'belaug-ffxiv/FFXIV_Library',
+      repoId: 'R_kgD0Pyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+    };
+    function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+    function loadGiscusForCurrentLang(){
+      const mount = document.getElementById('giscus_container');
+      if (!mount) return;
+      mount.innerHTML = '';
+      const langCode = getLang(); // EN / JP / ZH
+      const s = document.createElement('script');
+      s.src = 'https://giscus.app/client.js';
+      s.setAttribute('data-repo', GISCUS_CFG.repo);
+      s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+      s.setAttribute('data-category', GISCUS_CFG.category);
+      s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+      s.setAttribute('data-mapping', 'specific');
+      s.setAttribute('data-term', location.pathname + '｜' + langCode);
+      s.setAttribute('data-reactions-enabled', '1');
+      s.setAttribute('data-emit-metadata', '0');
+      s.setAttribute('data-input-position', 'bottom');
+      s.setAttribute('data-lang', uiLang(langCode));
+      s.setAttribute('data-theme', GISCUS_CFG.theme);
+      s.setAttribute('crossorigin', 'anonymous');
+      s.async = true;
+      mount.appendChild(s);
+    }
   </script>
 </body>
 </html>
