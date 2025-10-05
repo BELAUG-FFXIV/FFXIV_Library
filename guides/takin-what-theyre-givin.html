@@ -43,16 +43,19 @@
     .link{color:#0b60d8;text-decoration:none}
     .link:hover{text-decoration:underline}
 
-    /* 長文自動收合 */
-    .story-collapsible{position:relative;max-height:380px;overflow:hidden}
-    .story-collapsible::after{
-      content:"";position:absolute;inset:auto 0 0 0;height:72px;
-      background:linear-gradient(to bottom, rgba(255,248,230,0), var(--card));
+    /* 展開/收合 */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
     }
-    .story-toggle{display:inline-block;margin-top:10px;padding:8px 14px;border:1px solid var(--border);
-      border-radius:999px;background:#fff;cursor:pointer;font-weight:600}
-    .story-expanded{max-height:none}
-    .story-expanded::after{display:none}
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
   </style>
 </head>
 <body>
@@ -87,12 +90,16 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
-          <div id="panel-story"   class="tab-panel active"></div>
-          <div id="panel-acq"     class="tab-panel"></div>
-          <div id="panel-unlockq" class="tab-panel"></div>
-          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -104,16 +111,19 @@ const i18n = {
   EN:{
     langLabel:'EN',
     pageTitle:"Takin’ What They’re Givin’",
-    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
-    story:`<p>You return to the Quicksand, and Momodi greets you with her usual blend of sarcasm and warmth. She doesn’t wait for questions—she already knows why you’ve come. A lead, perhaps. Or just the hope that something might shake loose in Ul’dah’s tangled web.</p>
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+<p>You return to the Quicksand, and Momodi greets you with her usual blend of sarcasm and warmth. She doesn’t wait for questions—she already knows why you’ve come. A lead, perhaps. Or just the hope that something might shake loose in Ul’dah’s tangled web.</p>
 <p>She sends you to Horizon, a busy trading post in western Thanalan, where a gemstone merchant named Dadanen is looking for help. There’s coin to be made, maybe gossip to be heard—especially the kind that brushes shoulders with the royal family. Momodi even suggests taking a chocobo porter to make the journey quicker, if you’ve got the gil.</p>
-<p>At Horizon, Dadanen welcomes you like he’s been expecting you. He talks of shipments, merchants, and the wear on his legs. There’s plenty to be done, he says—and you’ve just arrived in time.</p>`,
+<p>At Horizon, Dadanen welcomes you like he’s been expecting you. He talks of shipments, merchants, and the wear on his legs. There’s plenty to be done, he says—and you’ve just arrived in time.</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>Quest Giver</b> Momodi <small class="muted">(Ul’dah - Steps of Nald, X: 11.6, Y: 9.6)</small></div>
     </div>`,
     unlockq:`<div class="stack">
-      <div class="row"><a class="link" href="way-down-in-the-hole.html
-">Way Down in the Hole</a></div>
+      <div class="row"><a class="link" href="way-down-in-the-hole.html">Way Down in the Hole</a></div>
     </div>`,
     followq:`<div class="stack">
       <div class="row"><a class="link" href="supply-and-demands.html">Supply and Demands</a></div>
@@ -122,16 +132,19 @@ const i18n = {
   JP:{
     langLabel:'JP',
     pageTitle:'ホライズンへ',
-    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
-    story:`<p>クイックサンドに戻ったあなたを、モモディがいつものように皮肉と愛想半分で迎えてくれる。何を求めてきたかなんて、わざわざ聞かなくてもわかっているという様子だ。王家に関する情報か、それともウルダハの絡まった陰謀の糸をほぐす糸口か。</p>
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+<p>クイックサンドに戻ったあなたを、モモディがいつものように皮肉と愛想半分で迎えてくれる。何を求めてきたかなんて、わざわざ聞かなくてもわかっているという様子だ。王家に関する情報か、それともウルダハの絡まった陰謀の糸をほぐす糸口か。</p>
 <p>彼女はあなたを「ホライズン」に送る。西ザナラーンにあるその交易拠点には、宝石商のダダネンがおり、手伝ってくれる人間を探しているという。金になる話か、あるいは王室に近い噂話が聞けるかもしれない。ギルに余裕があるなら、チョコボポーターで向かうといいとモモディは勧める。</p>
-<p>ホライズンに到着すると、ダダネンはあなたを歓迎する。まるで最初から来るのがわかっていたかのように。彼は日々の商取引の忙しさを語り、「チョコボの脚が欲しい」と笑う。そして、あなたが来たことを心底喜んでいる──ここには、やるべきことが山ほどあるのだ。</p>`,
+<p>ホライズンに到着すると、ダダネンはあなたを歓迎する。まるで最初から来るのがわかっていたかのように。彼は日々の商取引の忙しさを語り、「チョコボの脚が欲しい」と笑う。そして、あなたが来たことを心底喜んでいる──ここには、やるべきことが山ほどあるのだ。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>クエスト発行</b> モモディ <small class="muted">（ウルダハ：ナル回廊, X: 11.6, Y: 9.6）</small></div>
     </div>`,
     unlockq:`<div class="stack">
-      <div class="row"><a class="link" href="way-down-in-the-hole.html
-">成功の表と裏</a></div>
+      <div class="row"><a class="link" href="way-down-in-the-hole.html">成功の表と裏</a></div>
     </div>`,
     followq:`<div class="stack">
       <div class="row"><a class="link" href="supply-and-demands.html">宝石商の憂鬱</a></div>
@@ -140,16 +153,19 @@ const i18n = {
   ZH:{
     langLabel:'ZH',
     pageTitle:'奔向地平線',
-    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
-    story:`<p>你回到 Quicksand，Momodi 依舊用她特有的嘲諷與溫暖迎接你。她根本不需要問你來的理由──你自己也知道，總是在找線索，也許是與王室有關的動靜，也許只是希望能攪動 Ul’dah 這座城的沉寂。</p>
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+<p>你回到 Quicksand，Momodi 依舊用她特有的嘲諷與溫暖迎接你。她根本不需要問你來的理由──你自己也知道，總是在找線索，也許是與王室有關的動靜，也許只是希望能攪動 Ul’dah 這座城的沉寂。</p>
 <p>她叫你去西邊的 Horizon，那裡是一個熱鬧的交易站，有位名叫 Dadanen 的寶石商正尋找幫手。那裡不僅有工作機會，也許還有一些與王族相關的耳語等著你。Momodi 還建議你搭乘 chocobo porter，以節省體力和時間，只要你負擔得起那點費用。</p>
-<p>你抵達 Horizon，Dadanen 像早就知道你會來一樣迎接你。他談起貨運、商隊、還有雙腿的疲憊。他說，這裡的工作永遠做不完，而你，來得正是時候。</p>`,
+<p>你抵達 Horizon，Dadanen 像早就知道你會來一樣迎接你。他談起貨運、商隊、還有雙腿的疲憊。他說，這裡的工作永遠做不完，而你，來得正是時候。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>任務發布</b> Momodi <small class="muted">（烏爾達哈 - 納爾回廊, X: 11.6, Y: 9.6）</small></div>
     </div>`,
     unlockq:`<div class="stack">
-      <div class="row"><a class="link" href="way-down-in-the-hole.html
-">成功背後的真相</a></div>
+      <div class="row"><a class="link" href="way-down-in-the-hole.html">成功背後的真相</a></div>
     </div>`,
     followq:`<div class="stack">
       <div class="row"><a class="link" href="supply-and-demands.html">供需與煩憂</a></div>
@@ -164,7 +180,8 @@ const panels = {
   story:  document.getElementById('panel-story'),
   acq:    document.getElementById('panel-acq'),
   unlockq:document.getElementById('panel-unlockq'),
-  followq:document.getElementById('panel-followq')
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
 };
 
 function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
@@ -176,12 +193,32 @@ function applyLang(lang){
   const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
   renderPanel(activeBtn.dataset.tab, lang);
 }
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
 function renderPanel(key, lang){
   const t = i18n[lang] || i18n.EN;
   Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
   panels[key].classList.add('active');
-  panels[key].innerHTML = t[key];
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
 }
+
 tabBtns.forEach(btn=>{
   btn.addEventListener('click', ()=>{
     tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
@@ -189,6 +226,7 @@ tabBtns.forEach(btn=>{
     renderPanel(btn.dataset.tab, getLang());
   });
 });
+
 langToggle.addEventListener('click', ()=>{
   const cur = getLang();
   const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
@@ -196,41 +234,39 @@ langToggle.addEventListener('click', ()=>{
   applyLang(next);
 });
 
-/* —— 長文自動收合（依字數自動出現） —— */
-const readMoreLabels = {
-  EN: {more:'Read more', less:'Show less'},
-  JP: {more:'続きを読む',   less:'折りたたむ'},
-  ZH: {more:'展開全文',     less:'收合內容'}
-};
-function makeStoryCollapsible(lang){
-  const panel = document.getElementById('panel-story');
-  if(!panel) return;
-  const textLen = panel.textContent.trim().length;
-  if(textLen < 800) return;
-  const inner = panel.innerHTML.trim();
-  const wrap = document.createElement('div');
-  wrap.className = 'story-collapsible';
-  wrap.innerHTML = inner;
-  const btn = document.createElement('button');
-  const L = readMoreLabels[lang] || readMoreLabels.EN;
-  btn.className = 'story-toggle';
-  btn.textContent = L.more;
-  btn.addEventListener('click', ()=>{
-    const on = wrap.classList.toggle('story-expanded');
-    btn.textContent = on ? L.less : L.more;
-  });
-  panel.innerHTML = '';
-  panel.appendChild(wrap);
-  panel.appendChild(btn);
-}
-/* 掛鉤 renderPanel：切到 Story 時套用收合 */
-const _origRenderPanel = renderPanel;
-renderPanel = function(key, lang){
-  _origRenderPanel(key, lang);
-  if(key==='story') makeStoryCollapsible(lang);
-};
-
 applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'belaug-ffxiv/FFXIV_Library',
+  repoId: 'R_kgD0Pyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
 </script>
 </body>
 </html>
