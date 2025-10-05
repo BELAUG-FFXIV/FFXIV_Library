@@ -43,7 +43,7 @@
     .link{color:#0b60d8;text-decoration:none}
     .link:hover{text-decoration:underline}
 
-    /* Story 展開 / 收合 */
+    /* 展開/收合 */
     .clamp{ position:relative; max-height:360px; overflow:hidden; }
     .clamp[data-collapsed="false"]{ max-height:none; }
     .clamp[data-collapsed="true"]::after{
@@ -90,12 +90,16 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
           <div id="panel-story"   class="tab-panel active"></div>
           <div id="panel-acq"     class="tab-panel"></div>
           <div id="panel-unlockq" class="tab-panel"></div>
           <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -107,7 +111,7 @@ const i18n = {
   EN:{
     langLabel:'EN',
     pageTitle:'Lord of the Inferno',
-    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
     readMore:'Show more', readLess:'Show less',
     story:`<div class="clamp" data-collapsed="true">
       <p>Thancred’s ruse seemed foolproof: Ungust, the false priest, would serve as bait to lure the Amalj’aa into a trap. You traveled to the Invisible City with the Immortal Flames, lying in wait for the enemy. At first, the plan unfolded as expected—until Ungust revealed his true allegiance. A traitor among the Flames had been feeding him information all along, turning the ambush against you.</p>
@@ -130,7 +134,7 @@ const i18n = {
   JP:{
     langLabel:'JP',
     pageTitle:'猛る焔神イフリート',
-    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
     readMore:'全文を表示', readLess:'折りたたむ',
     story:`<div class="clamp" data-collapsed="true">
       <p>偽りの神官アングストを囮にしてアマルジャを捕らえる――サンクレッドの策は万全に思えた。インヴィジブルシティに潜み、不滅隊とともに機を窺うあなた。しかし、仕掛けは無惨にも覆される。アングストは裏切り者であり、不滅隊の中にも内通者がいたのだ。</p>
@@ -153,7 +157,7 @@ const i18n = {
   ZH:{
     langLabel:'ZH',
     pageTitle:'地獄之火伊弗利特',
-    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
     readMore:'展開全文', readLess:'收合內容',
     story:`<div class="clamp" data-collapsed="true">
       <p>Thancred 的計畫看似天衣無縫──以假神父 Ungust 為餌，引 Amalj’aa 入局。你與 Immortal Flames 一同潛伏在 Invisible City，靜候時機。然而，計策在瞬間崩解──Ungust 暴露其真面目，甚至 Flames 中亦有內鬼早已暗中通風報信。</p>
@@ -182,7 +186,8 @@ const panels = {
   story:  document.getElementById('panel-story'),
   acq:    document.getElementById('panel-acq'),
   unlockq:document.getElementById('panel-unlockq'),
-  followq:document.getElementById('panel-followq')
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
 };
 
 function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
@@ -216,8 +221,9 @@ function renderPanel(key, lang){
   const t = i18n[lang] || i18n.EN;
   Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
   panels[key].classList.add('active');
-  panels[key].innerHTML = t[key];
-  if(key === 'story') wireClamp(panels[key], t);
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
 }
 
 tabBtns.forEach(btn=>{
@@ -236,6 +242,38 @@ langToggle.addEventListener('click', ()=>{
 });
 
 applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'belaug-ffxiv/FFXIV_Library',
+  repoId: 'R_kgD0Pyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
 </script>
 </body>
 </html>
