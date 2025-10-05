@@ -35,9 +35,6 @@
     .stack{display:flex;flex-direction:column;gap:10px}
     .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
     .row b{display:inline-block;min-width:130px}
-    .muted{color:var(--muted)}
-    .link{color:#0b60d8;text-decoration:none}
-    .link:hover{text-decoration:underline}
   </style>
 </head>
 <body>
@@ -66,106 +63,133 @@
           <button class="tab-btn" role="tab" aria-selected="true"  data-tab="about">About</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="seats">Seats</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
           <div id="panel-about" class="tab-panel active"></div>
-          <div id="panel-acq"   class="tab-panel"></div>
+          <div id="panel-acq" class="tab-panel"></div>
           <div id="panel-seats" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
   </main>
 
   <script>
-    const LANG_KEY = "ffxiv-guide-lang";
-    const i18n = {
-      EN: {
-        langLabel: "EN",
-        pageTitle: "Laurel Goobbue",
-        tabs: { about: "About", acq: "Acquisition", seats: "Seats" },
-        about:
-          "<div class='stack'>"
-          + "<div class='row'>Summon your laurel goobbue, towering friend to the sylphs.</div>"
-          + "<div class='row'>After having the moss and flowers growing upon his head pulled up and tossed aside like common weeds by a band of sylvan ne’er-do-wells, this quiet-mannered goobbue was taken in and cared for by the sylphs of Little Solace whose elders crafted for him a magnificent laurel with which to hide his scars.</div>"
-          + "</div>",
-        acq:
-          "<div class='stack'>"
-          + "<div class='row'>Purchased from Sylphic Vendor for 120,000 gil after achieving Trusted (Rank 4) reputation with the Sylph Tribe.</div>"
-          + "</div>",
-        seats: "<div class='stack'><div class='row'>1</div></div>"
+    const LANG_KEY='ffxiv-guide-lang';
+    const i18n={
+      EN:{
+        langLabel:'EN',
+        pageTitle:'Laurel Goobbue',
+        tabs:{ about:'About', acq:'Acquisition', seats:'Seats', comments:'Comments' },
+        about:`<div class="stack">
+          <div class="row">Summon your laurel goobbue, towering friend to the sylphs.</div>
+          <div class="row">After having the moss and flowers growing upon his head pulled up and tossed aside like common weeds by a band of sylvan ne’er-do-wells, this quiet-mannered goobbue was taken in and cared for by the sylphs of Little Solace whose elders crafted for him a magnificent laurel with which to hide his scars.</div>
+        </div>`,
+        acq:`<div class="stack"><div class="row">Purchased from Sylphic Vendor for 120,000 gil after achieving Trusted (Rank 4) reputation with the Sylph Tribe.</div></div>`,
+        seats:`<div class="stack"><div class="row">1</div></div>`
       },
-      JP: {
-        langLabel: "JP",
-        pageTitle: "ローレル・グゥーブー",
-        tabs: { about: "紹介", acq: "入手方法", seats: "座席数" },
-        about:
-          "<div class='stack'>"
-          + "<div class='row'>ラウレル・グーブを呼び出そう──シルフ族の高き友にして、静かなる巨躯のモンスター。</div>"
-          + "<div class='row'>かつて頭に茂っていた苔や花々を、森の悪戯者たちに雑草のように引き抜かれ投げ捨てられたこの穏やかな Goobbue は、Little Solace のシルフたちに保護され、長老たちの手でその傷を隠すための壮麗な月桂冠を授けられたという。</div>"
-          + "</div>",
-        acq:
-          "<div class='stack'>"
-          + "<div class='row'>シルフ族のよろず屋から、友好度「信頼」（ランク4）到達後に120,000ギルで購入可能。</div>"
-          + "</div>",
-        seats: "<div class='stack'><div class='row'>1</div></div>"
+      JP:{
+        langLabel:'JP',
+        pageTitle:'ローレル・グゥーブー',
+        tabs:{ about:'紹介', acq:'入手方法', seats:'座席数', comments:'コメント' },
+        about:`<div class="stack">
+          <div class="row">ラウレル・グーブを呼び出そう──シルフ族の高き友にして、静かなる巨躯のモンスター。</div>
+          <div class="row">かつて頭に茂っていた苔や花々を、森の悪戯者たちに雑草のように引き抜かれ投げ捨てられたこの穏やかなGoobbueは、リトルソルスのシルフたちに保護され、長老たちの手でその傷を隠すための壮麗な月桂冠を授けられたという。</div>
+        </div>`,
+        acq:`<div class="stack"><div class="row">シルフ族のよろず屋から、友好度「信頼」（ランク 4）到達後に 120,000 ギルで購入可能。</div></div>`,
+        seats:`<div class="stack"><div class="row">1</div></div>`
       },
-      ZH: {
-        langLabel: "ZH",
-        pageTitle: "月桂古布獸",
-        tabs: { about: "簡介", acq: "取得方式", seats: "可乘人數" },
-        about:
-          "<div class='stack'>"
-          + "<div class='row'>召喚這隻頭戴月桂冠的 Goobbue──Sylph 族的高大朋友。</div>"
-          + "<div class='row'>牠頭頂的苔蘚與花朵曾被一群森林頑徒拔除、亂扔，如同毫無價值的雜草。這頭性情溫和的 Goobbue 隨後被 Little Solace 的 Sylph 們收留並細心照料，長老們更特地為牠編織了一頂華麗的月桂冠，用以遮掩那些過往留下的傷痕。</div>"
-          + "</div>",
-        acq:
-          "<div class='stack'>"
-          + "<div class='row'>可於達成希爾芙族聲望「信任」（階級4）後，向希爾芙族商人以120,000金幣購得。</div>"
-          + "</div>",
-        seats: "<div class='stack'><div class='row'>1</div></div>"
+      ZH:{
+        langLabel:'ZH',
+        pageTitle:'月桂古布獸',
+        tabs:{ about:'簡介', acq:'取得方式', seats:'可乘人數', comments:'留言' },
+        about:`<div class="stack">
+          <div class="row">召喚這隻頭戴月桂冠的 Goobbue──Sylph 族的高大朋友。</div>
+          <div class="row">牠頭頂的苔蘚與花朵曾被一群森林頑徒拔除、亂扔，如同毫無價值的雜草。這頭性情溫和的 Goobbue 隨後被 Little Solace 的 Sylph 們收留並細心照料，長老們更特地為牠編織了一頂華麗的月桂冠，用以遮掩那些過往留下的傷痕。</div>
+        </div>`,
+        acq:`<div class="stack"><div class="row">可於達成 Sylph 族聲望「信任」（階級 4）後，向 Sylph 商人以 120,000 金幣購得。</div></div>`,
+        seats:`<div class="stack"><div class="row">1</div></div>`
       }
     };
 
-    const langToggle = document.getElementById("langToggle");
-    const pageTitle = document.getElementById("pageTitle");
-    const tabBtns = [].slice.call(document.querySelectorAll(".tab-btn"));
-    const panels = { about: panel("about"), acq: panel("acq"), seats: panel("seats") };
-
-    function panel(id){ return document.getElementById("panel-" + id); }
-    function getLang(){ return localStorage.getItem(LANG_KEY) || "EN"; }
+    const langToggle=document.getElementById('langToggle');
+    const pageTitle=document.getElementById('pageTitle');
+    const tabBtns=[...document.querySelectorAll('.tab-btn')];
+    const panels={
+      about:panel('about'),
+      acq:panel('acq'),
+      seats:panel('seats'),
+      comments:panel('comments')
+    };
+    function panel(id){return document.getElementById('panel-'+id);}
+    function getLang(){return localStorage.getItem(LANG_KEY)||'EN';}
 
     function applyLang(lang){
-      var t = i18n[lang] || i18n.EN;
-      pageTitle.textContent = t.pageTitle;
-      langToggle.textContent = "🌐 " + t.langLabel; // 安全字串相接
-      tabBtns.forEach(function(b){ b.textContent = t.tabs[b.getAttribute("data-tab")]; });
-      var active = tabBtns.find(function(b){ return b.getAttribute("aria-selected") === "true"; }) || tabBtns[0];
-      renderPanel(active.getAttribute("data-tab"), lang);
+      const t=i18n[lang]||i18n.EN;
+      pageTitle.textContent=t.pageTitle;
+      langToggle.textContent='🌐 '+t.langLabel;
+      tabBtns.forEach(b=>{if(t.tabs[b.dataset.tab])b.textContent=t.tabs[b.dataset.tab];});
+      const active=tabBtns.find(b=>b.getAttribute('aria-selected')==='true')||tabBtns[0];
+      renderPanel(active.dataset.tab,lang);
+      if(active.dataset.tab==='comments')loadGiscusForCurrentLang();
     }
 
-    function renderPanel(key, lang){
-      var t = i18n[lang] || i18n.EN;
-      Object.keys(panels).forEach(function(k){ panels[k].classList.remove("active"); });
-      panels[key].classList.add("active");
-      panels[key].innerHTML = t[key];
+    function renderPanel(key,lang){
+      const t=i18n[lang]||i18n.EN;
+      Object.keys(panels).forEach(k=>panels[k].classList.remove('active'));
+      panels[key].classList.add('active');
+      if(key!=='comments')panels[key].innerHTML=t[key];
+      if(key==='comments')loadGiscusForCurrentLang();
     }
 
-    tabBtns.forEach(function(btn){
-      btn.addEventListener("click", function(){
-        tabBtns.forEach(function(b){ b.setAttribute("aria-selected","false"); });
-        btn.setAttribute("aria-selected","true");
-        renderPanel(btn.getAttribute("data-tab"), getLang());
+    tabBtns.forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+        btn.setAttribute('aria-selected','true');
+        renderPanel(btn.dataset.tab,getLang());
       });
     });
 
-    langToggle.addEventListener("click", function(){
-      var cur = getLang();
-      var next = cur === "EN" ? "JP" : (cur === "JP" ? "ZH" : "EN");
-      localStorage.setItem(LANG_KEY, next);
-      applyLang(next);
+    langToggle.addEventListener('click',()=>{
+      const cur=getLang();const next=cur==='EN'?'JP':(cur==='JP'?'ZH':'EN');
+      localStorage.setItem(LANG_KEY,next);applyLang(next);
     });
-
     applyLang(getLang());
+
+    /* giscus comments */
+    const GISCUS_CFG={
+      repo:'belaug-ffxiv/FFXIV_Library',
+      repoId:'R_kgD0Pyh4Kw',
+      category:'General',
+      categoryId:'DIC_kwD0Pyh4K84CwPjL',
+      theme:'preferred_color_scheme'
+    };
+    function uiLang(code){return code==='JP'?'ja':(code==='ZH'?'zh-TW':'en');}
+    function loadGiscusForCurrentLang(){
+      const mount=document.getElementById('giscus_container');
+      if(!mount)return;
+      mount.innerHTML='';
+      const langCode=getLang();
+      const s=document.createElement('script');
+      s.src='https://giscus.app/client.js';
+      s.setAttribute('data-repo',GISCUS_CFG.repo);
+      s.setAttribute('data-repo-id',GISCUS_CFG.repoId);
+      s.setAttribute('data-category',GISCUS_CFG.category);
+      s.setAttribute('data-category-id',GISCUS_CFG.categoryId);
+      s.setAttribute('data-mapping','specific');
+      s.setAttribute('data-term',location.pathname+'｜'+langCode);
+      s.setAttribute('data-reactions-enabled','1');
+      s.setAttribute('data-emit-metadata','0');
+      s.setAttribute('data-input-position','bottom');
+      s.setAttribute('data-lang',uiLang(langCode));
+      s.setAttribute('data-theme',GISCUS_CFG.theme);
+      s.setAttribute('crossorigin','anonymous');
+      s.async=true;
+      mount.appendChild(s);
+    }
   </script>
 </body>
 </html>
