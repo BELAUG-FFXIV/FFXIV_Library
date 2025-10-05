@@ -332,17 +332,17 @@ const itemsSuffixEl= document.getElementById('itemsSuffix');
 const i18n = {
   EN: {
     langLabel: 'EN',
-    tagline: `The <b>FFXIV Library</b> is an extension of my YouTube channel.
-    Each video preserves the story’s atmosphere as it unfolds, while the Library offers fuller story details, quest records, and background notes —
-    so you can both enjoy the videos and fully understand the tale behind them.
-    If you enjoy this journey, you’re welcome to visit <a href="https://ko-fi.com/belaug" target="_blank" rel="noopener">Ko-fi</a> and buy me a cup of coffee!`,
+    tagline: `<b>FFXIV Library</b> is an extension of my YouTube channel.<br>
+Here you’ll find additional story details — quest records, background notes, and elements that couldn’t be fully shown in each video.<br>
+Every entry also has a message board where you can share your thoughts and connect with fellow travelers.<br>
+If you enjoy your time here, feel free to visit <a href="https://ko-fi.com/belaug" target="_blank" rel="noopener">Ko-fi</a> and buy me a cup of coffee — a small resting spot along the journey. ☕`,
     searchPH: 'Search title, series, tags, chapter…',
     itemsSuffix: 'items',
     categories: [
       { value: '',               label: 'All Categories' },
       { value: 'MSQ',            label: 'Main Story (MSQ)' },
-      { value: 'AllianceRaid24', label: 'Alliance Raid (24ppl)' },
-      { value: 'Raid8',          label: 'Raid (8ppl)' },
+      { value: 'AllianceRaid24', label: 'Alliance Raid (24-player)' },
+      { value: 'Raid8',          label: 'Raid (8-player)' },
       { value: 'Dungeon',        label: 'Dungeon' },
       { value: 'Trial',          label: 'Trial' },
       { value: 'JobQuests',      label: 'Job Quests' },
@@ -354,10 +354,10 @@ const i18n = {
       { value: 'BGM',            label: 'BGM' },
       { value: 'CollMount',      label: 'Collection (Mount)' },
       { value: 'CollWeapon',     label: 'Collection (Weapon)' },
-      { value: 'CollTool',       label: 'Collection (DOH/DOL Tool)' },
+      { value: 'CollTool',       label: 'Collection (Crafting/Gathering Tools)' },
       { value: 'HighDiff',       label: 'High-difficulty Content' },
       { value: 'RelaxingBGM',    label: 'Relaxing Background Vibes' },
-      { value: 'PVP',            label: 'PVP' },
+      { value: 'PVP',            label: 'PvP' },
     ],
     expansions: [
       { value: '',   label: 'All Expansions' },
@@ -369,7 +369,7 @@ const i18n = {
       { value: 'DT',  label: 'Dawntrail (DT)' },
     ],
     patches: [
-      { value: '',    label: 'All Patch' },
+      { value: '',    label: 'All Patches' },
       { value: '7.x', label: '7.x' },
       { value: '6.x', label: '6.x' },
       { value: '5.x', label: '5.x' },
@@ -382,44 +382,44 @@ const i18n = {
 
   JP: {
     langLabel: 'JP',
-    tagline: `<b>FFXIV Library</b> は、私の YouTube チャンネルを拡張したアーカイブです。
-    映像は物語の空気をそのままに、Library では各動画のストーリー内容やクエスト記録、背景解説をより詳しく掲載しています。
-    映像を楽しみながら、物語をより深く理解していただけます。
-    もしこの旅を気に入ってくださったなら、<a href="https://ko-fi.com/belaug" target="_blank" rel="noopener">Ko-fi</a> でコーヒーを一杯ご馳走くださいね。`,
+    tagline: `<b>FFXIV Library</b> は、私の YouTube チャンネルを補完する資料館です。<br>
+映像だけでは伝えきれない物語の細部──クエスト記録や背景設定などをここに収めています。<br>
+各ページにはメッセージボードもあり、感じたことを旅人同士で共有できます。<br>
+もしこの場所を気に入っていただけたなら、<a href="https://ko-fi.com/belaug" target="_blank" rel="noopener">Ko-fi</a> でコーヒーをごちそうください。旅の途中の小さな休憩所として。☕`,
     searchPH: 'タイトル・シリーズ・タグ・章… を検索',
     itemsSuffix: '件',
     categories: [
-      { value: '',               label: '全ての分類' },
-      { value: 'MSQ',            label: 'メインストーリー' },
-      { value: 'AllianceRaid24', label: 'アライアンス（24人）' },
+      { value: '',               label: 'すべての分類' },
+      { value: 'MSQ',            label: 'メインクエスト（MSQ）' },
+      { value: 'AllianceRaid24', label: 'アライアンスレイド（24人）' },
       { value: 'Raid8',          label: 'レイド（8人）' },
       { value: 'Dungeon',        label: 'ダンジョン' },
       { value: 'Trial',          label: '討伐・討滅戦' },
       { value: 'JobQuests',      label: 'ジョブクエスト' },
       { value: 'RoleQuests',     label: 'ロールクエスト' },
       { value: 'AlliedSociety',  label: '友好部族クエスト' },
-      { value: 'SideFeature',    label: 'サブクエスト / コンテンツ開放クエスト' },
-      { value: 'Seasonal',       label: 'シーズナルイベント / スペシャルイベント' },
+      { value: 'SideFeature',    label: 'サブクエスト／コンテンツ開放' },
+      { value: 'Seasonal',       label: 'シーズナル／スペシャルイベント' },
       { value: 'GoldSaucer',     label: 'ゴールドソーサー' },
       { value: 'BGM',            label: 'BGM' },
-      { value: 'CollMount',      label: 'マウントコレクション' },
-      { value: 'CollWeapon',     label: '武器コレクション' },
-      { value: 'CollTool',       label: 'クラフター/ギャザラーツールコレクション' },
-      { value: 'HighDiff',       label: '高難度コンテンツ' },
-      { value: 'RelaxingBGM',    label: 'リラックスできるFFXIVの風景と音楽' },
-      { value: 'PVP',            label: 'PVP' },
+      { value: 'CollMount',      label: 'コレクション（マウント）' },
+      { value: 'CollWeapon',     label: 'コレクション（武器）' },
+      { value: 'CollTool',       label: 'コレクション（クラフター／ギャザラーツール）' },
+      { value: 'HighDiff',       label: '高難易度コンテンツ' },
+      { value: 'RelaxingBGM',    label: 'リラックスBGM・風景' },
+      { value: 'PVP',            label: 'PvP' },
     ],
     expansions: [
-      { value: '',   label: '全ての資料片' },
-      { value: 'ARR', label: '新生エオルゼア' },
-      { value: 'HW',  label: '蒼天のイシュガルド' },
-      { value: 'SB',  label: '紅蓮のリベレーター' },
-      { value: 'SHB', label: '漆黒のヴィランズ' },
-      { value: 'EW',  label: '暁月のフィナーレ' },
-      { value: 'DT',  label: '黄金のレガシー' },
+      { value: '',   label: 'すべての拡張' },
+      { value: 'ARR', label: '新生エオルゼア（ARR）' },
+      { value: 'HW',  label: '蒼天のイシュガルド（HW）' },
+      { value: 'SB',  label: '紅蓮のリベレーター（SB）' },
+      { value: 'SHB', label: '漆黒のヴィランズ（SHB）' },
+      { value: 'EW',  label: '暁月のフィナーレ（EW）' },
+      { value: 'DT',  label: '黄金のレガシー（DT）' },
     ],
     patches: [
-      { value: '',    label: '全てのPatch' },
+      { value: '',    label: 'すべてのパッチ' },
       { value: '7.x', label: '7.x' },
       { value: '6.x', label: '6.x' },
       { value: '5.x', label: '5.x' },
@@ -432,41 +432,41 @@ const i18n = {
 
   ZH: {
     langLabel: 'ZH',
-    tagline: `<b>FFXIV Library</b> 是我 YouTube 頻道的延伸資料館。
-    影片保留故事當下的氛圍，而 Library 為每支影片補上更完整的故事內容、任務紀錄與背景說明，
-    讓你可以同步欣賞影片也可以完全理解劇情。
-    若你喜歡這份旅程，也歡迎到 <a href="https://ko-fi.com/belaug" target="_blank" rel="noopener">Ko-fi</a> 請我喝杯咖啡喔～`,
+    tagline: `<b>FFXIV Library</b> 是我 YouTube 頻道的延伸資料館。<br>
+這裡收錄了更多在影片中無法完整呈現的內容──任務紀錄、背景資料與細節補充。<br>
+每部影片下方也設有留言板，歡迎留下你的想法與感受，與其他旅人一同分享。<br>
+若你喜歡這裡的內容，也歡迎到 <a href="https://ko-fi.com/belaug" target="_blank" rel="noopener">Ko-fi</a> 請我喝杯咖啡，就當作旅途中一個小小的休息站。☕`,
     searchPH: '搜尋標題、系列、標籤、章節…',
     itemsSuffix: '項內容',
     categories: [
       { value: '',               label: '全部分類' },
-      { value: 'MSQ',            label: '主線任務' },
-      { value: 'AllianceRaid24', label: '聯盟戰（24人）' },
+      { value: 'MSQ',            label: '主線任務（MSQ）' },
+      { value: 'AllianceRaid24', label: '聯盟副本（24人）' },
       { value: 'Raid8',          label: '團本（8人）' },
-      { value: 'Dungeon',        label: '副本' },
-      { value: 'Trial',          label: '討伐戰' },
-      { value: 'JobQuests',      label: '職業任務' },
-      { value: 'RoleQuests',     label: '角色職業任務' },
+      { value: 'Dungeon',        label: '副本（Dungeon）' },
+      { value: 'Trial',          label: '討伐戰（Trial）' },
+      { value: 'JobQuests',      label: '職業任務（Job）' },
+      { value: 'RoleQuests',     label: '角色任務（Role）' },
       { value: 'AlliedSociety',  label: '友好部族任務' },
-      { value: 'SideFeature',    label: '支線 / 內容開放任務' },
-      { value: 'Seasonal',       label: '季節 / 特別活動' },
+      { value: 'SideFeature',    label: '支線／功能開放任務' },
+      { value: 'Seasonal',       label: '季節／特別活動' },
       { value: 'GoldSaucer',     label: '金碟遊樂場' },
       { value: 'BGM',            label: 'BGM' },
-      { value: 'CollMount',      label: '蒐集 - 坐騎' },
-      { value: 'CollWeapon',     label: '蒐集 - 武器' },
-      { value: 'CollTool',       label: '蒐集 - 製作/採集用工具' },
+      { value: 'CollMount',      label: '蒐集（坐騎）' },
+      { value: 'CollWeapon',     label: '蒐集（武器）' },
+      { value: 'CollTool',       label: '蒐集（製作／採集工具）' },
       { value: 'HighDiff',       label: '高難度內容' },
-      { value: 'RelaxingBGM',    label: 'FFXIV 背景放鬆音樂' },
+      { value: 'RelaxingBGM',    label: '放鬆背景音樂' },
       { value: 'PVP',            label: 'PVP' },
     ],
     expansions: [
       { value: '',   label: '全部資料片' },
-      { value: 'ARR', label: '新生艾奧傑亞' },
-      { value: 'HW',  label: '蒼天的伊修加德' },
-      { value: 'SB',  label: '紅蓮的解放者' },
-      { value: 'SHB', label: '漆黑的反叛者' },
-      { value: 'EW',  label: '曉月的終焉' },
-      { value: 'DT',  label: '黃金的遺產' },
+      { value: 'ARR', label: '新生艾奧傑亞（ARR）' },
+      { value: 'HW',  label: '蒼天的伊修加德（HW）' },
+      { value: 'SB',  label: '紅蓮的解放者（SB）' },
+      { value: 'SHB', label: '漆黑的反叛者（SHB）' },
+      { value: 'EW',  label: '曉月的終焉（EW）' },
+      { value: 'DT',  label: '黃金的遺產（DT）' },
     ],
     patches: [
       { value: '',    label: '全部 Patch' },
