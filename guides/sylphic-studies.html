@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sylphic Studies | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Sylphic Studies (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/2jNEMwp8ymw"
+              title="Sylphic Studies" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Sylphic Studies</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Sylphic Studies',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>At the Hawthorne Hut, Rolfe Hawthorne greets you but admits his memory has grown muddled with age. He recalls little of the sylphs himself, but directs you to those around the hut who have heard his tales.</p>
+      <p>Ysabel, his daughter, explains that sylph etiquette is utterly alien to Gridanians and warns you not to underestimate them for their childlike appearance. Blaisette adds that, unlike ordinary folk, sylphs draw their sustenance from sunlight rather than food. Monne, however, calls them tricksters—prone to pranks like painting faces on masks or causing sentries to tumble into ravines. Though said to mean no harm, their mischief is far from harmless.</p>
+      <p>Hearing these reminders, Rolfe’s memory returns in a rush. He recalls that for the sylphs, dancing is a traditional greeting, a gesture of trust and welcome. He advises you to remember this custom, for it may prove vital in earning their favor.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Rolfe Hawthorne <small class="muted">(East Shroud, X:16.7, Y:27.1)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="we-come-in-peace.html">We Come in Peace</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row">First Impressions</div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'変わり者の挨拶',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>ホーソーン家の小屋 で出迎えた ロルフ・ホーソーン は、年を重ねたせいか記憶が曖昧になってしまったと告げる。シルフ族 について詳しく知りたいなら、周囲の者から彼の昔話を聞くといいと言う。</p>
+      <p>娘の イザベル は、シルフ族 の礼儀作法が グリダニア の常識とはまるで異なると語り、その幼い姿に惑わされてはならないと忠告する。ブレゼット は、彼らは食事ではなく日光浴によって糧を得ていると教えてくれる。そして モンヌ は、シルフ族 は常習的ないたずら者で、仮面に モルボル の顔を描いたり、哨戒兵を谷底に落としたりすると憤る。悪意はないと言われても、悪戯が過ぎれば笑えない。</p>
+      <p>仲間の話を聞いて ロルフ の記憶はよみがえり、ついに大切なことを思い出す。シルフ族 にとって「踊り」は伝統的な挨拶であり、信頼と歓迎の証だという。これを忘れぬようにと彼は助言した。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> ロルフ・ホーソーン <small class="muted">（黒衣森：東部森林, X:16.7, Y:27.1）</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="we-come-in-peace.html">蜜の道を辿って</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row">魅惑の手土産</div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'探索森靈之道',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>在 Hawthorne Hut，Rolfe Hawthorne 熱情迎接了你，但也無奈承認自己年老記憶衰退，關於 Sylph 的細節早已模糊。他建議你向小屋周圍的人打聽，他曾經的故事或許能從他人口中拼湊起來。</p>
+      <p>他的女兒 Ysabel 解釋，Sylph 的禮儀與 Gridania 完全不同，提醒你別被他們孩童般的外貌欺騙。Blaisette 則說，他們並非靠食物維生，而是藉由沐浴陽光獲取能量。Monne 卻滿腹抱怨，直言 Sylph 是惡作劇的慣犯──不是在士兵面具上塗鴉 Morbol 的臉，就是讓巡邏兵跌落山谷。雖說無意傷人，但這種惡作劇已遠超「玩笑」的範疇。</p>
+      <p>聽著眾人的提醒，Rolfe 的記憶逐漸回籠。他終於想起，對 Sylph 來說，「舞蹈」是一種古老的問候方式，是信任與歡迎的象徵。他叮囑你務必銘記此事，因為這或許是贏得他們好感的關鍵。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 羅爾夫・霍索恩 <small class="muted">（黑衣森東部森林, X:16.7, Y:27.1）</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="we-come-in-peace.html">沿著蜜徑而來</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row">討森靈歡心的見面禮</div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'belaug-ffxiv/FFXIV_Library',
+  repoId: 'R_kgD0Pyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
