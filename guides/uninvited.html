@@ -32,7 +32,7 @@
     .video-card .bd{padding:0}
     .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
     .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
-    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:#222;border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
     .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
     .tab-panel{display:none}
     .tab-panel.active{display:block}
@@ -43,16 +43,19 @@
     .link{color:#0b60d8;text-decoration:none}
     .link:hover{text-decoration:underline}
 
-    /* Optional: 長文自動收合（前面說過的小掛件樣式，無侵入） */
-    .story-collapsible{position:relative;max-height:380px;overflow:hidden}
-    .story-collapsible::after{
-      content:"";position:absolute;inset:auto 0 0 0;height:72px;
-      background:linear-gradient(to bottom, rgba(255,248,230,0), var(--card));
+    /* 展開/收合（統一模板） */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
     }
-    .story-toggle{display:inline-block;margin-top:10px;padding:8px 14px;border:1px solid var(--border);
-      border-radius:999px;background:#fff;cursor:pointer;font-weight:600}
-    .story-expanded{max-height:none}
-    .story-expanded::after{display:none}
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
   </style>
 </head>
 <body>
@@ -87,12 +90,16 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
-          <div id="panel-story"   class="tab-panel active"></div>
-          <div id="panel-acq"     class="tab-panel"></div>
-          <div id="panel-unlockq" class="tab-panel"></div>
-          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -104,18 +111,22 @@ const i18n = {
   EN:{
     langLabel:'EN',
     pageTitle:'Uninvited',
-    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
-    story:`<p>Aboard the Prima Vista, the Lexentale family gathers with Cid, Mikoto, and their companions to examine the Otius—the mysterious auracite believed to hold the key to Ivalice’s legends. Mikoto, an Archon from Sharlayan, attempts to explain its aetherial properties in scientific terms, only to be stopped by Cid, who demands a simpler explanation. She finally reveals: auracite is unlike ordinary crystals—it absorbs will and desire, storing them until they manifest into reality, much like primal summoning.</p>
-<p>The revelation stirs unease. Argath, once a mere noble, was seemingly brought back by the crystal, his delusions amplified into monstrous form. Alma begins to suspect that her family’s pursuit of truth may come at a terrible cost. Ramza, however, refuses to consider caution. His obsession clouds his reason, and when Alma raises concerns, he lashes out—first at her, then at Montblanc, calling him a “bat-mole” and “vagrant.”</p>
-<p>Montblanc, wounded by the insults, insists he will prove his worth as an actor by slaying a beast and earning a place in the Majestic Theater Company. Before anyone can stop him, he storms out. Alma, deeply worried, pleads with Forename to find him before it’s too late.</p>
-<p>With Montblanc gone, Alma begs Forename to find him before tragedy strikes. The trail begins in Kugane, where local rumors speak of a trader bearing albino mole fur and bat wings—an unmistakable sign. From there, the party tracks the would-be actor to the dangerous borders of Dalmasca, finally finding him in the wilds of the Glittering Basin.</p>
-<p>Montblanc, dejected and ashamed, confesses he is unworthy of the stage—too cowardly to fight, too fragile to inspire. But Lina Mewrilah reminds him that heroes do not act alone, and that greatness comes not from grandstanding, but from connection and loyalty. With new resolve, Montblanc returns to the Prima Vista alongside his friends.</p>
-<p>No sooner do they arrive than chaos erupts. Alma is taken hostage by a group of Bangaa warriors—once Dalmasca’s royal fusiliers. They surrender peacefully, offering Jenomis’s stolen journal in return, and plead for help finding their leader: Ba’Gamnan. The truth emerges—they failed to protect Princess Ashelia during the fall of Nalbina Fortress and have lived in shame since. The auracite Duma, now in Ba’Gamnan’s possession, has begun feeding on his despair, twisting his desire for vengeance into monstrous form.</p>
-<p>Mikoto confirms their fears: like Argath, Ba’Gamnan is at risk of becoming a manifestation of his own hatred. As clues converge, a name surfaces—Ridorana Cataract, the legendary maw of the sea. If Ba’Gamnan is to be saved, they must act quickly… or prepare to face yet another nightmare born from the curse of auracite.</p>
-<p>With Ba’Gamnan’s descent into madness growing ever more likely, attention turns to a strange clue: the word “Ridorana” scrawled into Jenomis’s recovered journal. Mikoto explains that the Ridorana Cataract is a massive sea chasm located far to the south of Rabanastre, known in legend as the “Hell of Water.” Scholars have long attempted to chart its depths—some even by airship—but none have returned.</p>
-<p>Montblanc and Hurdy, moogles by nature and nomadic by heart, react with alarm: their kind cannot swim, and tales of the cataract chill even their adventurous spirits. The Bangaa, too, are reluctant—plagued by the knowledge that the auracite may have already consumed their captain’s soul. Yet guilt binds them; they failed Princess Ashelia, and they cannot fail again.</p>
-<p>Mikoto reflects on the nature of auracite, voicing a growing suspicion: these crystals may not be natural phenomena at all, but created artifacts—designed for some ancient purpose. If so, who made them? And why?</p>
-<p>As doubts swirl and fears mount, one truth emerges—whatever waits at Ridorana, it is bound to the fate of Ivalice itself. With Alma’s voice steady and Ramza finally silent, the company prepares to chart a course to the cataract, seeking answers, redemption, and perhaps, survival.</p>`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Aboard the Prima Vista, the Lexentale family gathers with Cid, Mikoto, and their companions to examine the Otius—the mysterious auracite believed to hold the key to Ivalice’s legends. Mikoto, an Archon from Sharlayan, attempts to explain its aetherial properties in scientific terms, only to be stopped by Cid, who demands a simpler explanation. She finally reveals: auracite is unlike ordinary crystals—it absorbs will and desire, storing them until they manifest into reality, much like primal summoning.</p>
+      <p>The revelation stirs unease. Argath, once a mere noble, was seemingly brought back by the crystal, his delusions amplified into monstrous form. Alma begins to suspect that her family’s pursuit of truth may come at a terrible cost. Ramza, however, refuses to consider caution. His obsession clouds his reason, and when Alma raises concerns, he lashes out—first at her, then at Montblanc, calling him a “bat-mole” and “vagrant.”</p>
+      <p>Montblanc, wounded by the insults, insists he will prove his worth as an actor by slaying a beast and earning a place in the Majestic Theater Company. Before anyone can stop him, he storms out. Alma, deeply worried, pleads with Forename to find him before it’s too late.</p>
+      <p>With Montblanc gone, Alma begs Forename to find him before tragedy strikes. The trail begins in Kugane, where local rumors speak of a trader bearing albino mole fur and bat wings—an unmistakable sign. From there, the party tracks the would-be actor to the dangerous borders of Dalmasca, finally finding him in the wilds of the Glittering Basin.</p>
+      <p>Montblanc, dejected and ashamed, confesses he is unworthy of the stage—too cowardly to fight, too fragile to inspire. But Lina Mewrilah reminds him that heroes do not act alone, and that greatness comes not from grandstanding, but from connection and loyalty. With new resolve, Montblanc returns to the Prima Vista alongside his friends.</p>
+      <p>No sooner do they arrive than chaos erupts. Alma is taken hostage by a group of Bangaa warriors—once Dalmasca’s royal fusiliers. They surrender peacefully, offering Jenomis’s stolen journal in return, and plead for help finding their leader: Ba’Gamnan. The truth emerges—they failed to protect Princess Ashelia during the fall of Nalbina Fortress and have lived in shame since. The auracite Duma, now in Ba’Gamnan’s possession, has begun feeding on his despair, twisting his desire for vengeance into monstrous form.</p>
+      <p>Mikoto confirms their fears: like Argath, Ba’Gamnan is at risk of becoming a manifestation of his own hatred. As clues converge, a name surfaces—Ridorana Cataract, the legendary maw of the sea. If Ba’Gamnan is to be saved, they must act quickly… or prepare to face yet another nightmare born from the curse of auracite.</p>
+      <p>With Ba’Gamnan’s descent into madness growing ever more likely, attention turns to a strange clue: the word “Ridorana” scrawled into Jenomis’s recovered journal. Mikoto explains that the Ridorana Cataract is a massive sea chasm located far to the south of Rabanastre, known in legend as the “Hell of Water.” Scholars have long attempted to chart its depths—some even by airship—but none have returned.</p>
+      <p>Montblanc and Hurdy, moogles by nature and nomadic by heart, react with alarm: their kind cannot swim, and tales of the cataract chill even their adventurous spirits. The Bangaa, too, are reluctant—plagued by the knowledge that the auracite may have already consumed their captain’s soul. Yet guilt binds them; they failed Princess Ashelia, and they cannot fail again.</p>
+      <p>Mikoto reflects on the nature of auracite, voicing a growing suspicion: these crystals may not be natural phenomena at all, but created artifacts—designed for some ancient purpose. If so, who made them? And why?</p>
+      <p>As doubts swirl and fears mount, one truth emerges—whatever waits at Ridorana, it is bound to the fate of Ivalice itself. With Alma’s voice steady and Ramza finally silent, the company prepares to chart a course to the cataract, seeking answers, redemption, and perhaps, survival.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>Quest Giver</b> Lina Mewrilah <small class="muted">(Kugane, X: 10.3, Y: 12.0)</small></div>
     </div>`,
@@ -129,19 +140,23 @@ const i18n = {
   JP:{
     langLabel:'JP',
     pageTitle:'踊りたい、踊らなきゃ',
-    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
-    story:`<p>プリマ・ヴィスタの会議室にて、レクスンタール家はシド、ミコトらと共に「オティウス」と呼ばれる謎のオーラサイトを調査していた。シャーレアン出身の賢人ミコトは、当初その性質を学術的な用語で説明しようとするが、シドに促され、より平易な言葉で真実を語る──オーラサイトは通常のクリスタルとは異なり、持ち主の「強い意志」や「欲望」を吸収し、それを現実として具現化させる力を秘めているという。</p>
-<p>この説明は一同に不安をもたらした。かつての貴族アルガスが復活し、狂気に陥ったのも、オーラサイトにより彼の野望が肥大化された結果だった。アルマは、この研究が彼らの家族に新たな悲劇をもたらすのではと怯える。しかし、ラ姆ザは慎重な姿勢を拒絶し、冷静さを失っていた。妹の忠告にも耳を貸さず、挙げ句の果てに、無邪気なモーグリのモンブランにまで罵声を浴びせる。</p>
-<p>「コウモリモグラ」「浮浪者」などと侮辱されたモンブランは、怒りと屈辱から一念発起し、「獣を討ち果たして劇団に自らの価値を証明する」と宣言し、その場を飛び出してしまう。残されたアルマは、彼の無事を案じ、フォルネに助けを懇願するのだった──。</p>
-<p>モンブランが姿を消したことで、アルマはフォルネに懇願する。「彼を見つけて、どうか助けて」と。手がかりはクガネから始まる──白いモグラの毛皮とコウモリの翼を持つ商人が目撃されたのだ。そこから一行は再びダルマスカへ向かい、危険な旅路の果て、グリッタリング・ベイスンで失意のモンブランを発見する。</p>
-<p>彼は自らの弱さを嘆き、劇の舞台に立つ資格がないと項垂れる。しかし、リナ・メウリラが語る──英雄とは一人で戦う存在ではなく、仲間と絆を結ぶ者であると。仲間の支えに背中を押され、モンブランは再び仲間たちと共にプリマ・ヴィスタへと帰還する。</p>
-<p>だが、戻った先で思わぬ事態が起きる。アルマがバンガ族の戦士たちに人質として囚われたのだ。彼らはかつてのダルマスカ王国に仕えた近衛兵であり、今は罪を償うために来たという。レクスンタール家の奪われた日誌を返却し、隊長であるバ＝ガムナンの行方を追っているのだと明かす。</p>
-<p>その過去──ナルビナ要塞陥落、アシェリア王女の死、そして果たせなかった使命。バ＝ガムナンはその罪に囚われ、今やドゥマの影響で憎しみと復讐の権化と化そうとしていた。</p>
-<p>ミコトの言葉がそれを裏付ける。「彼もまた、自身の願いによって怪物と化すかもしれません。」そして、残された最後の手がかり──「リドルアナ瀑布」──海が飲み込まれるという伝説の地。そこに彼の意志が導かれているのなら、時は残されていない──。</p>
-<p>バ＝ガムナンがオーラサイトによって精神を侵されつつある中、手がかりは一つの言葉へと収束する──「リドルアナ」。それはジェノミスの回収された日誌に記された謎の語であり、ミコトの説明によれば、ラバナスタの遥か南、ヴァルナード海にある巨大な海底渦「リドルアナ瀑布」の名だった。</p>
-<p>この場所は「水の地獄」と呼ばれ、古くから多くの学者がその真相を探ろうと試みてきたが、いずれも戻ることはなかったという。モーグリのモンブランとハーディも例外ではなく、水中に弱い彼らはこの地名に恐怖を感じる。一方、バンガ族の面々は、すでにバ＝ガムナンがドゥマによって取り込まれた可能性を否定できず、罪悪感に苛まれていた。</p>
-<p>かつて王女アシェリアを守れなかった自責の念が、彼らを再び動かしていた。ミコトはさらに一つの疑問を投げかける──この結晶は本当に自然の産物なのか？それとも、誰かが「目的」を持って造り出したものなのか？</p>
-<p>不安と疑念が交錯する中、一つだけはっきりしていることがあった。それは、リドルアナの先に「イヴァリースの運命」が結びついているということ。アルマの静かな声が響き、ラ姆ザもついに沈黙する。そして一行は決断する──その深淵へと、真実と贖罪を求めて航路を定めるのだった。</p>`,
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>プリマ・ヴィスタの会議室にて、レクスンタール家はシド、ミコトらと共に「オティウス」と呼ばれる謎のオーラサイトを調査していた。シャーレアン出身の賢人ミコトは、当初その性質を学術的な用語で説明しようとするが、シドに促され、より平易な言葉で真実を語る──オーラサイトは通常のクリスタルとは異なり、持ち主の「強い意志」や「欲望」を吸収し、それを現実として具現化させる力を秘めているという。</p>
+      <p>この説明は一同に不安をもたらした。かつての貴族アルガスが復活し、狂気に陥ったのも、オーラサイトにより彼の野望が肥大化された結果だった。アルマは、この研究が彼らの家族に新たな悲劇をもたらすのではと怯える。しかし、ラ姆ザは慎重な姿勢を拒絶し、冷静さを失っていた。妹の忠告にも耳を貸さず、挙げ句の果てに、無邪気なモーグリのモンブランにまで罵声を浴びせる。</p>
+      <p>「コウモリモグラ」「浮浪者」などと侮辱されたモンブランは、怒りと屈辱から一念発起し、「獣を討ち果たして劇団に自らの価値を証明する」と宣言し、その場を飛び出してしまう。残されたアルマは、彼の無事を案じ、フォルネに助けを懇願するのだった──。</p>
+      <p>モンブランが姿を消したことで、アルマはフォルネに懇願する。「彼を見つけて、どうか助けて」と。手がかりはクガネから始まる──白いモグラの毛皮とコウモリの翼を持つ商人が目撃されたのだ。そこから一行は再びダルマスカへ向かい、危険な旅路の果て、グリッタリング・ベイスンで失意のモンブランを発見する。</p>
+      <p>彼は自らの弱さを嘆き、劇の舞台に立つ資格がないと項垂れる。しかし、リナ・メウリラが語る──英雄とは一人で戦う存在ではなく、仲間と絆を結ぶ者であると。仲間の支えに背中を押され、モンブランは再び仲間たちと共にプリマ・ヴィスタへと帰還する。</p>
+      <p>だが、戻った先で思わぬ事態が起きる。アルマがバンガ族の戦士たちに人質として囚われたのだ。彼らはかつてのダルマスカ王国に仕えた近衛兵であり、今は罪を償うために来たという。レクスンタール家の奪われた日誌を返却し、隊長であるバ＝ガムナンの行方を追っているのだと明かす。</p>
+      <p>その過去──ナルビナ要塞陥落、アシェリア王女の死、そして果たせなかった使命。バ＝ガムナンはその罪に囚われ、今やドゥマの影響で憎しみと復讐の権化と化そうとしていた。</p>
+      <p>ミコトの言葉がそれを裏付ける。「彼もまた、自身の願いによって怪物と化すかもしれません。」そして、残された最後の手がかり──「リドルアナ瀑布」──海が飲み込まれるという伝説の地。そこに彼の意志が導かれているのなら、時は残されていない──。</p>
+      <p>バ＝ガムナンがオーラサイトによって精神を侵されつつある中、手がかりは一つの言葉へと収束する──「リドルアナ」。それはジェノミスの回収された日誌に記された謎の語であり、ミコトの説明によれば、ラバナスタの遥か南、ヴァルナード海にある巨大な海底渦「リドルアナ瀑布」の名だった。</p>
+      <p>この場所は「水の地獄」と呼ばれ、古くから多くの学者がその真相を探ろうと試みてきたが、いずれも戻ることはなかったという。モーグリのモンブランとハーディも例外ではなく、水中に弱い彼らはこの地名に恐怖を感じる。一方、バンガ族の面々は、すでにバ＝ガムナンがドゥマによって取り込まれた可能性を否定できず、罪悪感に苛まれていた。</p>
+      <p>かつて王女アシェリアを守れなかった自責の念が、彼らを再び動かしていた。ミコトはさらに一つの疑問を投げかける──この結晶は本当に自然の産物なのか？それとも、誰かが「目的」を持って造り出したものなのか？</p>
+      <p>不安と疑念が交錯する中、一つだけはっきりしていることがあった。それは、リドルアナの先に「イヴァリースの運命」が結びついているということ。アルマの静かな声が響き、ラ姆ザもついに沈黙する。そして一行は決断する──その深淵へと、真実と贖罪を求めて航路を定めるのだった。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>クエスト発行</b> リーナ・ミューリラ <small class="muted">（クガネ, X: 10.3, Y: 12.0）</small></div>
     </div>`,
@@ -155,20 +170,24 @@ const i18n = {
   ZH:{
     langLabel:'ZH',
     pageTitle:'不速之客',
-    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
-    story:`<p>在 Prima Vista 的會議室中，Lexentale 一家與 Cid、Mikoto 及其他夥伴聚集，圍繞 Otius 這顆神秘的 auracite 展開研究。來自 Sharlayan 的 Archon Mikoto 試圖以學術術語說明其特性，卻遭到 Cid 打斷，要求她用更簡單明瞭的語言。最終她揭示真相：這並非一般的水晶，而是能吸收意志與慾望，並在特定條件下將之化為現實，其原理與召喚原初存在極為相似。</p>
-<p>這番解釋引發眾人憂慮。曾被認為早已戰死的貴族 Argath，透過這塊水晶與其扭曲的野心重現人世。Alma 逐漸意識到，他們追尋真相的旅程，或許正引領著災禍。Ramza 卻毫不理會警告，執念蒙蔽理智，當 Alma 提出疑慮時，他不僅怒斥她，甚至轉向 Montblanc 出言侮辱，稱其為「蝙蝠鼴鼠」、「漂泊之輩」。</p>
-<p>面對羞辱，Montblanc 決心證明自己有資格登上舞台，發誓要斬殺猛獸來證明實力，從而加入 Majestic 劇團。他毫不猶豫地離開眾人身邊。Alma 見狀焦急不已，懇求 Forename 幫忙尋回他，避免釀成悲劇。</p>
-<p>Montblanc 失踪後，Alma 深知事態不妙，懇求 Forename 儘速將他找回。線索從 Kugane 開始流出——有商人販售白色鼴鼠毛與蝙蝠翅，顯然與 Montblanc 有關。眾人沿線一路追蹤，穿越 Othard 地區，再度踏上 Dalmasca。最終，他們在 Glittering Basin 的荒野中找到失魂落魄的 Montblanc。</p>
-<p>他垂頭喪氣，自認膽怯無能，無資格站上舞台。Lina Mewrilah 卻溫柔地告訴他：真正的英雄並非獨行俠，而是建立起信任與羈絆的人。英雄不需要孤身作戰，只需有人同行。這句話令 Montblanc 深受感動，重新燃起希望，與眾人一同返回 Prima Vista。</p>
-<p>然而回船後，迎接他們的卻是混亂。Alma 被一群 Bangaa 士兵脅持。令人驚訝的是，這些人正是昔日 Dalmasca 王國的忠臣——前皇家近衛兵。他們放下武器，歸還 Jenomis 的筆記，坦承自己並非敵人，而是為了尋找隊長 Ba’Gamnan 而來。</p>
-<p>眾人逐步拼湊出過去的真相：Nalbina Fortress 陷落時，他們曾肩負護送 Princess Ashelia 的任務，卻失職導致她身亡。這份羞辱與悔恨，如今被 auracite「Duma」所吞噬。水晶正汲取 Ba’Gamnan 的執念與自責，將他轉化為下個災厄之源。</p>
-<p>Mikoto 認為情況與 Argath 極其相似——「這樣下去，他將變成自己仇恨的化身。」而此時，眾人發現 Jenomis 的筆記頁面出現了新字——「Ridorana」。那是一處深海之淵的地名，亦是傳說中的地獄入口。如果想阻止 Duma 再度吞噬一切，他們必須在那裡迎來最後的對決。</p>
-<p>隨著 Ba’Gamnan 被 auracite 扭曲的危機逐步逼近，眾人注意到 Jenomis 筆記中的神秘字句：「Ridorana」。Mikoto 說明這是位於 Rabanastre 南方遙遠海域的巨大深淵——Ridorana Cataract，傳說中的「水之地獄」。曾有無數學者試圖深入探索，甚至以飛空艇下潛，但無一人生還。</p>
-<p>Montblanc 與 Hurdy 聞言色變。作為 desert moogle，水域對他們而言如同絕地，他們天生無法游泳，談及 Ridorana 時語氣罕見沉重。Bangaa 士兵們也陷入沉思：他們深知 Ba’Gamnan 的靈魂或許早已被 Duma 吞噬，現在前往瀑布，可能是赴死之路。</p>
-<p>但他們無法坐視不理。三十年前他們曾護送 Princess Ashelia 失敗，留下揮之不去的恥辱與悔恨，如今無論代價多高，他們都不能再次背棄。</p>
-<p>Mikoto 也提出一個令人不安的推測：auracite 或許並非自然形成，而是古代某人或某種文明製造的人工結晶，背後可能隱藏某種設計與目的。若真如此，這些石頭的創造者究竟意圖為何？</p>
-<p>儘管前路迷濛、恐懼難消，真相卻越發清晰：Ivalice 的命運，正與這座瀑布的深淵緊緊相繫。在 Alma 穩定的聲音與 Ramza 罕見的沉默中，一行人終於下定決心——啟程前往 Ridorana，迎向未知的真相與命運的審判。</p>`,
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>在 Prima Vista 的會議室中，Lexentale 一家與 Cid、Mikoto 及其他夥伴聚集，圍繞 Otius 這顆神秘的 auracite 展開研究。來自 Sharlayan 的 Archon Mikoto 試圖以學術術語說明其特性，卻遭到 Cid 打斷，要求她用更簡單明瞭的語言。最終她揭示真相：這並非一般的水晶，而是能吸收意志與慾望，並在特定條件下將之化為現實，其原理與召喚原初存在極為相似。</p>
+      <p>這番解釋引發眾人憂慮。曾被認為早已戰死的貴族 Argath，透過這塊水晶與其扭曲的野心重現人世。Alma 逐漸意識到，他們追尋真相的旅程，或許正引領著災禍。Ramza 卻毫不理會警告，執念蒙蔽理智，當 Alma 提出疑慮時，他不僅怒斥她，甚至轉向 Montblanc 出言侮辱，稱其為「蝙蝠鼴鼠」、「漂泊之輩」。</p>
+      <p>面對羞辱，Montblanc 決心證明自己有資格登上舞台，發誓要斬殺猛獸來證明實力，從而加入 Majestic 劇團。他毫不猶豫地離開眾人身邊。Alma 見狀焦急不已，懇求 Forename 幫忙尋回他，避免釀成悲劇。</p>
+      <p>Montblanc 失踪後，Alma 深知事態不妙，懇求 Forename 儘速將他找回。線索從 Kugane 開始流出——有商人販售白色鼴鼠毛與蝙蝠翅，顯然與 Montblanc 有關。眾人沿線一路追蹤，穿越 Othard 地區，再度踏上 Dalmasca。最終，他們在 Glittering Basin 的荒野中找到失魂落魄的 Montblanc。</p>
+      <p>他垂頭喪氣，自認膽怯無能，無資格站上舞台。Lina Mewrilah 卻溫柔地告訴他：真正的英雄並非獨行俠，而是建立起信任與羈絆的人。英雄不需要孤身作戰，只需有人同行。這句話令 Montblanc 深受感動，重新燃起希望，與眾人一同返回 Prima Vista。</p>
+      <p>然而回船後，迎接他們的卻是混亂。Alma 被一群 Bangaa 士兵脅持。令人驚訝的是，這些人正是昔日 Dalmasca 王國的忠臣——前皇家近衛兵。他們放下武器，歸還 Jenomis 的筆記，坦承自己並非敵人，而是為了尋找隊長 Ba’Gamnan 而來。</p>
+      <p>眾人逐步拼湊出過去的真相：Nalbina Fortress 陷落時，他們曾肩負護送 Princess Ashelia 的任務，卻失職導致她身亡。這份羞辱與悔恨，如今被 auracite「Duma」所吞噬。水晶正汲取 Ba’Gamnan 的執念與自責，將他轉化為下個災厄之源。</p>
+      <p>Mikoto 認為情況與 Argath 極其相似——「這樣下去，他將變成自己仇恨的化身。」而此時，眾人發現 Jenomis 的筆記頁面出現了新字——「Ridorana」。那是一處深海之淵的地名，亦是傳說中的地獄入口。如果想阻止 Duma 再度吞噬一切，他們必須在那裡迎來最後的對決。</p>
+      <p>隨著 Ba’Gamnan 被 auracite 扭曲的危機逐步逼近，眾人注意到 Jenomis 筆記中的神秘字句：「Ridorana」。Mikoto 說明這是位於 Rabanastre 南方遙遠海域的巨大深淵——Ridorana Cataract，傳說中的「水之地獄」。曾有無數學者試圖深入探索，甚至以飛空艇下潛，但無一人生還。</p>
+      <p>Montblanc 與 Hurdy 聞言色變。作為 desert moogle，水域對他們而言如同絕地，他們天生無法游泳，談及 Ridorana 時語氣罕見沉重。Bangaa 士兵們也陷入沉思：他們深知 Ba’Gamnan 的靈魂或許早已被 Duma 吞噬，現在前往瀑布，可能是赴死之路。</p>
+      <p>但他們無法坐視不理。三十年前他們曾護送 Princess Ashelia 失敗，留下揮之不去的恥辱與悔恨，如今無論代價多高，他們都不能再次背棄。</p>
+      <p>Mikoto 也提出一個令人不安的推測：auracite 或許並非自然形成，而是古代某人或某種文明製造的人工結晶，背後可能隱藏某種設計與目的。若真如此，這些石頭的創造者究竟意圖為何？</p>
+      <p>儘管前路迷濛、恐懼難消，真相卻越發清晰：Ivalice 的命運，正與這座瀑布的深淵緊緊相繫。在 Alma 穩定的聲音與 Ramza 罕見的沉默中，一行人終於下定決心——啟程前往 Ridorana，迎向未知的真相與命運的審判。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>任務發布</b> Lina Mewrilah <small class="muted">（久根, X: 10.3, Y: 12.0）</small></div>
     </div>`,
@@ -188,7 +207,8 @@ const panels = {
   story:  document.getElementById('panel-story'),
   acq:    document.getElementById('panel-acq'),
   unlockq:document.getElementById('panel-unlockq'),
-  followq:document.getElementById('panel-followq')
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
 };
 
 function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
@@ -200,12 +220,32 @@ function applyLang(lang){
   const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
   renderPanel(activeBtn.dataset.tab, lang);
 }
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
 function renderPanel(key, lang){
   const t = i18n[lang] || i18n.EN;
   Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
   panels[key].classList.add('active');
-  panels[key].innerHTML = t[key];
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
 }
+
 tabBtns.forEach(btn=>{
   btn.addEventListener('click', ()=>{
     tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
@@ -213,6 +253,7 @@ tabBtns.forEach(btn=>{
     renderPanel(btn.dataset.tab, getLang());
   });
 });
+
 langToggle.addEventListener('click', ()=>{
   const cur = getLang();
   const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
@@ -220,40 +261,39 @@ langToggle.addEventListener('click', ()=>{
   applyLang(next);
 });
 
-/* —— 長文自動收合（依字數自動出現） —— */
-const readMoreLabels = {
-  EN: {more:'Read more', less:'Show less'},
-  JP: {more:'続きを読む',   less:'折りたたむ'},
-  ZH: {more:'展開全文',     less:'收合內容'}
-};
-function makeStoryCollapsible(lang){
-  const panel = document.getElementById('panel-story');
-  if(!panel) return;
-  const textLen = panel.textContent.trim().length;
-  if(textLen < 800) return;
-  const inner = panel.innerHTML.trim();
-  const wrap = document.createElement('div');
-  wrap.className = 'story-collapsible';
-  wrap.innerHTML = inner;
-  const btn = document.createElement('button');
-  const L = readMoreLabels[lang] || readMoreLabels.EN;
-  btn.className = 'story-toggle';
-  btn.textContent = L.more;
-  btn.addEventListener('click', ()=>{
-    const on = wrap.classList.toggle('story-expanded');
-    btn.textContent = on ? L.less : L.more;
-  });
-  panel.innerHTML = '';
-  panel.appendChild(wrap);
-  panel.appendChild(btn);
-}
-const _origRenderPanel = renderPanel;
-renderPanel = function(key, lang){
-  _origRenderPanel(key, lang);
-  if(key==='story') makeStoryCollapsible(lang);
-};
-
 applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'belaug-ffxiv/FFXIV_Library',
+  repoId: 'R_kgD0Pyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
 </script>
 </body>
 </html>
