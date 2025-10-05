@@ -43,9 +43,9 @@
     .link{color:#0b60d8;text-decoration:none}
     .link:hover{text-decoration:underline}
 
-    /* Story 展開 / 收合 */
-    .clamp{ position:relative; max-height:360px; overflow:hidden; }
-    .clamp[data-collapsed="false"]{ max-height:none; }
+    /* 展開/收合 */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
     .clamp[data-collapsed="true"]::after{
       content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
       background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
@@ -90,12 +90,16 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
-          <div id="panel-story"   class="tab-panel active"></div>
-          <div id="panel-acq"     class="tab-panel"></div>
-          <div id="panel-unlockq" class="tab-panel"></div>
-          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -107,7 +111,7 @@ const i18n = {
   EN:{
     langLabel:'EN',
     pageTitle:'Amalj’aa Wrong Places',
-    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
     readMore:'Show more', readLess:'Show less',
     story:`<div class="clamp" data-collapsed="true">
       <p>Isembard is relieved that Sister Ourcen is safe in the inn, though her wounds proved worse than she admitted. Yet, recovery is expected. With that reassurance, he sends you onward: Thancred awaits at the Amalj’aa camp to the southeast.</p>
@@ -129,7 +133,7 @@ const i18n = {
   JP:{
     langLabel:'JP',
     pageTitle:'虚ろな富の行方',
-    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
     readMore:'全文を表示', readLess:'折りたたむ',
     story:`<div class="clamp" data-collapsed="true">
       <p>オーセン修道女は宿で静養していたが、受けた傷は思った以上に深く、それでも快復が見込まれていた。安心したイセンバードは、次なる一歩を託す。サンクレッドが南東のアマルジャ族の陣営で待っているという。</p>
@@ -151,7 +155,7 @@ const i18n = {
   ZH:{
     langLabel:'ZH',
     pageTitle:'失落之財的去向',
-    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
     readMore:'展開全文', readLess:'收合內容',
     story:`<div class="clamp" data-collapsed="true">
       <p>Sister Ourcen 在旅店休養，但傷勢比她先前說的更重。幸好，她有望完全康復。Isembard 放心之餘，請你前往東南方的 Amalj’aa 營地，Thancred 在那裡等你。</p>
@@ -179,11 +183,11 @@ const panels = {
   story:  document.getElementById('panel-story'),
   acq:    document.getElementById('panel-acq'),
   unlockq:document.getElementById('panel-unlockq'),
-  followq:document.getElementById('panel-followq')
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
 };
 
 function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
-
 function applyLang(lang){
   const t = i18n[lang] || i18n.EN;
   pageTitle.textContent = t.pageTitle;
@@ -213,8 +217,9 @@ function renderPanel(key, lang){
   const t = i18n[lang] || i18n.EN;
   Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
   panels[key].classList.add('active');
-  panels[key].innerHTML = t[key];
-  if(key === 'story') wireClamp(panels[key], t);
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
 }
 
 tabBtns.forEach(btn=>{
@@ -233,6 +238,38 @@ langToggle.addEventListener('click', ()=>{
 });
 
 applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'belaug-ffxiv/FFXIV_Library',
+  repoId: 'R_kgD0Pyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
 </script>
 </body>
 </html>
