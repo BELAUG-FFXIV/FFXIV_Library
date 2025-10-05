@@ -70,12 +70,18 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="req">Requirements</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlock">Follow-Up Quest</button>
+          <!-- 新增：Comments 分頁按鈕 -->
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
           <div id="panel-story" class="tab-panel active"></div>
           <div id="panel-acq" class="tab-panel"></div>
           <div id="panel-req" class="tab-panel"></div>
           <div id="panel-unlock" class="tab-panel"></div>
+          <!-- 新增：留言面板 -->
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -88,7 +94,7 @@
       EN:{
         langLabel:'EN',
         pageTitle:'The Pool of Tribute',
-        tabs:{story:'Story',req:'Requirements',acq:'Unlock Quest',unlock:'Follow-Up Quest'},
+        tabs:{story:'Story',req:'Requirements',acq:'Unlock Quest',unlock:'Follow-Up Quest',comments:'Comments'},
         story:`<p>Your efforts to wreak havoc on the Isle of Zekki and draw the Red Kojin away from their imperial masters have exceeded all expectations. Unfortunately, for reasons beyond your knowing, two of the sacred treasures stored in the isle’s vault “reacted” to the presence of the Yasakani-no-Magatama, summoning forth from the aether the great kami Susano─a primal by another name. How fortunate that you had the wisdom and foresight to invite several of your fellow adventurers on this journey to the Far East, and how kind they were to agree to help you torment the Red Kojin, for no single warrior, no matter how blessed or powerful, could ever hope to slay a primal on own, despite what some wandering minstrels would have you believe.</p>`,
         req:`<div class="stack">
           <div class="row">1 to 8 players (2 Tanks, 2 Healers, 4 DPS)</div>
@@ -109,7 +115,7 @@
       JP:{
         langLabel:'JP',
         pageTitle:'スサノオ討滅戦',
-        tabs:{story:'ストーリー',req:'必要条件',acq:'開放クエスト',unlock:'後続クエスト'},
+        tabs:{story:'ストーリー',req:'必要条件',acq:'開放クエスト',unlock:'後続クエスト',comments:'コメント'},
         story:`<p>ゼッキ島で暴れ回り、赤甲羅のコウジン族を帝国の支配から引き離す──あなたの行動は期待以上の成果を上げた。だが、不運にも島の宝物庫に眠っていた二つの神器が「八尺瓊勾玉」の存在に反応し、アシェンより偉大なる神「スサノオ」を呼び降ろしてしまったのだ。<br>幸いにも、あなたは東方への旅にあたり仲間の冒険者たちを誘っていた。彼らの助力がなければ、いかに祝福されし強者といえども、ただ一人で「蛮神」を討ち倒すことなど不可能である──吟遊詩人の歌がどう語ろうとも。</p>`,
         req:`<div class="stack">
           <div class="row">8人用コンテンツ（タンク2／ヒーラー2／DPS4）</div>
@@ -130,7 +136,7 @@
       ZH:{
         langLabel:'ZH',
         pageTitle:'須佐之男討滅戰',
-        tabs:{story:'故事概要',req:'需求條件',acq:'解鎖任務',unlock:'後續任務'},
+        tabs:{story:'故事概要',req:'需求條件',acq:'解鎖任務',unlock:'後續任務',comments:'留言'},
         story:`<p>你在 Zekki 島上製造混亂，成功將 Red Kojin 從帝國主人的掌控下引開，成果遠超預期。然而，不幸的是，島上寶庫中兩件聖物竟對 Yasakani-no-Magatama 的存在產生「共鳴」，自以太中召喚出了偉大神明──Susano，也就是另一種意義上的原初存在。<br>所幸你在啟程前往東方之時，明智地邀請了幾位冒險者同伴同行；也幸運他們願意助你一臂之力，共同對抗 Red Kojin。畢竟，無論何等強大的戰士，都不可能憑一己之力擊敗原初存在──縱然吟遊詩人會編織出另一番傳說。</p>`,
         req:`<div class="stack">
           <div class="row">1–8 人（2 坦克、2 治療、4 輸出）</div>
@@ -156,24 +162,23 @@
       story : document.getElementById('panel-story'),
       acq   : document.getElementById('panel-acq'),
       req   : document.getElementById('panel-req'),
-      unlock: document.getElementById('panel-unlock')
+      unlock: document.getElementById('panel-unlock'),
+      comments: document.getElementById('panel-comments') // 新增
     };
 
     function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
-    function applyLang(lang){
-      const t = i18n[lang] || i18n.EN;
-      pageTitle.textContent = t.pageTitle;
-      langToggle.textContent = `🌐 ${t.langLabel}`;
-      tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
-      const activeBtn = tabBtns.find(b=>b.getAttribute('aria-selected')==='true') || tabBtns[0];
-      renderPanel(activeBtn.dataset.tab, lang);
-    }
 
+    // 進入 comments 才載入 giscus；不要覆寫留言容器
     function renderPanel(key, lang){
       const t = i18n[lang] || i18n.EN;
       Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
       panels[key].classList.add('active');
-      panels[key].innerHTML = t[key];
+
+      if (key !== 'comments') {
+        panels[key].innerHTML = t[key];
+      } else {
+        loadGiscusForCurrentLang();
+      }
     }
 
     tabBtns.forEach(btn=>{
@@ -191,7 +196,50 @@
       applyLang(next);
     });
 
+    function applyLang(lang){
+      const t = i18n[lang] || i18n.EN;
+      pageTitle.textContent = t.pageTitle;
+      langToggle.textContent = `🌐 ${t.langLabel}`;
+      tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+      const activeBtn = tabBtns.find(b=>b.getAttribute('aria-selected')==='true') || tabBtns[0];
+      renderPanel(activeBtn.dataset.tab, lang);
+      // 若停在留言分頁，切語言後重載 giscus
+      if (activeBtn && activeBtn.dataset.tab === 'comments') loadGiscusForCurrentLang();
+    }
+
     applyLang(getLang());
+
+    /* === Giscus：單一 Comments 分頁，隨語言切換 === */
+    const GISCUS_CFG = {
+      repo: 'belaug-ffxiv/FFXIV_Library',
+      repoId: 'R_kgD0Pyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+    };
+    function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+    function loadGiscusForCurrentLang(){
+      const mount = document.getElementById('giscus_container');
+      if (!mount) return;
+      mount.innerHTML = '';
+      const langCode = getLang(); // EN / JP / ZH
+      const s = document.createElement('script');
+      s.src = 'https://giscus.app/client.js';
+      s.setAttribute('data-repo', GISCUS_CFG.repo);
+      s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+      s.setAttribute('data-category', GISCUS_CFG.category);
+      s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+      s.setAttribute('data-mapping', 'specific');
+      s.setAttribute('data-term', location.pathname + '｜' + langCode);
+      s.setAttribute('data-reactions-enabled', '1');
+      s.setAttribute('data-emit-metadata', '0');
+      s.setAttribute('data-input-position', 'bottom');
+      s.setAttribute('data-lang', uiLang(langCode));
+      s.setAttribute('data-theme', GISCUS_CFG.theme);
+      s.setAttribute('crossorigin', 'anonymous');
+      s.async = true;
+      mount.appendChild(s);
+    }
   </script>
 </body>
 </html>
