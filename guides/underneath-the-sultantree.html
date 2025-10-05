@@ -42,6 +42,20 @@
     .muted{color:var(--muted)}
     .link{color:#0b60d8;text-decoration:none}
     .link:hover{text-decoration:underline}
+
+    /* 展開/收合 */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
   </style>
 </head>
 <body>
@@ -76,12 +90,16 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
-          <div id="panel-story"   class="tab-panel active"></div>
-          <div id="panel-acq"     class="tab-panel"></div>
-          <div id="panel-unlockq" class="tab-panel"></div>
-          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -93,11 +111,15 @@ const i18n = {
   EN:{
     langLabel:'EN',
     pageTitle:'Underneath the Sultantree',
-    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
-    story:`<p>Papashan confesses the truth: your errand to the sentries was a pretext. A young noblewoman has gone missing, and her safety must be secured without alarming the public. He entrusts you with the task—find Lady Lilira before ill-intentioned hands do.</p>
-    <p>You journey south to the Sultantree and find Lilira deep in troubled prayer. But you’re not alone. A stranger appears from the shadows, warning of aetheric disturbances and unseen threats. When monsters emerge from the void, the two of you fight side by side to protect her. The battle drains you to unconsciousness—but in that darkness, a voice calls out.</p>
-    <p>Hydaelyn speaks. She grants you a vision of crystal, of light, and of a dire plea: banish the Darkness and become the bearer of the Light.</p>
-    <p>When you awaken, the stranger is gone. Lilira regains her composure and insists on returning to Ul’dah herself. There, Papashan is overwhelmed with relief, and you are quietly praised for your bravery. Your path forward has changed—not only in the eyes of Ul’dah’s people, but in the unseen gaze of gods and stars.</p>`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Papashan confesses the truth: your errand to the sentries was a pretext. A young noblewoman has gone missing, and her safety must be secured without alarming the public. He entrusts you with the task—find Lady Lilira before ill-intentioned hands do.</p>
+      <p>You journey south to the Sultantree and find Lilira deep in troubled prayer. But you’re not alone. A stranger appears from the shadows, warning of aetheric disturbances and unseen threats. When monsters emerge from the void, the two of you fight side by side to protect her. The battle drains you to unconsciousness—but in that darkness, a voice calls out.</p>
+      <p>Hydaelyn speaks. She grants you a vision of crystal, of light, and of a dire plea: banish the Darkness and become the bearer of the Light.</p>
+      <p>When you awaken, the stranger is gone. Lilira regains her composure and insists on returning to Ul’dah herself. There, Papashan is overwhelmed with relief, and you are quietly praised for your bravery. Your path forward has changed—not only in the eyes of Ul’dah’s people, but in the unseen gaze of gods and stars.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>Quest Giver</b> Papashan <small class="muted">(Central Thanalan, X:22.9, Y:27.8)</small></div>
     </div>`,
@@ -111,11 +133,15 @@ const i18n = {
   JP:{
     langLabel:'JP',
     pageTitle:'ササガン大王樹の下で',
-    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
-    story:`<p>パパシャンは真実を打ち明ける。哨兵への差し入れは口実だった。名家の令嬢が行方不明となり、騒ぎを避けるため密かに捜索が進められていたのだ。あなたは託される──その身を案じられているレディ・リリラを、誰よりも先に見つけてほしいと。</p>
-    <p>あなたはサルタンツリーへと向かい、祈りを捧げるリリラの姿を発見する。だがその場にもう一人の人物が現れ、不穏な気配を警告する。やがて現れる異形の魔物──あなたはその男と共に戦い、リリラを守る。全力を尽くした末、あなたは意識を失い、深い闇の中で“声”を聞く。</p>
-    <p>それは、ハイデリンの声──光の加護、そして使命を語る声だった。クリスタルを巡る運命、闇を祓う希望が、あなたの中に灯される。</p>
-    <p>目覚めた時、男の姿はなく、リリラは気を取り直して帰還を宣言する。ウルダハに戻れば、パパシャンは深く安堵し、あなたの行動に感謝の言葉を送る。だが、気づけばあなたの旅路は、神々と星々の意思すら巻き込むものへと変わっていた──。</p>`,
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>パパシャンは真実を打ち明ける。哨兵への差し入れは口実だった。名家の令嬢が行方不明となり、騒ぎを避けるため密かに捜索が進められていたのだ。あなたは託される──その身を案じられているレディ・リリラを、誰よりも先に見つけてほしいと。</p>
+      <p>あなたはサルタンツリーへと向かい、祈りを捧げるリリラの姿を発見する。だがその場にもう一人の人物が現れ、不穏な気配を警告する。やがて現れる異形の魔物──あなたはその男と共に戦い、リリラを守る。全力を尽くした末、あなたは意識を失い、深い闇の中で“声”を聞く。</p>
+      <p>それは、ハイデリンの声──光の加護、そして使命を語る声だった。クリスタルを巡る運命、闇を祓う希望が、あなたの中に灯される。</p>
+      <p>目覚めた時、男の姿はなく、リリラは気を取り直して帰還を宣言する。ウルダハに戻れば、パパシャンは深く安堵し、あなたの行動に感謝の言葉を送る。だが、気づけばあなたの旅路は、神々と星々の意思すら巻き込むものへと変わっていた──。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>クエスト発行</b> パパシャン <small class="muted">（中央ザナラーン, X:22.9, Y:27.8）</small></div>
     </div>`,
@@ -129,11 +155,15 @@ const i18n = {
   ZH:{
     langLabel:'ZH',
     pageTitle:'蘇丹王樹下',
-    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
-    story:`<p>Papashan 坦白了真相：送餅乾只是個藉口。真正的任務，是尋找一位失蹤的貴族少女。在這座城市中，消息若被不良之人得知，後果不堪設想。他把希望寄託在你身上，要你找到她，並確保她的安全。</p>
-    <p>你前往 Sultantree，發現 Lady Lilira 正低聲向祖靈祈禱。然而周圍的不安氣息越來越強，直到一名神秘男子現身，警告你們附近的以太異常。隨後，虛空中的魔物襲來。你與這名男子並肩作戰，拼盡全力保護 Lilira，卻也因此筋疲力盡，陷入昏迷。</p>
-    <p>就在意識沉入黑暗的那一刻，Hydaelyn 的聲音響起──祂賜予你異象、光之力量，以及命運的召喚：去驅逐黑暗，收集光之水晶。</p>
-    <p>你從虛脫中甦醒，陌生人早已離去。Lilira 雖然嘴硬，仍決定親自返回。回到 Ul’dah，Papashan 感激涕零，你的英勇也獲得肯定。但你已不再只是單純的冒險者──你踏上的，將是一條連神祇都注視的旅程。</p>`,
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Papashan 坦白了真相：送餅乾只是個藉口。真正的任務，是尋找一位失蹤的貴族少女。在這座城市中，消息若被不良之人得知，後果不堪設想。他把希望寄託在你身上，要你找到她，並確保她的安全。</p>
+      <p>你前往 Sultantree，發現 Lady Lilira 正低聲向祖靈祈禱。然而周圍的不安氣息越來越強，直到一名神秘男子現身，警告你們附近的以太異常。隨後，虛空中的魔物襲來。你與這名男子並肩作戰，拼盡全力保護 Lilira，卻也因此筋疲力盡，陷入昏迷。</p>
+      <p>就在意識沉入黑暗的那一刻，Hydaelyn 的聲音響起──祂賜予你異象、光之力量，以及命運的召喚：去驅逐黑暗，收集光之水晶。</p>
+      <p>你從虛脫中甦醒，陌生人早已離去。Lilira 雖然嘴硬，仍決定親自返回。回到 Ul’dah，Papashan 感激涕零，你的英勇也獲得肯定。但你已不再只是單純的冒險者──你踏上的，將是一條連神祇都注視的旅程。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>任務發布</b> 帕帕尚 <small class="muted">（薩納蘭中部, X:22.9, Y:27.8）</small></div>
     </div>`,
@@ -153,7 +183,8 @@ const panels = {
   story:  document.getElementById('panel-story'),
   acq:    document.getElementById('panel-acq'),
   unlockq:document.getElementById('panel-unlockq'),
-  followq:document.getElementById('panel-followq')
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
 };
 
 function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
@@ -165,12 +196,32 @@ function applyLang(lang){
   const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
   renderPanel(activeBtn.dataset.tab, lang);
 }
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
 function renderPanel(key, lang){
   const t = i18n[lang] || i18n.EN;
   Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
   panels[key].classList.add('active');
-  panels[key].innerHTML = t[key];
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
 }
+
 tabBtns.forEach(btn=>{
   btn.addEventListener('click', ()=>{
     tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
@@ -178,13 +229,47 @@ tabBtns.forEach(btn=>{
     renderPanel(btn.dataset.tab, getLang());
   });
 });
+
 langToggle.addEventListener('click', ()=>{
   const cur = getLang();
   const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
   localStorage.setItem(LANG_KEY, next);
   applyLang(next);
 });
+
 applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'belaug-ffxiv/FFXIV_Library',
+  repoId: 'R_kgD0Pyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
 </script>
 </body>
 </html>
