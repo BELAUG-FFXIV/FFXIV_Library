@@ -43,16 +43,19 @@
     .link{color:#0b60d8;text-decoration:none}
     .link:hover{text-decoration:underline}
 
-    /* —— 長文自動收合（依字數自動出現） —— */
-    .story-collapsible{position:relative;max-height:380px;overflow:hidden}
-    .story-collapsible::after{
-      content:"";position:absolute;inset:auto 0 0 0;height:72px;
-      background:linear-gradient(to bottom, rgba(255,248,230,0), var(--card));
+    /* 展開/收合 */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
     }
-    .story-toggle{display:inline-block;margin-top:10px;padding:8px 14px;border:1px solid var(--border);
-      border-radius:999px;background:#fff;cursor:pointer;font-weight:600}
-    .story-expanded{max-height:none}
-    .story-expanded::after{display:none}
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
   </style>
 </head>
 <body>
@@ -87,12 +90,16 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
-          <div id="panel-story"   class="tab-panel active"></div>
-          <div id="panel-acq"     class="tab-panel"></div>
-          <div id="panel-unlockq" class="tab-panel"></div>
-          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -104,10 +111,14 @@ const i18n = {
   EN:{
     langLabel:'EN',
     pageTitle:"Heir Today, Gone Tomorrow",
-    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
-    story:`<p>Leofric tries to send you away again, but when you insist, he relents. There’s something you can do—something he himself cannot. South of Lost Hope, a band of outlaws has taken over the Quiveron Manse. Their leader falsely claims to be heir to a fallen Syndicate member, exploiting the name to rob the helpless.</p>
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+<p>Leofric tries to send you away again, but when you insist, he relents. There’s something you can do—something he himself cannot. South of Lost Hope, a band of outlaws has taken over the Quiveron Manse. Their leader falsely claims to be heir to a fallen Syndicate member, exploiting the name to rob the helpless.</p>
 <p>Leofric’s hands are tied. If he acts, retaliation will fall on the refugees. But you’re still a stranger to the bandits—a ghost without a name. He gives you one task: eliminate the baron.</p>
-<p>You infiltrate the ruined estate and face down the scoundrels. When it’s over, you return. Leofric doesn’t celebrate. He only spits bitter truths: Ul’dah may glitter, but none of it reaches places like Lost Hope. He once believed in honor and duty—until he refused to be part of the farce. Now, his time is over. But yours may just be beginning.</p>`,
+<p>You infiltrate the ruined estate and face down the scoundrels. When it’s over, you return. Leofric doesn’t celebrate. He only spits bitter truths: Ul’dah may glitter, but none of it reaches places like Lost Hope. He once believed in honor and duty—until he refused to be part of the farce. Now, his time is over. But yours may just be beginning.</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>Quest Giver</b> Leofric <small class="muted">(Central Thanalan, X: 23.3, Y: 16.0)</small></div>
     </div>`,
@@ -121,10 +132,14 @@ const i18n = {
   JP:{
     langLabel:'JP',
     pageTitle:'その男、サー・キヴロン',
-    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
-    story:`<p>レオフリックは再び立ち去るよう促すが、あなたの強い意思に押され、ついに口を開く。彼にはできず、あなただからこそできることがあるのだという。ロストホープの南、クイヴェロン屋敷には盗賊団が巣くっており、その頭目は、カラミティで死んだシンジケート議員の後継者を自称している。</p>
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+<p>レオフリックは再び立ち去るよう促すが、あなたの強い意思に押され、ついに口を開く。彼にはできず、あなただからこそできることがあるのだという。ロストホープの南、クイヴェロン屋敷には盗賊団が巣くっており、その頭目は、カラミティで死んだシンジケート議員の後継者を自称している。</p>
 <p>彼らは名を語り、難民たちからわずかな所持品さえ奪っていく。だが、レオフリックは動けない。顔が知られている彼が動けば、報復の矛先はロストホープに向かう。だが、あなたは違う。名も顔も知られていない存在──影だ。</p>
-<p>あなたは屋敷へ向かい、無法者たちを討伐する。戻ったあなたに、レオフリックは感謝も歓喜も見せない。ただ、現実を語る。「ウルダハの繁栄」は表面だけのもの。小さき者たちは置き去りにされたまま。彼は「茶番」に加わるのを拒んだ──それが彼の終わりだった。だが、あなたの物語は、まだ始まったばかりだ。</p>`,
+<p>あなたは屋敷へ向かい、無法者たちを討伐する。戻ったあなたに、レオフリックは感謝も歓喜も見せない。ただ、現実を語る。「ウルダハの繁栄」は表面だけのもの。小さき者たちは置き去りにされたまま。彼は「茶番」に加わるのを拒んだ──それが彼の終わりだった。だが、あなたの物語は、まだ始まったばかりだ。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>クエスト発行</b> レオフリック <small class="muted">（中央ザナラーン, X: 23.3, Y: 16.0）</small></div>
     </div>`,
@@ -138,10 +153,14 @@ const i18n = {
   ZH:{
     langLabel:'ZH',
     pageTitle:'繼承人轉瞬即逝',
-    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
-    story:`<p>Leofric 再次要你離開，但你堅持留下。他嘆了口氣，終於低聲說出實情：在 Lost Hope 南邊的 Quiveron Manse，有一群盜賊盤踞。他們的首領自稱是已故 Syndicate 成員 Eolande Quiveron 的繼承人，假藉這個名號掠奪難民，無人能管。</p>
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+<p>Leofric 再次要你離開，但你堅持留下。他嘆了口氣，終於低聲說出實情：在 Lost Hope 南邊的 Quiveron Manse，有一群盜賊盤踞。他們的首領自稱是已故 Syndicate 成員 Eolande Quiveron 的繼承人，假藉這個名號掠奪難民，無人能管。</p>
 <p>Leofric 明白自己若親自出面，只會讓盜賊報復難民。他的臉太容易被認出。而你，是無名的影子，是陌生人。他託付你一件事：替 Lost Hope 解決這場壓迫。</p>
-<p>你潛入那座廢墟，親手終結了那群惡徒。回到 Lost Hope，Leofric 並沒有慶賀。他只道出冰冷事實：Ul’dah 或許看似繁榮，但那不屬於底層百姓。他曾相信榮譽與使命，卻因拒絕「扮演角色」而被排除。他的時代結束了。而你的責任，才正開始。</p>`,
+<p>你潛入那座廢墟，親手終結了那群惡徒。回到 Lost Hope，Leofric 並沒有慶賀。他只道出冰冷事實：Ul’dah 或許看似繁榮，但那不屬於底層百姓。他曾相信榮譽與使命，卻因拒絕「扮演角色」而被排除。他的時代結束了。而你的責任，才正開始。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>任務發布</b> Leofric <small class="muted">（薩納蘭中部, X: 23.3, Y: 16.0）</small></div>
     </div>`,
@@ -161,7 +180,8 @@ const panels = {
   story:  document.getElementById('panel-story'),
   acq:    document.getElementById('panel-acq'),
   unlockq:document.getElementById('panel-unlockq'),
-  followq:document.getElementById('panel-followq')
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
 };
 
 function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
@@ -173,13 +193,32 @@ function applyLang(lang){
   const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
   renderPanel(activeBtn.dataset.tab, lang);
 }
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
 function renderPanel(key, lang){
   const t = i18n[lang] || i18n.EN;
   Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
   panels[key].classList.add('active');
-  panels[key].innerHTML = t[key];
-  if(key==='story') makeStoryCollapsible(lang); // 進入 Story 時檢查是否需要收合
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
 }
+
 tabBtns.forEach(btn=>{
   btn.addEventListener('click', ()=>{
     tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
@@ -194,35 +233,39 @@ langToggle.addEventListener('click', ()=>{
   applyLang(next);
 });
 
-/* —— 長文自動收合（依字數自動出現） —— */
-const readMoreLabels = {
-  EN: {more:'Read more', less:'Show less'},
-  JP: {more:'続きを読む',   less:'折りたたむ'},
-  ZH: {more:'展開全文',     less:'收合內容'}
-};
-function makeStoryCollapsible(lang){
-  const panel = document.getElementById('panel-story');
-  if(!panel) return;
-  const textLen = panel.textContent.trim().length;
-  if(textLen < 800) return; // 內容不長就不處理
-  const inner = panel.innerHTML.trim();
-  const wrap = document.createElement('div');
-  wrap.className = 'story-collapsible';
-  wrap.innerHTML = inner;
-  const btn = document.createElement('button');
-  const L = readMoreLabels[lang] || readMoreLabels.EN;
-  btn.className = 'story-toggle';
-  btn.textContent = L.more;
-  btn.addEventListener('click', ()=>{
-    const on = wrap.classList.toggle('story-expanded');
-    btn.textContent = on ? L.less : L.more;
-  });
-  panel.innerHTML = '';
-  panel.appendChild(wrap);
-  panel.appendChild(btn);
-}
-
 applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'belaug-ffxiv/FFXIV_Library',
+  repoId: 'R_kgD0Pyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
 </script>
 </body>
 </html>
