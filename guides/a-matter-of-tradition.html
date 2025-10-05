@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>A Matter of Tradition | BELAUG · FFXIV Library</title>
-  <meta name="description" content="ARR 2.0 MSQ — A Matter of Tradition（備宴的傳統）：故事概要、取得方式與任務銜接。">
+  <meta name="description" content="MSQ – A Matter of Tradition (ARR Patch 2.0)">
   <link rel="icon" href="../img/favicon.ico" />
   <style>
     :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
@@ -17,8 +17,8 @@
     .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
     .home:hover{background:#fffef8}
     .right{display:flex;align-items:center;gap:8px}
-    .icon-btn{background:none;border:1px solid transparent;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
-    .icon-btn:hover{background:#fff;border-color:var(--border)}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
     .main{padding:20px 0 40px}
     .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
     @media (max-width:900px){
@@ -42,14 +42,20 @@
     .muted{color:var(--muted)}
     .link{color:#0b60d8;text-decoration:none}
     .link:hover{text-decoration:underline}
-    /* Story clamp + button */
-    .story-wrap{position:relative}
-    .story-content{max-height:360px;overflow:hidden;position:relative}
-    .story-content::after{content:"";position:absolute;inset:auto 0 0 0;height:64px;background:linear-gradient(to top,var(--card),transparent)}
-    .story-expanded{max-height:none!important}
-    .story-expanded::after{display:none}
-    .expand-btn{margin-top:8px;background:none;border:1px solid var(--border);padding:6px 10px;border-radius:8px;cursor:pointer;font-weight:600}
-    @media (max-width:600px){ .story-content{max-height:260px} }
+
+    /* 展開/收合 */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
   </style>
 </head>
 <body>
@@ -84,153 +90,186 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
           <div id="panel-story"   class="tab-panel active"></div>
           <div id="panel-acq"     class="tab-panel"></div>
           <div id="panel-unlockq" class="tab-panel"></div>
           <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
   </main>
 
-  <script>
-  const LANG_KEY = 'ffxiv-guide-lang';
-  const i18n = {
-    EN:{
-      langLabel:'EN',
-      pageTitle:'A Matter of Tradition',
-      tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
-      story:`<div class="story-wrap"><div class="story-content">
-        <p>By the Twelve—an adventurer like you receiving a personal invitation from Her Grace herself is unheard of. The honor weighs heavy, for only the most distinguished souls are ever granted a seat at the royal banquet. Owyne speaks of his awe, but quickly admits that he is no expert in protocol. Instead, he urges you to seek guidance from Momodi, who has long instructed foreign dignitaries in Ul’dahn custom.</p>
-        <p>When you return to the Quicksand, Momodi greets you warmly, half teasing, half proud. She explains the tradition: all guests must wear ceremonial earrings, crafted for this occasion alone. They are both symbol and safeguard, ensuring that only true invitees enter the banquet hall.</p>
-        <p>Your next stop is the Goldsmiths’ Guild. There, Mistress Serendipity welcomes you and presents the earrings she made by her own hand. The box, however, remains locked—only Momodi holds the authority to open it. You dutifully return, and Momodi herself unlocks the container, gasping at the finery within.</p>
-        <p>She warns you to guard the earrings well; in the wrong hands, they could spell disaster. With them in your possession, you are now ready. Soon, you will walk among Ul’dah’s elite, a guest of the Sultana herself.</p>
-      </div><button class="expand-btn" data-i18n="expand">Read more</button></div>`,
-      acq:`<div class="stack">
-        <div class="row"><b>Quest Giver</b> Owyne <small class="muted">(Heart of the Sworn, X:6.1, Y:6.0)</small></div>
-      </div>`,
-      unlockq:`<div class="stack">
-        <div class="row"><a class="link" href="duty-honor-country.html">Duty, Honor, Country</a></div>
-      </div>`,
-      followq:`<div class="stack">
-        <div class="row"><a class="link" href="a-royal-reception.html">A Royal Reception</a></div>
-      </div>`
-    },
-    JP:{
-      langLabel:'JP',
-      pageTitle:'晩餐会に備えて',
-      tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
-      story:`<div class="story-wrap"><div class="story-content">
-        <p>十二神に誓って──冒険者であるあなたが、ナナモ・ウル・ナモ女王陛下から直々に宴へ招待されるとは前代未聞のこと。オワインも驚嘆しつつ、その栄誉の重みを語る。しかし礼儀作法については自分には分からぬと告げ、クイックサンドのモモディを訪ねるよう勧める。</p>
-        <p>酒場へ戻ると、モモディはにこやかに迎え、半ばからかいながらも誇らしげに説明する。王家の宴に列席するには、特別に誂えられた「儀礼用の耳飾り」を必ず身につけねばならないという。象徴であり、また警護の一環であり、その耳飾りなくしては大広間に入ることは許されない。</p>
-        <p>続いて黄金細工師ギルドを訪ねると、セレンディピティが出迎え、彼女自らが手がけた耳飾りを手渡す。しかし箱は固く施錠されており、開封を許されているのはモモディただひとり。あなたは耳飾りを携え、再びクイックサンドへ戻る。</p>
-        <p>箱を開いたモモディは、その見事な細工に思わず息を呑む。彼女は「絶対に失くさぬように」と念を押し、もし悪人の手に渡れば何が起こるか分からないと警告する。こうして耳飾りを手にしたあなたは、いよいよウルダハの名士たちと肩を並べる時を迎えるのだった。</p>
-      </div><button class="expand-btn" data-i18n="expand">続きを読む</button></div>`,
-      acq:`<div class="stack">
-        <div class="row"><b>クエスト発行</b> オワイン <small class="muted">（銀冑団総長室, X:6.1, Y:6.0）</small></div>
-      </div>`,
-      unlockq:`<div class="stack">
-        <div class="row"><a class="link" href="duty-honor-country.html">至宝の影で蠢く闇</a></div>
-      </div>`,
-      followq:`<div class="stack">
-        <div class="row"><a class="link" href="a-royal-reception.html">王宮の晩餐会</a></div>
-      </div>`
-    },
-    ZH:{
-      langLabel:'ZH',
-      pageTitle:'備宴的傳統',
-      tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
-      story:`<div class="story-wrap"><div class="story-content">
-        <p>十二神在上──一名冒險者竟能獲得女王 Nanamo Ul Namo 的親自邀請，這在 Ul’dah 前所未有。Owyne 滿是驚歎，提醒這是極為崇高的榮譽，只有最尊貴的人才能在王室宴會中占有一席。然而他坦言自己並不熟悉禮儀，勸你去找 Momodi，她一直負責接待外來賓客，熟知所有應遵守的規矩。</p>
-        <p>回到 Quicksand，Momodi 熱情迎接你，語氣既調侃又帶著驕傲。她解釋道：按照古老的習俗，所有受邀出席宴會的人必須佩戴特製的「儀式耳環」。這不僅是象徵，更是安全措施，沒有它便不得入內。</p>
-        <p>你依指引前往 Goldsmiths’ Guild，公會長 Serendipity 親手將耳環交給你。她特別說明，盒子上了鎖，只有 Momodi 有權打開。你便將耳環帶回，Momodi 親自打開盒子，看著華麗的工藝忍不住倒吸一口氣。</p>
-        <p>她鄭重囑咐你務必妥善保管，因為一旦落入歹人之手，後果不堪設想。如今耳環已在你手中，你也整裝待發。下一步，便是踏入 Ul’dah 的權貴之間，成為女王座上真正的座上賓。</p>
-      </div><button class="expand-btn" data-i18n="expand">展開全文</button></div>`,
-      acq:`<div class="stack">
-        <div class="row"><b>任務發布</b> 奧懷恩 <small class="muted">（銀冑團總長室, X:6.1, Y:6.0）</small></div>
-      </div>`,
-      unlockq:`<div class="stack">
-        <div class="row"><a class="link" href="duty-honor-country.html">責任、榮耀與祖國</a></div>
-      </div>`,
-      followq:`<div class="stack">
-        <div class="row"><a class="link" href="a-royal-reception.html">皇宮盛宴</a></div>
-      </div>`
-    }
-  };
-
-  const langToggle  = document.getElementById('langToggle');
-  const pageTitle   = document.getElementById('pageTitle');
-  const tabBtns     = [...document.querySelectorAll('.tab-btn')];
-  const panels = {
-    story:  document.getElementById('panel-story'),
-    acq:    document.getElementById('panel-acq'),
-    unlockq:document.getElementById('panel-unlockq'),
-    followq:document.getElementById('panel-followq')
-  };
-
-  function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
-  function setLang(lang){ localStorage.setItem(LANG_KEY, lang); }
-  function applyLang(lang){
-    const t = i18n[lang] || i18n.EN;
-    pageTitle.textContent = t.pageTitle;
-    langToggle.textContent = `🌐 ${t.langLabel}`;
-    tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
-    const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
-    renderPanel(activeBtn.dataset.tab, lang);
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'A Matter of Tradition',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>By the Twelve—an adventurer like you receiving a personal invitation from Her Grace herself is unheard of. The honor weighs heavy, for only the most distinguished souls are ever granted a seat at the royal banquet. Owyne speaks of his awe, but quickly admits that he is no expert in protocol. Instead, he urges you to seek guidance from Momodi, who has long instructed foreign dignitaries in Ul’dahn custom.</p>
+      <p>When you return to the Quicksand, Momodi greets you warmly, half teasing, half proud. She explains the tradition: all guests must wear ceremonial earrings, crafted for this occasion alone. They are both symbol and safeguard, ensuring that only true invitees enter the banquet hall.</p>
+      <p>Your next stop is the Goldsmiths’ Guild. There, Mistress Serendipity welcomes you and presents the earrings she made by her own hand. The box, however, remains locked—only Momodi holds the authority to open it. You dutifully return, and Momodi herself unlocks the container, gasping at the finery within.</p>
+      <p>She warns you to guard the earrings well; in the wrong hands, they could spell disaster. With them in your possession, you are now ready. Soon, you will walk among Ul’dah’s elite, a guest of the Sultana herself.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Owyne <small class="muted">(Heart of the Sworn, X:6.1, Y:6.0)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="duty-honor-country.html">Duty, Honor, Country</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="a-royal-reception.html">A Royal Reception</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'晩餐会に備えて',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>十二神に誓って──冒険者であるあなたが、ナナモ・ウル・ナモ女王陛下から直々に宴へ招待されるとは前代未聞のこと。オワインも驚嘆しつつ、その栄誉の重みを語る。しかし礼儀作法については自分には分からぬと告げ、クイックサンドのモモディを訪ねるよう勧める。</p>
+      <p>酒場へ戻ると、モモディはにこやかに迎え、半ばからかいながらも誇らしげに説明する。王家の宴に列席するには、特別に誂えられた「儀礼用の耳飾り」を必ず身につけねばならないという。象徴であり、また警護の一環であり、その耳飾りなくしては大広間に入ることは許されない。</p>
+      <p>続いて黄金細工師ギルドを訪ねると、セレンディピティが出迎え、彼女自らが手がけた耳飾りを手渡す。しかし箱は固く施錠されており、開封を許されているのはモモディただひとり。あなたは耳飾りを携え、再びクイックサンドへ戻る。</p>
+      <p>箱を開いたモモディは、その見事な細工に思わず息を呑む。彼女は「絶対に失くさぬように」と念を押し、もし悪人の手に渡れば何が起こるか分からないと警告する。こうして耳飾りを手にしたあなたは、いよいよウルダハの名士たちと肩を並べる時を迎えるのだった。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> オワイン <small class="muted">（銀冑団総長室, X:6.1, Y:6.0）</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="duty-honor-country.html">至宝の影で蠢く闇</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="a-royal-reception.html">王宮の晩餐会</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'備宴的傳統',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>十二神在上──一名冒險者竟能獲得女王 Nanamo Ul Namo 的親自邀請，這在 Ul’dah 前所未有。Owyne 滿是驚歎，提醒這是極為崇高的榮譽，只有最尊貴的人才能在王室宴會中占有一席。然而他坦言自己並不熟悉禮儀，勸你去找 Momodi，她一直負責接待外來賓客，熟知所有應遵守的規矩。</p>
+      <p>回到 Quicksand，Momodi 熱情迎接你，語氣既調侃又帶著驕傲。她解釋道：按照古老的習俗，所有受邀出席宴會的人必須佩戴特製的「儀式耳環」。這不僅是象徵，更是安全措施，沒有它便不得入內。</p>
+      <p>你依指引前往 Goldsmiths’ Guild，公會長 Serendipity 親手將耳環交給你。她特別說明，盒子上了鎖，只有 Momodi 有權打開。你便將耳環帶回，Momodi 親自打開盒子，看著華麗的工藝忍不住倒吸一口氣。</p>
+      <p>她鄭重囑咐你務必妥善保管，因為一旦落入歹人之手，後果不堪設想。如今耳環已在你手中，你也整裝待發。下一步，便是踏入 Ul’dah 的權貴之間，成為女王座上真正的座上賓。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 奧懷恩 <small class="muted">（銀冑團總長室, X:6.1, Y:6.0）</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="duty-honor-country.html">責任、榮耀與祖國</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="a-royal-reception.html">皇宮盛宴</a></div>
+    </div>`
   }
+};
 
-  function renderPanel(key, lang){
-    const t = i18n[lang] || i18n.EN;
-    Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
-    panels[key].classList.add('active');
-    panels[key].innerHTML = t[key];
-    if (key === 'story') makeStoryCollapsible(panels[key], lang);
-  }
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
 
-  function makeStoryCollapsible(panel, lang){
-    const wrap = panel.querySelector('.story-wrap');
-    if(!wrap) return;
-    const content = wrap.querySelector('.story-content');
-    const btn = wrap.querySelector('.expand-btn');
-    const MAX = window.matchMedia('(max-width:600px)').matches ? 260 : 360;
-    const needClamp = content.scrollHeight > MAX + 8;
-    if(needClamp){
-      btn.style.display = 'inline-block';
-      btn.textContent = label(lang, true);
-      btn.onclick = ()=>{
-        content.classList.toggle('story-expanded');
-        const expanded = content.classList.contains('story-expanded');
-        btn.textContent = label(lang, !expanded);
-      };
-    }else{
-      content.classList.add('story-expanded');
-      btn.style.display = 'none';
-    }
-  }
-  function label(lang, expand){
-    if(lang==='EN') return expand ? 'Read more' : 'Show less';
-    if(lang==='JP') return expand ? '続きを読む' : '折りたたむ';
-    return expand ? '展開全文' : '收合內容';
-  }
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
 
-  tabBtns.forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
-      btn.setAttribute('aria-selected','true');
-      renderPanel(btn.dataset.tab, getLang());
-    });
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
   });
+}
 
-  langToggle.addEventListener('click', ()=>{
-    const cur = getLang();
-    const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
-    setLang(next);
-    applyLang(next);
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
   });
+});
 
-  applyLang(getLang());
-  </script>
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'belaug-ffxiv/FFXIV_Library',
+  repoId: 'R_kgD0Pyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
 </body>
 </html>
