@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Call of the Forest | BELAUG · FFXIV Library</title>
-  <meta name="description" content="ARR 2.0 MSQ — Call of the Forest（森林的召喚）：故事概要、取得方式與任務解鎖。">
+  <meta name="description" content="MSQ – Call of the Forest (ARR Patch 2.0)">
   <link rel="icon" href="../img/favicon.ico" />
   <style>
     :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
@@ -17,8 +17,8 @@
     .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
     .home:hover{background:#fffef8}
     .right{display:flex;align-items:center;gap:8px}
-    .icon-btn{background:none;border:1px solid transparent;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
-    .icon-btn:hover{background:#fff;border-color:var(--border)}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
     .main{padding:20px 0 40px}
     .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
     @media (max-width:900px){
@@ -42,14 +42,20 @@
     .muted{color:var(--muted)}
     .link{color:#0b60d8;text-decoration:none}
     .link:hover{text-decoration:underline}
-    /* Story clamp + button */
-    .story-wrap{position:relative}
-    .story-content{max-height:360px;overflow:hidden;position:relative}
-    .story-content::after{content:"";position:absolute;inset:auto 0 0 0;height:64px;background:linear-gradient(to top,var(--card),transparent)}
-    .story-expanded{max-height:none!important}
-    .story-expanded::after{display:none}
-    .expand-btn{margin-top:8px;background:none;border:1px solid var(--border);padding:6px 10px;border-radius:8px;cursor:pointer;font-weight:600}
-    @media (max-width:600px){ .story-content{max-height:260px} }
+
+    /* 展開/收合 */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
   </style>
 </head>
 <body>
@@ -84,12 +90,16 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
           <div id="panel-story"   class="tab-panel active"></div>
           <div id="panel-acq"     class="tab-panel"></div>
           <div id="panel-unlockq" class="tab-panel"></div>
           <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -101,11 +111,13 @@ const i18n = {
   EN:{
     langLabel:'EN',
     pageTitle:'Call of the Forest',
-    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
-    story:`<div class="story-wrap"><div class="story-content">
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
       <p>Baderon greets you with a grin, his voice rough but familiar. A new job’s come in, he says, from their sister guild in Gridania. He admits he knows little of the details, only that the request is meant for someone proven—someone like you, who braved the chaos of Sastasha and returned alive. If you’re willing, he urges you to seek out his counterpart in the Twelveswood: Mother Miounne. With a slap on the counter, he wishes you luck and sends you on your way.</p>
       <p>The sweet scent of forest air greets you as you enter the Carline Canopy in Gridania. You hear Miounne’s voice carrying across the hall, warm but commanding. She turns, her face lighting in recognition. “Oh, it’s you! Sent here by that foul-mouthed rogue, are you?” She laughs, clearly relieved that Baderon’s promised adventurer turns out to be you. “This makes things much easier. There’s a fair bit to explain about this task… Sit, and when you’re ready, I’ll tell you everything.”</p>
-    </div><button class="expand-btn" data-i18n="expand">Read more</button></div>`,
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>Quest Giver</b> Baderon <small class="muted">(Limsa Lominsa Upper Decks, X:11.6, Y:11.1)</small></div>
     </div>`,
@@ -119,11 +131,13 @@ const i18n = {
   JP:{
     langLabel:'JP',
     pageTitle:'森都で待つ仕事',
-    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
-    story:`<div class="story-wrap"><div class="story-content">
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
       <p>バデロンはいつものように陽気にあなたを迎える。今回の依頼は、グリダニアの姉妹ギルドからのものだという。詳しいことは知らぬと正直に言いつつも、「サスタシャの混乱を生き抜いたあんたなら問題なかろう」と太鼓判を押す。そして「興味があるなら、森都のミューヌに会ってみるといい」と肩を叩き、幸運を祈って送り出してくれる。</p>
       <p>森の香りが漂うカーラインカフェへ足を踏み入れると、温かくも凛とした声が響く。振り返ったミューヌは、あなたを見てぱっと笑顔を見せた。「まあ、あなたなのね！ バデロンの口の悪いあの人からの紹介ってわけ？」 からりと笑いながらも、その目には安堵の色が浮かぶ。「冒険者があなただなんて、ずっとやりやすくなるわ。依頼については色々と話さなくちゃいけないことがあるの。準備ができたら教えて、詳しく説明するからね。」</p>
-    </div><button class="expand-btn" data-i18n="expand">続きを読む</button></div>`,
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>クエスト発行</b> バデロン <small class="muted">（リムサ・ロミンサ：上甲板層, X:11.6, Y:11.1）</small></div>
     </div>`,
@@ -137,11 +151,13 @@ const i18n = {
   ZH:{
     langLabel:'ZH',
     pageTitle:'森林的召喚',
-    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
-    story:`<div class="story-wrap"><div class="story-content">
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
       <p>Baderon 帶著熟悉的笑容迎接你。他說這次的委託來自 Gridania 的姊妹公會，自己雖然對細節所知不多，但相信能從 Sastasha 的混亂中生還的你，一定能勝任。他拍拍櫃台，祝你一切順利，並叮囑你去找他在森林之都的對應者──Mother Miounne。</p>
       <p>當你走進 Gridania 的 Carline Canopy，森林的氣息迎面而來。Miounne 的聲音響徹大廳，溫暖卻不失威嚴。她轉過身，一見到你便露出笑容。「啊，原來是你！Baderon 那個滿嘴粗話的傢伙派你來的吧？」她笑著搖頭，顯然對冒險者是你感到放心。「這樣一來事情簡單多了。這項任務有不少細節需要交代……先坐下來吧，等你準備好了，我會把一切都告訴你。」</p>
-    </div><button class="expand-btn" data-i18n="expand">展開全文</button></div>`,
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>任務發布</b> 巴德隆 <small class="muted">（利姆薩．羅敏薩 上層甲板, X:11.6, Y:11.1）</small></div>
     </div>`,
@@ -161,11 +177,11 @@ const panels = {
   story:  document.getElementById('panel-story'),
   acq:    document.getElementById('panel-acq'),
   unlockq:document.getElementById('panel-unlockq'),
-  followq:document.getElementById('panel-followq')
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
 };
 
 function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
-function setLang(lang){ localStorage.setItem(LANG_KEY, lang); }
 function applyLang(lang){
   const t = i18n[lang] || i18n.EN;
   pageTitle.textContent = t.pageTitle;
@@ -175,38 +191,29 @@ function applyLang(lang){
   renderPanel(activeBtn.dataset.tab, lang);
 }
 
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
 function renderPanel(key, lang){
   const t = i18n[lang] || i18n.EN;
   Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
   panels[key].classList.add('active');
-  panels[key].innerHTML = t[key];
-  if (key === 'story') makeStoryCollapsible(panels[key], lang);
-}
-
-function makeStoryCollapsible(panel, lang){
-  const wrap = panel.querySelector('.story-wrap');
-  if(!wrap) return;
-  const content = wrap.querySelector('.story-content');
-  const btn = wrap.querySelector('.expand-btn');
-  const MAX = window.matchMedia('(max-width:600px)').matches ? 260 : 360;
-  const needClamp = content.scrollHeight > MAX + 8;
-  if(needClamp){
-    btn.style.display = 'inline-block';
-    btn.textContent = label(lang, true);
-    btn.onclick = ()=>{
-      content.classList.toggle('story-expanded');
-      const expanded = content.classList.contains('story-expanded');
-      btn.textContent = label(lang, !expanded);
-    };
-  }else{
-    content.classList.add('story-expanded');
-    btn.style.display = 'none';
-  }
-}
-function label(lang, expand){
-  if(lang==='EN') return expand ? 'Read more' : 'Show less';
-  if(lang==='JP') return expand ? '続きを読む' : '折りたたむ';
-  return expand ? '展開全文' : '收合內容';
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
 }
 
 tabBtns.forEach(btn=>{
@@ -220,11 +227,43 @@ tabBtns.forEach(btn=>{
 langToggle.addEventListener('click', ()=>{
   const cur = getLang();
   const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
-  setLang(next);
+  localStorage.setItem(LANG_KEY, next);
   applyLang(next);
 });
 
 applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'belaug-ffxiv/FFXIV_Library',
+  repoId: 'R_kgD0Pyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
 </script>
 </body>
 </html>
