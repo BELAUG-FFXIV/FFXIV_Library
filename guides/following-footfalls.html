@@ -43,16 +43,17 @@
     .link{color:#0b60d8;text-decoration:none}
     .link:hover{text-decoration:underline}
 
-    /* 長文自動收合 */
-    .story-collapsible{position:relative;max-height:380px;overflow:hidden}
-    .story-collapsible::after{
-      content:"";position:absolute;inset:auto 0 0 0;height:72px;
+    /* —— 手動展開/收合（固定提供按鈕） —— */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
       background:linear-gradient(to bottom, rgba(255,248,230,0), var(--card));
+      pointer-events:none;
     }
-    .story-toggle{display:inline-block;margin-top:10px;padding:8px 14px;border:1px solid var(--border);
-      border-radius:999px;background:#fff;cursor:pointer;font-weight:600}
-    .story-expanded{max-height:none}
-    .story-expanded::after{display:none}
+    .expand-wrap{margin-top:10px}
+    .expand-btn{display:inline-block;padding:8px 14px;border:1px solid var(--border);border-radius:999px;background:#fff;cursor:pointer;font-weight:600}
+    .expand-btn:hover{background:#fffef8}
   </style>
 </head>
 <body>
@@ -87,12 +88,16 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
-          <div id="panel-story"   class="tab-panel active"></div>
-          <div id="panel-acq"     class="tab-panel"></div>
-          <div id="panel-unlockq" class="tab-panel"></div>
-          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -104,10 +109,14 @@ const i18n = {
   EN:{
     langLabel:'EN',
     pageTitle:"Following Footfalls",
-    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
-    story:`<p>Fufulupa comes to you with urgent concern. Thaumaturges from the Ossuary are conducting a relic survey at the Footfalls, and Horizon has been tasked with their protection. But Captain Baldewyn, overseeing the deployment, has sent far too few Brass Blades for such a dangerous area.</p>
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+<p>Fufulupa comes to you with urgent concern. Thaumaturges from the Ossuary are conducting a relic survey at the Footfalls, and Horizon has been tasked with their protection. But Captain Baldewyn, overseeing the deployment, has sent far too few Brass Blades for such a dangerous area.</p>
 <p>Despite the chain of command, Fufulupa pleads for your help. You head toward the Footfalls and seek out Totoruna, one of the assigned guards. But your presence is not welcome. Totoruna scoffs at Fufulupa’s involvement, dismissing the boy’s caution and accusing him of overstepping.</p>
-<p>Though you came to offer help, you now see the deeper issue—pride, power, and division within the ranks. Something isn’t right beneath the surface, and you’ve just stepped into the middle of it.</p>`,
+<p>Though you came to offer help, you now see the deeper issue—pride, power, and division within the ranks. Something isn’t right beneath the surface, and you’ve just stepped into the middle of it.</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>Quest Giver</b> Fufulupa <small class="muted">(Western Thanalan, X:22.6, Y:17.1)</small></div>
     </div>`,
@@ -121,10 +130,14 @@ const i18n = {
   JP:{
     langLabel:'JP',
     pageTitle:'足跡の谷へ',
-    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
-    story:`<p>フフルパは深い憂慮を抱えてあなたに依頼を持ちかける。オッソアリーの呪術士たちがフットフォールズで古代遺物の調査を行っており、その護衛任務がホライズンの守備隊に下されたという。しかし、バルドウィン隊長が派遣した兵の数はあまりにも少なく、とても十分とは思えなかった。</p>
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+<p>フフルパは深い憂慮を抱えてあなたに依頼を持ちかける。オッソアリーの呪術士たちがフットフォールズで古代遺物の調査を行っており、その護衛任務がホライズンの守備隊に下されたという。しかし、バルドウィン隊長が派遣した兵の数はあまりにも少なく、とても十分とは思えなかった。</p>
 <p>命令系統を越える行動だと理解しつつも、フフルパはあなたに助力を求める。あなたは現地へ向かい、駐在するトトルナに声をかける。しかし、彼の反応は冷ややかだった。</p>
-<p>「フフルパなんぞ関係ない」「バルドウィンの信頼を受けたのは俺たちだ」と、彼はあからさまにフフルパを侮り、排除しようとする。あなたが感じたのは、単なる人数不足ではない──組織内に広がる歪みと緊張の兆しだった。</p>`,
+<p>「フフルパなんぞ関係ない」「バルドウィンの信頼を受けたのは俺たちだ」と、彼はあからさまにフフルパを侮り、排除しようとする。あなたが感じたのは、単なる人数不足ではない──組織内に広がる歪みと緊張の兆しだった。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>クエスト発行</b> フフルパ <small class="muted">（西ザナラーン, X:22.6, Y:17.1）</small></div>
     </div>`,
@@ -138,11 +151,15 @@ const i18n = {
   ZH:{
     langLabel:'ZH',
     pageTitle:'踏尋足跡之谷',
-    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
-    story:`<p>Fufulupa 神情凝重地向你求助。來自 Ossuary 的 Thaumaturges 正在 The Footfalls 探查古遺物，Horizon 駐軍被指派負責守衛。然而，負責部署的 Baldewyn 隊長卻只派出少數人手。</p>
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+<p>Fufulupa 神情凝重地向你求助。來自 Ossuary 的 Thaumaturges 正在 The Footfalls 探查古遺物，Horizon 駐軍被指派負責守衛。然而，負責部署的 Baldewyn 隊長卻只派出少數人手。</p>
 <p>Fufulupa 深知這樣的編制根本不足以保障施法者安全。他懇請你前往支援。你來到 Footfalls，找到了 Brass Blade 駐守兵 Totoruna，卻遭遇不屑的冷眼。</p>
 <p>「這又不關 Fufulupa 的事，」他這樣說。他不但拒絕你的幫助，還露骨地貶低 Fufulupa 的判斷力，暗示只有隊長親信才被視為「可信之人」。</p>
-<p>你本是來幫忙的，卻無意中觸碰到更深的裂縫──階級、私利、與不願面對的危機，正在 Horizon 內部悄然蔓延。</p>`,
+<p>你本是來幫忙的，卻無意中觸碰到更深的裂縫──階級、私利、與不願面對的危機，正在 Horizon 內部悄然蔓延。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>任務發布</b> 弗弗魯帕 <small class="muted">（薩納蘭西部, X:22.6, Y:17.1）</small></div>
     </div>`,
@@ -162,7 +179,8 @@ const panels = {
   story:  document.getElementById('panel-story'),
   acq:    document.getElementById('panel-acq'),
   unlockq:document.getElementById('panel-unlockq'),
-  followq:document.getElementById('panel-followq')
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
 };
 
 function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
@@ -174,12 +192,33 @@ function applyLang(lang){
   const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
   renderPanel(activeBtn.dataset.tab, lang);
 }
+
+/* 展開/收合與 Comments 載入 */
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
 function renderPanel(key, lang){
   const t = i18n[lang] || i18n.EN;
   Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
   panels[key].classList.add('active');
-  panels[key].innerHTML = t[key];
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
 }
+
 tabBtns.forEach(btn=>{
   btn.addEventListener('click', ()=>{
     tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
@@ -194,41 +233,39 @@ langToggle.addEventListener('click', ()=>{
   applyLang(next);
 });
 
-/* —— 長文自動收合（依字數自動出現） —— */
-const readMoreLabels = {
-  EN: {more:'Read more', less:'Show less'},
-  JP: {more:'続きを読む',   less:'折りたたむ'},
-  ZH: {more:'展開全文',     less:'收合內容'}
-};
-function makeStoryCollapsible(lang){
-  const panel = document.getElementById('panel-story');
-  if(!panel) return;
-  const textLen = panel.textContent.trim().length;
-  if(textLen < 800) return;
-  const inner = panel.innerHTML.trim();
-  const wrap = document.createElement('div');
-  wrap.className = 'story-collapsible';
-  wrap.innerHTML = inner;
-  const btn = document.createElement('button');
-  const L = readMoreLabels[lang] || readMoreLabels.EN;
-  btn.className = 'story-toggle';
-  btn.textContent = L.more;
-  btn.addEventListener('click', ()=>{
-    const on = wrap.classList.toggle('story-expanded');
-    btn.textContent = on ? L.less : L.more;
-  });
-  panel.innerHTML = '';
-  panel.appendChild(wrap);
-  panel.appendChild(btn);
-}
-/* 掛鉤 renderPanel：切到 Story 時套用收合 */
-const _origRenderPanel = renderPanel;
-renderPanel = function(key, lang){
-  _origRenderPanel(key, lang);
-  if(key==='story') makeStoryCollapsible(lang);
-};
-
 applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'belaug-ffxiv/FFXIV_Library',
+  repoId: 'R_kgD0Pyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
 </script>
 </body>
 </html>
