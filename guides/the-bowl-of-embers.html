@@ -70,12 +70,18 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="req">Requirements</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlock">Follow-Up Quest</button>
+          <!-- 新增：Comments -->
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
           <div id="panel-story" class="tab-panel active"></div>
           <div id="panel-acq" class="tab-panel"></div>
           <div id="panel-req" class="tab-panel"></div>
           <div id="panel-unlock" class="tab-panel"></div>
+          <!-- 新增：留言面板 -->
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -88,7 +94,7 @@
       EN:{
         langLabel:'EN',
         pageTitle:'The Bowl of Embers',
-        tabs:{story:'Story', req:'Requirements', acq:'Unlock Quest', unlock:'Follow-Up Quest'},
+        tabs:{story:'Story', req:'Requirements', acq:'Unlock Quest', unlock:'Follow-Up Quest', comments:'Comments'},
         story:`<p>Owing to a betrayal, you have been captured by the Amalj’aa and taken to their stronghold of Zanr’ak, there to be given as an offering to the primal Ifrit. If you are to survive this fiery encounter with the Lord of the Inferno, you and your comrades must fight with no less than every onze of your strength. Should you fall, your souls shall burn for eternity…</p>`,
         req:`<div class="stack">
           <div class="row"><strong>Players:</strong> 1–4 players (1 Tank, 1 Healer, 2 DPS)</div>
@@ -109,7 +115,7 @@
       JP:{
         langLabel:'JP',
         pageTitle:'イフリート討伐戦',
-        tabs:{story:'ストーリー', req:'必要条件', acq:'開放クエスト', unlock:'後続クエスト'},
+        tabs:{story:'ストーリー', req:'必要条件', acq:'開放クエスト', unlock:'後続クエスト', comments:'コメント'},
         story:`<p>裏切りにより、アマルジャ族に囚われ、ザンラクの拠点へと連行されたあなたは、焔神イフリートへの生贄として捧げられることに──。業火に包まれるこの戦いを生き延びるには、仲間と共に全力を尽くすしかない。敗北すれば、その魂は永劫の炎に焼かれ続けることとなる……。</p>`,
         req:`<div class="stack">
           <div class="row"><strong>プレイヤー数：</strong>1～4人（タンク1／ヒーラー1／DPS2）</div>
@@ -130,7 +136,7 @@
       ZH:{
         langLabel:'ZH-TW',
         pageTitle:'伊弗利特討伐戰',
-        tabs:{story:'故事概要', req:'需求條件', acq:'解鎖任務', unlock:'後續任務'},
+        tabs:{story:'故事概要', req:'需求條件', acq:'解鎖任務', unlock:'後續任務', comments:'留言'},
         story:`<p>你遭遇背叛，被 Amalj’aa 擄走，帶往他們位於 Zanr’ak 的據點，作為祭獻給焰神 Ifrit 的活人祭品。若想從這場炙熱的對決中倖存，你與夥伴必須傾盡全力迎戰。若是敗北，你的靈魂將永遠在地獄之火中燃燒……</p>`,
         req:`<div class="stack">
           <div class="row"><strong>人數：</strong>1–4 人（1 坦克／1 治療／2 輸出）</div>
@@ -156,7 +162,8 @@
       story : document.getElementById('panel-story'),
       acq   : document.getElementById('panel-acq'),
       req   : document.getElementById('panel-req'),
-      unlock: document.getElementById('panel-unlock')
+      unlock: document.getElementById('panel-unlock'),
+      comments: document.getElementById('panel-comments') // 新增
     };
 
     function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
@@ -167,13 +174,21 @@
       tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
       const activeBtn = tabBtns.find(b=>b.getAttribute('aria-selected')==='true') || tabBtns[0];
       renderPanel(activeBtn.dataset.tab, lang);
+      // 若目前在留言分頁，切語言後重載 giscus
+      if (activeBtn && activeBtn.dataset.tab === 'comments') loadGiscusForCurrentLang();
     }
 
+    // 不覆寫留言容器；進入留言分頁時載入 giscus
     function renderPanel(key, lang){
       const t = i18n[lang] || i18n.EN;
       Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
       panels[key].classList.add('active');
-      panels[key].innerHTML = t[key];
+
+      if (key !== 'comments') {
+        panels[key].innerHTML = t[key];
+      } else {
+        loadGiscusForCurrentLang();
+      }
     }
 
     tabBtns.forEach(btn=>{
@@ -192,6 +207,38 @@
     });
 
     applyLang(getLang());
+
+    /* === Giscus：單一 Comments 分頁，隨語言切換 === */
+    const GISCUS_CFG = {
+      repo: 'belaug-ffxiv/FFXIV_Library',
+      repoId: 'R_kgD0Pyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+    };
+    function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+    function loadGiscusForCurrentLang(){
+      const mount = document.getElementById('giscus_container');
+      if (!mount) return;
+      mount.innerHTML = '';
+      const langCode = getLang();
+      const s = document.createElement('script');
+      s.src = 'https://giscus.app/client.js';
+      s.setAttribute('data-repo', GISCUS_CFG.repo);
+      s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+      s.setAttribute('data-category', GISCUS_CFG.category);
+      s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+      s.setAttribute('data-mapping', 'specific');
+      s.setAttribute('data-term', location.pathname + '｜' + langCode);
+      s.setAttribute('data-reactions-enabled', '1');
+      s.setAttribute('data-emit-metadata', '0');
+      s.setAttribute('data-input-position', 'bottom');
+      s.setAttribute('data-lang', uiLang(langCode));
+      s.setAttribute('data-theme', GISCUS_CFG.theme);
+      s.setAttribute('crossorigin', 'anonymous');
+      s.async = true;
+      mount.appendChild(s);
+    }
   </script>
 </body>
 </html>
