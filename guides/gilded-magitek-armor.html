@@ -66,11 +66,15 @@
           <button class="tab-btn" role="tab" aria-selected="true"  data-tab="about">About</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="seats">Seats</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
           <div id="panel-about" class="tab-panel active"></div>
           <div id="panel-acq"   class="tab-panel"></div>
           <div id="panel-seats" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -82,7 +86,7 @@
       EN:{
         langLabel:'EN',
         pageTitle:'Gilded Magitek Armor',
-        tabs:{ about:'About', acq:'Acquisition', seats:'Seats' },
+        tabs:{ about:'About', acq:'Acquisition', seats:'Seats', comments:'Comments' },
         about:`<div class="stack">
           <div class="row">Call into battle your gilded suit of magitek armor. Its golden coating serves to resist magicks while impressing members of the opposite sex.</div>
           <div class="row">It only took a few heated skirmishes with the allied city–states for Garlemald to realize that the magicks wielded by the realm’s mages were too much for even the thickest of magitek armor plating. Alloyed gilding has since been discovered to dampen the effects of elemental charges and is now standard issue.</div>
@@ -95,7 +99,7 @@
       JP:{
         langLabel:'JP',
         pageTitle:'C式魔導アーマー',
-        tabs:{ about:'紹介', acq:'入手方法', seats:'座席数' },
+        tabs:{ about:'紹介', acq:'入手方法', seats:'座席数', comments:'コメント' },
         about:`<div class="stack">
           <div class="row">金色に輝く魔導アーマーを召喚せよ。鍍金された装甲は、魔法への耐性を高めるだけでなく、異性への印象を引き立てることも──あるかもしれない。</div>
           <div class="row">都市同盟との幾度かの交戦を経て、ガレマール帝国は気づかされた。エオルゼアの魔道士たちが操る魔法は、最厚の魔導装甲すら貫く力を持つことを。以後、元素エネルギーの干渉を抑える合金鍍金が発見され、現在では標準装備となっている。</div>
@@ -108,7 +112,7 @@
       ZH:{
         langLabel:'ZH',
         pageTitle:'鍍金魔導裝甲',
-        tabs:{ about:'簡介', acq:'取得方式', seats:'可乘人數' },
+        tabs:{ about:'簡介', acq:'取得方式', seats:'可乘人數', comments:'留言' },
         about:`<div class="stack">
           <div class="row">召喚這台鍍金的 Magitek Armor 戰甲，其金色塗層不僅能提升對魔法的抗性，也可能在無意間吸引異性的目光。</div>
           <div class="row">與聯盟都市的數次交火讓 Garlemald 意識到，即便是最厚重的魔導裝甲，也無法完全抵擋這片土地的魔法師所釋放的魔法攻擊。自此之後，合金鍍金被證實能削弱元素能量的衝擊，並成為標準配備。</div>
@@ -123,24 +127,34 @@
     const langToggle=document.getElementById('langToggle');
     const pageTitle=document.getElementById('pageTitle');
     const tabBtns=[...document.querySelectorAll('.tab-btn')];
-    const panels={ about:panel('about'), acq:panel('acq'), seats:panel('seats') };
+    const panels={
+      about:panel('about'),
+      acq:panel('acq'),
+      seats:panel('seats'),
+      comments:panel('comments')
+    };
 
     function panel(id){ return document.getElementById('panel-'+id); }
     function getLang(){ return localStorage.getItem(LANG_KEY)||'EN'; }
+
     function applyLang(lang){
       const t=i18n[lang]||i18n.EN;
       pageTitle.textContent=t.pageTitle;
-      langToggle.textContent = '🌐 ' + t.langLabel;
-      tabBtns.forEach(b=>{ b.textContent=t.tabs[b.dataset.tab]; });
+      langToggle.textContent='🌐 ' + t.langLabel;
+      tabBtns.forEach(b=>{ if (t.tabs[b.dataset.tab]) b.textContent=t.tabs[b.dataset.tab]; });
       const active=tabBtns.find(b=>b.getAttribute('aria-selected')==='true')||tabBtns[0];
       renderPanel(active.dataset.tab,lang);
+      if (active && active.dataset.tab==='comments') loadGiscusForCurrentLang();
     }
+
     function renderPanel(key,lang){
       const t=i18n[lang]||i18n.EN;
       Object.keys(panels).forEach(k=>panels[k].classList.remove('active'));
       panels[key].classList.add('active');
-      panels[key].innerHTML=t[key];
+      if (key!=='comments') panels[key].innerHTML=t[key];
+      if (key==='comments') loadGiscusForCurrentLang();
     }
+
     tabBtns.forEach(btn=>{
       btn.addEventListener('click',()=>{
         tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
@@ -148,11 +162,45 @@
         renderPanel(btn.dataset.tab,getLang());
       });
     });
+
     langToggle.addEventListener('click',()=>{
       const cur=getLang(); const next=cur==='EN'?'JP':(cur==='JP'?'ZH':'EN');
       localStorage.setItem(LANG_KEY,next); applyLang(next);
     });
+
     applyLang(getLang());
+
+    /* === Giscus：單一 Comments 分頁，語言切換 === */
+    const GISCUS_CFG = {
+      repo: 'belaug-ffxiv/FFXIV_Library',
+      repoId: 'R_kgD0Pyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+    };
+    function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+    function loadGiscusForCurrentLang(){
+      const mount = document.getElementById('giscus_container');
+      if (!mount) return;
+      mount.innerHTML = '';
+      const langCode = getLang(); // EN / JP / ZH
+      const s = document.createElement('script');
+      s.src = 'https://giscus.app/client.js';
+      s.setAttribute('data-repo', GISCUS_CFG.repo);
+      s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+      s.setAttribute('data-category', GISCUS_CFG.category);
+      s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+      s.setAttribute('data-mapping', 'specific');
+      s.setAttribute('data-term', location.pathname + '｜' + langCode);
+      s.setAttribute('data-reactions-enabled', '1');
+      s.setAttribute('data-emit-metadata', '0');
+      s.setAttribute('data-input-position', 'bottom');
+      s.setAttribute('data-lang', uiLang(langCode));
+      s.setAttribute('data-theme', GISCUS_CFG.theme);
+      s.setAttribute('crossorigin', 'anonymous');
+      s.async = true;
+      mount.appendChild(s);
+    }
   </script>
 </body>
 </html>
