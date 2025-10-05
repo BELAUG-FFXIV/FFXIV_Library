@@ -42,6 +42,20 @@
     .muted{color:var(--muted)}
     .link{color:#0b60d8;text-decoration:none}
     .link:hover{text-decoration:underline}
+
+    /* 展開/收合 */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
   </style>
 </head>
 <body>
@@ -76,12 +90,16 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
-          <div id="panel-story"   class="tab-panel active"></div>
-          <div id="panel-acq"     class="tab-panel"></div>
-          <div id="panel-unlockq" class="tab-panel"></div>
-          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -93,10 +111,14 @@ const i18n = {
   EN:{
     langLabel:'EN',
     pageTitle:'Out of House and Home',
-    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
-    story:`<p>Warin wastes no time. He briefs you on the problem: every day, ore wagons pass through Black Brush Station—yet each trip risks disaster. A misguided decision to build an ore storehouse within a nearby tunnel has created the perfect nesting ground for coblyns.</p>
-    <p>Now, the creatures lie in wait where wagons must pass, treating each shipment as a convenient meal. Warin hands you a silver ore cluster, asking you to use it as bait and drive them out.</p>
-    <p>You venture into the tunnel, luring the coblyns from the fissure and cutting them down. When you return, Warin commends your success. For a while, the shipments will be safe—and with them, the lifeblood of Ul’dah’s economy. He wishes more hands like yours stood watch over these veins of steel and stone.</p>`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Warin wastes no time. He briefs you on the problem: every day, ore wagons pass through Black Brush Station—yet each trip risks disaster. A misguided decision to build an ore storehouse within a nearby tunnel has created the perfect nesting ground for coblyns.</p>
+      <p>Now, the creatures lie in wait where wagons must pass, treating each shipment as a convenient meal. Warin hands you a silver ore cluster, asking you to use it as bait and drive them out.</p>
+      <p>You venture into the tunnel, luring the coblyns from the fissure and cutting them down. When you return, Warin commends your success. For a while, the shipments will be safe—and with them, the lifeblood of Ul’dah’s economy. He wishes more hands like yours stood watch over these veins of steel and stone.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>Quest Giver</b> Warin <small class="muted">(Central Thanalan, X:20.8, Y:18.5)</small></div>
     </div>`,
@@ -110,10 +132,14 @@ const i18n = {
   JP:{
     langLabel:'JP',
     pageTitle:'迷惑な鉱石マニア',
-    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
-    story:`<p>ワリンはすぐに本題に入る。ブラックブラッシュ停留所では毎日、鉱石を積んだ輸送車が通過している。しかし、ある者の誤った判断により、フェスカ監視所付近のトンネルに鉱石倉庫が建てられ、そこがコブリンの巣となってしまったのだ。</p>
-    <p>今では、奴らがトンネルに潜み、通過する輸送車をまるで給餌のように狙っている。ワリンはあなたに銀鉱石の塊を託し、コブリンたちを誘き出して倒すよう依頼する。</p>
-    <p>あなたはトンネルに向かい、音を頼りに奴らをおびき出して討伐する。任務を終え、戻ったあなたをワリンは称える。輸送路は一時的に安全を取り戻し、ウルダハの経済を支える「血管」は再び動き出すのだった。彼は言う──あなたのような者が、もっといてくれたらと。</p>`,
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>ワリンはすぐに本題に入る。ブラックブラッシュ停留所では毎日、鉱石を積んだ輸送車が通過している。しかし、ある者の誤った判断により、フェスカ監視所付近のトンネルに鉱石倉庫が建てられ、そこがコブリンの巣となってしまったのだ。</p>
+      <p>今では、奴らがトンネルに潜み、通過する輸送車をまるで給餌のように狙っている。ワリンはあなたに銀鉱石の塊を託し、コブリンたちを誘き出して倒すよう依頼する。</p>
+      <p>あなたはトンネルに向かい、音を頼りに奴らをおびき出して討伐する。任務を終え、戻ったあなたをワリンは称える。輸送路は一時的に安全を取り戻し、ウルダハの経済を支える「血管」は再び動き出すのだった。彼は言う──あなたのような者が、もっといてくれたらと。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>クエスト発行</b> ワリン <small class="muted">（中央ザナラーン, X:20.8, Y:18.5）</small></div>
     </div>`,
@@ -127,10 +153,14 @@ const i18n = {
   ZH:{
     langLabel:'ZH',
     pageTitle:'礦石狂的麻煩事',
-    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
-    story:`<p>Warin 直截了當地向你說明情況：Black Brush Station 每日都有礦車通過，但最近問題頻傳。有人竟在 Fesca’s Watch 隧道內設置礦石儲藏庫，結果吸引了喜歡金屬的 coblyn 族群前來築巢。</p>
-    <p>如今這些魔物守株待兔，等著礦車自動送餐上門。Warin 將一塊銀礦交給你，請你深入隧道，用它作為誘餌，引出並消滅那些潛伏的怪物。</p>
-    <p>你走進隧道，循聲追蹤，在裂縫間引出 coblyns，逐一將其討伐。回到營地後，Warin 向你致謝。短期內礦車可再度順利通行，而這些鐵軌如同 Ul’dah 經濟的血脈，你的行動保住了它的流動。他感慨地說，要是有更多像你這樣的人該有多好。</p>`,
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Warin 直截了當地向你說明情況：Black Brush Station 每日都有礦車通過，但最近問題頻傳。有人竟在 Fesca’s Watch 隧道內設置礦石儲藏庫，結果吸引了喜歡金屬的 coblyn 族群前來築巢。</p>
+      <p>如今這些魔物守株待兔，等著礦車自動送餐上門。Warin 將一塊銀礦交給你，請你深入隧道，用它作為誘餌，引出並消滅那些潛伏的怪物。</p>
+      <p>你走進隧道，循聲追蹤，在裂縫間引出 coblyns，逐一將其討伐。回到營地後，Warin 向你致謝。短期內礦車可再度順利通行，而這些鐵軌如同 Ul’dah 經濟的血脈，你的行動保住了它的流動。他感慨地說，要是有更多像你這樣的人該有多好。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>任務發布</b> 瓦林 <small class="muted">（薩納蘭中部, X:20.8, Y:18.5）</small></div>
     </div>`,
@@ -150,7 +180,8 @@ const panels = {
   story:  document.getElementById('panel-story'),
   acq:    document.getElementById('panel-acq'),
   unlockq:document.getElementById('panel-unlockq'),
-  followq:document.getElementById('panel-followq')
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
 };
 
 function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
@@ -162,12 +193,32 @@ function applyLang(lang){
   const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
   renderPanel(activeBtn.dataset.tab, lang);
 }
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
 function renderPanel(key, lang){
   const t = i18n[lang] || i18n.EN;
   Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
   panels[key].classList.add('active');
-  panels[key].innerHTML = t[key];
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
 }
+
 tabBtns.forEach(btn=>{
   btn.addEventListener('click', ()=>{
     tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
@@ -175,13 +226,47 @@ tabBtns.forEach(btn=>{
     renderPanel(btn.dataset.tab, getLang());
   });
 });
+
 langToggle.addEventListener('click', ()=>{
   const cur = getLang();
   const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
   localStorage.setItem(LANG_KEY, next);
   applyLang(next);
 });
+
 applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'belaug-ffxiv/FFXIV_Library',
+  repoId: 'R_kgD0Pyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
 </script>
 </body>
 </html>
