@@ -43,16 +43,19 @@
     .link{color:#0b60d8;text-decoration:none}
     .link:hover{text-decoration:underline}
 
-    /* 長文自動收合 */
-    .story-collapsible{position:relative;max-height:380px;overflow:hidden}
-    .story-collapsible::after{
-      content:"";position:absolute;inset:auto 0 0 0;height:72px;
-      background:linear-gradient(to bottom, rgba(255,248,230,0), var(--card));
+    /* 展開/收合（統一模板） */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
     }
-    .story-toggle{display:inline-block;margin-top:10px;padding:8px 14px;border:1px solid var(--border);
-      border-radius:999px;background:#fff;cursor:pointer;font-weight:600}
-    .story-expanded{max-height:none}
-    .story-expanded::after{display:none}
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
   </style>
 </head>
 <body>
@@ -87,12 +90,16 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
-          <div id="panel-story"   class="tab-panel active"></div>
-          <div id="panel-acq"     class="tab-panel"></div>
-          <div id="panel-unlockq" class="tab-panel"></div>
-          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -104,11 +111,15 @@ const i18n = {
   EN:{
     langLabel:'EN',
     pageTitle:'Unto the Heavens',
-    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
-    story:`<p>Before departure, Ojika Tsunjika recalled Galuf Baldesion’s words: “Surrender not to anger or hatred. Look beyond them, and there find true strength.” Across Labyrinthos, comrades offered support—Alpha chirped encouragement, Varshahn spoke of bonds between man and dragon, Erenville entrusted the future to the hero, and Nidhana prayed that hope would shape the akasa. Wilfsunn remembered Moenbryda, and Sharlayan scholars described the fusion of Loporrit hyperhopper technology with aetherology. At last, Fourchenault revealed the vessel’s true name: Ragnarok, born from Dalamud’s fragment and Louisoix’s legacy. Sicard then arrived with tribal allies, who pledged their faith to create benevolent deities from the Mothercrystal to fuel the ark. Farewells followed—Ameliance absent but praying, Tataru promising to inform the nations. With blessings from all, the Scions stood before Ragnarok, shining with sacrifice, unity, and hope, as Fourchenault gave the final words: “Go, and godsspeed.”</p>
-    <p>With all blessings given, the Scions boarded the Ragnarok. Alphinaud was urged to issue the launch command, his voice ringing clear: “Onward—unto the distant stars and beyond!” The engines roared, powered by deities born of the Mothercrystal, and the vessel pierced the skies. Garuda and the Lord of Revel lent their winds, hurling the ship into the firmament. As the stars faded into silence, Meteion’s voice reached them, soft yet suffocating. She spoke of the futility of life—joy stolen, love broken, all existence destined for nothing. The Scions answered with resolve: they knew sorrow, yet chose to endure, to hope, and to fight. The pressure of despair overwhelmed them, and Thancred vanished in pursuit of her shadow. Moments later, Ultima Thule unfolded before their eyes: an empty realm adrift in the sea of stars, desolate yet capable of sustaining life. With dread and determination intermingled, the Scions set foot on this unknown frontier.</p>
-    <p>The Ragnarok pierced the void, and at dream’s end two familiar voices stirred the silence—Hythlodaeus and Emet-Selch. They spoke unseen, reflecting on history’s endless cycle: though curtains fall, new tales always arise, and so this too must find its close. With their blessing, the Scions gazed upon Ultima Thule, a barren star adrift yet strangely hospitable. Livingway confirmed the environment would not kill them, and so exploration began. Yet dread lingered—the very air pressed heavy, disorienting, as if despair itself shaped the land. The group resolved to push onward, knowing Thancred had already vanished in pursuit of Meteion.</p>
-    <p>Everywhere, allies’ words echoed in memory: Fourchenault’s pride, Ameliance’s silent prayers, Cid’s assurances of Ragnarok’s strength, the Forum’s faith, the peoples’ hopes, and the Loporrits’ guidance. The ark embodied the efforts of countless hands, past and present. To falter now would betray them all. Thus, with fear and hope entwined, the Scions stepped forward into Ultima Thule, where despair awaited, and where the fate of the star would be decided.</p>`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Before departure, Ojika Tsunjika recalled Galuf Baldesion’s words: “Surrender not to anger or hatred. Look beyond them, and there find true strength.” Across Labyrinthos, comrades offered support—Alpha chirped encouragement, Varshahn spoke of bonds between man and dragon, Erenville entrusted the future to the hero, and Nidhana prayed that hope would shape the akasa. Wilfsunn remembered Moenbryda, and Sharlayan scholars described the fusion of Loporrit hyperhopper technology with aetherology. At last, Fourchenault revealed the vessel’s true name: Ragnarok, born from Dalamud’s fragment and Louisoix’s legacy. Sicard then arrived with tribal allies, who pledged their faith to create benevolent deities from the Mothercrystal to fuel the ark. Farewells followed—Ameliance absent but praying, Tataru promising to inform the nations. With blessings from all, the Scions stood before Ragnarok, shining with sacrifice, unity, and hope, as Fourchenault gave the final words: “Go, and godsspeed.”</p>
+      <p>With all blessings given, the Scions boarded the Ragnarok. Alphinaud was urged to issue the launch command, his voice ringing clear: “Onward—unto the distant stars and beyond!” The engines roared, powered by deities born of the Mothercrystal, and the vessel pierced the skies. Garuda and the Lord of Revel lent their winds, hurling the ship into the firmament. As the stars faded into silence, Meteion’s voice reached them, soft yet suffocating. She spoke of the futility of life—joy stolen, love broken, all existence destined for nothing. The Scions answered with resolve: they knew sorrow, yet chose to endure, to hope, and to fight. The pressure of despair overwhelmed them, and Thancred vanished in pursuit of her shadow. Moments later, Ultima Thule unfolded before their eyes: an empty realm adrift in the sea of stars, desolate yet capable of sustaining life. With dread and determination intermingled, the Scions set foot on this unknown frontier.</p>
+      <p>The Ragnarok pierced the void, and at dream’s end two familiar voices stirred the silence—Hythlodaeus and Emet-Selch. They spoke unseen, reflecting on history’s endless cycle: though curtains fall, new tales always arise, and so this too must find its close. With their blessing, the Scions gazed upon Ultima Thule, a barren star adrift yet strangely hospitable. Livingway confirmed the environment would not kill them, and so exploration began. Yet dread lingered—the very air pressed heavy, disorienting, as if despair itself shaped the land. The group resolved to push onward, knowing Thancred had already vanished in pursuit of Meteion.</p>
+      <p>Everywhere, allies’ words echoed in memory: Fourchenault’s pride, Ameliance’s silent prayers, Cid’s assurances of Ragnarok’s strength, the Forum’s faith, the peoples’ hopes, and the Loporrits’ guidance. The ark embodied the efforts of countless hands, past and present. To falter now would betray them all. Thus, with fear and hope entwined, the Scions stepped forward into Ultima Thule, where despair awaited, and where the fate of the star would be decided.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>Quest Giver</b> Ojika Tsunjika <small class="muted">(Old Sharlayan, X: 9.2, Y: 11.2)</small></div>
     </div>`,
@@ -122,12 +133,16 @@ const i18n = {
   JP:{
     langLabel:'JP',
     pageTitle:'天の彼方へ',
-    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
-    story:`<p>旅立ちの前、オジカ・ツンジカはガラフ・バルデシオンの言葉を思い出した──「怒りや憎しみに屈してはならぬ。その先にこそ真の力がある。」ラヴィリントスには仲間が集い、アルファの鳴き声や、ヴァルシャーンの人と竜の絆の言葉、エレンヴィルの未来を託す決意、ニダナの希望への祈りが響いた。ウィルフスンはモーエンブリダを偲び、学者たちはロポリットの技術とシャーレアンの知識の融合を語った。やがてフォルシュノーが船の真の名「ラグナロク」を明かし、ダラガブの欠片とルイゾワの遺志を受け継ぐと告げた。シカードは部族の仲間を伴い、マザークリスタルの力を温和なる神々へと変換することを誓う。別れの言葉が続き、アメリエンスは姿を見せずとも祈りを送り、タタルは諸国に知らせを約した。こうして犠牲と団結と希望を宿すラグナロクの前に立ち、フォルシュノーが最後の祝福を告げた──「行け……神々の加護あらんことを。」</p>
-    <p>すべての祈りを受け、暁はラグナロクへと乗り込んだ。発進の号令を託されたアルフィノは声高らかに叫ぶ──「さあ行こう、遥か彼方の星々へ！」マザークリスタルから生まれた神々の力を得た方舟は轟音と共に大空を突き抜け、ガルーダとリヴァイアサンの風もその船を押し上げた。やがて星々が沈黙に包まれる中、柔らかくも息苦しい声が響く。メーティオンだった。彼女は語る──生命は無意味であり、喜びも愛も必ず奪われ、全ては虚無に帰すのだと。しかし暁は答える。悲しみを知りながらも、それでも歩みを止めず、希望を胸に戦うのだと。絶望の圧に呑まれ、サンクレッドは彼女の影を追って姿を消す。そして目前に広がったのはウルティマ・トゥーレ──星海に漂う虚ろの地。荒涼でありながらも生を許す場所。恐れと覚悟を胸に、彼らは未知の地へと歩みを進めた。</p>
-    <p>虚無を突き抜けたラグナロク。その果てで、懐かしい声が静寂を揺るがした──ヒュトロダエウスとエメトセルクである。彼らは姿を見せず語りかける。歴史は幾度幕を閉じようとも、必ず新たな物語が紡がれる。そしてこの物語もまた、終幕を迎えねばならないのだと。祝福の言葉を残し、暁は見渡す──漂う荒星、ウルティマ・トゥーレ。荒涼としながらも、何故か生命を許容する地。</p>
-    <p>生存可能であるとリヴィングウェイが確認し、探索は開始された。しかし胸を締めつける不安は拭えない。大地そのものが絶望に形を与え、空気は重く、足元さえ揺らぐ。サンクレッドは既にメーティオンを追って姿を消し、仲間たちは彼を探し出す決意を固めた。</p>
-    <p>頭に響くのは、仲間と人々の言葉──フルシュノーの誇り、アメリアンスの祈り、シドの保証、フォーラムの信任、諸種族の願い、ルポリットの導き。ラグナロクは、過去と現在を結ぶ無数の手で築かれた希望そのもの。今ここで挫けるわけにはいかない。恐怖と希望を胸に、暁はウルティマ・トゥーレの大地へと歩みを進めた。そこには絶望が待ち受け、星の命運が懸かっていた。</p>`,
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>旅立ちの前、オジカ・ツンジカはガラフ・バルデシオンの言葉を思い出した──「怒りや憎しみに屈してはならぬ。その先にこそ真の力がある。」ラヴィリントスには仲間が集い、アルファの鳴き声や、ヴァルシャーンの人と竜の絆の言葉、エレンヴィルの未来を託す決意、ニダナの希望への祈りが響いた。ウィルフスンはモーエンブリダを偲び、学者たちはロポリットの技術とシャーレアンの知識の融合を語った。やがてフォルシュノーが船の真の名「ラグナロク」を明かし、ダラガブの欠片とルイゾワの遺志を受け継ぐと告げた。シカードは部族の仲間を伴い、マザークリスタルの力を温和なる神々へと変換することを誓う。別れの言葉が続き、アメリエンスは姿を見せずとも祈りを送り、タタルは諸国に知らせを約した。こうして犠牲と団結と希望を宿すラグナロクの前に立ち、フォルシュノーが最後の祝福を告げた──「行け……神々の加護あらんことを。」</p>
+      <p>すべての祈りを受け、暁はラグナロクへと乗り込んだ。発進の号令を託されたアルフィノは声高らかに叫ぶ──「さあ行こう、遥か彼方の星々へ！」マザークリスタルから生まれた神々の力を得た方舟は轟音と共に大空を突き抜け、ガルーダとリヴァイアサンの風もその船を押し上げた。やがて星々が沈黙に包まれる中、柔らかくも息苦しい声が響く。メーティオンだった。彼女は語る──生命は無意味であり、喜びも愛も必ず奪われ、全ては虚無に帰すのだと。しかし暁は答える。悲しみを知りながらも、それでも歩みを止めず、希望を胸に戦うのだと。絶望の圧に呑まれ、サンクレッドは彼女の影を追って姿を消す。そして目前に広がったのはウルティマ・トゥーレ──星海に漂う虚ろの地。荒涼でありながらも生を許す場所。恐れと覚悟を胸に、彼らは未知の地へと歩みを進めた。</p>
+      <p>虚無を突き抜けたラグナロク。その果てで、懐かしい声が静寂を揺るがした──ヒュトロダエウスとエメトセルクである。彼らは姿を見せず語りかける。歴史は幾度幕を閉じようとも、必ず新たな物語が紡がれる。そしてこの物語もまた、終幕を迎えねばならないのだと。祝福の言葉を残し、暁は見渡す──漂う荒星、ウルティマ・トゥーレ。荒涼としながらも、何故か生命を許容する地。</p>
+      <p>生存可能であるとリヴィングウェイが確認し、探索は開始された。しかし胸を締めつける不安は拭えない。大地そのものが絶望に形を与え、空気は重く、足元さえ揺らぐ。サンクレッドは既にメーティオンを追って姿を消し、仲間たちは彼を探し出す決意を固めた。</p>
+      <p>頭に響くのは、仲間と人々の言葉──フルシュノーの誇り、アメリアンスの祈り、シドの保証、フォーラムの信任、諸種族の願い、ルポリットの導き。ラグナロクは、過去と現在を結ぶ無数の手で築かれた希望そのもの。今ここで挫けるわけにはいかない。恐怖と希望を胸に、暁はウルティマ・トゥーレの大地へと歩みを進めた。そこには絶望が待ち受け、星の命運が懸かっていた。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>クエスト発行</b> オジカ・ツンジカ <small class="muted">（オールド・シャーレアン, X: 9.2, Y: 11.2）</small></div>
     </div>`,
@@ -141,12 +156,16 @@ const i18n = {
   ZH:{
     langLabel:'ZH',
     pageTitle:'奔向天際彼方',
-    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
-    story:`<p>臨行前，Ojika Tsunjika 引述 Galuf Baldesion 的教誨：「切莫屈服於憤怒與憎恨，越過它們方能找到真正的力量。」在 Labyrinthos，眾人齊聲支持──Alpha 的鳴叫、Varshahn 談及人與龍的羈絆、Erenville 將未來託付、Nidhana 祈求希望影響 akasa，Wilfsunn 緬懷 Moenbryda，而學者們則解說 Loporrit 技術與以太理論的融合。最終 Fourchenault 公布船名 Ragnarok，象徵 Dalamud 碎片與 Louisoix 的遺志。隨後 Sicard 帶來部族盟友，以信仰之力將 Mothercrystal 化為溫和神祇以驅動方舟。臨別之際，Ameliance 雖未能現身，卻送上祈禱；Tataru 保證將消息傳遍諸國。於是眾人立於承載犧牲、團結與希望的 Ragnarok 前，迎來 Fourchenault 的最後祝福：「去吧……願諸神庇佑。」</p>
-    <p>在眾人祈福之下，曉之血盟登上了諸神黃昏號。眾人推舉 Alphinaud 下達發射指令，他高聲宣告：「出發吧──奔向遙遠群星與無盡彼方！」引擎在 Mothercrystal 化成的神祇力量下怒吼，巨艦破空而出，Garuda 與 Lord of Revel 的風將其推送至蒼穹深處。隨著群星陷入死寂，一道柔和卻壓抑的聲音傳來──Meteion。她低語生命的虛無：幸福必將失落，愛情必將破碎，一切終將歸於無意義。然而，曉之血盟回應：即便知曉悲傷，他們仍選擇承受、懷抱希望、持續戰鬥。絕望的重壓使 Thancred 消失於她的背影之後。轉瞬間，眼前展開的是 Ultima Thule──漂泊於星海的虛空之境。荒蕪卻仍可容納生命。懷抱恐懼與決心，他們踏上了這片未知的前線。</p>
-    <p>諸神黃昏號穿越虛無，在夢的盡頭，兩道熟悉的聲音震動了寂靜──Hythlodaeus 與 Emet-Selch。他們未現身，卻低聲訴說：歷史縱使一次次落幕，總會有人接續舞台，新的故事必將誕生。而這段旅程，也終需迎來落幕。他們的祝福，化為勇氣伴隨在場的同伴。眼前展開的，是漂泊於群星間的荒寂之地──Ultima Thule。</p>
-    <p>Livingway 確認此處環境尚能容納生命，眾人因而開始探索。然而壓迫感揮之不去，空氣沉重，腳步迷離，仿佛大地本身由絕望所構成。Thancred 已隨 Meteion 的幻影消失無蹤，其餘同伴則下定決心追尋他的足跡。</p>
-    <p>腦海中縈繞著眾人的聲音：Fourchenault 的自豪、Ameliance 默默的祈禱、Cid 的保證、Forum 的信任、各族的願望，以及 Loporrits 的引導。諸神黃昏號凝聚了過去與現在無數雙手的努力，是星球最後的希望。此刻退卻，便是辜負一切。懷抱恐懼與希望，曉之血盟踏入 Ultima Thule 的大地。那裡潛藏著絕望，也將決定群星的命運。</p>`,
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>臨行前，Ojika Tsunjika 引述 Galuf Baldesion 的教誨：「切莫屈服於憤怒與憎恨，越過它們方能找到真正的力量。」在 Labyrinthos，眾人齊聲支持──Alpha 的鳴叫、Varshahn 談及人與龍的羈絆、Erenville 將未來託付、Nidhana 祈求希望影響 akasa，Wilfsunn 緬懷 Moenbryda，而學者們則解說 Loporrit 技術與以太理論的融合。最終 Fourchenault 公布船名 Ragnarok，象徵 Dalamud 碎片與 Louisoix 的遺志。隨後 Sicard 帶來部族盟友，以信仰之力將 Mothercrystal 化為溫和神祇以驅動方舟。臨別之際，Ameliance 雖未能現身，卻送上祈禱；Tataru 保證將消息傳遍諸國。於是眾人立於承載犧牲、團結與希望的 Ragnarok 前，迎來 Fourchenault 的最後祝福：「去吧……願諸神庇佑。」</p>
+      <p>在眾人祈福之下，曉之血盟登上了諸神黃昏號。眾人推舉 Alphinaud 下達發射指令，他高聲宣告：「出發吧──奔向遙遠群星與無盡彼方！」引擎在 Mothercrystal 化成的神祇力量下怒吼，巨艦破空而出，Garuda 與 Lord of Revel 的風將其推送至蒼穹深處。隨著群星陷入死寂，一道柔和卻壓抑的聲音傳來──Meteion。她低語生命的虛無：幸福必將失落，愛情必將破碎，一切終將歸於無意義。然而，曉之血盟回應：即便知曉悲傷，他們仍選擇承受、懷抱希望、持續戰鬥。絕望的重壓使 Thancred 消失於她的背影之後。轉瞬間，眼前展開的是 Ultima Thule──漂泊於星海的虛空之境。荒蕪卻仍可容納生命。懷抱恐懼與決心，他們踏上了這片未知的前線。</p>
+      <p>諸神黃昏號穿越虛無，在夢的盡頭，兩道熟悉的聲音震動了寂靜──Hythlodaeus 與 Emet-Selch。他們未現身，卻低聲訴說：歷史縱使一次次落幕，總會有人接續舞台，新的故事必將誕生。而這段旅程，也終需迎來落幕。他們的祝福，化為勇氣伴隨在場的同伴。眼前展開的，是漂泊於群星間的荒寂之地──Ultima Thule。</p>
+      <p>Livingway 確認此處環境尚能容納生命，眾人因而開始探索。然而壓迫感揮之不去，空氣沉重，腳步迷離，仿佛大地本身由絕望所構成。Thancred 已隨 Meteion 的幻影消失無蹤，其餘同伴則下定決心追尋他的足跡。</p>
+      <p>腦海中縈繞著眾人的聲音：Fourchenault 的自豪、Ameliance 默默的祈禱、Cid 的保證、Forum 的信任、各族的願望，以及 Loporrits 的引導。諸神黃昏號凝聚了過去與現在無數雙手的努力，是星球最後的希望。此刻退卻，便是辜負一切。懷抱恐懼與希望，曉之血盟踏入 Ultima Thule 的大地。那裡潛藏著絕望，也將決定群星的命運。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
     acq:`<div class="stack">
       <div class="row"><b>任務發布</b> 奧吉卡・津吉卡 <small class="muted">（古薩雷安, X: 9.2, Y: 11.2）</small></div>
     </div>`,
@@ -166,7 +185,8 @@ const panels = {
   story:  document.getElementById('panel-story'),
   acq:    document.getElementById('panel-acq'),
   unlockq:document.getElementById('panel-unlockq'),
-  followq:document.getElementById('panel-followq')
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
 };
 
 function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
@@ -178,12 +198,32 @@ function applyLang(lang){
   const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
   renderPanel(activeBtn.dataset.tab, lang);
 }
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
 function renderPanel(key, lang){
   const t = i18n[lang] || i18n.EN;
   Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
   panels[key].classList.add('active');
-  panels[key].innerHTML = t[key];
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
 }
+
 tabBtns.forEach(btn=>{
   btn.addEventListener('click', ()=>{
     tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
@@ -191,6 +231,7 @@ tabBtns.forEach(btn=>{
     renderPanel(btn.dataset.tab, getLang());
   });
 });
+
 langToggle.addEventListener('click', ()=>{
   const cur = getLang();
   const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
@@ -198,41 +239,39 @@ langToggle.addEventListener('click', ()=>{
   applyLang(next);
 });
 
-/* —— 長文自動收合（依字數自動出現） —— */
-const readMoreLabels = {
-  EN: {more:'Read more', less:'Show less'},
-  JP: {more:'続きを読む',   less:'折りたたむ'},
-  ZH: {more:'展開全文',     less:'收合內容'}
-};
-function makeStoryCollapsible(lang){
-  const panel = document.getElementById('panel-story');
-  if(!panel) return;
-  const textLen = panel.textContent.trim().length;
-  if(textLen < 800) return;
-  const inner = panel.innerHTML.trim();
-  const wrap = document.createElement('div');
-  wrap.className = 'story-collapsible';
-  wrap.innerHTML = inner;
-  const btn = document.createElement('button');
-  const L = readMoreLabels[lang] || readMoreLabels.EN;
-  btn.className = 'story-toggle';
-  btn.textContent = L.more;
-  btn.addEventListener('click', ()=>{
-    const on = wrap.classList.toggle('story-expanded');
-    btn.textContent = on ? L.less : L.more;
-  });
-  panel.innerHTML = '';
-  panel.appendChild(wrap);
-  panel.appendChild(btn);
-}
-/* 掛鉤 renderPanel：切到 Story 時套用收合 */
-const _origRenderPanel = renderPanel;
-renderPanel = function(key, lang){
-  _origRenderPanel(key, lang);
-  if(key==='story') makeStoryCollapsible(lang);
-};
-
 applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'belaug-ffxiv/FFXIV_Library',
+  repoId: 'R_kgD0Pyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
 </script>
 </body>
 </html>
