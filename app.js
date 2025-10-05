@@ -332,10 +332,10 @@ const itemsSuffixEl= document.getElementById('itemsSuffix');
 const i18n = {
   EN: {
     langLabel: 'EN',
-    tagline: '`The <b>FFXIV Library</b> is an extension of my YouTube channel.
+    tagline: `The <b>FFXIV Library</b> is an extension of my YouTube channel.
     Each video preserves the story’s atmosphere as it unfolds, while the Library offers fuller story details, quest records, and background notes —
     so you can both enjoy the videos and fully understand the tale behind them.
-    If you enjoy this journey, you’re welcome to visit <a href="https://ko-fi.com/belaug" target="_blank" rel="noopener">Ko-fi</a> and buy me a cup of coffee!`',
+    If you enjoy this journey, you’re welcome to visit <a href="https://ko-fi.com/belaug" target="_blank" rel="noopener">Ko-fi</a> and buy me a cup of coffee!`,
     searchPH: 'Search title, series, tags, chapter…',
     itemsSuffix: 'items',
     categories: [
@@ -379,12 +379,13 @@ const i18n = {
     ],
     clear: 'Clear filters',
   },
+
   JP: {
     langLabel: 'JP',
-    tagline: '<b>FFXIV Library</b> は、私の YouTube チャンネルを拡張したアーカイブです。
+    tagline: `<b>FFXIV Library</b> は、私の YouTube チャンネルを拡張したアーカイブです。
     映像は物語の空気をそのままに、Library では各動画のストーリー内容やクエスト記録、背景解説をより詳しく掲載しています。
     映像を楽しみながら、物語をより深く理解していただけます。
-    もしこの旅を気に入ってくださったなら、<a href="https://ko-fi.com/belaug" target="_blank" rel="noopener">Ko-fi</a> でコーヒーを一杯ご馳走くださいね。',
+    もしこの旅を気に入ってくださったなら、<a href="https://ko-fi.com/belaug" target="_blank" rel="noopener">Ko-fi</a> でコーヒーを一杯ご馳走くださいね。`,
     searchPH: 'タイトル・シリーズ・タグ・章… を検索',
     itemsSuffix: '件',
     categories: [
@@ -428,12 +429,13 @@ const i18n = {
     ],
     clear: '条件をクリア',
   },
+
   ZH: {
     langLabel: 'ZH',
-    tagline: '<b>FFXIV Library</b> 是我 YouTube 頻道的延伸資料館。
+    tagline: `<b>FFXIV Library</b> 是我 YouTube 頻道的延伸資料館。
     影片保留故事當下的氛圍，而 Library 為每支影片補上更完整的故事內容、任務紀錄與背景說明，
     讓你可以同步欣賞影片也可以完全理解劇情。
-    若你喜歡這份旅程，也歡迎到 <a href="https://ko-fi.com/belaug" target="_blank" rel="noopener">Ko-fi</a> 請我喝杯咖啡喔～',
+    若你喜歡這份旅程，也歡迎到 <a href="https://ko-fi.com/belaug" target="_blank" rel="noopener">Ko-fi</a> 請我喝杯咖啡喔～`,
     searchPH: '搜尋標題、系列、標籤、章節…',
     itemsSuffix: '項內容',
     categories: [
