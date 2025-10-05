@@ -89,12 +89,16 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
           <div id="panel-story"   class="tab-panel active"></div>
           <div id="panel-acq"     class="tab-panel"></div>
           <div id="panel-unlockq" class="tab-panel"></div>
           <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -106,7 +110,7 @@ const i18n = {
   EN:{
     langLabel:'EN',
     pageTitle:'Sylph-management',
-    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest' },
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
     readMore:'Show more', readLess:'Show less',
     story:`<div class="clamp" data-collapsed="true">
       <p>Having formally completed your enlistment, Minfilia sets aside ceremony and turns to you with a request. At the behest of the Order of the Twin Adder, the Scions have been studying the sylphs—an enigmatic beast tribe dwelling in the Twelveswood, known to worship the Primal Ramuh.</p>
@@ -128,7 +132,7 @@ const i18n = {
   JP:{
     langLabel:'JP',
     pageTitle:'青葉の思惑',
-    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト' },
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
     readMore:'全文を表示', readLess:'折りたたむ',
     story:`<div class="clamp" data-collapsed="true">
       <p>正式な手続きを終えた ミンフィリア は、改まった口調を解き、あなたに頼みごとを切り出す。双蛇党の依頼により、暁の血盟はシルフ族についての調査を行っていた。彼らは黒衣森に住まう蛮族であり、雷の蛮神「ラムウ」を信仰している。</p>
@@ -150,7 +154,7 @@ const i18n = {
   ZH:{
     langLabel:'ZH',
     pageTitle:'森靈的意圖',
-    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務' },
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
     readMore:'展開全文', readLess:'收合內容',
     story:`<div class="clamp" data-collapsed="true">
       <p>在完成正式的入伍手續後，Minfilia 收起禮節，語氣變得鄭重。她告訴你，因應 Twin Adder 的委託，Scions 已著手研究棲息於黑衣森林的神秘族群──Sylph。他們信奉雷之 Primal「Ramuh」，外表飄忽如浮動的蔬草，性情卻相對和善，具備溝通的可能性。</p>
@@ -178,7 +182,8 @@ const panels = {
   story:  document.getElementById('panel-story'),
   acq:    document.getElementById('panel-acq'),
   unlockq:document.getElementById('panel-unlockq'),
-  followq:document.getElementById('panel-followq')
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
 };
 
 function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
@@ -212,8 +217,9 @@ function renderPanel(key, lang){
   const t = i18n[lang] || i18n.EN;
   Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
   panels[key].classList.add('active');
-  panels[key].innerHTML = t[key];
-  if(key === 'story') wireClamp(panels[key], t);
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
 }
 
 tabBtns.forEach(btn=>{
@@ -232,6 +238,38 @@ langToggle.addEventListener('click', ()=>{
 });
 
 applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'belaug-ffxiv/FFXIV_Library',
+  repoId: 'R_kgD0Pyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
 </script>
 </body>
 </html>
