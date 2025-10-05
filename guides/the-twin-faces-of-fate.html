@@ -66,12 +66,18 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="notes">Additional Notes</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="lyrics">Lyrics</button>
+          <!-- Comments tab -->
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
           <div id="panel-theme"  class="tab-panel active"></div>
           <div id="panel-acq"    class="tab-panel"></div>
           <div id="panel-notes"  class="tab-panel"></div>
           <div id="panel-lyrics" class="tab-panel"></div>
+          <!-- Comments panel -->
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -83,7 +89,7 @@
       EN:{
         langLabel:'EN',
         pageTitle:'The Twin Faces of Fate',
-        tabs:{theme:'Theme',acq:'Acquisition',notes:'Additional Notes',lyrics:'Lyrics'},
+        tabs:{theme:'Theme',acq:'Acquisition',notes:'Additional Notes',lyrics:'Lyrics',comments:'Comments'},
         theme:`<div class="stack"><div class="row">Ul’dah 1.0 Theme</div></div>`,
         acq:`<div class="stack"><div class="row">Obtained in the Lost Canals of Uznair or the Hidden Canals of Uznair.</div></div>`,
         notes:`<div class="stack">
@@ -95,7 +101,7 @@
       JP:{
         langLabel:'JP',
         pageTitle:'運命の交わる街',
-        tabs:{theme:'テーマ',acq:'入手方法',notes:'補足',lyrics:'歌詞'},
+        tabs:{theme:'テーマ',acq:'入手方法',notes:'補足',lyrics:'歌詞',comments:'コメント'},
         theme:`<div class="stack"><div class="row">ウルダハ 1.0 テーマ</div></div>`,
         acq:`<div class="stack"><div class="row">ウズネアカナル深層またはウズネアカナル地下で入手。</div></div>`,
         notes:`<div class="stack">
@@ -107,7 +113,7 @@
       ZH:{
         langLabel:'ZH',
         pageTitle:'命運交織之城',
-        tabs:{theme:'主題',acq:'取得方式',notes:'補充說明',lyrics:'歌詞'},
+        tabs:{theme:'主題',acq:'取得方式',notes:'補充說明',lyrics:'歌詞',comments:'留言'},
         theme:`<div class="stack"><div class="row">烏爾達哈 1.0 主題曲</div></div>`,
         acq:`<div class="stack"><div class="row">可於烏茲奈爾深層運河或烏茲奈爾地底運河取得。</div></div>`,
         notes:`<div class="stack">
@@ -121,9 +127,14 @@
     const langToggle=document.getElementById('langToggle');
     const pageTitle=document.getElementById('pageTitle');
     const tabBtns=[...document.querySelectorAll('.tab-btn')];
-    const panels={ theme:panel('theme'), acq:panel('acq'), notes:panel('notes'), lyrics:panel('lyrics') };
+    const panels={
+      theme:document.getElementById('panel-theme'),
+      acq:document.getElementById('panel-acq'),
+      notes:document.getElementById('panel-notes'),
+      lyrics:document.getElementById('panel-lyrics'),
+      comments:document.getElementById('panel-comments') // 新增
+    };
 
-    function panel(id){ return document.getElementById('panel-'+id); }
     function getLang(){ return localStorage.getItem(LANG_KEY)||'EN'; }
 
     function applyLang(lang){
@@ -133,13 +144,20 @@
       tabBtns.forEach(b=>{ b.textContent=t.tabs[b.dataset.tab]; });
       const active=tabBtns.find(b=>b.getAttribute('aria-selected')==='true')||tabBtns[0];
       renderPanel(active.dataset.tab,lang);
+      // 如果目前就在留言分頁，切語言後重載 giscus
+      if (active && active.dataset.tab==='comments') loadGiscusForCurrentLang();
     }
 
+    // 不覆寫留言容器；進入留言分頁時載入 giscus
     function renderPanel(key,lang){
       const t=i18n[lang]||i18n.EN;
       Object.keys(panels).forEach(k=>panels[k].classList.remove('active'));
       panels[key].classList.add('active');
-      panels[key].innerHTML=t[key];
+      if(key!=='comments'){
+        panels[key].innerHTML=t[key];
+      }else{
+        loadGiscusForCurrentLang();
+      }
     }
 
     tabBtns.forEach(btn=>{
@@ -158,6 +176,38 @@
     });
 
     applyLang(getLang());
+
+    /* === Giscus：單一 Comments 分頁，隨語言切換 === */
+    const GISCUS_CFG = {
+      repo: 'belaug-ffxiv/FFXIV_Library',
+      repoId: 'R_kgD0Pyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwD0Pyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+    };
+    function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+    function loadGiscusForCurrentLang(){
+      const mount = document.getElementById('giscus_container');
+      if (!mount) return;
+      mount.innerHTML = '';
+      const langCode = getLang(); // EN / JP / ZH
+      const s = document.createElement('script');
+      s.src = 'https://giscus.app/client.js';
+      s.setAttribute('data-repo', GISCUS_CFG.repo);
+      s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+      s.setAttribute('data-category', GISCUS_CFG.category);
+      s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+      s.setAttribute('data-mapping', 'specific');
+      s.setAttribute('data-term', location.pathname + '｜' + langCode);
+      s.setAttribute('data-reactions-enabled', '1');
+      s.setAttribute('data-emit-metadata', '0');
+      s.setAttribute('data-input-position', 'bottom');
+      s.setAttribute('data-lang', uiLang(langCode));
+      s.setAttribute('data-theme', GISCUS_CFG.theme);
+      s.setAttribute('crossorigin', 'anonymous');
+      s.async = true;
+      mount.appendChild(s);
+    }
   </script>
 </body>
 </html>
