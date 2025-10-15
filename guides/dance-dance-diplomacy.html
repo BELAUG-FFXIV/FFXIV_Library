@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dance Dance Diplomacy | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Dance Dance Diplomacy (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/rq4oEv9J1ic" title="Dance Dance Diplomacy" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Dance Dance Diplomacy</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true" data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story" class="tab-panel active"></div>
+          <div id="panel-acq" class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel"><div id="giscus_container" style="min-height:320px"></div></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN: {
+    langLabel: 'EN',
+    pageTitle: 'Dance Dance Diplomacy',
+    tabs: { story: 'Story', acq: 'Acquisition', unlockq: 'Unlock Quest', followq: 'Follow-Up Quest', comments: 'Comments' },
+    readMore: 'Show more', readLess: 'Show less',
+    story: `<div class="clamp" data-collapsed="true">
+      <p>With the diplomatic mission to Little Solace at a stalemate, Yda proposes a more heartfelt solution—dancing. After all, you painstakingly learned the sylphs’ customary greeting, yet had no chance to use it. Though Yda’s enthusiasm is cut short by leg cramps, she encourages you to approach the sylphs with sincerity and spirit.</p>
+      <p>As you perform your lively jig, the sylphs begin to open up. Komuxio expresses hope for unity in protecting Little Solace. Others like Knolexia and Dellexia are charmed by your gestures, recognizing your goodwill. Though one admits their secret weaving arts remain out of reach to outsiders, your efforts earn their trust.</p>
+      <p>Upon your return, Yda beams with joy—your dance brought smiles and lifted the spirits of the entire settlement. And as for the better news? Her leg cramps are gone. With friendship rekindled, it’s time to move forward.</p>
+    </div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq: `<div class="stack"><div class="row"><b>Quest Giver</b> Yda <small class="muted">(East Shroud, X:21.9, Y:25.6)</small></div></div>`,
+    unlockq: `<div class="stack"><div class="row"><a class="link" href="first-contact.html">First Contact</a></div></div>`,
+    followq: `<div class="stack"><div class="row"><a class="link" href="forest-friend.html">Forest Friend</a></div></div>`
+  },
+  JP: {
+    langLabel: 'JP',
+    pageTitle: '挨拶は軽快に',
+    tabs: { story: 'ストーリー', acq: '入手方法', unlockq: '開放クエスト', followq: '後続クエスト', comments: 'コメント' },
+    readMore: '全文を表示', readLess: '折りたたむ',
+    story: `<div class="clamp" data-collapsed="true">
+      <p>リトルソルセでの和平交渉が難航するなか、ユウダが提案したのは心からの踊りだった。せっかくシルフ族の挨拶を習得したのだから、実際に披露してみようというのだ。本人も一緒に踊る気満々だったが、足の痙攣によりあえなく断念。それでもあなたには、誠意を込めて舞いを伝えるよう背中を押す。</p>
+      <p>あなたの陽気なステップに、シルフたちが次第に心を開いていく。コムシオはリトルソルセの守護に対する思いを語り、ノレクシアやデレクシアもその舞に感激。秘伝の織技を伝えることはできないとしながらも、彼らはあなたを「友」と認めてくれた。</p>
+      <p>拠点に戻ると、ユウダは大喜び。あなたの踊りがリトルソルセ全体に笑顔をもたらしたという。そして「さらに良い知らせ」として、自身の足の痙攣も完治したと笑う。信頼を取り戻した今、新たな一歩を踏み出す時だ。</p>
+    </div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq: `<div class="stack"><div class="row"><b>クエスト発行</b> イダ <small class="muted">（黒衣森：東部森林, X:21.9, Y:25.6）</small></div></div>`,
+    unlockq: `<div class="stack"><div class="row"><a class="link" href="first-contact.html">シルフ族との架け橋</a></div></div>`,
+    followq: `<div class="stack"><div class="row"><a class="link" href="forest-friend.html">仮宿暮らしの困りごと</a></div></div>`
+  },
+  ZH: {
+    langLabel: 'ZH',
+    pageTitle: '輕快的外交之舞',
+    tabs: { story: '故事概要', acq: '取得方式', unlockq: '解鎖任務', followq: '後續任務', comments: '留言' },
+    readMore: '展開全文', readLess: '收合內容',
+    story: `<div class="clamp" data-collapsed="true">
+      <p>在與 Little Solace 的和平使節任務陷入僵局之際，Yda 提出一個真誠又簡單的建議──跳舞。你費盡心力學會 sylph 的傳統招呼舞，卻遲遲未能施展。雖然她自己因腿抽筋無法共舞，但她堅信，只要你懷著真心，他們一定會明白你的善意。</p>
+      <p>當你在林間翩翩起舞，sylph 們終於敞開心扉。Komuxio 說明自己對守護 Little Solace 的期望，而 Knolexia 與 Dellexia 則因你的舞步而歡喜，視你為「願意理解我們的友人」。儘管有一位表示 sylph 的織術無法外傳，但這份文化差異並未阻礙彼此的理解與善意。</p>
+      <p>回到據點後，Yda 滿臉笑容迎接你──你的舞蹈為整個部落帶來了笑容與希望。而更棒的消息？她的腿抽筋也痊癒了！透過肢體與心意的交流，雙方的友誼終於邁出重要一步。</p>
+    </div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq: `<div class="stack"><div class="row"><b>任務發布</b> 伊達 <small class="muted">（黑衣森東部森林, X:21.9, Y:25.6）</small></div></div>`,
+    unlockq: `<div class="stack"><div class="row"><a class="link" href="first-contact.html">建立與森靈族的連結</a></div></div>`,
+    followq: `<div class="stack"><div class="row"><a class="link" href="forest-friend.html">森林中同伴的煩憂</a></div></div>`
+  }
+};
+
+const langToggle = document.getElementById('langToggle');
+const pageTitle = document.getElementById('pageTitle');
+const tabBtns = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story: document.getElementById('panel-story'),
+  acq: document.getElementById('panel-acq'),
+  unlockq: document.getElementById('panel-unlockq'),
+  followq: document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
