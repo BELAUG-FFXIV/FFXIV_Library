@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sylphish Concerns | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Sylphish Concerns (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative;max-height:360px;overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:"";position:absolute;left:0;right:0;bottom:0;height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card));pointer-events:none;
+    }
+    .expand-wrap{margin-top:12px}
+    .expand-btn{display:inline-block;padding:8px 14px;border-radius:10px;background:var(--card);border:1px solid var(--border);cursor:pointer;font-weight:600}
+    .expand-btn:hover{background:#fffef8}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe src="https://www.youtube.com/embed/noTLZ9lEYOA" title="Sylphish Concerns" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Sylphish Concerns</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story" class="tab-panel active"></div>
+          <div id="panel-acq" class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel"><div id="giscus_container" style="min-height:320px;"></div></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY='ffxiv-guide-lang';
+const i18n={
+EN:{
+  pageTitle:'Sylphish Concerns',
+  tabs:{story:'Story',acq:'Acquisition',unlockq:'Unlock Quest',followq:'Follow-Up Quest',comments:'Comments'},
+  readMore:'Show more',readLess:'Show less',
+  story:`<div class="clamp" data-collapsed="true">
+  <p>Buscarron greets you with a grave expression. While you were away, there were reports of sylphs seen wandering deep in the woods—far from their homeland, and close to these parts. It’s unheard of for sylphs to come so near. Something must have driven them to venture this far. More than likely, the missing sylph elder is among them. He marks the area of their last sighting on your map and asks you to investigate.</p>
+  <p>After surveying the forest and returning, Buscarron listens carefully to your report. When you mention what you saw, his eyes widen—Garleans, here in the Twelveswood? The idea shocks him. First sylphs, now Garleans, and both in the same place—surely that can’t be coincidence. Could the Garleans be tracking the sylphs, perhaps even hunting them? Yet, he shakes his head. Not this deep into the forest. The Wailers’ watchtowers are everywhere; no imperial force could possibly slip through unnoticed… unless someone showed them the way. A grim realization crosses his face—someone who knows Gridania’s defenses must have guided them. A traitor in Gridania.</p>
+  </div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+  acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Buscarron <small class="muted">(South Shroud X:18.1 Y:19.8)</small></div></div>`,
+  unlockq:`<div class="stack"><div class="row"><a class="link" href="like-fine-wine.html">Like Fine Wine</a></div></div>`,
+  followq:`<div class="stack"><div class="row"><a class="link" href="nouveau-riche.html">Nouveau Riche</a></div></div>`
+},
+JP:{
+  pageTitle:'木立を縫う者',
+  tabs:{story:'ストーリー',acq:'入手方法',unlockq:'開放クエスト',followq:'後続クエスト',comments:'コメント'},
+  readMore:'全文を表示',readLess:'折りたたむ',
+  story:`<div class="clamp" data-collapsed="true">
+  <p>ブスカロンは険しい表情であなたを迎えた。あなたが留守の間に報せが入ったという。シルフ族が森に現れたのだ。だがそこは彼らの縄張りではない、この辺りに近い場所だった。シルフ族がこんなにも遠くまで来るなど、聞いたことがない。よほどの理由があったに違いない。行方不明の長老もその中にいるかもしれない。彼は地図に印をつけ、「ここで目撃された」と告げ、調査を頼む。</p>
+  <p>森を調べて戻ると、ブスカロンは真剣に話を聞く。あなたが目にしたものを伝えると、彼は息をのんだ。「ガレマール帝国兵が……？　こんな森の奥に？」最初はシルフ族、そして今度はガレアン族──同じ場所に現れるとは、偶然とは思えない。彼らはシルフ族を追っているのか、それとも狩っているのか……？しかし、すぐに首を振る。「いや、この森の奥深くまで入り込むなど不可能だ。双蛇党の監視塔がいたるところにある。帝国兵が見つからずに通れるはずがない……まさか。」 「まさか誰かが道案内をしたのか。監視塔の位置と見張りの時間を知る者──グリダニアの裏切り者だ。」</p>
+  </div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+  acq:`<div class="stack"><div class="row"><b>クエスト発行</b> バスカロン <small class="muted">黒衣森：南部森林 (X:18.1 Y:19.8)</small></div></div>`,
+  unlockq:`<div class="stack"><div class="row"><a class="link" href="like-fine-wine.html">熟成される友情</a></div></div>`,
+  followq:`<div class="stack"><div class="row"><a class="link" href="nouveau-riche.html">犯人をとっちめろ！</a></div></div>`
+},
+ZH:{
+  pageTitle:'林影間的憂慮',
+  tabs:{story:'故事概要',acq:'取得方式',unlockq:'解鎖任務',followq:'後續任務',comments:'留言'},
+  readMore:'展開全文',readLess:'收合內容',
+  story:`<div class="clamp" data-collapsed="true">
+  <p>Buscarron 神情凝重地迎接你。你離開期間，有消息傳來：有 Sylph 被人看見出現在森林裡——離他們的領地很遠，就在這附近。Sylph 從未踏入過這麼深的區域，必定有什麼重大原因。或許，那位失蹤的長老也在其中。他在你的地圖上標出了目擊地點，請你前去調查。</p>
+  <p>你回來後，Buscarron 聽完報告，神色驟變。「Garleans……？在這片 Twelveswood 裡？」先是 Sylph，現在又是 Garleans，而且都出現在同一地點——這絕非巧合。難道 Garleans 在追蹤 Sylph？甚至是在狩獵他們？他搖了搖頭。「不，帝國軍不可能潛入這麼深的森林。Wailers 的瞭望塔到處都是，不可能沒被發現……除非——」他臉色一沉，低聲道：「除非有人帶他們進來。熟知監視塔位置與巡邏時刻的人……Gridania 的叛徒。」</p>
+  </div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+  acq:`<div class="stack"><div class="row"><b>任務發布</b> 巴斯卡隆　黑衣森林南部 <small class="muted">(X:18.1, Y:19.8)</small></div></div>`,
+  unlockq:`<div class="stack"><div class="row"><a class="link" href="like-fine-wine.html">歷久彌新的情誼</a></div></div>`,
+  followq:`<div class="stack"><div class="row"><a class="link" href="nouveau-riche.html">暴富與陰謀</a></div></div>`
+}
+};
+
+const langToggle=document.getElementById('langToggle');
+const pageTitle=document.getElementById('pageTitle');
+const tabBtns=[...document.querySelectorAll('.tab-btn')];
+const panels={
+  story:document.getElementById('panel-story'),
+  acq:document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments:document.getElementById('panel-comments')
+};
+
+function getLang(){return localStorage.getItem(LANG_KEY)||'EN';}
+function applyLang(lang){
+  const t=i18n[lang]||i18n.EN;
+  pageTitle.textContent=t.pageTitle;
+  langToggle.textContent=`🌐 ${t.langLabel||lang}`;
+  tabBtns.forEach(btn=>{btn.textContent=t.tabs[btn.dataset.tab];});
+  const activeBtn=tabBtns.find(b=>b.getAttribute('aria-selected')==='true')||tabBtns[0];
+  renderPanel(activeBtn.dataset.tab,lang);
+}
+
+function wireClamp(panelEl,t){
+  const clamp=panelEl.querySelector('.clamp');
+  const btn=panelEl.querySelector('[data-role="expand"]');
+  if(!clamp||!btn)return;
+  function setLabel(){const collapsed=clamp.getAttribute('data-collapsed')!=='false';btn.textContent=collapsed?t.readMore:t.readLess;}
+  setLabel();
+  btn.addEventListener('click',()=>{
+    const collapsed=clamp.getAttribute('data-collapsed')!=='false';
+    clamp.setAttribute('data-collapsed',collapsed?'false':'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key,lang){
+  const t=i18n[lang]||i18n.EN;
+  Object.keys(panels).forEach(k=>panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if(key!=='comments')panels[key].innerHTML=t[key];
+  if(key==='story')wireClamp(panels[key],t);
+  if(key==='comments')loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab,getLang());
+  });
+});
+
+langToggle.addEventListener('click',()=>{
+  const cur=getLang();
+  const next=cur==='EN'?'JP':(cur==='JP'?'ZH':'EN');
+  localStorage.setItem(LANG_KEY,next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG={repo:'BELAUG-FFXIV/FFXIV_Library',repoId:'R_kgDOPyh4Kw',category:'General',categoryId:'DIC_kwDOPyh4K84CwPjL',theme:'preferred_color_scheme'};
+function uiLang(code){return code==='JP'?'ja':(code==='ZH'?'zh-TW':'en');}
+function loadGiscusForCurrentLang(){
+  const mount=document.getElementById('giscus_container');
+  if(!mount)return;
+  mount.innerHTML='';
+  const langCode=getLang();
+  const s=document.createElement('script');
+  s.src='https://giscus.app/client.js';
+  s.setAttribute('data-repo',GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id',GISCUS_CFG.repoId);
+  s.setAttribute('data-category',GISCUS_CFG.category);
+  s.setAttribute('data-category-id',GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping','specific');
+  s.setAttribute('data-term',location.pathname+'｜'+langCode);
+  s.setAttribute('data-reactions-enabled','1');
+  s.setAttribute('data-emit-metadata','0');
+  s.setAttribute('data-input-position','bottom');
+   s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
