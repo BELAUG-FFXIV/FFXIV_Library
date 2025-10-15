@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Never Forget | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Never Forget (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+
+    /* 展開/收合 */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/9K6Vd331m_Y"
+              title="Never Forget" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Never Forget</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Never Forget',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>With no urgent fights to break up and the alehouse quiet for once, Buscarron approaches you with a more personal request. He tells you of a Qiqirn named Teteroon—an old friend. After the Calamity, Buscarron had found him collapsed in the Shroud, nearly dead amidst the chaos. He took him in, nursed him back to health, and even gave him work at the Druthers for a time.</p>
+      <p>Eventually, Teteroon spoke of leaving to pursue life as a merchant. He left with a trader bound for La Noscea and hadn’t been heard from since. While cleaning recently, Buscarron discovered something Teteroon had left behind—a scarlet earring he’d cherished. It had likely been forgotten in haste, but Buscarron couldn’t shake the feeling it should be returned.</p>
+      <p>He asks if you’d be willing to track Teteroon down and deliver the earring. He doesn’t know where the Qiqirn ended up, but a Roegadyn friend of his, Baensyng, might. You’ll find him in Hawkers’ Alley, Limsa Lominsa—he keeps close watch over the movements of merchants.</p>
+      <p>Baensyng recognizes the name immediately. Teteroon had once worked alongside Kyokyoroon, a fellow Qiqirn nearby. The two had made good coin together, but Teteroon had abruptly left Limsa, and no one knew why. Baensyng suggests you speak to Kyokyoroon directly—but warns he can be tight-lipped. As a gift, he hands you a chicken egg, grinning that the little rascal loves them more than customers.</p>
+      <p>Sure enough, the moment Kyokyoroon sees the egg, his mood changes entirely. He gushes with delight, claiming he loves chicken eggs more than anything. With trust earned, he explains that Teteroon had gone off in search of “sparklies,” eventually taking work at a trading post—but he can’t recall where. Instead, he directs you to Wineburg, a man at the ferry docks who remembers things better than he does.</p>
+      <p>Wineburg confirms he’d seen Teteroon boarding a ferry to Aleport. He suggests you start your search there and ask for Ahldfoet, an old hand who knows many things.</p>
+      <p>In Aleport, Ahldfoet recalls the Qiqirn well. Teteroon had headed north through Skull Valley, looking for a place run by his kin—likely Memeroon’s Trading Post on the shores of Bronze Lake.</p>
+      <p>You follow the road and finally find him. Teteroon greets you with a familiar blend of suspicion and surprise, asking if you bring something for him. When you reveal the earring, he gasps. He had sworn never to forget it… yet he had. He thanks you over and over, clutching the earring with reverence.</p>
+      <p>Then, softly, he asks how “good Buscarron” is doing. He misses him—misses the days they shared. His voice trails off, full of gratitude and longing.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Buscarron, South Shroud <small class="muted">(X: 18.1, Y: 19.8)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="druthers-house-rules.html">Druthers House Rules</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="microbrewing.html">Microbrewing</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'懐かしき忘れ物',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>珍しく Druthers が静けさを取り戻した頃、Buscarron はあなたに一つ頼み事をする。今回の件は私的な話だという。彼が語るのは、Teteroon という名の Qiqirn のこと──かつての友人だ。</p>
+      <p>天変地異の直後、Buscarron は混乱の中で倒れていた Teteroon を森で見つけた。彼は満身創痍だったが、手当てを受け、やがて Druthers で働くようになった。しばらくして、Teteroon は自分の道を歩むと決意し、La Noscea へ向かう商人の一団と共に町を離れていった。</p>
+      <p>先日店の掃除中、Buscarron は Teteroon の持ち物だった紅色のイヤリングを見つけた。それは彼が大切にしていたものに違いないが、旅立ちの際に忘れていったのだろう。できることなら、それを本人に返してやりたいという。</p>
+      <p>居場所の見当はつかないが、Hawkers’ Alley にいる Roegadyn の Baensyng なら何か知っているかもしれない。彼は商人たちの動向をよく把握している。</p>
+      <p>Limsa Lominsa に向かったあなたを迎えた Baensyng は、Teteroon の名前をすぐに思い出す。彼は近くにいる Kyokyoroon と血縁関係があり、ふたりは一緒に商売をしていたという。だが Teteroon は突然 Limsa を去り、行き先も理由も誰も知らなかった。</p>
+      <p>Baensyng は Kyokyoroon に話を聞くよう勧めるが、彼は口が固い。代わりに鶏の卵を持っていくといいと渡してくれる。「あいつは卵が大好きだからな」と笑いながら。</p>
+      <p>予想通り、卵を見た瞬間に Kyokyoroon の態度は一変。大喜びであなたを歓迎し、Teteroon の話をしてくれる。彼は「キラキラ」を探すために Limsa を離れ、今はどこかの交易所で働いているらしい。ただし場所までは思い出せないという。</p>
+      <p>代わりに Wineburg に聞くよう勧められる。自分は忘れっぽいが、Wineburg はよく覚えていると彼は言う。</p>
+      <p>Wineburg に話しかけると、Teteroon が Aleport 行きの船に乗ったと教えてくれる。現地では Ahldfoet を訪ねるといいと助言を受ける。</p>
+      <p>Aleport の Ahldfoet は Teteroon のことを覚えていた。彼は Skull Valley を越えて北へ向かい、同族が営む交易所──Bronze Lake のほとりにある Memeroon’s Trading Post を目指していたという。</p>
+      <p>道を辿り、ついにあなたは Teteroon を見つける。彼は最初こそ疑いの目を向けたが、あなたが差し出したイヤリングを見て目を丸くする。「絶対に忘れない」と誓ったはずの品を、忘れていた自分に驚きながら、彼は何度も礼を述べる。</p>
+      <p>そして、ふと視線を落としながら尋ねる。「Buscarron は元気？」 かつての日々を思い出すように、Teteroon は小さく、寂しげに微笑んだ。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> バスカロン　黒衣森：南部森林 <small class="muted">(X: 18.1, Y: 19.8)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="druthers-house-rules.html">バスカロンドラザーズの掟</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="microbrewing.html">テテルンのふるまい酒</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'那些被遺忘的溫柔',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Buscarron 難得沒有一堆醉漢要管，主動走向你，語氣比平時柔和許多。他說，想請你幫一個私人忙──關於一位名叫 Teteroon 的 Qiqirn 舊識。</p>
+      <p>天災過後，他曾在 Shroud 裡發現倒在地上的 Teteroon，渾身是傷，幾乎活不下來。他將他帶回 Druthers，小心照料直到康復。那之後，Teteroon 也在酒館幫了好一陣忙，直到他說想自己闖一番天地，便跟著商人團前往 La Noscea 展開新生活。</p>
+      <p>最近打掃時，Buscarron 無意間翻出一只紅色耳環──Teteroon 生前最愛的東西。他想，應該是離開時不小心忘了，心中總覺得，應該親手把這樣重要的東西還給他。</p>
+      <p>他不知道 Teteroon 現在在哪，但他有個在 Limsa Lominsa 的 Roegadyn 朋友 Baensyng，說不定能提供些線索。</p>
+      <p>在 Hawkers’ Alley，Baensyng 一聽到名字便想起來。Teteroon 曾和 Kyokyoroon 一起做過生意，賺了不少錢，但某天卻突然離開 Limsa，不知去向。他建議你親自問問 Kyokyoroon──不過這傢伙嘴巴很緊，要帶點「見面禮」比較保險。說完他塞給你一顆雞蛋，笑說：「他最愛這個了，比客人還重要。」</p>
+      <p>果不其然，一見雞蛋 Kyokyoroon 馬上臉色大變，興奮地說比什麼都愛。話匣子一開，他說 Teteroon 是去找「閃亮亮的東西」，現在在某個交易所工作。只是，他忘了那交易所在哪。</p>
+      <p>他想了一下，說 Wineburg 記憶好得多，可以去碼頭找他問問。</p>
+      <p>Wineburg 說的確有看到 Teteroon，搭船往 Aleport 去了。他建議你一到那邊就去問 Ahldfoet——那位老傢伙什麼都知道一點。</p>
+      <p>果然，Ahldfoet 認得 Teteroon。他說他去了 Skull Valley，再往北走，目標應該是 Bronze Lake 湖畔的 Memeroon’s Trading Post，那是由他們 Qiqirn 經營的地方。</p>
+      <p>你順著路來到交易所，終於再次見到 Teteroon。他一開始還狐疑地看著你，但當你遞上耳環，他眼神瞬間柔和下來。他說，那是他最重要的東西，明明發誓不會忘記……卻還是忘了。他握著耳環不斷向你道謝，眼眶微紅。</p>
+      <p>「Buscarron 好嗎？」 他低聲問，像是在問一個再也回不去的故鄉。他望著湖面，嘴角浮現一絲淡淡的微笑。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 巴斯卡隆　黑衣森林南部 <small class="muted">(X: 18.1, Y: 19.8)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="druthers-house-rules.html">酒館的行規</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="microbrewing.html">特特倫的自釀好酒</a></div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
