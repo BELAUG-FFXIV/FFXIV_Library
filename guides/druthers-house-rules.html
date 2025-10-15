@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Druthers House Rules | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Druthers House Rules (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+
+    /* 展開/收合 */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/Zx5wouCwFIs"
+              title="Druthers House Rules" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Druthers House Rules</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Druthers House Rules',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Though there’s still no word on the sylph elder, Buscarron greets you with a wry grin and suggests you lend a hand while waiting. He motions toward the door, explaining that a drunkard outside is on the verge of starting a brawl. All he asks is that you cool the man off—literally. No fists required, just a bucket of cold water.</p>
+      <p>He hands you the tub and shakes his head. Rowdy guests are one thing, he says, but the moment things turn violent, he has to step in. The Druthers is a place for noise and drink, not blood and broken teeth.</p>
+      <p>Outside, the Midlander is belligerent, slurring insults and puffing his chest with drunken bravado. He turns to you, ready to lash out—until the water hits him square in the face. Gasping at the sudden chill, he curses loudly, sputtering something about “Duskwight scum” before backing off and grumbling that he knows the rules. No fighting in the Druthers.</p>
+      <p>The Duskwight he’d been threatening offers a tired thanks. He claims he could’ve handled the fight himself, but doesn’t want to make trouble for Buscarron—cleaning up blood and teeth wouldn’t be fair on the barkeep.</p>
+      <p>Back inside, Buscarron gives you a nod of approval. Prejudice, he says, has no place under his roof. The man being harassed was a Duskwight Elezen—a people often misunderstood, seen as wild and untrustworthy by those in the cities. True, some can be rough, he admits, but many are no different from anyone else trying to enjoy a drink in peace.</p>
+      <p>He looks around the room, voice low but firm. The Druthers should be a place where coin—not race or name—buys a seat. Anyone who can pay and drink without starting a fight deserves to be welcome.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Buscarron, South Shroud <small class="muted">(X:18.1, Y:19.8)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="spirited-away.html">Spirited Away</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="never-forget.html">Never Forget</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'バスカロンドラザーズの掟',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>シルフ族の elder についてはまだ情報がないが、Buscarron は口元に笑みを浮かべ、待っている間に一つ手伝ってくれないかと提案する。店の外に、今にも暴れ出しそうな酔っ払いがいるというのだ。必要なのは拳ではなく、冷たい水の一桶──ただそれだけ。</p>
+      <p>桶を手渡しながら、彼は苦笑する。酒で騒ぐのは構わないが、暴力は店の品位に関わる。Druthers は、酒と笑い声は許されても、血や歯が飛び交う場所ではないと。</p>
+      <p>外に出ると、酔った Midlander が怒声を上げながら肩を揺らしていた。目が合うなり喧嘩腰になるが、容赦なく水を浴びせかけると、彼は大声で叫び、舌打ちをして後ずさる。「Duskwight のクズが──」と口にしかけるが、すぐに我に返り、「分かってるよ、喧嘩禁止なんだろ」と捨て台詞を吐いて去っていった。</p>
+      <p>一方で、狙われていた Duskwight は肩の力を抜き、あんたが来てくれて助かったと礼を述べる。自分でもどうにかできたが、Buscarron に血と歯の後始末をさせたくなかったのだと。</p>
+      <p>店へ戻ると、Buscarron は頷きながら言う。「あんな些細な偏見で喧嘩が始まるのは御免だ」。標的になったのは Duskwight Elezen──都市に馴染まず森に生きる彼らは、無法者のように見られることが多い。</p>
+      <p>確かに気性が荒い者もいるが、知れば悪い奴ばかりじゃない。Buscarron は言う。「Druthers くらいは、誰でも静かに飲める場所であっていいだろ？ 金さえ払えればな」。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> バスカロン　黒衣森：南部森林 <small class="muted">(X:18.1, Y:19.8)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="spirited-away.html">ただよえる長老</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="never-forget.html">懐かしき忘れ物</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'酒館的行規',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>儘管仍沒有 elder one 的消息，Buscarron 見到你時卻掛著一貫的半笑，說不如趁機幫他一個小忙。他指了指門外，說有個喝醉的傢伙正鬧著要打架，他需要你去「澆醒」他──不是動手，只要這桶冷水就夠了。</p>
+      <p>他把桶遞給你，搖頭嘆氣。店裡鬧哄哄沒關係，喝得高興他也樂見其成，但只要出現暴力，就非得出面制止不可。Druthers 是喝酒、發洩、喧囂的地方，不是灑血與掉牙的場所。</p>
+      <p>你走到店外，只見那名 Midlander 抬著下巴、滿臉通紅，醉語不休。一見你靠近，他立刻惡言相向。但你沒有猶豫，一桶冷水迎面潑去。他大叫出聲，抱怨著「Nophica 的奶啊，也太冷了吧！」雖然還想繼續罵著 Duskwight，但最後只是甩甩頭，悻悻地說知道規矩，不打了。</p>
+      <p>一旁的 Duskwight 向你點頭致意。他說自己原本也應付得了那種膽小鬼，但不想讓 Buscarron 收拾血跡和牙齒，那樣太不值得。</p>
+      <p>回到酒館裡，Buscarron 對你露出滿意的神情。他說自己絕不允許任何人因為偏見就在他店裡起爭執。那名被罵的是一位 Duskwight Elezen，他們總被視為隱居山林的異類，甚至被當作盜賊看待。</p>
+      <p>確實，有些 Duskwight 行事粗魯，但大多數人其實只是想找個地方安靜地喝杯酒。Buscarron 說，Druthers 至少應該是一個不論出身，只要願意付錢、和平飲酒就能被接納的地方──你說是不是？</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 巴斯卡隆　黑衣森林南部 <small class="muted">(X:18.1, Y:19.8)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="spirited-away.html">迷途的長老</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="never-forget.html">那些被遺忘的溫柔</a></div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
