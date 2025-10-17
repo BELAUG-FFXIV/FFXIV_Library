@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Nouveau Riche | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Nouveau Riche (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative;max-height:360px;overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{content:"";position:absolute;left:0;right:0;bottom:0;height:72px;background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card));pointer-events:none;}
+    .expand-wrap{margin-top:12px}
+    .expand-btn{display:inline-block;padding:8px 14px;border-radius:10px;background:var(--card);border:1px solid var(--border);cursor:pointer;font-weight:600}
+    .expand-btn:hover{background:#fffef8}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left"><a class="home" href="../index.html">🏠 Home</a></div>
+      <div class="right"><button id="langToggle" class="icon-btn">🌐 EN</button></div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd"><div class="video-wrap"><iframe src="https://www.youtube.com/embed/aJIYgd0jMQ0" title="Nouveau Riche" allowfullscreen></iframe></div></div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Nouveau Riche</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story" class="tab-panel active"></div>
+          <div id="panel-acq" class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel"><div id="giscus_container" style="min-height:320px;"></div></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY='ffxiv-guide-lang';
+const i18n={
+EN:{
+  pageTitle:'Nouveau Riche',
+  tabs:{story:'Story',acq:'Acquisition',unlockq:'Unlock Quest',followq:'Follow-Up Quest',comments:'Comments'},
+  readMore:'Show more',readLess:'Show less',
+  story:`<div class="clamp" data-collapsed="true">
+  <p>Buscarron confides that he may have identified the traitor aiding the Garleans. A regular at his tavern—once living modestly on soup and ale—has recently taken to ordering the finest wines and meats. The man is no merchant but a Wood Wailer named Laurentius. Suspecting him of selling information, Buscarron asks you to find Laurentius in the South Shroud and stop him if he is indeed in league with the Empire.</p>
+  <p>When confronted, Laurentius denies wrongdoing, but fragments of his muttering betray the truth: he has been selling patrol routes and rations for coin. Cornered, he confesses his guilt, claiming he only wished to change his fortunes in a world ruled by wealth. As Garleans appear to back him, Laurentius mocks your resolve—but unexpected allies, poachers and hunters alike, rise to your aid. Together you defeat the Imperial forces.</p>
+  <p>Shaken, Laurentius admits that Buscarron’s faith and your courage have opened his eyes. He resolves to confess his crimes to the Order of the Twin Adder, entrusting you with his final message: “Tell Buscarron…thank you.” Later, Buscarron confirms that Laurentius has surrendered himself. Though what he did was unforgivable, Buscarron hopes he will be given a chance at redemption. With the matter resolved, he brings word that the missing sylph elder has at last been found.</p>
+  </div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+  acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Buscarron <small class="muted">(South Shroud X:18.1 Y:19.8)</small></div></div>`,
+  unlockq:`<div class="stack"><div class="row"><a class="link" href="sylphish-concerns.html">Sylphish Concerns</a></div></div>`,
+  followq:`<div class="stack"><div class="row"><a class="link" href="into-the-beasts-maw.html">Into the Beast’s Maw</a></div></div>`
+},
+JP:{
+  pageTitle:'犯人をとっちめろ！',
+  tabs:{story:'ストーリー',acq:'入手方法',unlockq:'開放クエスト',followq:'後続クエスト',comments:'コメント'},
+  readMore:'全文を表示',readLess:'折りたたむ',
+  story:`<div class="clamp" data-collapsed="true">
+  <p>ブスカロンは、帝国に内通している裏切り者の正体に心当たりがあると打ち明ける。かつては質素に暮らしていた常連客が、最近では高価なワインや上等な肉ばかりを注文するようになったというのだ。彼は商人ではなく、ウッド・ワイラーのローレンティウス。ガレマール帝国に情報を売っていると疑い、サウスシュラウドで彼を探し出し、悪事を働いているようであれば止めてほしいと頼まれる。</p>
+  <p>ローレンティウスを問い詰めると、最初は否定するものの、巡回路や配給の情報を金で売っていたことを吐露する。貧しさと絶望の中で、金こそが力だと信じた末の裏切りだった。やがてガレマール帝国兵が現れ、彼はあなたを嘲笑うが、山賊や狩人たちが駆けつけ、共に戦う。帝国兵を撃退したのち、ローレンティウスはブスカロンの言葉を思い出し、自らの愚かさを悟る。</p>
+  <p>彼は双蛇党へ出頭し、罪を告白する決意を固めると、「ブスカロンに感謝を伝えてほしい」とあなたに託す。後にブスカロンは、ローレンティウスが自首したと知らせる。罪は重いが、まだ救いの余地があると信じ、彼の更生を願うのだった。そしてブスカロンは、新たな報せを伝える──行方不明だったシルフ族の長老が発見された、と。</p>
+  </div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+  acq:`<div class="stack"><div class="row"><b>クエスト発行</b> バスカロン <small class="muted">黒衣森：南部森林 (X:18.1 Y:19.8)</small></div></div>`,
+  unlockq:`<div class="stack"><div class="row"><a class="link" href="sylphish-concerns.html">木立を縫う者</a></div></div>`,
+  followq:`<div class="stack"><div class="row"><a class="link" href="into-the-beasts-maw.html">獄の底から響く声</a></div></div>`
+},
+ZH:{
+  pageTitle:'暴富與陰謀',
+  tabs:{story:'故事概要',acq:'取得方式',unlockq:'解鎖任務',followq:'後續任務',comments:'留言'},
+  readMore:'展開全文',readLess:'收合內容',
+  story:`<div class="clamp" data-collapsed="true">
+  <p>Buscarron 向你吐露心聲，懷疑一名協助 Garlean 的叛徒已浮出水面。這名老客原本過著清貧的生活，卻近來開始點最昂貴的酒與肉。那人不是商人，而是 Wood Wailer 的 Laurentius。Buscarron 請你前往 South Shroud，查出真相，若他真與帝國勾結，就必須阻止他。</p>
+  <p>你找到 Laurentius 時，他起初矢口否認，但隨著言語洩露真相──他確實以巡邏路線與糧食情報換取金錢。陷入絕境後，他坦承一切：不是為了背叛，只是為了金錢、為了活下去。Garlean 的士兵隨即現身支援他，而你則與意想不到的盟友──獵人與盜匪──並肩作戰，最終粉碎帝國勢力。</p>
+  <p>戰後，Laurentius 承認是 Buscarron 的信念與你的勇氣讓他醒悟。他決心前往 Order of the Twin Adder 自首，並請你轉達最後的話：「替我向 Buscarron 道謝。」稍後，Buscarron 得知他已親自走進巢穴坦承罪行。雖然他的行為難以饒恕，Buscarron 仍希望他有機會贖罪。此事告一段落後，Buscarron 帶來新的消息──失蹤的 sylph 長老，終於被找到了。</p>
+  </div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+  acq:`<div class="stack"><div class="row"><b>任務發布</b> 巴斯卡隆　黑衣森林南部 <small class="muted">(X:18.1, Y:19.8)</small></div></div>`,
+  unlockq:`<div class="stack"><div class="row"><a class="link" href="sylphish-concerns.html">林影間的憂慮</a></div></div>`,
+  followq:`<div class="stack"><div class="row"><a class="link" href="into-the-beasts-maw.html">來自地底的聲響</a></div></div>`
+}
+};
+
+const langToggle=document.getElementById('langToggle');
+const pageTitle=document.getElementById('pageTitle');
+const tabBtns=[...document.querySelectorAll('.tab-btn')];
+const panels={story:document.getElementById('panel-story'),acq:document.getElementById('panel-acq'),unlockq:document.getElementById('panel-unlockq'),followq:document.getElementById('panel-followq'),comments:document.getElementById('panel-comments')};
+
+function getLang(){return localStorage.getItem(LANG_KEY)||'EN';}
+function applyLang(lang){
+  const t=i18n[lang]||i18n.EN;
+  pageTitle.textContent=t.pageTitle;
+  langToggle.textContent=`🌐 ${t.langLabel||lang}`;
+  tabBtns.forEach(btn=>{btn.textContent=t.tabs[btn.dataset.tab];});
+  const activeBtn=tabBtns.find(b=>b.getAttribute('aria-selected')==='true')||tabBtns[0];
+  renderPanel(activeBtn.dataset.tab,lang);
+}
+function wireClamp(panelEl,t){
+  const clamp=panelEl.querySelector('.clamp');const btn=panelEl.querySelector('[data-role="expand"]');
+  if(!clamp||!btn)return;
+  function setLabel(){const collapsed=clamp.getAttribute('data-collapsed')!=='false';btn.textContent=collapsed?t.readMore:t.readLess;}
+  setLabel();
+  btn.addEventListener('click',()=>{const collapsed=clamp.getAttribute('data-collapsed')!=='false';clamp.setAttribute('data-collapsed',collapsed?'false':'true');setLabel();});
+}
+function renderPanel(key,lang){
+  const t=i18n[lang]||i18n.EN;
+  Object.keys(panels).forEach(k=>panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if(key!=='comments')panels[key].innerHTML=t[key];
+  if(key==='story')wireClamp(panels[key],t);
+  if(key==='comments')loadGiscusForCurrentLang();
+}
+tabBtns.forEach(btn=>{btn.addEventListener('click',()=>{tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));btn.setAttribute('aria-selected','true');renderPanel(btn.dataset.tab,getLang());});});
+langToggle.addEventListener('click',()=>{const cur=getLang();const next=cur==='EN'?'JP':(cur==='JP'?'ZH':'EN');localStorage.setItem(LANG_KEY,next);applyLang(next);});
+applyLang(getLang());
+
+const GISCUS_CFG={repo:'BELAUG-FFXIV/FFXIV_Library',repoId:'R_kgDOPyh4Kw',category:'General',categoryId:'DIC_kwDOPyh4K84CwPjL',theme:'preferred_color_scheme'};
+function uiLang
+function uiLang(code){return code==='JP'?'ja':(code==='ZH'?'zh-TW':'en');}
+function loadGiscusForCurrentLang(){
+  const mount=document.getElementById('giscus_container');
+  if(!mount)return;
+  mount.innerHTML='';
+  const langCode=getLang();
+  const s=document.createElement('script');
+  s.src='https://giscus.app/client.js';
+  s.setAttribute('data-repo',GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id',GISCUS_CFG.repoId);
+  s.setAttribute('data-category',GISCUS_CFG.category);
+  s.setAttribute('data-category-id',GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping','specific');
+  s.setAttribute('data-term',location.pathname+'｜'+langCode);
+  s.setAttribute('data-reactions-enabled','1');
+  s.setAttribute('data-emit-metadata','0');
+  s.setAttribute('data-input-position','bottom');
+  s.setAttribute('data-lang',uiLang(langCode));
+  s.setAttribute('data-theme',GISCUS_CFG.theme);
+  s.setAttribute('crossorigin','anonymous');
+  s.async=true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
