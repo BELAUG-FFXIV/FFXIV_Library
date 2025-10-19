@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Terror at Fallgourd | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Terror at Fallgourd (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    /* 展開/收合 */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/xH8yWVSWy70"
+              title="Terror at Fallgourd" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Terror at Fallgourd</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Terror at Fallgourd',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>After your return from Thanalan, Minfilia greets you with urgent news from the sylphs. A figure matching Lahabrea’s description has been sighted in the North Shroud—his appearance coinciding with a string of mysterious deaths. Convinced that he is involved, Minfilia entrusts you with continuing the investigation. She advises you to speak with Noraxia for details, and to tread carefully.</p>
+      <p>Noraxia explains that one of her friends in the Ashcrown Consortium relayed a troubling report: a miner named Medrod encountered a masked man accompanied by a grotesque, floating creature. Noraxia believes this “sinister one” to be none other than Lahabrea, and urges you to speak with Medrod at Fallgourd Float.</p>
+      <p>Upon arrival, you find the miner in a state of panic, haunted by what he witnessed. He trembles, convinced death is coming for him. Only after you calm his nerves does he regain composure enough to recount his story. He describes seeing a masked man in black leading a monstrous fiend—nothing but wings, fangs, and a single, unblinking eye—and beside him, the lifeless body of a woman.</p>
+      <p>Believing the man to be a servant of Thal come to claim her soul, Medrod fled in terror. When he learns you are investigating the same masked stranger, his companions, Aideen and Ivaurault, step forward, vowing to assist you—if only to spare themselves from Medrod’s continued hysteria. Grateful for your kindness, Medrod steels himself to help you uncover the truth behind the horror that has shaken the North Shroud.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Minfilia <small class="muted">(The Waking Sands, X:6.9, Y:6.1)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="back-to-square-one.html">Back to Square One</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="ziz-is-so-ridiculous.html">Ziz Is So Ridiculous</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'浮き村の怪事件',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>サナランでの任務を終えたあなたに、ミンフィリアが急報を伝える。シルフ族の友人たちからの知らせによると、ラハブレアの特徴に一致する人物が黒衣森北部森林で目撃されたという。さらにその周辺では、不審な死が相次いでいるとのことだった。彼女は確信する──この一連の事件の背後に、あの仮面の男が関わっていると。調査の続行をあなたに託し、詳しいことはノラクシアから聞くよう指示する。</p>
+      <p>ノラクシアは、友人であるアッシュクラウン商会の者から奇妙な話を聞いたという。採掘者のメドロッドが、黒衣をまとい仮面をつけた男と、翼と牙を持つ不気味な魔物を目撃したというのだ。彼女はその「邪悪なる者」こそラハブレアに違いないと考え、北部森林フォールゴード・フロートにいるメドロッドを訪ねるよう勧める。</p>
+      <p>現地で出会ったメドロッドは怯え切っていた。恐怖のあまり錯乱し、自分もいずれ死神に取り憑かれると信じていたのだ。あなたが落ち着かせると、ようやく彼は口を開く。「黒衣の仮面の男がいた……そいつの傍らには、翼と牙、巨大な眼球だけの異形が浮かび、そしてその足元には無残に息絶えた女の死体が……」。</p>
+      <p>その瞬間、彼は男を冥府神サルの使いと思い込み、命からがら逃げ出したという。あなたがその仮面の男を追っていると知ると、仲間のアイディーンとイヴォーロが協力を申し出る。「メドロッドの泣き言を二度と聞きたくないからな」と冗談めかして笑いながら。感謝の言葉を述べたメドロッドは、恐怖を乗り越え、事件の真相を突き止める覚悟を決めるのだった。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> ミンフィリア　西ザナラーン：砂の家 <small class="muted">(X:6.9, Y:6.1)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="back-to-square-one.html">束の間の帰還</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="ziz-is-so-ridiculous.html">採掘場の切り裂き魔</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'漂浮村的怪事',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>結束在 Thanalan 的任務後，Minfilia 傳來來自 sylph 族的急報：有人在 North Shroud 目擊到與 Lahabrea 外貌相符的男子，且該地近期接連出現多起離奇死亡事件。她深信這並非巧合，請你繼續調查，並建議先向 Noraxia 瞭解詳情。</p>
+      <p>Noraxia 告訴你，她在 Ashcrown Consortium 的友人通報了一起奇怪的事件——一名名為 Medrod 的礦工曾遭遇一位戴著面具、全身黑衣的男子，身旁還有一隻長滿利齒、長著翅膀與巨大獨眼的怪物。她認定這名「sinister one」正是 Lahabrea，請你前往 North Shroud 的 Fallgourd Float 找 Medrod 問清楚。</p>
+      <p>你找到 Medrod 時，他被恐懼逼得語無倫次，相信死神即將來臨。你安撫他後，他才逐漸冷靜下來，回憶起當時的景象──那名黑衣男子與恐怖的異形怪物一同出現，腳邊倒著一名慘死的女子。Medrod 當時以為那人是冥府之神 Thal 的使者，嚇得奪命而逃。</p>
+      <p>當他得知你也在追查同一位蒙面男子時，他的夥伴 Aideen 與 Ivaurault 出面表示願意協助，只為避免再聽 Medrod 歇斯底里的哀號。Medrod 對你的幫助心存感激，鼓起勇氣決心一同揭開這起潛伏於 North Shroud 的恐怖事件真相。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 明菲利亞　薩納蘭西部：覺醒沙之家 <small class="muted">(X:6.9, Y:6.1)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="back-to-square-one.html">回到起點</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="ziz-is-so-ridiculous.html">潛伏於礦場的魔影</a></div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
