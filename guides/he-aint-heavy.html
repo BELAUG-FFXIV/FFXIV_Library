@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>He Ain’t Heavy | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – He Ain’t Heavy (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    /* 展開/收合 */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/-pNqWDdgbnc"
+              title="He Ain’t Heavy" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">He Ain’t Heavy</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'He Ain’t Heavy',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Panic sweeps through Quarrymill as Meffrid discovers that Gallien has gone missing. The wounded Ala Mhigan should never have left his bed, not with his strength so depleted. Fearing the worst, Meffrid begs you to help search for him, urging you to speak first with Albreda.</p>
+      <p>Albreda recalls seeing Gallien depart earlier and entrusts you with a sealed letter he had left behind. In it, he writes of his decision to leave—unable to bear being a burden any longer, and determined to spare his brothers further pain. He implores them to reach Little Ala Mhigo safely, without him. Albreda curses herself for not realizing his intentions sooner, lamenting that in his selfless love, Gallien has chosen a path that can only lead to death.</p>
+      <p>Upon hearing this, Meffrid is stricken with anger and worry. Refusing to abandon his comrade, he rallies his men to scour the Twelveswood in search of the missing soldier. You soon find Gallien collapsed in the wild, beset by goblins, his breath shallow and labored.</p>
+      <p>When Meffrid arrives, Gallien weakly protests, urging the others to go on without him—but Meffrid silences him with fiery resolve. “We are Ala Mhigans,” he declares. “We never forsake one another, come what may. We swore an oath to reclaim our homeland—and we will stand on Ala Mhigan soil again, together or not at all!”</p>
+      <p>Moved to tears, Gallien accepts his captain’s words, and the group returns to Quarrymill. There, Meffrid thanks you for your aid, promising Gallien a proper scolding once he recovers. Though he dislikes staying among those who turned their backs on them, he vows to remain until Gallien regains his strength.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Meffrid <small class="muted">(South Shroud, X:25.6, Y:20.6)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="helping-horn.html">Helping Horn</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="come-highly-recommended.html">Come Highly Recommended</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'異邦の絆',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>クォーリーミルに動揺が走る。メッフリッドがガリアンの姿を見失ったのだ。重傷を負った彼が、この状態で歩き回れるはずがない。最悪の事態を恐れたメッフリッドは、あなたに探索の協力を求め、まずはアルブレダに話を聞くよう頼む。</p>
+      <p>アルブレダは、少し前にガリアンが村を出て行く姿を見たという。そして彼が残した封書を手渡す。その手紙には、「仲間にこれ以上迷惑をかけたくない」との思いが綴られていた。彼は自ら命を絶つ覚悟で森へと入ったのだ。アルブレダは悔しげに唇を噛みしめ、自らが止められなかったことを悔いる。ガリアンの仲間を思う心はあまりにも強く、その無私の愛が彼を破滅へと導こうとしていた。</p>
+      <p>報せを聞いたメッフリッドは激しく動揺し、すぐさま兵を集めて森の捜索を開始する。あなたもともにトゥワイン大森林を駆け、やがて野外で倒れたガリアンを発見する。彼の息は荒く、周囲にはゴブリンの影が迫っていた。</p>
+      <p>駆けつけたメッフリッドは、なおも自分を案じるガリアンを叱咤する。「俺たちはアラミゴの民だ！　どんな苦難があろうと仲間を見捨てはしない！」<br>彼は誓いを思い出させる。「祖国を取り戻すという誓いを忘れるな。アラミゴの大地に再び立つその日まで、共に歩むのだ！」</p>
+      <p>ガリアンは涙ながらに頷き、一行はクォーリーミルへと帰還する。メッフリッドはあなたに深く感謝し、ガリアンが回復した暁には「みっちり説教してやる」と笑みを浮かべる。村に対する複雑な思いを抱えつつも、彼は仲間が再び歩けるようになるまで留まる決意を固めていた。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> メフリッド　黒衣森：南部森林 <small class="muted">(X:25.6, Y:20.6)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="helping-horn.html">角薬が繋ぐ縁</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="come-highly-recommended.html">リトルアラミゴ再び</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'異邦之友',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>當 Meffrid 驚覺 Gallien 失蹤時，整個 Quarrymill 陷入不安。那名傷勢嚴重的 Ala Mhigan 士兵根本不該離開病榻。擔憂最壞的情況發生，Meffrid 緊急請求你的協助，讓你先去詢問 Albreda 是否知道情況。</p>
+      <p>Albreda 回想起 Gallien 早前離開村莊的情景，並交給你一封他留下的密封信。信中寫道，他無法再成為眾人的負擔，決定獨自離去，盼同袍們安全抵達 Little Ala Mhigo。Albreda 讀完後深深自責，懊悔沒能察覺他的心意。她明白 Gallien 那份為同伴犧牲的愛，是會將他送向毀滅的溫柔。</p>
+      <p>得知此事的 Meffrid 震怒又焦急，立刻召集手下展開搜尋。他絕不會放棄任何一位同袍。你們穿越 Twelveswood，在林間深處找到奄奄一息的 Gallien，他的氣息急促，周圍還有潛伏的 goblin。</p>
+      <p>當 Meffrid 趕到時，Gallien 虛弱地請求他們離開，但 Meffrid 以憤怒與信念回應：「我們是 Ala Mhigans，不論苦難絕不拋棄彼此！記住我們的誓言——奪回故鄉的那一天，我們要一起踏上 Ala Mhigo 的土地！」<br>Gallien 聽後熱淚盈眶，點頭應聲。</p>
+      <p>眾人平安返回 Quarrymill。Meffrid 對你表達深深的感謝，並半開玩笑地說等 Gallien 康復後要好好「教訓」他一番。儘管他仍厭惡這個對他們冷漠的村落，卻決定留下，直到戰友能再次站起。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 梅弗里德　黑衣森林南部 <small class="muted">(X:25.6, Y:20.6)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="helping-horn.html">因藥結緣</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="come-highly-recommended.html">再訪小阿拉米格</a></div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
