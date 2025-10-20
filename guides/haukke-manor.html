@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Haukke Manor | BELAUG · FFXIV Library</title>
+  <meta name="description" content="FFXIV ARR 2.0 Dungeon — Haukke Manor（名門屋敷 ハウケタ御用邸 / 名門之家：豪克塔府）：故事概要、需求條件、解鎖任務與後續任務，附影片。">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#ffffff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif; background:var(--bg); color:var(--fg);}
+    .container{max-width:1080px; margin:0 auto; padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border); background:#fff9edb3; backdrop-filter:saturate(120%) blur(6px); position:sticky; top:0; z-index:10}
+    .nav{display:flex; align-items:center; justify-content:space-between; height:60px}
+    .left{display:flex; align-items:center; gap:12px}
+    .home{border:1px solid var(--border); background:#fff; padding:4px 8px; border-radius:8px; text-decoration:none; color:var(--fg); font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex; align-items:center; gap:8px}
+    .icon-btn{background:none; border:none; cursor:pointer; font-size:14px; padding:6px 10px; border-radius:8px}
+    .icon-btn:hover{background:#fff; border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid; grid-template-columns:1.1fr 1fr; gap:20px; align-items:start;}
+    @media (max-width:900px){ .grid{grid-template-columns:1fr} .video-wrap{position:relative; padding-top:56.25%} .video-wrap iframe{position:absolute; inset:0; width:100%; height:100%} }
+    .card{background:var(--card); border:1px solid var(--border); border-radius:16px; box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px; border-bottom:1px solid var(--border); font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%; height:420px; border:0; display:block; border-radius:16px}
+    .tabs{display:flex; gap:8px; padding:12px 12px 0; flex-wrap:wrap}
+    .tab-btn{background:#fff; border:1px solid var(--border); color:var(--fg); border-radius:999px; padding:8px 14px; cursor:pointer; font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent); color:#fff; background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex; flex-direction:column; gap:10px}
+    .stack .row{padding:12px 14px; border:1px dashed var(--border); border-radius:12px; background:#fffdf6}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8; text-decoration:none}
+    .link:hover{text-decoration:underline}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/PTLCAhKp93I" title="Haukke Manor" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Haukke Manor</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true" data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="req">Requirements</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlock">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story" class="tab-panel active"></div>
+          <div id="panel-acq" class="tab-panel"></div>
+          <div id="panel-req" class="tab-panel"></div>
+          <div id="panel-unlock" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const LANG_KEY = 'ffxiv-guide-lang';
+
+    const i18n = {
+      EN:{
+        langLabel:'EN',
+        pageTitle:'Haukke Manor',
+        tabs:{story:'Story', req:'Requirements', acq:'Unlock Quest', unlock:'Follow-Up Quest', comments:'Comments'},
+        story:`<p>Once a serene retreat for the Seedseers to meditate and commune with nature, Haukke Manor gradually fell from grace. To the commonfolk of Gridania, it became a symbol of indulgence and moral decay—a house too lavish for the woods it stood in. Years of protest led to its sale, purchased by a Duskwight noblewoman named Lady Amandine.</p>
+        <p>Though little was known of her origins, whispers painted her as a woman of unbearable vanity. She spent fortunes on potions and unguents—honey from Coerthas, milk from exotic phurbles—all to preserve her flawless beauty. Yet her obsession only deepened, and rumors spread that she had taken to bathing in the blood of her virgin handmaidens.</p>
+        <p>When the Calamity struck, no concoction could hide the scars it left upon her. Faced with the ruin of her face, Lady Amandine turned in desperation to forbidden arts. In one last act of vanity, she offered up her soul to darkness itself—seeking not salvation, but the power to “save face.”</p>`,
+        req:`<div class="stack">
+          <div class="row"><strong>Players:</strong> 1–4 players (1 Tank, 1 Healer, 2 DPS)</div>
+          <div class="row"><strong>Class/Job:</strong> Disciples of War or Magic</div>
+          <div class="row">※ Limited jobs can participate only in a preformed party meeting party size requirements or an unrestricted party, and if duty rules allow.</div>
+          <div class="row"><strong>Level:</strong> 28 (Sync from 31)</div>
+          <div class="row">※ While synced, all item stats are adjusted.</div>
+          <div class="row">※ Role and item level restrictions are lifted for parties meeting minimum size requirements.</div>
+        </div>`,
+        acq:`<div class="stack">
+          <div class="row"><a class="link" href="#">Wrath of the Titan</a></div>
+        </div>`,
+        unlock:`<div class="stack">
+          <div class="row">None</div>
+        </div>`
+      },
+
+      JP:{
+        langLabel:'JP',
+        pageTitle:'名門屋敷 ハウケタ御用邸',
+        tabs:{story:'ストーリー', req:'必要条件', acq:'開放クエスト', unlock:'後続クエスト', comments:'コメント'},
+        story:`<p>かつてハウケタ御用邸は、シードシーアたちが瞑想と精神統一を行う聖なる隠れ家であった。だが時が流れるにつれ、豪奢なその造りはグリダニアの民にとって「節度を失った象徴」として忌み嫌われるようになる。長年にわたる抗議の末、屋敷はダスクワイト族の貴婦人、レディ・アマンディヌの手に渡った。</p>
+        <p>彼女の素性は謎に包まれていたが、その虚栄心は名高く、容姿を保つためにはいかなる出費も惜しまなかったという。クルザス産の稀少な蜂蜜を用いた軟膏や、異国のファーブルの乳を混ぜた香油──日々の美の儀式は狂気へと変わり、「処女の侍女の血で沐浴している」という噂まで囁かれた。</p>
+        <p>そして第七霊災が彼女を襲う。命こそ取りとめたものの、顔に刻まれた醜い傷はどんな秘薬でも覆えなかった。追い詰められた彼女は、ついに禁断の術に手を伸ばし、己の魂を闇へと差し出す。「美しさ」を取り戻すために。</p>`,
+        req:`<div class="stack">
+          <div class="row"><strong>プレイヤー数：</strong>1～4人（タンク1／ヒーラー1／DPS2）</div>
+          <div class="row"><strong>クラス／ジョブ：</strong>ファイター／ソーサラー</div>
+          <div class="row">※ リミテッドジョブは、規定人数の事前結成パーティまたは制限解除パーティかつ規定が許可する場合のみ参加可。</div>
+          <div class="row"><strong>レベル：</strong>28（シンク：31）</div>
+          <div class="row">※ シンク中は全装備ステータスが調整されます。</div>
+          <div class="row">※ 最低人数を満たすパーティではロール／IL制限が解除されます。</div>
+        </div>`,
+        acq:`<div class="stack">
+          <div class="row"><a class="link" href="#">海都の仇敵</a></div>
+        </div>`,
+        unlock:`<div class="stack">
+          <div class="row">なし</div>
+        </div>`
+      },
+
+      ZH:{
+        langLabel:'ZH-TW',
+        pageTitle:'名門之家：豪克塔府',
+        tabs:{story:'故事概要', req:'需求條件', acq:'解鎖任務', unlock:'後續任務', comments:'留言'},
+        story:`<p>Haukke Manor 曾是 Seedseers 靜坐冥想、傾聽自然之聲的聖地，後來卻逐漸被視為奢靡的象徵。對 Gridania 的平民而言，那座宅邸過於華麗，與森林的質樸格格不入。多年抗議之後，它被出售給名為 Lady Amandine 的 Duskwight 貴婦。</p>
+        <p>關於這位夫人的出身眾說紛紜，唯有她的虛榮廣為人知。為了維持無瑕的美貌，她揮金如土——使用來自 Coerthas 的稀蜜、以異國 phurbles 的乳汁製成洗劑。她的美顏儀式愈演愈烈，甚至傳出她以侍女的鮮血沐浴的可怕傳聞。</p>
+        <p>當 Calamity 降臨，再昂貴的藥膏也掩不住那醜陋的傷痕。絕望之中，Lady Amandine 轉向黑暗的禁術，簽下靈魂的契約。她並非為救贖，而是為了那虛妄的目的——「挽回她的容顏」。</p>`,
+        req:`<div class="stack">
+          <div class="row"><strong>人數：</strong>1–4 人（1 坦克／1 治療／2 輸出）</div>
+          <div class="row"><strong>職業：</strong>戰鬥職業／魔法職業</div>
+          <div class="row">※ 限定職業僅能在事先組成符合人數條件的隊伍，或以無限制規則參加，且需符合任務規則允許的情況。</div>
+          <div class="row"><strong>等級：</strong>28（同步至 31）</div>
+          <div class="row">※ 同步時，所有裝備數值將自動調整。</div>
+          <div class="row">※ 當隊伍僅達最低人數時，角色定位與裝備品級限制將解除。</div>
+        </div>`,
+        acq:`<div class="stack">
+          <div class="row"><a class="link" href="#">巨神與海都的宿怨</a></div>
+        </div>`,
+        unlock:`<div class="stack">
+          <div class="row">無</div>
+        </div>`
+      }
+    };
+
+    const langToggle = document.getElementById('langToggle');
+    const pageTitle  = document.getElementById('pageTitle');
+    const tabBtns    = [...document.querySelectorAll('.tab-btn')];
+    const panels = {
+      story : document.getElementById('panel-story'),
+      acq   : document.getElementById('panel-acq'),
+      req   : document.getElementById('panel-req'),
+      unlock: document.getElementById('panel-unlock'),
+      comments: document.getElementById('panel-comments')
+    };
+
+    function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+    function applyLang(lang){
+      const t = i18n[lang] || i18n.EN;
+      pageTitle.textContent = t.pageTitle;
+      langToggle.textContent = `🌐 ${t.langLabel}`;
+      tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+      const activeBtn = tabBtns.find(b=>b.getAttribute('aria-selected')==='true') || tabBtns[0];
+      renderPanel(activeBtn.dataset.tab, lang);
+      if (activeBtn && activeBtn.dataset.tab === 'comments') loadGiscusForCurrentLang();
+    }
+
+    // 不覆寫留言容器；進入留言分頁時載入 giscus
+    function renderPanel(key, lang){
+      const t = i18n[lang] || i18n.EN;
+      Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+      panels[key].classList.add('active');
+      if (key !== 'comments') {
+        panels[key].innerHTML = t[key];
+      } else {
+        loadGiscusForCurrentLang();
+      }
+    }
+
+    tabBtns.forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+        btn.setAttribute('aria-selected','true');
+        renderPanel(btn.dataset.tab, getLang());
+      });
+    });
+
+    langToggle.addEventListener('click',()=>{
+      const cur=getLang();
+      const next=cur==='EN'?'JP':(cur==='JP'?'ZH':'EN');
+      localStorage.setItem(LANG_KEY,next);
+      applyLang(next);
+    });
+
+    applyLang(getLang());
+
+    /* === Giscus：單一 Comments 分頁，隨語言切換（使用新版 repo/ids） === */
+    const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+    };
+    function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+    function loadGiscusForCurrentLang(){
+      const mount = document.getElementById('giscus_container');
+      if (!mount) return;
+      mount.innerHTML = ''; // 清掉舊 iframe/script
+      const langCode = getLang(); // EN / JP / ZH
+      const s = document.createElement('script');
+      s.src = 'https://giscus.app/client.js';
+      s.setAttribute('data-repo', GISCUS_CFG.repo);
+      s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+      s.setAttribute('data-category', GISCUS_CFG.category);
+      s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+      s.setAttribute('data-mapping', 'specific');                   // 使用固定 term
+      s.setAttribute('data-term', location.pathname + '｜' + langCode); // 每語言各自一串
+      s.setAttribute('data-reactions-enabled', '1');
+      s.setAttribute('data-emit-metadata', '0');
+      s.setAttribute('data-input-position', 'bottom');
+      s.setAttribute('data-lang', uiLang(langCode));
+      s.setAttribute('data-theme', GISCUS_CFG.theme);
+      s.setAttribute('crossorigin', 'anonymous');
+      s.async = true;
+      mount.appendChild(s);
+    }
+  </script>
+</body>
+</html>
