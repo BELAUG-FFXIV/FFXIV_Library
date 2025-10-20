@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Wrath of the Titan | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Wrath of the Titan (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    /* 展開/收合 */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/cQaDTOtnY7I"
+              title="Wrath of the Titan" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Wrath of the Titan</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Wrath of the Titan',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>The Maelstrom calls for aid. Minfilia explains that kobolds near Limsa Lominsa have reawakened Titan, a peril beyond any single beast tribe. She and Y’shtola recall the old havoc: years before the Grand Companies were reformed, Leviathan and Titan converged upon the seawall until mercenaries hired by Merlwyb held them at bay. Primals return so long as suffering wills them into being. Worse, unlike Ifrit, little is known of Titan; the only force to defeat him—the Company of Heroes—disbanded five years ago and left no chronicles. Y’shtola warns that even with Maelstrom support, you may be overmatched; the Echo won’t avail you here—only steel. You accept. Minfilia assigns the Scions: Thancred and Yda to petition the Grand Companies, Urianger to alert the Students of Baldesion (and Alphinaud), Papalymo to compile what little lore on Titan exists. You’ll be briefed further in the Sailors Ward—go provision yourself and walk in the Light of the Crystal.</p>
+      <p>At the Waking Sands, the halls buzz: Papalymo urges seeking former Company of Heroes; Noraxia jokes about making “walking ones” quiet; Arenvald beams—he’s to guard Noraxia; Biggs and Wedge offer practical help; Urianger speaks of spirits soaring as primals fall.</p>
+      <p>At Maelstrom Command, High Commander R’ashaht Rhiki confirms kobolds have moved south from O’Ghomoro—after crystals, fodder for their primal. Admiral Merlwyb arrives to thank you and to level with you: Limsa has long fought Sahagin and kobolds; in the past they turned to the Company of Heroes, but now they must rely on the Scions of the Seventh Dawn. Y’shtola pointedly notes the thalassocracy once made a pact to keep to their lands—was it not Lominsans who broke it? Merlwyb owns the fault, but remorse won’t spare the city from Titan’s wrath. Aether flows already roil inland; she asks for your help, promising the Maelstrom’s full support. Y’shtola concludes: the kobolds are no longer amenable to negotiation; prepare for conflict—first by learning all you can from the mercenaries who beat Titan before. R’ashaht mentions a former member said to work at the Grey Fleet mills in lower La Noscea.</p>
+      <p>At the mills, Y’shtola muses that heroes who toppled Titan and Leviathan seldom choose anonymity. You find Trachtoum, singing a ribald tavern tune; grumbling about fame, he nevertheless boasts he was once the Company’s best axeman and invites your questions.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Minfilia <small class="muted">(The Waking Sands, X:6.9, Y:6.1)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="skeletons-in-her-closet.html">Skeletons in Her Closet</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="tales-from-the-tidus-slayer.html">Tales from the Tidus Slayer</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'海都の仇敵',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>黒渦団から救援要請が届く。ミンフィリアは、リムサ・ロミンサ近郊のコボルド族が蛮神タイタンを再蛮神化させたと告げる。かつてはリヴァイアサンとタイタンが防波堤で相まみえ、提督が雇った傭兵によって辛くも撃退された歴史がある。だが、苦しみが続く限り蛮神は呼び戻される。イフリートと違い、タイタンについての知見は乏しい。過去に討ち倒した伝説の傭兵団も五年前に解散し、記録は残らない。ヤ・シュトラは警鐘を鳴らす――エコーは通じぬ、頼れるのは剣のみだと。あなたは依頼を受諾。ミンフィリアは暁の血盟を動かす。サンクレッドとイダは各グランドカンパニーへ支援を要請、ウリエンジェはバルデシオン委員会（およびアルフィノ）へ連絡、パパリモはタイタン資料の取りまとめ。補給を整え、「船乗りの街区」で戦術説明を受けよ、と送り出す。</p>
+      <p>砂の家は活気づく。パパリモは「元傭兵団員」を当たれと示唆し、ノラクシアは軽口を叩き、アレンヴァルドはノラクシアの護衛任務に胸を躍らせ、ビッグスとウェッジは実務支援を約す。ウリエンジェは「蛮神が倒れるたび士気は高まる」と静かに語る。</p>
+      <p>黒渦団司令部で高司令が報告。オ・ゴモロから南下する動き、狙いはクリスタル――蛮神の糧である。そこへ提督メルウィブが直々に礼を述べ、過去にサハギン族やコボルド族と幾度も争い、蛮神脅威にも対処してきたが、今は暁の力に望みを託すと明言する。ヤ・シュトラは、かつて海寇国家が「互いの領域を侵さぬ」と盟約したにもかかわらず、それを破ったのはロミンサ側ではないかと指摘。提督は非を認めつつ、「悔恨でタイタンの怒りは防げぬ」と断ずる。すでに内陸のエーテルにも乱れが出ており、支援を請う。交渉はもはや不可能――まずは過去にタイタンを退けた傭兵たちから学べ、とヤ・シュトラ。高司令は低地ラノシアの製粉所に、元団員が働いているという風聞を伝える。</p>
+      <p>現地でヤ・シュトラは、「タイタンとリヴァイアサンを退けた英雄が、名声から離れて暮らすとは」と感慨を漏らす。あなたは製粉所の男に会う。彼は酒歌を口ずさみつつ渋るが、やがて自らを「かつての傭兵団随一の斧使い」と名乗り、話を聞く構えを見せた。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> ミンフィリア　西ザナラーン：砂の家 <small class="muted">(X:6.9, Y:6.1)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="skeletons-in-her-closet.html">ダルタンクール家の悲劇</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="tales-from-the-tidus-slayer.html">タコタン討伐武勇伝</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'巨神與海都的宿怨',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Maelstrom 請求支援。Minfilia 說，Limsa Lominsa 附近的 kobolds 已再次召喚 Titan；她與 Y’shtola 回顧往事：在 Grand Company 重組以前，Leviathan 與 Titan 曾同時逼近海牆，所幸 Merlwyb 延聘的傭兵勉力擊退。只要苦難與憎恨仍在，primals 便不會真正消失。更糟的是，與 Ifrit 不同，Scions 對 Titan 幾乎一無所知；唯一曾擊敗牠的 Company of Heroes 已於五年前解散且無留下紀錄。Y’shtola 警告：Maelstrom 的支援仍可能不足，Echo 幫不上忙，你得以利刃求生。你同意出征。Minfilia 立即佈署：Thancred、Yda 走訪各 Grand Company；Urianger 聯絡 Students of Baldesion 與 Alphinaud；Papalymo 匯整所有 Titan 情報。你將在 Sailors Ward 接收戰術簡報，先整補再上路。</p>
+      <p>Waking Sands 內眾聲鼎沸：Papalymo 建議尋找 Company of Heroes 舊部；Noraxia 打趣；Arenvald 因成為她的護衛而自豪；Biggs、Wedge 提供修繕支援；Urianger 說每斬一尊 primal，士氣便更昂揚。</p>
+      <p>在 Maelstrom Command，高階指揮 R’ashaht Rhiki 指出 kobolds 自 O’Ghomoro 南移，目標是 crystals。Merlwyb 親至致謝，也坦承：Limsa 長年與 Sahagin、kobolds 交鋒，過去仰賴 Company of Heroes，如今唯有寄望 Scions of the Seventh Dawn。Y’shtola 提醒：海權政體曾與獸族立約各守疆域，是 Lominsans 先破約，怎能怪獸族護家？Merlwyb 接受責任，但痛悔救不了這座城；內陸 aether 已現紊亂，她懇請你出手，並承諾 Maelstrom 全力支援。Y’shtola 斷言：kobolds 已無和談空間；先向曾擊敗 Titan 的傭兵取經。R’ashaht 指出 lower La Noscea 的 Grey Fleet 製粉場有前團員出沒。</p>
+      <p>來到 mills，Y’shtola 感嘆這等功業竟選擇淡出人群。你找到正哼著酒歌的 Trachtoum；他先抱怨名氣帶來的打擾，又自稱昔日 Company 的「最強斧手」，願意聽你問個明白。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 明菲利亞　薩納蘭西部：覺醒沙之家 <small class="muted">(X:6.9, Y:6.1)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="skeletons-in-her-closet.html">深藏於達爾坦庫爾家的秘密</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="tales-from-the-tidus-slayer.html">塔可坦的討伐傳奇</a></div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
