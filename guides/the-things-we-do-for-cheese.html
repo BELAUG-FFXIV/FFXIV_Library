@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Things We Do for Cheese | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – The Things We Do for Cheese (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    /* 展開/收合 */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/wSHyEIOxeOE"
+              title="The Things We Do for Cheese" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">The Things We Do for Cheese</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'The Things We Do for Cheese',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>At Costa del Sol, Wheiskaet admits the final ingredient was never meant for you—Brayflox, his former quartermaster, planned to deliver it herself. But trouble at the Longstop forced an indefinite delay, and though he says nothing of the details, he fears the worst. Unable to go himself, he bids you hurry to the Hidden Falls docks and speak with Ozun Nazun, who will send you on to Raincatcher Gully, where Brayflox and her people have made their home.</p>
+      <p>At the docks, Ozun Nazun squints at your urgency—something amiss at the goblin settlement?—then points you to the skipper who’ll ferry you across. In Raincatcher Gully, Brayflox Alltalks explains in her clipped gobbie-speech: a “flighty-beast” drove her flock from Brayflox’s Longstop. If you want the promised treat, first help them take their home back.</p>
+      <p>Within the Longstop, panic flares and is stamped out in quick succession. Brayflox dashes off to handle sudden threats; you press on and reclaim the camp. In the aftermath, she thanks you, praising your quick plans and fighty-think, and presents the prize: goblin cheese—stinky-sweet, special-made by secret gobbie arts. “No party complete without gobbie gouda,” she insists.</p>
+      <p>Back in Costa del Sol, Wheiskaet takes one sniff and grimaces—no mistaking that unholy stench. All the same, he allows, such smell often heralds flavor. As for how it’s made? Best not to ask. He still shudders to remember what kind of milk the goblins use.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Wheiskaet <small class="muted">(Eastern La Noscea – Costa del Sol, X:32.6, Y:30.5)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="there-and-back-again.html">There and Back Again</a></div>
+      <div class="row"><b>Unlock Dungeon</b> <a class="link" href="brayflox-longstop.html">Brayflox’s Longstop</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="what-do-you-mean-you-forgot-the-wine.html">What Do You Mean You Forgot the Wine</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'ブレイフロクスの珍チーズ',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>コスタ・デル・ソルで、ヴェイスケートは明かす。最後の食材は本来あなたの役目ではなく、かつての物資係であるブレイフロクスが自ら届けるはずだった――だが「ブレイフロクスの野営地」で事態が起こり、引き渡しは無期限の延期に。詳細は伝わらないが、状況は深刻かもしれない。自ら助けに行けない彼は、あなたに「隠れ滝の船着場」へ急ぎ、オズン・ナズンに会って「レインキャッチャー樹林」の一角に住むブレイフロクスたちのもとへ向かえと託す。</p>
+      <p>船着場でオズン・ナズンは、ゴブリンの集落で何かあったのかと訝しみつつ、渡し守の船に乗れと教える。やがて「レインキャッチャー樹林」で出迎えたブレイフロクス・オールトークスは、例の“飛び回る獣”に追われ、民が「ブレイフロクスの野営地」から退いたこと、約束の珍味を渡すにはまず奪還が先決だと訴える。</p>
+      <p>野営地の内部では、突発の脅威にブレイフロクスが駆けつけ、あなたは進撃して拠点を取り戻す。戦いの後、彼女は機転と用意周到さを称え、秘伝の製法で作る「ゴブリンチーズ」を手渡す。「宴に欠かせぬ一品だ」と誇らしげに。</p>
+      <p>コスタ・デル・ソルに持ち帰ると、ヴェイスケートはひと嗅ぎして顔をしかめる――間違いなく“あの匂い”だ。とはいえ、強烈な臭気はしばしば旨味の証でもある。製法か？　知らぬが仏だ、と肩をすくめ、どんな乳を使うのかを知ってしまった日の戦慄は忘れられないと苦笑する。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> ヴェイスケート　東ラノシア：コスタ・デル・ソル <small class="muted">(X:32.6, Y:30.5)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="there-and-back-again.html">思い出の土産酒</a></div>
+      <div class="row"><b>ダンジョン開放</b> <a class="link" href="brayflox-longstop.html">奪還支援 ブレイフロクスの野営地</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="what-do-you-mean-you-forgot-the-wine.html">ごちそうには美酒を</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'為了起司，不惜一切',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>在 Costa del Sol，Wheiskaet 坦言：最後一樣材料原本不是你的任務——是他過去的軍需官 Brayflox 要親自送來。但 Brayflox’s Longstop 出了狀況，交付無限期延後；細節未明，他擔心情勢不妙。無法親自動身，他請你立刻前往 Hidden Falls docks 找 Ozun Nazun，由他指引你渡往 Raincatcher Gully，Brayflox 和她的族人就住在那裡。</p>
+      <p>在碼頭，Ozun Nazun 先是狐疑地問起 goblin 聚落出了什麼事，接著要你去找渡船的 skipper，會載你過去。抵達 Raincatcher Gully，Brayflox Alltalks 以她特有的 gobbie 語氣解釋：一頭 “flighty-beast” 把族人從 Brayflox’s Longstop 趕走。想要她承諾的 gobbietreat，就先幫忙把家園奪回。</p>
+      <p>進入 Longstop 後，驚險接連而至又被迅速平定；Brayflox 時而衝去處理突發威脅，你則一路推進，終於收復營地。事畢，她向你致謝，稱讚你的 plansmaking 與 fighty-think，並交出獎品：goblin cheese——又臭又甜，出自祕傳的 gobbie 工藝；她還笑說：「沒有 gobbie gouda，宴會就不算完整。」</p>
+      <p>將 goblin cheese 帶回 Costa del Sol，Wheiskaet 嗅了嗅便面露難色——這股可怕的味道錯不了。不過，他也承認這種氣味往往意味著濃郁滋味。至於是怎麼做的？還是不知道比較好——他至今一想到 goblin 用的是哪種 milk，就忍不住打冷顫。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 維斯凱特　拉諾西亞東部：科斯塔・德爾・索爾 <small class="muted">(X:32.6, Y:30.5)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="there-and-back-again.html">帶著回憶歸來的酒</a></div>
+      <div class="row"><b>解鎖地城</b> <a class="link" href="brayflox-longstop.html">奪回布雷福洛克斯野營地</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="what-do-you-mean-you-forgot-the-wine.html">盛宴怎能少美酒</a></div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
