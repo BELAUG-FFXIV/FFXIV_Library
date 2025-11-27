@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>In the Company of Heroes | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – In the Company of Heroes (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:1px solid transparent;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border-color:var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- Left: Video -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/W2g0ok1tn5c"
+              title="In the Company of Heroes" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right: Title + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">In the Company of Heroes</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'In the Company of Heroes',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Y’shtola reads the weariness on your face: to be made to fetch provisions for a banquet in your own honor while Titan’s shadow hangs over all—yet you bore it with grace.
+At the gathering, Gegeruju offers profuse apologies, and Wheiskaet lays the truth bare: the errands were trials. Long ago, five of the Company of Heroes swore that any who would follow them against a primal must be judged by deeds, not fame. If even one found the aspirant wanting, the attempt would end there; if found worthy, they would lend all aid. Sending the unready to die before Titan would be unconscionable.</p>
+      <p>One by one, the veterans speak. Landenel calls you brave, walking into danger despite warnings. U’odh Nunh praises unquestionable skill—prey stalked, and the strike delivered when the moment came. Shamani Lohmani sees kindness and the allies it attracts. Brayflox Alltalks chirps approval of a “talentful plansmaker,” a tricksy foe for the mighty rockman. Wheiskaet concurs: the Company judges you a worthy challenger. Let the Lord of Crags fall, and let a new legend be written—[Forename] [Surname], Titan’s Bane.</p>
+      <p>Laughter and music swell. Y’shtola thanks you for indulging them; U’odh savors old friends and older wine; Landenel grows wistful at the thought of reforming the Company; Brayflox celebrates “tastyfresh treats”; Shamani wishes the day would never end. A bronze-skinned beauty offers congratulations—and, with a playful glance, remarks on your dashing Elezen friend.
+You taste the exotic feast and, for a heartbeat, the world lays itself bare—its true form, its fleeting nature—and you cry out to the heavens in joy.</p>
+      <p>Then come parting words for the road ahead. Shamani bids you think only of the comrades at your side—victory is never won alone. Brayflox urges clever “fighty-think.” Landenel asks you to greet Titan in his name; U’odh reminds you to trust the veteran instincts forged in countless battles. Wheiskaet believes your fortitude will rival the earth itself.
+At last, Y’shtola’s voice cuts through the revelry: this celebration is as much for them as for you, but the battle has not yet begun. The hour is come for the captain to keep his promise—let us speak with him again.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Y’shtola <small class="muted">(Eastern La Noscea, X:32.6, Y:30.5)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="it-was-a-very-good-year.html">It Was a Very Good Year</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="as-you-wish.html">As You Wish</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'永遠なる海雄旅団',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Y’shtola は、その顔に刻まれた疲労を見抜く。己の祝宴のために食材を集めさせられ、しかもタイタンの影が迫る最中……それでも君は静かに耐え抜いた。
+やがて場に姿を現したゲゲルジュが深々と謝罪し、ウェイスケートが真実を語る。あの雑務はすべて「試し」だったのだ。かつて海雄旅団の五人は誓いを立てた――後に続き神を討たんとする者は、名声ではなく行いで量る。ひとりでも不適と見なせば退け、然るべき者であれば全力で助力する。備わらぬ覚悟でタイタンに挑ませるなど、死地へ送るに等しいからだ。</p>
+      <p>そして、ひとりずつ評が下る。ランデネルは警告を意に介さず危地に踏み込む「勇」を、ウ・オ・ヌンは獲物を追い、機を逃さず仕留める「技」を称える。シャマニ・ローマニは情け深さと、それが呼び寄せる同盟者を見たという。ブレイフロクスは「才ある策士、岩の巨人にも手強い」と満足げ。ウェイスケートも同意し、海雄旅団は君を「挑むに値する者」と認める。――さあ、岩神タイタンを討ち、[Forename] [Surname]、新たな伝説を刻め。「タイタン殺し」の誕生だ。</p>
+      <p>酒と音楽が満ちる。Y’shtola は労いを述べ、ウ・オ・ヌンは旧友と古酒を喜び、ランデネルは仲間の再結成に思いを馳せ、ブレイフロクスはご馳走に頬を緩め、シャマニは「この日が終わらなければ」と呟く。褐色の美女が祝辞を贈り、ついでに君のエレゼンの友を「粋な伊達男」と茶化して微笑んだ。</p>
+      <p>異国の珍味を口にした刹那、世界の真が垣間見える。すべてはうつろい、されど確かであると知り、君は天に歓喜を放つ。
+そして出陣の助言が続く。シャマニは「隣に立つ仲間だけを思え、勝利は独りでつかむものではない」と諭し、ブレイフロクスは「賢き戦い」を求め、ランデネルは「会ったら私の名を告げよ」と笑い、ウ・オ・ヌンは経験への信頼を促し、ウェイスケートは「その剛毅は大地に並ぶ」と太鼓判を押す。
+やがて Y’shtola が静かに告げる。祝宴は彼らのためでもあるが、戦いはまだ始まっていない。約束を果たす時だ――隊長と、もう一度話をしよう。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> ヤ・シュトラ　東ラノシア：コスタ・デル・ソル <small class="muted">(X:32.6, Y:30.5)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="it-was-a-very-good-year.html">人の命運、ワインの運命</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="as-you-wish.html">口笛は風に乗り</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'與英雄為伍',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Y’shtola 一眼就看出你的疲憊：在 Titan 壓境之時，還得為屬於自己的宴席張羅物資——而你選擇默默承受。
+席間，Gegeruju 連聲致歉，Wheiskaet 說明一切：那些差事都是試煉。當年 Company of Heroes 的五人曾發誓，凡欲追隨他們向 primal 挑戰者，必以行動而非名聲來衡量；哪怕只有一人認為不合格，也會當場否決；若被認可，便全力相助。讓毫無勝算之輩一波波送死於 Titan 之前，是他們絕不容許的事。</p>
+      <p>評語隨之落下：Landenel 肯定你的勇——明知危險仍直面而上；U’odh Nunh 肯定你的技——如沙之子般潛行伺機，一擊中的；Shamani Lohmani 看見你的善良，與因此匯聚在你身邊的盟友；Brayflox Alltalks 則咂舌稱你是「talentful plansmaker」，足以讓「mighty rockman」吃盡苦頭。Wheiskaet 總結：你已獲 Company 的認可。去擊落 Lord of Crags，讓新篇章寫下你的名——[Forename] [Surname]，Titan’s Bane。</p>
+      <p>笑語與樂聲起伏。Y’shtola 向你致謝；U’odh Nunh 難得離開 Forgotten Springs，與舊友與陳酒同樂；Landenel 因重聚而起舊日情懷，甚至想著是否重組 Company；Brayflox 為滿桌「tastyfresh treats」歡呼；Shamani 盼著這一天不會結束。人群中，一位古銅膚色的美女獻上祝賀，還打趣你那位氣質不凡的 Elezen 朋友。
+你品嚐異國佳饌，剎那間彷彿獲得啟示——現實的真形與其短暫一切同時展露，你忍不住向天呼喊歡喜。</p>
+      <p>臨別叮嚀接連送上：Shamani 要你只想著身邊的同伴——偉大的勝利從非一人之功；Brayflox 叮囑以聰明的「fighty-think」應敵；Landenel 要你當面替他向 Titan 致意；U’odh Nunh 要你信任久經戰陣的直覺；Wheiskaet 則篤定你的堅毅如大地般穩固。
+終於，Y’shtola 壓下喧囂：這場宴會固然屬於大家，但真正的戰鬥尚未開始。是時候讓隊長兌現承諾——我們得再去與他談談了。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 雅・修特拉　拉諾西亞東部：科斯塔・德爾・索爾 <small class="muted">(X:32.6, Y:30.5)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="it-was-a-very-good-year.html">命運與酒香交織的一年</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="as-you-wish.html">如你所願，口笛乘風</a></div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus comments === */
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
