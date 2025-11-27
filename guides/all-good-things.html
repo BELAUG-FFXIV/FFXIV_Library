@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>All Good Things | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – All Good Things (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:1px solid transparent;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border-color:var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    /* 展開/收合 */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/aYj1iGImq-I"
+              title="All Good Things" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">All Good Things</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'All Good Things',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+<p>After Titan falls, Y’shtola tells you that, though word will already have reached Maelstrom Command, protocol requires a formal report—and the honor is yours. She commends you and says you will speak again soon.</p>
+<p>You go to Maelstrom Command in Limsa Lominsa. R’ashaht Rhiki greets you by rank and name, pleased to have your triumph confirmed in person. First Ifrit and now Titan; when she thinks on your deeds, the loss of the Warriors of Light feels less keen. She will relay your report to the Admiral and sends regards to the Scions.</p>
+<p>Minfilia speaks over the linkpearl. Y’shtola has informed her of your success—a great victory for Eorzea—and she is glad that both you and Y’shtola are unscathed. You can look forward to a hero’s welcome. Return to the Waking Sands; there is much to discuss. Godsspeed.</p>
+<p>At Vesper Bay, you hear whispers about commotion and screams from within. Inside the Solar, Noraxia is glad you are safe. The Echo takes you. Minfilia’s words resound—thanks that you are safe; “Louisoix, do you see? Your light shines brightly in this one…” A shout: “Advance no further!” Livia sas Junius demands the one who slew Ifrit and Titan. Tataru whimpers.</p>
+<p>Minfilia tells someone to stay out of sight and leaves a message with you: she will surrender herself on the condition the innocents are spared. Livia mocks “conditions,” grants her courage, and says armor would serve her better. Minfilia insists the one they seek is not here. “Conditions of surrender… denied,” Livia says. A Scion cries, “Cease at once!” “Have you not done enough!” Minfilia answers. “Enough. We leave. Bring the prisoners,” Livia orders—the “High Priestess of the Scions” will suffice; they say she has the Echo.</p>
+<p>The Echo fades. Noraxia, dying, delivers Minfilia’s instruction: if you return, you must claim sanctuary at a church in eastern Thanalan. She tried to protect Minfilia from the imperials. “Forgive this one… Save—”</p>
+<p>At the church, Father Iliud sees your suffering and offers help. He asks what you will say. If you ask forgiveness, he counsels inward reflection and atonement. If you demand a curse and vengeance, he refuses and tells you to ask for justice. If you say “the wild roses are dead,” he understands—you are among friends of the Scions. If you say nothing, he grieves. He asks if Minfilia was among those taken and prays no further harm comes. You may stay as long as you wish. He says he has known Minfilia since childhood and calls Marques—a survivor of Carteneau—to look after you.</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>Quest Giver</b> Y’shtola <small class="muted">(Upper La Noscea, X:30.0, Y:23.1)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="lord-of-crags.html">Lord of Crags</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="you-cant-take-it-with-you.html">You Can’t Take It with You</a></div>
+</div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'灯りの消えた日',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+<p>タイタンを倒したあと、Y’shtola は告げる。黒渦団司令部には既に報せが届いているはずだが、儀礼として正式報告が要る――その栄誉はあなたに相応しい、と。彼女は労い、すぐにまた話そうと言う。</p>
+<p>あなたはリムサ・ロミンサの黒渦団司令部へ向かう。R’ashaht Rhiki はあなたの階級と名で迎え、直接の確認を喜ぶ。イフリート、そしてタイタン――あなたの働きを思えば、「暁光の戦士」不在の痛みは和らぐという。彼女は提督に報告を取り次ぎ、暁の仲間たちへ挨拶を託す。</p>
+<p>リンクパールからミンフィリアの声が届く。Y’shtola から成功の報せを受けた――これはエオルゼアの大勝利で、あなたと Y’shtola が無事であることを喜ぶ。英雄として迎えられるだろう。砂の家に戻ってほしい、話すことが多い。Godsspeed。</p>
+<p>ベスパーベイでは、中の騒ぎや悲鳴が囁かれている。太陽の間では、ノラクシアがあなたの無事を喜ぶ。そこで「エコー」が走る。ミンフィリアの言葉――「彼女（彼）は無事」「ルイゾワ、見ていて？」。そして叫び。「そこまでだ！」リウィア・サス・ユニウスが、イフリートとタイタンを屠った者の引き渡しを要求し、タタルが震える。</p>
+<p>ミンフィリアは誰かに身を隠すよう命じ、あなたに伝言を託す。無辜を救うなら自分が出頭する、と。リウィアは「条件」を嘲り、勇気は認めつつ、鎧のほうが役に立つと皮肉る。ミンフィリアは、探す相手はここにいないと言い切る。リウィアは「降伏条件は却下」と断じ、退却と捕虜の搬送を命じる。「暁の巫女」で当座は足りる、彼女もエコーを持つのだと。</p>
+<p>エコーが解ける。ノラクシアは瀕死の身で、ミンフィリアの言付けを伝える。あなたが戻ったら、東ザナラーンの教会で庇護を求めよ。帝国から彼女を守ろうとしたのだ――「許して……助け……」。</p>
+<p>教会で、司祭イリュドはあなたの苦悩を見て助力を申し出る。あなたに問いかける。懺悔なら内省と贖いを。復讐を求めれば拒み、正義を願えと諭す。「wild roses are dead」と告げれば、ここは暁の友だと明かして自由に語らせる。沈黙なら嘆息する。彼はミンフィリアが連れ去られたのか確かめ、これ以上の害がないよう祈る。あなたはここに留まってよい。彼は幼いころから彼女を知っており、マーケス（カルテノーの生存者）を呼んで、あなたの世話を任せる。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>クエスト発行</b> ヤ・シュトラ　高地ラノシア <small class="muted">(X:30.0, Y:23.1)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="lord-of-crags.html">憤怒の岩神タイタン</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="you-cant-take-it-with-you.html">止まったままの時間</a></div>
+</div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'美好終將落幕',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+<p>擊敗 Titan 之後，Y’shtola 告訴你：Maelstrom Command 雖已得知，但依規定仍需正式通報——這份榮耀由你完成。她稱讚你的表現，說很快再談。</p>
+<p>你前往 Limsa Lominsa 的 Maelstrom Command。R’ashaht Rhiki 以你的軍階與姓名迎接你，樂見你親口證實戰果。先是 Ifrit、接著 Titan；提到你的事跡，她覺得對 Warriors of Light 的思念沒那麼刺痛。她會把報告呈交 Admiral，並代向 Scions 致意。</p>
+<p>linkpearl 傳來 Minfilia 的聲音。Y’shtola 已告訴她你們成功了——這是 Eorzea 的大勝；她也為你與 Y’shtola 平安無事感到欣慰。她要你準備接受英雄式的歡迎，回到 Waking Sands 商議後續。Godsspeed。</p>
+<p>抵達 Vesper Bay，你聽見人們竊竊私語屋內的騷動與尖叫。進入 The Solar，Noraxia 為你的平安高興。Echo 襲來——Minfilia 的話與祈語交疊；隨即一聲「不得前進！」。Livia sas Junius 要求交出斬殺 Ifrit 與 Titan 的人；Tataru 輕聲抽泣。</p>
+<p>Minfilia 要人先躲起來，並託你傳話：只要饒過無辜，她願意自首。Livia 嘲笑「條件」，承認她的勇氣，又譏諷沒有盔甲。Minfilia 堅稱目標不在此處。「投降條件……不接受，」Livia 斷言，下令撤離並帶走俘虜：「High Priestess of the Scions」足堪代替，且她也擁有 Echo。</p>
+<p>Echo 消退。Noraxia 奄奄一息地把 Minfilia 的交代傳給你：若你回來，請到 Eastern Thanalan 的教會尋求庇護。她曾試著保護 Minfilia 不被帝國帶走。「請原諒……救——」。</p>
+<p>在教會裡，Iliud 神父看出你的痛楚並提出幫助，問你要說什麼。若你求赦，他要你向內看、認錯並贖罪；若你求復仇，他拒絕並請你祈求正義；若你說「the wild roses are dead」，他告訴你在這裡可以暢所欲言——這裡是 Scions 的朋友；若你沉默，他為此悲歎。他確認 Minfilia 是否也在被擄之列並祈禱眾人平安，允許你暫住，說自己自她年幼便識得她，並喚來 Carteneau 的生還者 Marques 照看你。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>任務發布</b> 雅・修特拉　拉諾西亞高地 <small class="muted">(X:30.0, Y:23.1)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="lord-of-crags.html">憤怒的岩神泰坦</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="you-cant-take-it-with-you.html">停滯之時，帶不走的一切</a></div>
+</div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
