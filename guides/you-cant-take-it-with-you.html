@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>You Can’t Take It with You | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – You Can’t Take It with You (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:1px solid transparent;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border-color:var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/5g-g5ktZak8"
+              title="You Can’t Take It with You" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">You Can’t Take It with You</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'You Can’t Take It with You',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+<p>Marques stops you gently and asks if you have a moment. A broken horologe was found in the pocket of a man brought here for burial. Something about it feels familiar to him, though he cannot say what. If he could tinker with the device, perhaps it would come back to him.</p>
+<p>He lacks the proper tools. He asks you to go to Camp Drybone to obtain a bull-point chisel and a pair of needle-nose pincers. They are often used by goldsmiths; they would know. He presses a coinpurse into your hand—he does not expect you to pay. “If…if there is anything I can do…please ask,” he adds.</p>
+<p>At Camp Drybone, a traveling goldsmith eyes the purse. “A bull-point chisel, and needle-nose pincers? Those don’t come cheap… Thal’s balls—yes, that will cover it.” Later, when you pass again, he flinches: “You again? No refunds—and there’s nothing wrong with those fine tools!”</p>
+<p>Back at the church, Marques asks if you brought the tools. He takes the horologe, then pauses. “Please wait here.” In moments, it is repaired. The result unsettles him. How did he do it? His hands moved with a mind of their own, deftly manipulating the clockwork with no doubt or uncertainty—as if he had done it countless times before. He apologizes. He asks you to give the horologe to Sister Eluned: the man who owned it is in her care, and it should be returned.</p>
+<p>Sister Eluned greets you: “Good evening. Have you come to pay your respects to this man?” The device is strange to her—does it measure time? Perhaps such things are common in Garlemald; its cities are said to brim with marvelous technologies. If it belonged to the deceased… might he have been a Garlean spy? The authorities in Camp Drybone should perhaps be notified. But she is struck by something else: how did Marques repair it? She knew he had a talent for the trades, yet this goes far beyond mending fences and thatching roofs.</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>Quest Giver</b> Marques <small class="muted">(Eastern Thanalan, X:11.2, Y:21.3)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="all-good-things.html">All Good Things</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="bringing-out-the-dead.html">Bringing out the Dead</a></div>
+</div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'止まったままの時間',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+<p>マーケスがあなたを呼び止める。埋葬のために運ばれてきた男の遺品のポケットから、壊れた懐中時計が見つかったという。どこか「覚え」がある気がするが、思い出せない。いじってみれば何かわかるかもしれない――ただし道具がない。</p>
+<p>彼はあなたにドライボーンのキャンプまで行き、先の尖ったタガネと細口のペンチを手に入れてほしいと頼む。金細工師がよく使うはずだから、尋ねるなら彼らがよいだろう。支払いは求めないと財布を渡し、「自分にできることがあれば、いつでも」と言葉を添える。</p>
+<p>キャンプ・ドライボーンの旅の金細工師は財布を見て眉を上げる。「タガネと先細のペンチ？　安くはないが……おっと、十分だ。毎度あり。」その後もう一度声をかけると、彼は慌てて言う。「返金はしないよ。売った品に問題はないからね！」</p>
+<p>教会に戻ると、マーケスは道具を受け取り、懐中時計に向き合う。「少し待ってください。」やがて装置はたやすく直った。だが彼は戸惑う。なぜ自分にできたのか――手が勝手に、確信をもって歯車を操った。まるで何度も繰り返してきた作業のように。彼は謝り、懐中時計をエリュネ修道女に渡してほしいと頼む。持ち主の男は彼女の世話になっており、返すのがよいだろうと。</p>
+<p>修道女エリュネはあなたに挨拶する。「こんばんは。この方に弔意を？」彼女は奇妙な装置に目を留める――時を計るものなのか？　ガレマールではありふれているのかもしれない。都市は驚くべき技術で満ちていると聞く。もし故人の所有物なら……ガレマールの間者だった可能性も？　ドライボーンの駐在へ知らせるべきかもしれない。だが彼女がさらに驚いたのは別の点だ。どうしてマーケスに修理ができたのか。器用なのは知っていたが、柵直しや屋根葺きの域をはるかに超えている。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>クエスト発行</b> マルケズ　東ザナラーン <small class="muted">(X:11.2, Y:21.3)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="all-good-things.html">灯りの消えた日</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="bringing-out-the-dead.html">静かなる葬送</a></div>
+</div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'停滯之時，帶不走的一切',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+<p>Marques 輕聲攔住你，問你能否抽空看看這只壞掉的 horologe——它是從一名送來下葬的男子口袋裡找到的。他對它有一種莫名的熟悉感，卻說不出為什麼。若能動手調整，也許能喚起記憶。</p>
+<p>他沒有合適的工具，請你代為跑一趟 Camp Drybone，買一支 bull-point chisel 和一把 needle-nose pincers。這些都是金工常用的工具，去問金細工師應該沒錯。他把 coinpurse 交給你，強調費用由他來出；臨走前又補上一句：「如果……如果我能幫上什麼，請一定告訴我。」</p>
+<p>在 Camp Drybone，traveling goldsmith 看了錢袋一愣：「bull-point chisel？還有 needle-nose pincers？這可不便宜……Thal’s balls！嗯，這樣夠了。愉快的交易。」你再經過時，他縮了縮肩：「又是你？先說好不退貨——我賣給你的工具可一點毛病都沒有！」</p>
+<p>回到教會，Marques 問你是否帶回工具。他接過 horologe，忽然要你稍等。很快地，裝置就被修好了，而他自己反而困惑：他到底是怎麼做到的？他的手像有自己的意志，俐落地操弄齒輪，沒有半分遲疑；就像無數次做過一樣。他向你道歉，請你把 horologe 交給 Sister Eluned——原主此刻由她照料，應當物歸原主。</p>
+<p>Sister Eluned 向你點頭致意：「晚上好。你是來向這位致意的嗎？」她打量這個古怪的裝置——你說它是用來計時的？或許在 Garlemald 這類東西很常見；聽說那裡的城市充滿各種神乎其技的科技。若這真是死者的遺物……會不會他其實是 Garlean 的間者？也許該通知 Camp Drybone 的駐軍。不過，她更在意的是另一點：Marques 是怎麼把它修好的？她知道他有些手藝，但這已遠遠超過補柵欄、鋪屋頂的程度了。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>任務發布</b> 馬爾克斯　薩納蘭東部 <small class="muted">(X:11.2, Y:21.3)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="all-good-things.html">美好終將落幕</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="bringing-out-the-dead.html">靜默送別</a></div>
+</div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
