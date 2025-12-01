@@ -349,7 +349,7 @@ If you enjoy your time here, feel free to visit <a href="https://ko-fi.com/belau
       { value: 'RoleQuests',     label: 'Role Quests' },
       { value: 'AlliedSociety',  label: 'Allied Society Quests' },
       { value: 'SideFeature',    label: 'Side / Feature Quests' },
-      { value: 'Hildibrand Adventures',    label: 'Hildibrand Adventures' }
+      { value: 'Hildibrand Adventures',    label: 'Hildibrand Adventures' },
       { value: 'Seasonal',       label: 'Seasonal / Special Events' },
       { value: 'GoldSaucer',     label: 'Gold Saucer' },
       { value: 'BGM',            label: 'BGM' },
