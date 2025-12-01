@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Three Collectors | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Hildibrand Adventures – The Three Collectors (ARR Patch 2.2)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:1px solid transparent;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border-color:var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/LzV1lDSIw0I"
+              title="The Three Collectors" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">The Three Collectors</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'The Three Collectors',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+<p>With Briardien’s plan in motion, Hildibrand cheerfully “summarizes” the strategy: head to the Observatorium, pose as ordinary smallfolk, and immediately ignore those instructions if inspiration strikes. You travel to snowy Coerthas with Gilgamesh grumbling about the cold and vowing vengeance on the demon bird that stole his weapon, then check in with the soldiers guarding the counterfeit Treaty-Blades. Briardien grudgingly accepts you as extra eyes, reminding you the target is a brute in red wielding a halberd. Gilgamesh soon slips away beyond the gates, and every suspicious movement turns out to be him chasing after another bird rather than the elusive duelist.</p>
+<p>Ellie suggests the thief might simply be waiting outside the walls, and advises you to arm yourself. Nashu obligingly digs up an old spear buried in the snow—the very one that once launched Hildibrand to Dalamud—and returns it to him. Determined to avoid violence but “ready for destiny,” the inspector presses on to the eastern roads, where Gilgamesh confides his longing for the bizarre hybrid spear–axe–musket he lost, “the strongest of spears.” When he recognizes Hildibrand’s recovered weapon as that very prize, the two men stubbornly refuse to yield it, each claiming a long history with the spear. Ellie points out they’ve caught the weapon thief in the act, but Hildibrand insists Greg is an honorable duelist who only claims trophies from fair battles─a statement Briardien promptly treats as a confession. Soldiers move to seize Gilgamesh, who storms off in outrage and challenges you to a formal duel behind Griffin Crossing’s doors: defeat him and keep the spear, or lose and forfeit your own weapons, even if you call allies to your side.</p>
+<p>In the end, the halberd satisfies him and Briardien proceeds with the delivery to Vesper Bay, where a dazed Hildibrand lies amid scattered blades. Ellie notices that “Eleazar’s sword” is among them, but quickly realizes every one she picks up is a counterfeit. Lady Durilda arrives demanding her Treaty-Blade, only for Briardien to deduce the truth: the real thief disguised themself as Durilda earlier, let the chaos around Gilgamesh’s arrest distract everyone, and walked away with the genuine blade. A taunting letter arrives—“four hundred years have I slept, one thousand faces do I wear… I shall come to claim the lapis maiden’s virtue”—revealing a new foe: a many-faced phantom thief whose earlier threats match this note. As Briardien fumes, Hildibrand loudly re-accepts the challenge “alone,” Godbert praises him as a true Manderville man, Durilda’s anger melts into laughter at the sight of two “gentleman mummers” dashing about, and Maria giggles beside her. While Hildibrand dramatically wonders if true love can bloom on this battlefield and whether a Manderville man will find a Manderville wife, Nashu’s attention drifts to the strange goggles worn by the phantom’s agents, already dreaming of asking for a pair “next time.”</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>Quest Giver</b> Hildibrand <small class="muted">(Western Thanalan, X:13.1, Y:14.1)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="manderville-men.html">Manderville Men</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="the-business-of-betrothal.html">The Business of Betrothal</a></div>
+</div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'天下無双の挑戦者',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+<p>ブリアルディアンの作戦が動き出す中、ヒルディブランドは改めて方針を「まとめ」る。目的地はクルザスの観測所、任務は「一般市民」に扮して偽のトリーティー・ブレード護送を装うこと──ただし、状況が求めるときは彼の指示を無視して即興で動く、というのがヒルディ流だ。ギルガメッシュは凍える寒さと吹雪に文句を言いつつ、「武器を奪った悪魔の鳥」への復讐を誓いながら同行する。観測所では兵たちが複製品を運び出す準備を進めており、ブリアルディアンはあなたたちをしぶしぶ「増員」として受け入れ、赤い衣服をまとったハルバード使いが現れたら決して単独で挑まず報告するよう命じる。だが、外で目撃される怪しい影の正体は、どれも決闘士ではなく、鳥を追い続けるギルガメッシュだった。</p>
+<p>やがてエリーは、賊が城壁の外で機会をうかがっているのではないかと指摘し、外に出るなら丸腰はやめるべきだと忠告する。ナシュは雪の中から一本の槍を掘り出すが、それはかつてヒルディブランドを赤い月まで打ち上げた、因縁深い槍そのものだった。運命に導かれたとばかりに槍を受け取ったヒルディブランドは、「極力暴力は避ける」と言いつつも武装を整え、観測所の東側で警戒にあたる。そこでギルガメッシュは、自分がこの地で最初に手にした「最強の槍」──槍の穂先に巨大な斧刃と銃身が溶接された奇妙な武器──をどれほど恋しく思っているか語り、その特徴がヒルディブランドの槍と完全に一致した瞬間、ふたりは互いの主張を譲らなくなる。エリーは「武器を奪う賊」を現行犯で押さえたと評するが、ヒルディブランドは「グレッグは正々堂々と決闘で武器を勝ち取っているだけだ」と擁護し、ブリアルディアンはそれをそのまま自白として扱う。激昂したギルガメッシュは兵士に囲まれながらも逃走し、やがてグリフィン・クロッシングの扉の向こうであなたを待ち受け、決闘を申し込む。倒せば槍はあなたのもの、負ければあなたと仲間の武器はすべて彼のコレクション入り──という条件のもと、彼は「巨大化の時間だ」と叫び、本気の戦いに臨む。</p>
+<p>決着後、ギルガメッシュは奪ったハルバードに満足し去っていき、ブリアルディアンは計画通りトリーティー・ブレードの受け渡しに向かう。ベスパーベイで意識を取り戻したヒルディブランドの周りには、エレアザーの愛刀そっくりの剣を含む、多数の刃がばらまかれていた。エリーが手に取ってみると、そのどれもが粗悪な模造品であることが判明する。そこへレディ・ドゥリルダが現れ、トリーティー・ブレードの所在を問い詰めたことで、真犯人の手口が明らかになる。依頼人に化けて先に刀を受け取り、ギルガメッシュ騒ぎで周囲の目を逸らしているあいだに、本物を持って姿を消した──ブリアルディアンはそう読み解き、「決闘士の挑戦状」とされていた文面が実は別人のものだと気づくのだ。</p>
+<p>新たに届けられた手紙には、「四百年の眠り、一千の顔を持つもの……ラピスの乙女の純潔を奪いに行く」と不気味な文言が刻まれている。これは以前トリーティー・ブレードを奪った怪盗が送ったものと同じ書式であり、標的を「ラピスの乙女」と呼ばれる令嬢に移したことを示していた。ブリアルディアンが苛立ちを隠さない一方で、ヒルディブランドは「多面の怪盗」との再戦を高らかに宣言し、ゴッドベルトはそんな息子を「立派なマンダヴィル」と褒めそやす。ドゥリルダは怒りながらも、ヒルディブランドとブリアルディアンが右往左往する姿に思わず笑いを漏らし、マリアとふたりで久しぶりに街へ芝居を観に行こうと提案する。ヒルディブランドは「恋と推理の戦場」で真実の愛は芽生えるのかと大げさなポーズを決め、ナシュは怪盗の手下が着けていた不思議なゴーグルに目を輝かせながら、「次はあれをお願いしてみよう」と、もうすでに次なる騒動を夢見ているのだった。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>クエスト発行</b> ヒルディブランド　西ザナラーン <small class="muted">(X:13.1, Y:14.1)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="manderville-men.html">キケンな彫金師</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="the-business-of-betrothal.html">秤量される金と心</a></div>
+</div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'無雙收藏家的對決',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+<p>在 Briardien 的周密計畫下，Hildibrand 先把行動方案「整理」給大家聽：前往 Coerthas 的 Observatorium，裝成普通小老百姓，依照「名偵探」的指示監視假貨運輸路線──如果情況需要，就果斷拋開那些指示，改用自己的靈感行動。你和眾人一同踏入風雪之地，Gilgamesh 一路抱怨刺骨寒風與沒完沒了的積雪，嘴裡卻仍念念不忘要向奪走他武器的「惡魔之鳥」報仇。抵達 Observatorium 後，士兵們正為多條運輸路線做準備，Briardien 把你們當成額外人手，叮囑若看見身穿紅衣、手持長柄斧的壯漢，只能通報不可逞英雄。偏偏外面每一次可疑動靜，都只是 Gilgamesh 追鳥追到城門口，讓眾人空忙一場。</p>
+<p>Ellie 提醒，賊很可能縮在城牆外等獵物送上門，勸你出門前最好拿件趁手的武器。Nashu 就這樣在雪堆裡挖出一把熟悉的槍矛──當年把 Hildibrand 射上紅月的那一把。Hildibrand 把這視為命運的安排，收下槍矛，嘴上仍說要盡量避免動武，腳步卻已經朝 Observatorium 東側邁去。在那裡，Gilgamesh 描述自己思念的「最強之槍」：槍尖鑲著斧刃，又焊接了火槍槍管，是他抵達這片土地後最珍惜的收藏之一。當他發現 Hildibrand 手中的武器完全符合這個特徵時，兩人同時拒絕退讓，各自宣稱這把槍陪自己征戰多年，怎麼也不能再失去。Ellie 一語道破，他們正好逮到偷武器的賊本人；Hildibrand 卻堅持 Greg 是堂堂正正的決鬥者，武器都是透過公平對決贏來的。Briardien 乾脆把這番話當成自白，下令逮人。憤怒的 Gilgamesh 不願受拘，退入 Griffin Crossing 的門後，向你發出正式挑戰：若你獲勝，槍矛歸你；若你戰敗，你與同伴的武器通通成為他的戰利品，任你帶再多盟友也無濟於事。伴隨著他那句「是時候變大了」，決鬥正式展開。</p>
+<p>之後，Gilgamesh 對手中奪來的長柄斧感到滿意，撤離戰場，Briardien 則照計畫完成「Treaty-Blade 抵達 Vesper Bay」的戲碼。等 Hildibrand 在碼頭附近回過神時，腳邊散落著一地兵器，其中一把外型酷似 Eleazar 的家傳之劍。Ellie 拿起來端詳，卻很快就發現不對勁──不只那一把，現場所有刀劍看起來都是粗糙的仿製品。正當眾人困惑之際，Lady Durilda 氣沖沖地趕到，質問她的 Treaty-Blade 在哪裡。Briardien 當場貫通整個案情：真正的賊先一步偽裝成委託人，趁 Gilgamesh 的騷動吸引所有注意力時，從貨物中調包真品，帶著真正的 Treaty-Blade 消失無蹤，而碼頭上留給他們的只是一堆假貨。所謂「紅衣長柄斧賊」的挑戰書，其實根本出自另一個人之手。</p>
+<p>這時，一封語氣怪異的新信件送到 Hildibrand 手中：「吾已沉眠四百年，吾有千張面孔。汝之所有，即為吾物。我將前來奪走青玉少女的貞潔。」字體與措辭與先前威脅信完全一致，證實真正的幕後黑手，是一名能以千張面孔行走世間的怪盜，現在的目標改成了被稱作「lapis maiden」的貴族小姐。Briardien 對這群「看不出來真相」的同伴不加掩飾地冷嘲熱諷，Hildibrand 卻一口氣再次接受挑戰，自稱會以一人之力對決多面怪盜。Godbert 在旁邊點頭稱讚兒子「果然是 Manderville 之男」，Durilda 則在怒火與無奈之間，被 Hildibrand 和 Briardien 你追我跑的樣子逗笑，與 Maria 一起放聲大笑，甚至興致勃勃地說好久沒去看表演，打算母女倆進城看一出戲。Hildibrand 邊喘邊擺出戲劇化姿勢，大談怪盜覬覦淑女與「戰場上的愛情」，Nashu 則不太在乎推理本身，反而盯著那些戴著奇怪護目鏡的男人，期待下次能問對方要一副戴戴看。故事在這一片混亂卻歡樂的氣氛中暫時落幕，預告著下一場「怪盜對決名偵探」的鬧劇即將登場。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>任務發布</b> 希爾迪布蘭德　薩納蘭西部 <small class="muted">(X:13.1, Y:14.1)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="manderville-men.html">曼德維爾，這個危險的金匠！</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="the-business-of-betrothal.html">金錢與心意被放上天秤的兩端</a></div>
+</div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
