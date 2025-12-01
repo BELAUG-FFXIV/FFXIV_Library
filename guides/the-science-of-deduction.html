@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Science of Deduction | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Hildibrand Adventures – The Science of Deduction (ARR Patch 2.2)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:1px solid transparent;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border-color:var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/CS0mOE5b4Oo"
+              title="The Science of Deduction" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">The Science of Deduction</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'The Science of Deduction',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+<p>Ellie shares what she has learned: the duelist’s next target is the Treaty-Blade, once part of an Ishgardian noble’s collection and now owned by an Ul’dahn collector—Lady Durilda of Vesper Bay. To approach this difficult woman, Ellie plans to use her fondness for rare flowers and drags you along to Camp Drybone to buy Althyk lavender from Tutusi. There, you witness a sharp-tongued “gentleman” expose a staged Amalj’aa attack as murder, reading callused fingers and false alibis with effortless precision. Tutusi explains that this man, Briardien, hails from one of Ishgard’s High Houses and solves crimes simply because he enjoys it—“nothing like that buffoon Hildibrand,” as Ellie mutters that she’d rather not think about him at all.</p>
+<p>Flower in hand, you visit Lady Durilda, only to be dismissed the moment you step inside. She has no need of common adventurers, mocks the idea that she could be won over with a single gift, and declares that she values only beauty that endures “like her own.” Even when Ellie warns her that a notorious duelist is after the Treaty-Blade, Durilda coolly replies that she reads the Mythril Eye and knows the story already; her guards and her chosen “gentleman” are more than enough. She invites you to behold this peerless inspector—just as Hildibrand bursts in with a dramatic vow to guard the blade without sleep until the culprit is brought to justice. A moment later, Briardien arrives, introduces himself as a consulting inspector, and, with a single sniff and a few cutting words, dismisses Hildibrand and Nashu as rank amateurs before walking away with the job, leaving Durilda to order all of you out.</p>
+<p>Before you can depart, Durilda’s maid Maria returns in tears: startled by a strange flying thing while crossing a bridge, she dropped a vase from the Royal House of Thorne into Nophica’s Wells. Durilda explodes, forcing the girl to go back out and find it alone. Hildibrand intervenes, begging to search in her stead and confidently promising to earn Durilda’s respect by recovering the vase. Maria explains how she lost it and admits she’s afraid of the monsters below; Ellie decides to follow Briardien instead, telling Maria to run to you if anything happens. Down at Nophica’s Wells, locals confirm that anything dropped from the bridge is quickly swept downstream, and a traveler named Gilgamesh curses a “demon bird” and the painful trash underfoot. At the water’s edge, Hildibrand spots the shattered vase, crushed beneath Gilgamesh’s heel as he chased the bird that stole his weapon. While Maria despairs, Nashu insists the inspector will think of something, and Hildibrand calmly has everyone gather the scattered fragments, certain that a master artisan who has worked miracles with far less will be able to restore what was broken.</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>Quest Giver</b> Ellie <small class="muted">(Eastern Thanalan, X:10.9, Y:16.4)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="the-immaculate-deception.html">The Immaculate Deception</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="the-hammer.html">The Hammer</a></div>
+</div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'はじまりの予告',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+<p>エリーは、決闘士が狙う次なる標的が「トリーティー・ブレード」であることを明かす。それは元々イシュガルド貴族のコレクションに属していた名剣で、今はベスパーベイに暮らす裕福な商人の妻、レディ・ドゥリルダが買い取ったものだという。気難しい彼女に取り入るため、エリーは希少な花好きという情報を頼りに、あなたを伴ってキャンプ・ドライボーンのトゥトゥシのもとへ向かい、アルジク・ラベンダーを購入する。そこで目の当たりにしたのは、アマルジャ族の襲撃を装った殺人事件を、指先のマメとぎこちない証言だけで見抜く一人の紳士だった。トゥトゥシによれば、彼はイシュガルドの名門に連なるブリアルディアンという男で、「単に好きだから」事件を解決して歩いているらしい。「あの道化ヒルディブランドとは大違いだろう？」という言葉に、エリーは「ヒルディブランドのことは考えたくもない」とため息をつく。</p>
+<p>花束を手にベスパーベイの屋敷を訪ねると、レディ・ドゥリルダは冒険者を見るなり不快感を露わにし、志願者はもう足りていると冷たく言い放つ。贈り物で機嫌を取ろうとする意図も見抜いたうえで、「花の美しさはすぐにしおれる。自分が求めるのは、時を超えて変わらぬ美しさだ」と言い、あなたたちを追い返そうとする。エリーが決闘士によるトリーティー・ブレード狙いの計画を警告しても、「ミスリルアイ」は読んでいるし、護衛も“紳士”も雇ってあるから心配無用だと一蹴する。そして自慢の「稀代の名探偵」を見せてやると言ったまさにそのとき、「夜に行き交う船、闇に灯る灯り──」とお決まりの名乗りと共に、ヒルディブランドが飛び込んでくるのだった。彼は自らを「探偵紳士ヒルディブランド」と名乗り、犯人が捕まるその日まで一睡もせずトリーティー・ブレードを守ると高らかに宣言するが、すぐ後に現れたブリアルディアンは、自身を「コンサルティング・インスペクター」と紹介し、腐臭と硝煙の匂いだけでヒルディブランドとナシュを嗅ぎ分け、「素人芝居」と切り捨てて去っていく。レディ・ドゥリルダは、彼こそが自分の選び抜いた探偵だと言わんばかりに満足げにしつつ、あなたたちに出て行くよう命じる。</p>
+<p>そこへ、メイドのマリアが慌てて戻ってくる。ウルダハで受け取った由緒あるソーン王家ゆかりの花瓶を抱えて帰る途中、橋の上で奇妙な「飛んでいる何か」に驚いて走り出し、ノフィカの井戸に落としてしまったというのだ。レディ・ドゥリルダは、その価値もわからず壊したのかと烈火のごとく怒り、マリアひとりで探しに行くよう命じる。見かねたヒルディブランドは、危険な場所へ少女ひとりを向かわせるわけにはいかないと身代わりを申し出て、花瓶を見つけ出せば自分への信頼も得られると「妙案」を口にする。マリアから詳しい経緯と、ノフィカの井戸周辺に棲む魔物への恐怖を聞き出したヒルディブランドは、ナシュとあなた、それにマリアを引き連れて捜索に向かうことを決めるが、エリーは決闘士の動向を追うためブリアルディアンを追跡することを選び、危険を感じたらこの冒険者のもとへ走るようマリアに言い含める。</p>
+<p>ノフィカの井戸では、橋の上から何かを落とした少女を見たという商人や、「変な翼を持つ獣」を見かけたという者から話を聞き、落し物は流れに乗ってすぐ下流へ流されるだろうと教えられる。さらに、川底のゴミに足を刺されながら「忌々しい魔鳥め」と呪っている旅人ギルガメッシュとも出会う。水際を捜索していたヒルディブランドは、やがて粉々に砕けた花瓶の破片を目にし、それがギルガメッシュが武器を奪った「魔鳥」を追うあまり、誤って踏みつぶしてしまったものだと知る。マリアが顔を青ざめさせる中、ナシュは「きっと名探偵なら何とかしてくれる」と必死に励まし、ヒルディブランドは落ち込むどころか、むしろ顔を輝かせてすべての破片を集めるよう指示する。彼曰く、「もっとひどい状態の品を見事によみがえらせた」名工のもとへ持ち込めば、この程度の壊れ方など問題ではない──こうして、決闘士の事件の陰で、花瓶修復という新たな難題が静かに動き出すのだった。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>クエスト発行</b> エリ―　東ザナラーン <small class="muted">(X:10.9, Y:16.4)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="the-immaculate-deception.html">鍵穴の光は</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="the-hammer.html">白髪の鬼</a></div>
+</div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'推理開端的序曲',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+<p>Ellie 先向你說明自己查到的結果：決鬥士下一個要奪走的目標，是曾屬於 Ishgard 貴族收藏、如今被 Ul’dah 富商之妻買下的名刃 Treaty-Blade，也就是現在收藏在 Vesper Bay 的 Lady Durilda 家中的那一把。為了接近這位難伺候的收藏家，她打算利用對方喜歡稀有花朵的嗜好，帶你一起去 Camp Drybone 向 Tutusi 購買 Althyk lavender。剛好這時，一位陌生的紳士在攤位前輕描淡寫地拆穿了一起「Amalj’aa 襲擊商隊」的假案，光靠手上的繭和破綻就看穿了真相。Tutusi 解釋，那人叫 Briardien，出身 Ishgard 名門，並非正式職務，只是純粹「喜歡破案」才到處介入事件──說到這裡，他還順口把 Hildibrand 比成小丑，讓 Ellie 只能苦笑說，她寧可不要想起那個名字。</p>
+<p>帶著花來到 Vesper Bay 的宅邸，Lady Durilda 一看到是冒險者就露出嫌惡的表情，先是說早就不缺護衛，又嘲諷你們以為送對禮物、說對話就能得到她的青睞。她聲稱自己只重視能跨越時間、永不改變的美，「就像我一樣」，對花這種一下就凋謝的東西毫無興趣。就算 Ellie 提出警告，告訴她有惡名昭彰的決鬥士盯上 Treaty-Blade，她也只回一句「Mythril Eye 我早就看過」，強調自己有整隊護衛，還特別「挑選了一位紳士」負責這件案子。她得意地說要讓你們見識「完美無缺的名偵探」時，Hildibrand 卻先一步衝進大廳，用一貫的誇張台詞亮相，自稱「探查代理人、名偵探 Hildibrand」，並發誓要在犯人落網前絕不安眠，誓死守護 Treaty-Blade。接著現身的 Briardien 則冷靜地自我介紹為「consulting inspector」，光憑一股腐臭與硝磺味就把 Hildibrand 和 Nashu 的名字說了出來，當面把他們貶為「外行人玩偵探遊戲」後，轉身離開跟進調查，讓 Lady Durilda 更加确信自己不需要你們，多次下逐客令。</p>
+<p>正當你們準備離開時，女僕 Maria 慌張地回到屋內。她坦承，自己照母親的吩咐在 Ul’dah 領回一只出自 Royal House of Thorne 的古老花瓶，途中經過橋時被一個奇怪的飛行物嚇到，慌亂逃跑時不慎把花瓶掉進 Nophica’s Wells。Lady Durilda 聽完立刻雷霆大怒，要她立刻回去把花瓶找回來，找到前不准回來。看不下去的 Hildibrand 趕緊請纓，表示這種危險的地方不該讓小女孩一個人前往，還順勢說只要成功找回花瓶，就一定能贏得她的信任，藉此取得調查決鬥士的許可。Maria 說明自己只敢在橋上往下看，因為井底附近的魔物讓她非常害怕；Ellie 則決定追上 Briardien，堅持自己作為記者必須在現場見證決鬥士落網，臨走前只交代 Maria，一旦覺得害怕或有危險，就立刻跑去找你。</p>
+<p>來到 Nophica’s Wells 一帶，你向橋邊的商人和居民打聽，得到的回覆都是「看見女孩掉了什麼東西」、「掉進水裡的東西會很快被沖到下游」之類的線索；一旁還有自稱 Gilgamesh 的旅人，一邊咒罵「偷武器的魔鳥」，一邊抱怨河裡的垃圾刺得腳底生疼。順著水流搜索時，Hildibrand 終於發現一堆碎片──Lady Durilda 的花瓶已被人踩得粉碎，而「肇事者」正是追著那隻魔鳥一路追到河邊的 Gilgamesh。Maria 看見殘骸臉色發白，Nashu 連忙安慰她說，Inspector 一定會想到辦法。Hildibrand 則完全沒有慌亂，只是像往常一樣挺起胸膛，請你們把所有碎片仔細撿起來，並自信滿滿地說，把這些交給那位曾經「用更糟糕的殘片都能起死回生」的名工匠，就還有希望。就這樣，為了追查決鬥士而展開的行動，悄悄與修復一只破碎花瓶的任務交織在一起，朝下一步推進。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>任務發布</b> 艾麗　薩納蘭東部 <small class="muted">(X:10.9, Y:16.4)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="the-immaculate-deception.html">完美無瑕的騙局</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="the-hammer.html">白髮修羅與鐵鎚</a></div>
+</div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
