@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Immaculate Deception | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Hildibrand Adventures – The Immaculate Deception (ARR Patch 2.1)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:1px solid transparent;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border-color:var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/guwBtxnvxOo"
+              title="The Immaculate Deception" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">The Immaculate Deception</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'The Immaculate Deception',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+<p>At Ellie’s prodding, you travel to the Golden Bazaar to meet Humphrey, the supposed “victim” of the duelist. He greets you with loud laughter and claims he drove the villain off as a mighty Warrior of Light, even brandishing his sword as proof. Nashu gasps in admiration—until Ellie appears with Eleazar in tow, and the story collapses. Eleazar reveals he entrusted his late father’s treasured blade and repair money to Humphrey, only for the man to lose the sword in a duel and waste the gil on a chirurgeon. Bald from stress and heartbreak, Eleazar swears he will have his heirloom back, while Humphrey finally breaks down, admits the truth, and shamelessly begs you to help him recover what he squandered.</p>
+<p>Ellie denounces him for stealing another man’s legacy and expecting others to fix his mess, but Hildibrand refuses to abandon him. If Eleazar is to be saved from despair, Humphrey must also be saved from his lies. You question the people of the Golden Bazaar: Beneger confirms the blade was a genuine antique, Lululo condemns Humphrey yet quietly suggests that even a counterfeit might soothe Eleazar in his final days, and Aebbe points you toward the traveling merchant Jojonpa. Jojonpa explains that any dubious antiques he acquires are tossed into a spring east of Camp Drybone—and that a sword resembling Eleazar’s may be lying there now. Torn between honesty and mercy, Hildibrand settles on a temporary ruse that might ease Eleazar’s heart while they search for the true blade.</p>
+<p>At the spring, Jojonpa can no longer hold back his laughter at Hildibrand’s ridiculous outfit. The inspector, declaring himself not yet fully recovered from past injuries, insists he must be smothered in salamander oil before entering the water and asks you—quite seriously—to rub it in. Under his increasingly dramatic groans, you complete the “treatment,” and the pair of you plunge into the cold spring. No sword surfaces where Jojonpa said, but Nashu ends up drenched by a sudden splash, and Ellie warns that anything left here will soon be taken by the commonfolk. Even so, Hildibrand remains cheerfully confident, sends Nashu to Ul’dah for fresh clothes and the strongest hair tonic she can find, and at last presents Eleazar with a blade bearing every familiar chip and scratch.</p>
+<p>Moved to tears, Eleazar blesses you and Hildibrand for returning his father’s sword. Ellie quietly admits she never expected the inspector to go so far for two complete strangers without asking for reward, but Hildibrand simply replies that a gentleman sees the good in every soul and forsakes no one. Just then, a case from Pearl Lane arrives with his new outfit and hair tonic—and a mysterious object lodges itself squarely in his forehead. It is a calling card from the duelist, vowing to come for the collector’s blade. Ellie recognizes it as a challenge; Hildibrand hears only invitation. Declaring himself Hildibrand, agent of enquiry, inspector extraordinaire, he accepts with theatrical flair. Humphrey watches in stunned admiration and whispers that this is no mere Warrior of Light, but a true Gentleman of Light—while, somewhere beneath blue skies and rolling desert, the elusive duelist also prepares for the coming clash.</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>Quest Giver</b> Ellie <small class="muted">(Ul’dah - Steps of Nald, X:8.3, Y:11.1)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="after-her-own-heart.html">After Her Own Heart</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="the-science-of-deduction.html">The Science of Deduction</a></div>
+</div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'鍵穴の光は',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+<p>エリーにけしかけられたあなたは、ゴールドバザーで「被害者」とされる冒険者ハンフリーを訪ねる。彼は豪快に笑い、自分こそが蛮勇なる「光の戦士」であり、決闘で例の決闘士を追い払ったのだと自慢げに語り、手にした剣を誇らしげに見せつける。ナシュは目を輝かせて称賛するが、そこへエリーとエレアザルが現れ、虚勢は一瞬で崩れ去る。エレアザルは、亡き父から受け継いだ宝剣と鍛冶代のギルをハンフリーに託したにもかかわらず、彼が決闘で剣を奪われ、ギルも治療費に使い果たしたことを暴露するのだ。心労のあまり「流れる黄金の髪」を失い、今はつるりとした頭を抱えたエレアザルは、家宝を取り戻さねば決して許さぬと誓い、ハンフリーは観念して真実を白状しながら、図々しくもあなたに助けを請う。</p>
+<p>エリーは「他人の遺産を騙り、自業自得の尻ぬぐいまで他人に押しつけるのか」と激しく糾弾するが、ヒルディブランドは首を横に振る。ハンフリーを見捨てれば、エレアザルの心も救えない──それが紳士の答えだと。あなたはともにゴールドバザーの人々に聞き込みを行う。ベネガーは剣が本物の古代の品だったと認め、贋作に騙される収集家も多いと語る。ルルロはハンフリーへの怒りを隠さない一方で、「本人が安らげるなら、贋作を渡すのも一つの手ではないか」と、老いた男の残り少ない日々を思いやる。アエッベは骨董品に詳しい行商人ジョジョンパの名を挙げ、話はキャンプ・ドライボーン東の泉へとつながっていく。ジョジョンパは、真偽の怪しい品はすべてその泉に投げ捨てていると打ち明け、エレアザルの剣に似た品もそこに沈んでいるかもしれないと言う。</p>
+<p>ジョジョンパはヒルディブランドの奇抜な装いを見てついに笑いを堪えきれなくなるが、当の本人は至って真面目だ。幾度もの負傷からいまだ完全に癒えていないと語り、「水に入る前にはサラマンダーオイルをたっぷり塗り込まねばならない」と主張して、あなたに全身へ塗布する役目を押しつける。子どもの頃に母に手当てを受けた思い出を口にしつつ、痛みと快感が入り混じった大げさなうめき声を上げるヒルディブランドに半ばあきれつつ、あなたはどうにか「治療」を終え、ふたりで泉へ飛び込む。ジョジョンパが言った場所には剣の影は見えず、代わりにナシュが突然の水しぶきで全身びしょ濡れになる。エリーは、この泉が人々の貴重な水源である以上、沈んだ物はすぐ誰かに拾われてしまうだろうと冷静に告げるが、ヒルディブランドはなおも前向きで、ナシュにウルダハへ行って自分の替えの服と、エレアザルのための最強の育毛トニックを買ってくるよう頼む。そうしてついに、彼はエレアザルのもとへ、一目で「父の剣」とわかる傷だらけの古剣を差し出すのだった。</p>
+<p>エレアザルは、刃に刻まれた欠けや傷を確かめながら震える声で礼を述べ、あなたとヒルディブランドに神々の加護を祈る。エリーは、報酬も求めず、ただふたりのためにそこまで骨を折る姿に驚きを隠せないが、ヒルディブランドは「紳士はすべての魂の中に善きものを見出し、決して誰ひとり見捨てたりはしない」と静かに答える。そのとき、パールレーンの行商人から届いた衣服と育毛トニックのケースを受け取ろうとしたヒルディブランドの額に、何かが突き刺さる。そこには「収集家の剣を受け取りに来る」と記された、名もなき差出人の一文──決闘士からの挑戦状があった。これは威嚇だと見抜いたエリーに対し、ヒルディブランドは胸を躍らせ、「探偵紳士ヒルディブランド、挑戦受けて立つ！」と高らかに宣言する。ハンフリーはその雄姿に打たれ、「光の戦士」ではなく「光の紳士」だと感嘆の声を漏らす。そのころ、どこか青空と砂漠が広がる地でも、伝説の剣を求める決闘士が、次なる幕開けに備えて静かに闘志を燃やしていた。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>クエスト発行</b> エリ―　ウルダハ：ナル回廊 <small class="muted">(X:8.3, Y:11.1)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="after-her-own-heart.html">くりかえす恋の悲哀</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="the-science-of-deduction.html">はじまりの予告</a></div>
+</div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'完美無瑕的騙局',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+<p>在 Ellie 的半推半諷之下，你來到 Golden Bazaar，與自稱「被害者」的冒險者 Humphrey 見面。他放聲大笑，說自己早就打敗那個決鬥士，自豪地把眼前的武器說成是「光之戰士」的勝利證明，Nashu 也真的被唬得一愣一愣。就在這時，Ellie 帶著 Eleazar 闖進來，一句話就把謊言撕得粉碎──原來 Eleazar 曾把亡父留下的傳家寶劍，以及送修用的 gil 全部託付給 Humphrey，結果對方不但在決鬥中把劍輸掉，連錢也拿去看醫生。Eleazar 因為壓力和心痛把一頭「金色長髮」都熬成禿頭，怒吼著一定要把父親的劍討回來。Humphrey 終於撐不住，承認一切，卻還是厚著臉皮向你求助，想讓你幫他收拾這攤爛局。</p>
+<p>Ellie 忍不住痛罵他先是偷別人的名聲，現在又想把自己的錯事丟給別人收尾，但 Hildibrand 卻搖頭拒絕旁觀。若是放著 Humphrey 不管，被傷害最深的 Eleazar 也得不到真正的安寧──這是他身為紳士的堅持。於是你們開始在 Golden Bazaar 打聽消息。Beneger 證實那把劍雖不起眼，卻的確是貨真價實的古董；Lululo 則一邊罵 Humphrey 無恥，一邊又嘆氣說，也許就算是仿品，只要能讓 Eleazar 在生命最後的日子裡安心，也未必全然是錯。Aebbe 提到四處奔走的商人 Jojonpa，讓線索一路指向 Camp Drybone 東邊的泉水。Jojonpa 坦白說，自己只要覺得來路可疑，就會把那些古董全丟進那口泉裡，其中可能就包括一把外型相近的古劍。Hildibrand 在「誠實」與「善意的謊言」之間猶豫片刻，最後選擇先用一點小小的欺瞞讓 Eleazar 的心稍微得到安穩，再繼續追查真正的家寶所在。</p>
+<p>到了泉邊，Jojonpa 再也忍不住，對 Hildibrand 那身裝扮笑到停不下來，而當事人卻一本正經地宣稱自己過去累積的傷勢尚未痊癒，必須先全身塗滿 salamander oil 才能下水。於是你只好在他一邊回憶小時候被母親照料、一邊發出誇張呻吟的情況下，把油確實推開來回按摩，直到他滿意為止，兩人才一同跳進冰冷的泉水裡。Jojonpa 指出的那一處並沒有發現目標，但某個角落突然濺起的水花，卻讓 Nashu 渾身濕透。Ellie 提醒，這裡是 Camp Drybone 住民方便取水的泉眼，沈在底下的東西很快就會被撿走，不會一直留在原地。就算如此，Hildibrand 仍然保持樂觀，一邊請 Nashu 回 Ul’dah 幫他買換洗衣物和最強效的生髮藥，一邊終於把一把傷痕與缺口都和記憶相符的古劍，放回 Eleazar 手中。</p>
+<p>Eleazar 捧著似曾相識的刃鋒，手指沿著每一道缺口顫抖地滑過，感激地向你和 Hildibrand 祝福，仿佛連失去的日子也一起被救回。Ellie 承認自己從沒想過，眼前這位「名偵探」會為兩個素昧平生的人做到這種地步，還不開口談報酬，Hildibrand 卻只是理所當然地回答：真正的紳士會看見每一個靈魂的善意，不會輕易放棄任何人。就在這時，從 Pearl Lane 買回來的衣服與生髮藥送到他面前，一張不知從哪裡飛來的紙片卻先一步筆直釘在他的額頭。那是一封沒有署名的挑戰書：「我將前來取走收藏家的劍。」Ellie 馬上看出這是決鬥士的挑釁，而 Hildibrand 則激動地把它視為華麗的舞台邀請。於是，他擺出一如既往浮誇的姿勢，高聲宣告自己──探查的代理人、非凡的名偵探 Hildibrand──接受這場決鬥。Humphrey 目瞪口呆，最後只能低聲讚嘆，眼前的並非什麼單純的「Warrior of Light」，而是一位徹頭徹尾的「Gentleman of Light」。遠方藍天與沙漠之下，正尋找傳說之劍的決鬥士也悄悄整裝待發，下一幕鬧劇般的對決即將揭幕。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>任務發布</b> 艾麗　烏爾達哈 - 納爾回廊 <small class="muted">(X:8.3, Y:11.1)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="after-her-own-heart.html">一再重演的戀傷</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="the-science-of-deduction.html">推理開端的序曲</a></div>
+</div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
