@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>What Price Victory | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Hildibrand Adventures – What Price Victory (ARR Patch 2.4)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:1px solid transparent;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border-color:var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/N-O8L2BRGdI"
+              title="What Price Victory" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">What Price Victory</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'What Price Victory',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+<p>After learning the truth about Ultros, Hildibrand is crushed by guilt: the “criminal mastermind” they had been chasing is really just a hapless, love-starved octopus who dreams of a cute girl, mountains of gil, and the adoration of millions. While Nashu cheerfully muses she’d happily have him “for dinner” with lemon butter, Ellie drags the investigation back on track. From Dour Meadow at the Coliseum, they learn that Avila has gone to the Coffer & Coffin to drink with her countrymen, and that she does not take kindly to personal questions.</p>
+<p>Watching from a distance, the party overhears Avila vow that the spoils of the Mythril Cup will be hers, just as Raubahn Aldynn once claimed a new life in the Coliseum. By seizing the prize Warden’s Grace, she plans to multiply her people’s wealth ten-thousandfold and win them a real place in Ul’dahn society. She then heads to Nanawa Mines to meet her younger sister. On the way, Ultros attempts to stop you with a homemade firesand bomb, but Hildibrand casually identifies the smell, declares it too dangerous to leave lying about, and simply hurls it away—much to “Uncle Ulty’s” horror.</p>
+<p>At Nanawa Mines, you spy Avila speaking with her sister Hegelina, a miner with an injured leg. Avila scolds her for working before she is healed and promises that victory is assured: Warden’s Grace is worth some thirty million gil, enough to buy fine necklaces, Sunsilk dresses, and every luxury Hegelina has ever been denied. Hegelina, however, admits that what truly fills her with pride is seeing her sister stand tall in the Coliseum; no matter how humble their birth, if they stand strong together, that alone is the “wealth” she desires. Avila calls her too quick to settle, but assures her she will do this “for them both” and hurries back before any reporter can eavesdrop on her moment of softness. Hildibrand wipes away a tear at the display of sisterly love, while Ellie quietly relates, having once been alone in the world with only her own sister.</p>
+<p>Before they can reflect further, Ultros springs his next trap: a concealed pit meant for the Warrior of Light. At the last moment Hildibrand dives in instead, “investigating” the hole and announcing that nothing seems amiss. The others barely react—clearly this kind of reckless self-sacrifice is nothing new. Ultros is shaken by the inspector’s gallant behavior, but refuses to give up, deciding to call in a “big friend” from the Coliseum: a hungry chimera. Unfortunately for him, by the time the beast is meant to appear, it has already been slain by none other than Godbert Manderville, who is out “for a stroll” seeking inspiration and materials. Delighted by the sight of the squirming culprit, he declares that Orthrus will make a fine model for a new sea-themed ring and promptly turns the shrieking octopus into raw “material,” much to Ultros’s despair.</p>
+<p>Reeling from yet another surprise encounter with his father, Hildibrand insists they hurry back to Ul’dah—the stands are filling, and the Mythril Cup is about to begin. Though he wishes he had uncovered more of Avila’s secrets, he decides there is no better place to continue his investigation than on the field of battle itself, where blades will cross, plots will unravel, and the truth behind the tournament will surely come to light.</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>Quest Giver</b> Hildibrand <small class="muted">(Ul’dah - Steps of Nald, X:8.3, Y:11.1)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="eight-armed-and-dangerous.html">Eight-armed and Dangerous</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="the-trouble-with-truffles.html">The Trouble with Truffles</a></div>
+</div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'天下無双の再戦者',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+<p>真相を知ったヒルディブランドは、大いに反省する。これまで犯罪者と疑って追いかけてきた「ウルティ」、実は恋に不器用で、女の子と大金、そして大勢からの喝采を夢見るだけの哀れなタコだったのだ。ナシュは「レモンバターソースでいただきたいですねぇ」とマイペースに呟きつつも、エリーは気持ちを切り替え、調査を続行することにする。コロセウムのドア・メドウから、アヴィラが同郷の仲間たちと酒を酌み交わすため、カッパー&コフィンに向かったこと、そして私的なことを根掘り葉掘りされるのを極端に嫌う気性の荒い女だという話を聞き出す。</p>
+<p>一行は距離を取りつつ、アヴィラの会話に耳を傾ける。彼女は、ミスリルカップの賞品を必ず手にすると豪語する。それは、かつてラウバーン・アルディンがコロセウムで成り上がったように、自分たちも貧困から抜け出し、新たな人生を勝ち取るための戦いだ。優勝賞品「ウォーデンズグレイス」を手に入れれば、民の富は千倍、いや一万倍にもなる──ウルダハという「富こそ力」の街で、これ以上踏みつけられずに済むのだと。そう語った彼女は、妹ヘゲリナと会うためナナワ銀山へ向かう。道中、ウルティロスは自作の火薬爆弾で一行を葬ろうとするが、ヒルディブランドは匂いで即座に火薬を嗅ぎ分け、「危険物は放置できん」とあっさり投げ捨ててしまい、タコの悲鳴が虚しく響く。</p>
+<p>ナナワ銀山では、アヴィラが鉱夫姿の妹ヘゲリナと言葉を交わしている場面を目撃する。彼女は、怪我が完治するまで重労働はしない約束だったはずだと妹を叱りつけつつ、トーナメントの準備は万全であり、「ウォーデンズグレイス」は既に自分たちのものも同然だと自信を見せる。その価値は少なく見積もっても三千万ギル──Eshtaime’s の首飾りも、Sunsilk のドレスも、これまで指をくわえて眺めるしかなかった贅沢が、妹のものになるのだと。ボロ服に身を包み、上流階級から哀れみと蔑みの視線を受ける日々は終わる、とアヴィラは力強く言い切る。</p>
+<p>しかしヘゲリナは、富そのものよりも、コロセウムで堂々と立つ姉の姿を誇りに思う気持ちを口にする。どれほど生まれが卑しくとも、強く立ち、共に立ち続けること──それだけで自分には十分な「富」だと。それを聞いたアヴィラは、妹の「満足の早さ」を嘆きつつも、「だからこそ自分が二人分の未来を掴む」と優しく言い聞かせ、記者に聞かれるのを恐れてそそくさと立ち去る。ヒルディブランドは、姉妹の深い絆に鼻をすすり、エリーもまた、自分も姉と二人きりで生きてきた過去を重ね合わせ、静かに共感を漏らす。</p>
+<p>だが感傷に浸る暇はない。ウルティロスが仕掛けた落とし穴が次々と待ち構え、勇者をおびき寄せようとする。ところが、その罠に真っ先に飛び込んだのはヒルディブランド本人だった。彼は穴の底を「調査」したうえで、「異常なし」と胸を張るが、周囲の誰も驚かない。どうやら、命知らずの自己犠牲は彼の日常らしい。タコは本物の紳士ぶりに感心しつつも、「だからといって手加減はしない」とばかりに、コロセウムから連れてきたキマイラを切り札として呼び出そうとする。</p>
+<p>しかし現場にいたのは、すでにキマイラを叩き伏せたゴッドベルト・マンダヴィルだった。新たな作品のインスピレーションと素材を求めて散歩中の彼は、うろたえるタコを見て「海の魔物を思わせる、しなやかにうねる指輪のデザインが浮かんだ」とご満悦。そのままオルトロスを「次の傑作候補」として捕まえ、筋肉を恨む叫び声だけが虚しく響く。思わぬところで再び父と鉢合わせしたヒルディブランドは寿命が縮む思いをしながらも、コロセウムの観客席が埋まりつつあることに気づき、急ぎウルダハへ戻ることにする。アヴィラの秘密はまだ解き明かせていないが、「戦場こそ真実が姿を現す場所」と言わんばかりに、ヒルディブランドはミスリルカップの舞台そのものを次なる調査現場と定めるのだった。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>クエスト発行</b> ヒルディブランド　ウルダハ：ナル回廊 <small class="muted">(X:8.3, Y:11.1)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="eight-armed-and-dangerous.html">金色に染まるコロセウム</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="the-trouble-with-truffles.html">秤を正すために</a></div>
+</div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'為勝利再戰的無雙鬥士',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+<p>在了解 Ultros 的真相之後，Hildibrand 充滿愧疚──原來他們一直當成嫌疑犯追著跑的「Ulty」，其實只是個戀愛不順的小章魚，一心只想要可愛女孩、數不盡的財富，外加萬人崇拜的掌聲。Nashu 還在那邊說「如果做成檸檬奶油烤章魚應該很好吃」，Ellie 則把大家拉回正題，決定繼續追查 Avila。從 Coliseum 的 Dour Meadow 那裡，他們打聽到 Avila 目前在 The Coffer & Coffin 跟同鄉喝酒，也聽說她非常討厭別人打探私事，連記者 Ganelon 問幾句都差點被她拆了頭。</p>
+<p>一行人在遠處觀察，聽見 Avila 說她必定會在 Mythril Cup 中奪冠，正如 Raubahn Aldynn 當年在 Coliseum 中藉勝利改變命運一樣。只要拿到獎品 Warden’s Grace，就能讓自己一族的財富翻上千倍、甚至萬倍，在這個「有錢就是力量」的 Ul’dah 再也不用被人從社會邊緣一腳踢開。說完，她便啟程前往 Nanawa Mines 與妹妹會合。途中，Ultros 企圖用自製的火藥炸彈把你們一網打盡，但 Hildibrand 一聞到 firesand 的味道就認出來，直說不能讓這種危險物放在路邊，接著就很自然地把炸彈丟遠，讓在暗處偷看的「Uncle Ulty」當場尖叫。</p>
+<p>在 Nanawa Mines 一帶，眾人看到 Avila 正和身穿礦工服的妹妹 Hegelina 說話。Avila 先是責怪妹妹腿傷未癒就偷偷跑來做苦工，接著滿懷信心地說自己已經做好一切準備，Warden’s Grace 絕對穩拿。那件獎品的估價少說也有三千萬 gil，到時候 Hegelina 可以戴 Eshtaime’s 的項鍊、穿 Sunsilk 的禮服，把過去那些只能遠遠看著上流社會炫耀的奢侈品全變成自己的。她發誓，讓兩人穿著破舊衣服，成為 Ul’dah 上層階級同情與嘲笑對象的日子將一去不復返。</p>
+<p>然而 Hegelina 卻有不同想法。她承認金錢固然重要，但每當看到姐姐在 Coliseum 裡挺直腰桿、在成千上萬的觀眾面前戰鬥，她就感到無比驕傲。無論出生多低，只要兩姊妹能一起站穩、一起面對世界，那份並肩而立的力量，就是她所渴望的全部「財富」。Avila 則說這正是妹妹的缺點──太容易滿足、太容易看低自己──但也溫柔地保證，會由自己來替兩個人爭取更高的位置。她怕這段軟弱的模樣被記者聽去，很快便轉身離開。Hildibrand 被這份姐妹情感動得鼻酸，Ellie 則坦承自己也曾和姐姐兩人相依為命，因此對 Avila 不由得多了一份共鳴。</p>
+<p>就在氣氛有些柔軟之時，Ultros 下一波陷阱啟動了：他在地上挖了幾個坑，想引誘 Warrior of Light 掉下去。沒想到在關鍵一刻，跳下去的卻是 Hildibrand 自己。他一臉認真地說是在「調查」洞裡有沒有異狀，最後還對大家報告「看起來沒什麼特別的」，而 Nashu 和 Ellie 只是習以為常地看著，顯然這種拼命護人的行為對他們來說早就不是第一次。Ultros 雖然由衷佩服這種紳士式的犧牲精神，但仍不願放棄，決定拿出壓箱底的「大絕招」——從 Coliseum 叫來一頭飢腸轆轆的 chimera。</p>
+<p>結果等他回過神來，chimera 早已被另一位肌肉怪物解決──正是為了新作品到處找靈感和材料的 Godbert Manderville。他被眼前會說話的章魚逗得興致勃勃，靈感一來，直接宣告要以牠為藍本打造出「如同海獸扭動般流線的戒指」，當場把 Ultros 當成下一件藝術品的素材，惹來對方一陣「我最討厭肌肉男！」的哀嚎。Hildibrand 再次在荒郊野外巧遇親爹，只覺得自己壽命少了一年，但很快又注意到 Coliseum 周圍已經聚集起龐大人潮。</p>
+<p>Mythril Cup 即將開幕，Hildibrand 自知沒有挖出更多 Avila 的秘密，但也轉念一想：既然她把命運押在戰場上，那麼最適合繼續調查的地方，就是比武場本身。他抬頭看向正在沸騰的觀眾席，決定一邊揮劍、一邊查清這場比賽背後所有隱藏的真相。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>任務發布</b> 希爾迪布蘭德　烏爾達哈 - 納爾回廊 <small class="muted">(X:8.3, Y:11.1)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="eight-armed-and-dangerous.html">多臂殺機席捲金色競技場</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="the-trouble-with-truffles.html">為了那點松露的麻煩事</a></div>
+</div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
