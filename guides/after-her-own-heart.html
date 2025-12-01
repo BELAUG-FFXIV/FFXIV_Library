@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>After Her Own Heart | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Hildibrand Adventures – After Her Own Heart (ARR Patch 2.1)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:1px solid transparent;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border-color:var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/b9k9rnFOQJ0"
+              title="After Her Own Heart" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">After Her Own Heart</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'After Her Own Heart',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+<p>Wymond watches Hildibrand sprint off and just sighs, telling you that if you don’t follow him, he’ll only be disappointed. The “lady in question” turns out to be Yellow Moon, a glamorous Ul’dahn who lives for luxury and pretty things. You find her at the Weavers’ Guild, halfway through a fitting, tears in her eyes over her beloved wand, Pure Heart, stolen right out from under her. Before you can speak, Hildibrand appears beside her, seizing on her distress like a beacon. With a hand to his chest, he vows to scour all creation—from the deepest hells to the highest heavens—to recover her treasured wand, while Nashu echoes his declaration a beat behind. Then he turns to you, praising your “instincts” for arriving at Yellow Moon’s side, and asks her to walk you through the theft.</p>
+<p>Between sniffles, she explains that this isn’t the first time something has gone missing. She remembers having Pure Heart when she left home, then spent the day browsing Sunsilk Tapestries and watching matches at the Coliseum… and somewhere along the way, it vanished. With no clear time or place, Hildibrand proposes a reenactment of the day. At Sunsilk, she admits that “nothing unusual” happened—unless you count a stranger suddenly throwing himself at her feet and confessing eternal love. Startled, she dropped her purse on his foot and he fled yelping. The inspector declares this obviously unrelated and marches everyone to the Coliseum. There, she recalls another “ordinary” moment: choosing which fight to watch when a gladiator approached from behind, confessed his undying love, and received a full-force swing of her purse to the face. Laden with a small fortune in coin, the blow knocked him out cold. Hildibrand marvels at her strength and spins a theory on the spot: a humiliated warrior, stung by rejection, stole her “weapon” in revenge.</p>
+<p>While he poses dramatically, you notice Nashu staring suspiciously at a stack of crates. She mutters that similar crates were at the Weavers’ Guild and Sunsilk too, and then, with that bright Nashu logic, she presses a bag of explosives into your hands and tells you to “have fun” finding out what’s inside. One controlled detonation later, a sweating man tumbles out of the shattered crate—surrounded by others who were hiding the same way—and Nashu spots Pure Heart among their hoard. Yellow Moon’s fury boils over as the men confess: they’re not thieves, but “devotees” who stalk her around Ul’dah, collecting anything she drops “for safekeeping” and watching over their “goddess” from inside their boxes. As she rages and they swoon at her righteous anger, Hildibrand tries to fold this discovery into his theory about the weapon thief, but a nearby woman cuts him off. Calm and sharp-eyed, Ellie of the Mythril Eye reminds him that the true culprit is a duelist who only takes weapons after defeating their owners in honorable combat—something these pathetic crate-squatters could never manage. She offers to introduce you to one of the duelist’s victims, only to watch, exasperated, as Hildibrand strides off in triumph before she can even say the man’s name—leaving you to trail after the “inspector extraordinaire” and pick up the details he didn’t bother to hear.</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>Quest Giver</b> Wymond <small class="muted">(Ul’dah - Steps of Nald - Emerald Avenue, X:9.9, Y:8.7)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="back-in-the-saddle.html">Back in the Saddle</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="the-immaculate-deception.html">The Immaculate Deception</a></div>
+</div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'くりかえす恋の悲哀',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+<p>ウィモンドは、勢いよく走り去っていくヒルディブランドの背中を眺めながら、あきれ半分にあなたへ肩をすくめる。「行ってやったほうがいい」と彼は言う。今回の被害者、イエロームーンは贅沢とお洒落をこよなく愛する貴婦人で、日がな一日、裁縫師ギルドで新しい装いの仕立てに夢中らしい。あなたが裁縫師ギルドを訪ねると、彼女はちょうど試着の最中で、愛用の杖「ピュアハート」を失った悲しみから涙を浮かべていた。</p>
+<p>そこへ、まるで舞台の幕が上がるかのようなタイミングでヒルディブランドが現れ、彼女の嘆きを「紳士の耳を打つ号令」と受け取り、胸を張って名乗りを上げる。紳士探偵ヒルディブランドが、七つの地獄の底から天の頂まで、「ピュアハート」を必ず探し出してみせる──その大仰な誓いに、ナシュも慌てて「同じこと！」と続く。あなたにも「正義に仕える同志」として鋭い勘を称えた彼は、イエロームーンから詳しい話を聞き出そうとする。彼女は鼻をすすりながら、今回に限らず身の回りの品が何度も失くなっていること、当日も家を出てサンスウィルク・タペストリーで流行の衣装を眺め、コロセウムで試合を見物するうち、気づけばピュアハートが消えていたことを打ち明ける。</p>
+<p>時間も場所も特定できない状況に、ヒルディブランドは「当日の行動をそっくり再現する」という、いかにも彼らしい策を提示する。サンスウィルクでの様子を語らせると、イエロームーンは「特別なことは何も」と言いつつ、見知らぬ男が突然愛の告白をしてきたことをぽろりと漏らす。あまりの唐突さに驚いて手を滑らせ、落とした財布が相手の足に直撃し、悲鳴を上げた男は逃げ去った──それでも彼女にとっては「別に大したことではない」のだ。次に向かったコロセウムでは、今度は背後から剣闘士に口説かれ、反射的に振りぬいた財布が、莫大な金貨の重みもあって相手を一撃で気絶させたことを思い出す。ヒルディブランドは彼女の怪力に感嘆しつつ、「誇りを傷つけられた戦士が、復讐として彼女の“武器”を奪ったのだ」と、もっともらしく推理を披露する。</p>
+<p>その横で、ナシュはじっと巨大な木箱を見つめていた。裁縫師ギルドにも、サンスウィルクにも、そしてコロセウムにも、同じような木箱がやたらと置かれていた──そう呟いた彼女は、ふと思いついたようにあなたの手に爆薬を押しつけ、「中身を確かめてみましょう！」と悪びれもせずに笑う。やがて木箱のひとつが爆発で吹き飛び、中から汗だくの男が転がり出る。周囲の箱にも同じように人が潜んでおり、その足もとには、イエロームーンが泣き求めていたピュアハートや、行方不明だった品々が山のように積まれていた。問い詰められた男たちは盗人であることを否定し、「イエロームーン様こそ我らの太陽と星。女神をお守りするために陰から見守り、時おり落とした品を“預かっていただけ”」だと言い張る。イエロームーンは激昂し、彼女の怒りを「罰」として甘んじて受けようとする男たちは、ただの変態ストーカー以上でも以下でもない。</p>
+<p>しかし、その騒ぎを「最近の武器盗難事件」と無理やり結びつけようとしたヒルディブランドの前に、ひとりの女が冷水を浴びせる。ミスリルアイの記者エリーは、犯人が「決闘士」として正面から挑んだ相手に勝利したあとで武器だけを奪う人物であること、こんな木箱に隠れている連中にそんな芸当はできないことを淡々と指摘する。数週間にわたって事件を追い続けてきたと語る彼女は、被害者のひとりを紹介すると申し出るが、ヒルディブランドは「貴重な情報に感謝する」と言い終えるや否や、肝心の名前を聞きもせずにナシュと共に走り出してしまう。エリーの怒鳴り声を背中で受けながら、あなたもまた、振り回される覚悟を新たにして名探偵の後を追うのだった。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>クエスト発行</b> ワイモンド　ウルダハ：ナル回廊 - エメラルドアベニュー <small class="muted">(X:9.9, Y:8.7)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="back-in-the-saddle.html">解かれぬ迷宮の扉</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="the-immaculate-deception.html">鍵穴の光は</a></div>
+</div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'一再重演的戀傷',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+<p>Wymond 看著 Hildibrand 又一次甩下所有人自己衝出去，只能嘆口氣，叫你還是跟上，不然那個男人肯定會失望。這次的被害人是 Yellow Moon，一位熱愛精品與華服的 Ul’dah 貴婦。據說她幾乎每天都泡在 Weavers’ Guild 量身試衣，你照著線索找去，很快就看見她一邊試著新衣，一邊為了遺失的杖 Pure Heart 哀聲嘆氣。就在這時，Hildibrand 像是從舞台側幕跳出來一樣現身，把她的哭訴當成「召喚紳士的號角」，當場立下誓言：無論是七層地獄還是天頂，只要是 Eorzea 的一角，他都會替她把 Pure Heart 找回來。Nashu 照例在旁邊重複一句「就是他說的那樣！」，而你則被他認定為「同樣侍奉正義的同伴」，被拉進事件現場。</p>
+<p>Yellow Moon 抽泣著說，Pure Heart 並不是第一件消失的東西。那天離家時她還帶在身上，後來先去 Sunsilk Tapestries 看新款禮服，又到 Coliseum 想賭一場，等到發現時，杖和其他小東西都不見了。線索模糊到毫無頭緒，Hildibrand 就提出他一貫的「名偵探方案」──重演當天行程，從記憶裡把線索挖出來。於是你們先陪她回到 Sunsilk Tapestries，請她回想當時的情景。Yellow Moon 說「其實沒發生什麼特別的事」，話鋒一轉卻提到有個陌生男人突然上前告白。她被嚇得手一抖，把錢包砸在他腳上，對方慘叫一聲就落荒而逃。Hildibrand 認定這「並不重要」，於是又帶隊前往 Coliseum。那裡，Yellow Moon 又想起自己被一名 gladiator 從背後搭話，同樣是突如其來的愛之告白，換來的是一記全力揮出的錢包，裡頭裝著一大筆 gil，沉重到可以直接把對方打昏。Hildibrand 一邊讚嘆她的力氣，一邊立即拼湊出一個理論：受辱又被擊倒的戰士懷恨在心，把她的「武器」偷走當成報復。</p>
+<p>你看著他擺出自信滿滿的推理姿勢，卻發現 Nashu 的視線一直停在 Coliseum 一角，那裡堆著幾個可疑的木箱。她嘀咕著，在 Weavers’ Guild、Sunsilk Tapestries 和這裡都看過同樣的箱子，然後好像突然想到什麼，把一包炸藥塞進你手裡，要你「試著打開看看，一定很好玩」。在一聲巨響之後，其中一個木箱炸開，一個滿身是汗的男人滾了出來，周圍幾個箱子裡也有人躲著。Nashu 眼尖，立刻在他們藏匿的物品裡找到了 Pure Heart 和 Yellow Moon 失去的其他東西。經你們一問，這群人連忙否認自己是賊，自稱只是 Yellow Moon 的「devotees」，把她當成太陽與星辰，躲在箱子裡偷偷跟著，只為確保她平安，順便把她不小心掉落的東西「回收保管」。這種說法對 Yellow Moon 來說只剩下噁心，她憤怒地斥責他們的跟蹤與偷竊，而那些男人反而為能接受「女神的懲罰」而激動不已。</p>
+<p>正當 Hildibrand 打算把這件事硬套進「武器竊賊」的案件裡，一道冷靜的聲音從旁插入。自稱 Mythril Eye 記者的 Ellie 指出，真正的兇手是一名 duelist──他只會在正面決鬥之後奪走受害者的武器，那種躲在木箱裡偷窺的傢伙根本不可能就是犯人。她說自己已經調查了好幾週，願意帶你們去見其中一名被害者。Hildibrand 卻只聽到「願意提供情報」這段，就自顧自地宣告這是「美好友情的開端」，沒等 Ellie 把名字說完就再度轉身離開。Ellie 的怒吼在身後迴盪，你只能無奈地跟上那位紳士名偵探的腳步，準備在他把案子越攪越亂之前，替整件事補上真正需要的細節。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>任務發布</b> 懷蒙德　烏爾達哈 - 納爾回廊 ‧ 翡翠步道 <small class="muted">(X:9.9, Y:8.7)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="back-in-the-saddle.html">再次整裝上陣通往未解之謎</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="the-immaculate-deception.html">完美無瑕的騙局</a></div>
+</div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
