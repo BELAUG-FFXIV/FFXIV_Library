@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Hammer | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Hildibrand Adventures – The Hammer (ARR Patch 2.2)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:1px solid transparent;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border-color:var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/CDFVp7BmVqY"
+              title="The Hammer" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">The Hammer</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'The Hammer',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+<p>To restore Lady Durilda’s shattered vase, Hildibrand declares there is only one man in all Eorzea equal to the task: a goldsmith whose hammer skills are so fearsome that rival craftsmen despair at the sight of his work. To Gilgamesh, it sounds less like a quiet artisan and more like a battlefield legend—and Hildibrand agrees. He recalls how a gang of notorious thieves once targeted luxury shops in Ul’dah, only to end their spree at this lapidary’s door. By dawn, the thieves were found beaten and trussed up in the Gold Court, muttering only, “The hammer… the hammer…” when questioned. Maria shivers at the story; Gilgamesh, on the other hand, is delighted by the thought of such a dangerous man.</p>
+<p>Introducing himself properly at last, Gilgamesh explains that his “companion” Enkidu is, in truth, a green-painted rooster to stave off loneliness. Still, he eagerly offers to help you seek out the legendary artisan. Hildibrand happily accepts, mangling his name into “Gilligan” and then “Greg,” before inviting him to call him “Hildy” in return. Reasoning that a goldsmith who insists on gathering his own materials would be hunting ore near Bluefog in northern Thanalan, Hildibrand leads you and your new ally there in search of clues.</p>
+<p>Among the rocky paths, you find a trail of corpses: a doblyn felled by a clean blow to the head, a basilisk, an ahriman, and even a chimera in the distance—all killed by a hammer. Hildibrand recognizes the style immediately. If these are the artisan’s “prizes,” then he must still be nearby, perhaps even watching to see who has followed his trail. To draw him out, Hildibrand announces that he must do the unthinkable and “break his oath”… by dancing. Launching into the Manderville family dance—“I’m a Mander-Mander-Manderville man♪”—he whirls and poses across the rocks until he can barely stand, certain that no one who knows him could ignore such a sight. Out of breath and clutching his legs, he finally turns to you with grave seriousness: to lure out this cautious hunter, you must inherit the sacred Manderville dance and perform it in his stead.</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>Quest Giver</b> Hildibrand <small class="muted">(Western Thanalan, X:20.1, Y:24.6)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="the-science-of-deduction.html">The Science of Deduction</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="manderville-men.html">Manderville Men</a></div>
+</div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'白髪の鬼',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+<p>レディ・ドゥリルダの花瓶を元どおりにするには、エオルゼア広しといえど、ただひとりの男に頼るほかない──そうヒルディブランドは断言する。その男は、ライバルの金細工師たちを打ちのめすほどの作品と闘志を持つ、伝説的な金細工師だという。ギルガメッシュは「それではまるで戦士ではないか」と呟き、ヒルディブランドは頷きながら、かつてウルダハで高級品店ばかりを狙った盗賊団の話を語り出す。最後に襲われたのが、この金細工師の店だったが、翌朝ゴールドコートで盗賊たちは打ちのめされ、縛り上げられた姿で発見された。ブラスブレードは犯人を突き止められず、ただ盗賊のひとりが「ハンマーだ……ハンマーが……」と呟き続けていたという。マリアは思わず身震いし、ギルガメッシュは「実に危険そうで良い」と目を輝かせる。</p>
+<p>ようやく名乗りを上げたギルガメッシュは、自らをギルガメッシュと紹介し、「相棒のエンキドゥ」は寂しさを紛らわすために緑色に塗ったニワトリであると打ち明ける。それでも、伝説の金細工師を探す手伝いを喜んで引き受けると言い、ヒルディブランドは「ギリガン」「グレッグ」と見事に名前を言い間違えながらも快く歓迎し、自分のことは「ヒルディ」と呼ぶよう勧める。素材を自ら採りに行く職人気質を踏まえ、ヒルディブランドは、彼が北ザナラーンのブルーフォグ付近で採掘している可能性が高いと推理し、一行はその地へ向かう。</p>
+<p>岩場を進むうち、一行は奇妙な死骸の列を見つける。頭部を一撃で砕かれたドブリン、倒れ伏すバジリスクとアーリマン、そして遠くにはキマイラと思しき巨獣。どれもハンマーで仕留められた痕跡があり、ヒルディブランドはその「仕事ぶり」に見覚えがあると確信する。これらは金細工師が狩り取った獲物であり、ならば本人もまだ近くに潜んでいる──おそらくこちらの様子をうかがっているのだろう。用心深い男をおびき出すため、ヒルディブランドは「誓いを破り、禁断の行い」をしなければならないと宣言する。その「禁断」とは……踊ること。</p>
+<p>「マンダヴィル家に伝わる舞だ！」と言うや否や、ヒルディブランドは「マンダ・マンダ・マンダヴィル♪」と歌いながら全身で踊り始める。滑稽でありながら、見ている者の目を離させない不思議な舞に、ギルガメッシュも思わず見入ってしまう。やがて息も絶え絶えになったヒルディブランドは、これは父から子へと受け継がれてきた家伝の舞であり、知る者ならば目にすればきっと姿を現すはずだと説明しつつ、脚を伸ばさずに踊ったせいで限界に達したと嘆く。そして真剣な面持ちであなたの方を向き、「もはや他に道はない。マンダヴィルの舞をお前に託す！」と告げるのだった。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>クエスト発行</b> ヒルディブランド　西ザナラーン <small class="muted">(X:20.1, Y:24.6)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="the-science-of-deduction.html">はじまりの予告</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="manderville-men.html">キケンな彫金師</a></div>
+</div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'白髮修羅與鐵鎚',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+<p>為了修復 Lady Durilda 那只被踩得粉碎的花瓶，Hildibrand 宣稱整個 Eorzea 裡只有一個人辦得到──一位拿起榔頭就能讓其他金匠絕望的怪物級金工師。對 Gilgamesh 來說，這聽起來根本不像溫和的工匠，而是戰場上會被人當成魔物的男人。Hildibrand 於是說起過去的傳聞：當年 Ul’dah 有一群專挑高級店下手的盜賊，最後一間被盯上的店，就是這位金匠的小店。可隔天早上，盜賊們卻全被綁成一串丟在 Gold Court，遍體鱗傷、嘴還被塞住。Brass Blades 怎麼查都查不出是誰動的手，只知道其中一人一直發抖喊著：「是榔頭……那把榔頭……」聽到這裡，Maria 忍不住緊張起來，Gilgamesh 卻露出興奮的笑容，說自己「非常喜歡危險的男人」。</p>
+<p>這才正式自我介紹的 Gilgamesh 告訴你，他身旁的 Enkidu 其實只是被他抓來、塗成綠色的公雞，用來填補思念真正同伴的寂寞。不過，這點小事並不影響他的熱情──他很樂意一起幫忙尋找這位傳說中的金匠。Hildibrand 高興地接受，卻把對方名字一路從「Gilligan」叫到「Greg」，最後乾脆說這樣比較有親切感，並邀請對方叫自己「Hildy」。基於這位職人向來堅持親自採集材料的習慣，Hildibrand 推理他很可能正在 Northern Thanalan 的 Bluefog 一帶敲打礦石，於是整隊人馬立刻動身前往。</p>
+<p>在 Bluefog 附近的岩場上，你們很快發現一連串令人不安的痕跡：頭骨被一擊敲碎的 doblyn、倒地的 basilisk 和 ahriman，遠處甚至躺著一頭被擊倒的 chimera。所有傷口都像是被重錘砸出的結果，Hildibrand 一眼就認出這是那位金匠獨特的「手筆」。如果這些都是他狩獵的戰利品，那本人肯定還在附近觀察，也許正藏在某處打量你們的動機。要讓這樣謹慎的獵手現身，Hildibrand 說，他必須做出一件違背自身誓言的「大逆不道之舉」──那就是，跳舞。</p>
+<p>他深吸一口氣，突然踏出誇張的步伐，一邊唱著「I’m a Mander-Mander-Manderville man♪」一邊旋轉、擺 pose，展開據說代代相傳的 Manderville 之舞。這舞步荒唐得讓人無言，卻又奇妙地讓人移不開視線，連 Gilgamesh 都呆呆看著。等到 Hildibrand 氣喘吁吁地停下來，才說這是 House Manderville 自古傳給子孫的家族舞，只要目標是認識他的人，看到這一幕就絕對不會無動於衷。只是他忘了事先拉筋，雙腿已經抽痛得難以再動，只好用嚴肅的表情看向你，宣佈自己要做出一個重大的決定──把 Manderville 之舞暫時托付給你，由你代替他跳出這支會把獵物從暗處逼出來的家傳之舞。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>任務發布</b> 希爾迪布蘭德　薩納蘭西部 <small class="muted">(X:20.1, Y:24.6)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="the-science-of-deduction.html">推理開端的序曲</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="manderville-men.html">曼德維爾，這個危險的金匠！</a></div>
+</div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
