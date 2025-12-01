@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Eight-armed and Dangerous | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Hildibrand Adventures – Eight-armed and Dangerous (ARR Patch 2.4)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:1px solid transparent;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border-color:var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/5lVlnyahCl4"
+              title="Eight-armed and Dangerous" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Eight-armed and Dangerous</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Eight-armed and Dangerous',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+<p>Ellie tracks you down in Ul’dah with fresh news: the phantom thief’s next “victor’s spoils” is tied to a new tournament at the Coliseum—the Mythril Cup, sponsored by Amajina & Sons Mineral Concern. Its chairman, Fyrgeiss, Syndicate member and wealthy martial-arts enthusiast, is offering up treasures from his personal collection, and that alone is enough to catch the eye of a many-faced thief. To dig deeper, Ellie brings you to her colleague Ganelon, who’s covering the tourney. He grudgingly shares what he knows: with only days left, competitors are collapsing or withdrawing one after another from “accidents” and “illnesses,” forcing the organizers to change the event into a single massive melee.</p>
+<p>At the Coliseum, Ellie introduces herself to the organizer Dour Meadow, just as a commotion breaks out: Hildibrand attempts a “gentlemanly” opening move and gets instantly floored by Inspector Briardien, who couldn’t stand how loudly the man was thinking. Ignoring the chaos, Briardien demands details on the prizes. Dour Meadow explains that Fyrgeiss has prepared a ring called Warden’s Grace, set with a great sun sphere, as the champion’s reward, with lavish second- and third-place prizes besides. But he refuses to hand them over for “inspection” and insists that if Briardien wants his hands on the spoils, he’ll have to win them like everyone else. With so many fighters out, the Coliseum is eager for “fresh blood” and signs you up on the spot, thrilled to have the Warrior of Light in the lineup.</p>
+<p>You also meet the arena’s peculiar receptionist: the purple, many-limbed Ultros, a slime-mouthed cephalopod born of thaumaturgical experiments and spared execution only because he begged to work instead. He is utterly smitten with a stern gladiatrix named Avila, who vows to claim the victor’s spoils with her Tempest Blade and has no intention of letting any “inspector” interfere. While Briardien quietly notes how suspiciously confident she seems, Hildibrand fixates on Ultros’s color and appendages, convinced there’s “a case” wrapped around every tentacle.</p>
+<p>Worried about the string of “accidents,” Ellie drags you back to Ganelon, who points to a pattern: many of the fighters who dropped out were scheduled to face Avila. He sends you to the Pugilists’ Guild to question Raging Rat, a bruised and battered contender who fought her in the preliminaries. Rat swears he didn’t truly lose—that Avila doesn’t fight fair and that her Tempest Blade is some kind of foul trick. He quickly slips into ugly prejudice about Ala Mhigan refugees, prompting Ellie to shut him down and leave. Outside, Nashu wonders if Avila is using sorcery or an accomplice; Ellie finds the latter more likely.</p>
+<p>Hildibrand, meanwhile, spins a romance in his head: a misunderstood Ala Mhigan swordmaster and a many-armed outcast, united by shared injustice—Avila and Ulty, an obviously perfect pairing in his eyes. Convinced he’s “seen the truth,” he drags everyone back to the Coliseum to tail Ultros. Hiding in plain sight, you watch as Ultros gushes over Avila’s “delicious legs,” murmurs something inappropriate, and she flees in embarrassment or anger. Crestfallen but undeterred, he soon turns his slime-dripping charm on another gladiatrix, only to scare her off as well. Nashu ponders whether they should “put him out of his misery” with lemon butter; Hildibrand sees only mounting “evidence” of a sinister plot. Ellie, exasperated, offers a simpler explanation as she watches the octopus deflate each time he’s rejected: maybe Ultros isn’t conspiring with Avila at all—maybe he just likes girls.</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>Quest Giver</b> Ellie <small class="muted">(Eastern La Noscea, X:32.0, Y:30.4)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="a-case-of-indecency.html">A Case of Indecency</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="what-price-victory.html">What Price Victory</a></div>
+</div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'金色に染まるコロセウム',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+<p>エリーはウルダハであなたを見つけると、怪盗の次なる標的「勝者の戦利品」に関する最新情報を伝える。コロセウムでは、アマジナ鉱山社主催の大規模大会「ミスリルカップ」の準備が進行中であり、その賞品は、シンジケートの一員にして巨万の富を誇る会長ファルゲイスが、自らの秘蔵コレクションから提供するというのだ。格闘技好きとしても知られる彼が用意した豪華な賞品は、千の顔を持つ怪盗の興味を引くには十分すぎる。エリーは、現地取材中の同僚ガネロンのもとへあなたを案内し、状況を聞き出す。彼の話によれば、開幕を目前に控えた今、出場予定だった剣闘士たちが「怪我」や「体調不良」を理由に次々と棄権しており、そのせいで大会形式も急きょトーナメント制から乱戦方式へと変更を余儀なくされたという。</p>
+<p>一行がコロセウムを訪れると、エリーは大会運営の責任者ドール・メドウに取材を申し入れるが、その矢先、場内で騒ぎが起こる。紳士らしい名乗りを上げようとしたヒルディブランドが、一撃で地面に沈められたのだ。犯人はもちろんコンサルティング・インスペクター、ブリアルディアン。「うるさい思考が目障りだった」とさらりと言い放つ彼は、すぐさま賞品の詳細を要求する。ドールの説明によれば、優勝者には「ウォーデン・グレイス」と呼ばれる指輪が授与され、そのサンストーンはカルンの外では最大級の逸品だという。二位、三位にも相応の宝が用意されているが、宝物庫はスタントーチの精鋭部隊が昼夜厳重に警備しており、「怪盗ごときに奪われるはずがない」と胸を張る。ブリアルディアンは、前回ブラスブレードたちがどれほど役に立たなかったかを引き合いに出し、宝を自分のもとへ運ぶよう迫るが、ドールは「お前こそ怪盗の変装かもしれん」とこれを拒否。もし宝に触れたければ「他の出場者と同じように、闘技で勝ち取れ」と言い放ち、戦力不足を補うべく、あなたを新たな参加者としてその場で登録してしまう。光の戦士がリングに立つという噂で、コロセウムが湧くのは時間の問題だった。</p>
+<p>そこで紹介されたのが、紫色の触手をうねらせる受付係、オルトロスである。呪術士ギルドの古代呪法実験から生まれた異形の魔物で、処分寸前に「平和に暮らしたい、なんでもするから」と命乞いした結果、コロセウムで雑務をこなす身となったという。そんな彼が、剣闘士アヴィラに露骨な熱視線を送っている。冷徹な口調で「勝者の戦利品を手にするのは、この私だけ」と言い放つ彼女は、自らの技「テンペストブレード」に絶対の自信を抱き、捜査など意にも介さない様子だ。その過剰な自信にブリアルディアンは不審を覚えるが、ヒルディブランドはと言えば、オルトロスの色と脚の本数にばかり目を輝かせ、「この触手の一本一本に事件の匂いがする」と頓珍漢な確信を深めていく。</p>
+<p>度重なる事故に不安を覚えたエリーは、再びガネロンのもとを訪ねる。彼の調査で見えてきたのは、「棄権した剣闘士の多くが、アヴィラとの対戦を控えていた」という不穏な共通点だった。エリーは、予選で彼女と戦い、無残な敗北を喫したという剣闘士レイジング・ラットの話を聞くため、格闘士ギルドへ向かう。彼は、全身傷だらけの身体をさすりながら、「記録上は敗北でも、自分は負けを認めない」と強がりつつ、「テンペストブレード」は卑劣な秘術に違いないと主張する。やがて話題はアラミゴ難民全体への偏見へとすり替わり、エリーはうんざりした様子で会話を打ち切る。外に出ると、ナシュが「本当に魔法か、それとも共犯者がいるのか」と首をかしげ、エリーは「彼女の戦いぶりからすると、後者の可能性が高い」と冷静に見立てる。</p>
+<p>そんな中、ヒルディブランドだけは別の幻想を膨らませていた。周囲から疎まれるアラミゴの剣士と、実験の果てに生まれた八本足のはぐれ者──不器用な二人が共に正義を求める「アヴィラ＆ウルティ」という物語が、彼の脳内ではすっかり完成してしまっているのだ。「これ以上わかりやすい真相があるものか！」と自信満々の紳士は、一行を引き連れて再びコロセウムへ。物陰から様子をうかがうと、オルトロスはアヴィラの「魅力的な脚」によだれを垂らしながら甘い言葉をささやき、彼女は顔をしかめて逃げ出してしまう。落ち込んだ彼は、すぐに別の女剣闘士に声をかけるが、やはり一言二言で悲鳴と共に走り去られてしまうばかり。ナシュは「レモンバターをかけて楽にしてあげたほうがいいのでは」と本気とも冗談ともつかないことを口走り、ヒルディブランドは「深まる疑惑」にひとり頷く。しかし、恋愛沙汰に関しては人一倍鋭いエリーには、ただ一つの真実しか見えない。「どう考えても、あのタコは共犯者なんかじゃない。ただのスケベなタコよ」と、心の中でため息をつくのだった。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>クエスト発行</b> エリー　東ラノシア：コスタ・デル・ソル <small class="muted">(X:32.0, Y:30.4)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="a-case-of-indecency.html">るり色の婚約者</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="what-price-victory.html">天下無双の再戦者</a></div>
+</div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'多臂殺機席捲金色競技場',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+<p>Ellie 在 Ul’dah 把你攔下來，帶來關於「victor’s spoils」的新線索：Coliseum 正在籌備一場名為 Mythril Cup 的大型比武大會，由 Amajina & Sons Mineral Concern 贊助，而 Syndicate 成員、巨額財富在手的會長 Fyrgeiss，將親自拿出自己的收藏當獎品。這樣的寶物，自然也會吸引千面怪盜的目光。為了取得更多情報，Ellie 帶你去找正在負責採訪的同事 Ganelon。他一邊抱怨稿子被迫改寫了好幾次，一邊透露實情：距離開賽只剩幾天，參賽劍鬥士卻因各種「意外」與「病痛」接連退賽，主辦方只好放棄原本的淘汰賽制，改成少數選手一同上場的亂鬥賽。</p>
+<p>你和 Ellie 來到 Coliseum，向負責實務運營的 Dour Meadow 表明 Mythril Eye 記者身分，準備打聽更多細節。就在此時，場內傳來一陣騷動──Hildibrand 正要以紳士風度自我介紹，結果瞬間被一記重拳打倒在地。出手的人是冷靜的 Inspector Briardien，理由只是「那傢伙在那裡思考就讓人心煩」。Briardien 不浪費時間，直接要求 Dour Meadow 說明獎品內容。對方解釋，Fyrgeiss 提供的頭獎是一枚名為 Warden’s Grace 的戒指，鑲著一顆巨大 sun sphere，是除了 Qarn 以外難得一見的寶物，二、三名的獎勵也同樣不容小覷。雖然 Dour Meadow 強調有 Stone Torches 精銳日夜看守寶庫，不怕怪盜來犯，但 Briardien 立刻用上次 Brass Blades 完全沒擋下盜賊的前車之鑑回嗆，要求把寶物帶到自己面前保管。Dour Meadow 則反問：「我怎麼知道你不是怪盜的易容？」堅決拒絕，只說如果想拿到獎品，就得跟別人一樣上場戰鬥。因為選手人數不足，他索性當場把你這位 Warrior of Light 加進參賽名單裡，想像著當消息傳開時，觀眾與收入會怎麼暴增。</p>
+<p>這時，你們也見到了 Coliseum 奇特的接待員──紫色觸手在地板上拖曳的 Ultros。據說他是 Thaumaturges’ Guild 進行古代咒術實驗時產生的異形，本來要和其他怪物一起被丟進沙漠深坑封印，卻在關鍵時刻哭著求饒，說自己「只想和平生活，什麼都可以做」，於是被留下來當雜工兼接待。如今，他整個人──不，整隻章魚──都被女劍鬥士 Avila 迷得神魂顛倒。這位來自 Ala Mhigo 的女戰士冷冷宣告，將憑藉自己的 Tempest Blade 奪下勝利，根本不把調查一事放在眼裡。她過分篤定的態度引起 Briardien 的懷疑，但 Hildibrand 的注意力卻完全集中在 Ultros 的顏色和腳數上，堅信那一身觸手裡藏著「案件的氣味」。</p>
+<p>對於接連發生的攻擊事件，Ellie 感到不安，再次回去找 Ganelon。對方整理線索後指出，退賽的劍鬥士中，有相當多人原本都排定與 Avila 對戰。於是你們前往 Pugilists’ Guild，拜訪在預賽中被 Avila 打得遍體鱗傷的 Raging Rat。這名劍士肚裡滿是怨氣，一邊揉著傷口一邊強調自己「在紀錄上也許輸了，但他絕不承認失敗」，還咬定 Avila 的 Tempest Blade 是某種卑鄙的秘術。說著說著，他便把怨恨擴大到整個 Ala Mhigan 難民身上，語氣充滿偏見與歧視，讓 Ellie 直接翻臉、終止談話。走出門外，Nashu 疑惑到底是魔法，還是 Avila 有同伴暗中相助；Ellie 則冷靜判斷，從對方的作風看來，「共犯」更有可能。</p>
+<p>此時，Hildibrand 的腦內劇場已經暴衝到另一個方向。他一邊感嘆世間的不公，一邊在心裡編織出一段「被嫌棄的 Ala Mhigan 女劍士與實驗產物章魚」的故事：兩個被世界排斥的靈魂，在命運與正義之名下相遇相依──「Avila 與 Ulty」這對組合，對他來說簡直是天作之合。自信滿滿的紳士於是拉著眾人回到 Coliseum，準備從 Ultros 的一舉一動中揭露真相。你們躲在一旁偷看，只見 Ultros 對 Avila 的「美腿」口水直流，不知低聲說了什麼，結果換來她滿臉不快、匆忙離去。失落的他很快又把目標轉向另一位女劍鬥士，卻同樣在幾句話之後，被對方一聲驚呼甩在原地。Nashu 看著這一幕，甚至認真考慮要不要「淋上檸檬奶油，讓他早點解脫」，Hildibrand 則把這些反應全都當成「可疑行動」記在腦裡。只有 Ellie 看著那隻一次又一次被拒絕、觸手都快垂到地上的章魚，無奈地在心裡吐槽：這傢伙哪裡像共犯？明明就只是隻色得要命的章魚而已。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>任務發布</b> 艾麗　拉諾西亞東部：科斯塔・德爾・索爾 <small class="muted">(X:32.0, Y:30.4)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="a-case-of-indecency.html">不體面風波與那位琉璃色未婚妻</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="what-price-victory.html">為勝利再戰的無雙鬥士</a></div>
+</div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
