@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A Case of Indecency | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Hildibrand Adventures – A Case of Indecency (ARR Patch 2.3)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:1px solid transparent;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border-color:var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/_e1dIVixqMg"
+              title="A Case of Indecency" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">A Case of Indecency</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'A Case of Indecency',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+<p>With Arabella safely spirited away in a servant’s disguise, the stage is set for the thief’s final gambit at Costa del Sol. Briardien cannot find a single guest hiding an injured right hand and decides that Arabella must not appear in public, no matter how angry Vannes or Guguremu might become. Hildibrand, blissfully taking an insult as praise, accepts the “honored task” of causing a distraction and is entrusted—somehow—with Arabella’s exquisite banquet dress. As the guests assemble, Yalto Nolto and Sainana welcome everyone to the joint feast of the Brugaire Consortium and East Aldenard Trading Company, and Morgant proudly announces the betrothal of his son Vannes to the legendary “lapis maiden.” All eyes turn to the stage as the bride is called forth…</p>
+<p>What appears, however, is not Arabella but “Hildibella”—Hildibrand squeezed into the bridal gown, batting his eyelashes and crying out “My sun and stars!” as he throws himself at a horrified Vannes. While the crowd recoils and Vannes screams for the guards to seize this “cross-dressing deviant,” Hildibrand launches into a grand speech, accusing him of being the phantom thief of many faces. After all, only someone who had already seen the real Arabella could see through his “perfect disguise,” or so his logic goes. Ellie can only hold her head in her hands as the inspector’s deductions fall apart in public. Then, in the confusion, the real Arabella appears—pulled away by a man claiming to be Vannes—just as Briardien notices a glove covering the stranger’s right hand. A mocking voice fills the air as the thief finally reveals himself, gleefully announcing that while everyone was busy jeering at Hildybella, he has already taken what he came for. In a blink, he vanishes with Arabella’s treasured clasp in hand, leaving the crowd in an uproar and Hildibrand swooning at the thought that the thief came “all this way just for him.”</p>
+<p>In the aftermath, the truth emerges: the true Vannes was found bound and gagged in a storeroom, the engagement is summarily cancelled, and Guguremu’s carefully arranged future crumbles. Yet Arabella herself is unexpectedly at peace. She thanks Hildibrand, saying that this madcap night has taught her she does not need to sacrifice her own life entirely for profit and obligation; instead, she will find her own path to make her father happy. One mystery remains: the card had promised to steal the “lapis maiden’s virtue,” yet in the end the thief took only her neckpiece. Lewenhart recalls Guguremu’s explanation when the clasp first arrived—engraved with the sun goddess’s mark, it is a famed Brugaire treasure known as Azeyma’s Virtue. Briardien dryly notes that they must read more carefully between the lines next time. A final taunting card appears—“Made you look!”—followed by a new riddle: when next they meet, the thief will come to claim “the victor’s spoils.” As Hildibrand trembles, loudly insisting that the bomb was definitely the thief’s doing and not his own, Briardien vows that the man of a thousand faces has sealed his fate by calling him out by name. Somewhere beyond the festivities, the phantom thief prepares his next masquerade, and the key to the coming case—both literal and figurative—waits to be turned.</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>Quest Giver</b> Hildibrand <small class="muted">(Eastern La Noscea, X:20.5, Y:21.6)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="seeds-of-rebellion.html">Seeds of Rebellion</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="eight-armed-and-dangerous.html">Eight-armed and Dangerous</a></div>
+</div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'るり色の婚約者',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+<p>アラベラを使用人の服に着替えさせて馬車へ避難させたブリアルディアンは、右手を負傷したはずの怪盗がどこにも見つからないことに苛立ちつつも、「花嫁を人前に立たせることはできない」と断じる。一方、事情をよく理解していないヒルディブランドは、「気を引くことなら得意だろう」と皮肉混じりに託された役目を褒め言葉と受け取り、アラベラの婚礼衣装まで預かって上機嫌。やがてコスタ・デル・ソルでは、ヤルト・ノルトとサイナナが来賓たちに向けて挨拶し、ブルゲール・コンソーシアムと東アルデナード商会の合同宴席の開幕を宣言する。モーガントが息子ヴァンスと「ラピスの乙女」の婚約を高らかに告げ、客席の期待が最高潮に達したそのとき──。</p>
+<p>壇上に姿を現したのは、噂の絶世の花嫁……ではなく、ドレスに身をねじ込んだヒルディブランドこと「ヒルディベラ」だった。彼は金髪を揺らしながらヴァンスに駆け寄り、「我が太陽にして星よ！」と抱きつかんばかりの勢いで求愛し、会場は悲鳴とざわめきに包まれる。ヴァンスは「花嫁をどこへやった、この変態！」と怒号を上げ、兵たちに逮捕を命じるが、当のヒルディブランドは一歩も退かない。彼は胸を張り、「真のアラベラを見たこともないはずのあなたが、なぜ一目で私の変装を見破れたのか」と声高に問い、そこから一気に飛躍して、「事前に本物の姿を知っていた怪盗だからこそだ」と勝ち誇る。しかし、その理屈はあまりに強引で、エリーでなくとも頭を抱えたくなるものだった。</p>
+<p>混乱のさなか、本物のアラベラはすでに別の入口から会場へ誘い出されていた。「危険な変人がいる」と優しく声をかける男は、自らをヴァンスと名乗るが、その右手にはきつくはめられた手袋が光る。ブリアルディアンが違和感に気づいた瞬間、男は高笑いとともに正体を現す。「貴公らは愚鈍だが、あの愉快な紳士だけは侮れなかった」と言い残し、誰もがヒルディベラに目を奪われている隙に、アラベラの首もとから宝飾品を奪い取っていたことを告げると、千の顔を持つ怪盗は煙のように姿を消してしまう。残されたのは呆然とする招待客と、なぜか「自分のためにここまでしてくれたのだ」と感涙にむせぶヒルディブランドだけだった。</p>
+<p>事後の調査で、本物のヴァンスが倉庫部屋で縄と猿ぐつわもろとも転がされていたことが発覚し、婚約話は白紙に戻る。ググレムとモーガントは怒りに震えるが、当のアラベラは静かな面持ちで真実を受け止めていた。彼女は、騒動そのものは大変だったものの、自分の人生をすべて「商会のため」に捧げる必要はないのだと気づかせてくれたと語り、「父を幸せにする方法は、自分らしく生きる道を見つけることかもしれない」と決意を口にする。それを聞いたエリーは、まずヒルディブランドに着替えを用意するべきだとため息をつきつつも、どこか満足げだ。</p>
+<p>一方、怪盗が残した予告状の文言も解き明かされていく。「ラピスの乙女の純潔をいただく」との一文に反し、奪われたのはアラベラの首飾りだけだと首をかしげるエリーに、レーベンハルトはふとググレムから聞いた話を思い出す。太陽を象ったその金具は、ブルゲール家の宝物庫でも屈指の名品であり、人々はそれを「女神の加護」と呼んでいるのだという。ブリアルディアンは、「乙女の“美徳”」という言葉遊びに怪盗の悪戯心を見て取り、「次の挑戦状が届いたときは、文面の奥まで読み解かねばならない」と皆に釘を刺す。最後に拾い上げたカードには、「見事に引っかかってくれてありがとう」と挑発めいた一文と、「次こそは真の勝者の戦利品をいただきに参上する」と新たな謎が踊っていた。暗殺を諦めたわけではないと悟ったブリアルディアンは、千の顔を持つ怪盗に改めて宣戦布告し、ヒルディブランドは必死に「爆弾は怪盗の仕業だった」と強調しながら冷や汗を流す。やがて、倉庫の鍵と「次の事件の鍵」が同じものであるかのような、ナシュのとぼけた一言を合図に幕が下り、怪盗と二人の探偵による次なる舞台の開幕が、静かに予告されるのだった。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>クエスト発行</b> ヒルディブランド　東ラノシア <small class="muted">(X:20.5, Y:21.6)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="seeds-of-rebellion.html">語られし理由</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="eight-armed-and-dangerous.html">金色に染まるコロセウム</a></div>
+</div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'不體面風波與那位琉璃色未婚妻',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+<p>在 Costa del Sol，Arabella 已經換上僕人服，躲在馬車旁，由 Briardien 緊盯不放；真正站上舞台的，反而是被託付「想辦法拖延時間」的 Hildibrand。Inspector 四處找不到右手受傷的可疑人物，只得判斷讓 Arabella 公開露面風險太高，婚約人與兩家商會會不高興，他完全不在意。Hildibrand 則一如既往地把嘲諷當稱讚，開心收下 Arabella 的禮服，信心滿滿保證自己會「完美地掩護」大家。宴會開始後，Yalto Nolto 和 Sainana 代表 Brugaire Consortium 和 East Aldenard Trading Company 歡迎賓客，Morgant 也在眾人面前宣布，兒子 Vannes 將迎娶傳說中的「lapis maiden」。在滿場的歡呼與期待之中，新娘終於被邀請登場──</p>
+<p>結果踏上紅毯的，卻是一身婚紗、步伐浮誇的「Hildibella」。Hildibrand 穿著 Arabella 的禮服，面露陶醉地朝 Vannes 飛奔，張口就喊出「我的太陽與星辰！」，一邊高舉雙手要與他共結連理。賓客們目瞪口呆，Vannes 則嚇得當場破口大罵，要守衛把這個「變裝狂人」抓起來關進牢裡。Hildibrand 對此完全不以為意，反而開始一本正經地推理：世上真正見過 Arabella 本人的，只有 Guguremu 和 Lewenhart；既然 Vannes 一直宣稱今天才是初次見面，卻能一眼看出眼前的「花嫁」是偽裝，那就代表他早就知道真正的模樣──也就是人們口中的 phantom thief。這套邏輯在他自己聽來天衣無縫，在旁的 Ellie 只剩無奈扶額。</p>
+<p>就在這場鬧劇造成最完美的混亂時，那名戴手套的「Vannes」正溫柔地把真正的 Arabella 從人群中帶走，口口聲聲說要保護她遠離瘋子。Briardien 注意到他右手上刻意遮掩的傷痕，正要出聲喝止，對方卻已經忍不住笑出聲來。聲音從宴會場上空迴盪開來──千面怪盜愉快地宣告，大家的目光全被 Hildibella 吸引過去時，自己的目標早就到手。Arabella 頸上的珍貴飾扣被他收入囊中，留下滿場尖叫與混亂，他則像一陣風一樣消失無蹤。Hildibrand 此時還沉浸在「原來你特地為了我而來，你一定很愛我！」的自我感動裡，完全沒有意識到自己被當成煙霧彈利用得一乾二淨。</p>
+<p>事後調查很快揭露真相：真正的 Vannes 被綁住丟在倉庫裡，婚約自然宣告取消，兩家商會怒不可遏。出乎意料的是，最坦然的反而是 Arabella。她向 Ellie 坦白，雖然這一切讓人頭昏腦脹，但也正是這場鬧劇讓她明白，自己並不必完全為了 East Aldenard Trading Company 的未來放棄一切，而是可以用自己的方式，去思考怎麼讓 Guguremu 感到幸福。她說，是 Hildibrand 讓她看見這種可能性。Ellie 一邊吐槽要先替這位「紳士」找件像樣的衣服，一邊對這個回答暗自感到欣慰。</p>
+<p>剩下的謎題，是那句「要奪走 lapis maiden 的 virtue」究竟意味著什麼。表面上看來，phantom thief 只拿走了頸上的飾扣，談不上什麼「貞潔」或名譽。直到 Lewenhart 想起剛收下這件禮物時，Guguremu 曾特別說明：那是 Brugaire 收藏中少數帶有太陽女神紋章的名品，內部以暱稱稱它為「女神的美德」，在商會間頗負盛名。於是 Briardien 恍然大悟──所謂「lapis maiden 的 virtue」，說的其實就是這件寶物本身；下次只要再收到挑戰狀，就必須從字裡行間讀出真正的目標。最後，Nashu 又在現場撿到一張卡片，上面寫著「Made you look!」這樣的小惡作劇，背面則寫著：「下次相會之時，我將來奪走勝利者的獎賞。」Briardien 讀完只是冷冷一笑，宣稱 man of a thousand faces 既然敢點名挑戰自己，就已經寫下了結局。Hildibrand 則在一旁冒著冷汗，一面拼命強調先前的炸彈「當然是怪盜的陰謀」，一面跟著高喊「對，對，必須時刻保持警惕！」在 Costa del Sol 的夜風裡，案件暫告一段落，但下一場假面舞會與追逐，已經悄悄在暗處排練完畢。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>任務發布</b> 希爾迪布蘭德　拉諾西亞東部 <small class="muted">(X:20.5, Y:21.6)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="seeds-of-rebellion.html">反叛種子背後的真相</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="eight-armed-and-dangerous.html">多臂殺機席捲金色競技場</a></div>
+</div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
