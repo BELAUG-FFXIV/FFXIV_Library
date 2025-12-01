@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Manderville Men | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Hildibrand Adventures – Manderville Men (ARR Patch 2.2)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:1px solid transparent;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border-color:var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/DB21OI3JzAQ"
+              title="Manderville Men" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Manderville Men</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Manderville Men',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+<p>Having entrusted you with the sacred Manderville dance, Hildibrand declares you as close as siblings and sends you to perform it beside the fallen chimera. Under Gilgamesh’s curious gaze and Nashu’s eager cheering, you launch into the steps “only a Manderville can,” and your efforts are swiftly rewarded. A booming chorus answers your dance as a muscular, half-naked man appears, singing his own Manderville verse—Godbert Manderville, the terrifying goldsmith of legend. He assures you he has no quarrel with anyone but the chimera, then recognizes you by your “strong yet tender fingers” and demands to know how you learned the Manderville dance. When Hildibrand steps forward, Godbert is stunned to realize his son is still alive after ten long years and rails at him for allowing his parents to believe he perished with Dalamud.</p>
+<p>The reunion is brief; Hildibrand pleads for Godbert’s help restoring Maria’s shattered vase. Delighted, Godbert breaks into yet another sung jingle, then sets hammer to work. In moments he transforms the fragments into a dazzling, heavily “improved” piece that glitters in the fading light. Hildibrand protests that his father has destroyed any historical value the antique once had, but Godbert insists he has elevated a dull object into true art, and pointedly asks how long it has been since Hildibrand held a hammer himself. Hildibrand stands firm: blacksmithing is not his path—he is an inspector, sworn to help people like Maria and the victims of the weapon-stealing duelist. Maria, however, quietly worries that her mother will hate the extravagant redesign. Gilgamesh, amused, suggests they cannot know until they show her and mentions he would gladly cross blades with the mysterious duelist himself. With that, you return to Vesper Bay, Godbert promising to follow later on “business,” while Gilgamesh pauses to chase a glimpse of the demon bird that stole his own weapon.</p>
+<p>Back at the manor, Maria nervously presents the vase to Lady Durilda, who explodes in outrage at the “gaudy trash” and accuses you all of using her daughter in some cheap trick. Ellie fires back, pointing out that Durilda sent a child alone into danger, only for the air in the room to change when Godbert arrives and reveals the vase as his work. Durilda instantly reverses course, proclaiming she loves it and naming it the new centerpiece of her Thorne Dynasty collection. Learning that Hildibrand is Godbert Manderville’s son, she eagerly accepts his aid, and the inspector uses this opening to rejoin Briardien’s investigation. Briardien grudgingly explains his plan: counterfeit Treaty-Blades made by Jojonpa have been sent to the Observatorium and issued to sellswords; all are decoys, while the real Treaty-Blade stays locked in its original vault. When the thief strikes any route, hidden forces disguised as commoners will converge to seize him. Though he calls you superfluous, Briardien allows you to help as extra “smallfolk” watchers if you can blend in.</p>
+<p>Hildibrand proudly declares himself a master of disguise and asks for a description of the duelist. Ellie, exasperated that no one thought to ask Humphrey sooner, supplies it: a towering brute in red who wields a halberd. Hildibrand laughs that such a gaudy figure will be easy to spot in Coerthas’s snow, just as Gilgamesh rushes up, apologizing for his lateness. When Hildibrand repeats that the culprit wears a “ridiculous outfit,” Gilgamesh is suddenly intrigued, musing on what reason a warrior might have for such impractical clothing, while Hildibrand chuckles at the thought—both men unknowingly circling ever closer to the truth.</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>Quest Giver</b> Hildibrand <small class="muted">(Northern Thanalan, X:23.6, Y:23.9)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="the-hammer.html">The Hammer</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="the-three-collectors.html">The Three Collectors</a></div>
+</div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'キケンな彫金師',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+<p>マンダヴィル家の秘伝の舞を伝授したヒルディブランドは、もはやあなたは兄弟同然だと言い、倒れたキマイラのそばで「真のマンダヴィル」として踊るよう促す。ギルガメッシュが訝しげに見守り、ナシュが目を輝かせる中、あなたが渾身のマンダヴィルダンスを披露すると、その動きに呼応するかのように、陽気な歌声と共に屈強な半裸の男が現れる。自らもマンダヴィルの節を歌いながら登場したその人物こそ、噂に名高い伝説の金細工師、ゴッドベルト・マンダヴィルであった。彼は、決着をつけるべき相手はキマイラだけだと笑って場を和ませつつ、あなたの「強くも優しい指先」に見覚えがあると目を細め、誰にマンダヴィルの舞を教わったのか問いただす。そしてヒルディブランドの姿を認めた瞬間、十年もの間、息子の死を信じて嘆いていた父としての感情が爆発し、ダラガブの事件以来、生存を隠し続けてきたことを激しく責め立てる。</p>
+<p>しかし再会の感傷に浸っている暇はなく、ヒルディブランドはマリアの花瓶の修復を頼み込む。ゴッドベルトは意気揚々と自作の歌を口ずさみながらハンマーを振るい、砕け散った破片をあっという間にまばゆい装飾を施した花瓶へと作り変える。ヒルディブランドは「骨董品としての価値を台無しにした」と慌てるが、ゴッドベルトは「つまらぬガラクタを真の芸術品に昇華させた」と胸を張り、久しくハンマーを握っていない息子をひそかに案じる。それでもヒルディブランドは、自分の道は職人ではなく「人々を助ける探偵」であると主張し、マリアや武器を奪われた被害者たちのためにこそ力を尽くしたいと語る。マリアは、母親がこの派手な花瓶を気に入るとは思えないと不安を漏らすが、ギルガメッシュは「むしろ気に入るかもしれぬ」とあっけらかんと言い、自身も決闘士と手合わせしてみたいと面白がる。あなたたちはゴッドベルトと別れ、彼が素材集めを終えたのちにベスパーベイで落ち合う約束を交わしつつ、一足先に屋敷へ戻ることになる。</p>
+<p>ベスパーベイの屋敷では、マリアが震える手で花瓶を差し出すが、レディ・ドゥリルダは「成金趣味のガラクタ」と罵り、娘をも巻き込んだ茶番だと激怒する。エリーは、彼女がたったひとりでマリアを危険な任務に向かわせたことを糾弾するが、その空気を一変させたのは、遅れて現れたゴッドベルトのひと言だった。花瓶が自らの再構築によるものだと名乗り出た瞬間、ドゥリルダは態度を一変させ、「ソーン王家コレクションの新たな目玉」だと絶賛する。彼女はヒルディブランドがゴッドベルトの息子だと知って驚きつつ、その力を借りたいと申し出て、エリーもまた、その父がシンジケートの一員になっていた事実に目を丸くする。こうしてヒルディブランドは再びブリアルディアンの捜査に加わり、決闘士を追う体制が整えられていく。</p>
+<p>しぶしぶながらも、ブリアルディアンはこれまでの計画を説明する。偽物の骨董品を扱うジョジョンパに依頼し、複製したトリーティー・ブレードを観測所に運ばせ、レディ・ドゥリルダ配下の傭兵たちに配布していること。本物は元の持ち主の金庫に保管したまま、複数の経路で「運搬」を偽装し、いずれかで賊が襲撃した瞬間、各ルートに紛れ込ませた変装済みの兵たちが一斉に包囲する手筈であることを明かすのだ。すべて計算ずくだと豪語し、ヒルディブランド一行を「不要」と斬り捨てながらも、「一般人」に扮して道を見張る役なら任せてもよいと言う。ヒルディブランドは「変装の達人」であると胸を張り、賊の特徴を尋ねるが、エリーは「どうして今まで誰も Humphrey に聞かなかったのか」とため息をつきつつ、赤い服をまとった大柄なハルバード使いだと教える。雪深いクルザスでは目立ちすぎる格好だとヒルディブランドが笑っていると、そこへギルガメッシュが遅れて合流し、「ばかばかしい格好」という情報に妙な興味を示す。戦士がわざわざ不便な格好をする理由とは──ふたりはそう語り合いながら、知らず知らず決闘士の正体へと近づいていくのだった。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>クエスト発行</b> ヒルディブランド　北ザナラーン <small class="muted">(X:23.6, Y:23.9)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="the-hammer.html">白髪の鬼</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="the-three-collectors.html">天下無双の挑戦者</a></div>
+</div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'曼德維爾，這個危險的金匠！',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+<p>既經把 Manderville 家傳之舞教給你之後，Hildibrand 說你們現在就像手足一樣，請你代替自己站在倒地的 chimera 旁跳舞，好把那位傳說中的金匠引出來。在 Gilgamesh 好奇的眼神與 Nashu 興奮的期待下，你照著剛學會的步伐跳起來，不一會兒，一道熟悉又陌生的歌聲從岩場傳來──一位身材壯碩、只穿著泳褲的男人一邊唱著自己的 Manderville 歌詞一邊走近，你們要找的 Godbert Manderville 就這樣現身。他保證自己只是在替 chimera「結帳」，對你們沒有敵意，接著認出你手上熟練卻溫和的力道，驚訝地追問你到底是跟誰學的 Manderville 之舞。當 Hildibrand 出現在他眼前時，Godbert 簡直不敢相信這個十年前離家、又在 Dalamud 事件後被全家認定為罹難的人居然還活著，怒氣與震驚一口氣爆發，質問他為何讓父母背負這麼久的悲傷。</p>
+<p>情緒雖然激烈，事情卻不能等。Hildibrand 趕緊把話題拉回 Maria 的花瓶，拜託 Godbert 幫忙修復。Godbert 立刻哼起又一段關於自己是「Manderville 金匠」的歌，一邊抄起榔頭開始工作。短短幾下，散落一地的碎片就被他敲成一只閃閃發光、裝飾誇張的新花瓶。Hildibrand 忍不住大叫這完全破壞了古董原本的歷史價值，Godbert 卻只覺得自己把一個「沒特色的舊東西」升級成真正的藝術品，順勢問兒子多久沒握過榔頭了。Hildibrand 拒絕接招，堅定表示自己的道路不是工匠，而是「調查官」，要用這份工作幫助像 Maria 那樣的人，以及被偷走武器的無辜受害者。Maria 則小聲說，母親大概不會喜歡這種畫風完全不同的改造版。Gilgamesh 卻樂在其中，說誰知道呢，也許 Lady Durilda 反而會愛上這種「重新想像」，還說自己身為決鬥者，很想和那名偷武器的決鬥士交手看看。最後，你們與 Godbert 暫別，由他繼續在 Bluefog 採集材料，自己一行則先回 Vesper Bay。</p>
+<p>回到宅邸後，Maria 緊張地把花瓶捧到母親面前，Lady Durilda 一看就火冒三丈，說這是「俗不可耐的垃圾」，還指責你們竟然讓女兒牽扯進這種騙局裡。Ellie 當場反擊，當著眾人的面指出她之前是如何讓 Maria 一個小女孩獨自面對盜賊與魔物的威脅。就在氣氛即將完全崩壞時，Godbert 抵達現場，平靜地說這只花瓶是自己重新打造的作品。聽到「Manderville」這個姓氏，Lady Durilda 馬上變臉，慌忙改口說不喜歡只是失言，其實非常「熱愛」這件作品，甚至決定把它當作 Thorne 王朝收藏的新核心展示品。得知 Hildibrand 是 Lord Godbert Manderville 的兒子後，她立刻重新評估這位「名偵探」的價值，乾脆直接邀請他正式協助這樁案件。Ellie 也這才意識到，這位半裸跳舞的金匠，就是那個取代 Eolande Quiveron、坐上 Syndicate 席位的傳奇富豪。</p>
+<p>藉著這個契機，Hildibrand 再次與 Briardien 會合，要求對方分享目前掌握的情報。Briardien 雖然覺得你們多此一舉，還是簡短說明自己的佈局：他找上專門賣假骨董的 Jojonpa，委託對方製作多把 Treaty-Blade 複製品，全部送往 Observatorium 發給 Lady Durilda 帶來的傭兵。真正的 Treaty-Blade 則留在原主人保險庫裡，等賊人出手那一刻，無論他襲擊哪一條運輸路線，暗中埋伏在各處、偽裝成平民的士兵就會同時包圍過去。從他的角度看，所有風險都已被算進去，多出來的你們反而是「累贅」，頂多可以充當路邊普通行人，多幾雙眼睛盯著出入口。Hildibrand 卻信心滿滿，自稱易容高手，立刻詢問有沒有關於決鬥士外貌的情報。這時 Ellie 終於受不了，嘆氣說你們誰都沒去問 Humphrey 嗎，然後把描述說出來：一個身材高大、穿著紅色衣裝、手持長柄斧的男人。在白雪覆蓋的 Coerthas，那種打扮不可能低調。</p>
+<p>Hildibrand 大笑說這種人應該一眼就能認出來，話才說完，Gilgamesh 就氣喘吁吁地趕來，表示自己終於追上隊伍。當他聽到「衣著可笑」這個關鍵形容詞時，突然被勾起興趣，開始思考一個戰士為什麼會刻意穿上不實用、甚至有些滑稽的服裝。Hildibrand 則把這當成笑話，覺得這種品味本身就足以讓紳士忍俊不住。你們在看似閒聊的氛圍中，卻一步步逼近那位以搶奪武器為樂的神秘決鬥士真正的身影。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>任務發布</b> 希爾迪布蘭德　薩納蘭北部 <small class="muted">(X:23.6, Y:23.9)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="the-hammer.html">白髮修羅與鐵鎚</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="the-three-collectors.html">無雙收藏家的對決</a></div>
+</div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
