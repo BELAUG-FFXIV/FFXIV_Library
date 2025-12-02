@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A Gentleman Falls, Rather than Flies | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Hildibrand Adventures – A Gentleman Falls, Rather than Flies (HW Patch 3.2)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:1px solid transparent;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border-color:var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/kmGWFMtHdGY"
+              title="A Gentleman Falls, Rather than Flies" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">A Gentleman Falls, Rather than Flies</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'A Gentleman Falls, Rather than Flies',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+<p>In the chill streets of Ishgard, you are greeted by a familiar voice and an even more familiar energy. Nashu Mhakaracca practically bounces in place at the sight of you, declaring it “serendipity” that you should meet here of all places. She has, she proudly explains, been calculating the trajectory of the latest Manderville mishap—specifically, the angle and force with which Hildibrand was catapulted into the sky. Her triple-checked numbers insist that he must have landed somewhere in Ishgard…but her investigation has stalled. Now that you’re here, she’s certain fortune is on their side again. Together you begin questioning merchants about a “gentlemanly Highlander,” only to be met with puzzled looks and half-hearted guesses—until the well-informed Elaisse recalls rumors of a foreign guest received by Lord Edmont de Fortemps.</p>
+<p>Following this lead to Fortemps Manor, a knight confirms that Lord Edmont is indeed entertaining a foreign visitor and invites you to wait in the gazebo. Nashu nervously whispers about “dangerous gazebos,” but agrees to trust you to keep any rogue architecture in check. From your vantage point, you overhear Lord Edmont speaking with a well-built man in fine dark clothes, praising the invigorating Coerthan air and the progress of their commercial talks. Nashu bursts forward, convinced she has found the inspector at last—only to realize the man is Lord Godbert Manderville himself. Before the confusion can fully settle, an inquisitor named Cyr barges in and dramatically accuses Godbert of heresy, then just as dramatically backpedals when he learns the “heretic” is a guest of House Fortemps.</p>
+<p>Cyr explains that he is searching for a suspicious, possibly heretical man: muscular, darkly dressed, and, as some witnesses put it, “gentlemanly.” Nashu and Godbert immediately recognize the description as Hildibrand to a tee. Seeing the overlap in your goals, Cyr proposes that you travel together to Falcon’s Nest, where the first sightings were reported. There, Ser Redwald describes a mysterious vagabond spotted near the Dusk Vigil who fled when hailed by a patrol. Cyr lapses into old habits, sniffing out “the scent of heresy” and confessing that the inquisition has had so little real work of late that their very existence is under review. He swears by Halone to uncover at least one true heretic and prove their worth—but in the meantime, he leads you all toward the frozen ruins of the Vigil to chase your shared quarry.</p>
+<p>The bitter cold at Dusk Vigil nearly drives Cyr back, but Nashu’s sharp eyes catch a figure emerging from the ruined fortress. She calls out to the “inspector,” only to be answered by one of the Gentle Dead Men—an undead gentleman who once served under “Master Zombibrand.” Cyr immediately proclaims him a heretic raised by unholy sorcery, but Nashu cheerfully corrects him, introducing the zombie as a friend. The Gentle Dead Man explains that their lonely existence in Ul’dah led them to rumor of a zombie-held fortress in Coerthas, and he came as emissary hoping to meet fellow undead…only to discover that all within are now truly, irrevocably dead, thanks to your past deeds. Hearing that even Zombibrand has passed on for good disappoints him, but he brightens when he realizes why you’ve come.</p>
+<p>Nashu’s shoulders sag as she admits her calculations were wrong—Hildibrand never landed in Coerthas at all. Yet the Gentle Dead Man reassures her: as founder of the Gentle Dead Men, Hildibrand’s aether is inextricably entwined with theirs. He can feel his overlord’s presence tugging at him even now and offers to guide you straight to the missing inspector. Nashu is instantly revived, Godbert is delighted, and the group marches off in pursuit of this new lead—leaving a shivering Cyr scrambling to catch up, muttering half-remembered lectures about heresy and wondering if zombification counts. As you press on through the ice and wind, Nashu marvels at frozen rivers and maybe-frozen fish, Godbert admires the stark beauty of Coerthas and wishes Julyan could see it, and even Redwald quietly prays for “the boy’s” success. Somewhere ahead, the trail of Hildibrand Manderville finally begins to take shape once more.</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>Quest Giver</b> Nashu Mhakaracca <small class="muted">(The Pillars, X:5.9, Y:9.9)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="her-last-vow.html">Her Last Vow</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="dont-call-it-a-comeback.html">Don’t Call It a Comeback</a></div>
+</div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'事件屋を探せ',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+<p>イシュガルドの冷たい空気の中、あなたは聞き覚えのある声に呼び止められる。振り返れば、そこに立っていたのはナシュ・マカラッカ。彼女は「Forename に会えるなんて、これは運命──いえ、セレンディピティです！」と大喜びし、こうなったからには「紳士探偵」の捜索を手伝ってほしいと目を輝かせる。彼女は、再び空高く打ち上げられたヒルディブランドの軌道計算をしていたらしく、何度も計算をやり直した結果、「着地点はイシュガルドに違いない」という結論に達していた。だが、肝心の聞き込みはなかなかうまくいかず、「紳士的なハイランダー」を知る者は誰もいない。</p>
+<p>それでも二人で商人たちに話を聞き続けるうちに、エレーズがふと「フォルタン伯エドモンの招きで訪れた異国の客」の噂を口にする。もしや、と向かったフォルタン家の屋敷では、門番が「まさに今、客人をもてなしている最中だ」と教えてくれ、しばし庭園のあずまやで待つよう勧められる。ナシュは「ガゼボは危険な魔物なのでは」と本気で怯えつつも、あなたが一緒なら大丈夫と覚悟を決め、ふたりで様子をうかがう。やがて、フォルタン伯と、黒い服に身を包んだ大柄な男が現れ、クルザスの凍てつく空気が商談にも頭にも良いと談笑しながら別れの挨拶を交わす。</p>
+<p>ナシュは飛び出さんばかりの勢いで「インスペクター！」と叫ぶが、その男はヒルディブランドではなく、父親のゴッドベルト・マンダヴィルだった。そこへ、突然イシュガルドのインクイジターであるシルが現れ、狂気じみた目つきでゴッドベルトを「異端者」と断じる。しかし、彼がフォルタン家の客人だと知るや否や、シルは慌てて平身低頭し、事情を説明する。彼が追っているのは、筋骨たくましく、黒い衣をまとい、一部の者からは「紳士的」と評される謎の男──どう考えてもヒルディブランドその人だ。シルは、最初の目撃情報があったファルコンネストへ共に向かうことを提案し、「もし同一人物であり、潔白が証明されるならば、その場で事を収めるのが最善だ」と語る。</p>
+<p>ファルコンネストに着くと、レッドワルドが報告書にも軽く記しただけの「黒衣の放浪者」の目撃談を語る。彼によれば、その男は黙約の塔の近くで哨戒隊に呼びかけられるや否や、姿を消したという。シルは思わず「異端の匂いがする」と鼻を鳴らし、すぐに師から叱られた癖だと謝るが、異端審問の仕事が減り続け、組織の存在意義すら疑問視されている現状を嘆きつつ、「ハローネに誓って、必ずや真の異端者を見つけ出し、我らがまだ必要とされていることを証明してみせる」と熱く語る。その言葉とは裏腹に、彼の足取りは凍てつくクルザスの寒さに震えながら、黙約の塔へと続いていく。</p>
+<p>黙約の塔周辺は、シルが悲鳴を上げるほどの極寒の地だった。「こんな場所に生きている者などいるはずがない」と愚痴をこぼす彼をよそに、ナシュは塔から出てくる人影を見つけ、「インスペクター！」と駆け寄る。そこに立っていたのは、かつてゾンビブランドと共にあった「ジェントル・デッドメン」の一員。シルは反射的に「死者を蘇らせる異端の魔法だ！」と叫ぶが、ナシュは笑いながら「彼は異端者じゃなくて、紳士的なゾンビの方ですよ」と紹介する。</p>
+<p>ジェントル・デッドマンは、ウルダハでの孤独な「半死半生」の日々の中、「ゾンビが守る廃砦」の噂を聞きつけ、仲間を代表してここまで来たのだと語る。だが、砦の中にいたはずのゾンビたちは、あなたの活躍によってすでに「本当に」滅び去っており、ゾンビブランドもまた完全に逝ってしまったと聞かされ、深いため息をつく。計算違いに肩を落とすナシュに、彼は優しく首を振る。「我ら『ジェントル・デッドメン』の創設者であり主君たるお方の魂は、今も我々と深く結びついている。彼の在り処は、わたしの朽ちかけた鼻が脳みそを嗅ぎ分けるように、感じ取ることができる」と。</p>
+<p>ナシュは一瞬で元気を取り戻し、ゴッドベルトも息子との再会の可能性に目を輝かせる。ジェントル・デッドマンを先頭に一行が歩き出すと、シルは後方でひとり立ち尽くし、師の言葉──「異端はさまざまな形を取り、油断すればすぐに根を張る病である」──を思い出しながら、「ゾンビ化も異端に入るのでは」と真剣に悩む。しかし、気づけば一行はすでに遠く離れており、彼は慌てて凍えた身体を引きずって後を追う。凍りついた川面を見て目を丸くするナシュ、氷雪の風景にも美を見出し「妻にも見せたかった」と呟くゴッドベルト、そして「若者の成功を祈る」とそっと祈りを捧げるレッドワルド──そうして、ヒルディブランド・マンダヴィルを巡る新たな旅路は、氷に閉ざされたクルザスの大地で再び動き出すのだった。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>クエスト発行</b> ナシュ・マカラッカ　イシュガルド：上層 <small class="muted">(X:5.9, Y:9.9)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="her-last-vow.html">事件は砂塵に消ゆ</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="dont-call-it-a-comeback.html">のこされた手がかり</a></div>
+</div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'就算摔下來也得像個紳士',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+<p>在冰冷的 Ishgard 街頭，一道熟悉的聲音突然朝你揮手。轉頭一看，是 Nashu Mhakaracca 一如往常地充滿活力，她先叫出你的名字，接著立刻把這次的重逢定義為「serendipity」，說既然天意都出手安排了，你就一定要幫她一起找回 Inspector Hildibrand。她得意洋洋地說，自己一直在計算 Hildibrand 每次被砲轟到天上時的軌道，這回還特地「三重確認」，得出一個結論：他一定是落在 Ishgard。只是，實際的調查完全不如預期順利──沒有人知道什麼「gentlemanly Highlander」。</p>
+<p>你陪著她在市集間一家一家詢問商人，Frine 和 Norlaise 只說自己接過不少 Highlander 冒險者的生意，但稱不上紳士；Pienne 則把你們轉介給消息靈通的 Elaisse。就在 Nashu 以為又要碰壁時，Elaisse 想起最近的風聲：Lord Edmont de Fortemps 正在接待一位外地來的客人，也許就是你們要找的人。你們順著線索前往 Fortemps Manor，House Fortemps 的騎士確認伯爵確實正在會見外客，並請你們暫時在花園的 gazebo 等候。Nashu 小聲嘀咕「gazebo 這種東西聽起來就很危險」，但看著你在身旁，還是勉強說服自己相信這次的 gazebo 不會暴走。</p>
+<p>不久之後，你們看到 Count Edmont 帶著一位高大的男人走出屋外，談論著 Coerthas 的寒風十分提神，對商談也有所助益。Nashu 幾乎是衝上前去，大喊「Inspector！」──結果對方轉過身來，卻是 Lord Godbert Manderville。還來不及理清這個巧合，Inquisitor Cyr 突然殺進庭院，指著 Godbert 大聲指控他是異端，直到得知這位「可疑男子」其實是 Fortemps 家客人時才慌忙道歉。Cyr 解釋自己正在追查一個可疑人物：身材壯碩、穿著深色衣服，行事卻「相當紳士」。聽到這樣的描述，Nashu 和 Godbert 幾乎同時想到 Hildibrand。</p>
+<p>既然目標看起來是一樣的人，Cyr 建議大家一起前往 Falcon’s Nest，因為最早的目擊情報就來自那一帶。到了當地，Redwald 回報了一件他原本只當作「順手提一下」的小事：巡邏隊曾在 Dusk Vigil 附近看到一名神秘的肌肉男，一叫住他，他便拔腿就跑。Cyr 聽完忍不住說自己嗅到了「heresy 的氣味」，又連忙道歉，解釋那只是以前跟著導師學來的壞習慣。近來幾乎沒有人被證實為 heretic，Inquisition 的預算和存在價值都受到懷疑，他一心只想抓到一個真正的異端，證明這個機構仍有用武之地。於是，在他的帶領下，一行人踏上通往 Dusk Vigil 的冰封道路。</p>
+<p>到了 Dusk Vigil 一帶，寒風冷得連 Cyr 都忍不住抱怨「這裡根本不可能有活物」，但 Nashu 眼尖地發現，有人正從廢棄的堡壘方向走來。她高聲呼喊 Inspector，迎面而來的卻不是 Hildibrand，而是來自 Ul’dah 的 Gentle Dead Men 其中一員。Cyr 反射性地把他當成「被異端儀式喚醒的不死者」，激動地大吼，Nashu 則笑著為他澄清，這位只是「有點寂寞但很紳士的 zombie 朋友」。</p>
+<p>這位 Gentle Dead Man 說，在 Ul’dah 過著半死不活的日子實在太孤單了，聽說遠方有一座由 zombie 盤踞的廢城堡，他們十分高興，還特地選出他作為 emissary 前來拜訪。沒想到等他千里迢迢趕到，堡壘裡的 zombie 卻早已「徹底死亡」，連 Master Zombibrand 也不例外──得知真相的那一刻，他忍不住嘆了一口氣。Nashu 這才沮喪地承認，自己的軌道計算從一開始就錯了：Inspector 根本沒有摔進 Coerthas。</p>
+<p>不過 Gentle Dead Man 隨即安慰她，說如果你們找的是他們的 overlord，那就不用擔心。身為 Gentle Dead Men 的創立者，Hildibrand 的 aether 與他們緊緊相連，他現在甚至能清楚感覺到那股牽引力。只要順著這股感應前進，就一定能找到 Inspector。Nashu 立刻重燃幹勁，Godbert 也滿臉期待，於是大家跟在這位僵尸紳士後面繼續上路，把還在原地思考「zombification 算不算 heresy」的 Cyr 遠遠拋在後頭。</p>
+<p>走在冰雪之中，Nashu 看到結凍的水面驚呼「連魚是不是也一起凍住了」，Godbert 則望著銀白世界感嘆這片土地有自己獨特的美，只可惜 Julyan 沒能一同欣賞。Redwald 靜靜地說，或許也該為那個「少年」默默祈禱，而在他們前方，看似遙不可及的 Hildibrand 軌跡，終於再一次清晰地浮現在旅途的前方。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>任務發布</b> 娜修・瑪卡拉卡　伊修加德 - 上層區 <small class="muted">(X:5.9, Y:9.9)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="her-last-vow.html">她最後的誓約，隨風而逝</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="dont-call-it-a-comeback.html">一場不能稱之為回歸的殘留線索</a></div>
+</div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
