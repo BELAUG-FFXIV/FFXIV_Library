@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Coliseum Conundrum | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Hildibrand Adventures – The Coliseum Conundrum (ARR Patch 2.4)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:1px solid transparent;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border-color:var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/PEkLXaugXXo"
+              title="The Coliseum Conundrum" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">The Coliseum Conundrum</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'The Coliseum Conundrum',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+<p>As the Mythril Cup is about to begin, Briardien orders you to keep well away from Avila’s mysterious blade while he watches her from the stands, determined to uncover the trick behind her strength. Back at the Coliseum, Dour Meadow announces a last-minute change: one fighter has dropped out, and Ultros himself has stepped in as a replacement, sending the crowd into a frenzy. When the melee begins, Avila tears through her foes like a storm, while Ultros whispers his scheme—he and his “buddy” will sweep the field together, then he’ll take a dive and split the winnings. The “Tempest Blade” is revealed at last when Briardien notices Avila’s anxious gaze toward the gate: Typhon bursts into the arena, using gold truffles as bait to unleash gigantic sneezes that look as if they erupt from Avila’s sword. The crowd realizes they’ve been deceived, turns on the Ala Mhigan girl with open contempt, and Avila can only stammer about doing it all for her sister before Ultros quickly proposes a new spectacle—a final match between himself, Typhon, and the Warrior of Light. The chant of “ULTROS!” from the stands makes the decision for everyone.</p>
+<p>The venue for this special showdown is Halatali, atop the perilous platform known as the Dragon’s Neck. Dour Meadow, ever the promoter, agrees that two-on-one would be unfair and allows you to bring a full party to even the odds. In the ensuing chaos of slippery ink, gale-force sneezes, and precarious footing, you and your allies send Ultros and Typhon flying, claiming victory and, with it, the Mythril Cup. Back in Ul’dah, Briardien uses your triumph to secure front-row seats at the award ceremony; from there, he intends to catch the phantom thief the moment he makes his move.</p>
+<p>At the ceremony, Dour Meadow unveils the supposed Warden’s Grace from Fyrgeiss’s personal vault, proudly presenting it as the legendary treasure coveted by Eorzea’s latest master thief. The lights dim and a masked figure descends from above—the many-faced phantom thief at last—promising the true “main event.” Hildibrand shouts a Manderville oath to end the fiend’s career, only for Gilgamesh to burst in as well, demanding a rematch against you and the return of his stolen “spear.” As accusations fly, truffles rain mysteriously from above, Typhon lets out another colossal “FUNGAH!” and the prize is launched skyward. Godbert, refusing to see his son give up, kicks Hildibrand into the air Manderville-style in a desperate bid to reclaim the treasure, but despite the spectacular attempt, the ring ultimately lands in the thief’s hands—only for him to declare it a fake. His true target, the second-place prize Ring of Inquiry, vanishes from the storeroom almost simultaneously.</p>
+<p>In the aftermath, Godbert calmly confirms that the “sun sphere” is indeed a shoddy replica, leaving Dour Meadow sweating and stammering for excuses. Avila, realizing she sold her honor and cooperated with Ultros for a false treasure, despairs at her own foolishness until Hildibrand reminds her that she fought for Hegelina above all else; she admits as much and resolves to face the hard work of regaining her sister’s trust. Meanwhile, Briardien and the others piece together the thief’s pattern: the Treaty-Blade, Azeyma’s Virtue, and now the Ring of Inquiry—all relics from the age of Belah’dia. The phantom’s calling cards speak of “four sacred treasures” and “justice served in the blazing light of the sun,” and Ellie notes how common folk are beginning to cheer for the thief who humiliates Ul’dahn elites more than for his wealthy victims. Suspecting that his next target may be a Syndicate member—or even the sultana herself—Briardien steels himself for the confrontation ahead, while Hildibrand dramatically vows to be the one to gather all four relics first. The “episode” closes on Nashu’s teasing hint: the key to the next case is a mask, and the chase after the many-faced phantom thief has only just begun.</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>Quest Giver</b> Briardien <small class="muted">(Ul’dah - Steps of Thal, X:14.0, Y:10.0)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="the-trouble-with-truffles.html">The Trouble with Truffles</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="shades-of-sildih.html">Shades of Sil’dih</a></div>
+</div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'のこされたメッセージ',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+<p>ブリアルディアンは、ミスリルカップ開幕を前に「アヴィラの力の仕掛けを見抜くまでは、決して刃の間合いに入るな」とあなたに念を押し、自身は観客席から戦いを見届ける段取りを整える。その頃コロセウムでは、ドア・メドウが観衆の前で新たな目玉を発表していた。直前に負傷者が出たため、その代打として人気者のウルティロスが参戦するというのだ。大歓声の中で乱戦が始まると、アラミゴ出身の女戦士アヴィラは旋風のように敵を薙ぎ払い、ウルティロスは「最後に自分がわざと負ける」という条件で共闘を持ちかける。やがてブリアルディアンは、どの瞬間よりもアヴィラが闘技場の門を気にしていることに気付き、開門を命じる。そこへ現れたのは、巨大なくしゃみで突風を巻き起こす怪物タイフォン。ゴールドトリュフの香りでくしゃみを誘発し、それをあたかもアヴィラの「テンペストブレード」から放たれる技のように見せかけていたのだ。</p>
+<p>真相が露見すると、観客はたちまちアヴィラを「卑劣なアラミゴ人」と罵り始め、差別的な野次が飛び交う。アヴィラは「すべては妹のためだった」と言いかけるが、言葉にならないうちに、ウルティロスが話をさらう。「ここは乱戦を中止して、残った３名──自分とタイフォン、そして光の戦士による決戦といこうじゃないか」と提案し、観衆は「ウルトロス」コールでそれに応える。舞台はハラタリ修練所の「ドラゴンズネック」。ドア・メドウはさすがに二対一は不公平だと、あなたに仲間を７人まで連れてくることを許可する。滑りやすい足場、インクや突風が飛び交う混沌の中、あなたたちはウルティロスとタイフォンを打ち倒し、ミスリルカップの勝者として名を刻むことになる。</p>
+<p>その後、ブリアルディアンはあなたの勝利を利用し、授賞式の特等席を確保する。こここそが、怪盗が動く瞬間を捉える最高の場所だと踏んだのだ。ドア・メドウがフィルゲイスの私蔵庫から持ち出したという宝「ウォーデンズグレイス」を誇らしげに掲げると、天井から仮面の怪人が舞い降りる。「多面の怪盗」がついに姿を現し、真の「本番」の始まりを告げる。ヒルディブランドはマンダヴィルの名にかけて盗みの終止符を打つと宣言するが、その場に乱入したギルガメッシュは、あなたへの再戦と自らの「槍」の返還を高らかに要求。場内が混乱する中、どこからともなくトリュフが降り注ぎ、タイフォンの「フンガー」が炸裂して賞品が宙を舞う。</p>
+<p>あきらめかけたヒルディブランドに、父ゴッドベルトが喝を入れる。「指輪が来ないなら、お前が空へ行けばよい」とばかりに、マンダヴィル流の豪快な蹴りで息子を空高く打ち上げるものの、結果として指輪は怪盗の手中に収まってしまう。しかし、怪盗はそれを一瞥すると「これは偽物だ」と言い捨てる。真に狙われていたのは、倉庫から同時に消えた二等賞「リング・オブ・インクワイアリー」の方だったのだ。ゴッドベルトは一目で「この太陽球は粗悪なレプリカだ」と見抜き、ドア・メドウは脂汗を流しながら言い訳に終始する。</p>
+<p>一方、アヴィラは自らの名誉を捨ててウルティロスと手を組んだ末、偽物の宝に踊らされていた事実に打ちひしがれる。だがヒルディブランドは、すべては妹ヘゲリナのためだったのだろうと語りかける。図星をさされた彼女は、自責の念を抱えながらも、「失った信頼と誇りを取り戻す」と前を向く決意を示す。ブリアルディアンとゴッドベルトは、怪盗の標的を整理する。トリーティーブレード、アーゼマの愛、リング・オブ・インクワイアリー──いずれもベラフディア時代の由緒ある遺物であり、怪盗のカードには「ベラフディアの四つの聖遺物」「太陽の裁き」といった語が踊る。エリーは、標的がコレクター、交易商、鉱山王といった権力者ばかりであることから、庶民の多くが被害者よりも怪盗に肩入れし始めていると指摘する。</p>
+<p>ブリアルディアンは、次なる標的がシンジケートの誰か、あるいはナナモ・ウル・ナモその人かもしれないと警戒を強めるが、ヒルディブランドは逆にやる気を燃やし、「四つの遺物を手にするのは、このマンダヴィル紳士だ」と高らかに宣言。ナシュは「次の事件のカギは仮面ですよ！」とおどけたナレーションで幕を引き、多面の怪盗を追う新たな捜査の始まりを暗示するのだった。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>クエスト発行</b> ブリアルディアン　ウルダハ：ザル回廊 <small class="muted">(X:14.0, Y:10.0)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="the-trouble-with-truffles.html">秤を正すために</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="shades-of-sildih.html">旧怨なる亡霊</a></div>
+</div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'競技場裡被遺落的訊息',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+<p>Briardien 很快總結完 Syntgoht 那邊得到的資訊，認定再耗下去只是浪費時間，於是帶著你回到 Coliseum，準備在 Mythril Cup 的實戰中拆穿 Avila 的秘密。他打算在觀眾席找個制高點專心觀察，叮囑你在看清「Tempest Blade」的真相之前，絕對不要靠近 Avila 的攻擊範圍。舞台另一頭，Dour Meadow 則宣布新的賣點──因為臨時有人受傷退賽，「大家最愛的章魚」Ultros 將代打上陣。亂戰一開打，Avila 的刀鋒如暴風般橫掃全場，Ultros 則一邊上演搞笑，一邊暗中與她配合，靠「神祕力量」把對手吹飛。當 Briardien 注意到 Avila 不斷焦躁地盯著鬥技場入口時，他下令打開大門，巨型怪物 Typhon 隨之現身：原來所謂的 Tempest Blade，其實是利用 gold truffles 引發 Typhon 的超級噴嚏，讓所有人誤以為暴風是從她的武器釋放出來。</p>
+<p>真相曝光後，觀眾立刻反過來辱罵 Avila，不少 Ul’dah 市民把對她的憤怒和偏見發洩到整個 Ala Mhigo 民眾身上。Avila 慌亂地想為自己辯解，只勉強說出「一切都是為了妹妹」的片段，Ultros 就搶先插嘴，提議將亂戰腰斬，改成自己＋Typhon 對上 Warrior of Light 的「冠軍賽」。面對看台上整齊劃一的「ULTROS」口號，Dour Meadow 乾脆順水推舟，場地改成 Halatali 的 Dragon’s Neck，並允許你最多帶七名夥伴入場，以平衡對上兩名巨大怪物的不利形勢。最終，你和同伴在搖晃的平台上躲過墨汁與噴嚏，將 Ultros 和 Typhon 打落台下，贏得勝利與 Mythril Cup 的冠軍之名。</p>
+<p>憑藉這場勝利，Briardien 成功拿到頒獎典禮的前排座位，他認為這是逮住 phantom thief 的最佳機會。台上，Dour Meadow 高舉來自 Fyrgeiss 私人金庫的「Warden’s Grace」，當作這次備受矚目的獎品。就在這時，戴著面具的怪盜自空中現身，自我介紹為「多面怪盜」，宣告真正的演出現在才要開始。Hildibrand 當場以 Manderville 之名發誓，絕不再讓他偷走任何寶物；Gilgamesh 也殺進會場，一邊對你宣戰，一邊向怪盜索回自己的「槍」。混亂之中，gold truffles 再度從天而降，Typhon 發出震耳欲聾的「FUNGAH」，把獎品震飛到半空。Godbert 不願看兒子就此放棄，乾脆照老樣子一腳把 Hildibrand 踢上天空，想讓他在空中搶回寶物，結果指環最後仍落入怪盜掌心。</p>
+<p>然而怪盜只看了一眼，便斷言這枚指環是贗品，真正的目標是同時從倉庫消失的二等獎「Ring of Inquiry」。Godbert 隨即用行家目光證實，所謂 Warden’s Grace 確實只是粗糙的仿製品，Dour Meadow 當場滿頭大汗。另一邊，Avila 則因為自己為了虛假的寶物出賣榮譽、跟 Ultros 勾結而陷入自責，覺得對不起 Hegelina。Hildibrand 卻指出，她整個計畫的出發點，始終是想為妹妹爭取更好的未來。她終於承認自己被金錢與名聲沖昏頭，但也決定正面面對後果，努力重新贏回妹妹的信任。</p>
+<p>事後眾人整理線索：Treaty-Blade、Azeyma’s Virtue、Ring of Inquiry──這些被盜或成為目標的寶物，全都可追溯到 Belah’dia 時代。怪盜在卡片上談到「四件聖遺物」與「在太陽之光下伸張的正義」，而 Ellie 則指出，從 Ul’dah 市井的輿論來看，越來越多人把他視為替平民出口氣的「怪盜英雄」，反而對那些被偷寶物的富豪、礦業公司和武裝組織毫無同情。Briardien 推測，下一個目標可能會是 Syndicate 成員，甚至是 Sultana 本人，局勢變得更加兇險。就在這樣的氣氛下，Hildibrand 卻反而燃起鬥志，高聲宣告要搶在 phantom thief 前面集齊 Belah’dia 的四件寶物。最後，Nashu 用「面具」作為下一起事件的關鍵暗示，為即將展開的後續案件畫下充滿懸念的句點。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>任務發布</b> 布里亞迪安　烏爾達哈 - 撻爾回廊 <small class="muted">(X:14.0, Y:10.0)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="the-trouble-with-truffles.html">為了那點松露的麻煩事</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="shades-of-sildih.html">夙怨難消的亡靈</a></div>
+</div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
