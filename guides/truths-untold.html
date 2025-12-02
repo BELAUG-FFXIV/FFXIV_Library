@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Truths Untold | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Hildibrand Adventures – Truths Untold (ARR Patch 2.5)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:1px solid transparent;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border-color:var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/nM6EPwGZ2eM"
+              title="Truths Untold" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Truths Untold</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Truths Untold',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+<p>With her disguise finally stripped away, the woman before you scoffs that she’s been undone by a “muscle-bound muttonhead” and his ridiculous companions. When Briardien questions her uncanny resemblance to Ellie, she answers with open contempt: consulting inspector or not, he’s far from the genius his reputation suggests. Of course they look alike—Ellie is her sister, her partner in every crime. The thief you’ve been chasing is named Cecy, and she and Ellie are the last surviving heirs of Sil’dihn nobility. Every time you “saw” the phantom thief, Cecy was the one behind the mask while Ellie stood safely among you, feeding her information and turning your failures into sensational stories that captivated Ul’dah.</p>
+<p>Pressed by Hildibrand, Cecy finally reveals her goal: justice for Sil’dih. In her telling, it was Ul’dah—not Sil’dih—that created the deadly zombie powder and used it to turn Sil’dih’s proud soldiers into shambling corpses, then buried the truth beneath lies and “official history.” One ancestor of hers stole a cache of the powder from the Ul’dahn army in his dying moments and sealed it away in a hidden vault. That vault can be opened only by gathering four ancient Belah’dian relics, once kept in Sil’dih’s royal palace before Ul’dah claimed them. Those are the treasures Cecy has been stealing. As she laughs, she boasts that Ellie is even now on her way to the vault with all four relics in hand, ready to make Ul’dah relive Sil’dih’s last horror—zombie powder raining down upon the city, turning citizens into monsters in the streets.</p>
+<p>Moments later, events take a different turn as the poison in Hildibrand’s veins begins to spread and his skin turns a sickly shade of green. Julyan storms in, more furious than frightened, and declares that there is still time to save her “idiot boy” with a proper Manderville remedy: a special holy water brewed from Oversoul rags and twice-distilled water. She sends you and Gilgamesh racing to the markets—Syntgoht for the cloth scrap, Gest for the water—while Briardien searches for the missing Nashu. At Syntgoht’s Sundries, the merchant refuses to hand over his last tatter of Oversoul rags without rare chimera membrane, only for Avila the Tempest to arrive and offer the materials in thanks for the part you and Hildibrand played in setting her straight.</p>
+<p>With the first ingredient secured, you seek out Gest, who makes no effort to hide his resentment of the Mandervilles and refuses to help—even if Hildibrand dies. Only the sudden arrival of Arabella turns the tide: in exchange for a dance with her, Gest grudgingly hands over the twice-distilled water she demands for you. Returning to Julyan with both items, you watch her improvise “Manderville home cookin’” over a skillet, pouring holy water into Hildibrand’s mouth and halting the spread of zombification—at least for now. Briardien reappears with Nashu in tow, found fast asleep in a messy corner of Pearl Lane, and brings urgent news: Ellie has been sighted near the Sil’dihn ruins. Julyan orders you all after her, promising to look after her son and consult experts on his condition.</p>
+<p>Gilgamesh pledges his strength for Ul’dah and for his rival Hildy, only to be immediately conscripted by Julyan as a glorified porter, sent to fetch “twenty crates” of fire crystals to keep Hildibrand warm. Grumbling to Enkidu about the burdens he must bear for the sake of a proper rematch with you, he laments that only one true friend has ever stood by his side—and she is long gone. Yet when he cries out her name to the heavens in a dramatic plea, a blinding flash answers him, and the crates of crystals vanish in an instant. In their place appears a familiar voice and presence: Enkidu herself, reunited with Gilgamesh at last as he marvels that his faithful companion has once more kept him waiting until the most outrageous possible moment.</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>Quest Giver</b> Hyuran Woman <small class="muted">(Ul’dah - Steps of Thal, X:12.0, Y:11.8)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="beneath-the-mask.html">Beneath the Mask</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="her-last-vow.html">Her Last Vow</a></div>
+</div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'めぐる血の呪',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+<p>正体を暴かれた女は肩をすくめ、「筋肉だらけの間抜けと、その道化一座にしてやられた」と吐き捨てる。ブリアルディアンがエリーとのあまりに似た容貌を訝しむと、彼女は冷笑しながら、自称「名高い」顧問監察官の洞察力のなさをあざける。似ていて当然だ──エリーは彼女の実の妹であり、犯罪における有能な相棒なのだから。仮面を替え、顔を変えようとも、自分の名はひとつだけ。盗賊の本名は Cecy。二人は、滅びたサルディア名家の最後の末裔だと名乗りを上げる。</p>
+<p>ヒルディブランドが「何を成し遂げようとしているのか」と紳士らしく問いかけると、Cecy はついに胸中を明かす。彼女が掲げるのは「正義」──四百年前、サルディアをゾンビの国へと貶めたのは、歴史が語るような自滅ではなく、ウルダハ側が開発した「死の粉」の仕業だと主張する。先祖の一人は、ウルダハ軍の兵器庫から大量の粉を奪い、命尽きる間際に秘蔵の宝物庫へと封じた。強力な魔法で守られたその宝物庫を開ける唯一の鍵こそ、ベラフディアゆかりの四つの秘宝──元はサルディア王宮にあったものを、ウルダハが奪い取って自分たちのものとした宝だ。これまでの華麗な盗みは、その鍵を揃えるための布石。Ellie は人々の前で「記者」として振る舞いながら情報を集め、Cecy は仮面の下で宝を奪い、二人はあなたたちの空振りすら劇的な物語に仕立てて民衆の人気を勝ち取ってきたのだという。</p>
+<p>さらに Cecy は、Ellie がすでに四つの秘宝を携えて、秘宝庫のあるサルディア遺跡へ向かったと告げる。封印が解かれれば、長き眠りについていた zombie powder が解き放たれ、ウルダハの街路には、かつてサルディアが味わったのと同じ地獄が再現されるだろう──彼女は高笑いしながらそう言い放つ。ブリアルディアンは荒唐無稽だと断じるが、Cecy は「歴史書こそが嘘であり、真実を語る者を闇から黙らせてきたのがお前たちだ」と、偽りの裁定者たちを激しく糾弾するのだった。</p>
+<p>その直後、別の危機が訪れる。毒が全身に回り始めたヒルディブランドの肌が緑色に変わり、明らかに zombification が進行しているのだ。そこへ怒涛の勢いで現れたのは、彼の母ジュリアン。久々に再会した息子の悲惨な姿に怒り心頭ながらも、「まだ間に合う」と断言し、マンダヴィル式特製「聖水」で解毒すると宣言する。材料は Oversoul rags のぼろ切れと、二度蒸留した清水。それを調達する役目は、あなたとギルガメッシュに任された。ブリアルディアンは、その間に行方不明のナシュを探しに向かう。</p>
+<p>市場であなたたちはまず Syntgoht を訪ねるが、Oversoul rags は残り一切れで、すでに希少なキマイラの膜と引き換えの約束済みだと言われる。ギルガメッシュが必死に食い下がるも、商人も生活がかかっていると譲らない。そこへ偶然現れたのは、闘技場で因縁のある Avila。ちょうど修行で十体のキマイラを倒してきたところだと言い、Inspector とあなたへの恩返しだと惜しみなく素材を差し出す。Syntgoht は Avila の姿に感激し、喜んで取引に応じてくれる。</p>
+<p>次に向かった水商人 Gest は、マンダヴィル家への私怨を隠そうともせず、瀕死のヒルディブランドを救うためだと聞いても耳を貸さない。そこへ舞踏会の主役たる Arabella が現れ、あなたに笑顔で声をかける。状況を聞いた彼女は、Gest に向き直り、「この冒険者に必要な水を渡すなら、一曲の相手をしてもよい」と条件を突きつける。女神のような申し出に Gest は即座に折れ、二度蒸留水の瓶をあなたに押しつけると、Arabella とのダンスへと消えていく。</p>
+<p>素材を携えて戻ると、ジュリアンは「本物のマンダヴィル家の料理」を見せてやるとばかりに、鍋とフライパンを振るい、Oversoul rags と水を混ぜて特製の聖水を作り上げる。それを Hildibrand に飲ませ、祈るように鍋を掲げると、彼女は「これで広がりは止まった。あとはあの子自身の根性次第」と言い切る。ほどなくして、ブリアルディアンはゴミだらけの路地裏で気持ちよさそうに昼寝していたナシュを拾って戻り、Ellie がサルディア遺跡で目撃されたとの急報を伝える。ジュリアンは息子の看病と専門家への相談は自分に任せ、あなたたちには一刻も早く遺跡へ向かうよう怒鳴り飛ばすのだった。</p>
+<p>一方ギルガメッシュは、Ul’dah と Hildy のために力を貸すと胸を叩いた矢先、ジュリアンに「筋肉ばかりの役立たず」と一喝され、今度は火クリスタル二十箱の運搬係に任命されてしまう。Enkidu とぼやきながら、それでもヒルディブランドとあなたがどれだけ多くの仲間に支えられているかを見て、自分にはただ一人の親友しかいなかったことを嘆く。やがて、彼は空に向かって失われた友 Enkidu の名を叫び、どこにいようと戻ってきてくれと Dramatic に呼びかける。</p>
+<p>その瞬間、空から閃光が走り、山と積まれたクリスタルが忽然と姿を消す。代わりに聞こえてきたのは、懐かしい声。「こんなところで会うとはね、古い友よ」と語りかけるその存在こそ、再び彼の前に姿を現した本物の Enkidu。ギルガメッシュは喜びと驚きに打たれながら、ようやく再会を果たした親友を前に、次なる騒動の幕開けを予感するのだった。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>クエスト発行</b> ヒューラン族の女　ウルダハ：ザル回廊 <small class="muted">(X:12.0, Y:11.8)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="beneath-the-mask.html">秘史を抱く者たち</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="her-last-vow.html">事件は砂塵に消ゆ</a></div>
+</div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'隱藏於血脈的真相',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+<p>偽裝被徹底拆穿之後，眼前的女人只是不屑地冷笑，說自己居然會倒在「一個滿身肌肉的蠢貨加上一群丑角」手裡。當 Briardien 指出她和 Ellie 的神似，她乾脆直接承認：顧問監察官的名聲被嚴重高估了。她和 Ellie 本來就是親姊妹，也是一路合作到現在的犯案拍檔。無論戴上多少層面具，她的名字只有一個──Cecy，而兩人正是 Sil’dihn 貴族血脈僅存的後代。</p>
+<p>Hildibrand 以一貫紳士的口吻，只問了她一件事：這一切的計畫究竟是為了什麼。Cecy 給出的答案是「正義」。在她的說法中，四百年前把 Sil’dih 變成「亡者之國」的，並不是歷史書上寫的「自毀」，而是 Ul’dah 下令製造的 zombie powder 所造成的屠殺。Ul’dah 把這種粉末當成兵器，將 Sil’dih 的士兵變成喪屍，再用多重謊言掩蓋真相。她的某位祖先在臨死前，從 Ul’dahn 軍隊偷走大量粉末，藏進一個以強大魔法封印的祕密金庫。而要打開這個金庫，唯一的鑰匙，就是四件來自 Belah’dia 的古老遺物──原本收藏在 Sil’dih 王宮，卻被 Ul’dah 奪走、據為己有的寶物。</p>
+<p>Cecy 接著說明，一路以來搶走的各種王家寶物，其實就是那四把鑰匙。每次你們「遇見」phantom thief 時，真正戴著面具行動的是她，而 Ellie 則安然待在你們中間，以記者身分蒐集情報，替她補足逃脫所需的細節，還順便把你們的失敗寫成精彩刺激的傳聞，讓全城愈來愈迷戀這位「面具義賊」。她毫不掩飾自己對民眾的嘲諷：只要故事夠好聽，大家便心甘情願把真相交給講故事的人。如今四件遺物已經到手，Ellie 此刻正往 Sil’dihn 遺跡的祕密金庫前進，只要封印解除，沉睡了四百年的 zombie powder 就會如雨落下，讓 Ul’dah 親身體會當年 Sil’dih 經歷過的地獄。</p>
+<p>就在這樣的宣言之後，你們還來不及追上 Ellie，Hildibrand 身上的毒便開始全面發作，肌膚染上一層詭異的綠色。這時 Julyan 毫不客氣地闖進現場，一邊大罵「誰把我兒子搞成這樣」，一邊又卻步不退：她說還來得及救，靠的就是正宗 Manderville 家的「特調聖水」。配方聽起來出奇簡單──一片 Oversoul rags 舊布加上一瓶 twice-distilled water──但跑腿的人就辛苦了。她嚴厲地指派你和 Gilgamesh 去市場找 Syntgoht 和 Gest 進貨，自己則要留在原地盯緊兒子的狀況；Briardien 則趁這段時間去找失蹤的 Nashu。</p>
+<p>在 Syntgoht’s Sundries，那名商人表示手上只剩最後一塊 Oversoul rags，已經答應要用來交換稀有的 chimera membrane。Gilgamesh 為了 Hildibrand 的性命拼命哀求，但對方也有生計壓力，態度頗為堅決。就在僵持之際，於 Coliseum 結識的 Avila 出現在你們身後，說自己的訓練課題是討伐十隻 chimera，因此身上正好有多餘的素材。她感謝當初你和 Inspector 幫她擺脫不光彩的名聲，願意以此作為還人情的方式。Syntgoht 認出她是「Avila the Tempest」，興奮得幾乎要把布碎免費送給你們，交易就此迅速完成。</p>
+<p>接著你們去找水商 Gest，卻迎來一張毫不掩飾厭惡的臉。這位商人對 Manderville 一家積怨已久，抱怨他們明明富可敵國，卻每一筆生意都要精算到最後一枚 gil。即便得知 Hildibrand 命在旦夕，他也說如果這個家族就此斷絕，自己反而能睡得更好。正當你們一籌莫展時，Arabella 在舞會場邊現身，親切地向你打招呼。聽完情況後，她轉向 Gest，提出一個條件：只要他願意把 twice-distilled water 交給你，她就答應跟他跳一支舞。這個條件對 Gest 來說顯然無法拒絕，他咬牙把瓶子塞到你手裡，心滿意足地牽著 Arabella 走向舞池。</p>
+<p>帶著兩樣材料回到 Julyan 身邊，她立刻展開所謂「Manderville 家的家傳料理」，一邊在鍋裡調配 Oversoul rags 和清水，一邊嘴裡念著奇妙的祈禱詞，最後做出一瓶看似半料理半藥水的東西。她將它灌進 Hildibrand 口中，宣稱至少已經把毒的蔓延控制住，剩下的就看他自己能不能撐過去。隨後，Briardien 也帶著 Nashu 回來──她只是躲在 Pearl Lane 的垃圾堆角落呼呼大睡，完全沒意識到局勢有多嚴重。更重要的是，他帶來了新的情報：有人在 Sil’dihn 遺跡附近目擊 Ellie。Julyan 把後續的照護與專家諮詢攬到自己身上，對你們吼了一句「Ul’dah 的未來靠你們了」，催促你立刻動身。</p>
+<p>Gilgamesh 表示自己會為了 Ul’dah 與好友 Hildy 盡力，話才說完又被 Julyan 抓去當苦力，要求他去市場扛二十箱 fire crystals 回來給兒子保暖。他一邊和 Enkidu 抱怨命運，一邊也忍不住感嘆：Forename 和 Hildibrand 身邊有那麼多願意出手相助的朋友，自己卻只有一位真正的摯友，而且早已失散。於是他仰望天空，戲劇性地大喊 Enkidu 的名字，請她不論身在何處都回到自己身邊。</p>
+<p>就在呼喊的尾音迴盪之際，天際亮起刺眼的閃光，原本堆在腳邊的 fire crystals 突然集體消失。替代它們的，是一個再熟悉不過的身影和聲音──Enkidu，本尊到場。Gilgamesh 又驚又喜，半是埋怨半是感動地喊著「你為什麼總讓我等這麼久」，而你也明白，有了這對久別重逢的搭檔，接下來的騷動絕對不會少。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>任務發布</b> 海休蘭女子　烏爾達哈 - 扎爾回廊 <small class="muted">(X:12.0, Y:11.8)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="beneath-the-mask.html">面具之下的真相</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="her-last-vow.html">她最後的誓約，隨風而逝</a></div>
+</div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
