@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Her Last Vow | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Hildibrand Adventures – Her Last Vow (ARR Patch 2.5)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:1px solid transparent;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border-color:var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/LGztO-QkE1E"
+              title="Her Last Vow" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Her Last Vow</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Her Last Vow',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+<p>Julyan all but shoves you toward the Sil’dih excavation, barking that while you stand around worrying over Hildibrand, a “moon-sick maid” is perched on a crate of zombie powder, ready to turn Ul’dah into a land of the walking dead. She promises she won’t let her boy die so easily—your task is to stop Ellie before she damns an entire nation.</p>
+<p>At the dig site, Phillice explains that your companions have already found Ellie and are keeping watch from a distance. No matter how they call to her, she will not answer, eyes fixed on her grim purpose. The crate beneath her isn’t a simple seat but a stockpile of Traders’ Spurn—one wrong move, and the consequences could be catastrophic. Nashu sniffles over a friendship she thought was real, Briardien berates his own blindness, and even Godbert urges caution: anger Ellie here, and she might not hesitate to unleash the powder. With no safe way to restrain her by force, Phillice turns to you as their last hope. She begs you to simply step forward, call out Ellie’s name, and trust that the bond you shared will be enough to shake her from her path.</p>
+<p>What follows is a flurry of chaos and narrow escapes, yet in the end Ul’dah is spared. Cecy’s schemes are broken, and Ellie, confronted with the wreckage left behind, apologizes for deceiving you, insisting that—for whatever little it’s worth—it was never personal. Phillice, shaken by how many lives have been scarred in the name of “protecting history,” resolves to resign as an Arbiter of Truth, no longer willing to uphold pretty lies that only sow more suffering. Somewhere out of sight, Cecy’s voice reaches out one last time to the sister she dragged into this revenge, whispering a simple plea: “Ellie… Forgive me…”</p>
+<p>In the aftermath, Julyan crows that all’s well that ends well. At her request, Hildibrand’s undead acquaintances—the so-called Gentlemen of Light—answered the call, proving that even zombies can behave like perfect gentlemen under the right influence. Humphrey, dazzled, swears that one day he’ll be a hero like them. Godbert praises his wife’s hand-mixed holy water with all the fervor of a proud husband, while the city begins to breathe again.</p>
+<p>As for Hildibrand, he bounces back in his own unique fashion. Half the time he’s vanishing underground after some “subterranean curiosity,” the next he’s racing after Greg and his oversized avian companion in pursuit of the lost Treaty-Blade, loudly insisting you join him in delivering the coup de grâce—even when you’ve already finished the job. Maxinne can only stare after the giant man in red who barges past and asks if he’s a cultist, then later checks that you survived the “most ghastly sound” from within. Through it all, Hildibrand remains the same: ever-confident, ever-clueless, and ever certain that with you at his side, no treasure can escape the keen eye of an agent of enquiry and inspector extraordinaire.</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>Quest Giver</b> Julyan <small class="muted">(Ul’dah - Steps of Thal, X:12.0, Y:11.8)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="truths-untold.html">Truths Untold</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="a-gentleman-falls-rather-than-flies.html">A Gentleman Falls, Rather than Flies</a></div>
+</div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'事件は砂塵に消ゆ',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+<p>ジュリアンは、緑色の息子のそばからあなたを追い立てるように送り出し、「月に狂った小娘」がサルディア発掘現場でトレーダーズ・スパーンの山に腰掛け、ウルダハを「歩く死者の国」に変えようとしているのを思い出させる。ヒルディブランドの身を案じる気持ちは嬉しいが、「あの子をこんなところで死なせはしない」と母は豪語する。今なすべきは、Ellie を止め、この街を守ることだ。</p>
+<p>発掘現場に辿り着くと、フィリスが状況を説明する。仲間たちはすでに Ellie の居場所を突き止め、少し離れたところから見守っているが、誰が声をかけても彼女は一切応じようとしない。彼女が腰掛けている木箱の中身は、ただの椅子代わりではなく、びっしりと詰め込まれた Traders’ Spurn──一歩でも踏み誤れば、取り返しのつかない惨事となるだろう。ナシュは「友達」だと信じていた彼女の裏切りに涙ぐみ、ブリアルディアンは自らの洞察力の欠如をかみしめるように唇をかむ。ゴッドベルトもまた、むやみに刺激してはならないと忠告する。力ずくで止める道が断たれた今、フィリスは最後の望みをあなたに託す。</p>
+<p>「あなたにだけは届くかもしれない」──そう言って彼女は、危険を冒して飛び込めとは言わない、ただ声が届く位置まで歩み出て、Ellie の名を呼んでほしいと懇願する。幾度もの旅路を共にした時間が、復讐に囚われた心を揺さぶると信じて。あなたの叫びは、やがて暴走しかけた計画の歯車を狂わせ、Cecy と Ellie の復讐劇は終焉を迎える。ウルダハの頭上に降り注ぐはずだった「死者の粉」は、未然に防がれたのだ。Ellie は静かにあなたに謝罪し、「騙していたことは悪かったけれど、少なくとも、あなた個人が憎くてしたわけではない」とだけ言い残す。</p>
+<p>四百年の時を経て、「真実を裁く者たち」もまた岐路に立たされる。フィリスは、歴史を守るための「ささやかな嘘」が、いかに多くの苦しみを生んできたかを目の当たりにし、組織から身を引く決意を固める。仲間を失い、信念さえ揺らいだ今、その役目を継ぐべきかどうかは、もはや自分が決めることではないと。どこか離れた場所から、Cecy の「Ellie……許して」というか細い声だけが、風に紛れて届いてくる。</p>
+<p>一方、ジュリアンは「終わりよければすべてよし」とばかりに笑い飛ばす。彼女の頼みに応じて、ヒルディブランドの「亡者仲間」たる Gentlemen of Light も姿を見せ、ゾンビでありながら紳士らしい振る舞いを見せたことに満足げだ。ハンフリーは、光り輝く紳士たちに目を輝かせ、「いつか自分もああなりたい」と夢見る。ゴッドベルトは、世界一の料理人たる妻が調合した聖水の効き目を称え、胸を張る。</p>
+<p>やがてヒルディブランドも、いつもの調子を取り戻す。グレッグを追いかけているうちに地下の「珍妙な何か」に気を取られたり、巨大な鳥を従えた男との再戦を前に、失われた条約剣 Treaty–Blade を一緒に取り戻そうと張り切ったり……あなたがすでに決着をつけたと告げても、「さすがは我が相棒！」と勝手に手柄の一部にしてしまう。マキシーヌは、砦の中へ駆け込んでいった赤い巨漢を見て「カルト教団かと思った」と首をかしげ、戦いのあとには、内部から聞こえたおぞましい音を心配してあなたの無事を確かめに来る。そんな周囲の困惑もどこ吹く風、ヒルディブランドは今日も胸を張り、「宝の隠し場所など、この紳士探偵の目を逃れられるものか！」と森の方角すら定かでないまま駆け出していくのだった。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>クエスト発行</b> ジュリアン　ウルダハ：ザル回廊 <small class="muted">(X:12.0, Y:11.8)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="truths-untold.html">めぐる血の呪</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="a-gentleman-falls-rather-than-flies.html">事件屋を探せ</a></div>
+</div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'她最後的誓約，隨風而逝',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+<p>Julyan 直接把你從 Hildibrand 身邊「掃」出去，一邊罵你磨磨蹭蹭，一邊提醒當前真正的危機：Ellie 這個「被月亮蛀到腦子的小姑娘」正坐在 Sil’dih 挖掘現場，屁股底下是一整箱 Traders’ Spurn，只要一個判斷失誤，就會把 Ul’dah 變成「行屍走肉之國」。她相信自己一定有辦法先保住兒子的命，現在該輪到你去阻止那場四百年後的復仇。</p>
+<p>你趕到遺跡，Phillice 告訴你眾人已經在前方找到 Ellie。她就那樣坐在木箱上，背對所有人，無論誰開口呼喚都得不到任何回應。那個木箱並不是臨時找來的椅子，而是一整箱 Trader’s Spurn，一旦發生衝突，後果不堪設想。Nashu 在旁邊抽噎著說還以為自己交到朋友，Briardien 則難以置信自己竟然會看走眼到這種程度。Godbert 也提醒你千萬別惹怒這位小姐，否則她也許真的會不顧一切打開盒子。</p>
+<p>在沒有任何「可以動手」的選項之下，Phillice 將目光投向你。她說不會叫你冒險衝上去，只希望你走到聲音傳得到的地方，好好喊一聲 Ellie 的名字。一起旅行、一起追逐 phantom thief 的那些日子，也許仍然在她心裡留下了什麼，能讓她從憤怒裡稍微停下腳步。接下來發生的一切如風暴般掠過──陰謀失敗、封印解除前被阻止、Ul’dah 最終躲過災難──而當塵埃落定，Ellie 只留下一句輕聲的道歉：「對不起騙了你，Forename。就算沒什麼用，我還是想說，這一切並不是衝著你個人來的。」</p>
+<p>這場事件也為「Arbiters of Truth」畫上了註腳。Phillice 看見歷史被「善意的謊言」包裹之後，會如何出現扭曲與犧牲，於是決定辭去裁定者的職務。至於是否要補上空出來的位置，就交給上頭去決定。某處看不見的地方，Cecy 的聲音微不可聞地響起，只剩下一句「Ellie……原諒我……」飄散在風裡。</p>
+<p>事後，Julyan 用一句「有驚無險就好」總結了整件事。她得意地說，自己請來了 Hildibrand 的「不死老相好」──Gentlemen of Light──幫忙，沒想到那些 zombie 居然這麼有禮貌，想必也是受了兒子影響。Humphrey 眼睛發亮地把他們稱作「Gentlemen of Light」，發誓有一天自己也要成為那樣的英雄。Godbert 則一臉驕傲地稱讚妻子的手作聖水，說這正是他當年娶進門的世界級廚師。</p>
+<p>至於 Hildibrand，本人則照樣用他一貫的節奏在世界各地亂闖。一會兒說自己在追蹤 Greg，途中遇到什麼地下的「奇妙發現」分了心；一會兒又豪氣萬丈地宣告要跟你一起從那個死不認輸的對手手中奪回 Treaty-Blade。你就算告訴他戰鬥已經結束，他也只會滿臉欣慰地說是自己的調教有成。Maxinne 好幾次聽見裡面傳出驚人的聲響，跑來確認你是否安然無恙，順便問那個衝進要塞的「紅衣猛男」是不是你的熟人。你只能承認，是的，那就是你那位總是出場、退場都極有存在感的對手。</p>
+<p>當一切告一段落，Hildibrand 再一次信心滿滿地拍著胸口，說只要有他這位「agent of enquiry and inspector extraordinaire」在，這世上就沒有找不到的寶藏──說完卻又立刻迷失方向，開始問你森林到底在那一邊。你看著他遠去的背影，很清楚地知道：不管是 zombie 陰謀還是 Greg 的挑戰，只要這個男人還在到處亂跑，這個世界就永遠不會無聊。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>任務發布</b> 茱莉安　烏爾達哈 - 扎爾回廊 <small class="muted">(X:12.0, Y:11.8)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="truths-untold.html">隱藏於血脈的真相</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="a-gentleman-falls-rather-than-flies.html">就算摔下來也得像個紳士</a></div>
+</div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
