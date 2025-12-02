@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sibling Strife | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Hildibrand Adventures – Sibling Strife (ARR Patch 2.5)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:1px solid transparent;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border-color:var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/yJm9NvkYcRo"
+              title="Sibling Strife" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Sibling Strife</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Sibling Strife',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+<p>Hildibrand seizes on the old woman’s testimony as if it were a revelation from the Twelve. With great dramatic flair, he declares that the phantom thief must truly be a phantom: a wayward spirit of Sil’dih, trapped between life and death for centuries since falling on the battlefield. If the culprit is an anguished ghost, then the solution is simple—or so he claims. They must soothe the tortured soul, uncover the cause of its grudge, and guide it peacefully to the next life.</p>
+<p>Briardien calls his theory idiotic, but concedes that real knowledge of Sil’dih might help. So you and Hildibrand head to the Thaumaturges’ Guild, where scholars happily lecture you on ancient history. Erasmus tells of Belah’dia’s golden age and the twin princes whose rivalry split the kingdom into Ul’dah and Sil’dih. Yayaroku continues the tale: generations of simmering resentment finally boiled over into war, and Sil’dih’s alchemists, desperate to match Ul’dah’s forces, created the horrific draught known as the Traders’ Spurn to turn their own dead—and even the weak among the living—into an army of undead soldiers.</p>
+<p>Cocobuki, meanwhile, reminds you that history is written by the victors. He contrasts the “golden scales” of Ul’dah, weighing prosperity and justice, with the “silver scales” of Sil’dih, weighing knowledge twisted into terrifying power. Yet buried passages tell a different story: Ul’dahn and Amalj’aa warriors once fought side by side against Sil’dih, a fact carefully omitted from popular histories. Truth, he warns, shifts like desert sand; one must always ask who chose which version of events to preserve. Nenekko then takes you further back, to the War of the Magi and the Sixth Umbral Calamity. Hunted and despised, surviving mages fled to Thanalan and founded Belah’dia eight centuries ago—a nation of mages ruling for mages, whose wonders might have rivaled any in the present…had it survived.</p>
+<p>After gathering this lore, Hildibrand “summarizes” in his own way: Belah’dia split into Ul’dah and Sil’dih, their rivalry led to war, and Sil’dih used alchemy to create undead legions. From this, he leaps to a grand conclusion: the phantom thief must be a descendant of doomed Sil’dih, seeking revenge on Ul’dah for turning his people into zombies. To “pacify” him, Hildibrand proposes digging up the Sil’dihn statesman who conceived the strategy and making him apologize in person. Briardien shuts that down immediately but agrees the Sil’dihn connection is real: the thief’s silver scales and his knowledge of Belah’dian relics point to someone steeped in that forgotten history.</p>
+<p>The missing piece is the murder victims. What ties them together? Ellie reports whispers about a nervous man visiting each victim before they died. Hildibrand dramatically proclaims that this man “might know something,” and Ellie names him: Guguriya, a traveling merchant who often passes through Horizon. You confront him there, only for Hildibrand to immediately accuse him of being the killer. Guguriya, indignant and terrified, tries to walk away—until Lady Durilda herself appears. With a few sharp words and the promise (or threat) of taking her business elsewhere, she coerces him into cooperating with “the handsome inspector”…and his foolish companion.</p>
+<p>Under pressure, Guguriya reveals what he learned while investigating the killings for a client. The thief is using Traders’ Spurn, has promised five corpses, and seems to be targeting a secret group known as the Arbiters of Truth. These shadowy elites, he says, control what the public is allowed to know about the Ul’dah–Sil’dih conflict—suppressing inconvenient facts and rewriting history. Forced to choose between fear and duty, Guguriya finally names his client: Hob, a man with high-ranking friends in the Brass Blades. After hearing about the zombified corpses, Hob panicked and fled toward Limsa Lominsa with five sellswords as bodyguards, intending to board a private ship from Vesper Bay instead of risking the prying eyes at the city’s airship docks.</p>
+<p>You hurry to Vesper Bay, but arrive too late. Hob has already been transformed into a shambling undead, growling his hunger for brains. There’s no saving him; you put him down, and another message from the thief appears: “And then there was one…” Hildibrand notes again that familiar prickling at the back of his neck—the feeling of being watched—while Nashu blinks innocently. Briardien decides they should report back to Phillice; if Hob was a member of the Arbiters of Truth, then identifying the rest of the circle might lead them to the final intended victim.</p>
+<p>Back at the palace, Phillice reels at news of a fourth corpse and the mention of the Arbiters. Before she can process it, a distant cry cuts through the air: Ellie screaming for help, from the direction of the royal vault. The Sultansworn rush toward the sound as the case takes a darker turn: the phantom thief has claimed another life, and now his game has reached the very heart of Ul’dah.</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>Quest Giver</b> Hildibrand <small class="muted">(Western Thanalan, X:28.7, Y:24.9)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="shades-of-sildih.html">Shades of Sil’dih</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="beneath-the-mask.html">Beneath the Mask</a></div>
+</div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'きめられた物語',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+<p>ヒルディブランドは、あの老婦人の証言を、まるで天啓のごとく受け止めていた。彼は胸を張り、「ファントムシーフはやはり幽霊だ！」と堂々と宣言する。シラディハの戦場で無念の死を遂げ、幾世紀も生者と死者の狭間を彷徨い続ける怨霊──それが真相だというのだ。そうであるならば、やるべきことは一つ。亡霊が抱える無念の正体を突き止め、その恨みを晴らし、安らかに旅立てるよう慰めればよい……と、彼は至極まじめな顔で語る。</p>
+<p>当然ながら、ブリアルディアンはこの幽霊説を一蹴するが、「シラディハの実情を知ること」自体には同意する。こうして一行は呪術士ギルドを訪ね、古文書の守り手たちから話を聞くことになった。エラスムスは、まずベラフディアの繁栄と、王家に生まれた双子の皇子の確執から語り始める。父王亡き後、互いに正統な後継者を名乗った双子は、やがて国を二つに分け、姉妹国家ウルダハとシラディハが誕生した。</p>
+<p>やがて悪感情は抑えきれぬ憎しみに変わり、ついに戦争へと発展する。ヤヤロクは、その戦の凄惨さと、劣勢に立たされたシラディハが選んだ狂気の一手を語る。シラディハの錬金術師たちは「トレーダーズ・スパーン」と呼ばれる秘薬を生み出し、倒れた兵士たちをアンデッドとして戦場に呼び戻したばかりか、戦えぬほど傷ついた生者にまでそれを用い、国民を「死してなお戦う兵」として使い捨てたというのだ。</p>
+<p>その一方で、ココブキは歴史の裏側を示す。ウルダハの黄金の天秤は繁栄と正義を量り、シラディハの白銀の天秤は知識と力を量る──だが、その力が辿り着いた先は、人の魂を引き裂き、操り人形のような殺戮者へと変える恐るべき術だった、と公的な歴史は伝える。しかし彼は問いかける。「歴史を書くのは誰か？」と。古い文書には、「シラディハ戦役において、ウルダハ兵とアマルジャ族が肩を並べて戦った」という一節が隠されていたが、民が読む歴史書には一切載ってはいない。都合の悪い真実は、誰かの手で砂のように掻き消される──それが砂都の現実だと。</p>
+<p>ネネッコは語りをさらに過去へと遡らせる。魔法文明が隆盛を極めた第五星暦、やがて魔大戦が起き、第六霊災の大洪水が文明を呑み込んだこと。罪を着せられた魔道士たちは迫害を受け、居場所を失い、その一部がタナランへ流れ着き、八百年前に「ベラフディア」という魔道国家を築いたこと。もしこの国が今も続いていたなら、いかなる叡智が花開いていたか──それは、今となっては想像するしかない夢物語である。</p>
+<p>一連の話を聞き終えたヒルディブランドは、自信満々に「推理」を披露する。ベラフディアは継承戦争で二つに割れ、ウルダハとシラディハは確執の末、戦争へ。シラディハは錬金術でアンデッド兵を作り出した。その結果、無念のまま倒れた者たちの末裔が、今まさに復讐に燃えている──つまり、ファントムシーフは「シラディハの末裔であり、祖国をゾンビに変えられた恨みを晴らそうとしている」と結論づけたのだ。そして彼は、「その怨霊を慰めるため、当時この策を立案したシラディハの高官を墓から掘り起こし、直接謝罪させよう」と本気で提案する。ブリアルディアンは深いため息をつき、その案を一瞬で却下しつつも、「犯人がシラディハと何らかの関わりを持つ」可能性自体は認める。あの銀の鱗を思わせるけばけばしい衣装、ベラフディア遺物に関する異様な知識──すべては忘れ去られた歴史との繋がりを示していた。</p>
+<p>残る謎は、殺された四人を結ぶ「共通点」だ。そこへエリーが新たな証言を持ち込む。事件直前、被害者たちの元を訪ねていたひとりの男がいるらしい、と。怯えた様子が印象的で、名はググリヤ。ホライズンを行き来する旅商人だという。ホライズンで彼に話を聞こうとするや否や、ヒルディブランドは早速「愛か金か、どちらのために人を殺したのだ！」と決めつけてかかり、ググリヤを本気で怯えさせてしまう。</p>
+<p>そこへ現れたのが、懐かしい顔──レディ・ドゥリルダだ。彼女は自宅のあるホライズンにおり、偶然その騒ぎを耳にしたのだという。彼女はエシュテイムの宝飾品をちらつかせつつ、商売の縁を盾にググリヤをきつく諭し、「この人たちに協力しなさい」と釘を刺す。かつてヒルディブランドたちのおかげで「何よりも大切なもの」を取り戻したと語りながら。</p>
+<p>観念したググリヤは、震えながらも知る限りを明かす。ファントムシーフは Traders’ Spurn を手にし、五つの死体を求めている。そして、その標的は「Arbiters of Truth（真実の裁定者）」と呼ばれる秘密結社だという。ウルダハとシラディハの戦争に関する「都合の悪い真実」を封じ込め、民衆に伝わる歴史を操作する、影の有力者たち──それが彼らの正体らしい。あまり大声では言えない話だが、と前置きしたうえで、彼はついに依頼主の名を告げる。</p>
+<p>依頼主の名はホブ。バスカロンのような飲んだくれではなく、ブラスブレードにも顔の利く実力者だ。被害者が皆「ゾンビにされてから殺された」と聞かされると、彼は我が身の危険を悟って逃亡を図った。リムサ・ロミンサに向かうと言い残し、五人の傭兵を護衛につけて。だが、人目の多い飛空艇を避けるため、彼はウルダハのエーテライトからヴェスパーベイに向かい、そこで待つ私船に乗り込むつもりだ、と。</p>
+<p>一行が急ぎヴェスパーベイへ駆けつけたときには、すでに手遅れだった。ホブは Traders’ Spurn によってアンデッドに変えられ、「脳ミソをよこせ……」と唸るばかりの存在になっていたのだ。救う術はなく、あなたは彼を葬り去る。残されたのは、犯人の新たなメッセージ──「そして残るは、あと一人」。</p>
+<p>ヒルディブランドは、またしても背筋に走る奇妙な寒気を口にする。「誰かに見られているような気がする」と。ナシュはきょとんと首をかしげるばかりだが、ブリアルディアンはまずフィリスに報告すべきだと判断する。ホブが Arbiters of Truth の一員であるなら、他のメンバーを突き止めることで、最後の標的にも辿り着けるかもしれないからだ。</p>
+<p>王宮へ戻ると、フィリスは四人目の犠牲者と秘密結社の名に蒼ざめる。彼女が言葉を継ごうとしたその瞬間、廊下の向こうから絞り出すような悲鳴が響いた。「誰か……助けて！」──それは、エリーの声だった。叫びは王家の宝物庫の方角から聞こえてくる。サルタン警護隊と一行は慌てて駆け出し、事件はついにウルダハの中枢を巻き込む、危うい局面へと突入していく。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>クエスト発行</b> ヒルディブランド　西ザナラーン <small class="muted">(X:28.7, Y:24.9)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="shades-of-sildih.html">旧怨なる亡霊</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="beneath-the-mask.html">秘史を抱く者たち</a></div>
+</div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'寫定在手足之間的劇本',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+<p>Hildibrand 把那位老太太的證詞，當成最後一塊拼圖。他雙手一攤，宣布「一切都清楚了！」在他看來，phantom thief 果然不只是怪盜，而是「幽靈」本尊──一位在古老戰場上含恨而死、幾百年來被困在生者與死者之間的 Sil’dih 英靈。既然如此，解法就再單純不過：找出這個亡靈真正的怨恨所在，安撫它、讓它放下復仇，平靜地前往下一個世界。</p>
+<p>Briardien 對這番說法完全不買帳，但他同意「好好搞懂 Ul’dah 與 Sil’dih 的恩怨」確實有幫助。於是你和 Hildibrand 先來到 Thaumaturges’ Guild，向那裡的學者請教。Erasmus 從 Belah’dia 的興盛說起：那是魔法文明最輝煌的時代之一，直到王家誕生了一對爭強好勝的雙胞胎王子。父王過世後，兩人都自稱正統繼承人，誰也不肯退讓，只好將王國一分為二，變成姊妹國 Ul’dah 與 Sil’dih。</p>
+<p>Yayaroku 接著補全戰爭的那一段。兩國表面上共存了好幾代，積怨卻像暗流一樣越積越深，終於爆發成慘烈的戰爭。面對 Ul’dah 的軍力優勢，Sil’dih 的錬金術師走上極端，調製出名為 Traders’ Spurn 的藥：不只用在戰死者身上，甚至拿來灌給傷重、無法再戰的同胞，把他們全部變成不死軍隊。只是想到就令人發毛的做法，卻成了當時他們心目中「保衛國家」的最後手段。</p>
+<p>Cocobuki 的角度更尖銳。他說，官方歷史把 Ul’dah 形容成「以繁榮與正義為天秤」的金色之國，把 Sil’dih 描繪成「追求知識卻走向恐怖力量」的銀色之國。但歷史記得的，往往只是勝利者想留下的版本。他在被塵封的古書裡，偶然發現「Ul’dah 士兵曾與 Amalj’aa 並肩作戰對抗 Sil’dih」的記載，而這段內容完全沒有出現在一般民眾能讀到的史書裡。某個時刻、某個人認為這段真相「不方便」，於是它就被埋葬在圖書館的黑暗角落裡。</p>
+<p>Nenekko 則把時間軸拉得更長。第五星曆是魔法的大繁榮時代，強盛文明在魔道的力量下彼此競逐，最後釀成 War of the Magi，導致第六靈災的大洪水。文明被洪水吞沒，魔法師被指為萬惡之源，遭到各地放逐與迫害。一小群倖存的 mage 流亡到 Thanalan，在那裡建立了 Belah’dia──一個「由 mage 統治、為 mage 而建」的國家。如果這個國家一直延續到現在，或許這片沙漠會是完全不同的光景。</p>
+<p>等到你把各種說法都聽完，Hildibrand 也「整理」出自己的版本：Belah’dia 因繼承權之爭分裂成 Ul’dah 與 Sil’dih；兩國衝突升級成戰爭；Sil’dih 不惜用 Traders’ Spurn 把自己的人民變成 undead 軍隊。於是他得出「完美結論」：phantom thief 是 Sil’dih 的後裔，為了被變成 zombie 的祖先復仇而來。而為了「撫慰」對方的靈魂，他提出天馬行空的方案──去把當年下令使用這個策略的 Sil’dih 大臣從墳裡挖出來，讓他親自向怪盜道歉。這種說法自然被 Briardien 當場駁回，不過他也承認，犯人確實與 Sil’dih 有深刻的關聯：那身像銀鱗一樣張揚的服裝，對 Belah’dia relics 的熟悉，都指出同一個方向。</p>
+<p>真正困惑的是那些死者。出版負責人、政府高官、學者、以及剛剛變成 zombie 的 Hob──到底有什麼共通點，足以讓他們被鎖定？Ellie 於是說起自己在街上打聽到的情報：最近有人看到一名神情緊張的男子，在命案發生前拜訪過幾位死者。那人自稱 Guguriya，是經常往返 Horizon 的旅商。於是你們跑去 Horizon 找他，結果話還沒說兩句，Hildibrand 就先一步大喊「你為了愛還是為了錢才殺了人！」把對方嚇得立刻想轉身離開。</p>
+<p>偏偏這一幕，又被路過的 Lady Durilda 給聽見。她原來就住在這一帶，對這位小商人相當熟悉。她先用一貫的威嚴口吻提醒 Guguriya，自己可以隨時「跳過中間人」直接去 Ul’dah 採買，接著又提到 Hildibrand 一行人曾幫她找回比任何寶物更重要的東西，最後只留下一句：「就算是那個笨蛋，他們也幫了我大忙──你要盡全力協助他們。」在利害關係與感情壓力之下，Guguriya 只好認命，把知道的事情都說出來。</p>
+<p>他透露，自己原本是受一位客戶委託調查命案。分析種種線索後，他懷疑 phantom thief 的真正目標，是一個叫做「Arbiters of Truth」的秘密組織。這群人表面上遍佈各領域要職，私底下卻負責篩選「Ul’dah 與 Sil’dih 的戰爭」相關資訊，決定哪些真相可以被百姓知道，哪些必須永遠埋起來。Traders’ Spurn、五具屍體、被刻意改寫的歷史──所有線索都指向這個看不見的圈子。</p>
+<p>至於雇主的身分，Guguriya 猶豫了很久，最後還是說出實話：對方叫 Hob，與 Brass Blades 中的高層來往密切。當他得知幾名死者全都被變成 zombie 才被殺時，馬上驚慌失措，認定自己也在名單上。因為不想在擁擠的飛空艇碼頭暴露行蹤，他帶著五名 sellsword，選擇先傳送到 Vesper Bay，再搭乘預先準備好的私船出海往 Limsa Lominsa。</p>
+<p>然而等你們趕到 Vesper Bay，一切已經太遲。Hob 的眼睛失去焦點，皮膚呈現病態的綠色，只剩下「好餓……想吃腦袋……」的呻吟。Traders’ Spurn 再一次發揮了效果，他已經完全變成 undead，只能由你親手送他解脫。留在地上的，是 phantom thief 新丟下的訊息：「然後，只剩下一個。」</p>
+<p>Hildibrand 又一次提起那股怪異的違和感──自從開始追查 phantom thief，他總覺得「有人在暗處盯著自己」。Nashu 歪頭裝傻，Briardien 則決定先回去向 Phillice 報告。既然 Hob 是 Arbiters of Truth 的一員，弄清楚這個組織的其他成員，也許就能推測出最後一個目標是誰。</p>
+<p>回到王城，Phillice 聽到「第四名犧牲者」與 Arbiters of Truth 的名號，臉色明顯一變。就在她努力消化這些消息時，一聲尖銳的呼救劃破空氣──是 Ellie 的聲音，方向正是 royal vault 所在的位置。Sultansworn 們立刻拔腿衝出房間，你和 Hildibrand 也跟在後頭。phantom thief 的遊戲，終於把手伸進了 Ul’dah 的心臟地帶，而下一步會發生什麼，誰也說不準。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>任務發布</b> 希爾迪布蘭德　薩納蘭西部 <small class="muted">(X:28.7, Y:24.9)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="shades-of-sildih.html">夙怨難消的亡靈</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="beneath-the-mask.html">面具之下的真相</a></div>
+</div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
