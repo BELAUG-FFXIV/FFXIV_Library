@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A Gazebo to Call Our Own | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Hildibrand Adventures – A Gazebo to Call Our Own (HW Patch 3.4)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;
+      background:var(--bg);
+      color:var(--fg);
+    }
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{
+      border-bottom:1px solid var(--border);
+      background:#fff9edb3;
+      backdrop-filter:saturate(120%) blur(6px);
+      position:sticky;
+      top:0;
+      z-index:10;
+    }
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{
+      border:1px solid var(--border);
+      background:#fff;
+      padding:4px 8px;
+      border-radius:8px;
+      text-decoration:none;
+      color:var(--fg);
+      font-weight:800;
+    }
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{
+      background:none;
+      border:1px solid transparent;
+      cursor:pointer;
+      font-size:14px;
+      padding:6px 10px;
+      border-radius:8px;
+    }
+    .icon-btn:hover{background:#fff;border-color:var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{
+      display:grid;
+      grid-template-columns:1.1fr 1fr;
+      gap:20px;
+      align-items:start;
+    }
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{
+        position:absolute;
+        inset:0;
+        width:100%;
+        height:100%;
+      }
+    }
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:16px;
+      box-shadow:0 4px 14px rgba(0,0,0,.05);
+    }
+    .card .hd{
+      padding:14px 16px;
+      border-bottom:1px solid var(--border);
+      font-weight:700;
+    }
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{
+      width:100%;
+      height:420px;
+      border:0;
+      display:block;
+      border-radius:16px;
+    }
+    .tabs{
+      display:flex;
+      gap:8px;
+      padding:12px 12px 0;
+      flex-wrap:wrap;
+    }
+    .tab-btn{
+      background:#fff;
+      border:1px solid var(--border);
+      color:var(--fg);
+      border-radius:999px;
+      padding:8px 14px;
+      cursor:pointer;
+      font-weight:600;
+    }
+    .tab-btn[aria-selected="true"]{
+      border-color:var(--accent);
+      color:#fff;
+      background:var(--accent);
+    }
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{
+      padding:12px 14px;
+      border:1px dashed var(--border);
+      border-radius:12px;
+      background:#fffdf6;
+    }
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:"";
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:0;
+      height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card));
+      pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block;
+      padding:8px 14px;
+      border-radius:10px;
+      background:var(--card);
+      border:1px solid var(--border);
+      cursor:pointer;
+      font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/rnzZe4ym75g"
+              title="A Gazebo to Call Our Own" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">A Gazebo to Call Our Own</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'A Gazebo to Call Our Own',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+<p>Cyr greets you in Ishgard with uncharacteristic relief, insisting that your very presence is proof that Halone smiles upon him this day. He admits, with a hint of desperation, that he needs your help—but begs you not to flee in terror before hearing him out. The matter concerns the esteemed knights of the Heavens’ Ward, now missing and widely presumed dead. None have returned to the capital since all the unpleasantness began, and yet rumors claim these honored sers have been seen walking the streets. To Cyr, it sounds like heresy most foul, and he is determined to uncover the truth. For that, however, he needs all the help he can muster…including, Fury take him, the “serendipity” of a certain inspector. Better to seek Hildibrand out on their own terms, he reasons, than wait for the man to appear at the worst possible moment. And if they keep close watch, they can also keep an eye on that boy—mammet, he hastily corrects himself. Resolute, Cyr bids you accompany him to Fortemps Manor. This may be his last chance to prove his worth to his superiors, and he cannot afford to fail.</p>
+
+<p>At the manor gazebo, you arrive to find Hildibrand in the midst of disciplining Gigi. The inspector, arms crossed in exaggerated indignation, declares that such behavior is unbecoming of a gentleman. Gigi, voice warbling and uneven, protests that he was merely drawing a family crest for their home. Hildibrand counters that the gazebo he tried to decorate belongs to Lord Edmont, and gently reminds the boy that stealing from “Uncle Edmont” would hardly be gentlemanly. Gigi falters, admitting that he doesn’t want to steal—only to know where their gazebo is, and whether it has a warm stove and a steaming kettle inside. Hildibrand sweeps an arm toward the heavens, declaring that as gentleman inspectors, they have no need of kettles or gazebos; the world itself is their home, and they can go wherever the red fern grows or the wild rose blooms. Gigi is unconvinced. He insists he cares nothing for wild roses and wants to live in a gazebo with Papa Hildy and Mama Nashu. Nashu, ever literal, remarks that gazebos are expensive and dangerous if not domesticated, and Hildibrand hastily agrees, calling them dangerous indeed. He tries to lure Gigi back into the romantic ideal of a roaming gentleman inspector’s life, but just then Cyr and you step into the scene. Hildibrand greets you cheerily, asking whether you’ve come as adoring fans or on business. Cyr, long-suffering as ever, replies that it is always business and quickly demands to know what is going on here.</p>
+
+<p>Cyr explains that if it is a case Hildibrand desires, there is one close at hand. Reports claim individuals are masquerading as knights of the Heavens’ Ward. These contemptible charlatans have lured hapless maidens to private parties by promising the company of legendary sers, charging a small fee for the privilege. Those foolish enough to attend were so traumatized by what they actually witnessed that they refuse to speak of it in detail. Cyr asks for Hildibrand’s assistance and assures him that proper compensation will be provided. The inspector, puffing up with theatrical pride, proclaims that he is well-versed in matters of the fairer sex—only for a sharp voice to cut in: “Since when!?” Julyan storms onto the scene, furious that her son continues to play at being an inspector and now a father to “a bloody mammet” besides. She declares he is coming home this instant. Hildibrand protests that being an inspector is his life’s calling and insists that Gigi is his son—a Manderville man. Julyan mutters that his stubbornness must come from his sorry excuse for a father, but grudgingly accepts that he cannot be dragged off so easily. Hildibrand, determined to show his mother and the world both his worth, rallies Nashu, Gigi, and you to accept Cyr’s case and bring the false knights to justice. Julyan, scowling, asks that you and Cyr help keep him out of trouble and follows along with a resigned “come along.”</p>
+
+<p>Later, at The Last Vigil, Cyr lets out a weary sigh and admits that, if nothing else, he can say with confidence that they are all quite mad. Nashu, tilting her head, wonders aloud why the knights are so popular with highborn ladies if they aren’t supposed to behave in such questionable ways. Julyan grumbles about what’s so appealing about being paid a pittance to do the watch’s job, while Hildibrand muses that there must be at least one fair maiden willing to share something of value. They question three different women in turn. A world-weary maiden scoffs at the idea of being fooled, saying the so-called knights bore no resemblance whatsoever to the true Heavens’ Ward—she would know, having memorized every detail of her dear Ser Adelphel’s face. A crestfallen maiden wrings her hands over having squandered her allowance on those men and fears that the awful rumors about the real Ser Zephirin may be true, that he now walks in Halone’s halls. She declares through tears that she will never love another. A vengeful maiden, shaking with fury, demands swift and terrible vengeance upon the frauds who preyed upon ladies’ emotions for gil. She insists that if Ser Charibert were here, he would purge the impostors like the festering sickness they are. Cyr quietly notes the pity of Charibert’s continued absence, only to be met with another outburst as the woman demands to know who will deal with these criminals and heretics if not the true knights.</p>
+
+<p>As they regroup, Gigi nervously tugs at Hildibrand’s sleeve and whispers that the “grandmama” over there is staring at them. Hildibrand, flustered, admonishes him: a gentleman must choose his words carefully. Gigi has only one grandmother, and, most crucially, must never, ever call her “Grandmama”—at least, not yet. The boy solemnly promises not to call Julyan “Grandmama Julyan,” then promptly turns and greets her with a courtly flourish, utterly winning her over. Julyan laughs that he’s quite the charmer and admits she was ready to rip his head off if he said the G word again. Hildibrand then turns to you and Cyr, asking what new information his faithful assistants have gleaned. Cyr dryly reports that all they have confirmed is just how deeply these scorned women despise the fake knights. Nashu happily repeats stories she has heard about what they would do to the impostors if they ever cornered them, only for Julyan to explode that oaths and girlish fantasies are a sorry excuse for results from a so-called Manderville man. Hildibrand, undaunted, declares that the truth is often hidden behind a tapestry of lies and deception, which can be unraveled by tugging on a single loose thread. Spotting a nearby woman, he strides over and addresses her as “young lady.” Cyr, watching her, quietly doubts she was the charlatans’ intended target. The woman, Dorys, proves him wrong: she confesses she was taken in by the false promises of the “Grand Sers.” Long had she yearned to meet Ser Vellguine, so when the chance finally came she accepted without hesitation—only to scream and flee when her blindfold was removed and she saw the hideous faces of the so-called Grand Sers. When she returned with the watch, the men were gone, but neighbors recalled hearing them speak of seeking shelter in a place called Idyllshire. Dorys apologizes for not having more, but hopes the information will help. Hildibrand swears that he will not rest until these dastardly fiends are punished, and Gigi leads a rousing cheer of “hip hip hooray” in his honor, which Julyan repeats in a much flatter tone. The inspector announces that their quarry lies in Idyllshire and exhorts his loyal assistants to follow. Cyr balks at the idea of traveling to the Dravanian hinterlands “just like that,” but there is no stopping the Manderville momentum.</p>
+
+<p>The journey proves as harrowing as Cyr feared. Upon arrival in Idyllshire, he grumbles that at several points he was certain he would either die horribly or be forced to part with his precious coin. Nashu, eyes sparkling, promptly asks whether she can keep just one of their assailants, promising to walk him, feed him, and stuff fresh herbs into his mask every day. Julyan sighs that the whole trip was a bloody waste of time, while Gigi looks around, troubled by a strange sense of familiarity. He insists that he feels as though he has been here before, even though he knows he cannot have. Hildibrand, undisturbed by such mysteries, marvels at the settlement around them, calling it a testament to the hard work and camaraderie of its uplander and gobbie citizens. Cyr, more practical, is merely relieved that they are no longer being chased by fire-breathing dragons, musket-wielding crabs, and bomb-throwing goblins—the other kind, he notes. Nashu cheerfully reminds everyone how easily Julyan and her trusty pan sent those enemies flying, which prompts Gigi to excitedly declare that he wants to see her make the bad gobbies fly again. Julyan snaps that, aside from you, the whole lot of them would be dead in a ditch if not for her. Hildibrand insists he would never allow harm to come to his beloved son or loyal assistant, only for Cyr to attempt to interject and be cut off as the inspector dramatically announces the next step: they shall split up and question the good people of Idyllshire. His keen inspector’s sense tells him that someone here must know of the false knights they seek. Cyr sniffs the air and wonders if what he senses is madness, while Julyan eyes the settlement with disdain, calling it a city of vagabonds, cutthroats, and charlatans, and warning Hildibrand not to fall in with them. The inspector, by contrast, sees a place where goblins, treasure hunters, and adventurers are blessed with the freedom to live as they please. Gigi throws his arms up and shouts “hooray for everything,” and Nashu gleefully imagines even more nameday gifts waiting to be found.</p>
+
+<p>Questioning the locals yields results. Loudjox, puffing and hissing through his mask, admits that he knows of the Grand Sers. The sneaky uplanders keep to themselves and mingle not with the gobbieflock, but Loudjox has no intention of asking questions as long as jinglyshine changes hands. Geimlona recalls that the Grand Sers drifted into Idyllshire some time ago and occasionally visit the Great Library, though she cannot say why. Dorys—somehow here as well—explains that the Grand Sers keep to themselves in a building south of the Roundspot and warns that they are a dangerous bunch, liable to kill anyone who so much as looks at them the wrong way. As she speaks, Cyr stares at her, struck by a peculiar sense of recognition, and wonders aloud if she might be the long-lost twin sister of an Ishgardian noblewoman. Dorys panics, cries out for him to look behind at a three-headed goobbue, and bolts, leaving Cyr with the uneasy feeling that he has not seen the last of her. Eventually, Hildibrand gathers everyone and proclaims that, thanks to the testimony of a concerned citizen, they now know the villains’ precise location: a building to the south of the markets. He praises your efforts, identifies the structure in question, and leads the party there. Finding no one home, he decides that they have no choice but to wait. As they stand outside, Gigi shuffles closer to Hildibrand and shyly confesses that he really likes this place. He says that he thinks he, Papa Hildy, and Mama Nashu could have many exciting adventures if they stayed here. Hildibrand considers this and agrees that the community seems to have fostered an enlightened, free society that welcomes honest souls willing to work and contribute. Then, almost as an afterthought, he asks if anyone happened to see a gazebo on their way in.</p>
+
+<p>At that moment, a goblin voice cries out in surprise, calling Hildibrand by his full name. The inspector turns, squinting, and wonders aloud if the masked figure might be Slowfix Cointoss. Slowfix confirms it with a delighted “pshkohhh,” and Nashu, curious, asks if the inspector knows this gobbie. Hildibrand explains that Master Slowfix was once his very first employer. Slowfix recounts how, long ago in Thanalan, his gobbieflock was waylaid by bandits. With no jinglyshine to pay the Brass Blades, they had no way to recover their stolen goods—until they made a deal with a gentleman uplander. Disguised as an innocent milkmaid, Hildibrand tracked the bandits down, brought “much bangyboom,” and returned the goblins’ missing cargo along with a measure of justice. It was a near thing, Hildibrand admits, for the bandits were sharp enough to see through his disguise, and in his haste to flee he tripped over a barrel of firesand—resulting in the “boom gobbie doom” that the goblins still remember. From that day on, Slowfix says, he gained a new appreciation for uplanders. Were it not for that chance encounter with the gentleman inspector, he might never have conceived of the egalitarian utopia that would become Idyllshire. With metaphorical tongue-flaps, he even calls Hildibrand a founding father of the settlement.</p>
+
+<p>Though clearly pleased by the praise, Hildibrand moves the conversation forward. He marvels at how far the gobbieflock has come since their wandering days and at what they have made of these once-ruined grounds. Slowfix, in turn, says that they have not forgotten the inspector’s kindness and that he is here to offer a helping hand. Hildibrand, never one to refuse generosity, admits that his son Gigi has grown quite fond of Idyllshire and that he would like to stay here for a time with the boy and his faithful assistant. They would not require much in the way of accommodations—a humble gazebo would do, he says. Slowfix snorts and asks why they should settle for a gazebo when there is a perfectly good estate right behind them. The residents of that building are in arrears, and Slowfix would be happy to evict them. Hildibrand hesitates, protesting that they are currently pursuing the fiends who live there on suspicion of defrauding young women. At the mention of fraud in his egalitarian utopia, Slowfix bristles. He declares that such behavior cannot be tolerated and that it is all the more reason to let the gentleman uplander and his flock stay in the house instead of the Grand Sers—no jinglyshine required. Gigi erupts in delight, calling it a giant gazebo they can call their own. Hildibrand is momentarily speechless, then thanks Master Slowfix over and over. The goblin waves off his gratitude, saying the gobbieflock is morally obliged to repay the gentleman uplander’s past generosity, and wishes them good luck in their hunt for the Grand Sers.</p>
+
+<p>Gigi then tugs at Hildibrand’s sleeve once more and asks, shyly, whether, since this is now their gazebo, he might draw their family crest on it. Hildibrand beams and says he can think of no better way to celebrate this joyous occasion—and perhaps to draw the ire of the former tenants. He invites Gigi to come with him to buy paints so that the new “gazebo” can become the boy’s canvas. Julyan watches him go and mutters that now he’s gone and gotten himself a bloody gazebo, and if he really thinks she will let him keep on playing at being a father, he has another thing coming. Hildibrand, looking up at their newly acquired home, notes that there is still no sign of the notorious Grand Sers…and that they are, quite evidently, going to need more paint.</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>Quest Giver</b> Cyr <small class="muted">(Foundation, X:9.9, Y:11.4)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="the-measure-of-a-mammet.html">The Measure of a Mammet</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="dont-trust-anyone-over-sixty.html">Don’t Trust Anyone over Sixty</a></div>
+</div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'はじめての我が家',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+<p>イシュガルドの街で、シルはあなたの姿を見つけると、まるでハルオーネの導きそのものだと言わんばかりに胸を撫で下ろす。今日はどうしてもあなたの助けが必要なのだと切り出し、あなたが悲鳴を上げて逃げ出す前に、どうか最後まで話を聞いてほしいと懇願する。件の問題とは、いまや消息不明、そして死亡したものとされている蒼天騎士団の騎士たちについてであった。あの「一件」以来、誰一人として都に戻ってきていないにもかかわらず、最近になって、栄誉ある彼らが街を歩いているのを見たという噂が流れているというのだ。シルにとって、それはまさしく背教の臭いがする話であり、真相を突き止めずにはいられない。だが、それにはできる限りの助力が必要であり……よりにもよって、あの奇天烈な紳士の「幸運」に頼らざるを得ないと苦々しく認める。どうせ放っておけば、いちばん都合の悪いタイミングで現れる男だ。ならばこちらから会いに行き、主導権を握ったうえで、ついでにあの少年──いや、マメットも見張っておいたほうがいい。覚悟を決めたシルは、フォルタン家の屋敷まで同行してほしいと頼む。これは上官たちに自らの有用性を示す最後の機会になるかもしれないのだ、と。</p>
+
+<p>フォルタン家の庭に建つ東屋に着くと、そこではちょうどヒルディブランドがギギを叱りつけているところだった。彼は大袈裟に腕を組み、「紳士たる者、このような振る舞いは決してふさわしくない！」と声を張り上げる。ギギは不揃いな声で抗議し、自分はただ「我が家」のための家紋を描こうとしただけだと言い張る。しかしヒルディブランドは、ギギが落書きしようとした東屋はエドモン卿の所有物であり、「エドモンおじさま」から盗むような真似は紳士のすることではないと諭す。ギギはしょんぼりとしながらも、盗みたいわけではないと認める。ただ、自分たちの東屋はどこにあって、中には温かいストーブと湯気の立つやかんがあるのかどうか、それが知りたいだけなのだと。するとヒルディブランドは大仰な仕草で空を仰ぎ、紳士探偵である自分たちには、やかんも東屋も必要ないと宣言する。世界そのものが我が家であり、赤いシダの茂る場所へも、ワイルドローズの咲く場所へも、どこへでも自由に旅できるのだと。だがギギは納得しない。野バラなんてどうでもよくて、パパ・ヒルディとママ・ナシュと一緒に東屋で暮らしたいのだと強く訴える。ナシュは「東屋は高価だし、ちゃんと飼いならさないと危険ですからね」と真顔で口を挟み、ヒルディブランドも慌てて「危険な代物だ」と同調する。そして再び、放浪する紳士探偵のロマンでギギを説得しようとしたまさにそのとき、シルとあなたが場に姿を現す。ヒルディブランドはにこやかに挨拶し、「熱狂的なファンとして来たのか、それとも仕事か」と訊ねるが、シルはうんざりした様子で「いつだって仕事に決まっている」と答え、まずは今ここで何が起きているのか説明を求めるのだった。</p>
+
+<p>シルは、もし事件を望むのであれば、すぐ近くに格好の案件があると告げる。蒼天騎士団の騎士を装う者たちがいるという報告だ。卑劣な詐欺師たちは、伝説の騎士たちと共に過ごせると称して、上流階級の娘たちを少額の料金で「内々の宴」に誘い込んでいるらしい。愚かにも参加してしまった者たちは、その場で見聞きしたものがあまりにも衝撃的だったせいで、詳細を語ることすら拒んでいるという。シルはヒルディブランドの協力を仰ぎ、その働きにはしかるべき報酬を支払うと約束する。するとヒルディブランドは胸を張り、「このヒルディブランド、淑女の扱いには精通している」と自信満々に言い放つ。だが、その言葉を遮るように鋭い声が飛ぶ。「いつからだい、それは！？」。そこへジュリアンが怒涛の勢いで現れ、息子がいまだに「紳士探偵ごっこ」を続けているうえに、「マメットの父親」まで気取っていることに激怒する。そして「今すぐウルダハに帰るよ」と強引に連れ戻そうとするが、ヒルディブランドは検事ならぬ「検事局」ではなく探偵であることこそが自分の天職だと訴え、ギギは紛れもなく自分の息子であり、立派なマンデヴィル家の一員だと主張する。ジュリアンは、頑固さだけはあのろくでなしの父親譲りだと悪態をつきつつも、力づくで引きずっていくこともできず、じれったげに溜息をつく。ヒルディブランドは、母親にも世間にも自分の実力を証明してみせると心に決め、ナシュとギギ、そしてあなたを伴って、シルの依頼を受けて偽騎士たちの事件に挑むことを宣言する。ジュリアンは眉をひそめながらも、「あんたたちも、あの馬鹿をトラブルから遠ざけるのを手伝っておくれよ」とあなたとシルに頼み、渋々ながら一行の後を追うのだった。</p>
+
+<p>やがて「最後の挨拶」の広場に戻ってきた一行の中で、シルは深々とため息をつき、「少なくとも一つだけ確かなことがある」と口を開く。それは、彼らが揃いも揃って正気とは思えない、という事実だった。ナシュは首をかしげながら、騎士たちがああいうことをしてはいけないのであれば、どうして上流階級のご令嬢たちにあれほど人気があるのだろうと不思議がる。ジュリアンは、「ロクな給金も出ないのに、なんで見回り役の仕事なんか買って出るのかね」とぼやき、ヒルディブランドは、それでも何か有益な情報を持つ淑女が一人くらいはいるはずだと前向きだ。彼らは順番に三人の女性へ話を聞くことにする。まず「世慣れた娘」は、そんな茶番に引っかかるほど愚かではないと鼻で笑う。彼女によれば、その「騎士」とやらは、本物の蒼天騎士団とは似ても似つかぬ外見だったという。彼女は、敬愛するアデルフェル卿の顔を隅々まで暗記していると胸を張り、その証言には自信満々だ。次に「打ちひしがれた娘」は、わずかな仕送りをあの男たちに注ぎ込んでしまった自分を責め、ハルオーネの恩寵から外れてしまったようだと嘆く。あの酷い噂が真実であり、ゼフィラン卿がすでに「ハルオーネの座」へと旅立ってしまったのだとすれば、自分は受け入れるしかないのだろうか……。彼女は、あまりにも美しく、信仰心厚い真の騎士だった彼を想い、「もう二度と誰も愛さない」と誓いながら涙に暮れる。最後に「復讐心に燃える娘」は、怒りに震えながら、感情を弄び、ギルを巻き上げた連中に対して、迅速かつ苛烈な報いを要求する。もしシャリベル卿がここにいたなら、あのような連中は病巣のように焼き払われていたに違いないと。シルは小さく「あいにく彼も行方不明だ」とぼやき、その不在を惜しむが、娘はさらに声を荒げ、自分たちに犯罪者や異端者を粛清しろというのかと訴えるのだった。</p>
+
+<p>再び一行が集まると、ギギはそっとヒルディブランドの袖を引き、「あそこのグランドママが、こっちをじっと見てる」と囁く。ヒルディブランドは慌ててギギをたしなめ、紳士は言葉遣いに気をつけなければならないと諭す。ギギに祖母はひとりだけであり、そして何より重要なのは、「グランドママ」と呼んではいけないということだ。少なくとも、まだそのときではない、と。ギギは「グランドママ・ジュリアンとは呼ばない」と固く約束したうえで、くるりと向きを変え、淑女然とした挨拶を彼女に捧げる。その愛らしさに、ジュリアンは思わず笑い、「ほう、気の利いた坊やじゃないか。もう一度“Gの一言”を口にしたら、その頭を引きちぎってやろうかと思ってたってのにね」と機嫌を和らげる。そこへヒルディブランドが、自慢の助手たちがどんな情報を集めたのかとあなたとシルに尋ねる。シルは肩をすくめ、偽騎士たちに対する女性たちの憎悪が骨の髄まで染み込んでいること以外、目新しいことは何もなかったと報告する。ナシュは楽しげに、もし連中を追い詰めたら何をしてやるかという物騒な話ばかり聞かされたと付け加え、ジュリアンは「そんなもんでよくマンデヴィルの名を名乗れるね」とヒルディブランドを叱りつける。だが彼は怯むことなく、真実は嘘と欺瞞の織りなすタペストリーの向こうに隠れているものであり、たった一本のほつれた糸を見つけて引き抜けば、すべてが解き明かされるのだと大言壮語する。そして近くにいた若い女性に目を留め、「お嬢さん」と声をかける。シルは彼女を見つめながら、どうにも今回の詐欺師たちの標的には見えないと小声で呟く。だが、ドリスと名乗るその女性は、あっさりと予想を覆した。彼女は、「グランド・サー」と名乗る男たちの甘言にまんまと乗せられたのだと告白する。長年、ヴェルギーネ卿に一目会いたいと願っていた彼女は、ついにその機会が訪れたと聞き、一瞬たりとも迷うことなく申し込みをしたという。だが、屋敷に連れて行かれて目隠しを外されたとき、そこにいた「グランド・サー」たちの醜悪な顔を見て悲鳴を上げ、そのまま逃げ出してしまった。治安維持隊を連れて戻ってきたときには、男たちの姿はすでになく、代わりに近隣の住民から、「イディルシャイア」と呼ばれる場所に身を隠すつもりだという会話を耳にしたと教えられたのだという。たいした情報ではないかもしれないが、捜索の助けになればと、ドリスは不安げに言葉を結ぶ。ヒルディブランドはその場で誓いの言葉を口にし、「このヒルディブランド、卑劣な犯罪者どもに必ずや然るべき罰を与える」と声高に宣言する。ギギは「パパ・ヒルディに三回の歓声を！」とばかりに「ヒップ・ヒップ・フレー！」と叫び、ジュリアンもやや投げやりにそれに続く。こうして一行は、標的がイディルシャイアに潜んでいると確信し、ヒルディブランドの号令のもと、ドラヴァニア高地へ向かうことになるのだった。</p>
+
+<p>旅路は、シルが予想していた以上に過酷なものとなる。イディルシャイアに到着した彼は、いつ命を落としてもおかしくない場面が何度もあったし、少なくとも大切な財布とは泣く泣く別れさせられるところだったと、半ば本気で愚痴をこぼす。するとナシュが、「一匹くらいなら飼ってもいいですか？　毎日お散歩して、ご飯をあげて、マスクには新鮮なハーブを詰めてあげます！」と目を輝かせる。ジュリアンは深々と溜息をつき、「まったく、時間と労力の無駄だよ」とぼやくが、ギギは周囲を見回しながら、どこか懐かしいような、不思議な感覚にとらわれていた。ここに来たことがあるはずはないのに、それでもこの場所を知っているような気がしてならないのだと呟く。ヒルディブランドはそんな謎にはあまり頓着せず、目の前に広がる光景に感嘆の声を上げる。高地ドラヴァニアの廃墟に築かれたこの集落は、ヒカセンとゴブリンたちが力を合わせ、協力し合うことで成り立っている──そうした勤勉さと連帯の証だと。シルは、より現実的なところに目を向け、炎を吐く竜や、銃を構えたカニ、爆弾を投げつけてくる別種のゴブリンたちに追い回されなくて済むようになっただけでも十分だと胸をなで下ろす。ナシュは、「でも、ジュリアンさんとフライパンがいれば敵なしでしたよね！」と笑顔で言い、ギギも「悪いゴブリンをもう一度空に吹っ飛ばすところが見たい！」と興奮気味に叫ぶ。ジュリアンは「まったく、あんたたちは……あの子（あなた）を除けば、みんなどこかの溝に転がってたところを、あたしが助けてやったようなもんだよ」と毒づくが、ヒルディブランドは「愛する息子と忠実な助手に、危険など決して近づけはしない」と胸を張る。シルが「少し口を挟んでもいいだろうか」と言いかけると、ヒルディブランドはその言葉を遮るように、次の段取りを高らかに宣言する。ここからは手分けしてイディルシャイアの住民たちに聞き込みをするのだ。自慢の探偵としての勘が、必ずやこの中に偽騎士たちの情報を知る者がいると告げている──と。シルは鼻をひくつかせ、自分が感じ取っているのは勘ではなく、単なる頭痛ではないかと疑う一方、ジュリアンは街並みを見渡し、「浮浪者とゴロツキとペテン師の吹き溜まりにしか見えないね。あんた、くれぐれもあいつらに染まるんじゃないよ」と釘を刺す。だがヒルディブランドは、ここを、ゴブリンやトレジャーハンター、冒険者たちが自らの夢を追い、自分の望む生き方を選べる、自由な場所だと讃えるのだった。ギギは両手を挙げて「なんでもばんざい！」と叫び、ナシュは「誕生日プレゼントがまた増えました！」とはしゃぐ。</p>
+
+<p>聞き込みの成果はすぐに現れる。ラウドジョックスは、マスク越しに「プシュッ、シュコー」と息を吐きながら、グランド・サーのことを知っていると認める。あのうわさの連中は、ゴブリンたちとはほとんど関わろうとせず、いつもこそこそと身を隠しているらしい。しかしラウドジョックスは、「それぞれ好きにすればいい」とばかりに、余計な質問はせず、代わりにチャリンと鳴る対価さえもらえればそれでいいのだと肩をすくめる。ゲイムロナは、グランド・サーたちがしばらく前にイディルシャイアへ流れ着き、ときどき「大図書館」を訪れているのを見かけたと話すが、その理由まではわからないという。そして、ここにもなぜかドリスの姿があった。彼女は、グランド・サーたちが「ラウンドスポット」の南にある建物に引きこもっており、目つき一つが気に入らないだけで人を殺しかねない、危険な連中だと警告する。彼女の横顔を見たシルは、妙な既視感にとらわれ、「まさか……イシュガルドのある貴族夫人の、行方不明になった双子の妹だったりしないだろうね？」と口走ってしまう。ドリスは動揺し、「な、何ですって！？　あ、あの……あっちを見て！　三つ首のグゥーブーよ！」と叫びながら、慌てて逃げ出してしまう。残されたシルは、彼女とこれで縁が切れたとは到底思えないと、嫌な予感を覚えるのだった。やがてヒルディブランドは全員を集め、「心ある市民の証言のおかげで、我々はついに、連中の正確な居場所にたどり着いた！」と高らかに宣言する。マーケットの南にある建物こそ、グランド・サーたちの巣だと説明し、あなたを称えながら、その建物を指し示して仲間たちを導く。だが、扉を叩いても反応はなく、どうやら留守のようだ。ヒルディブランドは、ならばここで待つしかないと判断し、一行は建物の前で張り込みを始める。そんな中、ギギはヒルディブランドに寄り添い、ここが本当に気に入ったのだと打ち明ける。パパ・ヒルディとママ・ナシュと一緒にここに住めば、きっとたくさんのわくわくする冒険ができる気がする、と。ヒルディブランドはしばし考え、このコミュニティが、皆が働き、全体のために貢献しようとする「正直な魂」を受け入れている、啓蒙された自由な社会であるように感じると口にする。そして、ふと思い出したように、「ところで、ここに来る途中で東屋を見かけた者はいるかね？」と尋ねるのだった。</p>
+
+<p>そのとき、どこからかゴブリンの声が響く。「これはこれは、プシュコー……ヒルディブランド・ヘリドール・マキシミリアン・マンデヴィルではないか！」。ヒルディブランドは目を凝らし、そのゴブリンがスローフィックス・コイントスではないかと尋ねる。スローフィックスは「プシュコー」と肯定し、ナシュは「検事……じゃなくて検事局でもなく、探偵さんはこのゴブリンさんをご存じなんですか？」と首をかしげる。ヒルディブランドは、マスター・スローフィックスこそが、自分の最初の雇い主だと誇らしげに明かす。スローフィックスは、昔、タナランを旅していたときのことを語り出す。ゴブリンたちのキャラバンは、途中で山賊に襲われ、積み荷を奪われてしまった。ブラスブレードに取り締まりを頼むギルもなく、荷を取り返す術はないかに思われた。だがそこで、「紳士のごとき異邦の冒険者」と取引をしたのだという。彼は素早く山賊たちの居場所を突き止め、「ドカン、ボカン」と大爆発を巻き起こしながら戦い、奪われた荷を取り戻し、「正義」までセットで届けてくれたのだと。ヒルディブランドは、バレないはずの「ミルクメイド」の変装が意外に早く見破られ、逃げる途中で火薬樽につまずいてしまったことを苦笑まじりに振り返る。「そして結果として……“ドカン、ゴブリン全滅の危機”というわけだ」と冗談めかして言うと、スローフィックスはさらに話を続ける。そのとき以来、彼はヒカセンたちに対する見方が変わったのだと。あの紳士との偶然の出会いがなければ、「平等な理想郷」としてのイディルシャイアを思いつくこともなかったかもしれない。比喩的な言い回しではあるが、ヒルディブランドを「イディルシャイアの建国の父」の一人と言っても差し支えない、とまで言ってのけるのだった。</p>
+
+<p>ヒルディブランドはその言葉を嬉しそうに受け止めつつも、話を前に進める。長い放浪を経て、今やゴブリンたちがここまで立派な街を築き上げたことに感嘆し、「いやはや、なんと見事なことか」と目を丸くする。スローフィックスは、「ゴブリンたちはずいぶん遠くまで歩いてきたが、紳士の親切を忘れたことはない」と言い、ここにいるのも手助けを申し出るためだと続ける。ヒルディブランドは、差し伸べられた善意を断るような真似はしないと笑い、自分の息子ギギがこの街をすっかり気に入ってしまったので、しばらくここに滞在したいと打ち明ける。必要な宿は多くない。控えめな東屋ひとつあれば十分だ、と冗談めかして付け加えると、スローフィックスは鼻を鳴らし、「なぜ東屋なんかで我慢する？　後ろにある立派な屋敷が空いているのに」と返す。どうやらあの建物の住民は家賃を滞納しており、スローフィックスとしては、いつでも立ち退きを命じる用意があるのだという。ヒルディブランドは思わずたじろぎ、そこには今まさに、若い女性たちを騙した疑いで追っている連中が住んでいるのだと説明する。だが、「平等な理想郷」でそんな詐欺まがいの真似が行われていると知ったスローフィックスは憤慨する。彼はそのような行為を絶対に許さないと宣言し、「グランド・サー」たちには出て行ってもらい、その代わりに紳士とその一行に住んでもらえばいいと提案する。しかも、ギルを払う必要もない、と。ギギは大喜びで、「やった！　ぼくたちの巨大な東屋だ！」と叫ぶ。ヒルディブランドは言葉を失いながらも、マスター・スローフィックスに何度も礼を述べる。だがスローフィックスは、「涙目で言葉を並べる必要はない」と笑い、ゴブリンたちには、かつて紳士から受けた恩を返す道義的な義務があるのだと告げる。そして、「新しい東屋」を楽しむといい、と言い残し、グランド・サーの捜索に幸運があることを願って彼らを送り出すのだった。</p>
+
+<p>その後、ギギは再びヒルディブランドの袖をつまみ、そわそわしながら尋ねる。ここが本当に自分たちの東屋なのであれば、そこに自分たちの家紋を描いてもいいか、と。ヒルディブランドは満面の笑みを浮かべ、これほどめでたい出来事を祝うのにふさわしい方法はほかにないと答える。それに、前の住人たちの神経を少しばかり逆なですることもできるかもしれないと、いたずらっぽく付け加える。そして、「さあ、一緒に絵の具を買いに行こう。この東屋全体を、おまえのキャンバスにしてしまうのだ！」とギギを誘う。ジュリアンはその背中を見送りながら、「今度は東屋まで手に入れただと？　まったく、そんな調子でいつまでも“父親ごっこ”を続けるつもりなら、あたしが黙ってないからね」と毒づく。そんな中でヒルディブランドは、新たに手に入れた「我が家」を見上げながら、未だに悪名高きグランド・サーの姿はどこにも見当たらないと呟き、そして最後に、「どうやら、もっとたくさんの絵の具が必要になりそうだ」と苦笑するのだった。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>クエスト発行</b> サー　イシュガルド：下層 <small class="muted">(X:9.9, Y:11.4)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="the-measure-of-a-mammet.html">端緒を掴め</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="dont-trust-anyone-over-sixty.html">時魔法の謎</a></div>
+</div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'第一次擁有的家',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+<p>在 Ishgard 的街道上，Cyr 一看到你，彷彿終於得到 Halone 垂憐似的鬆了一口氣。他坦白說，今天實在非得請你幫忙不可，但也拜託你先別尖叫著轉身逃走，至少把話聽完。這次要處理的，是如今失蹤、而且幾乎被視為已經殉職的 Heavens’ Ward 騎士們。自從那場「風波」以來，沒有任何一位騎士回到首都，然而最近卻開始流傳──有人在街上看見這些尊貴的騎士身影。對 Cyr 來說，這聽起來根本就是最惡質的異端行徑，他無論如何都想查個水落石出。但要做到這一點，就得集結一切能用的戰力……包括、讓 Fury 也想扶額的，那位奇妙紳士的「幸運」之力。既然遲早他都會在最糟糕的時間點自己冒出來，不如乾脆由這邊主動去找，至少還能掌握主導權，順便看緊那個少年──不，應該說那個 mammet。下定決心之後，Cyr 請你與他一同前往 Fortemps Manor。這或許是他向上級証明自己價值的最後機會，他輸不起。</p>
+
+<p>來到宅邸花園裡的涼亭時，你正好看到 Hildibrand 正在對 Gigi 授予「父親的管教」。他雙臂誇張地抱胸，嚴肅宣稱那種行為實在有失紳士風範。聲線忽高忽低的 Gigi 抗議說，自己只是在為「家」畫家徽而已。Hildibrand 則指出，Gigi 打算塗鴉的這座涼亭，其實是 Lord Edmont 的財產，從「Edmont 叔叔」那裡偷東西，可一點也不紳士。他這麼一說，Gigi 雖然垂下眼，承認自己並不是想偷，只是很想知道──既然那不是他們的涼亭，那麼「我們的涼亭」又在哪裡？裡面是不是有溫暖的火爐，和一只熱騰騰的水壺？Hildibrand 立刻抬頭望向天空，以一貫戲劇化的姿態宣告，身為紳士探偵，他們根本不需要水壺或涼亭：整個世界就是他們的家，他們可以自由前往紅色蕨草搖曳之處，也可以追隨野薔薇綻放的地方。然而，Gigi 完全不買帳。他說自己才不在乎什麼野薔薇，只想和 Papa Hildy、Mama Nashu 一起住在涼亭裡。Nashu 煞有介事地補充，涼亭其實非常昂貴，而且要是沒馴養好還很危險。Hildibrand 只好順勢附和，說這確實是危險之物，試圖再一次把話題拉回「浪跡天涯的紳士探偵」浪漫上。就在這時，Cyr 與你走進了花園。Hildibrand 立刻露出熟悉的招牌笑容，打招呼問你們是以忠實粉絲身份來訪，還是為了公事而來。Cyr 一如往常地回以乾巴巴的一句「當然是公事」，然後先不談案件本身，反而先追問，剛才這一幕到底是怎麼回事。</p>
+
+<p>在確認現場混亂的狀況大致平息後，Cyr 終於說起正事。如果 Hildibrand 正在尋找案件，那附近就有一樁再適合不過的對象：有人正在冒充 Heavens’ Ward 的騎士。這些卑鄙詐騙犯，自稱是傳說中的偉大騎士，收取少量費用，就引誘天真的貴族千金前往「私密聚會」，保證能與那些名聲顯赫的騎士相伴。結果願意參加的那些人，所見所聞實在過於可怕、過於羞恥，以至於事後完全不願細說。Cyr 希望 Hildibrand 能協助調查，並保證會支付合理的報酬。聽到這裡，Hildibrand 立刻挺胸，自信滿滿地宣稱自己對「淑女之道」可說是相當精通。話音未落，一道辛辣的聲音插了進來：「從什麼時候開始？」Julyan 怒氣沖沖現身，對兒子一邊裝紳士探偵、一邊又自稱是「一個該死的 mammet 的爸爸」感到火冒三丈，當場宣布他現在就要乖乖跟她回 Ul’dah。Hildibrand 則激烈抗議，那是自己的天職，身為探偵是他畢生的使命，而 Gigi 則是他的兒子，一名堂堂正正的 Manderville 男子。Julyan 嘀咕著他這股硬脾氣，肯定是從那不成才的父親那裡遺傳來的，一面又無法真的在這裡就把人扛回去，只能不情不願地嘆氣。Hildibrand 心裡卻已經做出決定──他要向母親、也向世人證明，自身身為探偵與父親的價值。他召集 Nashu、Gigi 和你，一同接下 Cyr 的委託，誓要將那些偽騎士繩之以法。Julyan 雖然滿是怨言，還是開口請你和 Cyr 幫忙看好這個不省心的兒子，說完便沉重地跟在隊伍後頭。</p>
+
+<p>之後，一行人回到 The Pillars 的 The Last Vigil，再度集合。Cyr 深深嘆了一口氣，說至少有一件事是可以絕對肯定的──那就是這群人，沒有一個看起來正常。Nashu 歪著頭想了一會兒，說如果那些騎士不應該做那種事，那為什麼還能在貴族小姐之間如此受歡迎呢？Julyan 則碎念著，拿那點可憐的薪水還要替治安隊去做臟活，究竟有什麼好處。Hildibrand 卻依然樂觀，認定一定會有哪位淑女願意提供有用的情報。眾人於是分頭向三位少女打聽消息。第一位「看透世事的少女」冷笑著說，自己才沒笨到會被那種把戲蒙騙。依她所見，那些自稱騎士的傢伙，跟真正的 Heavens’ Ward 一點相似之處也沒有。身為 Ser Adelphel 的狂熱仰慕者，她驕傲地表示，自己早就把那位騎士的面容每一寸都烙印在心裡。第二位「喪氣的少女」則低頭懊悔，說自己用光了全部零用錢換來那場羞辱，活像被趕出神祇護蔭之外。她懷疑那些可怕流言是否為真──或許她早就該接受現實：Ser Zephirin 現在已經行走在 Halone 的殿堂，而不再屬於這個世界。她哭著說，對她而言，他是美麗而正直的騎士，是信仰的守護者，也因此發誓此生再不會愛上任何人。第三位「心懷怨恨的少女」則滿腔怒火，要求對那些騙子施以迅速而殘酷的制裁。她指責那些人利用女性感情來填滿自己的錢袋，說如果 Ser Charibert 還在，就會把那群傢伙視為潰爛的瘡疤，統統清除乾淨。聽到這裡，Cyr 只能喃喃自語，感嘆 Charibert 依舊失蹤，實在可惜。那少女卻更加激動地質問，究竟打算讓誰來處理這些罪犯與異端？難道要她們自己去清算嗎？</p>
+
+<p>眾人重新會合時，Gigi 悄悄拉了拉 Hildibrand 的袖子，小聲說那邊的「grandmama」一直盯著他們看。Hildibrand 頓時慌了，趕忙教育他，紳士說話一定要小心。首先，他只有一位祖母；其次，也是最重要的一點──絕對、絕對不能叫她「Grandmama」，至少現在還不行。Gigi 認真地保證，自己不會叫 Julyan「Grandmama Julyan」，說完卻立刻轉身，以十足紳士的姿勢向她行禮問安。這份乖巧讓 Julyan 也忍不住笑出聲，說自己原本還以為，只要再聽到一次那個「G 字開頭」的稱呼，就要當場把這孩子的頭扭下來。隨後，Hildibrand 把注意力拉回「助手們身上」，詢問你和 Cyr 到底查到了什麼新線索。Cyr 無奈地表示，除了更確定被騙的女性對那些假騎士恨之入骨以外，幾乎沒有實質進展。Nashu 倒是樂在其中，興奮地轉述那兩位女士說，如果有機會把那些人逼到牆角，一定會怎麼樣「好好料理」對方的各種幻想。Julyan 聽完只覺得火大，痛罵兒子居然把這種東西當成果實，敢稱自己是 Manderville 男人，實在可笑。Hildibrand 卻完全沒被這些話擊垮，反而一本正經地說，真相往往藏在謊言與欺瞞織成的掛毯後頭，只要找到一條鬆脫的線頭，輕輕一拉，就能把一切謎團扯開。說完他看見附近站著一名婦人，便當場上前，用一貫誇張的口氣稱呼她為「年輕的小姐」。Cyr 在一旁暗自腹誹，覺得那位「年輕女士」無論如何都不像詐騙犯的目標。然而，名叫 Dorys 的女子卻很快推翻了他的猜測。她承認自己確實曾被那些「Grand Sers」的甜言蜜語所騙，因為她長久以來都渴望能見到 Ser Vellguine 一面，所以在得知終於有機會與他相會時，幾乎連一刻都沒有猶豫就答應了。結果被帶到宅邸、解除眼罩之後，映入眼簾的卻是幾張恐怖扭曲、與夢中騎士完全不同的臉，她只來得及尖叫便拔腿逃走。等她帶著 watch 回去時，那些人早已人去樓空，只剩鄰居說他們曾聽見對方談論，要去一個叫 Idyllshire 的地方避風頭。Dorys 說，自己能提供的就只有這些了，希望多少能幫上忙。聽完後，Hildibrand 當場立下誓言，說身為探偵與紳士，他不會安然罷休，直到那些惡徒被好好懲罰。Gigi 立刻帶頭為 Papa Hildy 高聲歡呼三次「hip hip hooray」，而 Julyan 也勉強跟著小聲「hooray」了一句。一行人於是確信獵物就藏身在 Idyllshire，跟著 Hildibrand 的步調，準備前往 Dravanian hinterlands。Cyr 一度驚呼，真的要就這樣立刻去那種地方嗎，但顯然已經沒有人打算停下腳步。</p>
+
+<p>前往 Idyllshire 的旅程，比 Cyr 所預期的還要驚險。他抵達後立刻抱怨，這一路上不知道經歷了多少次差點死得很難看，或至少被迫與自己心愛的小錢包「永別」。Nashu 眼睛一亮，馬上問他可不可以「領養」其中一個，保證會帶出去散步、按時餵食，還會每天替他的面具塞滿新鮮香草。Julyan 則重重嘆氣，覺得這趟根本是浪費時間。倒是 Gigi 一邊環顧這個聚落，一邊小聲喃喃，說這地方有一種很熟悉的感覺。明明不可能來過這裡，他卻總覺得好像曾在某處看見過這樣的景象。Hildibrand 對這個謎題倒不怎麼在意，反而興致勃勃地讚嘆，眼前這座位於廢墟上的聚落，是 uplander 與 gobbie 共同努力、互相扶持的結晶。Cyr 則務實得多，只覺得不再被會噴火的巨龍、扛著火銃的螃蟹，以及會扔炸彈的 goblin 追著跑，已經是足以感謝 Halone 的恩典。Nashu 開心地說，那些敵人根本敵不過 Lady Julyan 與她手上的平底鍋，讓 Gigi 也興奮起來，大喊好想再看一次「壞 gobbie 被打飛」的畫面。Julyan 不客氣地抱怨，除了你以外，這群人恐怕早就在某條溝裡橫著躺了，要不是她一路把大家敲出條生路。Hildibrand 當然不服氣，嚴肅表示自己絕不會讓危險靠近心愛的兒子和忠誠的助手。Cyr 正想插話，Hildibrand 卻又先聲奪人，宣布下一步行動：接下來大家要分頭向 Idyllshire 的居民打聽線索。他的「探偵直覺」保證，這裡一定有人知道那些假騎士的消息。Cyr 嗅了一下空氣，只覺得這股氣味更像是頭痛而不是直覺。Julyan 則用一種嫌棄的眼神打量整座聚落，說這裡看起來就是流浪漢、殺手和騙子聚集的地方，警告 Hildibrand 千萬別跟這些人同流合污。但在 Hildibrand 看來，這裡是 goblin、treasure hunter 與冒險者們，能自由追逐夢想、按照自己的方式生活的地方。Gigi 舉起雙手大喊「萬事萬歲」，Nashu 則把這一切視作又多了一堆「生日禮物」。</p>
+
+<p>接下來的詢問很快就有了結果。Loudjox 一邊「噗咻、噗咻」地透過面具呼吸，一邊承認自己確實知道 Grand Sers 的存在。那些 sneaky 的 uplander 總是獨來獨往，不怎麼和 gobbieflock 打交道，但他不打算多問，只要有 jinglyshine 進口袋就行。Geimlona 回憶，那群 Grand Sers 是不久前飄進 Idyllshire 的，偶爾會去 Great Library，不過她並不清楚原因。Dorys 也在這裡，她說那群人一直躲在 Roundspot 南邊的一棟建築裡，而且相當危險，只要你用不對的眼神看他們一眼，就有可能被殺。看著她，Cyr 忽然生出一股強烈的既視感，忍不住出聲詢問，她難道不是某位 Ishgard 貴族夫人的失散雙胞胎妹妹嗎？Dorys 聞言整個人慌了，支支吾吾了一下，隨即大喊「你快看！後面有三個頭的 goobbue！」，趁眾人下意識轉頭的瞬間拔腿就跑。Cyr 望著她逃走的背影，只覺得這肯定不是最後一次見到那個女人。之後，Hildibrand 把大家召集到一起，宣布在「熱心市民的證言」幫助下，他們終於掌握到目標的確切藏身處：就在市集南側那棟建築。他稱讚了你的功勞，帶著眾人來到那座房子前敲門，卻發現屋內毫無動靜，看來現在沒有人在家。於是他決定留在原地埋伏守候。等候的過程中，Gigi 悄悄靠到 Hildibrand 身旁，坦白說自己真的很喜歡這個地方。他覺得，如果能在這裡和 Papa Hildy 與 Mama Nashu 一起生活，一定會發生非常多令人興奮的冒險。Hildibrand 想了一會兒，認同這個社群似乎確實培養出一種開放又自由的風氣，只要是肯努力工作、願意為整體做出貢獻的「誠實之人」，都能在這裡被接納。話鋒一轉，他忽然問大家，有沒有誰在進來的路上看見過涼亭。</p>
+
+<p>就在這時，一道熟悉又帶著「pshkohhh」尾音的 goblin 聲音響起，喊出 Hildibrand 的全名。Hildibrand 眯起眼打量，隨即驚喜地猜測，對方是否正是 Slowfix Cointoss。Slowfix 立刻用特有的聲調表示肯定，Nashu 則好奇地問 inspector 是否認識這位 gobbie。Hildibrand 自豪地說，Master Slowfix 正是當年雇用他的第一位主人。於是 Slowfix 講起當年在 Thanalan 的往事。那時 gobbieflock 的隊伍在旅途中遭 bandit 攔截，貨物全被搶走。手邊沒有 jinglyshine 可以付給 Brass Blades，他們根本沒有辦法討回那些東西。直到他們與某位「gentleman uplander」做了一筆 busydeal：那人很快就找出 bandit 的藏身處，帶著「bangyboom」的火光殺入，把那些被搶走的貨物和「正義」一起送回給 goblin。Hildibrand 則補充，當時自己偽裝成「純真 milkmaid」的計畫其實差點被識破，急忙逃跑時又一腳絆到裝滿 firesand 的木桶，才演變成所謂的「boom gobbie doom」。Slowfix 說，自那次事件以後，他對 uplander 的看法完全改觀。可以說，如果沒有那次與紳士相遇，他也不會想到要建立一個強調平等的 utopia──也就是今日的 Idyllshire。因此，即便只是比喻，他也願意稱 Hildy 為這座聚落的「創始之父」之一。</p>
+
+<p>Hildibrand 帶著幾分感動，又把話題拉回眼前。看著 gobbieflock 從當年的流浪隊伍一路走到今天，將荒廢的遺跡打造成這樣的城市，他忍不住張大眼睛讚嘆。Slowfix 則表示，他們從未忘記那位紳士當年的援手，而他這次出面，就是為了伸出援助之手。Hildibrand 當然不會拒絕這樣的好意，他坦白說，自己的兒子 Gigi 已經深深喜歡上這座城市，所以他希望能與兒子與助手在此暫住一段時間。他們的要求並不高──只要一座小小的涼亭，就綽綽有餘。Slowfix 聽完，發出一聲輕哼，反問為什麼要滿足於一座涼亭，當他們身後就有一棟狀況良好的 estate。那棟屋子的住戶已經拖欠租金許久，他隨時可以把人請出去。Hildibrand 一時語塞，只能說那正是他們正在追查的嫌犯住處，那些人涉嫌欺騙年輕女性。結果「fraud」這個字一出口，Slowfix 立刻在所謂「egalitarian utopia」的管理者身份下怒火中燒。他表示絕對不能容忍這種事情，更覺得這正是把那群 Grand Sers 趕走、改由紳士一行入住的最佳理由，甚至還說可以完全不收 jinglyshine。聽到這裡，Gigi 高聲歡呼，說這簡直是他們可以擁有的「巨大涼亭」。Hildibrand 一時不知道該說什麼，只能一遍又一遍向 Master Slowfix 道謝。Slowfix 則揮揮手，說他們 gobbieflock 在道義上有義務回報紳士當年的幫助，讓他們好好享受新的「gazebo」，也祝他們在追捕 Grand Sers 的路上好運。</p>
+
+<p>等到情緒稍微平復下來之後，Gigi 再一次拉住 Hildibrand，很小聲地問。既然這裡現在是「我們的涼亭」，那麼自己是不是可以在上面畫出屬於他們的 family crest？Hildibrand 笑得合不攏嘴，說沒有比這更適合慶祝這個好消息的方式了──說不定還能順便惹惱一下以前的房客。於是他邀請 Gigi 一起去買 paint，說要把這座「gazebo」整個當成畫布，讓他盡情揮灑。看著這一幕，Julyan 在一旁怒氣衝衝地嘀咕，說這傢伙現在連涼亭都弄到手，如果真的以為自己會任由他一直玩「當爸爸」的遊戲，那可就大錯特錯。Hildibrand 則抬頭望向他們新得到的屋子，自言自語說那群惡名昭彰的 Grand Sers 到現在還不見蹤影，看來他們接下來，大概會需要比想像中更多的顏料了。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>任務發布</b> 薩爾　伊修加德：下層 <small class="muted">(X:9.9, Y:11.4)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="the-measure-of-a-mammet.html">從人偶開始追尋真相</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="dont-trust-anyone-over-sixty.html">時間魔法的謎團</a></div>
+</div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
