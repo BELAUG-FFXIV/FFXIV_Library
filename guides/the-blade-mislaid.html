@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Blade Mislaid | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Hildibrand Adventures – The Blade Mislaid (SB Patch 4.35)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:1px solid transparent;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border-color:var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/Q0FJLWeKxj4"
+              title="The Blade Mislaid" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">The Blade Mislaid</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'The Blade Mislaid',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+<p>Hildibrand declares with great satisfaction that his latest geiko disguise may well have been his finest performance yet, while Nashu rubs at her shoulders and groans that living as a geiko is exhausting work. Yojimbo, however, has little patience for theatrics. He reminds everyone that the true objective is the recovery of the treasured Soboro Sukehiro. When he briefly wonders if he has met you before, he dismisses the thought as nonsense and turns back to the task at hand. Shigure then presents the dagger he snatched from the Wolf Burglar amid the chaos. Though old and worn, it has clearly been kept in good condition, and its make is unmistakably of Doman design. To Shigure, it feels like something more than a common tool, a clue to the thief’s origins. Hildibrand loudly praises this reasoning as if it were his own, insisting that such keen attention to detail means Shigure has the makings of an inspector. Shigure chooses to accept this as a compliment and sets your next destination: Yanxia. Before long, you stand together at the crystal-rich shores near Prism Lake, where Nashu is immediately distracted by the dazzling shards glittering in the light. Yojimbo assures you that his companion Daigoro is a good dog despite his fearsome fangs, and Hildibrand momentarily forgets the mission as he marvels at the splendor of the landscape—until he apologizes and asks how you are to track your quarry. Shigure has no answer, but Yojimbo does: Daigoro’s nose. At his master’s urging, the dog sniffs the Wolf Burglar’s dagger, barks eagerly as he catches the scent, and Hildibrand charges off after him with Nashu close behind, while Shigure dares to hope that fate itself is smoothing the road to success.</p>
+<p>Following Daigoro’s trail leads you to the outskirts of a ruined Doman settlement near Monzen, but there the dog comes to an uncertain halt. He whimpers and refuses to go farther, and Nashu worries aloud if something is wrong. Yojimbo mutters that the air reeks of Namazu, and that their peculiar odor has muddled Daigoro’s senses. Since the trail cannot be followed any farther, Shigure suggests that you search the ruins for other clues, even as Hildibrand and Nashu immediately sprint off without a plan, forcing Shigure to sigh and ask you to search another direction on your own. You make your way through the rubble and abandoned houses until you find a Namazu sprawled on the ground, snoring and reeking strongly of tea. Rousing him, you learn that he is merely suffering from a brutal hangover. He thanks you for waking him before beasts or bandits could prey upon him, then nervously asks if you might be a thief yourself. Depending on how you answer, he either hurriedly insists he has nothing of value or explains that he is hunting for no one, but in both cases he recalls, through the haze of drink, having seen a traveler pass by with an unusual sword on his back. Though he admits that everything is a blur, he confidently claims his barbels can sense what his memory cannot. Hildibrand attempts to reassure the Namazu that you have your own methods of tracking the Wolf Burglar, but the catfish ignores him, swaying slightly as his “keen Namazu sense” awakens. With great ceremony, he points off into the distance at the same moment Hildibrand points in that very direction and loudly agrees. Shigure tries to press them for specifics, but the Namazu is already retreating, declaring that his hangover forbids any further effort and cheerfully bidding you all goodbye as he waddles away. Left with little else, you continue combing the ruins until you notice a conspicuous pair of gloves among broken potsherds. They seem recently used and out of place, and Yojimbo suggests that while he does not recall the thief wearing them, they are the only promising lead you have. Daigoro eagerly sniffs the gloves, barks with renewed certainty, and takes off once more, the scent of your quarry firmly in his nose now that the Namazu’s stench has lifted.</p>
+<p>You follow Daigoro at a run, racing through Yanxia until the dog stops and barks toward a familiar lupin figure. Shigure spots the Wolf Burglar ahead and vows he will not slip away again. Yojimbo raises a hand to check the eager ronin, reminding him that the thief is swift and slippery; this chase is better left to the one foe he cannot outrun. At Yojimbo’s command, Daigoro surges forward, paws pounding the earth as he streaks toward the Lupin with astonishing speed. Nashu cries out in admiration at how fast the dog can run, and Yojimbo proudly declares that none are faster. Between Daigoro’s relentless pursuit and your party’s pressure, the Wolf Burglar is finally cornered and brought low, his attempts to rely on connections and bribes proving useless. In the struggle, you secure the precious Soboro Sukehiro, and Hildibrand flourishes the blade, urging Shigure to rejoice now that the thief and his prize are both in your grasp. Yojimbo steps in with practiced calm, stating that while you are all but certain this is the real sword, he would like to verify its authenticity. Hildibrand agrees at once, and Yojimbo studies the blade closely before confirming that it is no fake, but a true masterpiece worthy of the name Soboro Sukehiro. Then, as if suddenly remembering something, he claims pressing business in Kugane and offers to return the sword to its rightful owner on your behalf. He assures you that he will surrender it to no one else and strides away with the weapon in hand. Hildibrand beams and calls you lucky to have a friend like “Jim,” declaring him steadfast, loyal, and honorable—practically a Manderville in all but blood. Shigure, satisfied that the thief is at least in custody, proposes that you escort the bound Wolf Burglar back to Kugane, where the Sekiseigumi will surely be delighted to receive him.</p>
+<p>Back in Kugane’s Rakuza District, Shigure introduces himself and your companions to the Sekiseigumi at Matsuba Square and announces that you have captured the notorious Wolf Burglar at last. Miyamagi can scarcely believe the news at first, but his disbelief quickly turns to joy as he recognizes the thief who has so long mocked him and his brothers. He thanks you all for this unexpected bounty and invites you to bring the prisoner inside. The Wolf Burglar, even in chains, mutters that you are all fools, blind to the true villain among you. Soon after, Akebono arrives and confirms that the Lupin has indeed been detained, praising the capture as an auspicious turn of events and asking who deserves his gratitude. Hildibrand steps forward to claim responsibility in his usual flamboyant fashion, then Akebono immediately inquires after the Soboro Sukehiro. Shigure freezes when he realizes that the sword is not present and admits he believed Yojimbo had already returned it. At the mention of that “disrespectful disgrace of a samurai,” Akebono’s expression darkens. He has seen neither hide nor hair of Yojimbo and clearly did not entrust the weapon to him. Hildibrand tries to excuse their missing ally, suggesting that Jim may simply be enjoying dango at the Umineko Teahouse before visiting Akebono, but Shigure quietly voices the possibility that Yojimbo has instead absconded with the blade. Akebono’s temper finally snaps. He rails at you all, declaring it unimaginable that anyone thought it wise to entrust such a treasure to a single man—especially a man he had only just driven from his service. Fixing Shigure with a hard stare, he vows that if the sword is not recovered, he will devote his remaining years to ensuring the ronin’s dreams never come true.</p>
+<p>Before that threat can fully sink in, the solemn Sekiseigumi officer you have met before speaks up. He notes that such an outcome would be regrettable and then turns to Shigure, recalling that it was once the young man’s dream to serve alongside the Sekiseigumi. He asks if that wish still burns within him, and Shigure, flustered but resolute, answers that it does. The officer nods and, in light of Shigure’s recent accomplishments—including the capture of the Wolf Burglar—formally offers to induct him into the Sekiseigumi. Overcome, Shigure immediately accepts. There are a few procedures and conversations with superiors to be handled first, the officer adds, but they can see to that at once if Shigure’s comrades do not mind waiting. Hildibrand assures him that you will all gladly await Shigure’s triumphant return. Some time later, Shigure steps back out before you, newly clad in the dignity of a Sekiseigumi samurai. He hesitates when Nashu declares him “reborn,” yet admits that he does feel like a changed man. He thanks you, Hildibrand, and Nashu sincerely, saying that it is the three of you who have helped him grow. Then he shares the news of his first assignment: he is to pursue the renegade Yojimbo and reclaim the Soboro Sukehiro. With no extra men or resources granted to him, he frankly admits he cannot hope to succeed alone and begins to ask for your aid. Hildibrand cuts him off with a broad smile and a raised hand, proclaiming that he will gladly help. Once more, he swears as agent of enquiry and inspector extraordinaire to scour all of creation—from the deepest pit of the seven hells to the heavens’ highest peak—for Jim and the Soboro Sukehiro. The hunt, he declares, begins anew that very moment, and Nashu dashes after him, pleading for the inspector not to leave her behind.</p>
+<p>When the dust finally settles, Shigure turns to you in quieter surroundings and confesses that part of him still struggles to believe what has transpired. The Wolf Burglar is captured, he has at last become a member of the Sekiseigumi, and yet it all feels strangely unreal. He thanks you again and again for everything you have done, admitting that the strangest part of this journey may not have been the thieves, swords, or undead companions, but rather the loss of his own hair along the way. That, he says, was the most vexing complication of all—though Nashu has assured him she is already hunting down a powerful tonic to fix it. For now, there is nothing to do but wait. Until a new lead on the Soboro Sukehiro presents itself, you can only enjoy this brief lull and allow fate to decide when your shared story will move forward once more.</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>Quest Giver</b> Shigure <small class="muted">(Kugane, X:10.0, Y:7.8)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="in-the-eye-of-the-hingan.html">In the Eye of the Hingan</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="the-black-heart-beneath.html">The Black Heart Beneath</a></div>
+</div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'近接の脅威',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+<p>ヒルディブランドは、先ほどまで扮していた芸妓姿を思い返し、「これまでで最高の変装だったかもしれない！」とご満悦の様子で胸を張る。一方、ナシュは肩を回しながら、「芸妓をやるのって、本当に大変ね……」と、すっかり疲れた声を漏らす。そんな中、ヨウジンボウは一切の茶番を切り捨てるように、まずは宝刀ソボロ・スケヒロを取り戻さねばならないと皆に念を押す。どこかで会ったことがあるような気がするとあなたの顔を見つめるが、「気のせいだ」と自分で言い聞かせ、真顔に戻る。続いて、シギュレが混乱のさなかにウルフ・バーグラーから奪い取った短刀を取り出す。古びてはいるものの、丁寧に手入れされてきたことがうかがえる一本で、その意匠はどう見てもドマの品だ。ただの道具以上の意味を持つ、大切な所有物に違いないとシギュレは読み取る。するとヒルディブランドは、同じ点に自分も気づいていたと大げさに褒め称え、シギュレには名探偵の素養があるとまで言ってのける。シギュレは苦笑しつつも、それを褒め言葉として受け取り、次の目的地をヤンサに定める。やがて一行はプリズムレイク近くの水辺にたどり着き、あたり一面に散らばるクリスタルが陽光を反射してきらめく光景に出迎えられる。ナシュは早速きらきらとした欠片に夢中になり、ヨウジンボウは鋭い牙を見せるダイゴロウが実はとてもいい犬だとあなたに告げる。ヒルディブランドは、目の前の光景のあまりの壮麗さに思わず見とれてしまうが、すぐに我に返り、肝心の盗人をどう追うべきかと皆に問いかける。シギュレも答えを持ち合わせていない中、ヨウジンボウは「犬の鼻」に活路を見出す。彼の指示でダイゴロウが短刀の匂いを嗅ぐと、犬はすぐに吠え声を上げて獲物の匂いを捉えたことを知らせる。ヒルディブランドとナシュは勢いよくその背を追い、シギュレは、もしかすると運命が自分たちに味方しているのかもしれないと小さくつぶやきながら、その後に続く。</p>
+<p>ダイゴロウの足跡を辿った一行は、やがてモンゼン近くの廃墟へと行き着く。ところがそこで、犬は急に立ち止まり、不安げに鼻を鳴らしてそれ以上先へ進もうとしない。ナシュは心配そうに様子を窺い、ヨウジンボウは、辺り一帯に漂うナマズオたちの匂いが嗅覚を狂わせているのだろうと低く呟く。これ以上、匂いだけに頼ることはできないと見て、シギュレは廃墟の中を手分けして捜索しようと提案するが、ヒルディブランドとナシュは話が終わる前に駆け出してしまい、シギュレはまたしてもため息をつきながら、あなたに北西の方角を任せるのだった。あなたは崩れかけた家々の間を進み、瓦礫をかきわけるうちに、一匹のナマズオが地面に倒れて眠りこけているのを見つける。強烈な茶の香りをまとったその小さな体を揺さぶって起こすと、彼はひどい二日酔いに苦しみつつも、自分はちゃんと生きていると主張し、獣や盗人に襲われる前に起こしてくれたあなたに礼を述べる。そして、おそるおそる、あなたが盗人ではないかと疑いの目を向けてくる。あなたの返答次第で、彼は慌てて「価値のある物は何も持っていない」と弁解したり、「盗人など探していない」とごまかしたりするが、いずれにせよ、背中に妙な剣を背負った旅人を見かけた記憶があると口にする。酒で頭はぼんやりしているものの、自分の「ひげ」の感覚なら、ぼやけた記憶に代わって役に立つはずだというのだ。</p>
+<p>その様子を見たヒルディブランドは、そこまで無理をする必要はない、自分たちにもウルフ・バーグラーを追う手立てはあるのだと気取った口調で申し出るが、ナマズオは聞いているのかいないのか、ゆらゆら揺れながら「ナマズオセンス」を働かせることに集中している。やがて彼は大きくひげを振るわせ、「あっちだ」とばかりに片方のヒレである方角を指し示す。その瞬間、ヒルディブランドも同じ方向を指差し、「その通り、あちらだ！」とぴったり重なる。シギュレが慌てて「具体的にどちらなのか」と問いただそうとする頃には、ナマズオはすでにふらつく足取りで立ち去る準備をしていた。二日酔いゆえこれ以上は無理だと告げ、「ウルフ・バーグラー探しを楽しんでね」と気楽な挨拶を残して去っていく。手がかりは心もとないものの、あなたはなおも廃墟を調べ続け、やがて砕けた陶片のあいだに、妙に目立つ一対の手袋を見つける。場違いにきれいなその手袋を手に戻ると、ヨウジンボウは「盗人が身につけていた記憶はないが、他に当てはない以上、試してみる価値はある」と言い、ダイゴロウに匂いを嗅がせることを提案する。犬は嬉しそうに手袋に鼻先を押し当て、何度か深く息を吸い込んだ後、大きく吠えて新たな匂いを掴んだことを告げる。ナマズオがいなくなった今、邪魔をする臭いはない。こうしてダイゴロウは再び、獲物を求めて駆け出すのだった。</p>
+<p>あなたたちはダイゴロウの後を追ってヤンサの地を駆け抜け、やがて犬が吠え立てる先に見覚えのあるルパンの姿を認める。シギュレはついにウルフ・バーグラーを視界に捉え、「今度こそ逃がさない」と決意を込めてつぶやく。だが、ヨウジンボウは焦る浪人を制し、盗人の素早さと抜け目なさをよく知っているはずだと諭す。この追跡は、彼が決して逃げ切れない相手──つまりダイゴロウに任せるべきだと。ヨウジンボウの号令一下、犬は地を蹴って前へ飛び出し、四肢を伸ばして信じられない速度でルパンに迫っていく。ナシュは「なんて速いワンちゃん！」と歓声を上げ、ヨウジンボウも自慢げに「彼より速い者はいない」と言い切る。ダイゴロウに執拗に追われ、あなたたちにも退路を塞がれたウルフ・バーグラーは、ついに逃げ道を失って捕らえられる。頼みの綱であった縁故や賄賂も、今回は通用しない。もみ合いの末、あなたたちはソボロ・スケヒロを取り返し、ヒルディブランドは誇らしげにそれを掲げて、盗人と宝刀を同時に押さえたとシギュレに祝辞を送る。そこへヨウジンボウが歩み出て、ほぼ間違いなく本物だとは思うが、念のため真贋を確かめたいと申し出る。ヒルディブランドは即座に同意し、ヨウジンボウは刀身を細かく観察したのち、それが贋作ではなく、まさしくソボロ・スケヒロと呼ぶにふさわしい名刀だと断言する。そして、ふと何かを思い出したように「クガネで急ぎの用事がある」と言い出し、せっかくなので自分が責任を持って持ち主のもとへ届けてこようと申し出る。誰にも渡さないと固く約束したヨウジンボウは、そのまま刀を携えて立ち去っていく。ヒルディブランドは満面の笑みで、ああした友を持てる自分たちは幸運だと語り、「忠義に厚く、勇敢で、まるでマンデヴィル家の一員のようだ」とヨウジンボウを褒めそやす。シギュレは、盗人さえ押さえれば、後はクガネの赤誠組が喜んで牢に入れてくれるだろうと判断し、捕らえたウルフ・バーグラーを連れてクガネへ戻ることを提案する。</p>
+<p>ヒンガシの都クガネに戻り、ラクザ地区の松葉広場でシギュレは自らと仲間たちを名乗り、長らく街を騒がせてきた「クガネのウルフ・バーグラー」を捕らえたと赤誠組に報告する。ミヤマギは最初こそ耳を疑うが、縛り上げられたルパンの姿を目にした途端、その顔に驚きと喜びが入り混じった表情を浮かべる。長年頭痛の種だった賊がこうして転がり込んできたことに深く感謝し、「ありがたく預からせてもらおう」と一行を中へと招き入れる。鎖に繋がれたウルフ・バーグラーはなおも強気な態度を崩さず、「皆、真の悪党に気づかない愚か者だ」と吐き捨てる。やがてアケボノが姿を現し、ウルフ・バーグラーが本当に捕らえられたのか確認すると、これはまことにめでたい出来事だと称える。そして、誰のおかげでこの吉報を得られたのかと問うと、ヒルディブランドが一歩前に出て、例によって大仰な名乗りと共に自分の手柄だと言い切る。そこまではよかったが、アケボノがすぐにソボロ・スケヒロの所在を尋ねた瞬間、場の空気が一変する。</p>
+<p>シギュレは、刀がここにないことにようやく気づき、ヨウジンボウがすでに返却済みだと思っていたと正直に打ち明ける。アケボノは、「あの無礼で不名誉な侍」ヨウジンボウから預かった覚えなどないと冷ややかに言い放ち、その顔に怒気を浮かべる。ヒルディブランドは、きっとジムはウミネコ茶屋で団子でも楽しんでから、改めて挨拶に来るつもりなのだとお気楽な推測を口にするが、シギュレは小さく、「もしかすると、刀を持って逃げたのかもしれない」と本音を漏らす。これを聞いたアケボノの堪忍袋の緒がついに切れた。彼はあなたたち全員を見渡し、どうして誰一人として、そのような宝刀をたった一人の男に託すことを賢明だと思ったのかと怒鳴りつける。しかも、その男はつい先ほど、自分が信を置けないとして手放した者なのだと。やがて怒りの矛先はシギュレに向けられ、「もしその刀を取り戻せなければ、残りの生涯を費やしてお前の夢を踏みにじってやる」と冷酷な宣告を突きつける。</p>
+<p>その緊張を断ち切るように、以前会った赤誠組の組士が口を開く。彼は「それではあまりに救いがない」と言い、ふとシギュレの方を向いて、かつて彼が赤誠組に加わることを夢見ていたと話していたのを思い出したと告げる。その志は今も変わっていないのかと問いかけられ、シギュレは驚きながらも、変わらぬ願いだとはっきり答える。組士は満足げにうなずくと、ウルフ・バーグラーを捕縛するという大きな成果を挙げた今こそ、彼を赤誠組に迎え入れたいと正式に申し出る。思いがけない言葉に胸を震わせながら、シギュレは即座に入隊の意志を示す。上層部との話し合いや書類手続きなど、いくつかの段階を踏む必要はあるが、それらは今すぐにでも始められると組士は続け、仲間たちが待つことをいとわないならと問いかける。ヒルディブランドは「もちろんだ」と快く答え、シギュレの栄えある門出をここで待つと約束する。</p>
+<p>しばしの後、シギュレは赤誠組の一員としての責任と誇りを胸に、あなたたちの前へ戻ってくる。ナシュが「まるで生まれ変わったみたい」と称えると、本人はそこまで大げさなものではないと言いつつも、確かにこれまでとは違う自分を感じていると認める。そして、ここまで導いてくれたのは、あなたとヒルディブランド、ナシュの三人のおかげだと、改めて深く頭を下げる。そのうえで、就任早々に課せられた最初の任務について打ち明ける。それは、裏切り者となったヨウジンボウを追跡し、ソボロ・スケヒロを取り戻すことだった。新米ゆえに追加の人員も支援も与えられておらず、このままでは成功はおぼつかない。だからこそ、どうか力を貸してほしいと口を開きかけたところで、ヒルディブランドが大仰な仕草でそれを遮る。彼は、そんなことを言われるまでもないと笑い、「稀代の名探偵ヒルディブランドは、あなたとともに世界の果てまで――七つの地獄の底から天の頂まで――ジムとソボロ・スケヒロを追い求める」と、先ほどと同じ誓いを改めて宣言する。そして、「今この瞬間から再び狩りの始まりだ！」と締めくくるやいなや、勢いよく駆け出していく。ナシュも慌ててその背を追いかけ、「待ってください、インスペクター！」と叫びながら、賑やかに街の喧騒の中へ消えていく。</p>
+<p>ようやく静けさが戻ると、シギュレはあなたの方へ向き直り、まだ自分の身に起きたことのすべてを信じきれないと正直な胸の内を明かす。ウルフ・バーグラーを捕らえ、念願の赤誠組の一員となったにもかかわらず、どこか夢のように感じられるのだと。それでも、ここまで来られたのはひとえにあなたの力あってこそだと、改めて深い感謝の言葉を述べる。奇妙な出会いや巡り合わせに満ちた道のりの中で、彼にとって最も厄介だったのは、実は髪を失ってしまったことだと苦笑混じりに打ち明ける。だが、ナシュはすでに髪を取り戻すための特効薬を探し始めているらしい。今はただ、運命が次の一歩を示してくれるのを待つしかない。ソボロ・スケヒロに関する新たな手がかりが現れるその日まで、ささやかな休息の時間を楽しみながら、物語の続きが再び動き出す瞬間を静かに待つのだった。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>クエスト発行</b> シグレ　クガネ <small class="muted">(X:10.0, Y:7.8)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="in-the-eye-of-the-hingan.html">うわさの剣豪</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="the-black-heart-beneath.html">東の国の闇</a></div>
+</div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'那把遺失利刃引發的近身威脅',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+<p>Hildibrand 想起方才的 geiko 變裝，大聲感嘆那可能是自己有史以來最完美的偽裝，而 Nashu 則揉著肩膀說，扮演 geiko 可一點都不輕鬆。Yojimbo 對這些玩笑並不買帳，他提醒大家真正的目標，是把寶刀 Soboro Sukehiro 奪回來。當他短暫地盯著你看，彷彿覺得在哪裡見過你，卻又隨即把這念頭當成錯覺甩開，重新收斂表情。這時 Shigure 拿出自己在混戰中從 Wolf Burglar 身上奪來的短刀。那柄刀雖然老舊磨損，卻仍保持良好狀態，一看就知道被細心保養過，多年來從未被輕視。而且刀身的造型毫無疑問是 Doma 出品。對 Shigure 來說，這把短刀顯然不只是工具，更是主人身分與出身的重要線索。Hildibrand 興致勃勃地搶著說自己也注意到同樣的細節，還誇 Shigure 很有「名偵探」的潛質。Shigure 選擇把這句話當成稱讚，於是將下一站定在 Yanxia。不久之後，你們便抵達 Prism Lake 近郊的水岸。四周滿是閃著光的 crystal，Nashu 一看到就被吸引住。Yojimbo 向你保證 Daigoro 雖然牙齒嚇人，其實是隻性情溫馴的好狗。Hildibrand 也被眼前壯麗的景色震住，讚嘆這樣的風景實在難得一見，隨後才急忙道歉，說自己不能忘記眼下的追捕任務。當他問該如何追蹤目標時，Shigure 也一時沒有頭緒。這時 Yojimbo 給出答案：就交給 Daigoro 的鼻子。你把從 Wolf Burglar 身上取得的短刀交給 Daigoro 嗅聞，只見牠用力吸了幾口氣，隨即興奮地吠叫起來。Hildibrand 一看到這反應就衝在最前面追上去，Nashu 趕忙跟上，而 Shigure 則在身後小聲說，也許命運真的在幫助你們完成這場狩獵。</p>
+<p>順著 Daigoro 的腳步，你們一路追到了 Monzen 附近的廢墟。但就在那裡，狗突然停了下來，發出低鳴，拒絕再往前踏一步。Nashu 擔心地蹲下來查看，Yojimbo 則皺眉說，這附近的空氣被 Namazu 的味道弄得一團混亂，Daigoro 的嗅覺被完全干擾了。既然無法單靠氣味追蹤，Shigure 建議大家分頭在廢墟裡找尋其他線索。然而話才說完，Hildibrand 和 Nashu 就習慣性地往前狂奔，讓 Shigure 只能無奈地嘆氣，拜託你獨自去西北一帶調查。你穿過倒塌的房屋與殘破的牆壁，最後在一堆瓦礫間找到一隻倒在地上的 Namazu，身上散發出濃厚的茶味。你把他搖醒後，他一邊打嗝一邊聲稱自己還活得好好的，只是喝太多茶導致嚴重的宿醉。他感謝你在自己被野獸或盜賊襲擊之前把他叫醒，接著有些緊張地詢問你是不是「thieving bandit」。你根據自己的方式回應，於是他要嘛急著強調自己身上沒任何值錢的東西，要嘛裝作事不關己，但不管怎麼說，他都想起曾看到有旅人揹著一把相當特別的劍從這裡經過。雖然當時他已經醉得不省人事，但他說自己的觸鬚能彌補混亂的記憶。</p>
+<p>看到這一幕，Hildibrand 嘗試用華麗的口吻安慰對方，說就算不用他那套「Namazu 感應」，你們也有辦法找到 Wolf Burglar，但這隻 Namazu 顯然沒有打算理會。他搖搖晃晃地站穩，說自己的「Namazu sense」正在甦醒，然後慢慢抬起一側的鰭，指向遠方。就在同一瞬間，Hildibrand 也指向同一方向，大聲附和「沒錯，就是那邊！」。Shigure 想立刻追問「到底是那個方向」，卻發現這位 Namazu 已經開始邁開腳步，表示自己頭還很痛，再幫忙就太勉強了，最後留下一句「祝你們捕狼愉快」便晃悠悠離去。線索模糊得令人頭疼，但你仍繼續在廢墟裡搜尋，直到在一堆破碎陶片旁發現一雙格外顯眼的手套。它看起來相當新，也明顯不像是被遺棄很久的東西。當你把手套拿回去給 Yojimbo 看時，他說自己不記得 Wolf Burglar 有戴手套，但在沒有別的線索前，這是唯一能試著追蹤的物件。於是 Daigoro 又一次把鼻子貼近手套，用力嗅了幾口，接著發出充滿精神的吠聲。隨著 Namazu 的氣味消散，牠終於能再次清楚捕捉到目標的痕跡，你們也隨之再度展開追跡。</p>
+<p>你們跟著 Daigoro 在 Yanxia 的大地上奔跑，終於在遠處看見一個熟悉的 Lupin 身影。Shigure 一眼認出那就是 Wolf Burglar，咬緊牙關說這次絕對不再讓他逃掉。Yojimbo 此時伸手攔住他，提醒這個賊有多敏捷，單靠人類的腳程很難追得上。既然如此，就交給唯一無法被甩開的對手──Daigoro。隨著 Yojimbo 的指令發出，Daigoro 像箭一樣衝出，腳步在大地上疾馳，速度之快讓 Nashu 忍不住驚呼「牠真的好快！」。Yojimbo 則十分自豪地說，世上沒有哪個對手能跑得比牠還快。在 Daigoro 的緊追與你們的包抄下，Wolf Burglar 終於被逼入角落，再也無路可逃。這次，不論他想仰賴什麼「高層關係」或賄賂，都派不上用場。混戰中，你們成功奪回 Soboro Sukehiro，Hildibrand 高高舉起這把刀，興奮地要 Shigure 一起為這場勝利歡呼：盜賊被制伏，寶刀也重新回到你們手中。Yojimbo 隨即出面，冷靜地表示雖然看起來幾乎可以肯定，但他仍希望親自確認真偽。Hildibrand 很爽快地交給他，Yojimbo 仔細檢視刀鋒與細節後，肯定這是貨真價實的 Soboro Sukehiro，是稱得上藝術品的名作。然後，他彷彿突然想起什麼「重要公事」，說自己必須立刻回 Kugane，一方面也能順勢把刀物歸原主。對此，他向你承諾絕不會把刀交給其他人，接著就這樣帶著寶刀轉身離去。Hildibrand 則完全沒有懷疑，笑著說能有這樣一位朋友真是幸運，形容他忠誠、可靠又有義氣，簡直就像「另一個世界的 Manderville」。Shigure 則認為既然賊已經落網，接下來就是把他押回 Kugane，交由 Sekiseigumi 關進牢裡。</p>
+<p>回到 Hingashi 的 Kugane 後，你們來到 Rakuza District 的 Matsuba Square。Shigure 向在場的 Sekiseigumi 表明身份，宣告自己與同伴已成功抓住長年在 Kugane 作亂的 Wolf Burglar，並前來將他交給官方看管。Miyamagi 一開始不敢相信，但看到被綁得結結實實的 Lupin 時，表情立刻從愕然轉為欣喜。他說這個賊一直都是 Sekiseigumi 的心頭大患，如今終於送上門來，實在令人感激，於是恭敬地邀請你們把犯人押進去。即便身上束縛重重，Wolf Burglar 仍冷笑著嘟囔，說你們全都是蠢貨，看不見真正的惡徒。沒多久，Akebono 也抵達現場，一聽說 Wolf Burglar 已被拘禁，便稱讚這是值得大肆慶賀的轉機，急切地想知道究竟該向誰致謝。Hildibrand 當然毫不客氣地站出來，用他一貫華麗的方式自報姓名，說是自己將賊人親手抓到。Akebono 也不多追究，只接著問那把 Soboro Sukehiro 現在何處。</p>
+<p>Shigure 這才意識到情況不對，發現身邊根本沒有那把刀。他坦白說自己以為 Yojimbo 已經先一步把刀送回來了。聽到這個名字，Akebono 的臉色立刻變得難看，說那個被他視為恥辱的 samurai，我行我素又毫無禮節，他可從來沒有從對方手中收到任何東西。Hildibrand 還試圖以輕鬆的口氣為「Jim」辯護，說他大概只是先跑去 Umineko Teahouse 吃盤 dango，再計畫來這裡報到，但 Shigure 低聲說出大家心中最不願承認的可能──也許 Yojimbo 已經帶著 Soboro Sukehiro 逃之夭夭。這一句話徹底點燃了 Akebono 的怒火。他忍不住咆哮，質問你們究竟在想什麼，怎麼會有人認為把如此貴重的寶刀交給一個人保管是「明智的決定」，更別說那個人還是剛被他驅逐出門的人。他把視線釘在 Shigure 身上，語氣冰冷地警告，如果那把刀沒有找回來，他就要用自己餘下的一生，讓這個浪人的夢想永遠無法實現。</p>
+<p>就在這份威脅彷彿要把氣氛壓得喘不過氣來時，那位你先前見過的冷面 Sekiseigumi 組士開口了。他說那樣的結局實在太過殘酷，接著轉頭看向 Shigure，提起自己還記得他曾說過，希望有一天能站在 Sekiseigumi 的隊伍之中。他問 Shigure，那個夢想現在是否依然存在。Shigure 雖然緊張，卻仍堅定地回答：「是的。」這名組士點頭表示理解，並在眾人面前宣佈，考量到 Shigure 最近完成的種種功績──尤其是協助捕獲 Wolf Burglar──他希望正式邀請 Shigure 加入 Sekiseigumi。對 Shigure 而言，這句話近乎夢話，但他沒有猶豫太久，很快就以近乎激動的語氣答應。組士補充說，當然還需要一些程序與向上級報告，不過這些都能立刻開始處理，只要同伴們不介意先在一旁等候。Hildibrand 微笑著說完全沒問題，表示你們會在這裡等候 Shigure 以新身分回來。</p>
+<p>不久後，Shigure 再次出現在你面前，已成為名正言順的 Sekiseigumi 成員。Nashu 開心地說這簡直像「Shigure 重生」，雖然他苦笑著說不敢用那麼誇張的形容，但依然承認自己的確有種「變成了不一樣的人」的感覺。他向你、Hildibrand 和 Nashu 深深一鞠躬，說自己能走到這一步，都是因為你們三人的陪伴與幫助。接著，他告訴你們自己已經接到第一項任務──那就是追捕已成叛徒的 Yojimbo，並奪回 Soboro Sukehiro。身為剛入隊的新血，他沒有獲得任何額外人手或資源，如果只靠他一個人的力量，要完成這件事幾乎是不可能的。因此，他鼓起勇氣，想請你們再一次伸出援手。話還沒說完，Hildibrand 就高舉雙手打斷他，說根本不需要多說，他理所當然會幫忙。於是，他再次以 agent of enquiry、inspector extraordinaire 的名義發誓，將與你和 Shigure 一起搜遍整個世界──從七重地獄最深處到諸天的最頂端──也要把 Jim 和 Soboro Sukehiro 找回來。至此，他宣布狩獵再度開始，自己則率先衝向前方。Nashu 連忙追上去，一邊喊著要他等等自己，一邊消失在 Kugane 的街巷之中。</p>
+<p>待一切稍微平息下來，Shigure 私下找上你，用比之前柔和得多的語氣說，有一部分的自己到現在仍難以相信這一切是真的。Wolf Burglar 已經被捕，他也真的穿上了 Sekiseigumi 的服裝，卻仍覺得自己像走在一場離奇的夢裡。他再次對你表達深深的感謝，說如果沒有你，他絕不可能走到這一步。在這條彎彎繞繞的道路上，他遇過盜賊、名刀、怪異的亡者與各種離奇事件，但對他本人而言，最困擾的體驗卻是那場讓他失去頭髮的意外。雖然說起來有些不好意思，但那才是他心中最在意的「後遺症」。好在 Nashu 保證自己正在替他尋找一種強效的生髮藥劑，希望能讓頭髮恢復原樣。現在，你們能做的只有等待。直到出現有關 Soboro Sukehiro 的新線索之前，你和 Shigure 只能暫時享受這段難得的空檔，靜靜讓命運決定故事下一次啟程的時刻。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>任務發布</b> 時雨　九街 <small class="muted">(X:10.0, Y:7.8)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="in-the-eye-of-the-hingan.html">傳聞中的劍豪</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="the-black-heart-beneath.html">潛藏其下的黑心</a></div>
+</div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
