@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Past Is Never Past | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Hildibrand Adventures – The Past Is Never Past (SB Patch 4.56)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:1px solid transparent;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border-color:var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/vSAJDm-Qor0"
+              title="The Past Is Never Past" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">The Past Is Never Past</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'The Past Is Never Past',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+<p>Nashu paces the streets of Kugane’s Ijin District, wringing her hands as she wonders where in the world Hildibrand has gone. With Shigure detained by the Sekiseigumi for aiding the Wolf Burglar, the inspector has thrown himself into investigating Master Akebono, but so far found nothing. Just as she voices her worries to you, Hildibrand appears in his usual dramatic fashion, loudly commending a nearby admirer for his unwavering dedication to honor, justice, and a perfectly boiled egg. He declares that in all his years as an inspector, he has never known a more passionate fan. Then, with a proud flourish, he explains that while pursuing rumors about Master Akebono, he received a mysterious letter that can only be from one of his many admirers. Nashu, thrilled that even in the Far East he has a following, begs to read it. Squinting at the clumsy Eorzean letters, she puzzles it out: someone calls upon the “something-something of Light” who seeks the strongest of swords, the Soboro Sukehiro, and claims to have taken it for themself, demanding a duel upon Kugane Ohashi. Hildibrand takes “something-something of Light” to mean himself—the Gentleman of Light—and, while insisting he would rather avoid violence, rushes off to reason with this misguided challenger before you or Nashu can stop him. Nashu is left staring after him, certain the letter actually said “Warrior of Light” and was meant for you; she decides to stay behind in case he comes back and urges you to hurry after him before he does something foolish.</p>
+<p>At the gate leading to Kugane Ohashi, you instead find Hildibrand buried headfirst in the ground, legs kicking helplessly in the air. In a muffled voice he calls out, recognizing you and admitting he has landed himself in quite the pickle—by which he means the earth itself. Kugane Ohashi lies just beyond the gate, but before he could pass through, he was suddenly accosted, flipped upside down, and driven into the ground by “Jim,” a dear but misguided fellow. Now, with his body firmly embedded in the stone, Hildibrand can only entrust the duel to you, asking you to face the challenger in his stead. He promises, in full inspectorly confidence, that he will eventually extricate himself… somehow. You leave him there, the system itself offering a dry “Good night, sweet prince,” and step onto the bridge to see this challenge through.</p>
+<p>On Kugane Ohashi, the truth of the matter is revealed when Gilgamesh greets Hildibrand with an easy “We meet again, Hildy.” Startled, Hildibrand can scarcely believe his eyes: Greg is here, in Kugane, and in the Far East no less. Greg hedges, then confesses that he has been masquerading as “Jim” all along. After his second defeat at Forename’s hands in Eorzea, he left the realm to hone his skills and seek stronger weapons overseas. Unfortunately, he forgot to budget for food and drink, and soon found himself starving. In desperation, he looked to his only companion—a painted rooster that had kept him company in his darkest hour—and survived by making a terrible sacrifice he would carry in his heart thereafter. Sustained just enough to go on, he wandered until he crossed paths with a stray dog who, like him, bore the scars of misfortune. Seeing a fellow orphan of fate, he named the dog Daigoro, and together they traveled and worked to survive. When they finally reached Kugane, Greg took on work as a mercenary to rebuild his savings and continue his search for the strongest of swords. Through such ventures he acquired the Zanmato and forged a reputation as Yojimbo, fashioning a ronin’s garb that would satisfy clients who sought a legendary swordsman. Kageyama was one such employer—but when Greg saw that Forename and their comrades would be his opponents, he realized he had not been paid nearly enough for the task. Later, glimpsing Forename walking the streets of Kugane, his competitive spirit flared anew. Upon hearing of the Soboro Sukehiro, he resolved to claim it for their inevitable third bout and penned the challenge letter to the Warrior of Light. But when Hildibrand misread his words and came in Forename’s stead, Greg felt compelled to remove the inspector from the field by force, embedding him by the gate and waiting for the true opponent to arrive.</p>
+<p>Having told his tale, Greg admits that, despite all his efforts and newfound strength, he was defeated yet again by the Warrior of Light. He declares there will be no more tricks: he has taken his shot and fallen short, and so he will abandon his shenanigans and instead devote himself to supporting Forename’s endeavors in order to atone. Hildibrand, delighted, assures him that no apology is needed between friends and warmly welcomes him as a full-fledged assistant. Together with you, they return to Kugane’s Rakuza District, where Hildibrand marvels that this is a twist no one could possibly have foreseen, while Greg suggests letting bygones be bygones and moving forward as comrades toward a common goal. It is at this moment that Nashu rushes in with dire news: as punishment for aiding the Wolf Burglar’s escape, Shigure has been sentenced to death by ritual suicide. Gilgamesh’s jovial mood falls away as he acknowledges the gravity of the situation, and Hildibrand at once resolves that they cannot sit idle.</p>
+<p>Determined to save Shigure, Hildibrand declares that, assuming the Wolf Burglar has already vanished into the wind, their only remaining option is to dig deeper into Master Akebono’s hidden past and prove that the sword he claims was stolen from him was in fact stolen by him first. “Divide and conquer, agents of enquiry style!” he proclaims, sending everyone out to gather information. Your search takes you first to Byakudan at the Umineko Teahouse on Pier 2, who explains that Akebono built his fortune selling a wide range of medicinal wares for all manner of ailments. His products, she says, are by all accounts highly effective and popular, and he still enjoys a reputation as a premier source of alchemical goods. Yet his clientele spends in a single visit what she earns in a month; luxurious as they are, his remedies are far beyond her means. She has never purchased them herself and doubts she ever will, barring some wildly unlikely windfall.</p>
+<p>At Kogane Dori, Keiten offers a more measured appraisal. He is willing to speak of Master Akebono’s character as a businessman and notes that, like all who rise to mercantile prominence, Akebono stands at the center of rumor and intrigue. For every voice that praises him, another condemns him. None deny that his medicines are effective; he sources only the finest ingredients from Radz–at–Han, the birthplace of alchemy, and satisfied customers are beyond counting. Yet none deny, either, the exorbitant profits he earns by tightly controlling the supply of these Hannish ingredients. With no true competition, he is free to dictate prices as he pleases. As a result, those in desperate need have been driven to spend their entire life’s savings or to borrow from unsavory moneylenders simply to afford his miraculous cures. Technically, Keiten concedes, Akebono operates wholly within the bounds of the law, and so as a businessman he must be lauded for his success. But he refuses to speak on the man’s morals or ethics, leaving you to draw your own conclusions.</p>
+<p>Returning to Rakuza District, you share what you have learned with Hildibrand and the others. Whether you emphasize the unrivaled potency of Akebono’s medicines or the ruinous prices he charges, the picture is the same: this is a man who preys on the sick and needy for personal gain. Hildibrand concludes that, as suspected, there is far more to Master Akebono than meets the eye. Nashu, however, can no longer contain her panic: Shigure’s execution could be carried out at any moment if they do not act. Hildibrand is taken aback—he had hoped to conduct a thorough investigation and gather irrefutable evidence to secure the man’s freedom, but time has run out. With a grim resolve he declares that there are many paths to a just end; if they must take a shortcut to prevent a grave miscarriage of justice, then so be it.</p>
+<p>At the Sekiseigumi Barracks in Rakuza District, you arrive just as Shigure prepares to carry out his sentence. Kneeling before his honored brothers, he does not beg for forgiveness, but prays that by surrendering his life he might cleanse the Sekiseigumi of the shame his misdeeds have brought upon them. Before the blade can fall, a Sekiseigumi swordsman cries out in confusion, followed by the turnkey, who declares that the man before them is an impostor and orders him seized at once. Hildibrand shouts for the real Shigure to escape while he has the chance, but Shigure protests that he will do no such thing—he has lost what little honor he had in life and wishes at least to reclaim it in death. At that crucial moment, the Wolf Burglar himself intervenes, calling out that Shigure’s honor is still his. There is no need for him to spill his own blood this day, the thief insists, for he stands there with both the Soboro Sukehiro and the infamous Wolf Burglar in custody, exactly as promised. When Shigure demands to know why, the Wolf Burglar simply reminds him of their deal for temporary release and says that he is a wolf of his word.</p>
+<p>A Sekiseigumi blade examines the weapon and confirms that it is indeed the Soboro Sukehiro. Satisfied, he orders the Wolf Burglar escorted back to his cell and a runner dispatched to Master Akebono’s estate at once. Yet even with the thief reclaimed and the sword returned, the captain warns Shigure that their business is far from done: the Wolf Burglar may be back in chains, but Shigure must still answer for his reckless actions. After a moment’s deliberation, the captain announces a new sentence: Shigure will conduct a formal investigation into the rumors surrounding Master Akebono. Before the order can take shape, Kumode appears, smiling thinly. He dismisses the need for any further inquiry, declaring the matter resolved now that the Wolf Burglar has been recaptured. Shigure recognizes him as Master Akebono’s guest—the one the geiko once hurled into a wall—but Kumode feigns ignorance, claiming to remember neither the incident nor Shigure himself. Calmly, he reiterates that while the Sekiseigumi are free to investigate if they wish, such wasteful use of resources might force his associates to reconsider the support allocated to them in the coming year. Under the weight of that veiled threat, the captain quickly backs down, assuring Kumode that they value his counsel and will defer to his judgment. He declares the matter of the Soboro Sukehiro and Master Akebono officially closed. As the scene ends, Kumode repeats, with quiet finality, that “that will be all.”</p>
+<p>Back in the Rakuza District, Koju remarks that he never expected the Wolf Burglar to turn himself in, much less to save a member of the Sekiseigumi—honorable to a fault, he muses. Nashu celebrates that they have saved Shigure just in time, while Gilgamesh quips that it was “in the nick—or rather before the nick” of the blade. Hildibrand laughs heartily and proclaims that he, Hildibrand, agent of enquiry and inspector extraordinaire, has once more achieved the impossible and rescued a man from certain death. Still, he cannot help but note with some regret how eager the authorities were to wash their hands of the affair. Shigure, he understands, is not so willing to let things end here; the young officer still has questions he wishes to ask the Wolf Burglar, and the truth behind Master Akebono remains shrouded in doubt.</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>Quest Giver</b> Nashu Mhakaracca <small class="muted">(Kugane, X:10.5, Y:8.1)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="good-swords-good-dogs.html">Good Swords, Good Dogs</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="dont-do-the-dewprism.html">Don’t Do the Dewprism</a></div>
+</div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'秘められた証拠品',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+<p>クガネの異人街では、ナシュが行ったり来たり歩き回りながら、ヒルディブランドがいったいどこへ行ってしまったのかと案じていた。ウルフ・バーグラーを逃がした罪でシギュレがセキセイ軍に拘束されて以来、紳士探偵はアケボノ殿の素性を探ろうと奔走してきたものの、決定的な成果は上がっていない。そんな不安をあなたに打ち明けていると、そこへいつものように大仰な身振りでヒルディブランドが帰還する。彼は、名もなき一人の男の「名誉と正義、そして半熟卵」への揺るぎなき忠誠心を称え、探偵人生でこれほど熱心なファンを見たことはないと胸を張る。続いて、アケボノを巡る黒い噂を追っていた最中、自分の崇拝者からに違いない謎めいた手紙を受け取ったのだと得意げに語る。ナシュは、遠い東方にまでファンがいることに目を輝かせ、ぜひ内容を読ませてほしいとせがむ。拙いエオルゼア文字に首をかしげながら読み進めた彼女は、「光のなんとか」へ宛てて、最強の刀ソボロ・スケヒロを求める者よ、自分がその宝刀を手中に収めたので、決着をつけたければクガネ大橋まで来い──といった趣旨が書かれていると説明する。ヒルディブランドは、その「光の何某」とは自分、すなわち“Gentleman of Light”のことに違いないと勝手に解釈し、本当は決闘などせず話し合いで解決したいと言いつつも、呼び出した不届き者を諭すべく飛び出して行ってしまう。ナシュは、手紙には「Warrior of Light」と書かれていたはずで、この挑戦状はあなた宛てだと確信しながらも、すでに走り去った紳士を追うことはできない。彼女は万一戻ってきたときのためにここで待つと言い、あなたに「バカなことをする前に」急いで追いかけるよう背中を押すのだった。</p>
+<p>クガネ大橋へと続く門まで駆けつけると、待っていたのは決闘者ではなく、地面に頭から突き刺さったまま足だけをばたつかせるヒルディブランドの姿だった。くぐもった声であなたに気づいた彼は、見てのとおり少々やっかいなピクルス──もとい、地面にはまって身動きが取れない状況にあるのだと自嘲気味に説明する。門の先にクガネ大橋はあるが、そこを通ろうとした瞬間、「ジム」と名乗る男に不意打ちを食らい、逆さにされ、そのまま勢いよく地面に叩き込まれてしまったらしい。今や体は石畳にしっかり固定されてしまい、彼にできるのは決闘の場をあなたに託すことだけだ。ヒルディブランドは、勝負はあなたに任せ、自分はいつか必ずこの状況から抜け出してみせると気丈に言い添える。システムメッセージが「Good night, sweet prince…」と皮肉げに流れる中、あなたは紳士をその場に残し、橋の上で待つ挑戦者のもとへ向かう。</p>
+<p>クガネ大橋に出ると、そこで待っていたのはヨウジンボウの姿ではなく、「また会ったな、ヒルディ」と気さくに声をかけるギルガメッシュであった。ヒルディブランドは目を丸くし、ここがクガネ、さらには遥か東方であるにもかかわらず、グレッグがなぜここにいるのかと驚きを隠せない。グレッグはもごもごと言葉を濁したのち、自分こそがこれまで「ジム」として振る舞っていた張本人であると白状する。エオルゼアで二度にわたりあなたに敗れた彼は、さらなる研鑽とより強き武器を求め、海を越えて修行の旅に出た。しかし、飲み食いの予算を考えずに旅立ったために、やがては飢えに苦しみ、ついには暗い旅路を共にした絵付きの雄鶏という唯一の友に目を向けざるを得なくなる。彼はその犠牲を胸に刻みつつ命をつなぎ、ふらふらとさまよい歩いた末、一匹の野良犬と出会った。数奇な運命に翻弄されてきたその姿に、自らと同じ「運命の孤児」を見た彼は、その犬に「ダイゴロウ」と名を与え、ともに生き延びるために旅と仕事を続けることにした。</p>
+<p>やがて一行はクガネへと辿り着き、グレッグは散財した懐を立て直し、なおも最強の武器を求めるべく、傭兵として働きはじめる。そうした依頼の中で彼はザンマトウを手に入れ、“ヨウジンボウ”としての名声を高めていった。伝説の浪人らしく見えるように装いを整え、依頼人の期待に応える姿は、たちまち評判を呼ぶ。カゲヤマもまた、そうした依頼主の一人だった。しかし、相手があなたと仲間たちであると知ったとき、受け取った報酬がとても見合うものではなかったと気づき、己の浅はかさを嘆くことになる。その後、クガネの街を歩くあなたの姿を目にした瞬間、二度敗れた相手への闘志が再び燃え上がった。やがて、ソボロ・スケヒロの噂を耳にした彼は、三度目の決戦に備えてその刀を我が物にせんと決意し、光の戦士への挑戦状を書きしたためる。しかし、紳士探偵がその内容を読み違え、自分宛てだと勘違いして現れてしまったため、グレッグは仕方なく彼を戦場から遠ざけるべく、門の前でひっくり返して地面に突き刺したのだと明かす。</p>
+<p>ひと通り語り終えたグレッグは、それでも全力を尽くした末に、またしても光の戦士に敗れてしまったのだと肩を落とす。だが同時に、もうこれ以上小細工はしないと宣言し、自分は一度狙って外した身であり、これからは悪ふざけをやめて、償いのためにもあなたたちの冒険を全力で支えると誓う。ヒルディブランドは、友の間に謝罪は無用だと笑い飛ばし、グレッグを正式な助手として迎え入れることを喜びをもって告げる。こうしてあなたと二人の珍妙な紳士はラクサ地区へ戻り、ヒルディブランドは誰にも予想できなかった急展開だったと感嘆し、グレッグもまた「昔のことは水に流し、共通の目的に向かう仲間として歩もう」と申し出る。しかし、そこへナシュが駆け込んできて、表情を曇らせたまま「大変です！」と声を上げる。ウルフ・バーグラーを逃がした罪により、シギュレに切腹の沙汰が下ったというのだ。陽気だったギルガメッシュもその知らせを重く受け止め、ヒルディブランドは一刻の猶予もないと悟る。</p>
+<p>シギュレを救うため、ヒルディブランドは、ウルフ・バーグラーがすでにどこかへと姿を消していると仮定したうえで、残された道はアケボノ殿の過去をさらに深く掘り起こし、彼が盗まれたと主張する刀こそ、もともと彼自身が盗み取ったものだという証を見つけ出すことだと宣言する。「ここは探偵式“分断して調査”作戦だ！」とばかりに、各々に情報収集の役割を割り振り、調査を開始させる。あなたはまず、桟橋のウミネコ茶屋にいるビャクダンを訪ねる。彼女によれば、アケボノ殿はありとあらゆる症状に効く薬品を売りさばくことで莫大な財を築いたという。その効き目は折り紙付きで、今なお錬金術の大家として名高い存在だそうだ。しかし、その薬はひと瓶で自分のひと月分の給金が吹き飛ぶほど高価で、自分にはとても手が出ないと肩をすくめる。遠い親戚が莫大な遺産を残してくれるか、よほど現実離れした幸運でもない限り、彼女がアケボノの薬を買う日は来ないだろうと苦笑してみせるのだった。</p>
+<p>続いてあなたは、コガネ通りのケイテンのもとを訪れる。商人としてアケボノ殿の人物像を語ることについて、彼は一定の距離を保ちながらも口を開く。大商人として頭角を現した者らしく、アケボノは常に噂と陰口の中心にいる。称賛する者がいれば、呪詛を投げかける者もいる。しかし、その薬の効き目を疑う者はいない。錬金術発祥の地ラザハンから取り寄せた最高級の素材のみを用いており、満足した顧客は数知れないのだとケイテンは認める。その一方で、彼はハン薬の供給を厳しく管理し、実質的な独占状態にあるため、法外な利益を上げていることも誰も否定できないと続ける。競合がいない以上、価格は彼の思うがままになり、奇跡の薬を求めて藁にもすがる者たちは、全財産を投じるか、あるいは胡散臭い金貸しに手を出すしかなくなってしまう。もっとも、ケイテンは、アケボノのやり方はあくまで法の範囲内であり、商人としては成功を称えられて然るべきだと冷静に結論づける。ただし、その道徳や倫理については一切語らないとし、「典型的な大商人」であるとだけ言い残して、判断はあなたに委ねるのだった。</p>
+<p>ラクサ地区に戻ったあなたは、集めた情報をヒルディブランドたちに報告する。アケボノの薬が比類なき効き目を持ちながら、その裏で人々の財布と人生を容赦なく削り取っていることを知ると、紳士探偵は「病める者と弱き者を食い物にする男」としての側面を確信し、やはりアケボノ殿には表向きの顔以上のものがあると考えを深める。だがその一方で、ナシュはもはや焦燥を抑えきれない。シギュレの処刑は今にも執行されるかもしれないのだ。ヒルディブランドは、本来なら徹底した調査を行い、疑いようのない証拠を揃えてから釈放を勝ち取りたかったが、もはや時間が残されていない現実を悟る。「正義に至る道はひとつではない。大いなる冤罪を防ぐためなら、近道もやむなしだ」と、彼は覚悟を固めるのだった。</p>
+<p>ラクサ地区のセキセイ軍兵舎へ駆けつけると、ちょうどシギュレが切腹の儀を行おうとしているところであった。彼は同僚たちを前に跪き、自らの過ちによってセキセイ軍にかけた汚名を、命を捧げることで雪がんと祈りを捧げる。その瞬間、セキセイ軍の一人が「どういうことだ」と声を上げ、牢番が「そやつは偽物だ、ただちに捕らえよ」と叫ぶ。ヒルディブランドは、本物のシギュレに今こそ逃げる好機だと叫ぶが、シギュレは「そんなことはできない」と首を振り、生きている間にわずかに持っていた名誉を失ってしまった以上、せめて死によってそれを取り戻したいのだと頑なだ。そこへウルフ・バーグラーが現れ、「名誉はまだおまえのものだ」と静かに告げる。ソボロ・スケヒロを手にした自分と、悪名高きウルフ・バーグラーがここにいる以上、今日おまえが腹を切る必要はない、と。そして、仮釈放の約束をした以上、自分は「狼に二言はない」とばかりに、その言葉を守りに来たのだと語る。</p>
+<p>セキセイ軍士が刀を調べると、それが紛れもなくソボロ・スケヒロであることが確認される。彼はウルフ・バーグラーを再び牢へ連行するよう命じ、同時にアケボノ邸へ急使を出すよう指示する。しかし、盗人が捕まり、刀も戻ったとはいえ、隊長は「これで終わりではない」とシギュレを叱責する。ウルフ・バーグラーが再拘束されたとはいえ、シギュレ自身もまた軽率な行動の責任を負わねばならないのだ。しばし考え込んだ末、隊長は新たな裁定として、アケボノ殿を巡る噂について正式な調査を行う任務をシギュレに与えると告げる。しかし、その決定が固まるより早く、クモデが姿を現し、面倒くさそうに「そんな必要はない」と口を挟む。ウルフ・バーグラーが戻った以上、この退屈な一件は解決したと見なすべきだと断じるのだ。シギュレは彼を、以前アケボノ邸で芸者に壁へ叩きつけられていた男だと見抜くが、クモデはそのような出来事もシギュレの顔も覚えがないと、とぼけてみせる。そのうえで、調査を続けるのは自由だが、「無駄な出費」が重なれば、来年度以降にセキセイ軍へ割り当てられる資金を見直さざるを得ないかもしれないと、露骨な圧力をかけるのだった。</p>
+<p>その含みのある脅しに耐えきれず、隊長はたちまち態度を翻し、「クモデ殿のご意見を重く受け止める」と述べて、彼の判断に従う姿勢を示す。そして、「ソボロ・スケヒロおよびアケボノ殿に関する件は、これをもって正式に終結とする」と宣言する。クモデは「以上だ」と静かに言い残し、その場の空気に冷たい幕を引く。こうして真相究明への道は無理やり閉ざされ、場には後味の悪さだけが残るのだった。</p>
+<p>再びラクサ地区に戻ると、コウジュが、「まさかウルフ・バーグラーの方から出頭してくるとは思わなかったし、その相手がセキセイ軍の一人だなんてな。あいつは筋金入りで義理堅い」と感心したように漏らす。ナシュは「やりましたね、シギュレさんを救えました！」と胸をなでおろし、ギルガメッシュは「まさに“首の皮一枚”──いや、“首に刃が届く前”だったな」と駄洒落混じりに振り返る。ヒルディブランドは高らかに笑い、「かくしてこのヒルディブランド、事件屋にして紳士探偵は、またしても不可能を可能とし、死の淵にあった男を救い出したのだ！」と胸を張る。しかし同時に、周囲の者たちがいかにあっさりとこの件から手を引こうとしているかに、少なからず寂しさも覚える。少なくともシギュレはそうではない。彼はまだ、ウルフ・バーグラーに問いただしたいことがあるようであり、アケボノ殿を巡る真実も、いまだ闇の中に隠されたままなのだった。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>クエスト発行</b> ナシュ・マカラッカ　クガネ <small class="muted">(X:10.5, Y:8.1)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="good-swords-good-dogs.html">のべつ幕なし武器怪盗</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="dont-do-the-dewprism.html">薬に侵されし最強の男</a></div>
+</div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'封存於過去的關鍵證物',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+<p>在 Kugane 的 Ijin District，Nashu 一邊在街上來回踱步，一邊煩惱著 Hildibrand 到底跑到哪裡去了。自從 Shigure 因為幫助 Wolf Burglar 逃脫而被 Sekiseigumi 拘留之後，紳士偵探就一直忙著調查 Master Akebono 的種種疑點，卻遲遲沒有結果。她正把這些不安告訴你時，Hildibrand 一如往常華麗登場，大聲稱讚旁邊一名男子為「名譽、正義，還有溫泉蛋」奉獻不渝，並誇口說自己從業以來從未見過這麼熱情的支持者。接著，他得意洋洋地說，在追查 Akebono 周遭的黑暗傳聞時，收到了某位崇拜者寄來的神祕書信。Nashu 聽說連遠在東方都有人是他的粉絲，眼睛一亮，立刻央求要親自看看內容。她盯著歪七扭八的 Eorzean 字母細讀之後說，信中寫著：致那位「某某 of Light」，尋求最強之劍 Soboro Sukehiro 的人──此寶刀如今已在我手中，若想奪回，就到 Kugane Ohashi 來決一死戰。Hildibrand 立刻把那個「某某 of Light」解讀成自己，也就是自封的「Gentleman of Light」，一口咬定挑戰書是寫給他的。他嘴上說更希望能用溫和的對話解決紛爭，實際上已經熱血沸騰，完全不給人阻止的機會，拔腿就朝橋的方向衝去。Nashu 則愣愣地看著他的背影離開，確信信裡寫的是「Warrior of Light」，真正的收信人其實是你。她決定留在原地以防 Hildibrand 繞一圈又折返，同時催促你快去把人追回來，免得他一不小心又做出什麼愚蠢行動。</p>
+<p>你一路追到通往 Kugane Ohashi 的門口，卻沒有看到決鬥對手，而是看到 Hildibrand 頭朝下整個人插進地面，只剩雙腳在空中拼命亂晃。他用悶悶的聲音叫住你，自嘲現在確實是遇上了「大麻煩」，而那個麻煩指的就是腳下這片把他牢牢卡住的石板。門後就是 Kugane Ohashi，他本來正要通過，卻在那一瞬間被自稱 Jim 的男人偷襲，整個人被倒栽蔥般翻過來，狠狠釘進石地裡。如今他的身體被石頭死死固定，已經不可能親自上橋應戰，只能把這場決鬥託付給你。Hildibrand 堅稱自己遲早會想出辦法把身體從地面拔出來，要你放心去面對挑戰者。當系統冷淡地丟下一句「Good night, sweet prince…」時，你只好先把紳士留在原地，踏上橋面，準備迎向這場「決一勝負的決鬥」。</p>
+<p>在 Kugane Ohashi 上等著你的，並不是陌生的傭兵，而是熟悉的 Gilgamesh。他笑著說「我們又見面了，Hildy」，讓 Hildibrand 驚訝得瞪大眼睛，完全想不到 Greg 竟然會出現在 Kugane，還是遠在東方的這片土地上。Greg 一開始支支吾吾，最後坦承，自己一直以來扮演的「Jim」就是他本尊。自從在 Eorzea 第二次敗在你手下之後，他便離開故土，決心到海外修行，鍛鍊劍技並尋找更強大的武器。只是他出發時根本沒替吃喝預算做打算，很快就陷入斷糧絕境。走投無路之際，他只能把目光投向唯一的旅伴──那隻在最黑暗時刻陪在身邊的彩繪公雞。為了活下去，他做出無法挽回的犧牲，決心把這份罪疚與羈絆永遠藏在心裡。靠著這殘存的氣力，他晃晃悠悠繼續旅程，直到遇上一隻同樣飽受命運捉弄的流浪狗。看見那個身影時，他彷彿看見另一個自己，一個同樣被命運拋來拋去的「命運孤兒」。於是他替這隻狗取名為 Daigoro，從此兩者結伴而行，一起接各種工作掙扎求生。</p>
+<p>終於，他們來到 Kugane，Greg 便開始以傭兵身分接案，一方面重建被自己揮霍光的存款，一方面繼續找尋最強之劍。透過接連不斷的任務，他得到名為 Zanmato 的武器，也逐漸打響「Yojimbo」之名。為了符合委託人的想像，他特意穿上符合「傳說浪人」形象的服裝，把自己打造成人人口中的名刀客。Kageyama 正是其中一位委託他的人。然而當他發現對手竟是你和你的同伴時，才驚覺自己收下的報酬根本不值這樣的風險，暗自懊悔太過大意。後來，他在 Kugane 的街上看見你的身影，那股被你兩度擊敗的鬥志又立刻燃燒起來。某日他聽說了 Soboro Sukehiro 的傳聞，便決定為第三次對決做準備，搶在你之前把寶刀握在手中，於是寫下那封挑戰信送給 Warrior of Light。沒想到讀信的人卻是 Hildibrand，而對方還一口咬定那是寫給自己的情書，於是 Greg 只好把他從戰場上「請」走──他把紳士倒立翻起來，直接用力插在門邊的石板裡，然後自己留在橋上等待真正的對手到來。</p>
+<p>說完這一連串遭遇後，Greg 坦言，即使付出所有努力並獲得新的力量，他仍然再一次輸給了 Warrior of Light。他當場宣佈，不會再搞任何花招與騙術，自己已經用盡機會、卻依然落敗，接下來要做的不是再出風頭，而是好好反省，改為全力支援你的冒險，以此彌補過去犯下的種種荒唐。Hildibrand 聽完後爽朗大笑，說真正的朋友之間用不著道歉，反而熱情歡迎他加入，正式任命 Greg 為自己的助手。你和這兩名紳士一同回到 Kugane 的 Rakuza District，Hildibrand 感嘆這實在是任何人都無法預料的戲劇性展開，Greg 則提議把過去的恩怨一筆勾銷，今後以共同目標為前提並肩作戰。就在此時，Nashu 急匆匆跑來，大叫「不得了啦！」並帶來壞消息：作為協助 Wolf Burglar 逃脫的懲罰，Shigure 被判處以切腹自盡。原本還開心著剛才戲劇性重逢的 Gilgamesh 也頓時收起笑意，Hildibrand 則立刻意識到事態刻不容緩。</p>
+<p>為了拯救 Shigure，Hildibrand 判斷 Wolf Burglar 此刻八成已經不知去向，那麼剩下唯一的突破口，就是深入挖掘 Master Akebono 的過去，找出證據證明那把自稱「被偷走」的寶劍，其實最初就是由 Akebono 自己從別人手上奪來的。他一聲令下，要大家來個「Agents of Enquiry 式分頭調查」，各自去收集情報。你首先前往 Pier 2 的 Umineko Teahouse，向 Byakudan 打聽。她說 Akebono 就是靠販售各式各樣的藥品發家致富的，無論是什麼症狀，都有人宣稱吃了他的藥就痊癒，因此到現在依然被視為頂尖的鍊金藥品供應者。只是，這些藥品在她眼裡根本是遙不可及的奢侈品──一位客人一趟花掉的錢，就等於她一整個月的薪水。她自己從未買過，也不覺得將來有機會買得起，除非哪天突然冒出一位遠房親戚留給她天降橫財，或者發生其他完全不切實際的奇蹟。</p>
+<p>接著你來到 Kogane Dori，向商人 Keiten 詢問對 Akebono 的看法。他表示，自己可以就「商人」這個立場談談 Akebono 的人格，但必須保持一些距離。凡是爬上商界頂端的人，身邊總少不了流言與陰影，Akebono 也不例外：有人稱讚他是救世主，也有人咬牙恨他入骨。不過，有一點是大家都認同的──他的藥的確有效。Akebono 從鍊金術發源地 Radz–at–Han 採購頂級素材，製成的各種藥品讓無數顧客口耳相傳。然而，沒有人否認他在這之中賺得了多麼誇張的暴利。透過嚴格控制 Hannish 材料的供應，他幾乎壟斷了市場，完全不必擔心競爭，一切售價都能隨他心意調整。結果就是，許多病急亂投醫的人被迫傾家蕩產，只求換取一線生機；更多人則不得不向不良放款者低聲下氣，借錢買下這些所謂的「奇蹟藥」。Keiten 最後總結說，Akebono 的行為雖然冷酷，卻都在法律容許的範圍之內，從純粹商業角度來看，他確實可以被稱為成功人士。但至於這樣做在道德與倫理上是否站得住腳，他拒絕下任何定論，只淡淡地說了一句「他就是典型那種大商人」，讓你自己去咀嚼其中含意。</p>
+<p>你帶著這些情報返回 Rakuza District，向 Hildibrand 一行人報告。無論你選擇強調的是 Akebono 的藥效有多好，還是他開出的價格有多離譜，最後拼湊出的圖像都是同一幅──這是一個把病人與弱者當成獵物、只為填滿自己口袋的男人。Hildibrand 聽完後斷言，正如之前所懷疑的那樣，Master Akebono 絕不只是外表上看起來那樣光鮮，他的背後肯定藏著更多見不得人的故事。然而，Nashu 已經等不及完整調查的結果，她焦急地提醒大家，Shigure 的處刑隨時都有可能被執行。Hildibrand 原本希望能踏實地完成調查，再拿著無可辯駁的證據去拯救那名年輕武士，如今只能承認時間已經不站在他們這一邊。他深吸一口氣說，通往正義的道路不只一條，若要避免一場明目張膽的冤案，走上一條「捷徑」也在所難免。</p>
+<p>你們抵達 Rakuza District 的 Sekiseigumi Barracks 時，正好趕上 Shigure 進行切腹儀式。他跪在同袍面前，聲稱自己不求寬恕，只希望用這條性命作為祭品，洗清自己給 Sekiseigumi 帶來的恥辱。就在刀鋒即將落下之際，一名 Sekiseigumi 成員突然驚呼「這是怎麼回事」，牢房看守也立刻叫道「那個人是冒牌貨，快抓住他！」。Hildibrand 此時大喊要 Shigure 趁亂逃走，說現在正是逃命的好機會，然而 Shigure 卻搖頭拒絕──他自認早已失去身為武士僅存的尊嚴，至少希望能在死亡中找回一點榮耀。這時，Wolf Burglar 出聲打斷，宣稱 Shigure 的榮耀仍然屬於他自己，今天不需要用腹中的刀來證明。因為 Soboro Sukehiro 已經在他手中，而那個惡名昭彰的 Wolf Burglar 也站在這裡，正如先前承諾的一樣。當 Shigure 問他為什麼要這麼做時，Wolf Burglar 只淡淡提醒，兩人曾經約定過暫時放他出來，而他是一隻說到做到的狼，不會違背自己的承諾。</p>
+<p>Sekiseigumi 的刀士檢查過武器後，確認那把確實就是 Soboro Sukehiro。於是他下令把 Wolf Burglar 押回牢房，同時立刻派人前往 Master Akebono 的宅邸通報。即便如此，隊長仍然冷冷地對 Shigure 表示，事情還沒有結束──Wolf Burglar 雖然重新入獄，但 Shigure 仍必須為自己的輕率行為負責。他稍作思考後，宣佈新的處置：由 Shigure 負責正式調查關於 Master Akebono 的各種流言。然而這句話才剛說出口，Kumode 便出現在房門口，用懶洋洋的語氣插話說「沒那個必要」。在他看來，既然 Wolf Burglar 已經回到牢裡，這樁令人厭煩的案件就可以視為已經圓滿落幕。Shigure 一眼認出他就是曾經在 Akebono 宅邸被藝妓狠狠摔向牆壁的那位客人，但 Kumode 假裝什麼都不記得，說自己既不記得那件事，也不認得 Shigure 的臉。接著，他不動聲色地表示，如果 Sekiseigumi 堅持要調查，他們當然可以照做，只是這樣的「浪費性支出」一多，明年分配給他們的人力與預算恐怕就得重新評估了。這句話聽在耳裡，已經不再只是「建議」，而是赤裸裸的威脅。</p>
+<p>面對這種壓力，Sekiseigumi 隊長很快就軟下來，急忙表示非常重視 Kumode 的意見，願意完全尊重他的判斷。於是他當場宣佈，關於 Soboro Sukehiro 以及 Master Akebono 的所有案件，從現在起正式結案，不再追究。Kumode 在一旁輕飄飄地補上一句「事情就到此為止吧」，用這句看似隨口的話替真相蓋上一層厚重的蓋子。就這樣，原本通往真相的道路被硬生生封死，只留下滿室令人難受的沉重空氣。</p>
+<p>待風波平息後，你回到 Rakuza District，Koju 感慨地說，做夢也沒想到 Wolf Burglar 竟然會自己走出來投案，而且居然是為了拯救一名 Sekiseigumi 成員，「那傢伙真是固執得過頭，卻也義氣得過頭」。Nashu 則開心地說「太好了，我們救下 Shigure 了！」，Gilgamesh 也打趣說這次真的是「刀落下之前的最後一刻」才搶回來的。Hildibrand 開懷大笑，再次高調宣稱自己這位 agent of enquiry、inspector extraordinaire 又一次完成不可能的任務，從死神手中把一個人硬是拉了回來。不過，他也不免感嘆，其他人似乎太急著把這件事當成「已經結束的麻煩事」，迅速撇得一乾二淨。至少，Shigure 並不這麼想──據說他仍然有許多問題想親自問問 Wolf Burglar，而關於 Master Akebono 背後的真相，也依舊像迷霧一樣籠罩在眾人看不清的地方。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>任務發布</b> 娜修・瑪卡拉卡　九街 <small class="muted">(X:10.5, Y:8.1)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="good-swords-good-dogs.html">沒完沒了的武器怪盜</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="dont-do-the-dewprism.html">最強的男人卻敵不過藥物侵蝕</a></div>
+</div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
