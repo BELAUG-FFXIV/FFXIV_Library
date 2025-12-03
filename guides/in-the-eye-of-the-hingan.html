@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>In the Eye of the Hingan | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Hildibrand Adventures – In the Eye of the Hingan (HW Patch 4.35)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:1px solid transparent;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border-color:var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/BlUM5LxeZFA"
+              title="In the Eye of the Hingan" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">In the Eye of the Hingan</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'In the Eye of the Hingan',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+<p>You are in Kugane’s Rakuza District when Shigure all but runs up to you, eyes shining with urgency. The Wolf Burglar you have hunted day and night has struck again, and word has only just reached him. Hildibrand and Nashu are already on the scene, and if you hurry, you may yet arrive before they begin questioning witnesses. Together, you make for the plaza where Akebono is holding court. There, you find the inspector in full introduction mode, loudly proclaiming himself an “agent of enquiry, inspector extraordinaire” as he urges the agitated merchant to recount his tale. Akebono remembers Nashu and the “Western inspectors,” and explains that the Wolf Burglar brazenly tried to steal the finest sword in his collection—the Soboro Sukehiro—in broad daylight. Yet the thief failed. Laughing boisterously, Akebono declares that his new bodyguard, a peerless samurai named Yojimbo, drove the criminal off. Hildibrand congratulates him on his good fortune, but Shigure cannot shake his concern. The Wolf Burglar has pride, he says, and is not the sort to abandon a prize so easily. He begs Akebono to let you and his men help guard the blade, that you might finally bring the villain to justice, but the merchant brusquely refuses. Yojimbo alone is worth a hundred men, he insists, and he will not hear another word. With a final warning to Shigure to “find some other way to impress the Sekiseigumi,” Akebono sweeps off toward Sanjo Hanamachi for an evening engagement, leaving you to watch his overconfidence with no small unease.</p>
+<p>You follow him to Sanjo Hanamachi, only to find your path barred by Akebono’s doorman. No matter how eloquently Shigure insists you are here to help protect the Soboro Sukehiro, the guard remains unmoved. In his eyes, you are only suspicious strangers trying to trick a “daft doorman” into letting you close to the priceless sword. He mocks the very idea that Master Akebono would consort with the likes of you and sneers that “not a looker among you” could hope to be admitted. When Hildibrand protests that his mother has always called him handsome, the man retorts that, at best, the inspector might pass for a taikomochi—and Akebono has specifically stated that the only additional guests he would accept tonight are geiko of surpassing beauty. With that, he orders you all to clear off. Shigure sighs that the attempt has gone “rather poorly” and murmurs that you may have to accept this outcome. Hildibrand, however, refuses to concede. If Akebono will not listen to reason, then he must be made to listen to reason—and the inspector claims to have a plan “of surpassing beauty” to do just that.</p>
+<p>Pressed for details, Hildibrand asks if Shigure knows any geiko. The samurai hesitates, then admits there is an okiya nearby whose proprietress has occasionally given him odd jobs. Hildibrand seizes upon this at once and bids him lead the way. At the okiya, the proprietress eyes your group and raises a brow at the inspector’s extravagant introduction. She knows Shigure as a hapless youth to whom she has tossed the occasional handout, and assumes he still has not found honest work if he appears with a band of foreign “inspectors.” Hildibrand acknowledges that Shigure is not gainfully employed, but insists that is not why you have come. There is a grave injustice to avert, he declares, and to that end he requests that the proprietress lend her finest kimono—for Nashu, his steadfast assistant, to wear for a short while. The kimono will be returned posthaste, he promises. She laughs at the very idea. In her world, a geiko’s kimono is priceless; no one worth her salt would let a stranger parade around town in hers “just like that.” If you truly need her help, she says at last, you should be willing to pay for it—say, seventy thousand gil. You can only stare, and whether you confess to having lost your last coin at the Saucer or simply fall silent, Hildibrand waves you off and grandly insists that he will pay the expense himself.</p>
+<p>That confidence does not survive Nashu’s simple observation that his coinpurse is completely empty. Hildibrand splutters, demanding to know since when, then admits that this is a serious “fly in the ointment.” Shigure quietly offers his own meager funds, but Hildibrand cuts him off at once. He would never take money from an unfortunate youth with no steady work or skills to speak of, he insists. For a moment, it seems you are at an impasse. Then the inspector snaps his fingers, claiming inspiration. In his brief time in Hingashi, he says, he has come to understand the complexities of Hingan culture, including a custom by which one may express the fervor of his conviction by shaving every hair from his head. If Shigure is willing to demonstrate such resolve, perhaps that alone will convince the proprietress. Shigure balks at the idea of sacrificing his flowing hair for a kimono, but before he can protest further, Nashu cheerfully volunteers to “do the honors.” A few decisive snips later, Shigure stares in horror at his reflection, mourning the loss of his once-beautiful locks.</p>
+<p>The proprietress, on the other hand, bursts into helpless laughter. She has not laughed so hard in ages, she says, and assures Shigure that, if anything, Nashu has done him a favor. With his new look, even the Sekiseigumi might take him more seriously. Still chuckling, she declares the entertainment payment enough and agrees to lend a kimono without asking a single coin. Hildibrand hails her as a saint and asks Nashu if she is ready. Nashu answers that she is always ready and disappears inside with the proprietress to change. While you wait, Hildibrand proclaims there is no greater truth than that, if you trust in yourselves and the gods, fate will conspire to help you succeed. Shigure can only wonder aloud if this truly reflects the will of the kami. Before long, the inspector pricks up his ears and declares that he hears them coming. Nashu steps out with a delighted “ta-daaa,” resplendent in a kimono and full makeup. Hildibrand is quick to praise her, and even Shigure is forced to admit she looks every bit the perfect geiko. Surely, he says, no doorman could turn her away now.</p>
+<p>You return to Sanjo Hanamachi with Nashu at the forefront. Hildibrand loudly extols the beauty of his “stalwart ass— that is, the lovely geiko Nashu,” and the doorman eyes her from head to toe. His demeanor changes at once. Wondering where Master Akebono has been hiding such a vision, he decides his employer is certain to take a shine to her. He allows Nashu to pass through the door, but only Nashu; the rest of you must remain outside. Hildibrand exults that the plan has worked, while Nashu bid you all wish her luck before disappearing into the pleasure district. Shigure cannot help but doubt the wisdom of sending her in alone and notes that, ideally, at least you or he should have accompanied her. Hildibrand merely smiles and reminds him that this is a plan of surpassing beauty, and everything is proceeding as intended.</p>
+<p>Inside, Akebono reclines with a cup of wine, savoring the company of “two treasures without peer”: his Soboro Sukehiro and the geiko Chiyoume. At his side, a dead-eyed patron sighs over the impossibility of understanding a woman’s heart, lamenting that, unlike Akebono, he cannot simply reach out and seize what he desires. Akebono coolly insists that what he wants, he takes—and hints that his associate will also get what he wants once a certain “project” is complete. The man calls Chiyoume to drink with them and showers her with clumsy praise, declaring that she deserves only the best if she will give herself to him body and soul. She responds with practiced grace, saying his persistence verges on obsession and reminding him that she is willing to entertain many guests with traditional arts, not to belong to any one man. Undeterred, he mutters that she will be his in the end, one way or another. It is at this tense moment that Nashu appears and politely asks pardon of the gathered lords.</p>
+<p>The dead-eyed patron’s mood improves at once. Delighted by the unexpected arrival of another geiko, he beckons Nashu to sit. Before she can, Hildibrand bursts into the room with a theatrical greeting, having disguised himself as a taikomochi. Akebono splutters in outrage, insisting he explicitly ordered that he would receive no male entertainers today, while the dead-eyed patron declares that this is a bridge too far even for him. Yojimbo, by contrast, is briefly struck speechless by Nashu’s beauty and grace. Akebono insists that now is not the time for such distractions and orders his bodyguard to escort the “fetching yet belligerent taikomochi” out. Yojimbo refuses to lay hands on a fair maiden and declares that he agreed only to guard the sword, not to act as an instrument of his master’s whims. Akebono fumes at this defiance, but before he can press the issue, the room is thrown into further chaos.</p>
+<p>Shigure calls out from the doorway that the Wolf Burglar is there at last. Hildibrand triumphantly proclaims that the villain has revealed himself and, in the same breath, strikes a pose and reminds everyone that he himself is “master of disguise, inspector of a thousand faces, defender of justice.” Before you can decide whether to laugh or groan, the true Wolf Burglar makes his entrance, greeting the inspector as the “talking statue” and asking if he has come to watch the theft of the Soboro Sukehiro. With a mocking flourish, the thief moves to seize the sword. Shigure shouts for everyone not to let him escape, and Yojimbo rushes after him with a cry of “Halt, fiend!” There is a flurry of movement; wine spills, guests cry out, and Chiyoume collapses in the confusion. When she slowly comes to, her would-be suitor hurries to her side, calling her his “concubine to be” and fretting over the possibility of a single scratch, only to have her coolly warn him to watch where he puts his hands if he wishes to keep them.</p>
+<p>By the time the dust settles, the Wolf Burglar has vanished yet again. Shigure tries to salvage some pride by declaring that, although the thief escaped, he has once more failed in his thievery and the Soboro Sukehiro must surely still be safe. Akebono demands he actually look at what he is holding. In Shigure’s hands is a plainly inferior blade that looks nothing like the masterpiece it was meant to protect. Realizing he has been duped, Akebono explodes in fury, calling him a “bald imbecile” and ordering him out of his sight until he can recover the real sword. Shigure mutters that he is not technically bald, but the protest dies on his lips as Akebono storms away.</p>
+<p>Later, outside, Hildibrand muses that this may have been his best disguise yet, while Nashu admits that being a geiko is far from easy. Yojimbo joins you, repeating Akebono’s order that the Soboro Sukehiro must be recovered and dismissing any suggestion that you might have met him before. Shigure looks downcast, lamenting that he sacrificed his flowing hair for nothing, and admits that his opinion of Akebono diminishes by the moment. Even so, the merchant remains a man of influence, and what little reputation Shigure possesses will be ruined if he fails to bring the Wolf Burglar to justice. The good news is that you are no longer alone in this task. Yojimbo has volunteered his services, and together you may yet redeem yourselves. Looking back on the trail of clues, Shigure confides that he thinks he knows where the thief is headed next—and invites you to continue the hunt by his side.</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>Quest Giver</b> Shigure <small class="muted">(Kugane, X:13.2, Y:13.3)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="of-wolves-and-gentlemen.html">Of Wolves and Gentlemen</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="the-blade-mislaid.html">The Blade Mislaid</a></div>
+</div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'うわさの剣豪',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+<p>クガネのラクザ地区で過ごしていたあなたのもとに、シュギレが息を切らして駆け込んでくる。日夜追い続けてきたウルフ・バーグラーが、再び犯行に及んだという知らせが、つい先ほど飛び込んできたのだという。ヒルディブランドとナシュはすでに現場へ向かっており、急げば目撃者への聞き取りが始まる前に合流できるかもしれない。あなたはシュギレとともに急ぎ現場へ向かう。そこでは、検事を名乗る紳士が、いつもの調子で「稀代の名探偵ヒルディブランド！」と名乗りを上げ、被害者であるアケボノに、ここで何が起こったのか語るよう促していた。アケボノはナシュと「西から来た検事たち」を思い出し、ウルフ・バーグラーが真昼間から自慢の秘蔵刀「ソボロスケヒロ」を盗もうとしたのだと説明する。しかし、盗みは失敗に終わった。彼は大声で笑い、新たに雇った護衛、ヨウジンボウという無双の侍が、賊を追い払ったのだと誇らしげに語る。ヒルディブランドはその幸運を称えるが、シュギレの表情は晴れない。ウルフ・バーグラーは誇り高い盗人であり、一度狙った獲物をあっさり諦める男ではないと考えているのだ。彼は、あなたたちにも刀の警護に加わらせてほしいと懇願し、今度こそ賊を正義の前に引きずり出したいと申し出る。だが、アケボノはその提案を一蹴する。ヨウジンボウひとりで百人分の働きがある、と言い放ち、これ以上の口出しは許さないと怒気を含んだ声で告げると、「赤誠組に認められたければ別の方法を探せ」とシュギレを突き放し、足早に三条花街へと出かけていく。その後ろ姿には、運よく難を逃れたがゆえの、危うい慢心がにじんでいた。</p>
+<p>あなたたちはアケボノを追い、三条花街へと向かうが、入口には彼の部下が門番として立ち塞がっている。シュギレは、ソボロスケヒロを守るために協力しに来たのだと真摯に説明するが、門番は信用するどころか、逆に疑いを深めるばかりだ。彼の目には、あなたたちは「お人よしの門番を騙して中に入り、秘蔵の刀を盗もうとする連中」にしか映っていない。アケボノがそんな怪しい一団と付き合うはずがない、と鼻で笑い、「お前たちの中には一人として見目のいい者などいない」と容赦なく言い放つ。ヒルディブランドが「母は自分をなかなかの美男子だと言っていた」と反論しても、門番は「せいぜい太鼓持ちくらいだろう」と一蹴する。さらに、今夜アケボノが受け入れる追加の客は、「抜きん出た美しさを持つ芸子」に限るという条件まで突きつけ、「さっさと失せろ」と追い払おうとする。シュギレは肩を落とし、「どうやら失敗だったようだ」とため息をついて、このまま成り行きを受け入れるしかないのかと呟く。しかし、ヒルディブランドは首を横に振る。理屈で聞く耳を持たないのなら、「理屈を聞かざるを得ない状況にしてみせる」と言い、「見目麗しき計画」があると自信満々に告げるのだった。</p>
+<p>詳しく聞こうとするシュギレに向き直り、ヒルディブランドは「芸子の知り合いはいないか」と問いかける。シュギレは少し言い淀みながらも、近くに置屋があり、そこの女将に時折雑用を回してもらっていることを打ち明ける。それを聞いたヒルディブランドは、すぐさまその置屋へ案内するよう求める。置屋に着くと、女将はあなたたち一行を値踏みするように見つめ、ヒルディブランドの芝居がかった名乗りに眉をひそめる。彼女にとってシュギレは、これまで何度か小銭を恵んだことのある「不憫な若者」に過ぎず、そんな彼が見慣れぬ「検事」たちを連れて現れたということは、いまだまともな職に就けていない証だろうと苦笑する。ヒルディブランドは、確かにシュギレは今、定職を持ってはいないと認めたうえで、今回の訪問はそのこととは無関係だと強調する。今まさに防がねばならない重大な不正があり、そのためにこそ、ナシュに最上の着物を貸してほしいのだと、身振り手振りを交えて懇願する。着物はすぐに返却すると、声を大にして約束するが、女将はあきれたように笑い出す。</p>
+<p>「着物を貸せですって？ そんな簡単に言われてもね」と彼女は返し、芸の道では着物こそが命であり、腕の立つ芸子ほど大切にするものだと諭す。見知らぬ者に、ただで街中を歩かせるなどありえない。もし本当に助けが欲しいのなら、それなりの代価を払う覚悟が必要だろうと告げ、「そうだね……七万ギル、というところか」と値をふっかけてくる。あなたが思わず絶句する間に、ヒルディブランドは大きく胸を叩き、自分が支払うから心配無用だと豪語する。しかし、ナシュがさりげなく「検事さんのお財布はすっからかんですよ」と暴露したことで、その自信はあっという間に崩れ去る。ヒルディブランドは「いつの間に！」と叫び、これは予想外の「想定外」だと頭を抱える。シュギレが、自分のわずかな蓄えならと申し出るも、ヒルディブランドは即座にそれを断る。「定職も技量もない若者から金を取るなど、紳士のすることではない」と真剣な顔で言い切ると、場は完全な行き詰まりに見えた。</p>
+<p>沈黙ののち、ヒルディブランドは何かを閃いたように手を打ち鳴らす。ヒンガシの文化には、己の信念の強さを示すため、「頭を丸める」風習があると、どこか得意げに語り出すのだ。その覚悟を示せば、女将の心も動くかもしれない、と。シュギレは、自慢の長髪を犠牲にするなど、とんでもないと顔を歪めるが、ナシュは「わたしに任せて！」と嬉々としてハサミを構える。あれよあれよという間に髪は切り落とされ、鏡に映るのは、さきほどまでとはまるで別人のような自分の姿。シュギレは「俺の、美しい髪が……」と呆然と呟くしかない。</p>
+<p>一方、女将は腹を抱えて大笑いする。「こりゃ傑作だよ」と言い、こんなに笑ったのは久しぶりだと涙を拭いながら喜ぶ。ナシュはむしろ彼に似合っていると励まし、女将も「これなら赤誠組にも真面目に見てもらえるかもね」とからかいつつ、今回の一件を「十分すぎる見世物」と評価する。そして、「代金のことはいい。こんなに楽しませてもらったんだ、着物くらい喜んで貸してやるさ」と言い、金の話を打ち切るのだった。ヒルディブランドは「聖女のようなお方だ！」と感極まり、ナシュに準備はいいかと声をかける。ナシュは「いつでも大丈夫です！」と元気よく返事をし、女将とともに奥へと消えていく。待つ間、ヒルディブランドは「自分と神々を信じれば、運命はきっと味方してくれる」といつもの調子で語り、シュギレは「これも神々の御心なのだろうか」と小さくつぶやく。やがて、「そろそろだな」とヒルディブランドが耳を澄ませると、着替えを終えたナシュが「じゃーん！」と姿を現す。華やかな着物に身を包み、完璧な身なりに整えられた彼女の姿に、ヒルディブランドは惜しみない賛辞を送り、シュギレもまた、「まさに本物の芸子だ」と舌を巻く。これなら、門番も追い返すことはできまい、と。</p>
+<p>あなたたちは再び三条花街へと戻り、今度は前面に立つナシュを中心に入口へと向かう。ヒルディブランドは、いつものように大げさな身振りで「誰が何と言おうと、我らが芸子ナシュの美しさに文句をつける者などいるまい」と称え、門番はまじまじと彼女を眺める。その目つきは先ほどとは打って変わり、「こんな娘を今までどこに隠していたのか」と感心しきりだ。アケボノもきっと気に入るに違いないと頷き、ナシュだけは中へ通すことを許すが、他の者は一切認めないと念を押す。ヒルディブランドは「作戦は成功だ！」と喜び、ナシュは「応援していてくださいね！」と笑顔で言い残し、花街の奥へと消えていく。シュギレは、不安を抑えきれず、「誰か一人くらい付き添わせた方がよかったのでは」と呟くが、ヒルディブランドは「何度も言っただろう、これは『見目麗しき計画』なのだ」と微笑み、すべて計算のうちだと自信を見せる。</p>
+<p>その頃、室内ではアケボノが杯を手に、ソボロスケヒロと芸子チヨウメという「二つの至高の宝」に囲まれて上機嫌だった。彼の隣では、虚ろな目をした男が、女心の不可解さを嘆いている。アケボノのように、欲しいものをいつでも手にできるわけではないと愚痴をこぼし、チヨウメに対しても執拗な言葉を投げかける。アケボノは、欲するものは自らの手でつかみ取るものだと冷ややかに言い放ち、「小さな計画」が完成すれば、お前も望みを叶えられるだろうと含みを持たせる。その男はチヨウメを手招きし、一緒に杯を傾けようと誘い、「美しく、踊りも巧みなお前には最高のものだけがふさわしい。身も心も自分に捧げるなら、その最高のものを授けてやる」と甘言をささやく。チヨウメは、相手の根気強さを一応は称えつつも、それが執着に変わりつつあると柔らかな笑顔でいさめ、自分は誰にでも芸を披露するが、誰か一人に「所有」されるつもりはないと、これまで何度も伝えてきたはずだと言う。それでも男は、「いずれは自分のものになる」と執念深く呟く。その緊張感漂う空気のなか、「失礼いたします」とナシュがそっと声をかけて部屋に入ってくる。</p>
+<p>思わぬ新顔の芸子の登場に、虚ろな男は一気に機嫌を良くし、「もう一人呼んでいたのか」と喜びながらナシュを隣へと手招きする。だが、その直後、ヒルディブランドが派手な挨拶とともに部屋へ飛び込んでくる。今度は太鼓持ち風の装いでの変装だ。アケボノは顔色を変え、「今日は太鼓持ちを呼ぶつもりはないと、はっきり言ったはずだ！」と怒鳴り、虚ろな男も「人の趣味に口出しはしないが、これはさすがにやりすぎだ」とドン引きしてみせる。一方、ヨウジンボウはナシュの美しさと所作に一瞬心を奪われ、「なんと見事な……」と呟く。しかし、アケボノは今はそんなことをしている場合ではないと叫び、この「妙に魅力的で押しの強い太鼓持ち」を今すぐ外へ連れ出せと命じる。ヨウジンボウは、「麗しき乙女に手を上げるなど、自分にはできない」ときっぱり拒み、自分はあくまで刀の護衛として雇われたのであって、主人の気まぐれの道具になるつもりはないと告げる。アケボノは激怒するが、そのやり取りに割って入るように、さらに事態が動き出す。</p>
+<p>扉の方から、シュギレの声が響く。「ウルフ・バーグラーだ、あそこにいる！」ヒルディブランドもまた、「ついに正体を現したな、盗っ人め！」と高らかに叫びつつ、同時に自分自身を「千の顔を持つ名探偵」として誇らしげにポーズを決める。あなたが呆れる間もなく、本物のウルフ・バーグラーが姿を現し、「しゃべる像じゃないか」とヒルディブランドに声をかける。どうやらソボロスケヒロを盗みに来たところを、またしても見つかったらしい。彼は悪びれる様子もなく、「さて、いつものようにやらせてもらうぜ」と言って刀へと手を伸ばす。シュギレは「逃がすな！」と叫び、ヨウジンボウも「そこまでだ、賊め！」と後を追う。室内は一気に混乱し、酒はこぼれ、客たちの悲鳴が飛び交い、チヨウメは衝撃で気を失ってしまう。やがて彼女が気がつくと、先ほどの男が「未来の側室殿」と呼びかけながら駆け寄り、一つの傷でもついていたら心が張り裂けてしまうと騒ぎ立てるが、チヨウメは冷ややかに、手を置く場所にはくれぐれも気をつけた方がいい、さもないとその手を失うことになるかもしれないと忠告する。</p>
+<p>しかし、その頃にはウルフ・バーグラーの姿はすでに消えていた。シュギレは、盗人こそ逃げたものの、今回も盗み自体は失敗に終わったはずだと必死に言い繕い、「ソボロスケヒロは無事に違いない」と口にする。するとアケボノは、彼が抱えている刀を指さし、「それをよく見ろ」と怒鳴る。シュギレの腕の中にあるのは、どう見ても代用品に過ぎない、似ても似つかぬ刀だった。ソボロスケヒロは、見事にすり替えられてしまっていたのだ。事態を悟ったアケボノは烈火のごとく怒り、「このツルツル頭の間抜けめ！」と罵声を浴びせる。「これがソボロスケヒロに見えるか？ 見えるのか？」と畳みかけた後、「本物を見つけるまで二度と顔を見せるな！」と怒鳴りつけ、その場を去ってしまう。シュギレは、小さく「俺は別にツルツルじゃないんだが……」と呟くが、その声が届くことはなかった。</p>
+<p>しばらくして、外に出たあなたたちは、それぞれの感想を漏らす。ヒルディブランドは「今までで一番の変装だったかもしれない」と満足げに語り、ナシュは「芸子もなかなか大変なお仕事ですね」と苦笑する。ヨウジンボウも現れ、アケボノの言葉どおり、「ソボロスケヒロを取り戻さねばならない」と淡々と告げる。どこかで見かけたことがあるのではないかという疑念を抱いても、彼はすぐに「気のせいだ」と取り合わない。シュギレは、せっかく髪を犠牲にしたというのに、結局ソボロスケヒロは盗まれてしまったと肩を落とし、アケボノへの好感度が下がる一方であることを認める。それでも、アケボノがこの地で大きな影響力を持つ人物であることに変わりはなく、自分のささやかな評判も、ウルフ・バーグラーを捕まえ損ねればすべて失われてしまうだろうと苦い顔をする。</p>
+<p>だが、完全に絶望したわけではない。ヨウジンボウが自ら協力を申し出たことで、もはやシュギレとあなたは孤立無援ではないのだ。三人で力を合わせれば、まだ巻き返しの余地はある。これまでの足跡を振り返りながら、シュギレは、盗人が次にどこへ向かうのか、おおよその見当がついてきたと打ち明ける。そして、もしよければこれからも共に追跡を続けてほしいと、真剣な眼差しであなたに頼むのだった。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>クエスト発行</b> シグレ　クガネ <small class="muted">(X:13.2, Y:13.3)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="of-wolves-and-gentlemen.html">狙われた獲物</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="the-blade-mislaid.html">近接の脅威</a></div>
+</div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'傳聞中的劍豪',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+<p>你在 Kugane 的 Rakuza District 行動時，Shigure 急匆匆跑到你面前，眼中帶著緊張的光。你們日夜追尋的 Kugane Wolf Burglar 又再度出手，他說這消息才剛傳到自己耳中。Hildibrand 和 Nashu 已經搶先一步趕往現場，如果你現在立刻同行，或許還能在他們開始詢問證人之前會合。你跟著 Shigure 一起趕到發生騷動的廣場，只見檢查官照例大聲自我介紹為「agent of enquiry、inspector extraordinaire」，鼓勵受害者 Akebono 把發生的事說清楚。Akebono 認出 Nashu 和這群來自西方的「inspectors」，於是說起剛才的遭遇──Wolf Burglar 大膽地在大白天試圖偷走他收藏中最珍貴的一把刀「Soboro Sukehiro」。然而，犯案並沒有成功。他得意地大笑，表示自己最近雇了一名新的 bodyguard，那就是實力無雙的 samurai・Yojimbo，正是這位護衛趕跑了賊人。Hildibrand 祝他運氣不錯，但 Shigure 的表情依然凝重。他認為 Wolf Burglar 是個頗具自尊的盜賊，不會這麼輕易放棄到手的獵物，於是懇求 Akebono 讓你們加入防衛行列，一起守護那把刀，好藉機將這名盜賊繩之以法。Akebono 卻毫不領情，斷然拒絕。他說 Yojimbo 一人就抵得上一整隊護衛，根本不需要多餘的幫手，還不耐煩地要 Shigure 去找別的方法討好 Sekiseigumi。丟下這句話，他甩袖離去，興致勃勃地朝 Sanjo Hanamachi 的夜生活走去，只留下你們望著他的背影，為那份過頭的自信感到不安。</p>
+<p>你們追到 Sanjo Hanamachi 的入口，卻馬上被 Akebono 的門房攔下。無論 Shigure 多麼真誠地解釋你們是來協助守護 Soboro Sukehiro 的，門房始終不為所動。在他眼中，你們只是一群試圖「騙過笨門衛、趁機接近名刀然後動手偷走」的可疑人物。他嘲笑 Akebono 不可能跟你們這種人打交道，又毫不留情地說「你們這幾個裡面一個長得好看的都沒有」。當 Hildibrand 抗議自己從小被母親稱讚很英俊時，門房冷冷回一句，最多也就是個 taikomochi，而 Akebono 今天明明交代過，只會再接待「美貌無雙的 geiko」。既然你們誰都不是，他便下逐客令，叫你們趕快滾開。Shigure 長歎一聲，說這次嘗試看來是徹底失敗了，或許只能認命接受這個結果。然而，Hildibrand 卻不打算放棄。他說，如果 Akebono 不肯用理性傾聽，那就想辦法讓對方「被迫面對現實」，並宣稱自己已經有一個「美得不可思議」的計畫。</p>
+<p>在 Shigure 追問之下，Hildibrand 先問他是否認識任何 geiko。Shigure 有些猶豫，最後承認附近有一間 okiya，女將以前偶爾會丟一些零工給他做。Hildibrand 聽完立刻抓住這個線索，要他帶路前往。到了 okiya，女將打量著你們，對 Hildibrand 誇張的自我介紹只回以微微揚眉。她坦白說自己的確曾對這個「可憐的年輕人」施捨過幾次零用錢，如今他帶著一群來路不明的「inspectors」上門，大概也代表他到現在還沒找到正經工作。Hildibrand 雖然承認 Shigure 目前並沒有穩定職業，卻堅稱這次造訪與此無關。他說你們正面對一樁必須阻止的重大不公，要拯救某個狀況非常危急的局面，為此才希望女將能借出一套最好的 kimono──讓他的助手 Nashu 暫時穿上。衣服會很快歸還，他再三保證。女將聞言大笑，說在她們這一行，kimono 可不是隨便就能借給陌生人的東西，真正有身價的 geiko 更不可能讓別人穿著自己的禮服在街上到處晃。</p>
+<p>她說，如果你們真的那麼需要她的幫忙，就應該願意付出相對應的代價──比方說，七萬 gil。你一時說不出話來，無論是坦承自己的 gil 已經在 Saucer 的賽 chocobo 場上花光，還是乾脆默默垮下肩膀，Hildibrand 都把你推到一旁，自信滿滿地拍著胸口說這筆錢由他來出。奈何 Nashu 很誠實地指出，他的 coinpurse 早就空了個透。Hildibrand 驚叫著問「從什麼時候開始」，但事實已擺在眼前，他不得不承認這是個「致命的小問題」。Shigure 試著提出可以拿自己的積蓄出來湊，卻被 Hildibrand 嚴正拒絕──他說自己絕不可能從一個失業又沒有什麼拿手技藝的青年身上收錢。氣氛一度陷入僵局，看起來似乎已經沒有退路。</p>
+<p>就在此時，Hildibrand 靈光一閃，打了個響指，說自己在 Hingashi 的短暫停留中，稍微理解了這裡複雜的文化習俗，其中就包括「為了表达決心而把頭髮全部剃光」的做法。如果 Shigure 願意用這種方式展示決心，或許就能打動女將。Shigure 一聽到要把自己驕傲的長髮奉獻出來，立刻一臉驚恐，還來不及拒絕，Nashu 已經一邊說「交給我吧！」一邊拿起工具。沒多久，一綹綹頭髮墜落地面，當 Shigure 抬頭看向鏡子，只剩下呆滯地喃喃自語：「我的頭髮……我那一頭美麗的長髮……」</p>
+<p>女將卻笑得眼淚都流出來。她說已經好久沒有笑到這種程度，笑完還抽空安慰 Shigure，表示 Nashu 其實幫了他一個忙，以這個樣子去見 Sekiseigumi，反而比較有「正經 samurai」的樣子。她最後拍板宣布，光是這場鬧劇就值回票價，Kimono 不用再談什麼租金，就當作你們帶來的節目酬勞。Hildibrand 感動得稱讚她簡直像 saint 一樣，隨即詢問 Nashu 是否準備就緒。Nashu 元氣十足地回答「隨時可以！」，便跟著女將進入裡面換裝。等待期間，Hildibrand 照例開始談論「只要相信自己與諸神，命運便會幫助你們成功」，而 Shigure 則忍不住小聲感嘆，這大概也是 kami 某種莫名其妙的旨意。沒過多久，Hildibrand 說自己聽到了腳步聲。隨著一聲「登場啦～」，換好裝的 Nashu 走了出來。她身著華麗 kimono，妝髮一絲不苟，姿態完全不輸任何一位 geiko。Hildibrand 當然第一時間送上熱烈讚美，而就連 Shigure 也不得不承認，眼前的 Nashu 看起來就是貨真價實的 geiko，門房這次不可能再找得到藉口拒人於門外。</p>
+<p>你們再次回到 Sanjo Hanamachi，把 Nashu 推到最前方。Hildibrand 以一貫誇張的語氣大聲宣示，「無論你對我們其餘幾人有什麼意見，總不能睜著眼說這位 geiko 不美吧」。門房仔細打量 Nashu，態度馬上變了個樣。他讚嘆這樣的美人居然是第一次見到，覺得 Akebono 一定會喜歡，於是同意讓 Nashu 一人進入，但堅持其他人全部留在外面。Hildibrand 興奮地說「作戰成功！」，Nashu 則回頭請你們祝她好運，接著轉身走進熱鬧的花街深處。Shigure 看著她的背影，仍不放心地喃喃自語，覺得最好至少讓你或他自己其中一人跟進去比較保險。Hildibrand 只是微笑，提醒 Shigure 自己可是從頭到尾都說這是一個「美得驚人」的計畫，一切都在掌握之中。</p>
+<p>此時，在包廂裡的 Akebono 正悠哉品酒，自得其樂地同時享受兩樣寶物的陪伴──「無雙之刀 Soboro Sukehiro」與「無雙之 geiko・Chiyoume」。一旁那位 Dead-eyed Miscreant 則苦惱地對著酒杯感嘆，說自己怎麼也搞不懂女人的心，而 Akebono 卻能隨心所欲得到自己想要的東西。Akebono 冷冷地說，想要的東西就用手去拿就是了，並暗示只要自己的「小計畫」一完成，對方也能如願以償。那男人叫來 Chiyoume，邀她坐下喝酒，又一邊奉承她美貌與舞技，一邊說只要她願意把身心都交給他，就會給她世上最好的待遇。Chiyoume 保持優雅笑容，卻也毫不退縮地提醒他，他的執著已經逼近病態。她說自己已經重覆說過不知多少次，很樂意以傳統技藝款待來客，但這並不代表要成為誰的專屬「所有物」。男人只是不悅地說她依舊固執，並放話「總有一天會得到她，不論用什麼方法」。就在這樣微妙的空氣中，換上 geiko 打扮的 Nashu 輕聲開口，向在座的幾位 lord 行了一禮。</p>
+<p>Dead-eyed Miscreant 看到又多了一名 geiko，馬上喜形於色，以為是 Akebono 另外叫來的陪酒，連忙招呼 Nashu 過來坐。緊接著，Hildibrand 也踏著誇張的步伐闖入房間，穿著 taikomochi 風格的衣裳，大聲向在座所有人打招呼。Akebono 一看到這幕，臉色立刻沉下，強調自己今天明明交代過不會接待 taikomochi，感覺像被狠狠捉弄了一樣。Dead-eyed Miscreant 也覺得事情有些「過頭」，一副難以接受的模樣。相較之下，Yojimbo 的目光倒是被 Nashu 的姿態深深吸引，一時說不出話，只能低聲讚嘆她的美與優雅。Akebono 卻無心欣賞這一切，他覺得現在根本不是鬧這種情趣的時候，於是命令 Yojimbo 立刻把這個「既迷人又不知進退的 taikomochi」給趕出去。Yojimbo 卻堅定地拒絕，表示無論如何，他都不會對一位 fair maiden 動粗，當初答應受雇只是為了替名刀護衛，並不是為了替主人執行任性妄為。Akebono 因此怒火中燒，氣氛愈發緊繃。</p>
+<p>就在這個僵持的瞬間，房門外傳來 Shigure 的呼喊聲──「他在那裡，Wolf Burglar 出現了！」Hildibrand 也趁勢大喊，說盜賊終於暴露了真面目，一邊還擺出名偵探的招牌姿勢，自稱是「千百種偽裝皆能駕馭的 Inspector」。你還來不及吐槽，就見真正的 Wolf Burglar 大搖大擺地現身，自顧自地跟這位「會說話的雕像」打招呼，問他是不是特地來看自己偷 Soboro Sukehiro。說完，他便帶著一貫的戲謔態度朝名刀伸出手。Shigure 立刻大叫不要讓他跑掉，Yojimbo 也拔聲喝令「站住，賊人！」，隨即衝上前去。房間裡瞬間陷入一片混亂，酒杯翻倒、客人四散驚呼，Chiyoume 更是被突如其來的騷動嚇得暈了過去。等她慢慢恢復意識時，那名 Dead-eyed Miscreant 早已扑到她身旁，自稱要是未來的「concubine」哪怕只受一點傷，他都會心碎不已。Chiyoume 冷冷回敬，提醒他要好好注意自己雙手伸往何處，否則要保住這雙手可沒那麼容易。</p>
+<p>等到場面總算稍微平息，Wolf Burglar 卻早已趁亂逃之夭夭。Shigure 依舊想保留一點面子，說雖然賊又一次逃掉，不過至少這回偷盜本身應該是失敗的，Soboro Sukehiro 理當還安然無恙。Akebono 卻叫他好好看清楚自己手裡拿的到底是什麼。你低頭一看，Shigure 抱著的是一把明顯不對勁的刀，無論怎麼看都不像那把名震一方的名刀，只是品質平平的替代品。Soboro Sukehiro 顯然已在混亂中被掉包。Akebono 當場爆氣，怒罵 Shigure 這個「剃光頭的蠢貨」，一次又一次問他「那真的看起來像 Soboro Sukehiro 嗎？」最後乾脆把他轟出視線，要他在找回真正的刀之前絕對不要再出現在自己面前。Shigure 小聲抗議自己其實沒有完全禿頭，但這句話自然沒有人聽見。</p>
+<p>稍後，你們回到外頭，幾人各自發表感想。Hildibrand 滿意地說這也許是自己至今最成功的偽裝之一，Nashu 則苦笑著說要扮演好 geiko 其實不容易。Yojimbo 也走上前來，重申剛才 Akebono 的命令──不論如何都必須找回 Soboro Sukehiro。他對於你認為曾在哪裡見過他的疑問，只用一句「別想太多」帶過，不願多談。Shigure 低著頭，感慨自己為這件事犧牲了一頭飄逸的長髮，結果名刀還是被偷走，到頭來好像什麼也沒換到。雖然他對 Akebono 的好感愈來愈低，但也承認對方仍是這一帶舉足輕重的人物，如果這次無法成功將 Wolf Burglar 繩之以法，他那本就不多的名聲，大概也會徹底毀掉。</p>
+<p>好在，事情並非完全沒有希望。至少現在你們不必再單打獨鬥，Yojimbo 已經主動表示願意加入追捕行列，只要大家合力，仍有機會扭轉局勢。Shigure 回顧一路上的線索，說自己大致能猜到盜賊接下來會往哪裡去。於是，他抬起頭，用比剛才穩定得多的語氣邀請你再一次同行──希望你能繼續與他並肩而行，一起追上那個總在最後一刻溜走的 Wolf Burglar，直到有朝一日，真正把對方推到正義面前。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>任務發布</b> 時雨　九街 <small class="muted">(X:13.2, Y:13.3)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="of-wolves-and-gentlemen.html">被盯上的獵物</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="the-blade-mislaid.html">那把遺失利刃引發的近身威脅</a></div>
+</div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
