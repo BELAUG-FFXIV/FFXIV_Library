@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Of Wolves and Gentlemen | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Hildibrand Adventures – Of Wolves and Gentlemen (HW Patch 4.25)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:1px solid transparent;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border-color:var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/_LiusyANXuk"
+              title="Of Wolves and Gentlemen" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Of Wolves and Gentlemen</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Of Wolves and Gentlemen',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+<p>You travel with Nashu and Shigure to the Ruby Sea, where the towering monolith of Sakazuki rises endlessly into the sky. Nashu tips her head back, squints up at the stone, and cheerfully wonders if, from just the right angle, it looks like it has ears—or maybe horns. Shigure, ever the dutiful samurai, explains that the Confederacy has every reason to watch even the smallest boats that come and go. Their survival depends on collecting the “Ruby Tithe,” a payment for safe passage. Any traveler who does not wish to be branded a bandit and stripped of their belongings must first journey to Sakazuki and make the proper overtures. Yet when it comes time to pay, Shigure protests miserably that he has nowhere near the purse of a wealthy merchant and begs them to be reasonable.</p>
+<p>It is then that you meet Ihaki. When he hears you are looking for a bandit on a boat, he scoffs that, to him, only those who refuse to pay the tithe are true bandits. He speaks of a strange fellow he saw not long ago—standing utterly still in a skiff, heedless of waves and wind, drifting like a dead man upon the water. Faced with such an ill omen, Ihaki chose the only course he considered reasonable: he left the “corpse” alone and tried to forget what he had seen. If you are willing to consort with the dead, he says, you may follow the boat’s course to the Isle of Bekko. At these words, Shigure’s eyes widen as scattered clues fall into place. The “dead man” was no corpse at all, but the Eorzean Gentleman mistaken for one, and the skiff belonged to the Kugane Wolf Burglar. Their liaison had said they could offer a trespasser in lieu of coin to pay the tithe; capturing the bandit would settle their debt. Shigure seizes upon the chance. The hunt will continue at the Isle of Bekko, where both the thief and the stolen inspector must surely be waiting.</p>
+<p>On the shores of the Isle of Bekko, Nashu suddenly points ahead and cries out. There, in the distance, she sees a “wolf”—or at least someone with big ears and a long fluffy tail. Shigure laughs triumphantly that they have the Wolf Burglar cornered at last. But as you draw closer, his confidence crumbles; the figure before you is not the thief, but a walking corpse. Shigure stammers that this must be a restless spirit bound to the mortal coil by burdens of the soul. The Gentle Dead Man calmly denies this, explaining that his soul bears no such weight. In death he found more freedom and purpose than he ever knew in life, along with comrades and a sense of brotherhood.</p>
+<p>Nashu recognizes him as one of the Gentle Dead Men and asks what he is doing so far from Eorzea. Overjoyed to meet Master Zombibrand’s compatriots in such distant lands, he recounts his tale. He once heard rumors of an island deep within the Sirensong Sea, said to be home to undead much like himself. Longing for company in their lonely existence, he and his fellows resolved to send an emissary, and he was the obvious choice. Yet when he reached the island, he found only bones—skeletons bereft of unlife. With a rueful note, he adds that, if you insist on cutting down every undead you meet on your travels, you should not be surprised to find so few left. The island was abandoned, Eorzea was far away, and he was left adrift with no clear path forward.</p>
+<p>Then he felt it: a familiar tingling in his rotting flesh, a pull he knew all too well. Master Zombibrand’s aether was calling him. Dutiful as ever, he followed that invisible trail across the sea and thus arrived on the Isle of Bekko. Nashu’s eyes shine as she understands what this means. If the Gentle Dead Man followed Hildibrand’s aether to this place, then the inspector and the thief who stole him must also be here. She asks if he still feels the inspector’s call and if he can lead you to him. With grisly enthusiasm, he assures you that he can, boasting that he could crack open a hapless merchant’s skull and feast on the contents before anyone could cry out—and urges you to follow.</p>
+<p>As you walk, Nashu cannot help but ask about his wolfish costume. The Gentle Dead Man explains that he received it from a traveling artist. When he confided how difficult it was to converse with ordinary folk, the artist created the outfit to soften his terrifying features. It has worked splendidly, he says, and your praise warms his dead heart. Still, there is no time to linger. Master Zombibrand needs you. Shigure admits that not a word he has heard makes sense to him, but he resolves to trust this misshapen undead wolfman if it means drawing closer to the thief. Deeper within the Isle of Bekko, the Gentle Dead Man declares that his master’s presence is close, while Shigure and Nashu steel themselves—one for the Wolf Burglar’s arrest, the other for the inspector’s rescue.</p>
+<p>Soon, you find another figure silhouetted against the rocks: big ears, a bushy tail, and the look of a cornered animal. Nashu cries out that there is a wolf; Shigure shouts that they have the Wolf Burglar at last and orders him to surrender. The thief curses that they have finally caught up with him, while Nashu exclaims that he looks exactly like her sketch. Shigure proclaims that the thief’s campaign of thievery ends today and that the bakufu will have their man—“their Lupin,” as he puts it—only for the thief to turn and bolt. When you look back, Hildibrand remains frozen in statue-like stupor.</p>
+<p>Deciding drastic action is needed, Nashu announces a triple helping of Nashu’s Delight—dango style—and sets her bombs around the inspector. Hildibrand erupts into a panicked cry of “BOOOOOOOOOMBS!” The Wolf Burglar snaps at him to get rid of them before they both die. The inspector calls desperately for you and Nashu, but Nashu insists that you need not worry about him. He survived being flung back from Dalamud, she reminds you; this is nothing. Better to seize the chance to catch the Wolf Burglar while you can. Shigure agrees that the thief has nowhere left to run—though a fall remains an option.</p>
+<p>The Wolf Burglar takes that hint. If those are the terms, he says, then he will choose the fall. He grumbles that he only came this close to capture because he tried to steal such a hefty prize and declares that, if the “statue” is not even a statue, there is no reason for him to stay. Wishing you better luck next time, he makes his escape in a leap. Shigure fumes at the villain’s audacity, but the bombs have done their work.</p>
+<p>Out of the smoke, Hildibrand staggers back to life. He turns to you, saying he has come to expect such cold, calculating behavior from dear Nashu, but not from you. Nashu, on the other hand, is delighted. She cheers that nothing wakes the inspector quite like a brush with certain death. Shigure can only stare in disbelief. Moments ago, the Eorzean Gentleman was unmoving stone; now he speaks and gestures with all the vigor of a living man. The Gentle Dead Man gently reminds him that he too can move, despite neither living nor breathing, and that Master Zombibrand is certainly no mere statue. Nashu nods firmly and proudly proclaims Hildibrand once more an agent of enquiry and inspector extraordinaire.</p>
+<p>Studying Shigure’s clothing, Hildibrand surmises that he is a samurai and correctly guesses that you are in the Far East. He revels in waking from gentle slumber in a foreign land, greeted first by a Far Eastern admirer. But his mood shifts in an instant. His keen investigator’s sense has detected a petitioner in need, he declares, and he must rush to answer—for honor, for justice, and for a hard-boiled egg. With that, he races off. Nashu runs after him as best she can, calling for him to slow down because she cannot run that fast. The Gentle Dead Man watches them go, moved by the sight of Master Zombibrand restored to his old self. If he still had an eye and tear ducts, he says, he might even weep. Yet he cannot remain. He must return to his brothers and leaves the care of their undead overlord in your hands.</p>
+<p>Left behind with Shigure, you hear him reflect that in Eorzea, a man may be both an inspector extraordinaire and a zombie overlord. Such a land of mysteries and strange customs is beyond his understanding. He regrets that the Wolf Burglar has eluded justice once more, but he is glad the chase has reunited Hildibrand with his comrades. All that remains is to see where the inspector’s much-vaunted “keen sense” will lead you next, and he urges everyone to follow.</p>
+<p>Before long, Shigure notices a small beastman nearby and wonders aloud if it is another “ratman” like the one that was sold at auction. Nashu corrects him with a smile, explaining that it is a Qiqirn and that the inspector seems to have found one. The Wayward Qiqirn peers up at you and asks if you are friends, because he has a friend in need of a friend. Hildibrand’s eyes gleam. He proudly announces that he has indeed sniffed out a case: “The Case of the Kidnapped Qiqirn.” He explains that this Qiqirn’s dearest friend was abducted by a villain in Kugane.</p>
+<p>The Qiqirn tells his story in halting but earnest words. He and his friend are sailors for the East Aldenard Trading Company. Their ship docked in Kugane to unload cargo, and while they were there, a “goodly merchant” approached and offered them a hearty feast. Trusting him, they followed through a confusing maze of left and right turns until they had no idea where they were. In a dark alley, bad men suddenly sprang out. They gagged his friend, shoved a bag over his head, and dragged him away. The Wayward Qiqirn fought back as best he could, broke free, and fled in desperation, finally leaping into the water. The currents carried him across the sea until he washed ashore here on the Isle of Bekko.</p>
+<p>Hildibrand wonders aloud what motive anyone could have for kidnapping a hapless Qiqirn sailor. Shigure supplies the answer: in the Far East, many people mistake Qiqirn for ratmen of local folklore, whose flesh is said to grant everlasting life. To those hunters, it hardly matters who or what their victims really are. An Eorzean sailor with unusual features, an incredible statue that turned out to be a man, a Qiqirn who can pass for a ratman—their paths all lead back to the same “goodly merchant.” Shigure concludes that the broker must have kidnapped others from distant lands to sell at auction. Nashu insists you must save the Qiqirn’s friend as well. Shigure swears that the wicked will be punished and the innocent set free, and Hildibrand eagerly claims he was just about to say the same. Thus resolved, you return to Kugane to confront the culprit.</p>
+<p>On Kogane Dori, the Silver-tongued Broker pales at the sight of the living Eorzean Gentleman and cries out that he should be dead. Hildibrand steps forward and declares that the merchant’s reckoning has come. Shigure accuses him of kidnapping a Qiqirn sailor and selling him into slavery, announcing that he is under arrest. The broker feigns confusion, claiming he would never forget such a reprehensible act, and then questions Shigure’s authority. The samurai is not of the Sekiseigumi; he is a common ronin from the countryside whom the merchant “generously” hired to guard his auction—an auction that failed to protect a priceless piece.</p>
+<p>Hildibrand retorts that the stolen “piece” stands before him and that the Qiqirn who escaped the kidnapping plot is living proof of the broker’s crimes. The merchant remains unmoved. Whatever authority Hildibrand may possess in Eorzea, he says, it means nothing here. Only the Sekiseigumi can compel answers and arrest criminals in Kugane, and with that, he tries to walk away.</p>
+<p>Before he can, a solemn Sekiseigumi officer steps in and tells the broker he need not answer to you—but he will answer to him. The officer reveals that they have had their eye on the merchant for some time and that all good things must come to an end. The Wolf Burglar’s meddling merely delayed the inevitable; they now have all the proof they need. He instructs the merchant to come quietly—or resist, and do him a favor.</p>
+<p>Turning to Shigure, he acknowledges that, thanks to Shigure’s efforts, they can finally bring this charlatan to justice, and offers his sincere thanks. Shigure stammers that such praise is a great honor and begins to say that perhaps this will help mend his reputation, but the officer cuts him off. The fact that Shigure failed to inform the Sekiseigumi of the Wolf Burglar’s crime, despite being present, and instead pursued the thief alone, is inexcusable. Reckless disregard for procedure and a thirst for personal glory are qualities he will not suffer in their samurai. For that reason, he cannot admit Shigure to the Sekiseigumi.</p>
+<p>Nearby, the Wayward Qiqirn clings to his rescued friend and thanks you all profusely. He vows to be far more wary next time and never again follow “goodly merchants” into dark alleys. Shigure bows his head and apologizes. As the merchant said, he admits, he is no more than a common ronin. He came to Kugane hoping to join the Sekiseigumi, but was deemed unworthy. Unable to find work as a samurai, he struggled to make ends meet. Just as he was ready to abandon his dream and return to his village, he heard of a notorious thief—one who targeted only the wealthy and influential. If he could bring such a criminal to justice, perhaps the Sekiseigumi would finally recognize his worth. That hope has driven him ever since.</p>
+<p>Hildibrand raises a hand and tells him to say no more. Shigure’s earnest nature and passion for the law, he says, have already won him over. He swears, here and now, that as an agent of enquiry and inspector extraordinaire, he will help Shigure scour all of creation—from the deepest pits of the seven hells to the very pinnacle of the heavens—for the Kugane Wolf Burglar. And they will start at once. Shigure still does not quite know what to make of the man, but he finds himself grateful for the offer of help.</p>
+<p>Later, Shigure turns to you and thanks you more quietly than the others. Of all those who have aided him, your assistance feels the most reliable. The Wolf Burglar is a cunning foe, and sheer passion will not be enough to catch him. While he values the help of the inspector and his assistant, he believes that in the end it will be the cooler heads—his and yours—that prevail. One day, he vows, with your help he will drag the thief into the light of justice.</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>Quest Giver</b> Shigure <small class="muted">(The Ruby Sea, X:38.1, Y:38.1)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="life-imitates-art-imitates-life.html">Life Imitates Art Imitates Life</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="in-the-eye-of-the-hingan.html">In the Eye of the Hingan</a></div>
+</div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'狙われた獲物',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+<p>あなたはナシュとシュギレとともに紅玉海へ向かい、天へと果てしなく伸びる巨大な「サカズキ」の塔を見上げる。ナシュは首をかしげて塔を見つめ、「こうして目を細めて見ると、耳が生えているみたい……それとも角かな？」と、相変わらず能天気な調子でつぶやく。一方、侍であるシュギレは真面目な表情で、この地の成り立ちを説明する。紅玉海賊衆は、紅玉海を行き交うあらゆる船を監視し、「紅玉の関銭」と呼ばれる通行料を徴収することで生計を立てている。略奪されたくない旅人は、まずサカズキに立ち寄り、丁重に挨拶と支払いを済ませねばならないのだ。ところが、いざ支払いの段になると、シュギレは「自分は豪商などではない」と嘆き、どうか勘弁してほしいと必死に頭を下げることしかできない。</p>
+<p>そこで出会ったのが、イハキという男だ。舟上の賊を探していると聞いても、彼はあざ笑うように肩をすくめ、「関銭を払わぬ者だけが盗人だ」と言い放つ。そして、つい先ほど目にした「奇妙な男」の話をし始める。波風をものともせず、小舟の上で微動だにせずに立ち尽くすその姿は、まるで生ける屍のようだったと。あからさまな不吉の前兆に関わるつもりはなく、イハキは声をかけることもなく、そのまま見逃したという。その「死に体の男」が向かった先は「ベッコ島」。死人と関わる覚悟があるなら追ってみるがいいと、彼は忠告する。</p>
+<p>その言葉を聞き、シュギレの脳裏で点と点が一気につながる。あの「死体」は本物の死者ではなく、「エオルゼアの紳士」を見間違えたものに違いない。そして、その小舟の主こそ「クガネのウルフ・バーグラー」であろうと。先ほど、紅玉海賊衆との仲介役から、「無断航行者を引き渡せば、関銭の代わりと認めよう」と言われたことも思い出す。盗人を捕らえれば、そのまま支払いにもなるわけだ。シュギレはそう結論づけ、獲物と紳士が共に姿を消した場所こそ、ベッコ島に違いないと高らかに宣言する。</p>
+<p>やがて一行がベッコ島の岸辺にたどり着くと、ナシュが突然立ち止まり、前方を指差して声を上げる。「ねえ、見て！ あそこにオオカミがいるわ！ 大きな耳に、ふさふさの尻尾！」シュギレは、ついにウルフ・バーグラーを追い詰めたと確信し、高らかに名乗りを上げて降伏を迫る。しかし、距離を詰めてその姿がはっきり見えると、彼の自信は崩れ去る。そこに立っていたのは盗人ではなく、明らかに生者ではない「歩く死体」だったからだ。シュギレは蒼白になり、魂の未練に縛られて現世をさまよう「亡者」だと震えながら口にするが、当の「ジェントル・デッドマン」は穏やかな声でそれを否定する。自分の魂には重い枷などなく、むしろ死してからの方が、かつての生よりも多くの自由と目的、そして仲間との絆を得たのだと。</p>
+<p>ナシュは、彼が「ジェントル・デッドメン」の一員であることにすぐ気づき、なぜエオルゼアからこれほど遠く離れた地にいるのかと首をかしげる。亡者は、はるかシラディ海の奥深くに、自分たちと同じような不死者が暮らす島があるという噂を耳にした過去を語り始める。孤独な存在同士が集える場所を求めて、仲間たちは使者を送ることを決め、その役目を担ったのが自分だった。しかし、たどり着いた先で出会ったのは、魂の宿らない骸骨ばかり。彼は苦笑しながら、あなたたちが旅の途上で出会うアンデッドを片端から斬り捨てれば、そうした島が寂れていくのも当然だと皮肉を添える。島は既に見捨てられ、人影もなく、エオルゼアへ戻る術も見つからない。途方に暮れていたその時、彼の腐りかけた肉体に、懐かしい「引き寄せる感覚」が走った。ゾンビブランド様のエーテルが、自分を呼んでいる――そう確信した彼は、その見えざる導きに従って海を渡り、こうしてベッコ島へたどり着いたのだ。</p>
+<p>ナシュは目を輝かせて叫ぶ。ということは、ゾンビブランドことヒルディブランドと、彼を奪った盗人が、この島のどこかにいるに違いないと。今もなお紳士の呼び声を感じられるのか、そして案内してもらえるのかと、彼女は身を乗り出して問いかける。ジェントル・デッドマンは、若干物騒な冗談を交えつつ、自分の実力を保証する。うかつな商人の頭を割り、中身を平らげるくらい、誰かが声を上げる前にやってのけられるとまで言ってみせ、だから自分についてくるよう促すのだった。</p>
+<p>道中、ナシュはどうしても「オオカミのような装い」が気になって仕方がない。ジェントル・デッドマンは、旅の芸術家と出会ったときのことを語る。生者との会話がいかに難しいかを打ち明けたところ、その男は、自分の恐ろしい風貌を和らげるための衣装をこしらえてくれたのだという。大きな耳と尻尾を揺らすその姿には、確かにどこか愛嬌がある。ナシュの「とても似合っている」という言葉は、彼の「死せる心」を温めるには十分だった。それでも、長々と立ち話をしている暇はない。ゾンビブランド様が自分たちを待っている、と彼は再び先を急がせる。</p>
+<p>一方のシュギレには、聞けば聞くほど訳が分からない。しかし、目の前の「いびつな狼男の亡者」が盗人への道を示してくれるというのなら、信じてみるほかない。こうして一行はベッコ島の奥へと進み、ジェントル・デッドマンは「主の気配はすぐそこだ」と告げる。シュギレは盗人を捕らえる覚悟を固め、ナシュは紳士との再会を胸に描き、あなたもまた足を速めていく。</p>
+<p>やがて岩場の先に、再び大きな耳とふさふさの尾を持つ影が見える。ナシュが「オオカミだ！」と声を上げると、シュギレはついにウルフ・バーグラーを追い詰めたと確信し、堂々と名乗りを上げて降伏を迫る。盗人は舌打ちしながら、自分がとうとう捕まるところだったと悔しげに吐き捨てる。ナシュは、目の前の男が自分の描いた似顔絵と寸分違わぬことに感動し、シュギレは「今日こそ盗みの連鎖に終止符を打つ」と宣言する。幕府がこの日、「ルパン」とも呼ばれる男をついに手中に収めるのだと。しかし、盗人は踵を返して逃げ出した。</p>
+<p>追おうとして振り返ると、ヒルディブランドは相変わらず石像のように固まったままだ。ナシュは「こうなったらいつものアレしかない」とばかりに、「ナシュ特製お団子風ボム」の三連続投下を決める。次の瞬間、紳士は「ボーーーーーーンブ！」と悲鳴を上げ、盗人は「バカ者、早く処分しろ、巻き添えで死ぬつもりか！」と怒鳴り返す。ヒルディブランドは、あなたとナシュに助けを求めて叫ぶが、ナシュは「心配ご無用！」と笑って受け流す。ダラガブから地上に叩き落とされても生きて帰ってきた男なのだから、この程度はどうということもない――それより今は、盗人を逃がさないことこそが先決だと。シュギレもまた、「逃げ場はない」と言いつつ、「落下」という選択肢だけは残っていると皮肉を添える。</p>
+<p>盗人はそれを聞き、「そういうことなら、落ちる方を選ぶさ」と言って身を翻す。高価な「像」に手を出したことが、自分をここまで追い詰めた原因だと自嘲しつつ、「像が像でないのなら、ここにとどまる理由もない」と言い残し、見事な逃げ足を見せる。シュギレは、その厚顔無恥さに憤りを隠せない。だが、爆弾が果たした役目は明らかだった。</p>
+<p>爆煙の中から、紳士がよろよろと目を覚まし、まずあなたに向き直る。彼は、冷静に状況を読み切り、自分を犠牲にする判断をするナシュならまだしも、まさかあなたまで同じ選択をするとは思わなかったと、少し拗ねたように言う。一方ナシュは、「やっぱり瀕死体験は目覚ましに最高ね！」と満面の笑みを浮かべる。ヒルディブランドが元どおりになった、とはしゃぐ彼女とは対照的に、シュギレは言葉を失っていた。つい先ほどまでただの石像であったはずのエオルゼアの紳士が、今や生きた人間のように身振り手振りを交えて話しているのだ。</p>
+<p>そこへジェントル・デッドマンが口を挟み、「息もしていない自分でさえこうして動けるのだから、ゾンビブランド様が石像のはずがない」と穏やかに諭す。ナシュも力強くうなずき、「彼は『異邦の紳士』にして『超・名探偵』なのだから」と、誇らしげに紹介し直す。ヒルディブランドはシュギレの装いに目を留め、その衣服から彼が侍であると見抜く。ならば、ここは極東の地に違いないと推理し、異国で目を覚ましたと思ったら、最初に出迎えてくれたのが熱心なファンの侍だったことにご満悦だ。</p>
+<p>しかし、感慨に浸っている暇はない。彼はすでに「助けを求める者の気配」を感じ取ったと宣言し、「名誉と正義と、そして固ゆで卵のために」走り出す。ナシュは必死にその背を追いかけ、「待ってください、そんなに速く走れません！」と叫びながら、塔の陰へと消えていく。残されたジェントル・デッドマンは、その背中を見送りながら、「ゾンビブランド様は本当にいつものお姿に戻られた」と感無量の面持ちで語る。涙を流したいところだが、「生憎、もう目玉も涙腺もなくてね」と苦笑を添える。そして、自分にはエオルゼアで待つ「ジェントル・デッドメン」の仲間たちのもとへ戻る務めがあると告げ、ゾンビブランド様という「不死者の主」をあなたたちに託すのだった。</p>
+<p>シュギレは、エオルゼアという地に改めて思いを馳せる。あの国では、一人の男が「名探偵」でありながら「不死者の君主」でもあり得るのだ。あまりに奇妙で不可思議な風習に、彼は一生理解が追いつかないかもしれないと苦笑する。それでも、盗人を取り逃がした悔しさと同じくらい、紳士が仲間たちと再会できたことを嬉しく思っていた。こうなれば、彼の「鋭い勘」がどこへ導くのか、最後まで見届けるしかない。そう語り、一行は再び紳士の後を追って歩き出す。</p>
+<p>ほどなくして、シュギレはもう一人の小柄な獣人を見つけ、「先の競売で売られていた『ネズミ男』と同じか」と呟く。するとナシュが、「いいえ、あれはキキルンよ」と訂正し、「ヒルディブランドさんがキキルンを見つけたのね」と微笑む。心細げな「迷子のキキルン」は、恐る恐る目の前の一行を見上げ、「困っている友だちがいる。あなたたちは友だち？」と問いかける。ヒルディブランドは途端に真剣な顔になり、「嗅ぎつけた事件はやはり間違いなかった」と胸を張る。「その名も『誘拐されたキキルン事件』！」と高らかに宣言し、この小さな水夫の親友が、クガネの街で悪漢にさらわれたのだと説明する。</p>
+<p>キキルンは、不器用ながらも懸命に、自分たちの身に起きた出来事を語る。彼と友は East Aldenard Trading Company の船に乗り、クガネへと航海する船員だった。荷下ろしのためにクガネの港に停泊していたとき、「善良そうな商人」が彼らに声をかけ、豪勢な食事に招待すると持ちかけてきた。ふたりはその誘いに乗り、商人の後について、右へ左へと何度も角を曲がるうちに、すっかり道に迷ってしまう。やがて人通りのない路地に踏み込んだ瞬間、複数の男たちが飛び出してきて、友の口に猿ぐつわをかませ、頭から袋を被せた。キキルン自身は必死にもがいて逃げ出し、最後には海へ飛び込むことで追っ手を振り切ったという。流れに流され、気づけばベッコ島の岸辺に打ち上げられていたのだ。</p>
+<p>ヒルディブランドは、なぜわざわざキキルンの水夫を攫う必要があったのかと首をひねる。するとシュギレは、極東に伝わる「ネズミ男」の伝承を引き合いに出す。その肉を食べれば永遠の命を得られると信じる者がおり、キキルンはその姿ゆえに、ここではしばしば「ネズミ男」と誤解されるのだと。そして、奇妙な風貌のエオルゼア人水夫、実は人間である「像」、そして今目の前にいるキキルン――これらすべての背後にいる「善良な商人」は、ひとりしかいないと断じる。遠い異国から「珍品」を集めてきては競売にかける、あの男だ。</p>
+<p>ナシュは、「ならばこのキキルンの親友も助けなきゃ」と拳を握り、シュギレもまた、「悪しき者には相応の罰を、罪なき者には自由を」と誓いの言葉を口にする。そこへヒルディブランドが勢いよく乗っかり、「もちろん、今まさに同じことを言おうとしていたところですとも！」と胸を張る。一行は、誘拐犯である「善良な商人」を追及すべく、再びクガネの黄金通りへと向かうのだった。</p>
+<p>黄金通りに戻った彼らの前に現れた Silver-tongued Broker は、生きている「エオルゼアの紳士」の姿を目にした途端、雷に打たれたような顔で「まさか、生きていたのか」と叫ぶ。ヒルディブランドは一歩前へ出て、「お前の審判の時が来た」と高らかに告げ、シュギレは Qiqirn の水夫を誘拐し、奴隷として売り払った罪で逮捕すると宣言する。</p>
+<p>仲買人は、そんな非道な行いをした覚えはないととぼけるばかりか、シュギレの権限そのものに疑問を投げかける。彼は赤誠組の者でもなく、田舎から出てきた一介の浪人に過ぎないではないかと。自らはその浪人に仕事を与え、競売の警護を任せてやったというのに、守るべき貴重な「出品物」を盗まれたのだ――と、逆に責め立てる。</p>
+<p>これに対しヒルディブランドは、盗まれた「像」こそ、いま目の前に立つ自分自身であり、さらに、誘拐から逃げ延びたキキルンもここにいる――これ以上ない証拠だと反論する。だが仲買人は、「エオルゼアでどれほどの権勢を誇ろうとも、ここヒンガシでは通用しない」と冷ややかに言い放つ。犯罪者を尋問し、逮捕できるのは赤誠組だけだと突っぱね、「それではごきげんよう」と立ち去ろうとする。</p>
+<p>そこへ、厳しい面持ちの赤誠組組士が一歩前に出る。「連中に答える必要はないが、俺にはある」と、仲買人に鋭い視線を向ける。彼は、すでに仲買人の悪行には目をつけており、これまで粘り強く証拠を集めてきたのだと明かす。ウルフ・バーグラーの騒動は、単に逮捕の時期を少し遅らせただけに過ぎない。必要な証拠はすでに揃っており、あとは引っ立てるだけだと告げ、「おとなしく来るならまだしも、抵抗するなら、こちらとしてはむしろ好都合だ」と冷然と言い放つ。</p>
+<p>そして彼は、シュギレの方へ向き直る。今回の一件で、仲買人を断罪する決定的な材料を得られたのは、ひとえにシュギレたちの働きがあってこそだ――そう礼を述べ、「心より感謝する」と頭を下げる。思いがけない言葉に、シュギレは顔を紅潮させ、「このような誉れの言葉を賜れるとは」と感激し、それが自分の汚名返上につながればと口にしかける。だが、組士はすぐさまその言葉を遮る。</p>
+<p>ウルフ・バーグラーの犯行現場に居合わせながら、赤誠組に一報を入れることなく単独で追跡したことは、決して看過できない重大な過ちだと、彼は厳しく言い渡す。名声と私利私欲のために無謀な行動に走る者を、赤誠組に迎え入れるわけにはいかない――その信念から、今この時点でシュギレを組に迎えることはできないと宣告する。</p>
+<p>一方、救い出された迷子のキキルンは、親友を取り戻せた喜びを全身で表しながら、「もう怪しい商人について行かない」と何度も礼を述べる。シュギレは深々と頭を下げ、自らの過ちを詫びる。そして、商人が言ったとおり、自分はただの浪人に過ぎないことを認める。かつてクガネにやって来て赤誠組への入隊を志したものの、不適格と判断され、侍として他に働き口も見つからず、貧しさにあえいでいた日々のことを静かに語る。そんな折、富と権勢を誇る者ばかりを狙う盗人、「ウルフ・バーグラー」の噂を耳にした。もし自分がその大盗賊を捕まえてみせれば、赤誠組もさすがに実力を認めてくれるのではないか――その一心でここまで追い続けてきたのだと。</p>
+<p>そこでヒルディブランドは手を上げ、「もう十分だ」と彼の言葉を制する。シュギレのまっすぐな性分と正義への情熱は、すでに自分の心を打ったと、真顔で告げる。そして、ここに誓うと声を張り上げる。「このヒルディブランド、稀代の名探偵にしてエオルゼアきっての紳士が、あなたとシュギレ殿とともに世界の果てまで――七つの地獄の底から天の頂まで――クガネのウルフ・バーグラーを追い詰めてみせましょう！」と。その場で即座に「大捜査計画」を宣言し、「今この瞬間から捜査開始だ！」と勢いよく締めくくる。</p>
+<p>シュギレは、目の前の男をどう評してよいものか、まだ答えを出せずにいる。それでも、その申し出に感謝している自分がいることも否定できない。後になって彼は、改めてあなたに向き直り、静かに礼を述べる。今回の追跡劇に協力してくれた者たちの中でも、とりわけあなたの力は頼もしかったと。ウルフ・バーグラーは狡猾にして油断ならぬ敵であり、ただ情熱に任せて突き進むだけでは決して捕まえられない。ヒルディブランドとナシュの助力をありがたく思いつつも、最後にものを言うのは、冷静さを失わない自分とあなたの判断だと信じている――いつかあの盗人を裁きの場へ引きずり出す日まで、と彼は静かに誓うのだった。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>クエスト発行</b> シグレ　紅玉海 <small class="muted">(X:38.1, Y:38.1)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="life-imitates-art-imitates-life.html">金で買われる事件屋</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="in-the-eye-of-the-hingan.html">うわさの剣豪</a></div>
+</div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'被盯上的獵物',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+<p>你與 Nashu 和 Shigure 一同前往 The Ruby Sea，抬頭望向那座一路延伸到天際的巨塔 Sakazuki。Nashu 歪著頭、眯起眼睛打量那座塔，興奮地說如果換個角度看，好像長著一對耳朵，又好像是角。相較之下，Shigure 語氣沉穩得多，他像一名盡責的 samurai 一樣，向你解釋這片海域的規則。紅玉海上的每一艘船，都不可能逃過海賊聯盟的監視；他們的生存，全仰賴所謂的「Ruby Tithe」──也就是收取通行費。任何不想被視為海盜、被洗劫一空的旅人，都必須先到 Sakazuki，向海賊們正式「打過招呼」，付清應有的代價。</p>
+<p>然而，當真正要伸手進錢袋時，Shigure 卻只能苦笑著哀求，說自己可不是什麼富有的 merchant，拜託對方網開一面。就在這時，你們遇見了 Ihaki。當他聽說你們正在找「坐船的 bandit」時，只是不屑地冷哼一聲。在他眼裡，不肯繳納關稅的人才是真正的賊。他提起不久前看到的一個男人──站在小船上，完全不理會風和浪，一動也不動，就像真正的死人一樣漂在水面上。面對這樣不祥的畫面，Ihaki 自認無能為力，也不願惹麻煩，只能裝作什麼都沒看見。那艘船的方向，是名為 Isle of Bekko 的小島。如果有人願意和死人打交道，就追過去吧，他這麼說。</p>
+<p>這番話，讓 Shigure 心中原本零散的線索瞬間串成一條清楚的線。那個「死人」恐怕根本不是屍體，而是被誤認為死人的 The Eoruzean Gentleman，而小船的主人，就是 Kugane Wolf Burglar。他又想起海賊聯盟的聯絡人說過，只要帶一名 trespasser 來交給他們，就能抵掉 Ruby Tithe。既然如此，抓到盜賊本身，就相當於完成了支付義務。Shigure 當機立斷，宣告下一步就是前往 Isle of Bekko。無論是追捕盜賊，還是尋回被奪走的紳士，答案肯定都在那座島上。</p>
+<p>抵達 Isle of Bekko 的海岸不久，Nashu 突然停下腳步，指著前方大喊。她說那裡有一隻狼──至少看起來擁有一對大耳朵和一條蓬鬆的長尾巴。Shigure 聽得精神一振，自信地認定那就是他們苦苦追尋的 Wolf Burglar，大聲喝令對方立刻投降。然而，當你們靠近到能看清輪廓的距離時，他的自信瞬間崩潰。站在那裡的並不是生者，而是一具明顯已經死去卻仍在行走的身體。Shigure 臉色發白，喃喃說那是被未了心願束縛在現世的亡靈，卻被對方平靜地否認。這名 Gentle Dead Man 表示，自己的靈魂並沒有什麼沉重的枷鎖；相反地，他在死亡之後，比生前獲得更多的自由與目的，甚至還找到了同伴與歸屬。</p>
+<p>Nashu 很快就認出他是 Gentle Dead Men 的一員，疑惑他為什麼會離 Eorzea 那麼遙遠。這位亡者對能在這麼遠的地方再遇到 Master Zombibrand 的同伴感到十分欣喜，於是開始講述自己的旅程。他說，曾在 Sirensong Sea 深處聽聞有一座島，據說聚集了許多和自己相似的亡者。對一個孤單的不死者來說，那樣的地方是難以抗拒的安身之所，因此同伴們決定派出使者前往，而他理所當然地被選中了。</p>
+<p>然而，他抵達後發現的，只是一堆堆毫無生氣的骸骨，那些骨頭裡已經不再住著任何靈魂。他還半開玩笑地提了一句，若你們一路上把遇到的 undead 全都砍個乾淨，那要找到「同類」本來就不容易。那座島早已被棄置，沒有可以依靠的人，而 Eorzea 又遙不可及，他一度完全不知道下一步該往哪裡走。就在那時，他腐朽的身體裡傳來一股熟悉的牽引感。他立刻明白，那是 Master Zombibrand 的 aether 在召喚自己。於是，他追著那道看不見的軌跡，一路漂流到現在所在的這座小島。</p>
+<p>聽到這裡，Nashu 的眼睛亮了起來。這不就代表，Inspector Hildibrand 和那個搶走他的盜賊，也在這座島上的某個角落嗎？她連忙問對方是否仍能感受到檢查官的呼喚，並請他帶路。Gentle Dead Man 用帶著黑色幽默的語氣保證自己絕對沒問題，還順口說只要他願意，甚至可以在別人來得及叫喊之前，就把倒楣商人的頭顱打開，把裡面吃得一乾二淨。說完，他便示意你們跟著他往島的深處前進。</p>
+<p>行進途中，Nashu 的好奇心又轉向他身上那套「像狼一樣的裝扮」。Gentle Dead Man 於是提起自己曾在旅途中遇到一位 traveling artist 的經過。那人聽他抱怨與普通人對話有多麼困難後，便替他做了一套服裝，認為這樣能稍微柔和他原本駭人的外表。結果證明，這套狼裝的確讓他看起來多了幾分可愛，而不只是令人恐懼的亡者而已。Nashu 的稱讚讓他「死去的心」也覺得溫暖許多，但他隨即提醒大家，Master Zombibrand 還在等待，不能在這裡耽擱。</p>
+<p>至於 Shigure，越聽越搞不懂眼前這個「扭曲的狼形亡者」到底是哪一路人物。不過，只要他真能帶路找到盜賊，那就值得信任。於是，你們跟著 Gentle Dead Man 繼續深入 Isle of Bekko。他一面走，一面說 Master 的氣息就在不遠處，Nashu 則滿懷期待，希望能在這座島上與檢查官重逢，而 Shigure 也做好了將 Wolf Burglar 一舉逮捕的準備。</p>
+<p>沒過多久，你們又在岩壁前方看見一個有著大耳朵與蓬鬆尾巴的身影。Nashu 再次驚呼那是一隻狼，Shigure 則認定獵物已經走投無路，高聲宣告你們終於抓到了 Wolf Burglar，要他束手就擒。盜賊低聲咒罵，說自己居然真的被追到這一步，而 Nashu 則興奮地發現，眼前的人和自己畫出的草圖一模一樣。Shigure 宣稱，這一天將是他連串竊盜行為的終點，bakufu 終於可以將他這個「Lupin」帶回去伏法。話才說完，盜賊就調頭拔腿狂奔。</p>
+<p>你們正要追上去時，回頭一看，Inspector Hildibrand 依然像雕像一樣停在原地。Nashu 決定採用她慣用的「特效療法」，說是該來一份「Nashu’s Delight──dango style」三連發，說完便開始布置炸彈。下一刻，紳士爆發出撕心裂肺的叫聲，大喊「BOOOOOOOOOMBS!」，盜賊也在一旁吼著，要他快把炸彈丟掉，否則兩個人都要一起送命。Inspector 朝你和 Nashu 拼命求救，但 Nashu 卻毫不擔心地要你們別理會他。這個男人可是連從 Dalamud 墜落那種事都活過來了，這點程度根本不算什麼。現在更重要的，是趁機把 Wolf Burglar 抓住。Shigure 也表示盜賊已經無路可逃，只剩下「往下掉」這一條路可以選。</p>
+<p>於是，盜賊冷靜地做出了選擇。如果結局註定如此，那就乾脆往下跳吧。他一邊感嘆自己之所以會被逼到這地步，是因為伸手去偷那種「大件」的錯誤決定，一邊說如果所謂的「雕像」根本不是真的雕像，那他也沒有留下來的必要。留下一句「下次再見吧，各位捉賊人」，他縱身一躍，消失在你們的視線之外。Shigure 對這種肆無忌憚的態度氣得咬牙切齒，但炸彈確實達成了另一個目的。</p>
+<p>爆炸過後，Hildibrand 從「石像」的姿勢中甦醒過來，第一件事就是轉向你，半抱怨半開玩笑地說，他本以為那種冷靜而算計的決定只會出現在 Nashu 身上，沒想到你也能如此果斷地把他當成可有可無的籌碼。反倒是 Nashu，早已樂不可支地歡呼起來。她說自己早就知道，Inspector 最適合的叫醒方式，就是和死亡擦肩而過。Shigure 則完全說不出話來。先前還像真正雕像一樣一動不動的 The Eoruzean Gentleman，此刻竟然像生者一樣揮手、說話，表情豐富。</p>
+<p>這時，Gentle Dead Man 出聲提醒他，自己明明既沒有呼吸、也沒有心跳，卻依然可以自由行動，何況是 Master Zombibrand，又怎麼可能只是雕像？Nashu 也用力點頭，重新鄭重地介紹 Inspector 的身分──他是 agent of enquiry，也是 inspector extraordinaire，這一點從未改變。Hildibrand 這才有餘裕細看 Shigure 的打扮。他憑著對方的裝束，立刻推斷出那是 samurai 的衣著，進而得出你們現在所在之地正是 Far East 的結論。能在異國他鄉甦醒，又一出場就遇見熱情的仰慕者，這種展開正合他意。</p>
+<p>他很快宣稱，自己的「名偵探直覺」已經感應到有委託人正在等待，必須立刻出發，為了榮耀、正義，還有一顆完美的水煮蛋。話一說完，他便頭也不回地奔了出去。Nashu 只好邊叫邊追，喊著自己跑得沒那麼快，身影很快消失在島上的岩石與樹影間。留下來的 Gentle Dead Man 望著他們遠去的背影，感慨地說 Master Zombibrand 果然恢復成以往那個模樣。若是還有眼淚，他應該會忍不住掉下來，只可惜現在既沒有眼眶，也沒有淚腺。他知道自己不能久留，因為遠在 Eorzea 的 Gentle Dead Men 還在等他回去。他把這位 undead overlord 託付給你們，好好保護，然後毅然決然地準備離開島嶼。</p>
+<p>Shigure 望著這一切，心中只覺得 Eorzea 真是個充滿不可思議風俗的地方。一個人既可以是 inspector extraordinaire，同時又是 zombie overlord，光是想像就讓他難以理解。即便如此，他還是由衷替 Hildibrand 能與同伴重逢感到高興。雖然 Wolf Burglar 又一次從他手中溜走，但既然如此，他也只能繼續跟上，看那位紳士口中的「敏銳直覺」會把大家帶往何處。</p>
+<p>沒多久，Shigure 注意到不遠處又出現一個小小的獸人身影，忍不住想到之前在拍賣會上被當作貨品出售的那隻「ratman」。Nashu 卻笑著出聲糾正，說那不是 ratman，而是 Qiqirn，還說看來 Inspector 又找到了一位新的委託人。這名 Wayward Qiqirn 抬頭望著你們，小心翼翼地問你們是不是「friend」，因為他有一位「friend in need of friend」。</p>
+<p>Hildibrand 聽到這裡，立刻認真起來，宣稱自己早就聞到事件的味道了，這就是「The Case of the Kidnapped Qiqirn」。他解釋說，這隻 Qiqirn 最要好的 friend，被 Kugane 某個惡徒綁走了。Wayward Qiqirn 雖然語氣斷斷續續，卻努力把事情講清楚。他和 friend 是 East Aldenard Trading Company 的 sailor，搭乘商船在海上航行，此次來到 Kugane 卸貨。當船停在港口時，有一位看起來「goodly」的 merchant 上前搭話，說要請他們吃一頓豐盛的大餐。兩人沒有多想，就跟著對方離開港口。</p>
+<p>一路上轉來轉去，左轉、右轉又左轉，很快就迷失了方向。直到他們走進一條安靜的巷子，突然有一群 bad men 衝出來，把 friend 的嘴堵住，再罩上一個袋子。Wayward Qiqirn 拼命反抗，趁亂成功掙脫，然後一口氣逃跑，最後選擇跳進海裡。冰冷的海水把他帶離了危險，也把他一路推送到這座 Isle of Bekko 的岸邊。</p>
+<p>Hildibrand 對於有人特地綁走一名 Qiqirn sailor 這件事感到困惑，於是思索起綁架的動機。Shigure 這時說出自己的推論：在這一帶，Qiqirn 很容易被當成傳說中的 ratman，而有些人相信，食用 ratman 的肉可以獲得永恆的生命。對那些人而言，他們根本不在乎對方是 Qiqirn 還是什麼，只把他視為謠言中的「幸運肉」。眼前這位 Qiqirn 水手、曾被當成「雕像」拍賣的 Hildibrand、以及早前聽到的種種線索，全都指向同一個人──那位自稱「goodly merchant」的 Silver-tongued Broker。Shigure 認定，這傢伙很可能不只綁架了這一位 Qiqirn，還從各地抓來形貌特殊的人，通通當成奇貨販賣。</p>
+<p>Nashu 聽完後，立刻表示無論如何都得把那位「friendly friend」救出來。Shigure 也跟著發誓，他們一定要讓邪惡之人得到應有的懲罰，讓無辜者重獲自由。Hildibrand 當然不會錯過加一句話的機會，他照慣例說，自己原本也正打算說同樣的話。於是，你們再度踏上歸途，往 Hingashi 的 Kugane──往 Kogane Dori 而去。</p>
+<p>在熱鬧的 Kogane Dori 上，Silver-tongued Broker 一見到完好站在眼前的 The Eoruzean Gentleman，宛如被雷擊中般驚叫出聲。Hildibrand 上前一步，高聲宣告他的清算時刻到了。Shigure 緊接著指控他誘拐 Qiqirn sailor，並將對方販賣為奴，正式宣布要將他逮捕。Silver-tongued Broker 卻裝出一副困惑的樣子，說自己要是做過那種卑鄙行為，怎麼可能會忘記？接著他話鋒一轉，質疑 Shigure 憑什麼有資格在這裡逮人。Shigure 不是 Sekiseigumi 的成員，只是一名來自鄉下、到城裡尋找工作的 ronin。他還刻意提起，自己對這名浪人是多麼「仁慈」，願意雇用他擔任拍賣會的 guard，結果對方卻連一尊無價的「 statue」都守不住。</p>
+<p>Hildibrand 則反駁說，那尊被偷走的「piece」就站在你們眼前，旁邊還有一位從他綁架計畫中逃脫的 Qiqirn，這樣的證據已經足夠清楚。即使如此，Silver-tongued Broker 還是冷冷地說，無論這位「Inspector」在 Eorzea 擁有什麼樣的權威，來到這裡都不算數。在 Kugane，只有 Sekiseigumi 才有權審問與逮捕罪犯。他說完這些，就打算以一句「那就此別過」來結束對話，邁開步伐準備離開。</p>
+<p>就在這個瞬間，一名氣質嚴肅的 Sekiseigumi 組士走上前來，對 Silver-tongued Broker 說，他或許可以不回答外人的質問，但沒辦法逃避 Sekiseigumi 的追究。組士坦言，自己早已盯著這名 merchant 許久，對方那些見不得人的勾當，一直在他們的監視之下。只不過現如今，所有需要的 evidence 都已經收集完畢。Wolf Burglar 的介入或許稍微延後了逮捕的時間，但並沒有改變結局。他要 Silver-tongued Broker 自己選擇，是乖乖束手就擒，還是反抗一下，好讓他有理由動手。</p>
+<p>隨後，他轉身對 Shigure 等人說，這次能夠順利扳倒這個 charlatan，多虧了他們提供的線索與協助，於是正式向 Shigure 表達由衷的感謝。突然被如此肯定，Shigure 顯得又慌又感動，說這樣的讚許對自己而言是莫大的榮耀，或許也能多少彌補先前留下的污點。然而，這名組士很快收回了溫和的語氣。他指出，Shigure 雖然曾親眼目睹 Wolf Burglar 的犯罪現場，卻沒有通知 Sekiseigumi，反而選擇獨自追擊。對於一個志在守護城市、維持秩序的 samurai 而言，那樣的行為是無法被接受的。為了避免讓渴望名聲與私利的人進入隊伍，他無法在此時批准 Shigure 加入 Sekiseigumi。</p>
+<p>另一邊，得救的 Wayward Qiqirn 則抱著 friend，反覆向你們致謝。他說自己以後會更加小心，再也不會隨便跟著所謂的 goodly merchant 走進昏暗的小巷裡。Shigure 低頭為自己的行徑道歉，承認如同 Silver-tongued Broker 所說，他不過是一名普通的 ronin。他坦承自己曾為了加入 Sekiseigumi 來到 Kugane，卻被判定不適任。之後，他既找不到像樣的武士工作，又難以維持生計，只好在現實與理想之間掙扎。就在他準備放棄夢想、回鄉之際，他聽說了那位只偷富商與權貴的盜賊──Kugane Wolf Burglar。如果他能將這名臭名昭彰的賊人繩之以法，或許就有機會讓 Sekiseigumi 改變對他的評價。於是，他一路追著這個目標走到了今天。</p>
+<p>Hildibrand 舉起一手，打斷他接下來的道歉。對他來說，Shigure 那份真誠與對正義的熱情，已經足以換來自己的信賴。他在街道中央發下誓言，宣告自己，身為 agent of enquiry、inspector extraordinaire，將與這名 samurai 一起，從七重地獄的深淵到天之巔峰，搜尋整個世界，也要把 Kugane Wolf Burglar 揪出來。更重要的是，他要立刻開始，現在就是第一步。</p>
+<p>Shigure 面對這樣的宣言，內心仍然難以完全理解眼前這個男人到底是怎樣的一個存在，但他也清楚自己真心感激這份援手。事後，他特地轉向你，向你表達了格外鄭重的謝意。在這一路的追捕中，雖然 Hildibrand 和 Nashu 的幫忙也很重要，但真正讓他覺得可靠的人，是你。Wolf Burglar 是一個極其狡猾的敵人，光靠熱情與憤慨是不夠的。Shigure 說，他很珍惜 Inspector 與 Nashu 的力量，但他相信，最後關鍵的一步，會來自他和你這兩個能保持冷靜的頭腦。直到有一天，能真正把那位盜賊押上正義的審判台為止，他都會與你並肩向前。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+  <div class="row"><b>任務發布</b> 時雨　紅玉海 <small class="muted">(X:38.1, Y:38.1)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+  <div class="row"><a class="link" href="life-imitates-art-imitates-life.html">被金錢收買的名偵探</a></div>
+</div>`,
+    followq:`<div class="stack">
+  <div class="row"><a class="link" href="in-the-eye-of-the-hingan.html">傳聞中的劍豪</a></div>
+</div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
