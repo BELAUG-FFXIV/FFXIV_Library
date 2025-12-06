@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A Manager’s Delegation | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – A Manager’s Delegation (DT Patch 7.31)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    /* 展開/收合 */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/Xddprne-ZyA"
+              title="A Manager’s Delegation" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">A Manager’s Delegation</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'A Manager’s Delegation',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>At Glassblowers’ Beacon, Mumukko calls you over and asks if you have a moment to spare. When you agree, he reminds you of the “special guest” he mentioned before: now that the first outpost on another star has been completed, the Forum has dispatched a councilor to conduct an inspection. Because you already have an established rapport with that august institution, he has decided to bring you along as his intermediary. Before you can protest, he hustles you to the cosmoport, where he welcomes Councilor Y’adebh to Phaenna and inquires after her journey. She replies that the trip was not taxing, yet confesses that what she has seen so far has greatly betrayed her expectations—up to this very moment. The initiative would not exist without the Ragnarok, and if Etheirys’s first interstellar expedition is to rely on Sharlayan technology, then it is the Forum’s duty to guard against its misuse. Sharlayan has invested not only machinery but also coin and personnel, most of the researchers here hailing from her homeland. After the Final Days, however, every Sharlayan action is watched more closely than ever. If people come to believe that Sharlayan’s ambitions include extrastellar colonization, conflict is sure to follow. Their continued involvement, she explains, depends on whether your results outweigh that risk—and she intends to make an honest accounting.</p>
+      <p>Feeling the weight of her words, Mumukko quickly turns the conversation toward you, insisting that such a tremendous burden would surely be lightened with the help of the “expert” standing at her side. Y’adebh answers that she has heard tales of your many accomplishments, and that your familiarity with all parties may prove a boon to her work here. She invites you to offer your insight as you see fit, and Mumukko, seizing the opportunity, leaves the councilor in your care, suggesting you begin by introducing her to everything that has been built at Glassblowers’ Beacon. After the formalities, he pulls you aside and nervously warns you not to offend her—Y’adebh is notoriously difficult even by Forum standards. The councilor, for her part, promises to follow your lead and asks that you conduct a thorough tour. As the two of you walk together, you try a little small talk. She falls silent for a moment, then apologizes and admits that it has been some time since you and the Scions last stood before the Forum, and she has been curious how you have spent the intervening days. Judging by the calluses on your hands, she concludes that you have not rested on your laurels at all, but remain every bit the adventurer she has heard so much about.</p>
+      <p>You guide her through Glassblowers’ Beacon, where she studies the camp with a practiced eye. Key facilities stand clustered at the center, encircled by residential and other, less vital structures. The hangar has been positioned to suit Phaenna’s geography, but in its overall arrangement, the outpost closely resembles the original designs for a post-exodus colony. Scaled down though it is, it looks very much like the shelter once envisioned for refugees of the Final Days, complete with familiar comforts echoing those found in the cities of Etheirys. Clearly, the initiative understands how quickly those without extensive field training can become unmoored if they are stripped of the amenities that give them a sense of psychological safety. At your suggestion, she takes a closer look at the bustling camp center, nodding approvingly at the research submission and supply counters placed in a well-trafficked nexus. To her, the entire operation has the appearance of a functioning cooperative, though she remarks that its inner workings will require closer study in future evaluations. Even so, judging by how well the facilities meet the needs of participants, she concludes that your funding has been allocated with admirable acumen and that, at least here, she is satisfied with what she sees.</p>
+      <p>When you lead her outside the outpost to Millefiori, Y’adebh pauses to take in the view. From the ground, Phaenna is every bit as beautiful as it was from above, perhaps even more so. Yet she confesses that it feels strange to descend upon a foreign world only to find her own countrymen milling calmly about. Many of the devices around you are technologies she is seeing for the first time—Loporrit innovations, she guesses—yet she can tell that each has been shaped by Sharlayan theoretics. Though she knew these systems were originally planned for the exodus, seeing that design made manifest on another star strikes her as surreal. After a thoughtful silence, she explains that the initiative’s reports already provide sufficient background on the star’s topography and physical conditions. What she wants now is your informed opinion on the project itself, in detail—if you have time to spare.</p>
+      <p>You agree to undergo her inquiry, and she notes that your answers will be quoted verbatim in her report, though she urges you not to let that trouble you. She begins by asking how you would evaluate cooperation between the Sharlayans and the Loporrits. You answer that they complement each other’s strengths, and she concurs, observing that her countrymen temper the Loporrits’ free-spirited notions with reason, while those same notions drive the initiative ever forward. As an example, she points to the balanced partnership between Mumukko and Phasingway, whose management system has kept serious problems at bay. Next she turns to the collaborators recruited from other nations across Etheirys. You explain that each of you contributes unique skills toward a unified purpose, and she is pleased to include that sentiment in her report, noting that the project clearly benefits from the breadth of knowledge gathered here. In time, the insight gained by these luminaries will be carried back to their homelands and shared for generations to come. When the topic shifts to technology, she remarks that the machinery once designed for Sinus Ardorum has been repurposed for Phaenna, and asks if it is sufficient to the star’s needs. You reply that it functions well, yet you remain committed to continual improvement. Reassured that the systems operate as designed even in previously unknown environs, she praises the rigorous testing that precedes each new phase of exploration and urges that such diligence continue. At last she poses her final question: in your view, what is the purpose of this initiative as a whole? You answer that it is a journey undertaken to learn of the stars and to seek hope. Y’adebh laughs softly that such an answer may be a touch saccharine for an official report, and yet she understands why Searchingway’s lofty ideals attract like-minded souls—and admits that even she might be converted.</p>
+      <p>Having concluded her inquiry, Y’adebh tells you that your optimistic view, forged through firsthand experience with the initiative’s trials and tribulations, bodes well for its future. Your objectivity as someone so closely involved, she says, will lend credibility to her own assessment. She now feels she has seen and heard enough to judge the initiative a worthy use of funding, and thanks you for ensuring that she can return to Sharlayan bearing fortuitous tidings. She confides that she came here fearing Sharlayan’s wisdom might be traded for nothing but needless conflict, but after gazing through the Stellascope and glimpsing the promise slumbering in distant worlds, she has remembered the thrill she felt when she first set foot on this magnificent star. Before she departs, she remarks that she is glad to have finally spoken with you in person, and reveals that she and Y’shtola are half-sisters—two of twelve daughters sired by their late father. Your surprise makes her laugh, and though she notes they have never been especially close, she worries for Y’shtola as any sister would. Her journey here, she admits, was not solely for the Forum’s sake; she also wished to take your measure. She asks that you continue to lend your aid to both the initiative and Y’shtola whenever your paths cross. At last, she suggests returning to Glassblowers’ Beacon to inform Mumukko that her business here is done. Back at the outpost, a nervously fidgeting Mumukko asks how the inspection went, only to be reassured when Y’adebh declares herself well satisfied and praises the initiative’s success to date. She looks forward to his future reports and calmly entrusts the budget to his capable hands before taking her leave. Only then does Mumukko sag with relief, confessing how much he had dreaded facing such a formidable councilor. Relieved and grateful, he thanks you for once more proving the wisdom of his choice of intermediary, and with the Forum’s blessing secured, he invites you to keep walking at his side as the initiative strides ever further into the great unknown—assuming, of course, that you still have the time.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Mumukko, Phaenna <small class="muted">(X:28.4, Y:12.7)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="a-managers-discernment.html">A Manager’s Discernment</a></div>
+      <div class="row"><a class="link" href="perspective-reflected.html">Perspective Reflected</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="a-managers-patience.html">A Manager’s Patience</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'プロジェクトマネージャーの意義あるお仕事',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>グラスブロワーズ・ビーコンでムムッコに呼び止められたあなたは、少し時間があるかと尋ねられる。うなずいて応じると、彼は以前話していた「特別な来訪者」のことを思い出させる。惑星パエンナでの最初の前哨基地が完成した今、フォーラムはその成果を視察するために評議員を派遣してきたというのだ。シャーレアンの重鎮たちと築いた信頼関係を見込んで、ムムッコはあなたを視察の仲介役として同道させることに決めていた。そう説明すると、彼はあなたに礼を言う暇も与えぬままコスモポートへと連れて行き、到着したヤ・アデブ評議員をパエンナへ迎え入れる。旅路の疲れを案じるムムッコに対し、彼女は道中はさしたる負担ではなかったと答えつつも、ここに至るまでに見てきたものが自分の予想を大きく裏切ったと打ち明ける。ラグナロクなくしてこの計画はありえず、エーテルス初の星間遠征がシャーレアンの技術に依存するのであれば、その濫用を防ぐのはフォーラムの務めだ。シャーレアンは技術だけでなく、多額の資金と人材をも投じており、ここで働く研究者の多くも彼女の祖国から来ている。だが「ファイナルデイズ」以降、シャーレアンの行動はこれまで以上に厳しい目にさらされている。もしも彼らの野心が「星の外への植民」にまで及ぶと受け取られれば、避けがたい対立が生じるだろう。だからこそ、リスクを上回る成果を示せるかどうかが、今後も関わり続ける条件であり、自分はその是非を正直に見極めに来たのだとヤ・アデブは告げる。</p>
+      <p>重責を思い知らされたムムッコは、すかさず話題をあなたへと向け、「この重荷も、そこの“専門家”の助けがあればぐっと軽くなるはずだ」と評議員に訴える。ヤ・アデブは、あなたの多くの武勇伝を耳にしていると語り、関係者すべてに通じたあなたの立場は、視察を進めるうえで大きな助けになるかもしれないと認める。そして、必要とあらばいつでも意見を聞かせてほしいと申し出ると、ムムッコは好機とばかりに評議員をあなたに託し、グラスブロワーズ・ビーコンの施設を案内してさしあげてほしいと頼む。形式的な挨拶を終えたところで、ムムッコはあなたを脇へ呼び、あのヤ・アデブ評議員はフォーラムの中でもひときわ扱いづらい人物だと念を押し、「くれぐれも怒らせないように」と震える声で釘を刺す。一方のヤ・アデブは、あなたの案内に従うと約束し、どうか手を抜かず、徹底的に見せてほしいと穏やかに告げる。歩き出したあなたが軽く話しかけると、彼女はしばし黙り込み、それから謝意を示しつつ口を開いた。暁の血盟と共にフォーラムの前に立った日から久しく、あの後あなたがどのような時間を過ごしてきたのか気になっていたのだという。だが、あなたの手のひらに刻まれた固いまめを見るかぎり、華々しい武勲に安住するどころか、今もなお噂に違わぬ冒険者として歩み続けているのだと彼女は確信する。</p>
+      <p>あなたはヤ・アデブを伴い、グラスブロワーズ・ビーコンの各所を案内していく。彼女はまず、拠点全体の構造を鋭い眼差しで眺める。中心部には研究や運営に欠かせない主要施設が集められ、その周囲を居住区や優先度の低い設備が取り囲んでいる。ハンガーの配置は惑星パエンナの地形に合わせて調整されているものの、全体のレイアウトは、かつて想定されていた「脱出計画の入植地」の設計図にきわめて近い。規模こそ小さいが、ファイナルデイズの難民を迎え入れる避難施設として構想された居住地を思わせ、エーテルスの都市を連想させる「慣れ親しんだ快適さ」が各所に散りばめられているのだ。ヤ・アデブは、野外活動に不慣れな人々ほど、見慣れた生活基盤を失うことで心の拠り所を見失いやすいことを、計画側がよく理解していると評する。あなたの案内でキャンプ中央へと足を運ぶと、彼女は研究提出窓口と補給カウンターが往来の多い場所にまとめられている様子を見て、「共同体として機能していることが一目でわかる」と満足げにうなずく。もっとも、実際の運営の細部は今後の視察で改めて確認する必要があるとも付け加えながら、少なくともここまでの施設配置から判断するに、与えられた資金は参加者の需要にきちんと応える形で、理にかなって使われていると結論づけ、「この区画に関しては十分に評価に値する」と述べる。</p>
+      <p>やがてあなたは、拠点の外にあるミレフィオーリへと彼女を連れ出す。地表から見上げるパエンナの景色は、軌道上から見たそれにも勝るほどの美しさで、ヤ・アデブはしばし言葉を失う。見知らぬ星の地を踏みしめながら、そこに暮らすのが他ならぬシャーレアンの同胞たちであるという光景は、彼女に奇妙な心地よさと違和感の入り混じった感覚を抱かせる。周囲で稼働する多くの機器は、彼女にとっても初めて目にする技術であり、その多くがロポリットたちの発明品だろうと推測する一方で、その根本にはシャーレアン流の理論が確かに息づいていると見抜く。かつて「脱出計画」のために構想された技術が、こうして異星の大地に実装されている――その事実を目の当たりにし、彼女は「現実離れした光景だ」と率直な感想を漏らす。やがて考え込むようにうなったあと、パエンナの地勢や環境については、これまでの報告書で十分な資料が揃っていると述べ、むしろ今知りたいのは、この計画そのものを当事者として見てきたあなたの見解だと言う。そして、もし時間が許すのであれば、詳細な意見をじっくり聞かせてほしいと頼みかける。</p>
+      <p>あなたが問いかけに応じると、ヤ・アデブはまず、これからの受け答えが報告書に原文のまま記載されることを断りつつ、それを気にして言葉を濁す必要はないと微笑む。最初の質問は、シャーレアンとロポリットたちの協力体制についてだ。あなたは、互いの長所を補い合っていると答える。彼女はその答えにうなずき、突拍子もない発想で計画を前に進めようとするロポリットたちに対し、シャーレアンの研究者たちが理性的な視点を持ち込むことで、良い均衡が保たれていると評する。その好例として、ムムッコとフェイジングウェイの二人が築いた管理体制を挙げ、これまで大きな問題が起きていないのは彼らの手腕あってのことだと言葉を添える。次の問いは、エーテルス各地から招かれた協力者たちの働きぶりについてである。あなたは、出身地こそ違えど、それぞれが異なる技術と経験を持ち寄り、ひとつの目的のために力を尽くしていると説明する。ヤ・アデブは、その見解を報告書に記すことを喜び、幅広い知見が結集していることは計画にとって大きな強みであり、ここで得られた知識は、いずれ彼らが故郷へ戻ったとき、世代を越えてエーテルス全土へと還元されていくはずだと語る。話題が技術面に移ると、彼女はシヌス・アルドルム向けに設計された機器が、現在はパエンナ用に転用されていることに触れ、この惑星の需要を満たすのに十分かどうかを尋ねてくる。あなたは、現状の運用には支障はなく、同時に改善の余地を常に探っていると答える。未知の環境においても設計どおりに機能していると聞き、彼女は胸をなでおろしつつ、それを可能にしているのは、各段階の探索に先立って行われる厳格な検証作業だと評価し、その姿勢を今後も決して緩めないようにと念を押す。やがて最後の質問として、彼女はこの計画全体の目的をあなた自身はどう捉えているのかと尋ねる。あなたが「星々を知り、そこに希望を求める旅だ」と答えると、ヤ・アデブは思わず笑い声を漏らし、「サーチングウェイらしい高邁な理想に満ちた言葉だ」と評する。公式な報告書に記すにはいささか甘く感じられるものの、その理想に惹かれて集う者たちの心情は理解でき、自身もいずれ感化されてしまうかもしれないと、どこか楽しげに打ち明けるのだった。</p>
+      <p>質疑を終えたヤ・アデブは、計画の苦楽を身をもって味わってきたあなたが、なおもこれほど前向きな見解を抱いていることは心強いと述べる。計画に深く関わりながらも冷静さを失っていないあなたの証言は、自身の評価に大きな説得力を与えてくれるだろうとも言い添える。そして、ここまでで得た情報と印象をもって、この計画が投じられた資金に見合う価値ある取り組みであると判断できたと宣言し、彼女は協力への感謝を込めてあなたに頭を下げる。シャーレアンの知恵が、ただ無用な争いを招くだけのものになってはいないか――そんな不安を抱えてここへ来たが、ステラースコープを通して見た遥かなる世界の可能性に触れ、初めてこの星に足を踏み入れたときと同じ高鳴りを再び思い出したのだと語る。別れに先立ち、彼女はついに念願だったあなたとの対面を果たせた喜びを口にし、自分とヤ・シュトラが、亡き父のもとに生まれた十二人の娘のうちの二人であり、自身がその長女であることを打ち明ける。その告白にあなたが驚くと、彼女はおかしそうに笑い、たしかに二人は決して仲睦まじい姉妹ではないが、それでも姉としてヤ・シュトラの身を案じているのだと心情を吐露する。今回の旅もフォーラムの任務だけが目的ではなく、あなたという人物を自らの目で見極めたいという思いもあったと明かし、これからも機会があればこの計画に力を貸し、そしてヤ・シュトラと道を交えるときには変わらぬ助力を願いたいと静かに頼み込む。やがて彼女は、そろそろムムッコに視察の終了を伝えようと提案し、あなたと共にグラスブロワーズ・ビーコンへと歩を戻す。拠点に戻るなり、ムムッコはおずおずと視察の結果を尋ねるが、ヤ・アデブは落ち着いた口調で、「専門家」の協力のおかげで実りある対話ができ、視察は大いに満足のいくものとなったと告げる。彼女は、これまでの成果が非常に優れていることの証だと労いつつ、今後も進捗の報告を楽しみにしていると約束し、資金管理を任せることにも何の不安も抱いていないと、ムムッコに信頼の言葉を預ける。そして別れの挨拶を済ませると、エーテルスへと帰還し、終わりなき政治の駆け引きへと戻っていくのだった。残されたムムッコは、「あのヤ・アデブ評議員を相手に無事に乗り切れたのは奇跡だ」と胸をなでおろし、あなたを仲介役に選んだ判断が正しかったと、心の底から礼を述べる。フォーラムからの後押しも得られた今こそ、計画はさらなる未知へと歩みを進めていく――そう高らかに宣言しながら、「もちろん、これからも一緒に付き合ってくれるよね？」と、あなたの時間がまだ残っていることを期待するように微笑みかけるのだった。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> ムムッコ　惑星パエンナ <small class="muted">(X:28.4, Y:12.7)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="a-managers-discernment.html">プロジェクトマネージャーの明察なお仕事</a></div>
+      <div class="row"><a class="link" href="perspective-reflected.html">ガラスに映る未来</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="a-managers-patience.html">プロジェクトマネージャーの小粋なお仕事</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'經理的委派之道',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>在 Glassblowers’ Beacon，Mumukko 叫住了你，問你現在有沒有空。他見你點頭答應，便再次提起先前說過的「特別來賓」──隨著第一座建在異星上的前哨基地完工，Forum 派了一位評議員前來視察。因為你過去已和這個尊貴機構建立起信賴關係，他決定請你擔任這次視察的中間協調人。話才說完，他就拉著你前往 cosmoport，親自迎接抵達 Phaenna 的評議員 Y’adebh，關切問候她的旅途是否辛勞。Y’adebh 回應說旅程算不上艱苦，但也坦承一路所見所聞，直到此刻都大大顛覆了她原本的預期。沒有 Ragnarok，就不會有這整個計畫；若 Etheirys 首次正式的星際遠征要仰賴 Sharlayan 的技術，那麼防止這些技術被濫用，就是 Forum 無可逃避的責任。Sharlayan 投入的不只是機械，還有鉅額資金與人力，而這裡的大多數研究者也確實來自她的祖國。然而自 Final Days 之後，世人對 Sharlayan 的一舉一動比以往更加嚴格檢視。若有人認為他們的野心包含「星外殖民」，衝突必然隨之而來。因此，她此行的目的，就是要評估這項計畫的成果能否足以抵消那樣的風險，而她打算以最誠實的態度做出判斷。</p>
+      <p>感受到她話語背後的壓力，Mumukko 立刻把焦點推回到你身上，說這樣沉重的負擔，若有身旁這位「專家」幫忙，肯定會輕省許多。Y’adebh 表示，她早就聽說過你許多功績，也知道你熟悉相關的所有人事脈絡，或許能成為她視察上的一大助力。她邀請你在必要時盡情表達意見，而 Mumukko 則趁勢把評議員交給你，請你從 Glassblowers’ Beacon 開始，完整介紹這裡的一切。禮節性寒暄結束後，他又悄悄把你拉到一旁，神情緊張地提醒你千萬別得罪 Y’adebh──就算在 Forum 之中，她也是出了名難以應付的人物。另一方面，Y’adebh 則平靜地向你保證，她會依照你的步伐行動，只希望你帶她仔細走一遍，不要草率帶過。你們一同踏上巡視路線時，你試著先聊點日常，她沉默片刻，接著向你道歉，並坦白說自從你與 Scions 站在 Forum 面前之後，已經過了一段時間，她一直很好奇你在那之後過了怎樣的日子。如今看到你手上的厚繭，她確定你並沒有安坐在那些輝煌的戰功上，而是依舊如傳聞所說，繼續作為一名冒險者在前進。</p>
+      <p>你帶著 Y’adebh 走過 Glassblowers’ Beacon 的各個角落，她則用受過訓練的目光打量整座營地。核心設施集中在中央，外圍則是居住區以及其它相對次要的建築。雖然機庫的位置為配合 Phaenna 的地形做過調整，但整體配置卻與當年為「出走計畫」構想的殖民地設計相當接近。就規模而言，這裡或許小得多，然而無論是格局還是氛圍，都很像當初為了收容 Final Days 難民而想像出來的避難所，同時也刻意保留了許多與 Etheirys 各大城市相似的生活便利。Y’adebh 指出，這顯示計畫團隊十分清楚：對缺乏實地野外訓練的人來說，若連最基本的生活感都被剝奪，很容易就會失去心理上的穩定。依照你的提議，她又特地停在營地中央，觀察設置在往來人流匯集處的研究提交櫃台與補給窗口，對這樣的配置頻頻點頭，認為整個據點一眼看去就像真正的合作社。當然，她也補充說，實際的運作細節仍需在未來的評估中持續追蹤。不過就目前所見，她認為這裡的設施確實緊貼參與者的需求，資金也被運用在合適的地方，因此至少在這一區，她已相當滿意。</p>
+      <p>離開前哨後，你將 Y’adebh 帶到 Millefiori，讓她從高處眺望這顆星球。從地面仰望的 Phaenna，與在軌道上俯瞰時相比，顯得更加動人。Y’adebh 坦言，踏上陌生世界的土地，卻看到四處都是熟悉的 Sharlayan 同胞，這種景象讓她感到既奇妙又有些不真實。她注意到周遭運轉的許多裝置，其實連她也是第一次親眼看到，大概是 Loporrit 的各種新發明；然而仔細觀察後，她又能看出這些設備的基礎理論分明是出自 Sharlayan 的學派。明知這些技術原是為 exodus 準備，如今卻在另一顆星上變成具體的生活基礎，親眼見到之後，仍讓她覺得近乎超現實。沉吟片刻後，她表示關於 Phaenna 的地形與環境，已有充足的調查報告可供參考，反倒是這項計畫本身，她更想聽聽「親身參與者」的看法。如果你有時間，她希望你能詳盡地說一說自己的意見。</p>
+      <p>你答應接受這場詢問，Y’adebh 也先說明，她會將你的回答原文搬進報告，但同時要你別因此顧慮太多。她首先詢問，你如何看待 Sharlayan 與 Loporrit 之間的合作關係。你回答說雙方正好互補長處，她同意這個說法，指出自由奔放、點子總是天馬行空的 Loporrit，正因為有 Sharlayan 研究者帶來的理性視角，才能在不失控的情況下推動計畫，而像 Mumukko 與 Phasingway 的搭檔，就是最好的例子，他們建立的管理體系到目前為止成功避免了任何重大問題。接著，她把話題轉向來自 Etheirys 各國的協力者，問你如何描述他們的工作。你表示，雖然大家的出身與背景都不同，但每個人都拿出自己的專長，為同一個目標努力。Y’adebh 很樂意在報告中引用這樣的觀點，並指出這種廣泛的知識與經驗匯聚，正是這項計畫的一大優勢；而在這裡累積的成果，將來也會隨著這些關鍵人才返鄉，而傳回各地，造福未來好幾代人。談到技術時，她提起那些原本為 Sinus Ardorum 設計的機械如今被轉用到 Phaenna，並詢問你是否認為這樣足以應付當前需求。你回答說目前運作相當良好，同時也一直在尋找進一步改善的可能。得知系統在這樣陌生的環境中依舊能如設計般運行，Y’adebh 顯得很放心，也稱讚每一階段的探索之前，都有嚴謹的測試作為後盾，並叮囑你們今後也務必維持同樣的態度。最後，她問起你心中如何定義這項計畫的目的。你坦白說，對你而言，這是一段去認識星辰、並在其中追尋希望的旅程。Y’adebh 聽了笑出聲來，說這種回答非常符合 Searchingway 那種高遠的理想，或許放進正式報告會顯得有點甜，但她也理解為何這樣的理想會吸引到許多志同道合的人，甚至半開玩笑地表示，也許自己有一天也會被這股熱情說服。</p>
+      <p>詢問結束後，Y’adebh 表示，經過這番交談，她對這項計畫所取得的成果已有足夠的理解，也對未來充滿期待。身為與計畫關係最為密切的人之一，你仍能保持樂觀又不失客觀的態度，這樣的證言會讓她的評估更具說服力。她說，現在她已經可以明確地判斷，這項計畫確實值得繼續投資，並感謝你讓她能帶著好消息回到 Sharlayan。她坦承，自己原本擔心 Sharlayan 的智慧最終只會換來毫無意義的衝突，但在透過 Stellascope 望向沉睡於遙遠星辰中的種種可能後，她再度想起當年第一次踏上這顆壯麗星球時那份激動。臨別前，她表示很高興終於能與你當面對話，並透露自己其實是 Y’shtola 的同父異母姊姊之一，在已逝的父親眾多女兒之中，她是最年長的那個。看著你難掩驚訝的反應，她笑著承認，自己和 Y’shtola 從來算不上親近，但仍會像任何姊姊一樣掛心妹妹的安危。她也說，此行並非完全出於 Forum 的職務，多少也帶著想親眼認識你的心情前來，希望你今後能在力所能及的範圍內，繼續支援這項計畫，並在與 Y’shtola 再度相逢時伸出援手。說到這裡，她提議先回 Glassblowers’ Beacon，告知 Mumukko 視察已告一段落。回到據點後，緊張到語氣發抖的 Mumukko 立刻追問結果如何，Y’adebh 則語氣平穩地安撫他，讚許你一路以來提供了極具建設性的意見，讓她能對這裡留下極佳的印象。她說，這一切都充分證明計畫至今的成功，也期待今後能定期收到更多進展報告，並表示對他繼續負責預算運用一事毫不擔心。完成道別後，她終於啟程返回 Etheirys，再度投入沒完沒了的政治角力。目送她離去的 Mumukko 終於鬆了一大口氣，自言自語說能平安度過與這位評議員的會面簡直是奇蹟，隨即由衷地感謝你，再次證明自己把你選作中間人是最正確的決定。如今得到 Forum 的正式背書，計畫得以邁向更遙遠的未知──他帶著重新燃起的幹勁，看向你，半是邀請、半是期待地笑問：「你還有時間吧？」希望你能繼續陪他一同前行。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 穆穆可　Phaenna <small class="muted">(X:28.4, Y:12.7)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="a-managers-discernment.html">經理的洞察力</a></div>
+      <div class="row"><a class="link" href="perspective-reflected.html">倒映在玻璃中的未來</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="a-managers-patience.html">經理的耐心考驗</a></div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
