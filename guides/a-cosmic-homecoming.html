@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A Cosmic Homecoming | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – A Cosmic Homecoming (DT Patch 7.21)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    /* 展開/收合 */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/erftEegjjpI"
+              title="A Cosmic Homecoming" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">A Cosmic Homecoming</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'A Cosmic Homecoming',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Namingway first approaches you in the learned streets of Old Sharlayan, his long ears twitching as he cheerfully introduces himself and asks if you have seen any other Loporrits in the city. When you tell him of the moon, of Mare Lamentorum and the bustling colony you helped awaken there, his eyes go wide with disbelief and delight. He explains that over a century ago he was sent alone to survey Etheirys, only for his pod to crash and leave him stranded with no way to contact his kin. Even so, he spent a hundred years combing the world in faithful service, holding fast to the hope that he would someday return home. Only recently did he hear rumors of “moonfolk” visiting this bastion of scholars, prompting him to stow away on a ship to Old Sharlayan. Now, learning that travel to the moon is finally possible, he begs you to show him the way back to Mare Lamentorum and asks you to stand by him as moral support when he faces whatever welcome awaits. You agree, and arrange to reunite with him on the lunar surface.</p>
+      <p>Some time later, after a decidedly unnerving ascent through the Tower of Babil and its lingering Garlean contraptions, you and Namingway emerge once more beneath the cold light of Mare Lamentorum. Catching his breath, he mutters that the climb was anything but relaxing, yet when he looks out across the familiar craters and sees the warm lights of Bestways Burrow glowing in the distance, his voice softens in wonder. As you step inside the burrow, Loporrits whisper to one another and stare openly at the red garb only one of their kind has ever worn. A shout of recognition rings out as Searchingway rushes forward, half flustered and half relieved, demanding to know where Namingway has been for the last century. Namingway admits that his survey pod was smashed to pieces, that he was forced to make his way across Etheirys on foot, and that despite the hardship he completed his mission and returned with a startling observation: the people of Etheirys are all tiny. Searchingway responds with a rueful smile, explaining that they themselves have grown used to that truth through regular encounters with you and your comrades, and then delivers the greater revelation—that the Final Days have been averted, and there is no longer any need to evacuate the star. At this, Namingway all but explodes, struggling to accept that a hundred years of tireless work seems to have been rendered unnecessary in an instant.</p>
+      <p>Searchingway does not allow his old friend to sink into despair for long. He reminds Namingway that, though the Loporrits no longer have a purpose dictated by Hydaelyn, they are now free to seek out new dreams of their own. Here on the moon they have begun painting, making music, and sending broadcasts, searching for ways to connect with the people of Etheirys not as saviors, but as neighbors. As he speaks, he reveals his own newfound ambition: a grand endeavor he calls the Cosmic Exploration Initiative, a project to venture beyond their own firmament in search of other stars and other possibilities. He readily admits that naming such things has never been his forte and fondly recalls that it was Namingway who coined phrases like “carrots of happiness” and “Bestways Burrow” long before this day. Rather than let a century of experience go to waste, he suggests that Namingway turn that gathered wisdom toward naming the discoveries that await them among the distant worlds. The idea transforms Namingway’s frustration into joy, and he gladly agrees to lend his talents—not out of obligation this time, but for the simple pleasure of seeing his carefully chosen names take root.</p>
+      <p>Turning to you, Searchingway asks if you will join them at the “final frontier,” inviting you to imagine the strange new worlds yet unseen. However you choose to answer his jesting options, your resolve is the same: you agree to accompany them in this new venture. Overjoyed, Searchingway welcomes you aboard and calls for a comrade in stylish sunglasses—Drivingway, master of vehicular traversal. With brisk efficiency, Drivingway is instructed to ferry you and Namingway to the initiative’s base of operations. He warns that the outpost lies far from any aetheryte, the magnetic interference making traditional means of teleportation unworkable, and orders you to keep tails and paws inside the rover for the inevitably bumpy ride. While Searchingway departs in his own vehicle and promises to meet you there, you climb into the rover beside Namingway and rumble off across the pitted surface of Mare Lamentorum toward the cratered expanse of Sinus Ardorum.</p>
+      <p>Your journey ends at the Moongate Hub, a growing installation in Sinus Ardorum that serves as the heart of the Cosmic Exploration Initiative. As you disembark, Namingway whirls about in awe at the machinery, the scaffolds, and the rough foundations that hint at the outpost this place will become. Searchingway welcomes you to the hub and begins to outline the plan. Their first priority, he explains, is the completion and ongoing maintenance of the base itself: they must construct a dock where their new starship can safely land, as well as workshops and maintenance facilities to keep it in working order. Specialized machinery is being designed to survey and recover materials on foreign worlds, building upon devices first created for Sinus Ardorum. Loporrits, Studium faculty, and gleaners have all volunteered, and though there is much to do, the work thus far has proceeded at a comfortable pace. The starship and core facilities already function, even as they continue testing and refining their many fail-safes.</p>
+      <p>Finally, Searchingway turns back to you and presses an exotablet into your hands—a standard-issue device for members of the Cosmic Exploration Initiative. On its crystal display, you can see the team’s missions, requisitions, and overall progress, all updated in real time. To make full use of your crafts and skills, he tells you, they are also developing proprietary tools for gathering and crafting across the cosmos, relic devices known collectively as Cosmic Tools. He promises you a prototype and directs you to speak with Researchingway for the technical details, confident that your artisanship will prove invaluable as the project grows. With a cheerful flourish, he concludes that no explanation will ever match the understanding gained from simply lending a hand. He encourages you to assist with the many tasks around the base, to learn its workings from within, and then sends you off to begin your new role. At your side, Namingway vows that no new wonder—no crater, machine, or star—shall go unnamed, and together you step into life at Sinus Ardorum, ready to help shape the future of exploration.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Namingway, Old Sharlayan <small class="muted">(X:12.6, Y:13.6)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row">Endwalker｜暁月のフィナーレ｜曉月的終焉</div>
+      <div class="row">Disciples of the Land or Hand｜クラフター／ギャザラー Lv 10～｜採集或生產職業 Lv 10 以上</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row">Passion, Thy Name Is Ardorum｜未知待つ宙へ焦がれて｜為尚未抵達的星空悸動不已</div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'再会と、新たな計画！',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>学びの都オールド・シャーレアンの街角で、赤い服をまとった小さなレポリットが、ぴんと伸びた長い耳を揺らしながらあなたに声をかけてくる。自らをネーミングウェイと名乗った彼は、この町のどこかに自分と同じレポリットたちがいると聞き、行き先を尋ねにやって来たのだという。あなたが、月の嘆きの海にあるコロニーや、そこで出会った仲間たちの話を聞かせると、彼の瞳は驚きと喜びで大きく見開かれる。今から百年以上も前、彼はエオルゼア星を調査する単独任務に就き、しかし調査ポッドの墜落によって故郷との連絡手段を失い、この星に取り残されてしまったのだ。それでもネーミングウェイは任務を投げ出さず、いつか必ず月へ帰還できると信じて、ただひとりエオルゼア全土を巡り続けてきた。最近になってようやく、学術都市に「月の民」が訪れているという噂を耳にし、船に忍び込んでオールド・シャーレアンまで辿り着いたのだという。月への往来が確立されたと知った彼は、ついに嘆きの海へ戻れるのだと歓喜し、ベストウェイ・バローへの道を教えてほしいと頼み込む。そして、長い不在の後に仲間たちと再会するとき、そばに立っていてほしいと控えめに助けを求める彼の願いを、あなたは快く受け入れるのだった。</p>
+      <p>やがてバブイルの塔を登り、未だ禍々しさを残すガレマールの装置群を抜けた先で、あなたとネーミングウェイは再び嘆きの海の薄青い光の下に立つ。彼は肩で息をしながら、「決して快適な登りではなかった」とぼやきつつも、見慣れたクレーターと、その先であたたかな灯りを放つベストウェイ・バローの姿を目にした途端、声を震わせて「帰ってきた」と呟く。巣穴の中へ足を踏み入れると、レポリットたちは互いにささやき合い、赤い服に見覚えがあるのではと目を丸くする。ほどなくしてサーチングウェイが飛び出してきて、安堵と憤りの入り混じった様子で、百年もの間どこに行っていたのかと詰め寄る。ネーミングウェイは調査ポッドが粉々になり、徒歩でエオルゼアを巡らざるを得なかったこと、それでも任務はやり遂げ、そして驚くべき事実──「エオルゼアの人々は皆とても小さい」という観察結果を携えて帰ってきたと説明する。サーチングウェイは、あなたたち冒険者と幾度も顔を合わせるうちに、そのことはとうに承知していると苦笑しつつ、さらに重大な報せを伝える。終末はすでに回避され、この星を脱出する必要はなくなったのだと。ネーミングウェイは「我らの任務が、何だって？」と声を張り上げ、百年に及ぶ奮闘が無駄になってしまったのではないかと、言葉を失いかける。</p>
+      <p>しかしサーチングウェイは、旧き友が絶望に沈みきってしまう前に、静かにその肩を支える。ハイデリンから託された役目こそ終わったものの、それはレポリットたちが空虚になることを意味しない。今や彼らは、自らの意志で新たな夢を見つける自由を得たのだと語る。ここ月の世界では、絵を描き、音楽を奏で、さまざまな放送を通じてエオルゼアの人々とつながろうとする試みが始まっている。そうして自分自身の新たな志を打ち明けたサーチングウェイは、「コスモエクスプローラー計画」と名付けた宇宙探査プロジェクトについて語り出す。星々を巡り、新たな可能性を求める壮大な計画でありながら、自分は名付けに関しては素人同然だと苦笑し、かつて「幸せキャロット」や「ベストウェイ・バロー」といった言葉を生み出したのは、他ならぬネーミングウェイだったと懐かしそうに振り返る。百年にわたる経験と知見を無駄にせず、これから出会う新たな星々や発見に、ふさわしい名を授けてほしい──そう提案されると、ネーミングウェイの表情には次第に喜びが戻っていく。義務ではなく、純粋な楽しみとして名付けに携われることに魅力を見いだした彼は、喜んでその役目を引き受けるのだった。</p>
+      <p>サーチングウェイは今度はあなたのほうへ向き直り、「最後の開拓地」とも言うべき宇宙の彼方への旅に加わらないかと問いかける。まだ見ぬ世界へ踏み出すこと、そこに待つ奇妙で不思議な光景の数々を想像してみてほしいと、冗談を交えながら誘いをかけるのだ。返答の言い回しこそ選択肢によって異なるものの、あなたの心はすでに決まっている。彼らの計画に協力する意志を示すと、サーチングウェイは大いに喜び、「頼もしい仲間が増えた」と歓迎の言葉を送る。そして、サングラスをかけた頼れる運転手ドライビングウェイを呼び寄せ、ネーミングウェイとあなたを計画の拠点まで案内するよう命じる。ドライビングウェイは、目的地の拠点は強い磁場の影響でエーテライトを設置できないほど遠く離れているため、自分のローバーで向かうしかないと説明し、「尻尾と手足はきちんと座席の中に」とおどけながらも、荒れた月面を行く揺れる旅路に備えるよう注意を促す。サーチングウェイは別の車両で後から合流すると告げ、あなたはネーミングウェイと共にローバーに乗り込み、嘆きの海からシヌス・アルドルムへと続くクレーター地帯を駆け抜けていく。</p>
+      <p>やがてローバーはシヌス・アルドルムに築かれつつある施設群のひとつ、「ムーンゲート・ハブ」に到着する。ここがコスモエクスプローラー計画の中枢となる拠点だ。ローバーを降りたネーミングウェイは、あちこちに立ち並ぶ足場や骨組みだけの建物、運び込まれた機械を見て、好奇心の赴くままに視線を走らせる。サーチングウェイは改めてあなたを歓迎し、この拠点が今後どのように発展していくのかを語り始める。最優先事項は、この基地そのものの完成と維持管理だという。新たな星間船を安全に着艦させるためのドック、整備のための施設、そしてシヌス・アルドルムで培った技術を応用した、資源調査や回収に用いる専用機械の建設が必要だ。レポリットだけでなく、スタジウムの教員やグリーナーたちも多数志願しており、やるべきことは山積みでありながら、今のところ準備は快調な歩みを見せている。すでに星間船と中心施設は稼働しており、並行して数々の安全装置の検証や調整が進められているのだと説明を続ける。</p>
+      <p>最後にサーチングウェイはあなたの前に立ち、標準支給品だと説明しながら一枚のエクソタブレットを差し出す。これはコスモエクスプローラー計画の隊員たちが共通して使用する端末であり、チームの進捗状況や物資の要請、各種ミッションの情報が、リアルタイムで表示される仕組みになっているという。さらに、あなたのクラフターやギャザラーとしての腕前を宇宙規模で活かすため、星々での採集や製作に特化した専用道具群「コスモツール」の開発も進めていると語り、その試作品を託す予定であること、詳しい仕様についてはリサーチングウェイから説明を受けてほしいと告げる。どれほど言葉を尽くすよりも、実際に基地の仕事を手伝ってみるほうが、この計画の本質を理解できるだろう──そう結びながら、サーチングウェイは基地内のさまざまな任務に参加し、この場所の仕組みを肌で感じてほしいと背中を押す。隣ではネーミングウェイが、「どんな新しいものにも必ず名をつけてみせる」と意気込んでおり、あなたは二人のレポリットと肩を並べ、シヌス・アルドルムでの新しい日々と、宇宙探査の未来に向けて歩み出していくのだった。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> ネーミングウェイ　オールド・シャーレアン <small class="muted">(X:12.6, Y:13.6)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row">Endwalker｜暁月のフィナーレ｜曉月的終焉</div>
+      <div class="row">クラフター／ギャザラー Lv 10～</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row">未知待つ宙へ焦がれて｜Passion, Thy Name Is Ardorum｜為尚未抵達的星空悸動不已</div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'星海歸來，再啟新計畫',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>在 Old Sharlayan 的學術街區，一隻身穿紅衣、長耳毛茸茸的 Loporrit 主動向你打招呼。他自我介紹為 Namingway，說聽聞這座城市裡還有其他像他一樣的 Loporrit 出沒，因此特地上前打聽行蹤。當你提起 Mare Lamentorum、Bestways Burrow，以及你在月面上協助喚醒的那群同伴時，他的眼睛驚訝又欣喜地睜得老大。Namingway 說，早在百年前，他就奉命獨自前往 Etheirys 進行長期調查，卻在降落時遭遇事故，調查艙被撞得粉碎，與同伴失聯，只能被困在這顆星上。儘管如此，他沒有背棄自己的職責，一個人走遍整個世界，相信總有一天能回到月球。直到最近，他才聽說有「月之民」現身於這座學者之都，於是偷偷潛入往返的船隻來到 Old Sharlayan。如今得知往返月球的手段已經穩定，他終於看到返回 Mare Lamentorum 的希望，殷切地請你指引前往 Bestways Burrow 的方法，並希望在他與同伴多年後重逢時，你能站在他身旁，給他一份精神支柱。你答應了這份請求，約定稍後在月面與他會合。</p>
+      <p>不久之後，你和 Namingway 攀登 Tower of Babil，穿過仍殘留著詭異氣息的 Garlemald 裝置，再次站上 Mare Lamentorum 淡藍光芒照耀的地表。氣喘吁吁的 Namingway 一邊抱怨這趟旅程實在稱不上輕鬆，一邊抬頭望向熟悉的隕石坑群，當視線落在遠處燈火通明的 Bestways Burrow 時，他的聲音隨即變得柔和，喃喃道出「我回來了」。你們踏入巢穴後，周圍的 Loporrit 小聲竊語，目光聚焦在那身紅衣上，似乎回想起只有一個同伴曾經這麼打扮。很快地，Searchingway 忙不迭地衝到面前，語氣裡既有放心又有責備，追問 Namingway 這整整一百年間究竟跑到哪裡去了。Namingway 坦承自己的調查艙早已粉身碎骨，只能徒步在 Etheirys 各處奔波，但他仍完成了調查任務，帶回一項驚人的觀察結果──Etheirys 上的眾人全都小小一隻。Searchingway 苦笑著表示，他們早已在與你們冒險者一再接觸的過程中認清這件事，接著又補上更重大的消息：Final Days 已經被徹底化解，再也不需要執行星球撤離計畫。聽到這裡，Namingway 幾乎是喊了出來，難以接受自己辛勤奔波的一整個世紀，似乎在瞬間失去了意義。</p>
+      <p>然而，Searchingway 並沒有任由舊友墜入沮喪。他提醒 Namingway，雖然 Loporrit 不再背負 Hydaelyn 所賦予的使命，但這並不代表生命從此空虛，相反地，他們終於獲得自由，可以親自選擇新的夢想。如今在月面上，他們開始繪畫、創作音樂、進行各式播送，不再以「拯救者」的身分，而是以「鄰居」的姿態嘗試與 Etheirys 的居民建立連結。說到這裡，Searchingway 說出了自己的新志向：他將這場宏大的計畫稱為 Cosmic Exploration Initiative，也就是由他發起的宇宙探查計畫。這項計畫將帶領眾人踏出既有的天空，走向其他星球與未知的可能。即便如此，他仍坦率承認自己並不擅長替萬事萬物命名，反倒是 Namingway 早在很久以前就想出了「carrots of happiness」和「Bestways Burrow」等廣為流傳的稱呼。與其讓 Namingway 積累的一世紀見聞就此浪費，倒不如讓他把這些經驗化作靈感，為未來抵達的星辰、土地與發現起出最合適的名字。這番提議逐漸沖淡了 Namingway 心中的挫折，他的表情重新亮了起來，並爽快地答應接下這份工作──這一次，不是出於義務，而是源自單純的喜悅與熱愛。</p>
+      <p>說完對 Namingway 的邀請，Searchingway 把目光轉回你身上，問你是否願意一起邁向那被他戲稱為「最後開拓地」的宇宙前沿，想像那些尚未踏足的陌生世界，以及未來可能目睹的種種奇景。雖然你所選擇的回答或許帶著不同的玩笑口吻，但真正的心意只有一個──你願意加入這場嶄新的旅程。得到你的承諾後，Searchingway 高興地歡迎你成為計畫的一員，接著喚來戴著帥氣墨鏡的同伴 Drivingway，這位是負責載具運行的專家。他要 Drivingway 把你和 Namingway 一同送往計畫的核心據點。Drivingway 說明，目的地距離遙遠，又受到強烈磁場干擾，無法設置 aetheryte，因此除了搭乘他的月面載具，別無他法，並半開玩笑半認真地提醒大家把尾巴和爪子都收好，因為沿途的隕石坑保證會讓這趟路程顛簸不已。Searchingway 則表示自己會另行駕駛另一輛載具稍後會合。於是，你與 Namingway 一同登上月面車，從 Mare Lamentorum 出發，跨越連綿不絕的坑洞，朝 Sinus Ardorum 的方向前進。</p>
+      <p>最後，載具在 Sinus Ardorum 停下，你們抵達了名為 Moongate Hub 的設施群──這裡正是 Cosmic Exploration Initiative 的中樞基地。剛一下車，Namingway 便被眼前的景象吸引：正在搭建的鋼架、尚未完工的建物外殼，以及一台台運抵現場的機械設備，都預告著未來將誕生的一座新月面據點。Searchingway 在此迎接你們，說明這個基地未來的藍圖。首先要務，是完成並維持整個基地的運作：他們必須打造能安全停靠新型星艦的 dock，以及負責維修保養的各項設施，還要在既有的 Sinus Ardorum 技術基礎上，設計專門用來調查與回收資源的特殊機械。參與者不只限於 Loporrit，還包括 Studium 的教員與來自各地的 gleaner，眾多志工讓龐大的工程得以穩步推進。Searchingway 解釋，目前星艦與核心設施已經可以正常運作，他們一邊使用、一邊持續測試與調整各種安全機制，確保未來能在陌生的星球上同樣穩健地運行。</p>
+      <p>最後，Searchingway 走到你面前，遞上一台標準配發的 exotablet，說明這是所有 Cosmic Exploration Initiative 成員共用的作業終端。透過這塊晶體般的螢幕，你可以隨時查看隊伍的進度、物資申請情況，以及各種任務委託，所有資訊都會即時更新。為了讓你在宇宙規模上發揮職人工匠與採集者的本領，他們也正在打造專為宇宙環境設計的工具系列 Cosmic Tools，未來會把試作品交給你使用，並請你向 Researchingway 了解更詳細的技術說明。Searchingway 認為，再多言語都比不上實際參與，你只要開始協助基地內形形色色的任務，很快就能從實務中體會這項計畫的真意。說完，他鼓勵你多在 Moongate Hub 四處走動、熟悉整個據點的運作。你的身旁，Namingway 自信滿滿地表示，今後不論遇到任何新事物，他都會替它們想出最貼切的名稱。就這樣，你與這兩位 Loporrit 並肩踏入 Sinus Ardorum 的日常，準備在這片月面基地與星際計畫中，為未來的宇宙探險添上一分力量。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 內命威　舊薩雷安 <small class="muted">(X:12.6, Y:13.6)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row">Endwalker｜暁月のフィナーレ｜曉月的終焉</div>
+      <div class="row">採集或生產職業 Lv 10 以上</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row">為尚未抵達的星空悸動不已｜Passion, Thy Name Is Ardorum｜未知待つ宙へ焦がれて</div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
