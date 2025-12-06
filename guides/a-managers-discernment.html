@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A Manager’s Discernment | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – A Manager’s Discernment (DT Patch 7.31)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    /* 展開/收合 */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/BS-8sVsIZMk"
+              title="A Manager’s Discernment" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">A Manager’s Discernment</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'A Manager’s Discernment',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>With most of your work on Phaenna wrapped up, Mumukko greets you with a knowing smile and asks if you have a bit of time to spare. Whatever your answer, she takes it as permission to move straight to business and leads you to a nearby console, where another Loporrit is waiting. She introduces Phasingway, a fellow project manager in the initiative, and together they explain how they have been keeping the “cogs” of the operation from rolling off in all directions—Mumukko with her sharp Lalafellin eye for problems Loporrits might overlook, and Phasingway with long experience in stellar logistics. The two have been working as a multicultural management pair ever since the Ragnarok’s construction, combining their perspectives to prevent oversights in their oversight. Now that core development on Phaenna is complete, they have begun collecting feedback for a postmortem review…and those reports have turned up signs that a few screws have come loose. Specifically, project leader Commandingway and magitek specialist Justa, who were originally eager to expand the functionality of the initiative’s machinery, have become a little too enthusiastic. Word has reached management that the pair are skulking about, whispering to each other in tones of near-delirious excitement while refusing to share any details of their designs. Suspecting they are afraid of being reprimanded, Mumukko and Phasingway ask you to go in their stead. You have worked alongside both engineers before and earned their trust, making you an ideal “potential collaborator” who can find out what exactly they are plotting.</p>
+      <p>You head back to Glassblowers’ Beacon, where you find Commandingway and Justa animatedly discussing their latest ideas. Before you can announce yourself, Commandingway cheerfully hails you and explains that they are charting a bold new course to reinvent the fleet’s machinery. Justa insists that she may have gotten carried away, but credits Commandingway as a true visionary who makes the impossible seem possible. At Commandingway’s prompting, she rattles off some of their more extravagant concepts: aetherial sabers for dueling marauding pirates in spectacular fashion; transformation mechanisms—or better yet, fusion systems—that would allow five units to combine into a single weapon of overwhelming power; and massive mechanical arms tipped with drills, pulverizing threats from above and below the ground. If she only had the components from a standard magitek excavator, she says, she could begin fitting these upgrades at once. Before the conversation can spiral further into fantasy, Mumukko’s voice cuts sharply through the air. She and Phasingway have been observing from a distance, and now step in to demand an explanation. Mumukko reminds the two that they were explicitly told not to lose sight of the initiative’s needs, and demands to know how sabers and drill arms have anything to do with the mission at hand. Phasingway adds that nothing is more dangerous than a Loporrit’s lack of restraint paired with an engineer’s ambition. Justa protests that their ideas started with sensible improvements—extended crane mechanisms, scaffolding assistance features—but Mumukko clearly wants a concrete, practical direction. Turning to you, she asks for a level-headed suggestion, something that would genuinely benefit the initiative, such as a way to safely scale cliffs and descend into canyons, or a mechanism for transporting large quantities of fragile resources without damage. Whichever option you put forward becomes the new focus: if Commandingway and Justa submit plans that address that specific need, management will allow them to continue working on the machinery, provided they remember the budget and shared goals. With the terms set, Mumukko instructs Commandingway to accompany her for a more private discussion about their conduct, leaving Justa to watch them go with a guilty expression.</p>
+      <p>Once Mumukko and Commandingway are out of sight, Justa admits that she let her good sense slip away. On Phaenna, surrounded by new tools and possibilities, she feels as though she could build anything she can imagine, and that intoxication made it easy to forget the initiative’s purpose. For now, however, she resolves to return to her scheduled maintenance tasks and channel her creativity into more grounded designs. She asks if you would mind checking on Commandingway in her place; she worries that Mumukko’s lecture might drag on and leave the usually boisterous leader discouraged. On your way back through Glassblown Grotto, you pass Phasingway, who likens the reprimand to a bitter medicine or a “curative carrot”—unpleasant in the moment, but for Commandingway’s own good.</p>
+      <p>You arrive just as Mumukko begins her questioning. She asks Commandingway if they understand why they have been called aside, and the Loporrit hesitantly admits that things may have gotten a little out of hand. Once, Commandingway says, their duty was to stand at the helm while their charges forged ahead into the unknown. Had the exodus gone according to plan, they would have led a group to a new home on whatever star offered refuge, and Hydaelyn even gave them an extra-large body so that they would be easy to spot and rally around. Yet no matter how big they might be, they cannot fulfill that kind of duty alone. That is why serving as a leader for the initiative has meant so much: it has given them a crew to guide and a shared mission to pursue. They still believe that a commander’s role is to stand tall and inspire those who follow—but now see that they should have thought harder about what, exactly, they were inspiring their team to do. Chasing flashy weapons and giant drill arms might be exhilarating, but it does little to help the initiative succeed, and success is what would truly make everyone happiest. Phasingway urges Commandingway to remember this and to set a better example henceforth, and after a moment of reflection, the Loporrit snaps back to attention and salutes, declaring that they have been steered back onto the proper course. “Glory to the initiative!” they proclaim. Mumukko, however, can only sigh that dealing with such boundless enthusiasm is a constant headache.</p>
+      <p>As the conversation winds down, Phasingway notes that the team has barely finished its work on Phaenna, yet everyone is already tripping over themselves with anticipation for the next star on their list. Mumukko agrees that this likely won’t be the last bit of trouble management has to deal with, and asks you to keep your ear to the ground for any new signs of mischief or excess. Then she lets slip one final piece of information: even now, a very important guest is traveling from Etheirys to Phaenna via Sinus Ardorum. The details are strictly confidential, but she assures you that when the time is right, she will be in touch—and that your help will once again be essential in keeping the initiative on course.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Mumukko <small class="muted">(Phaenna, X:28.4, Y:12.7)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-brightest-star.html">The Brightest Star</a></div>
+      <div class="row"><a class="link" href="a-managers-patience.html">A Manager’s Patience</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="a-managers-delegation.html">A Manager’s Delegation</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'プロジェクトマネージャーの明察なお仕事',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>パエンナでの任務がおおむね一段落したころ、マムッコがあなたの前に現れ、少しばかり手が空いているのではないかと、それとなく問いかけてくる。あなたが応じると、彼女は待っていましたと言わんばかりに本題へ移り、近くの端末前へと案内した。そこには、もうひとりのレポリットが待っており、彼女はそのレポリットを、計画の共同プロジェクトマネージャーであるフェイジングウェイだと紹介する。ふたりは、コズミック・エクスプロレーション計画が円滑に回るよう歯車を整えつつ、その歯車が変な方向へ転がっていかないよう目を光らせてきたのだと説明する。ララフェルであるマムッコは、人間側の視点からレポリットでは見落としがちなほころびを見抜き、フェイジングウェイは星々を渡る計画運営の経験を活かして支えてきた。ラグナロク建造時から続くこの「多文化的な管理体制」によって、彼らは互いの視点を補い合い、プロジェクトの「見落としのない見張り」を目指してきたのだという。今やパエンナの基幹開発がひとまず完了し、ふたりは事後検証のためのフィードバックを集め始めていた──そして、その報告の中に、どうにも不穏な「ゆるんだネジ」の存在が見つかったのだと打ち明ける。具体的には、プロジェクトリーダーのコマンダウェイと、魔導技術担当のジャスタのふたりである。当初、彼らは計画で用いる機械の機能拡張に前向きで、むしろ意欲的すぎるほどだったが、最近ではその熱意が行き過ぎた様子が見られたという。どこからか、ふたりがこそこそと姿を消し、半ばうわ言のような興奮した声で何事かをささやき合っているという話が管理側の耳に届いたのだ。新しい設計案の詳細を一切明かそうとしないのも、叱責を恐れてのことだろうと、マムッコとフェイジングウェイは推測する。そこで彼らは、これまで共に働き、信頼を得てきたあなたに白羽の矢を立てる。コマンダウェイとジャスタにとって、あなたなら「協力者」として受け入れやすく、その実、どんな企みを進めているのか探るにはうってつけの存在なのだ。</p>
+      <p>あなたはグラスブロワーズ・ビーコンへ戻り、ふたりの様子をうかがいに行く。そこではすでに、コマンダウェイとジャスタが身振り手振りを交えながら最新の構想について語り合っていた。声をかけるより先に、コマンダウェイの方から陽気にあなたに挨拶し、自分たちは今、艦隊の機械を抜本的に作り替える大胆な進路を描いているのだと胸を張る。ジャスタは、自分は少々やりすぎてしまったかもしれないと苦笑しながらも、コマンダウェイこそ不可能を可能に見せてしまう真のビジョナリーだと称え、調子を合わせる。コマンダウェイに促されるまま、彼女は次々と派手な案を口にする。たとえば、宇宙海賊と派手に斬り結ぶためのエーテル製のサーベル、五機が合体して五倍の破壊力を生む変形・合体機構、さらには巨大なメカニカルアームの先端に取り付けたドリルで、地上と地下の敵をまとめて粉砕する仕組みなどだ。標準的な魔導掘削機から部品さえ調達できれば、すぐにも改造に取りかかれるのにと目を輝かせるジャスタ。しかし、そのまま話が空想に走り出そうとした瞬間、鋭いマムッコの声が場の空気を一変させる。遠巻きに様子を見ていたマムッコとフェイジングウェイが姿を現し、ふたりに説明を求めたのだ。マムッコは、計画のニーズを決して見失うなと念を押していたはずだと叱責し、サーベルやドリルアームが、いったいどこまで現場の役に立つというのか問いただす。フェイジングウェイもまた、歯止めの利かないレポリットの想像力と技師の野心ほど危うい組み合わせはないと肩をすくめる。ジャスタは、最初はクレーンの伸縮機構や足場設置を助ける機能など、もっと現実的な改良から始まったのだと弁明するものの、マムッコは、今ここで地に足のついた方向性をはっきり定めなければならないと判断する。彼女はあなたに向き直り、崖を安全に昇り降りできる仕組みや、大量の壊れやすい資源を丁寧に運搬する機構など、計画に真に役立つ具体的な案を一つ示してほしいと求める。あなたが選んだ提案こそが新たな設計方針となり、コマンダウェイとジャスタがそのニーズに応える計画案を提出するのであれば、管理側は引き続き機械の改良を任せるつもりだと約束する。ただし、予算と共通の目標を忘れないことが条件だ、と釘も刺される。そうして方針が固まると、マムッコはコマンダウェイに自分の持ち場まで同行するよう命じ、その行動について改めて話し合う必要があると告げるのだった。</p>
+      <p>ふたりが去ったあと、ジャスタは肩を落とし、自分の判断力がすっかりどこかへ飛んでいってしまっていたと認める。このパエンナでは、新しい道具と可能性に囲まれているせいか、心に浮かんだものは何でも形にできてしまうような気持ちになり、それがかえって計画本来の目的を見失わせてしまったのだと打ち明ける。それでも今は、まず割り当てられた保守作業をきちんと終わらせ、創意工夫はもっと現実的な設計に活かすべきだろうと気を取り直す。彼女は、マムッコに連れられて行ったコマンダウェイのことが気がかりだとあなたに打ち明け、長々と説教を受けて意気消沈してしまわないか心配しているのだと言う。だからこそ、代わりに様子を見てきてくれないだろうかと頼まれ、あなたは頷いてグラスブロウン・グロットの奥へ歩き出す。途中でフェイジングウェイとすれ違うと、彼は今回の叱責を「苦い薬」あるいは「治療用のニンジン」にたとえ、決して気持ちのよいものではないが、コマンダウェイ自身のためでもあるのだと静かに語るのだった。</p>
+      <p>やがて、あなたが足を運ぶと、ちょうどマムッコが本題を切り出すところだった。彼女はコマンダウェイに、自分がここに呼ばれた理由を理解しているかと問いかけ、レポリットは少しためらいながらも、どうやらやりすぎてしまったらしいと認める。かつてコマンダウェイの務めは、未知なる星々へと進む仲間たちの先頭に立ち、舵を握ることだった。もしあの日、星の移民計画が予定どおり進んでいれば、自分は多くの仲間を率いて新たな安住の地へと向かい、その星で家を築く先導役を務めていたはずだと打ち明ける。ハイデリンが、自分の身体をひときわ大きくしてくれたのも、皆の目に付きやすく、頼れる旗印になるようにとの配慮だったのだろう、とコマンダウェイは続ける。しかし、どれほど大きな身体を与えられたとしても、その使命をたったひとりで果たすことはできない。だからこそ、今こうしてコズミック・エクスプロレーション計画のリーダーとして仲間を導けることが、自分にとって何よりも大きな意味を持ってきたのだと語る。高く立ち、仲間を鼓舞することこそ指揮官の役目であるという信念は今も変わらない。だが同時に、自分が皆を「どのような行動へ」駆り立てているのかを、もっと真剣に考えるべきだったとも悟る。派手な武装や巨大なドリルアームを追い求めることは胸のすくような興奮をもたらすが、それ自体は計画の成功にはあまり寄与しない。仲間たちが本当に望んでいるのは、イニシアチブそのものが成果を上げることであり、その喜びこそが皆を幸せにするのだと、ようやく思い至ったのだ。フェイジングウェイは、そのことを決して忘れず、今後は仲間の模範となる行動を心がけてほしいと穏やかに告げる。しばしの沈黙ののち、コマンダウェイはぴんと背筋を伸ばして敬礼し、自分は再び正しい針路へ舵を切り直したのだと力強く宣言する。「計画に栄光あれ！」と声を上げるその姿に、マムッコは安堵と疲労の入り混じったため息を漏らし、尽きることのないその熱意に頭を抱えつつも、ひとまず任務は果たされたと判断するのだった。</p>
+      <p>話がひと段落すると、フェイジングウェイは、パエンナでの作業がようやく一区切りついたばかりだというのに、皆すでに次の星のことで頭がいっぱいになり、空回りし始めていると苦笑する。マムッコも、それに伴う騒動はこれで終わりではないだろうと同意し、あなたに対しても、これからも耳を澄ませて小さな異変を聞き取ってほしいと頼む。そして、ふと思い出したように、ひとつだけ重要な情報を明かす。今まさに、エオルゼアの人々が暮らす母なる星から、シヌス・アルドルムを経由して、このパエンナへ向かっている「とても大切な来訪者」がいるのだという。詳細は極秘扱いで今は明かせないが、いずれ時が来れば改めて連絡する──そのときもまた、計画を正しい航路に保つため、あなたの力が必要になるだろうと、マムッコは真剣な眼差しで告げるのだった。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> ムムッコ　惑星パエンナ <small class="muted">(X:28.4, Y:12.7)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-brightest-star.html">希望の輝き</a></div>
+      <div class="row"><a class="link" href="a-managers-patience.html">プロジェクトマネージャーの小粋なお仕事</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="a-managers-delegation.html">プロジェクトマネージャーの意義あるお仕事</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'經理的洞察力',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>當你在 Phaenna 上的大部分任務告一段落時，Mumukko 找上了你，用一貫乾脆的語氣問你現在手邊是否有一點空檔。不論你怎麼回答，她都順勢把這視為默許，直接帶你進入正題，領著你走向一台附近的終端機。那裡已有一名 Loporrit 等候多時，Mumukko 向你介紹，他是這項計畫的共同專案經理 Phasingway。兩人一起說明，整個 Cosmic Exploration 計畫的齒輪之所以運轉順利，是因為有人負責讓它們轉動，有人則負責防止它們朝奇怪的方向滾走──Phasingway 憑藉星際運作的長年經驗掌控全局，而 Mumukko 則用自己敏銳的 Lalafell 眼光，專門捕捉一般 Loporrit 容易忽略的細節。自從 Ragnarok 建造階段開始，他們就以這種多文化搭檔的方式管理專案，彼此補足視角，避免在「監督」的過程本身出現疏漏。如今 Phaenna 的核心開發已大致完成，他們也開始進行事後檢討，廣泛收集回饋──而就在這些報告當中，出現了幾顆「鬆動的螺絲」。被點名的，是計畫總指揮 Commandingway，和負責 magitek 技術的 Justa。兩人一開始對擴充計畫所使用機器的機能極為熱衷，熱衷到幾乎有點過頭。最近，管理層從各種管道得知，他們常常私下溜走，用近乎狂喜的低聲語調彼此竊竊私語，卻遲遲不肯向上層說明新設計的內容。Mumukko 與 Phasingway 懷疑，這八成是怕被念到頭上。於是，他們把希望寄託到你身上──你曾與這兩位工程師並肩工作，又獲得過他們的信任，在他們眼中是「可能的合作夥伴」，正好可以代替管理層出面，弄清楚這兩人究竟在打什麼主意。</p>
+      <p>你回到 Glassblowers’ Beacon，很快就找到正談得興致勃勃的 Commandingway 和 Justa。還沒來得及打招呼，Commandingway 便先熱情地向你喊話，說你來得正好，他們正在規畫一條「重新發明艦隊機械」的大膽航線。Justa 雖然承認自己可能有點過於興奮，卻仍由衷讚嘆 Commandingway 是真正的遠見者，總能把不可能變得好像觸手可及。在 Commandingway 的引導下，她開始滔滔不絕地列出各種誇張的構想：裝備 aetherial sabers，好讓大家能帥氣地和四處掠奪的星際海盜決鬥；內建變形機制──甚至是五機合體系統，讓五個單元融合成一台火力驚人的巨型兵器；還有在巨大機械臂末端安裝大型鑽頭，將地面與地底的威脅一併粉碎。如果能拿到標準 magitek excavator 的部件，她立刻就能開始改裝。就在話題越飄越遠、快要完全變成機器人夢想會的時候，一道銳利的聲音忽然響起，打斷了這段幻想。Mumukko 和 Phasingway 一直在暗處觀察，此刻終於走上前來，要求兩人說清楚、講明白。Mumukko 提醒他們，當初明明再三強調，不可以偏離整個 initiative 的實際需求，現在卻冒出什麼 sabers 和鑽頭巨臂，叫她怎麼放心。Phasingway 也補上一句，Loporrit 的無極限想像力如果和工程師的野心纏在一起，是多麼危險的組合。Justa 辯解說，最初的確只是打算做些很實際的改良，例如延伸起重機的機構、輔助搭建鷹架的裝置之類，直到後來才越想越遠。不過，Mumukko 顯然希望現在就把方向釐清。她轉向你，請你提出一個真正符合計畫需求的建議──像是設計一套能讓大家安全攀爬峭壁、下到深谷的系統，或是一組可以大量運送易碎資源、又不會把貨全震碎的運輸機構。你提出其中一項實際訴求，於是這就成了新的優先目標：只要 Commandingway 和 Justa 能交出確實回應這項需求的設計方案，管理層就會允許他們繼續改良機械，但同時嚴正提醒他們必須記住預算與共同目標。話說到這裡，Mumukko 隨即要 Commandingway 跟她回工作站，好好「談一談」剛才的行為，丟下 Justa 一個人站在原地，滿臉懊惱。</p>
+      <p>等兩人走遠後，Justa 終於鬆口承認，自己的理智被熱情沖昏了頭。在 Phaenna 這樣的環境裡，四周盡是前所未見的工具與可能性，讓她產生了一種「只要想得到就做得出來」的錯覺，也因此很容易忘記 initiative 本身的初衷。不過她很快振作起來，表示眼下還是先把手邊排定的維修工作完成，再把創意重新導向更腳踏實地的設計。她也坦白說，其實很擔心 Commandingway 的狀況，怕 Mumukko 的長篇訓話會讓這位一向充滿幹勁的領導者氣勢大減。所以，她拜託你代替自己去看看 Commandingway 的情形，確認那場訓誡不會拖得太久。你應允後離開 Glassblowers’ Beacon，在 Glassblown Grotto 的通道上遇見 Phasingway，他把這場嚴厲談話比喻成「苦口的藥」或「能治病的胡蘿蔔」──雖然不好受，卻是為了 Commandingway 自身著想。</p>
+      <p>當你抵達時，Mumukko 正好開口詢問 Commandingway 是否理解自己為何會被叫來這裡。Commandingway 猶豫片刻，低聲承認自己確實有些得意忘形。她說，自己過去的職責，是站在船首操舵，帶領同伴向未知之地突進；若當年的星球出走計畫一切順利，她本該率領一個小隊，在某顆適合安家的新星上建立據點。Hydaelyn 為了讓她「好認又顯眼」，特意賜予這具特別巨大、站在人群中就像旗幟般醒目的身體。然而，即便身形再大，一個人終究無法獨力完成那樣的使命。所以，如今能在這項 initiative 裡擔任領導者，對她而言才會如此重要──因為那意味著，她再次擁有了一支可以引導的隊伍，以及一個可以與大家共享的目標。她依然相信，指揮官的職責，就是站得高、看得遠，用行動去鼓舞團隊，但現在也不得不承認，自己沒有想清楚「到底在把大家推向什麼方向」。追逐華麗武裝與巨大鑽頭固然讓人熱血沸騰，卻並不能真正推動計畫向前；能讓所有成員打從心底感到滿足的，其實是 initiative 本身的成功。Phasingway 溫和地提醒她，要牢記這一點，也要在未來好好作為團隊的榜樣。Commandingway 默默思索片刻後，重新挺直身軀，像過去那樣用力敬禮，表示自己已經被重新拉回正確航道，並高聲喊出「Glory to the initiative！」。Mumukko 則無奈地嘆了一口氣，說這種永遠不會枯竭的熱情雖然讓人頭痛，但至少這次算是順利把狀況收回來了。</p>
+      <p>談話接近尾聲時，Phasingway 感慨地說，大家才剛在 Phaenna 上收尾，整個團隊就已經迫不及待地把心飛到下一顆星上，結果反而在期待中跌跌撞撞。Mumukko 也認同這點，認為這種麻煩事恐怕不會就此劃下句點，因此請你今後多留意周遭風聲，一旦察覺到什麼異常，就能及早通報。接著，她像突然想起什麼般補充了一句：就在此刻，有一位非常重要的來訪者，正從 Etheirys 出發，經由 Sinus Ardorum 前往這裡。關於這位訪客的細節目前仍屬機密，她無法多說，只表示時機一到，會主動聯絡你——而到那個時候，你的協助將再一次成為維持 initiative 穩健前進的關鍵。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 穆穆可　Phaenna <small class="muted">(X:28.4, Y:12.7)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-brightest-star.html">最耀眼的星辰</a></div>
+      <div class="row"><a class="link" href="a-managers-patience.html">經理的耐心考驗</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="a-managers-delegation.html">經理的委派之道</a></div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
