@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Brightest Star | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – The Brightest Star (DT Patch 7.31)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/f3NrTPL4ywM"
+              title="The Brightest Star" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">The Brightest Star</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'The Brightest Star',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>At Glassblown Grotto, Searchingway welcomes you back from your latest errands, grateful that all the running about for the initiative has left you with only a “metaphorical” eyeful of Phaenna’s perilous terrain. You reassure him that, though the star’s jagged shards have come uncomfortably close, you have yet to be skewered, and Namingway chimes in to complain that the land’s glittering sheen is nearly blinding—had he known, he says, he would have begged Drivingway for a pair of sunglasses. Moments later, Searchingway greets Namingway in earnest, praising how quickly he has set about naming every corner of this new world. Namingway admits that giving an entire star a unified naming scheme has been a spectacular challenge, but he proudly declares the task complete. Searchingway reminds him that Phaenna is only the first stop on their cosmic itinerary, and Namingway, undaunted, promises not to let his dictionaries gather dust as he turns to you with an eager request: would you join him on another tour, just as you did on Sinus Ardorum? Seeing your willingness, Searchingway urges you to go indulge Namingway’s enthusiasm while he remains at camp to monitor reports.</p>
+      <p>Before you set out, Searchingway quietly asks you to humor Namingway—this is a project the little Loporrit is particularly proud of. Namingway suggests beginning the tour right here at camp and working outward, and so you fall into step beside him as he leads you into the depths of the vast cavern that shelters the expedition from Phaenna’s harsh climate. He muses that it is curious how something as fragile as glass can be at once deadly and protective, for the walls around you are nothing but fused shards that both deflect the worst of the star’s elements and threaten anyone careless enough to approach. The scene reminds him of a gaffer shaping molten glass into a vessel that is both beautiful and strong, and so he explains how he came to call this sanctuary “Glassblown Grotto,” while the camp nestled within is the “Glassblowers’ Beacon,” a primordial flame around which man and Loporrit gather to craft their own marvels. With the grotto introduced, he cheerfully bids you follow him westward to the next wonder on his list.</p>
+      <p>Your next stop is a slow, translucent blue current winding south through Millefiori, which Namingway has dubbed the “Soda-lime Float.” Though its name sounds refreshingly sweet, he warns you not to drink a drop: in terms of its composition, this “water” is essentially liquid glass. The “fish” drifting within are no safer, for they are not living creatures at all, but silicate globules animated by the dense aether flowing beneath, which he jokingly names “impesctors”—impostors in a glassy guise. As you watch them drift past, he observes that Phaenna has yet to yield any animals that fit your usual definitions; only golems and other arcane entities roam here, leaving scholars to argue whether the impesctors are spirits, elementals, or something else entirely. Their very existence, he says, is a reminder of how vast nature is and how limited your understanding remains. Then, having introduced what he calls the “easy” names, he proposes heating things up and leads you south toward the blazing ridge he calls Fusingway Vent.</p>
+      <p>The onyx ridge looms over the fluorescent plains, its slopes veined with silicate magma that glows a sullen orange. Namingway proudly presents this place as “Fusingway Vent,” explaining that the heat here is strong enough to melt glass outright, as evidenced by the molten flows that pool and harden in ever-shifting patterns. Temperatures in the crater are fickle, and what appears to be a cooled crust may at any moment crack open to disgorge fresh liquid magma, prompting him to warn you to watch your step unless you wish to part ways with your favorite boots—or your favorite feet. Even as he jokes, he checks to see if you are enjoying the tour, then declares that the next destination offers the most spectacular scenery of all. With renewed excitement, he turns you toward the heights of the Iridized Rise, promising shining, shimmering splendor at the journey’s end.</p>
+      <p>At Iridized Rise, you are greeted by a panorama that looks more like a dream than a landscape, and Namingway beckons you to take in each feature in turn. He begins with a bristling x-shaped tree he has named the “distempered oak,” whose explosive glass spikes convert light into energy by means no one yet understands, each shard both branch and leaf shaped by the star’s harsh environment. Nearby, delicate blooms on filigreed stems form the shrub he calls the “myrrhine,” its lace-like petals carrying pollen and seeds like any ordinary flower despite their crafted appearance; with no animals to bear them, he explains, the blossoms must rely entirely on strong winds to scatter their progeny. A little farther on stands a strange glassy form reminiscent of a fungus from Weddingway’s Bower yet technically classed as a tree: the “display acanecia,” a broad glass plate balanced atop a glass cane, thought to have evolved to shield its soft bark from falling shards. From your vantage point, the land itself steps down in a staircase of color that lends the Iridized Rise its name—a series of solidified glass basins whose varied hues likely reflect differences in the sediments they once held. Finally, Namingway directs your gaze to the carpet of “faceted grass” underfoot, a field of identical crystalline blades whose regular shapes defy the rule that natural crystals never match, a phenomenon Sharlayan scholars attribute to Phaenna’s singular aetherial conditions.</p>
+      <p>Only after you have examined every last tree, shrub, and glittering strand does Namingway ask if the splendor has been “thoroughly beheld,” clearly delighted when you answer in the affirmative. He confesses that, while he expected the sea of stars to offer no shortage of novelties, he never dreamed that their very first destination would be so utterly unlike Etheirys. On Phaenna, even something as commonplace as glass has the power to surprise again and again, each new discovery raising fresh questions: where did these strange shapes, colors, and sounds come from, and why these forms rather than any others? He likens his work to glimpsing fragments of an impossibly grand design—one he will never see in full, no matter how long a Loporrit’s life might be—but believes that someday someone will grasp more of its shape. Others will follow in your footsteps, he says, cradling the fragile things you leave behind and building on what you have learned. The more time he spends here, the more he feels that this is the path Hydaelyn wished Her children to walk: each person taking a small step that nonetheless becomes part of a journey shared with countless others. Then, with a rueful laugh, he suggests that before pondering destiny any further, you should probably return to Searchingway, who has surely been waiting long enough at Glassblowers’ Beacon.</p>
+      <p>Back at camp, Namingway declares the tour another splendid success and insists that you recount every detail for Searchingway. The latter listens with evident satisfaction before noting that your circuit of Phaenna is not complete without visiting the initiative’s crowning achievement: the Phaenna Stellascope. When he unveils the great instrument, Namingway likens it in awe to a grander version of the Observatorium in Coerthas, and Searchingway eagerly demonstrates its capabilities, tapping at controls until the lens fills with distant stars rich in aether. Each glimmer, he explains, contains myriad possibilities, and with the Stellascope they mean to explore every one. Phaenna alone is breathtaking, and Namingway can scarcely imagine what other worlds await beyond, while Searchingway dares to hope that among those far-off lights they may yet find new life and new civilizations. He speaks of Meteion’s journey and the many stars that fell to despair, then gently asks you—who once stood at the very edge of existence—what you saw there. You answer with memories of the long dead and the ruin that claimed them, and the thought alone is enough to move Searchingway. Even so, he says, he wishes to make his own journey: to grieve what was lost, to seek his own meaning in it, and to hold fast to hope for any life that may still be out there. Already, research teams are debating whether they should one day make contact or refrain from interference, but for now, he will use the Stellascope to comb the horizon for the next celestial foothold, a star wrapped in strong currents and welcoming to more than plant-like forms. Once the coordinates are set he promises to be in touch, leaving you, Namingway, and the other explorers to return to your work beneath Phaenna’s shining sky.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Searchingway <small class="muted">Phaenna (X:27.2, Y:13.8)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="go-forth-brave-explorers.html">Go Forth, Brave Explorers</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row">To be continued</div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'希望の輝き',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>グラスブロウン・グロットの拠点で、サーチングウェイは、あちこちを走り回ってくれたあなたに労いの言葉をかける。コスモエクスプローラー計画のために奔走しながらも、パエンナの険しい地形を「比喩的な意味で見るだけ」で済んでいるようで安心した、と冗談めかして言うと、あなたも、鋭い欠片が危険なほど近くをかすめたことはあっても、まだ串刺しにはなっていないと軽口で応じる。そこへネミングウェイが加わり、この土地のきらめく光景は目がくらむほどで、こんなに眩しいと知っていれば、ドライビングウェイにサングラスをねだっていたのにとこぼす。やがてサーチングウェイは改めて彼を歓迎し、新しい星の隅々にまで名前を付けて回った働きを称える。ネミングウェイは、ひとつの星全体に統一感のある名前を与えるのは壮大な挑戦だったと打ち明けつつも、ひとまず仕事をやり遂げたと胸を張る。そこでサーチングウェイは、ここパエンナは旅路の第一歩にすぎないのだと念を押し、ネミングウェイは決して辞書をほこりまみれにはしないと笑って、今度はあなたに視線を向ける。シヌス・アルドルムのときのように、もう一度案内役を務めさせてほしいと熱心に頼まれ、あなたがうなずくと、サーチングウェイは、拠点で報告を確認している間にネミングウェイの願いを叶えてやってくれと背中を押す。</p>
+      <p>出発する前に、サーチングウェイは小さく声をひそめ、ネミングウェイの自慢の仕事だろうから、存分に付き合ってやってほしいと頼む。ネミングウェイは、見学は拠点から始めて外へ広げていこうと提案し、あなたは彼の隣に並んで歩き出す。広大な洞窟は、パエンナの過酷な環境から調査隊を守る大きな盾となっており、彼は、こんなにも脆いガラスが、同時に命を奪う凶器にも堅固な守りにもなり得るのは実に妙だと語る。周囲の壁は融け合った欠片そのもので、星の険しさを遮りながら、不用意に触れる者を容赦なく傷つけるのだという。その光景は、溶けたガラスを操って美しくも丈夫な器を形作るガラス職人の仕事を思わせると続け、この安息の地を「グラスブロウン・グロット」、そしてその中に灯る拠点を、人とレポリットが集い、ささやかな奇跡を生み出す焔になぞらえて「グラスブロワーズ・ビーコン」と名付けた経緯を教えてくれる。ひととおりこの場所を紹介し終えると、彼は明るく声を上げ、西にある次の見どころへ向かおうとあなたを促す。</p>
+      <p>次にたどり着いたのは、ミッレフィオーリの大地を、淡い青色の流れとなって南へと進む不思議な川だった。ネミングウェイはここを「ソーダライム・フロート」と呼んでいるが、いかにも甘く爽やかな名前に反して、一滴たりとも口にしてはならないと釘を刺す。その正体は水ではなく、成分だけを見ればほとんどガラスそのものなのだという。中を泳ぐ「魚」も安全とは程遠い存在で、実際には生き物ではなく、下を流れる濃密なエーテルに動かされるケイ素の球体だと説明し、彼はそれらを冗談めかして、偽物の魚という意味を込めた「インペスケター」と名付けて笑う。漂う姿を眺めていると、彼は、ここパエンナでは、まだ我々の常識に当てはまる動物という存在が見つかっておらず、いるのはゴーレムやその他の魔法的な存在ばかりだと語る。そのため、インペスケターが精霊なのか、元素の化身なのか、あるいは全く別の何かなのか、学者たちは議論を重ねているという。そのあり方そのものが、自然の広大さと自分たちの知識の限界を思い出させてくれるのだと締めくくると、彼はここまでが「簡単な」命名だと肩をすくめ、次はもっと熱い場所を案内しようと言って、燃え立つ稜線フュージングウェイ・ヴェントへと南へ向かう。</p>
+      <p>蛍光色の大地を見下ろすように、漆黒の稜線がそびえ立つ。斜面にはケイ素を多く含んだマグマが脈のように走り、鈍い橙色の光を放っている。ネミングウェイはここが「フュージングウェイ・ヴェント」だと誇らしげに告げ、この一帯の熱はガラスを容易に溶かしてしまうほどであると説明する。足元には、溶けた流れが溜まり、冷えては固まり、再び形を変えていく痕跡がいくつも残されていた。火口の温度は気まぐれで、ひとたび冷えたように見える地表も、いつ再び割れて新たな溶岩が噴き出すかわからないと彼は注意を促し、お気に入りの靴どころか、足そのものを失いたくなければ足下には十分気をつけてほしいと冗談めかして念を押す。軽口を交えながらも、彼はあなたがこの旅を楽しんでいるかどうか確かめ、次の目的地こそがパエンナで最も壮観な景色を見せてくれる場所だと力強く宣言する。こうして一行は、きらめく光景が待つイリダイズド・ライズの高みへと歩みを進めるのだった。</p>
+      <p>イリダイズド・ライズにたどり着くと、そこには現実離れした光景が広がっていた。ネミングウェイは、ひとつひとつの見どころを順番に味わってほしいと、あなたを案内していく。最初に示されたのは、無数の棘を全方位に伸ばした奇妙な樹木で、彼はこれを「ディステンパード・オーク」と名付けたという。その爆ぜるようなガラスの棘は、どのような仕組みかはまだ解明されていないものの、光を取り込み、枝でもあり葉でもある形状のままエネルギーへと変えているらしい。少し離れた場所には、繊細な装飾のような茎に、レースのような花弁を幾重にも重ねた低木があり、彼はそれを「ミュリーネ」と呼んでいる。一見すると人工物にしか見えないが、どの花もほかの種と同じように花粉と種を宿しており、しかし動物がいないこの星では、強い風だけを頼りに子孫を残しているのだろうと説明する。さらに進むと、ウェディングウェイの庭にある菌類を思わせつつも、分類上は樹木に含まれるという奇妙な存在が立っており、彼はそれを、ガラスの柱の上に一枚板のような広い天蓋を載せた姿から「ディスプレイ・アカネシア」と名付けていた。柔らかな樹皮を降り注ぐ欠片から守るために、この特異な形へと進化したのではないかと、自然学者たちは推測しているという。見下ろせば、足元の大地そのものが段々と色を変えながら連なり、イリダイズド・ライズという名の由来となった虹色の階段を形作っている。かつてこの一帯には小さな池が連なっており、それぞれにたまった液状のガラスが、温度の低下とともに固まっていったのだと学者たちは考えていた。色の違いは、池ごとに異なる堆積物が混じっていた証拠なのだろうとネミングウェイは語る。最後に彼は、足下一面を覆う「ファセテッド・グラス」に目を向けさせる。自然界では同じ形の結晶は生まれないと言われるなか、この草のような結晶の刃はどれも驚くほどそろった形をしており、その規則正しさこそが、パエンナ特有のエーテル的性質によるものだとシャーレアンの学者たちは考えているのだという。</p>
+      <p>すべての木や草花、きらめく風景を見終えたところで、ネミングウェイはようやく、十分に堪能できただろうかと問いかける。あなたがその美しさを存分に味わったと答えると、彼は心の底から嬉しそうな表情を浮かべる。彼は、星海に無数の未知があることは覚悟していたものの、最初の目的地がこれほどまでに元の世界と異なるとは想像していなかったと打ち明ける。ここパエンナでは、ありふれたガラスでさえ、見るたびに新たな驚きをもたらし、形や色、響きについて、なぜこの姿で、なぜこの組み合わせなのかという問いを次々と投げかけてくるのだという。自分がしていることは、途方もなく大きな設計図の断片を、ほんの少しだけ垣間見ているようなものだと、彼は静かに語る。その全体像を、生涯を尽くしても見ることはできないだろうが、いつか誰かが、今よりも多くを理解する日が来るに違いないと信じているのだ。あなたたちが残していく脆くも貴重なものを抱えながら、その足跡をたどる者たちが現れ、学びを積み重ねていくのだろうと続ける。彼がこの星で過ごす時間が長くなるほど、ハイデリンが子らに歩んでほしいと願った道とは、まさにこのような旅なのではないかという思いが強くなっていく。一人ひとりの踏み出す一歩は小さくとも、そのすべてが数えきれないほど多くの歩みと重なり合い、ひとつの大きな旅路を形作っていくのだと。そう語ったあとで、彼は少し照れたように笑い、運命について思いを巡らす前に、そろそろサーチングウェイのもとへ戻るべきだろうと提案する。グラスブロワーズ・ビーコンで待つ彼を、これ以上待たせるわけにはいかないのだ。</p>
+      <p>拠点へ戻ると、ネミングウェイは今回の旅も素晴らしいものだったと満足げに宣言し、あなたに、見てきたことを余さずサーチングウェイに伝えてほしいと頼む。サーチングウェイは、その報告に満足げに耳を傾けたあとで、パエンナの探索は、計画の「とっておき」を見なければ完結しないと切り出す。そうして彼が誇らしげに披露したのが、パエンナ・ステラスコープだった。巨大な装置が姿を現すと、ネミングウェイは、その威容に、クルザスの観測所を遥かにしのぐ規模だと感嘆の声を漏らす。サーチングウェイは意気揚々と操作盤に手を伸ばし、レンズの向こうに、豊かなエーテルをたたえた遠い星々の光を映し出してみせる。ひとつひとつの輝きには無数の可能性が宿っており、ステラスコープを使って、それらを余すことなく追い求めていくのだと彼は説明する。パエンナだけでも息をのむほどの美しさだが、そのさらに先には、どれほど多くの世界が広がっているのだろうかと、ネミングウェイは想像するだけで胸を躍らせる。一方サーチングウェイは、いつの日か、その遠い光の中に新たな命や文明を見つけられるかもしれないと、静かな期待を口にする。彼は、メーティオンが辿った旅路と、絶望に沈んだ数多の星々の話に触れたあとで、かつて世界の果てに立ったあなたに、そこでは何を見たのかと穏やかに問いかける。あなたが、失われた者たちの記憶や、彼らを飲み込んだ荒廃の光景について語ると、その想像だけでも胸が締めつけられると彼は目を伏せる。それでもなお、自らも旅に出たいのだと彼は言う。失われたものに哀悼を捧げ、自分なりの意味を見いだし、まだどこかにいるかもしれない命のために、最後まで希望を手放さないために。すでに研究班のあいだでは、いつか出会うかもしれない他の星の住人に、積極的に手を差し伸べるべきか、それとも干渉を控えるべきか、議論が始まっているという。だが今は何よりも、ステラスコープを使って、次なる足場となる星を探し出すことが先決だと彼は続ける。強い星海流に抱かれ、植物のようなもの以外の生命にも優しい環境を備えた星を見つけるために。座標が定まり次第、改めて連絡すると約束し、サーチングウェイは、新たな仕事へと歩き出す。こうしてあなたとネミングウェイ、そして仲間たちは、パエンナの輝く空の下で、それぞれの役目へと戻っていくのだった。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> サーチングウェイ　ファエナ <small class="muted">(X:27.2, Y:13.8)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="go-forth-brave-explorers.html">新たなる未知へ！</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row">つづく</div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'最耀眼的星辰',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>在 Glassblown Grotto 的營地裡，Searchingway 迎接剛結束差事回來的你，真心感謝你為整個 Cosmic Exploration 計畫奔走。他半開玩笑地說，希望你對 Phaenna 地形的「見識」只停留在比喻層面，而不是被那些危險的尖銳碎片真實地刺個正著。你安撫地回應，雖然星球上鋒利的晶片曾經危險地從身邊掠過，但至少到目前為止，自己還沒被串成烤肉串。這時 Namingway 也插話抱怨，這片土地的光澤幾乎亮得讓人睜不開眼，要是早知道會這麼耀眼，他一定會去跟 Drivingway 要一副墨鏡。片刻之後，Searchingway 正式向他致意，讚許他在這顆新星上飛快地替各個角落取名。Namingway 坦言，要替整顆星球建立一套統一的命名體系是場壯觀的挑戰，但他也自豪地宣告，第一階段總算告一段落。Searchingway 提醒他，Phaenna 只是宇宙旅程中的第一站，而 Namingway 毫不退縮地表示，自己的字典絕不會有蒙塵的一天，說完便滿懷期待地看向你，邀請你像在 Sinus Ardorum 那樣，再陪他走一趟命名之旅。見你點頭答應，Searchingway 便鼓勵你趁他留在營地整理報告時，好好滿足 Namingway 的熱情。</p>
+      <p>出發前，Searchingway 壓低聲音拜託你多多遷就 Namingway——這是他特別引以為傲的一項工作。Namingway 提議，就從營地開始，往外一圈一圈地參觀。你於是跟在他身旁，踏入這座龐大的洞窟深處；這裡像一口巨大的罩子，替整支調查隊擋下 Phaenna 嚴苛氣候的直擊。他一邊走，一邊感嘆像玻璃這麼脆弱的物質，竟能同時成為致命威脅與堅固屏障——周圍岩壁完全由熔合的碎片構成，一方面替眾人遮蔽外界的極端環境，一方面只要稍有不慎接近，就足以割傷任何人。這一幕讓他想起匠人操作熔融玻璃的情景，以火焰塑造出兼具美感與強度的器皿。也因此，他解釋自己如何將這處避風港命名為「Glassblown Grotto」，而營地本身則是「Glassblowers’ Beacon」——如同人類與 Loporrit 圍繞的原初火光，在此一同打造屬於自己的奇蹟。介紹完這片聖地後，他精神一振，邀請你繼續往西前進，去看看名單上的下一處奇景。</p>
+      <p>接下來，你們來到一條緩慢向南流動、半透明淡藍色的河流，它蜿蜒穿過名為 Millefiori 的地帶。Namingway 為它取名「Soda-lime Float」，光聽名字頗有清涼甜飲的感覺，但他立刻提醒你千萬不要喝上一口——就化學組成而言，這條「水流」本質上就是液態玻璃。河中那些看似悠遊的「魚」也同樣不能碰，因為牠們根本不是生物，而是被下方濃密以太牽動的矽質球體。他笑著替這些偽裝的魚取了個名字，叫做「impesctors」，意指披著魚外衣的冒牌貨。你注視著牠們漂移而過，他則補充，目前為止在 Phaenna 上還沒有發現任何符合一般「動物」定義的生命，只有各種魔法人偶與奧秘造物在此遊走。至於這些 impesctors 究竟算不算精靈、元素，還是全然不同的存在，學者們各有說法，爭論不休。對他來說，這些存在本身正提醒著大家，大自然的浩瀚與自己的知識是多麼有限。說到這裡，他笑稱自己介紹的只是「比較簡單的一批名字」，接著提議去一個真正會讓人「升溫」的地方，帶著你往南前行，前往名為 Fusingway Vent 的炙熱稜線。</p>
+      <p>在那裡，一道烏黑的稜線高高聳立，俯視著一片發光的平原，坡面上縱橫交錯的矽質岩漿脈發出黯淡卻灼熱的橙光。Namingway 自豪地宣稱，這裡就是他所命名的「Fusingway Vent」，並解釋這裡的高溫足以將玻璃完全熔化，四周那些時而凝固、時而又改變形狀的流痕，就是熔融後冷卻再度重組的痕跡。他提醒你，火口內的溫度變化極為反覆，看似已冷卻的地殼，隨時可能裂開，噴出新一波液態岩漿，於是半認真半玩笑地要你務必小心腳步，否則說不定會失去自己最愛的靴子，甚至是最重要的雙腳。說笑之間，他仍不忘確認你是否享受這趟旅程。得知你興致盎然後，他宣布下一站將呈現整個 Phaenna 上最壯麗的景色，於是帶著重新高漲的期待，領你朝 Iridized Rise 的高地前進，保證那裡將滿是耀眼而絢麗的光輝。</p>
+      <p>來到 Iridized Rise，你眼前展開的景色宛如夢境，遠比現實更像一幅畫。Namingway 招手要你一一細看眼前的景物。首先是一棵四面八方伸出尖刺的奇異樹木，他替它取名為「distempered oak」，那一根根仿若爆裂而生的玻璃棘刺，是在無人完全理解的機制下將光轉化為能量；每一塊晶刺同時兼具枝與葉的角色，形狀則是在這顆星嚴苛環境中被迫塑造出來。在不遠處，一叢細緻枝條上綻放著如蕾絲般的花朵，那是他命名為「myrrhine」的灌木。乍看之下，它的花瓣精緻得像手工藝術，但每一朵都和普通花卉一樣擁有花粉與種子。既然這個星球上沒有動物可以幫忙傳播，Namingway 便推測，這些脆弱的花只能完全仰賴強勁的風來散播後代。再往前，是一個彷彿出自 Weddingway’s Bower 的奇異「菇狀」身影，卻在分類上被歸為樹木。他替這種生物取名為「display acanecia」，外型像是玻璃枝幹頂著一整片廣大的玻璃盤；自然學家推想，這特殊形態，或許是為了在碎片風暴中保護柔軟樹皮而演化而成。從你們所在的制高點望去，整片地貌彷彿一階階彩色階梯向下延伸，這段「彩虹樓梯」也正是 Iridized Rise 名稱的由來。據學者推估，這裡曾經散布著一連串小型玻璃池，隨著氣溫降低逐漸凝固，而池與池之間沉積物的差異，則反映在如今一層層相異的色帶上。最後，Namingway 提醒你低頭看看腳下那片「faceted grass」地毯——滿地水晶般的草刃形狀幾乎一模一樣，完全違反在 Etheirys 上「自然結晶不會有完全相同形狀」的常識。對此，Sharlayan 的學者們認為，這是 Phaenna 獨特以太環境所造成的特殊現象。</p>
+      <p>等到你把每一棵樹、每一叢花、每一縷晶光都看過之後，Namingway 才問你是否已經「徹底將這份光輝收入眼底」，當你肯定地回答時，他臉上浮現由衷的喜悅。他坦言，自己早就料到星海中充滿新奇事物，但從沒想過第一個抵達的目的地，會與 Etheirys 有如此巨大的差異。在 Phaenna 上，連「玻璃」這麼平凡的東西，都能一次又一次帶來驚喜，每一次發現都會讓他產生新的疑問——這些奇怪的形狀、色彩與聲響究竟從何而來？為什麼會是這種樣貌，而不是其他可能？他將自己的工作比喻成在窺探某個龐大設計的一小角，雖然就算以 Loporrit 那漫長的壽命來說，也不可能看清全貌，但他相信總有一天，會有人在你們留下的基礎上，看得更遠一些。那些後來者會沿著你們的足跡前行，小心捧著你們留下的脆弱成果，繼續拓展已知世界。他越是在這顆星球上停留，就越覺得，也許這正是 Hydaelyn 希望她的子民走上的道路——每個人都只踏出微小的一步，卻在無數步伐重叠之中，構成一段共享的旅程。說到這裡，他帶著有些不好意思的笑意，提醒你們在沉思命運之前，最好還是先回 Glassblowers’ Beacon 找 Searchingway，畢竟對方應該已經等候多時。</p>
+      <p>回到營地後，Namingway 宣布這趟導覽又畫下了精彩句點，還堅持要你把一路上的見聞詳細轉述給 Searchingway。Searchingway 一邊聽，一邊露出滿意的笑容，接著表示，要讓這趟 Phaenna 之行真正圓滿，還少不了欣賞計畫的「壓軸成果」——Phaenna Stellascope。當他揭開這座龐大儀器的全貌時，Namingway 驚嘆地說，它彷彿是 Coerthas Observatorium 的放大版，而 Searchingway 則迫不及待地進行示範，靈巧地操作控制面板，直到鏡片中填滿了充盈以太的遙遠星辰光芒。他解釋，每一點微光都蘊含著無數可能，而他們打算仰賴 Stellascope，將這些可能一一追尋到底。光是 Phaenna 自身就已經美得令人屏息，而 Namingway 幾乎無法想像，在這片星海更深處還有多少未知世界等待著他們。Searchingway 則在那份讚嘆之外，多添了一份期許——或許在那些遙遠光芒之中，他們終有一天能找到新的生命，甚至全新的文明。他提起 Meteion 的旅程，以及那些最終陷入絕望的星辰，說完之後，溫和地向曾經站在「存在邊界」的你請求，希望你能告訴他親眼所見。你回答的是那些早已逝去生命的記憶，以及將一切吞沒的廢墟景象，而光是想像其中的重量，就足以讓 Searchingway 感到心痛。然而，他仍然表示，自己依舊想親自踏上旅程——為了哀悼失落的一切，為了在其中尋找屬於自己的意義，更是為了在可能存在的他者面前，堅持替所有生命守住最後一線希望。如今，研究團隊之間已經開始討論，若未來真的發現其他智慧生命，到底該主動接觸，還是選擇不干預。不過至少現在，最重要的任務仍是運用 Stellascope，從星空中尋找下一片立足之地——一顆被強烈星流包裹、對不只「類植物」生命也友善的星球。一旦座標確定，他承諾會再與你聯絡。說完這些，他與你、Namingway 以及其他探索者一同回到各自崗位，在 Phaenna 閃耀的天空下，繼續為那尚未看清全貌的遠大設計，邁出下一步。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 薩琴威　法恩納 <small class="muted">(X:27.2, Y:13.8)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="go-forth-brave-explorers.html">啟程吧，勇敢的探索者們！</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row">未完待續</div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
