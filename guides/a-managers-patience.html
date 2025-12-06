@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A Manager’s Patience | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – A Manager’s Patience (DT Patch 7.21)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    /* 展開/收合 */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/Y85pfmKvdFw"
+              title="A Manager’s Patience" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">A Manager’s Patience</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'A Manager’s Patience',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>At the Moongate Hub in Sinus Ardorum, the ever-busy project manager Mumukko waylays the adventurer in the middle of their rounds. A former Sharlayan bureaucrat turned acting project manager for the Cosmic Exploration Initiative, she explains that keeping such a massive undertaking on schedule depends on relentless micromanagement—on someone who can keep hundreds of specialists focused without letting them know how much slack actually exists in the timetable. Brilliant as they may be, many of those specialists are hopeless outside their own fields, and three of them have even failed to collect their crew uniforms despite the deadline having long since passed. Deciding that only a capable outsider can rein in these “brilliant buffoons,” Mumukko entrusts the adventurer with the forgotten uniforms and a map of the Moongate Hub, asking them to ensure every last laggard is properly outfitted.</p>
+      <p>Following the map through the hub, the adventurer first seeks out Chrysielle, the self-proclaimed xenobiologist. Lost in contemplation of the lunar regolith and the countless forms of life she is certain exist beyond their star, she has quite forgotten practical matters such as uniforms. When the garment is finally placed in her hands, she apologizes for the oversight, her thoughts already racing ahead to the future of xenobiology and the proof she intends to wrest from the stars. Donning the attire, she vows to stand at the vanguard of a new science and to silence the naysayers of the astronomical society with undeniable results. The next delivery goes to an off-duty gleaner, who is mortified to realize she has neglected to pick up her own equipment. She recalls a friendly rivalry with another gleaner who left Old Sharlayan to work as a freelancer, and admits that joining the initiative was her way of keeping pace. Shaken by such an amateurish mistake, she resolves to get her act together and hurries off to change, leaving the adventurer with two of three uniforms successfully delivered and one last name circled near the Galactic Way.</p>
+      <p>Waiting at the designated point along the Galactic Way, the adventurer is soon greeted by a familiar voice. Kokkol Dankkol, the eccentric engineer who once perfected the aetherburner for the Ragnarok, bounds into view with his usual rough humor, delighted to encounter the hero again in the heart of the Cosmic Exploration Initiative. He remarks that, while this may not be the very edge of the universe, a venture named “cosmic exploration” was sure to catch such an adventurer’s attention. Between jokes about the odds of meeting on the moon and passing along Margrat’s regards, he explains that he has been brought in as chief propulsion systems engineer and has come to inspect the completed vessel with his own eyes.</p>
+      <p>When the adventurer reveals that they have been searching for him to deliver a long-overdue crew uniform, Kokkol dimly recalls Mumukko saying something about his clothes, but brushes it off. The well-worn work gear he wears, especially his beloved tool belt steeped in blood, sweat, and tears, is part of how he faces his craft, and he balks at the idea of changing into anything else. At that moment, Mumukko herself arrives, cutting through his theatrics with a sharp command. She refuses to allow his “fluids” and grime to sully the initiative’s vessel or contaminate any ecosystem on a distant star. The uniforms, she explains, are imbued with purifying magicks that cleanse dangerous contaminants before they can spread, and anyone who sets foot on or even breathes near the Galactic Way is required to wear one. Reminding Kokkol that the brilliant mind who solved the aetherburner quandary should be more than capable of changing his outfit, she presses his responsibility as both engineer and explorer.</p>
+      <p>Put on the spot, Kokkol finally relents, grumbling that the new uniform is uncomfortably formfitting and ill-suited to a man of his stature. Even so, duty wins out over stubbornness, and he trudges off to continue his inspection as ordered. Watching him depart, Mumukko admits that Kokkol has always been too headstrong for his own good, but notes that his strong sense of duty can be turned to the project’s advantage when necessary. With the last of the uniforms accounted for, she invites the adventurer to return to Lunar Hopopolis, where she can formally express her thanks.</p>
+      <p>Back at the Moongate base in Lunar Hopopolis, Mumukko apologizes for sending a storied hero on what amounted to a courier’s errand, yet insists that their assistance was invaluable. The Cosmic Exploration Initiative has attracted gifted but eccentric individuals from across the star, and she knew from the outset that someone of the adventurer’s caliber would be needed to keep such personalities in line. Grateful that the uniforms have been delivered and order restored—for the moment, at least—she thanks the adventurer on behalf of the initiative and expresses the hope that she may call upon their aid again when the next challenge arises.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Mumukko, Sinus Ardorum <small class="muted">(X:21.6, Y:21.1)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="passion-thy-name-is-ardorum.html">Passion, Thy Name Is Ardorum</a></div>
+      <div class="row">Disciples of the Land or Hand</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="a-managers-persistence.html">A Manager’s Persistence</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'プロジェクトマネージャーの小粋なお仕事',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>シヌス・アルドルムの「ムーンゲート基地」で、常に忙しく立ち回っているプロジェクトマネージャーのムムッコが、通りがかった冒険者を呼び止める。かつてはシャーレアンの官僚として働いていた彼女は、いまやコスモエクスプローラー計画の臨時プロジェクトマネージャーとして、膨大な業務の采配を一手に担っていた。巨大な計画を予定どおり進めるには、実情を悟らせないまま数百人の専門家たちの鼻先を、常に「仕事」という名の硯に押し付けておく細やかな管理が欠かせない──それが彼女の信条だ。しかし、各分野で優秀な専門家ほど、ひとたび自分の領域を離れると途端にポンコツになるのが現実であり、その一端として、乗員制服の受け取り期限を過ぎてもなお、受領に来ない者が三人もいるという。そこでムムッコは、外部から来た信頼できる冒険者に白羽の矢を立て、忘れ去られた制服一式とムーンゲート基地内の地図を託し、「この才気あふれる間抜けたち」にきちんと制服を届けてほしいと依頼するのだった。</p>
+      <p>地図を頼りに基地内を巡る冒険者は、まず自称宇宙生物学者クリシエルのもとを訪ねる。彼女は月面を覆うレゴリスの観察に没頭し、星々の彼方に存在するであろう生命への思索に耽っていたせいで、現実的な制服の受け取りなどすっかり頭から抜け落ちていたらしい。制服を手渡されると、クリシエルは慌てて謝罪しながらも、その意識はすでに未知の生命と宇宙生物学の未来へと向かっている。正装を身にまとい、この計画の最前線に立つことで、自らの仮説を証明し、これまで彼女の理論を嘲笑ってきた天文台の面々を黙らせてみせる──そんな強い決意を口にするのだった。次に制服を受け取ったのは、オフの日にうっかり受領を忘れていたギャザラーの女性だ。彼女は、依頼品の質を競い合っていたライバルのギャザラーがオールド・シャーレアンを離れ、フリーランスとして活躍していることに触れ、自身も負けじとこの計画に参加した経緯を語る。しかし、自分の制服すら取りに来ないという初歩的なミスにひどく落ち込み、「もっと気を引き締めねば」と反省しながら、着替えのため足早にその場を辞する。こうしてふたりの「才気あふれる間抜け」は無事に制服を手にし、残る一着の持ち主が「ギャラクティックウェイ号」の近くにいることだけが、ムムッコの地図に記されていた。</p>
+      <p>指定された地点で待っていると、やがて陽気な声が冒険者を出迎える。姿を現したのは、かつて「ラグナロク」のためにエーテルバーナーを完成させた奇才の技師、コッコル・ダンクコルだった。彼は月面で再会したことに大いに驚きつつも、「宇宙の果てほどじゃねえが、『コスモエクスプローラー』なんて名前の計画なら、あんたが飛びついてきても不思議じゃねえ」と冗談めかして笑う。マルグラットからの伝言を伝えつつ、現在はコスモエクスプローラー計画において宇宙船の主任推進システム技師を務めており、完成したばかりの船を自分の目で確かめるため、ムーンゲート基地を訪れたのだと説明する。</p>
+      <p>冒険者が、実は彼を探して忘れられた制服を届けに来たのだと明かすと、コッコルはムムッコに何か言われていたような気がする、と曖昧な反応を返すものの、すぐに興味を失った様子を見せる。長年の仕事で血と汗と涙が染み込んだ作業着と工具帯こそが、自分が技師である証だと考えており、今さらよそ行きの制服など着る気にはなれないのだ。だが、その場にムムッコ本人が現れると、空気は一変する。彼女はコッコルの芝居がかった抵抗を一蹴し、彼の「体液や汚れ」を付着させたままでは、宇宙船のみならず、着陸先の星々の生態系を汚染しかねないと厳しく言い放つ。制服には有害な汚染物質を浄化する魔法が込められており、「ギャラクティックウェイ号」に近づく者は、呼吸ひとつする前に必ず着用しなければならないのだと説明したうえで、エーテルバーナー問題を解決したほどの天才技師なら、服を着替えるくらい朝飯前だろうと、その責任感に訴えかける。</p>
+      <p>観念したコッコルは、しぶしぶ制服に袖を通しながら、「こんなピッチピチの格好を人様に見せられるか」とぼやく。それでも、技師としての義務感が最終的には頑固さを上回り、新しい作業服に身を包んだ彼は、ぶつぶつ文句を言いながらも検査へと向かっていく。去っていく背中を見送りながら、ムムッコはコッコルが昔から頑固者であることを認めつつも、その強すぎる責任感をうまく利用すれば、計画のための心強い戦力になると評する。これで残る制服はひとつもなくなり、依頼はひとまず完了だ。ムムッコは冒険者に、ルナホップ・ポリス内部の執務場所「ルナーホップ・ポリス」へ戻ってくるよう求め、正式な謝礼を約束する。</p>
+      <p>ムーンゲート基地「ルナホップ・ポリス」に戻ると、ムムッコはまず、名の知れた英雄を単なるおつかいに駆り出してしまったことを詫びる。しかし同時に、今回の協力がどれほど助けになったかを強調し、この計画に世界中から集まった「優秀で、そして筋金入りに変わり者」たちをまとめ上げるには、冒険者のような存在が不可欠だと改めて認める。こうして制服の問題は解決し、コスモエクスプローラー計画の歯車は再び滞りなく回り始める。ムムッコは、今後も新たな難題が持ち上がった際には、また力を貸してほしいと期待を込めて告げ、計画を代表して深々と礼を述べるのだった。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> ムムッコ　焦がれの入江 <small class="muted">(X:21.6, Y:21.1)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="passion-thy-name-is-ardorum.html">未知待つ宙へ焦がれて</a></div>
+      <div class="row">クラフター／ギャザラー Lv 10～</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="a-managers-persistence.html">プロジェクトマネージャーの周到なお仕事</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'經理的耐心考驗',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>在 Sinus Ardorum 的 Moongate Hub 裡，總是忙得團團轉的專案經理 Mumukko 攔下正要離開的冒險者。她曾是 Old Sharlayan 的官僚，如今則擔任 Cosmic Exploration Initiative 的臨時專案經理，負責掌控這項龐大計畫的進度與資源。要讓這種規模的工程準時推進，就必須靠近乎龜毛的「微觀管理」──在不讓當事人察覺時，牢牢抓住數百名專家的鼻子往前推。偏偏這些人越是天才，在自己領域之外就越不可靠，其中三名參與者甚至連基本的乘員制服都忘了領，明明期限早就過了。Mumukko 深知要管好這些「才華洋溢的笨蛋」並不容易，於是把一整套被遺忘的制服和 Moongate Hub 的地圖交到冒險者手中，拜託他們代為送達，讓每個人都穿上規定的裝備。</p>
+      <p>按照地圖標記，冒險者先找上了自稱宇宙生物學家的 Chrysielle。她正沉浸在對月面風化層的觀察與思索之中，腦裡裝的全是「星海之中必然存在的無數生命」，實務上的制服領取自然被拋到九霄雲外。直到制服遞到眼前，她才慌忙道歉，卻又很快回到自己的世界，談起宇宙生物學的未來，以及自己要如何站在這門新學問的最前線。她相信，只要穿上這件制服、投身 Cosmic Exploration Initiative，就一定能拿到足以證明理論的樣本，讓天文學會那些輕視她的人啞口無言。第二件制服則送到一位正在休假的拾荒者手上。她對自己居然連「該領的裝備都能忘記」感到羞愧，說起過去在 Old Sharlayan 和另一名拾荒者互相較勁、比拼稀有發現的日子。那位對手如今已成為自由接案者，為了不落人後，她才報名加入這項計畫。然而，這種近乎新手級別的疏忽讓她深感挫折，下定決心要重新振作，說完便抱著制服匆匆去換裝。至此，三名「笨蛋天才」中已有兩人就位，地圖上只剩最後一個名字，被註記在 Galactic Way 附近。</p>
+      <p>來到指定地點稍作等待，一聲熟悉又豪爽的嗓音打破了寂靜。現身的，是曾為 Ragnarok 完成 aetherburner 的怪才工程師 Kokkol Dankkol。能在月面重逢，他顯得既驚訝又開心，還打趣說，就算這裡不算真正的「宇宙盡頭」，但只要聽到計畫名稱叫 Cosmic Exploration，這位冒險者肯定會第一個衝上前來。他順口帶來 Margrat 的問候，又提到自己在 Cosmic Exploration Initiative 中，已被任命為宇宙船的首席推進系統工程師，此行正是為了親眼確認組裝完成的艦艇狀況。</p>
+      <p>當冒險者表示自己是奉 Mumukko 之託，特地前來把遺忘的乘員制服交給他時，Kokkol 只隱約想起對方好像說過關於衣服的事，但顯然並沒有放在心上。他低頭看了看自己那套磨到破舊的工作服，以及滿是工具的腰帶，得意地說那裡頭浸透了自己的血汗與心力，才是最能讓他安心面對機械的戰裝，實在沒有興趣換成一件規矩的制服。就在兩人僵持之際，Mumukko 親自來到現場，乾脆利落地打斷這場鬧劇。她毫不客氣地指出，如果任由 Kokkol 身上的「各種東西」沾上宇宙船，不但會弄髒艦體，還可能在降落其他星球時污染當地生態。為了避免這種風險，所有乘員制服都施加了淨化魔法，能在有害污染物擴散之前將其徹底清除，任何人想踏上 Galactic Way，甚至只是在附近呼吸空氣，都必須先換上這一身。她最後提醒 Kokkol，既然能解決 aetherburner 這種棘手難題，換個工作服更不該成為問題，硬是把他身為工程師的責任拉到面前。</p>
+      <p>在這番疾言厲色與道理並陳之下，Kokkol 終於放棄抵抗，只是邊套上制服邊抱怨這種貼身剪裁實在不適合他這種體型。儘管嘴上滿是牢騷，最終還是被責任感推著往前走，換好新裝後，一邊嘀咕一邊踏上對艦艇的檢查行程。目送他離去，Mumukko 認真地說，Kokkol 一向固執得要命，但也因為如此，只要抓住他的使命感，就能把這股固執轉化為推動計畫前進的力量。至此，最後一件制服也順利交付，任務表面上告一段落。她邀請冒險者回到 Lunar Hopopolis 的辦公區，當面表達謝意。</p>
+      <p>回到月面基地 Lunar Hopopolis，Mumukko 首先為讓一位名聞遐邇的英雄去跑腿送衣而道歉，隨即又再三強調這份幫忙有多重要。Cosmic Exploration Initiative 吸引了來自各國的優秀人才，也聚集了大量我行我素、性格乖張的怪人，要讓這群人真正朝同一個目標前進，需要的不只是規章制度，更需要一位能在關鍵時刻出手相助的冒險者。如今制服問題告一段落，計畫的齒輪得以繼續順利運轉。Mumukko 代表整個計畫向冒險者深深一鞠躬，並坦言今後也一定還會遇到新的麻煩，希望到時仍能再度借助這份可靠的力量。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 穆穆可　熾情海灣 <small class="muted">(X:21.6, Y:21.1)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="passion-thy-name-is-ardorum.html">為尚未抵達的星空悸動不已</a></div>
+      <div class="row">採集或生產職業 Lv 10 以上</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="a-managers-persistence.html">經理鍥而不捨的堅持</a></div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
