@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pilot Wanted | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – Pilot Wanted (DT Patch 7.31)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    /* 展開/收合 */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/p-9NLrIbUYI"
+              title="Pilot Wanted" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Pilot Wanted</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Pilot Wanted',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>At Glassblown Grotto in Phaenna, the vacuum suit specialist hails you the moment she spots you, saying the rumors about your skill hardly do you justice. She explains that the team is preparing a high-altitude test flight: while vacuum suits are rarely used that way in standard operations, they are built for it. Until now, manned sorties were forbidden as a precaution, thanks to the difference in magnetism between Phaenna and Sinus Ardorum and the risk of colliding with project drones. With far fewer drones in the air, though, it should finally be possible to chart a safe route through pockets of low magnetic interference. There is, however, one condition that cannot be waived: pilots must fly in pairs in case of emergency. With a hopeful smile, she asks if you would join her in the sky—and when you agree, she lights up and tells you to come back once you are ready to strap in.</p>
+      <p>When you return to the camp, she confirms that all checks are complete and signals the start of the test flight. You board the vacuum suit and rise into the shimmering air, following her lead. Near the mouth of the grotto, she warns you to exercise caution—personnel and supplies are densely clustered below, and any malfunction could spell disaster. Before worry can settle in, she reminds you that the suits have undergone exhaustive inspections precisely for that reason, and her steady voice over the linkpearl guides you onward as the glassy terrain of Phaenna unfolds beneath your feet.</p>
+      <p>Leaving the camp behind, you follow her out over the crystalline stretches of Millefiori, well clear of the usual drone corridors. She has you double-check your visuals to confirm you are outside their flight path, then angles toward the river and the distant volcanic rise. You cut across the sparkling flow toward Fusingway Vent, listening for the slightest hint of engine trouble even as you take in the view. High above the onyx ridge, she notes, turbulence is to be expected—hot volcanic air surges upward in sharp currents. The suits are designed to withstand such buffeting to a point, she adds, but she would be far more concerned attempting this during a heavy glass storm.</p>
+      <p>Once the route has been traced and every checkpoint verified, the specialist declares the test a success and announces that it is time to try the automatic recall system. At her command, the suit’s mechanisms engage, and you are borne back toward Glassblown Grotto in a smooth, controlled arc. Touching down safely at camp, you remove your helmet as she asks for your impressions of the flight. Whether you praise the elegant path, the breathtaking scenery, or simply the thrill of skimming over Phaenna’s strange landscape, she listens attentively. She explains that even with limited routes, these sorties are invaluable for surveying broad swaths of the star—there are cases where live observation far outstrips anything a drone recording can provide, and repeating the same route can itself be a boon to research. There are still strict safety regulations and many constraints, she admits, but over time she hopes to enable more independent observation, and promises to keep your feedback in mind.</p>
+      <p>After giving you a moment to let your stomach settle, she reaches for your reward with practiced care, mindful of past incidents where an over-eager gesture sent gil scattering in front of freshly landed pilots. She passes you your payment with apologies for the small delay, then turns her attention back to the suits, which are already exporting data from the flight. That information, she says, will be paired with your comments to refine future operations. The route appears safe, but will need further testing before it can be offered to the entire initiative; until then, it will still see use in select missions. With the specialist already thinking ahead to the next round of trials, you take your leave, knowing that this brief circuit through Phaenna’s sky will help shape the paths future explorers will fly.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Vacuum Suit Specialist, Phaenna <small class="muted">(X:26.1, Y:12.5)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-brightest-star.html">The Brightest Star</a></div>
+    </div>`,
+    followq:`<div class="stack"></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'パワーローダー飛行実証実験',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>パエンナの Glassblown Grotto では、真空防護服の技術者が Forename の姿を見つけるなり、噂以上の腕前だと微笑みかける。彼女は、現在チームが高高度飛行のテストを計画しているのだと説明する。真空防護服は本来の運用では滅多にそこまでの高度で使われないが、想定上は対応できるよう設計されているという。これまでは、パエンナと Sinus Ardorum の磁場の違いに加え、上空を飛び交うプロジェクト用ドローンとの衝突リスクを考慮し、有人飛行は禁止されていた。だが今やドローンの数は大きく減り、磁気干渉の少ない空域を選べば、安全な航路を引ける可能性が出てきたのだと語る。とはいえ、万が一に備えてパイロットは必ず二人一組で飛ばねばならないという規則は変わらない。彼女は期待を込めた眼差しで、空の相棒になってくれないかと頼み込み、Forename が快諾すると、嬉しそうに「準備ができたら声をかけてほしい」と告げるのだった。</p>
+      <p>やがて準備を整えて戻ると、技術者は最終確認が終わったことを告げ、高高度テスト飛行の開始を宣言する。真空防護服に乗り込んだあなたは、彼女の後ろにつき、きらめく空へと浮かび上がる。洞窟の入口近くに差しかかると、彼女はリンクパール越しに注意を促す。下には多くの隊員や物資が密集しており、もしも不具合が起これば深刻な被害につながりかねないのだと。それでも過度に心配する必要はない、とすぐさま言葉を続ける。まさにその危険を想定して、今回使用する真空防護服には徹底した点検が施されているのだと説明し、穏やかで落ち着いた声で、さらなる上昇と前進を指示する。足元には、ガラスの星パエンナ特有のきらびやかな地形が広がっていった。</p>
+      <p>拠点を離れ、ふたりはドローンの飛行ルートから十分外れた Millefiori 上空へと進路を取る。彼女は、視界の確認を行い、障害物もドローンも見当たらないことを互いに確認してから、川と火山地帯へ向けてコースを切り替えるよう指示する。きらめく流れを横切り、Fusingway Vent へ向かう途中、彼女はエンジン音に耳を澄ませてほしいと頼みつつも、眼下の景色を楽しむ余裕も忘れないようにと語りかける。黒曜の尾根の上空では、高高度特有の乱気流が発生しやすく、熱せられた火山性の空気が鋭い上昇気流となって吹き上がるという。真空防護服はある程度までそうした揺れを想定して設計されているが、さすがに激しい「ガラス嵐」の最中に同じ航路を飛ぶのは控えたいところだと、半ば冗談めかして付け加える。</p>
+      <p>定められたポイントをひとつひとつたどり、予定していたルートの安全性を確認し終えると、技術者はテストが順調に終了したことを告げ、自動帰還システムの試験に移ると宣言する。彼女の合図とともに真空防護服の機構が作動し、ふたりの身体は滑らかな軌跡を描きながら Glassblown Grotto 方面へと引き返していく。無事に拠点に着地すると、彼女はヘルメットを外したあなたに感想を求める。洗練された飛行ルートであったこと、空から眺めるパエンナの景観がいかに見事だったか、あるいは単純に飛行そのものの楽しさなど──どのような言葉を返しても、彼女は真剣に耳を傾ける。たとえ運用できるルートが限られていたとしても、こうした飛行は広い範囲を一度に観測できる貴重な機会であり、記録用ドローンの映像では得られない情報も多いのだと説明する。同じルートを何度もなぞること自体が、研究にとって大きな利点になる場合もあるのだと続けると、安全規定やさまざまな制約がなお多いことも素直に認める。それでも、ゆくゆくはより自立した観測を可能にしたいと語り、あなたからの意見は今後の検討材料として大切にすると約束するのだった。</p>
+      <p>短い飛行の余韻が落ち着くのを待ってから、彼女は慎重な手つきで報酬の入った袋を取り出す。着陸したばかりの操縦士たちの前で袋を勢いよく開け、ギルをぶちまけてしまった苦い前例があるらしく、今回は細心の注意を払って支払いを済ませる。その間にも、真空防護服は先ほどの飛行データを自動的に出力しており、その情報とあなたの感想を組み合わせて、今後の運用を改善していくつもりだと力強く告げる。今回の航路は十分安全そうに見えるものの、イニシアチブ全体に開放するには、まだ追加の検証が必要だという。それでも、当面のあいだ幾つもの任務で活用されることになるだろうと自信をのぞかせる技術者に一礼し、あなたは新たな試みの一端を担った手応えとともに、その場を後にする。パエンナの空を巡るささやかな一周が、これから先に続く数多の探索者たちの航路を形作っていくのだと感じながら。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> パワーローダーの専任整備士　惑星パエンナ <small class="muted">(X:26.1, Y:12.5)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-brightest-star.html">希望の輝き</a></div>
+    </div>`,
+    followq:`<div class="stack"></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'徵求動力裝甲飛行測試駕駛',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>在 Phaenna 的 Glassblown Grotto 裡，Vacuum Suit Specialist 一看見你便主動上前打招呼，說傳聞根本不足以形容你的身手。她說明，團隊正準備進行一場高空測試飛行──真空防護服在一般作業中很少需要飛到那樣的高度，但從設計上是具備這種能力的。直到最近，因為 Phaenna 與 Sinus Ardorum 之間磁場差異太大，再加上空中充斥著專案用無人機，為了避免碰撞風險，一直禁止進行載人飛行。不過，如今無人機的數量大幅減少，只要避開磁氣干擾較強的區域，就有機會繪製出一條安全航線。她也強調，有一項規定仍然不能打破：為了應付突發狀況，所有飛行都必須由兩名駕駛一同執行。她帶著期待的神情，詢問你是否願意一同上天測試；當你答應時，她眼睛一亮，要你準備妥當後再回來找她，一起出發。</p>
+      <p>待你收拾妥當回到營地，她確認完最後的檢點，宣布高空測試正式開始。你登上真空防護服，依照她的指示緩緩升空，滑入這顆玻璃之星的耀眼天空。靠近洞窟入口時，她透過通話水晶提醒你務必小心──下方聚集了大量人員與物資，一旦發生故障，後果將不堪設想。不過，她隨即補充，正因如此，這次使用的真空防護服才會事先接受嚴格而反覆的檢驗，請你放心。伴隨著她穩定、冷靜的聲音，你繼續拉高高度，腳下是一片在光線下閃爍的 Phaenna 地表。</p>
+      <p>離開營地後，你們一路飛往 Millefiori 上空，刻意遠離既有的無人機航道。她要你再次確認視野，確定附近沒有障礙物與其他機體，才指示你調整航線，穿越河流，前往火山地帶。你們橫越閃亮的河面，朝 Fusingway Vent 的方向飛去，一邊細聽引擎有無異常聲響，一邊盡情欣賞腳下的景色。她說，在那座黑曜岩山脊的高空，常常可以預期會出現亂流──被加熱的火山熱氣會形成急劇上升的氣流。真空防護服在設計上能承受一定程度的搖晃，不過若是遇上猛烈的玻璃風暴，她還是寧願不要在同一條航線上冒險，語氣半是玩笑、半是真心提醒。</p>
+      <p>等到所有預定的檢查點都飛過一遍，確認這條路線的安全性之後，技師表示測試非常順利，接著宣布要啟動自動返航系統。隨著她下達指令，真空防護服的機構開始運作，你的身體隨之描出平穩的弧線，朝 Glassblown Grotto 緩緩折返。安全降落回營地後，她請你分享對這次飛行的感想。無論你是讚嘆航道設計得多麼流暢、稱讚空中的景色有多壯麗，或只是單純表達飛行本身有多令人興奮，她都認真聽在耳裡。她解釋，即使目前能運用的航線有限，這類飛行仍然是調查 Phaenna 的重要手段──有些研究課題，無人機紀錄再清晰，也比不上親眼從空中觀察，而反覆飛行同一條路線，本身也能為研究帶來穩定的比較資料。她坦承，出於安全規定與各種限制，現在還無法隨心所欲地自由飛行，但仍希望將來能讓更多人以較獨立的方式進行空中觀測，並保證會把你的意見納入後續的調整參考。</p>
+      <p>待你稍微平復因飛行而起的暈眩感，她才小心翼翼地取出報酬。看來過去曾在剛降落的駕駛面前打開錢袋、把吉爾灑得到處都是的慘痛教訓，讓她在這方面格外謹慎。她向你遞上酬勞，略帶歉意地為短暫的等待道歉，然後又把心思投入在眼前的工作上──此刻真空防護服正自動輸出方才飛行的各項數據。她說，這些資料會與你的回饋一同用來改善未來的運作。這條航線看起來相當安全，但在開放給整個 Cosmic Exploration 計畫的所有成員之前，仍需要更多次測試。不過，在那之前，它已經足以為數個任務派上用場。看著技師已經在思考下一輪試飛的準備，你帶著完成一項小小實驗的充實感離開營地，心知這趟繞行 Phaenna 天際的短暫旅程，將化作未來眾多探索者的指引航路之一。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 真空裝甲專員　法恩納 <small class="muted">(X:26.1, Y:12.5)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-brightest-star.html">最耀眼的星辰</a></div>
+    </div>`,
+    followq:`<div class="stack"></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
