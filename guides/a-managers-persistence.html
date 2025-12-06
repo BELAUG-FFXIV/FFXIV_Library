@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A Manager’s Persistence | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – A Manager’s Persistence (DT Patch 7.21)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    /* 展開/收合 */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/oDUYbejgQHU"
+              title="A Manager’s Persistence" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">A Manager’s Persistence</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'A Manager’s Persistence',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>After your earlier work in Sinus Ardorum, Mumukko corners you once more and pointedly asks if you have time to spare. When you give a simple, honest yes, she beams—exactly the answer she was hoping for. This time, the “troublemaker” in need of wrangling is Packingway, the Loporrit responsible for planning the interstellar supply chain. Pressing a small, sealed box into your hands, she instructs you to track Packingway down somewhere around the lunar base and tell them it must be stowed in the starship’s cargo hold. She warns that they may refuse or even run, but orders you not to give up: if they flee across the crater, across the moon, even to the very edge of the universe, you are to pursue them until they accept the box.</p>
+      <p>You soon find Packingway near the Moongate Hub, where they greet you cheerfully as a staunch supporter of Loporrits everywhere and ask how they can help. The moment you try to hand over Mumukko’s mystery box, however, their ears droop and they flatly refuse. A starship’s payload capacity, they insist, is extremely strict; every onze has been painstakingly calculated. If an item is not written into the design documents and cargo plan, there is simply no room for it, and no amount of pleading will change that. When you confront them a second time, box still in hand, they grow more agitated, scolding you for not listening. The vessel is already packed with heavy machinery and only the bare necessities, they say; adding something at the last minute would force them to redo all their carefully balanced calculations. If it isn’t on the cargo list, it isn’t coming aboard—no exceptions—and once again they bolt.</p>
+      <p>On your third attempt, Packingway all but explodes, demanding to know how many times they must repeat themselves before you understand that the box will not be accepted. Before they can run again, a familiar voice cuts through their protests: Mumukko strides onto the scene, ordering them to stop whining and put the thing in storage. If they intend to ignore her request, she declares, there is nowhere on the moon she won’t hunt them down—and you, she adds, would chase them to the very edge of existence to see this task done. At her prompting, you present the box, and she reveals its contents: an autonomous magitek probe devised by Justa, the engineer who has joined you. The device is designed to seek out sources of water in hostile environments, ready to be deployed whenever the crew makes landfall.</p>
+      <p>Packingway remains unconvinced and demands to know why such a device needs to be loaded at all. They argue that the ship’s stores already contain the minimum amount of water required for the journey, measured down to the last drop. At that, Mumukko’s patience finally snaps. All Packingway has accounted for, she shouts, is death by dehydration: Loporrits may not need water to live, but the crew from Etheirys can only survive a few days without it. What if the water tank is breached? What if a fire breaks out and the supply is spent dousing the flames? In an emergency, this probe could guide the crew to a new source of water as soon as they land, and for that reason its inclusion is nonnegotiable. She then mentions that she has already reviewed Packingway’s cargo list and questions whether two entire carrot cultivation stations are truly essential. Loporrits may work more efficiently with a steady supply of carrots, but they will hardly die without a second farm—one station should suffice. Horrified, Packingway cries that carrots are their very lifeline and dashes off in outrage, with Mumukko sprinting after them, still arguing. She calls back over her shoulder for you and Justa to return to the Lunar Hopopolis and wait for her there.</p>
+      <p>Left alone, Justa lets out a rueful laugh and admits she feels awkward standing before you. She explains that she once served with the Ist Legion and might well have frozen to death in Tertium had you and your companions not intervened. After the Final Days were averted, word of the cosmic exploration project reached her through a Sharlayan contact. The idea of interstellar travel was daunting, but she believed her magitek expertise could be of use. For a time she struggled with the thought of leaving Garlemald, where reconstruction efforts still needed hands, yet in the end she decided that broadening her horizons here would better serve her homeland in the long run.</p>
+      <p>As she speaks, she reflects on how much her outlook has changed. Not so long ago, she would have scoffed at the notion of working alongside the people of Sharlayan. But when she came here and saw the whole of their star from afar for the first time, the Empire that had once filled her world suddenly seemed small. Fixating on borders between nations now feels pitiful in comparison to the vastness of the heavens. This journey into space, she says, is the greatest windfall she could have imagined, and she thanks you for the chance you have indirectly given her. With Mumukko still in hot pursuit of Packingway, she suggests the two of you head back inside the Lunar Hopopolis to wait for the outcome.</p>
+      <p>In time, Mumukko returns, and Justa chuckles that she is curious to hear how things ended. Mumukko reports that, after some considerable arm-twisting, Packingway has finally agreed to store the cargo, and she thanks you sincerely for racing around the base to corner the elusive Loporrit. As the tension fades, she sighs that, for all their passion, the Loporrits have a limited understanding of mortal biology and a very different sense of time. To them, every task seems to span hundreds or thousands of years, while those who hail from Etheirys cannot afford to wait decades for every decision. She insists that this is precisely why the project needs comprehensive oversight from someone who can see things from a human perspective and nudge it forward when necessary. Then, with a confident smile, she reveals her own plans: she intends to join the voyage to the next star herself, and she hopes you will have plenty more time to spare for her when that day comes.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Mumukko, Sinus Ardorum <small class="muted">(X:21.6, Y:21.1)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="a-managers-patience.html">A Manager’s Patience</a></div>
+      <div class="row">Disciples of the Land or Hand — Lv 10+</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="a-managers-discernment.html">A Manager’s Discernment</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'プロジェクトマネージャーの周到なお仕事',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>シヌス・アルドルムでの一連の任務を終えたあと、ムムッコは再びあなたを呼び止め、時間の余裕があるかと単刀直入に尋ねてくる。はっきりと「ある」と答えると、彼女は期待どおりの返事だとばかりに満足げに微笑んだ。今回彼女が「厄介者」と呼ぶ相手は、星間物資輸送計画を担当しているレポリット、パッキングウェイである。ムムッコは小さな箱をあなたに手渡し、月面基地のどこかをうろついているパッキングウェイを見つけ出し、この箱を宇宙船の貨物室に入れるよう伝えてほしいと命じる。きっと拒否されるだろうし、逃げ出すかもしれないが、それでも諦めてはならない。クレーターを越え、月を越え、宇宙の果てにまで逃げようとも、箱を受け取らせるまで追いかけるのだと念押しするのだった。</p>
+      <p>やがてあなたはムーンゲート・ハブ付近でパッキングウェイを見つける。彼らはあなたを見るなり、「レポリットの熱心な支援者」として歓迎し、何か用事かと首をかしげる。しかし、ムムッコの謎めいた箱を差し出した途端、その耳はしゅんと垂れ、きっぱりと受け取りを拒否する。宇宙船の積載量は極めて厳密であり、すべてのオンスが綿密に計算されているのだという。設計書や貨物計画に記載のない荷物を気まぐれに積み込む余裕などなく、どれほど頼まれても方針は変えられないと告げて、足早に立ち去ってしまう。再び行く手を塞いで箱を差し出しても、パッキングウェイの苛立ちは増すばかりだ。船内はすでに多くの重機と最低限の物資でいっぱいであり、この段になって荷物を追加すれば、せっかく整えた計算をすべてやり直す羽目になる、とまくしたてる。貨物リストに載っていない物は積み込まない──例外はなしだと断言し、またもや逃げ去ってしまった。</p>
+      <p>三度目に箱を突きつけたとき、パッキングウェイはついに堪忍袋の緒が切れ、何度言えば分かるのかと声を荒げる。ところが、今度は彼らが逃げ出す前に、鋭い声がその抗議を遮った。ムムッコが現れ、泣き言はやめてさっさと倉庫に運ぶよう一喝する。もし彼女の依頼を無視するつもりなら、月面のどこに隠れようと見つけ出し、あなたもまた、宇宙の果てまで追いかけて箱を押し付けるだろうと脅し文句を添える。促されてあなたが箱を差し出すと、その中身が明かされる。中に収められていたのは、ジャスタが開発した自律型の魔導探査機だった。過酷な環境下でも水源を探知することを目的とした装置であり、着陸後にすぐ展開できるよう、あらかじめ宇宙船に積み込んでおく必要があるのだという。</p>
+      <p>しかし、パッキングウェイはなおも首を縦には振らない。航行中に必要となる水は、すでに最小限の量まで厳密に見積もってあると主張するのだ。その言葉に、ついにムムッコの堪忍袋が切れる。あなたたちの計算で見えているのは、「渇き死ぬ未来」だけだと彼女は怒鳴る。レポリットには水が不要かもしれないが、エーテルシス出身の乗組員は、数日しか水なしでは生きられないのだと。タンクが損傷したらどうするのか、火災が起きて消火のために備蓄を使い果たしたらどうするのか──そのような非常事態において、この探査機は着陸直後から新たな水源を見つけ出すための生命線となる。だからこそ、積載は絶対条件であり、交渉の余地はないと断言する。さらにムムッコは、すでに目を通していたパッキングウェイの「貨物リスト」にも触れ、ニンジン栽培ステーションを二基も積む必要が本当にあるのかと問いただした。ニンジンが作業効率を高めるのは理解しているが、二基なくともレポリットが死んでしまうわけではない。一基あれば十分だと切り捨てる。これにパッキングウェイは絶句し、「ニンジンこそが生命線だ」と叫んで逃げ出し、ムムッコも負けじと追いかけていく。彼女は振り返りざまに、あなたとジャスタにはルナホップ・ポリスへ戻って自分の帰りを待つよう言い残して去っていった。</p>
+      <p>取り残されたジャスタは、気まずそうに笑いながら口を開く。実はあなたの前に立つと少し緊張するのだという。かつて彼女はガレマール帝国軍の第I軍団に所属しており、あなたたちが介入しなければ、テルティウムの戦線で凍死していたかもしれない、と正直に打ち明ける。終末の災厄が退けられた後、彼女はシャーレアンの知人を通じて、この宇宙探索プロジェクトの噂を耳にした。星と星を渡る旅は畏怖すら覚えるほどの挑戦だったが、自身の魔導技術がきっと役に立つはずだと考えたのである。祖国ガレマルドの復興支援という課題は残っていたものの、ここで視野を広げ、知見を深めることこそが、いずれ故郷の助けになると判断したのだと語る。</p>
+      <p>そしてジャスタは、自らの心境の変化について静かに振り返る。かつての自分なら、シャーレアンの民と肩を並べて働くなど、鼻で笑っていただろうと。だが、この基地に赴き、彼女自身の目で星全体の姿を見下ろしたとき、かつて世界のすべてだと思い込んでいたガレマール帝国が、いかに小さな存在であったかを悟ったという。国境線に執着し続けることが、どれほどちっぽけなことかも同時に思い知らされた。彼女にとって、この宇宙への旅路は、望みうる限り最大の「幸運」そのものだと感じられた。そして、その機会を間接的に与えてくれたあなたに、改めて感謝の言葉を捧げる。ムムッコがまだパッキングウェイを追い回している様子を思い浮かべつつ、ジャスタは「そろそろ基地の中へ戻って、帰りを待ちましょう」と穏やかに提案した。</p>
+      <p>やがてムムッコが戻ってくると、ジャスタは「さて、どうなりましたかね」と目を細める。ムムッコは深いため息とともに、かなり強引な説得の末、ようやくパッキングウェイが貨物の保管に同意したことを報告し、彼らを追いかけてくれたあなたに心から礼を述べた。ひと息ついた彼女は、レポリットたちの情熱は本物だが、人間の生理や感覚に対する理解はまだまだ足りないと打ち明ける。彼らにとって、ひとつの仕事は何百年、何千年という単位で進めるものだが、エーテルシス出身の人々はそこまで悠長に構えてはいられないのだと。だからこそ、このプロジェクトには、人間の視点から全体を統括し、ときに前へ押し出す役割が欠かせないのだと力を込める。そして最後に、ムムッコ自身も次に向かう惑星への航海に同行するつもりであると明かし、そのときにもまた、あなたが時間を割いてくれることを心から願っていると笑顔で告げるのだった。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> ムムッコ　焦がれの入江 <small class="muted">(X:21.6, Y:21.1)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="a-managers-patience.html">プロジェクトマネージャーの小粋なお仕事</a></div>
+      <div class="row">クラフター／ギャザラー　Lv 10～</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="a-managers-discernment.html">プロジェクトマネージャーの明察なお仕事</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'經理鍥而不捨的堅持',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>在 Sinus Ardorum 完成先前的一連工作後，Mumukko 再次攔下你，直接問你是否還有時間可以支配。當你乾脆地回答「有」時，她顯得十分滿意——正是她所期待的答覆。這一次，她口中的「麻煩製造者」，是負責設計星際物資運輸計畫的 Loporrit──Packingway。Mumukko 把一個小箱子交到你手上，要你在月面基地一帶找到 Packingway，轉告他必須把這個箱子放進宇宙船的貨艙裡。她事先就提醒，你多半會被拒絕，對方甚至可能拔腿就跑；即便如此也不能放棄──就算他逃過整個隕石坑、逃遍整個月亮，甚至逃到宇宙的最邊緣，你都得追上去，直到他願意收下這個箱子為止。</p>
+      <p>不久之後，你在 Moongate Hub 附近找到了 Packingway。牠一看到你，就興高采烈地把你當成「到處支持 Loporrit 的熱心冒險者」，好奇問起你有何貴幹。然而，當你把 Mumukko 的神祕箱子遞出去的瞬間，牠的耳朵立刻垂了下來，斬釘截鐵地拒絕收貨。牠強調，宇宙船的載重上限極為嚴苛，每一個單位重量都經過精密計算，設計圖與貨物清單上沒有寫的東西，根本沒有空間可以塞進去，不管你怎麼拜託，原則就是不會改變。你第二次堵住牠的去路，重新遞上箱子時，Packingway 顯得更加煩躁，說你根本沒在聽牠說話。船上已經裝滿了各種重型機具，就連必需品也只帶到最低限度，這個時候再臨時多加一件貨物，只會逼得牠把整套計算全部重算一遍。如果不在貨物清單上，就不會上船——沒有例外。說完，牠又一次轉身逃走。</p>
+      <p>第三次把箱子塞到牠面前時，Packingway 終於大爆發，激動地質問你到底要牠重複多少次才肯罷休。就在牠準備再度拔腿就跑之前，一道熟悉的聲音打斷了牠的抗議——Mumukko 大步走了過來，直截了當地要牠別再哀嚎，立刻把箱子送進倉庫。如果牠打算無視自己的請求，這整個月面上沒有牠能藏身的地方，而你這位幫手，更會一路追到存在的盡頭，把箱子硬塞到牠手裡。Mumukko 示意你交出箱子，並揭露了其中的真相：那是一台由身旁這位工程師 Justa 親自開發的自律魔導探測機，功能是在惡劣環境中尋找水源，為降落後的船員提供關鍵的生存保障，因此必須事先裝載到宇宙船上。</p>
+      <p>即便如此，Packingway 仍舊難以點頭同意，反而追問為何非得把這種裝置帶上船不可。牠主張，航行途中所需的水量，早已被精準地估算到最低限度，船上的儲水完全足夠。這番話終於讓 Mumukko 壓抑已久的怒氣爆發，她大聲斥責 Packingway 只考慮到「渴死」這條結局。Loporrit 也許不需要靠水維生，但來自 Etheirys 的船員，沒有水頂多只能撐上幾天。萬一水箱破裂怎麼辦？萬一途中發生火災，只好把儲水拿去滅火，那接下來要怎麼活下去？她指出，在真正的緊急狀況下，這台探測機就是降落後立刻尋找新水源的生命線，因此「要不要帶上」並不是可以討價還價的選項。接著，Mumukko 又提起自己看過的貨物清單，質疑 Packingway 為何要準備兩座胡蘿蔔培養站。她表示，胡蘿蔔確實能讓 Loporrit 工作更有效率，但少一座並不會要了牠們的命，有一座就足夠了。聽到這裡，Packingway 幾乎要暈過去，大叫著「胡蘿蔔就是我們的命脈」，隨即拔腿狂奔，而 Mumukko 則不甘示弱地追了上去。她邊跑邊回頭喊道，要你和 Justa 先回 Lunar Hopopolis，在基地裡等她回來。</p>
+      <p>留下來的 Justa 苦笑著打破沉默，坦承站在你面前，其實讓她有些緊張。她說，自己曾是帝國第 Ist Legion 的一員，要不是當時你們一行人介入，她可能早已在 Tertium 的嚴寒中凍死。終末之日被阻止後，她透過一位 Sharlayan 的熟人，聽說了這項宇宙探索計畫。星際旅行本身令人望而生畏，但她相信自己的魔導技術能派上用場。一度，她也為是否該留下來協助 Garlemald 的重建而猶豫不決，不過最後還是選擇走上這條道路，相信在這裡拓展視野、累積經驗，未來反而能以更大的格局回饋故鄉。</p>
+      <p>說到這裡，Justa 開始回顧自己的心境轉變。過去的她，絕不可能想像自己會與 Sharlayan 的人站在同一陣線工作，甚至會嗤之以鼻。然而自從來到這座基地，親眼從高處俯瞰整顆星球之後，她才真正意識到，那個曾經佔據她全部世界的 Garlemald 帝國，其實是如此渺小。將心思牢牢綁在國與國之間的邊界上，在遼阔宇宙面前顯得多麼可笑。對她而言，這趟踏向星海的旅程，是再怎麼奢求也不為過的「巨大恩賜」，因此她由衷感謝你，哪怕只是間接地，為她開啟了這條道路。想到 Mumukko 還在某處追著 Packingway 跑，她便提議不如先回 Lunar Hopopolis 裡頭，一邊等待，一邊靜候結果。</p>
+      <p>過了一會兒，Mumukko 總算回到基地，Justa 笑著說自己也很好奇事情最後如何收場。Mumukko 長長吐了一口氣，表示經過一番「強硬說服」後，Packingway 終於答應把那件貨物收進倉庫，接著對你追著牠跑遍基地一事，表達由衷的感謝。放鬆下來之後，她坦白說，Loporrit 的熱情毋庸置疑，但對人類的生理需求，以及時間感的差異，理解仍然遠遠不夠。對他們來說，一個任務往往是以數百年、數千年為單位在思考，可是來自 Etheirys 的人，根本等不起那麼久。因此，這項計畫才迫切需要一位站在人類視角上、能夠統籌全局、在必要時推動進度的管理者。最後，Mumukko 露出自信的笑容，透露自己也打算隨同前往下一顆星球，希望到那時，你依然願意為她騰出更多時間，一起繼續這趟旅程。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 穆穆可　熾情海灣 <small class="muted">(X:21.6, Y:21.1)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="a-managers-patience.html">經理的耐心考驗</a></div>
+      <div class="row">採集或生產職業　Lv 10 以上</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="a-managers-discernment.html">經理的洞察力</a></div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
