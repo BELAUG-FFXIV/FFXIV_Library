@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Perspective Reflected | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – Perspective Reflected (DT Patch 7.31)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    /* 展開/收合 */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/_g9hPOZYPSs"
+              title="Perspective Reflected" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Perspective Reflected</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Perspective Reflected',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>At Glassblowers’ Beacon, an Ishgardian glassworker greets you with a wry smile, calling you a “proper adventurer” and observing that, out here on Phaenna, everyone is an adventurer of sorts. In truth, he explains, he is no wanderer by trade but a glassworker from Ishgard, invited to join the initiative for his craft. Overseeing the work at Glassblown Grotto has satisfied him greatly, yet now that his time on this star is drawing to a close, he finds himself regretting that he never truly stepped beyond the safety of the grotto. He is certain the vistas beyond would inspire him for years to come. And so he shyly asks a favor: would you escort him on a brief stroll through these harrowing environs, and perhaps help him collect a few fragments that he might one day incorporate into his stained glass? When you agree, he bows in gratitude and proposes that, once you have prepared yourself for whatever dangers lie ahead, you rendezvous a little southwest of the grotto, where Millefiori begins.</p>
+      <p>There, on the threshold of Millefiori, he falls silent, utterly captivated by the sight before him. The landscape is so breathtaking that he apologizes for forgetting himself, confessing that he had thought to venture much farther but now wonders if the inspiration he seeks might already lie here on Phaenna’s very doorstep. As an associate of the initiative, he reasons, you too must be an artisan in your own right—if not with glass, then with blade, spell, or simple experience—and he suggests that you share in this small artistic exercise. While he restricts his own steps to the relative safety of the immediate surroundings, he asks you to bring him whatever fetching fragments catch your eye, trusting your aesthetic sense to choose pieces worth preserving. With that, you part ways for a time: he remains near, drinking in the view, while you set out among the crystalline outcrops in search of glittering shards.</p>
+      <p>When you return, burdened with your finds, the glassworker rushes to greet you, relieved that you are still very much alive and clearly eager to hear what you have seen. He accepts the fragments from your hands and turns them over one by one, praising your discerning eye and declaring that it would be an honor to work any of these into a future piece. Both the sights and the samples, he says, have left him thoroughly dazzled. Then his curiosity turns back to you: you have spent far more time wandering this star than he has—how have you found your time on Phaenna? Whether you speak of wonders you never imagined, of the simple joy of exploration, or with a touch of dry humor, he smiles and calls your answer the words of a true adventurer. For himself, he admits that as beautiful as he finds the sea of stars, it frightens him in equal measure. There is so much to see and yet his own view will always be limited; the moment he stepped outside the grotto, the vastness of it all nearly overwhelmed him. Still, he is glad that, if only for a short while, he has been able to glimpse this star through your eyes. With that, he suggests you return together to the warmth and light of the Beacon.</p>
+      <p>Back at Glassblowers’ Beacon, he thanks you with deep sincerity, vowing never to forget the beauty of this evening. He confides that he might well have declined the initiative’s invitation altogether, were it not for a struggle he has been facing at his atelier in Ishgard. Not long ago, he says, Lord Aymeric commissioned a work of stained glass to commemorate the new harmony between man and dragon. From the very beginning, he floundered. To him, dragons had always been terrifying beasts, and to find beauty—much less kinship—in their visages lay far beyond his imagination. Yet after seeing Phaenna, he feels something within him beginning to shift. Even the most fearsome wyrm, he muses, is a single soul much like you or he, gazing out at the endless expanse of the cosmos with both fear and wonder. In his mind’s eye, he now envisions a dragon soaring between the stars, graceful and strong, following a distant glimmer of light across an unimaginable gulf. It is for that image, he decides, that these newly gathered fragments of glass will be used—a fitting tribute shaped from inspiration born on a star far from home.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Ishgardian Glassworker, Phaenna <small class="muted">(X:29.1, Y:13.6)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-brightest-star.html">The Brightest Star</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="a-managers-delegation.html">A Manager’s Delegation</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'ガラスに映る未来',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>グラスブロワーズ・ビーコンで、ひとりのイシュガルド出身のガラス職人が、冒険者であるあなたに声をかける。ここパエンナでは、誰もがある種の「冒険者」だと笑ってみせながらも、自分は本来、旅人ではなくガラス細工師であり、その技量を買われてこの計画に招かれたのだと紹介する。グラスブロウン・グロットで作業を取り仕切る日々には大いに満足しているものの、この星での任期が終わりに近づくにつれ、自分がほとんど外へ出たことがないまま終えてしまうことを悔しく思うようになったという。きっと外の光景を目にすれば、長く創作の糧となるはずだと知りながら、踏み出せずにいたのだ。そこで彼は、ささやかな願いとして、一度だけでよいから外の景色を見て回り、ついでに今後の作品に組み込めそうなガラス片をいくつか採取したいと打ち明ける。そして、危険な環境の中を歩くにはあなたの護衛が不可欠だと頭を下げるのだった。あなたが快諾すると、彼は感謝を込めて深く一礼し、必要な準備を整えたら、グロットの南西側、ミッレフィオーリの入り口付近で合流しようと提案する。</p>
+      <p>やがてミッレフィオーリの一角に立つと、職人は言葉を失い、ただ目の前の光景に見入ってしまう。あまりの美しさに我に返るのが遅れたことを詫びながら、本当はもっと遠くまで足を伸ばすつもりだったが、探し求めていたひらめきは、もしかするとこの足元にすでに揃っているのかもしれないと呟く。計画に関わるあなたもまた、ある意味では自分と同じ「職人」であろうと考えた彼は、この小さな創作の試みを一緒に楽しんでみないかと持ちかける。自分は安全と思しき周辺から大きく外れないよう注意を払いながら、あなたには、美しいと感じたガラス片を自由な感性で拾い集めてきてほしいと頼むのだった。こうして二人はいったん別れ、彼は近くで景色を味わい続け、あなたはきらめく結晶の群れのあいだへと踏み込み、作品の素材となる欠片を探しに出ることになる。</p>
+      <p>やがてあなたが数々の欠片を抱えて戻ってくると、ガラス職人はほっとしたように迎え、「無事で何よりだ」と安堵の息を漏らす。あなたから手渡されたガラス片を一つひとつ手に取りながら、その選び方に職人らしい審美眼を感じると称え、どれを作品に用いることになっても誇らしく思えるだろうと目を細める。景色も破片も、どちらも彼の目を十分に眩ませたようだった。ひとしきり感嘆したあと、今度は長くこの星を歩んできたあなた自身に話を向け、パエンナで過ごした時間をどう感じているのかと尋ねる。あなたが想像を超える驚きについて語ろうと、純粋に探索そのものの楽しさを口にしようと、あるいは少し皮肉を交えて返そうと、彼は穏やかに微笑み、「まさしく真の冒険者らしい言葉だ」と応じる。そして、自分にとって星海は、美しいと同時に恐ろしくもあるのだと正直な思いを打ち明ける。見渡すべきものがあまりにも多い一方、自分の視野は生涯をかけても限られている。そのことを思い知ったとき、グロットの外に踏み出した瞬間の自分は、ほとんど圧倒されかけていたのだと振り返る。それでも、短い時間とはいえ、あなたの目を通してこの星を垣間見ることができたことを嬉しく思うと告げ、そろそろビーコンへ戻ろうとあなたを促すのだった。</p>
+      <p>グラスブロワーズ・ビーコンへ戻ると、彼は改めて深く頭を下げ、この夕べに見た美しさと、あなたの助けに対する感謝を忘れることはないと伝える。そしてもし、自分がいま工房で抱えている悩みがなければ、この計画への招きを断っていたかもしれないと打ち明ける。少し前、イシュガルドでは、蒼天騎士団総長アイメリク卿から、「人と竜の新たな調和」を祝うステンドグラスの制作依頼が舞い込んでいた。しかし、彼は最初からつまずいてしまったという。これまで竜といえば、恐ろしい魔物としてしか認識しておらず、その顔に美しさや親愛の情を見出すなど、とても想像の及ぶところではなかったのだ。だが今は、パエンナでの体験を経て、その見方が少しずつ変わりつつあると語る。どれほど恐ろしい竜であっても、その実、果てしない宇宙を前に、恐れと驚きを抱きながら向き合う、ひとつの魂にすぎないのではないかと感じ始めたのだ。</p>
+      <p>彼の脳裏には、星々のあいだを優雅かつ力強く飛翔する一体の竜の姿が浮かび上がる。計り知れない距離を越え、遠くに瞬く微かな光を追いかけていく姿こそ、自分が表現すべき「人と竜の調和」の象徴なのではないかと、静かに言葉を紡ぐ。そのイメージを形にするためにこそ、今日あなたと共に集めたガラスの欠片を使いたい──彼はそう結論づけ、遠い星で得たひらめきを、故郷イシュガルドでの作品へとつなげていく決意を固めるのだった。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> 皇都のガラス職人　惑星パエンナ <small class="muted">(X:29.1, Y:13.6)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-brightest-star.html">希望の輝き</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="a-managers-delegation.html">プロジェクトマネージャーの意義あるお仕事</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'倒映在玻璃中的未來',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>在 Glassblowers’ Beacon，來自 Ishgard 的玻璃工匠朝你露出帶點打趣的微笑，稱呼你為「真正的冒險者」，又說在 Phaenna 上生活的每一個人，其實都算是某種形式的冒險者。不過，他很快補充，自己本業並不是旅人，而是出身 Ishgard 的玻璃職人，正因這份專業才受邀加入這項計畫。一直以來，他都相當滿足於在 Glassblown Grotto 監督各種作業，可是隨著在這顆星上的任期逐漸接近尾聲，他開始後悔自己始終沒有真正踏出洞窟，好好看一眼外面的風景——明明知道那樣的景致，足以成為往後多年創作的靈感來源。於是，他有些不好意思地向你提出請求：希望能趁著結束前，走一小段路看看 Phaenna 的風光，順便採集一些玻璃碎片，未來也許能鑲進自己的彩繪玻璃作品裡，但前提是必須由你陪同，才能穿越這周遭危險的地形。聽見你爽快答應，他鄭重向你致謝，並約定等你做好萬全準備後，在 grotto 西南側、接近 Millefiori 的位置會合。</p>
+      <p>當你們一同站在 Millefiori 的邊緣時，玻璃工匠不由得屏住呼吸，久久說不出話來，只是目不轉睛地凝視眼前的景色。過了好一會兒，他才回過神來，為自己太過沉醉而忘了開口道歉，隨即坦言原本打算走得更遠一些，但現在反倒覺得，也許他想尋找的靈感，就已經散落在 Phaenna 的家門口。身為 Cosmic Exploration 計畫的一員，他認為你肯定也是另一種意義上的「職人」──不管是熟練運劍、操控魔法，還是擁有歷練淬鍊出的目光──於是提議和你一起把這趟旅程當成一場小小的創作練習。他會盡量把自己的活動範圍限制在相對安全的周邊地帶，而你則可以任憑直覺，去收集那些「對你來說最順眼、最迷人」的玻璃碎片。就這樣，你們短暫分頭行動：他留在附近，一邊小心行走，一邊慢慢品味這片風光；你則踏入交錯的結晶之間，尋找值得被帶回的光之碎片。</p>
+      <p>當你帶著一袋閃耀的碎片回到他身邊時，Ishgardian Glassworker 顯然鬆了一大口氣，開心地感嘆你「還活得好好的」，也迫不及待想聽你在途中看見了什麼。他接過你遞上的 Fetching Fragment，認真地逐個端詳，稱讚你的眼光十分敏銳，能與其中任一片玻璃共事，對他來說都是一種榮幸。他說，這一路上看到的景致與手上這些樣本，確實讓他大開眼界、目眩神迷。隨後，他把話題拉回你身上——畢竟你在這顆星球上走過的路，比他多上許多——於是詢問你對 Phaenna 的感想。無論你談到的是自己從未想像過的奇景，還是單純喜愛冒險與探索本身，又或者用略帶玩笑的口吻作答，他都報以微笑，說那正是「真正的冒險者才說得出口的話」。至於他自己，則坦承自己對星海的感受，是「一半美麗、一半恐懼」：要看的東西實在太多，而他能親眼見到的卻永遠有限。只要一想到這件事，他在踏出 grotto 的那一刻幾乎被壓得喘不過氣來。然而，他仍感到慶幸，至少在這短暫的時間裡，能透過你的視角來認識這顆星。說完這些，他提議一同返回 Beacon，把這段短小卻意義重大的散步畫上句點。</p>
+      <p>回到 Glassblowers’ Beacon 後，玻璃工匠再次深深向你鞠躬，表示自己絕不會忘記今晚所見的美景，也不會忘記你給予的幫助。接著，他說出另一層心事——若不是因為目前在 Ishgard 工作室裡正為某件作品苦惱，他或許一開始就會婉拒這項計畫的邀請。不久之前，Lord Aymeric 親自委託他製作一幅彩繪玻璃，用來紀念人與龍之間新建立的和諧關係。然而從起稿那一刻起，他就感到極度掙扎。過去的他，一直只把龍視為令人畏懼的怪物，要在那樣的容貌中看見「美」，甚至是「親近感」，實在是難以想像的事。如今走過 Phaenna，他卻隱約感覺到自己的看法開始改變：即使是最可怕的 wyrm，本質上也和你、他一樣，只是孤單的靈魂，帶著恐懼與好奇，直面這片無邊無際的宇宙。</p>
+      <p>他的腦海中逐漸浮現出一幅畫面——一條龍在滿天星斗之間翱翔，既優雅又堅韌，追隨著極遠處那一縷微弱卻堅定的光芒，跨越難以想像的距離。對他而言，這樣的姿態，正好象徵著人與龍一同面向未知、共享驚懼與憧憬的全新關係。他最後下定決心，要將今天與你一同採集到的這些玻璃碎片，化作那幅作品的一部分，讓源自遙遠星辰的靈感，透過彩繪玻璃，在 Ishgard 的街景與天空之中，持續閃耀。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 伊修加德玻璃工匠　帕恩納星 <small class="muted">(X:29.1, Y:13.6)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-brightest-star.html">最耀眼的星辰</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="a-managers-delegation.html">經理的委派之道</a></div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+/* === Giscus：Comments 分頁 === */
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
