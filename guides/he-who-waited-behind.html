@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>He Who Waited Behind | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – He Who Waited Behind (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/puVp71qRhxA"
+              title="He Who Waited Behind" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">He Who Waited Behind</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'He Who Waited Behind',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Iliud marvels at the strange twist of fate that Master Cid Garlond was found within the church at last—something he can scarcely believe. Then he turns to what you came for: you seek Cid’s airship.</p>
+      <p>He admits he cannot say how much truth there is to it, but he speaks of a tale that spread in the wake of the Calamity—“The Final Flight of the Enterprise,” made popular much like “The Great Goobbue Wall of Ul’dah.” According to that story, the Enterprise flew northwest from Gridania toward Coerthas.</p>
+      <p>If the tale is true, Iliud reasons, the airship would have passed through the North Shroud—likely over Fallgourd Float, the closest settlement to Coerthas. The Serpents stationed there may have records of what happened on that day.</p>
+      <p>He had hoped you might rest from your journeys for a time, but he sees the world still has need of you and the Scions. He asks you to look after yourself—and Cid—as you go.</p>
+      <p>At Fallgourd Float, Aethelmaer listens as you ask about the Enterprise—Master Garlond’s ship. He says he does not need to consult any records; he remembers the airship being sighted overhead five years ago, clearly bound for Coerthas, though what became of it afterward he cannot say.</p>
+      <p>If you wish to learn more, Aethelmaer tells you to speak with Vortefaurt at Florentel’s Spire. Vortefaurt was on duty that day and saw the airship with his own eyes. Even so, Aethelmaer cannot help but question what you hope to accomplish—because even if you find the ship, you would still need a man of Master Garlond’s caliber to fly machinery so fiendishly complex.</p>
+      <p>You make your way to Florentel’s Spire, where Vortefaurt greets you as the man you seek and asks what this is about. He says he has served as a Wailer for many years, since before the great snows came to Coerthas—and when you speak of the Enterprise, he answers at once that he remembers the final flight.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Iliud <small class="muted">Eastern Thanalan (X:11.2, Y:21.3)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="eyes-on-me.html">Eyes on Me</a></div>
+      <div class="row">All classes and jobs (excluding limited jobs) (Level 36 or above)</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="cold-reception.html">Cold Reception</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'飛空艇エンタープライズの行方',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>イリュドは、ついにマスター・シド・ガーロンドが教会の中で見つかったという運命の巡り合わせに驚き、その事実が信じ難いと口にする。だがすぐに話を戻し、あなたが求めているのはシドの飛空艇なのだろうと確認する。</p>
+      <p>真偽は定かではないと断りつつも、イリュドは第七霊災の後に広まった話として、「エンタープライズ最後の飛行」と呼ばれる噂を語る。それは「ウルダハの大グゥーブー壁」と同じように人々の間で語られ、エンタープライズがグリダニアから北西へ飛び、クルザスへ向かったという。</p>
+      <p>もしそれが事実なら、飛空艇は黒衣森：北部森林を通過し、クルザスに最も近い集落であるフォールゴウドの上空を越えたはずだとイリュドは言う。そこに駐屯する双蛇党に、当日の出来事を記した記録が残っているかもしれない。</p>
+      <p>本当ならしばらく旅を休んでほしかったが、世界はなお、あなたと暁の血盟を必要としているのだとイリュドは告げる。そして、あなた自身とシドの身を案じ、どうか無理をしないようにと頼む。</p>
+      <p>フォールゴウドでエーセルメールにエンタープライズのことを尋ねると、彼はそれがマスター・ガーロンドの飛空艇だと理解したうえで、記録を見るまでもないと言い切る。五年前、クルザスへ向かう飛空艇が上空を通過したのをはっきり覚えているが、その後どうなったかまではわからないのだという。</p>
+      <p>さらに詳しく知りたければ、フロランテル監視哨のヴォルトゥフォールを訪ねるようにと案内される。彼は当日任務に就き、その目で見たのだと。だがエーセルメールは、たとえ飛空艇を見つけられたとしても、あの複雑な機構を操るにはマスター・ガーロンドほどの腕が必要ではないか、とあなたの目的を案じる。</p>
+      <p>あなたがフロランテル監視哨へ向かうと、ヴォルトゥフォールは名を呼ばれたと笑って出迎え、いったい何の用件かと尋ねる。彼はクルザスに大雪が訪れる以前から長く木人隊として務めてきたのだと言い、そして「エンタープライズ最後の飛行」については、その日を確かに覚えていると口にした。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> イリュド　<small class="muted">ザナラーン：東ザナラーン (X:11.2, Y:21.3)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="eyes-on-me.html">彼方より来たりて</a></div>
+      <div class="row">すべて（リミテッドジョブを除く）Lv 36～</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="cold-reception.html">あの山を越えて</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'飛空艇「Enterprise」的去向',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Iliud 感嘆命運的離奇——竟然真的在教會裡找到了 Master Cid Garlond，這幾乎讓人難以想像。接著他確認你的來意：你想找的，是 Cid 的飛空艇。</p>
+      <p>Iliud 說他不敢保證真假，但在 Calamity 之後，民間曾流傳一則故事，名為「The Final Flight of the Enterprise」，就像「The Great Goobbue Wall of Ul’dah」那樣一度相當盛行。那個故事說，Enterprise 從 Gridania 起飛後一路往西北方前進，朝 Coerthas 的方向飛去。</p>
+      <p>如果故事屬實，Iliud 推測那艘飛空艇必然穿越 North Shroud，並且很可能會飛過 Fallgourd Float——那是距離 Coerthas 最近的聚落。駐守在那裡的 Serpents 或許留有當天所發生事件的紀錄。</p>
+      <p>Iliud 原本希望你能暫時從旅途裡歇一口氣，但他看得出來，世界仍需要你與 Scions。他也提醒你務必照顧好自己——以及 Cid——再踏上接下來的路。</p>
+      <p>你來到 Fallgourd Float，向 Aethelmaer 詢問 Enterprise——也就是 Master Garlond 的飛空艇。Aethelmaer 說他甚至不需要去翻記錄：五年前他親眼見到那艘飛空艇從上空飛過，明顯朝 Coerthas 而去，只是之後究竟發生什麼事，他就無從得知了。</p>
+      <p>若你想知道更多，Aethelmaer 要你去 Florentel’s Spire 找 Vortefaurt——那天他正在值勤，而且是親眼所見。不過 Aethelmaer 也忍不住提出疑問：就算你真的找到了那艘飛空艇，沒有像 Master Garlond 那樣的技術，面對那套極其複雜的機械結構，恐怕也很難讓它再次飛起來。</p>
+      <p>你前往 Florentel’s Spire，Vortefaurt 以自己正是你要找的人來迎接你，並詢問你究竟為何而來。他說自己擔任 Wailer 多年，甚至早在 Coerthas 降下大雪之前就已在任——而當你提到 Enterprise，他立刻承認：他確實記得那一天，記得那趟最後的飛行。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 伊琉德　<small class="muted">薩納蘭 - 東薩納蘭 (X:11.2, Y:21.3)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="eyes-on-me.html">來自彼方</a></div>
+      <div class="row">所有職業（不含限定職） 等級 36 以上</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="cold-reception.html">冷眼相待：翻越過那座山</a></div>
+    </div>`
+  }
+};
+
+const LANG_KEY = 'ffxiv-guide-lang';
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
