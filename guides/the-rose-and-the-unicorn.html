@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Rose and the Unicorn | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – The Rose and the Unicorn (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/uU2fPgxZ7JA"
+              title="The Rose and the Unicorn" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">The Rose and the Unicorn</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'The Rose and the Unicorn',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Carrilaut draws you in close and speaks in a low voice, making it clear this is meant for you alone. Lord Francel, he insists, is no heretic—only a good, righteous man, wholly dedicated to the cause. He says he knows this for a fact, having served House Haillenarte for years before the Calamity.</p>
+      <p>You are told to go to Skyfire Locks and warn Francel of the storm that is coming. The inquisitors, Carrilaut warns, are ruthless, and they will spare him no mercy.</p>
+      <p>To prove you are a friend, you are given a sign: speak to him of an edelweiss, and he will know you for one of his own. With that final instruction, Carrilaut sends you on your way.</p>
+      <p>When you find Francel, he studies you and asks if you have something to say. Several strange phrases present themselves—talk of “the bearers of the white lily,” “the wild rose,” even a bold jest about an edelweiss—alongside the option to say nothing at all.</p>
+      <p>If you speak of the white lily, Francel answers at once that you have come to the wrong place, for House Haillenarte bears the rose. He suggests you might seek Gridania instead, saying he has heard an ancient Duskwight house there was said to use the white lily as its sigil, and the exchange goes no further.</p>
+      <p>Elsewhere in Coerthas, you are received at Camp Dragonhead by Haurchefant, who greets you as a well-traveled adventurer and tells you to be at ease—he is not one to stand on formality. He says plainly that he would gladly welcome many more brave souls like you, but asks what has brought you here.</p>
+      <p>He voices his hope that, if there is any justice in this world, the charges at hand will receive no serious consideration. Then he recalls that your letter mentioned a pressing matter for which you required assistance, and asks what it might be.</p>
+      <p>When you speak of the Enterprise—last seen above Coerthas before the Calamity five years ago—Haurchefant admits it may be difficult to find eyewitnesses. Ishgard did not participate in the Battle of Carteneau, he explains, and they were embroiled in their own internal conflicts at the time.</p>
+      <p>Even so, he promises to make inquiries on your behalf and share what he learns in the future. Until then, he bids you enjoy the hospitality of Camp Dragonhead, and says he will see that you are afforded every courtesy as a guest of House Fortemps.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Carrilaut <small class="muted">Coerthas Central Highlands (X:24.7, Y:28.8)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="three-for-three.html">Three for Three</a></div>
+      <div class="row">All classes and jobs (excluding limited jobs) (Level 36 or above)</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="the-talk-of-coerthas.html">The Talk of Coerthas</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'アインハルト家の受難',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>カリローはあなたを手招きし、耳打ちするように語りかける。これはあなただけに聞かせる話だと言い、フランセル卿は異端者などではなく、正しく清廉で、ただひたすらに大義に身を捧げる人物だと断言する。第七霊災以前、長くアインハルト家に仕えていたからこそ、それがわかるのだとも。</p>
+      <p>あなたに求められるのは、アートボルグ砦群へ向かい、迫り来る嵐をフランセル卿へ警告することだ。審問官たちは容赦がなく、彼に慈悲を与えることはない――カリローはそう言って、危機の切迫を伝える。</p>
+      <p>そして合言葉を授ける。「薄雪草」の名を告げれば、あなたを味方と知るはずだと。言うべきことを胸に刻み、あなたはフランセル卿のもとへ向かう。</p>
+      <p>フランセル卿はあなたを見るなり、何か言いたげだな、と問いかける。そこでいくつかの言葉を選べるようになり、「白百合」を掲げる者を求めるのか、「野薔薇」が咲く方へ行くのか、あるいは「薄雪草」を持ち出すのか、何も言わないのか――そんな選択が並ぶ。</p>
+      <p>もし「白百合」を口にすれば、フランセル卿はすぐに告げる。アインハルト家が掲げるのは薔薇であり、ここは違うのだと。グリダニアへ向かえば、「白百合」の意匠を用いる古いダスクウィングの家があると聞いたことがある、と続け、会話はそこで途切れる。</p>
+      <p>やがてあなたはキャンプ・ドラゴンヘッドへ招かれ、オルシュファンに迎えられる。旅慣れた冒険者の気配だと笑みを向け、形式ばった挨拶など気にせず楽にしてくれ、と言う。そして、勇敢な者がもっと増えればよいのに、と本音を漏らしつつ、なぜ来たのかと尋ねる。</p>
+      <p>彼は、もしこの世に正義があるなら、かの嫌疑が重く扱われることはないはずだ、と語る。続けて、手紙には急を要する助力の件が記されていたと言い、具体的に何を望むのかと問い返す。</p>
+      <p>あなたが、エンタープライズがクルザス上空で第七霊災の五年前に目撃されたことを話すと、オルシュファンは目撃者探しの難しさを認める。イシュガルドはカルテノーの戦いに参加しておらず、その頃は国内の争いに追われていたのだと説明する。それでも調べは進め、いずれ結果を伝えると約束し、当面はキャンプ・ドラゴンヘッドでのもてなしを楽しめ、フォルタン家の客として相応の待遇を用意しよう、と告げる。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> カリロー　<small class="muted">クルザス中央高地 (X:24.7, Y:28.8)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="three-for-three.html">砦に宛てられた荷物</a></div>
+      <div class="row">すべて（リミテッドジョブを除く）Lv 36～</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="the-talk-of-coerthas.html">四大名家に訊く</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'薔薇與獨角獸，House Haillenarte 家蒙難',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Carrilaut 把你招到身邊，壓低聲音要你靠近聽清楚──這些話只說給你聽。他斬釘截鐵地表示，Francel 並非異端者；他是正直而虔誠的人，將自己完全奉獻給那份信念與大義。Carrilaut 說自己之所以能如此肯定，是因為在 Calamity 之前，他曾多年侍奉 House Haillenarte。</p>
+      <p>他要你立刻前往 Skyfire Locks，警告 Francel 風暴將至。Carrilaut 強調，審問官冷酷無情，絕不會對 Francel 手下留情。</p>
+      <p>為了讓 Francel 確認你是可信之人，Carrilaut 交代你一個暗號：只要提到 edelweiss，Francel 就會知道你是朋友。說完，他催你動身，不可耽擱。</p>
+      <p>你找到 Francel 時，他望著你問道：「你看起來像是有話要說。是嗎？」隨之而來的，是幾句風格迥異的話可供你開口──提「white lily 的承載者」、說「wild rose 綻放之處」、甚至還有一句拿 edelweiss 開玩笑的調侃，以及「什麼都不說」的選項。</p>
+      <p>若你選擇提及 white lily，Francel 立刻回應你來錯了地方，因為 House Haillenarte 所承載的是 rose。他還提到，你或許該去 Gridania──他聽說那裡曾有一個古老的 Duskwight 家族以 white lily 為紋章。話至此，對話也就中斷了。</p>
+      <p>之後你來到 Camp Dragonhead，Haurchefant 以一種輕快而不拘禮數的態度迎接你，稱你身上帶著四處旅行的冒險者特有的氣勢。他說若你是來致意，無須拘泥形式；他向來不喜繁文縟節。寒暄過後，他問你此行所為何來。</p>
+      <p>他感嘆，若這世上真有正義，那些指控就不該被嚴肅看待。接著他想起你的信裡提到，你有一件急事需要協助，便請你說明究竟所求為何。</p>
+      <p>當你提起 Enterprise──在五年前、Calamity 發生前曾於 Coerthas 上空出現──Haurchefant 坦言要找出目擊者恐怕不易。他解釋，Ishgard 並未參與 Battle of Carteneau，當時他們正陷於自身的內部衝突之中。</p>
+      <p>儘管如此，Haurchefant 仍承諾會替你打聽並在日後告知結果。在那之前，他請你安心享受 Camp Dragonhead 的招待，並表示你將以 House Fortemps 的貴客身分，獲得應有的一切禮遇。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 卡里羅　<small class="muted">庫爾札斯中央高地 (X:24.7, Y:28.8)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="three-for-three.html">寄往堡壘的包裹</a></div>
+      <div class="row">所有職業（不含限定職） 等級 36 以上</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="the-talk-of-coerthas.html">為探Coerthas 風聲而訪四大名家</a></div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
