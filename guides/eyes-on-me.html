@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Eyes on Me | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Eyes on Me (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/zrBlrWwW8t0"
+              title="Eyes on Me" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Eyes on Me</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Eyes on Me',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Marques speaks to you in a strained whisper, insisting he is not imagining things—he knows he is being watched. The feeling is different this time, sinister, as if he is under observation, and though it comes and goes, he swears he felt it when he last stepped outside. He asks you to look outside for him—only for a moment.</p>
+      <p>You step out into the stillness—and the sense of unseen eyes proves real. Before you can do more than confirm what he feared, you are set upon, the attack forcing you to defend yourself and return at once.</p>
+      <p>When you come back, Marques sees it on you immediately. He asks if you were attacked and whether you are unharmed, relief breaking through his panic when you assure him you are still standing. He clings to the certainty that he was right—someone was watching him—but the reason gnaws at him all the more.</p>
+      <p>He wonders what the watcher wanted with him, and whether the man knew something of his past. The chance to ask is gone, and with it any easy answer; all he can do is ask for a moment alone to think. Then fear wins out again—Father Iliud must be told, and Marques asks you to carry the warning, convinced others may come for him again.</p>
+      <p>When you relay what happened, Iliud is aghast that such violence would occur on holy ground. He presses you for anything distinctive about the man’s clothing or possessions, and when you present what you recovered, he recognizes it at once—Garlean steel—and the implication lands with chilling weight.</p>
+      <p>Iliud calls for haste to Camp Drybone, determined to summon the Immortal Flames before more imperials arrive. Yet before action can be taken, a young man steps forward—Alphinaud—coolly admitting he had hoped to be the first to speak with you. He makes it plain he comes not on behalf of the Empire; instead, he means to revive the Scions of the Seventh Dawn, and he has come in search of a legend: the greatest engineer of the age, Master Cid Garlond—here for him.</p>
+      <p>Iliud protests that Alphinaud must be mistaken, pleading to be left in peace, but Alphinaud calls to Cid all the same. Marques falters at the name, the familiarity stirring something he cannot grasp, and Iliud—gentle, almost reverent—produces belongings and returns them to him, speaking as though he is giving back more than mere possessions. He confesses their time together was brief, yet it felt as if his son had returned, and he urges Cid to go help those who truly need him.</p>
+      <p>Cid can only ask who Alphinaud is. Alphinaud introduces himself and explains what has befallen the Scions at the Waking Sands, and how the city-states turned to reconstruction after the Calamity, leaving the Scions to face the primal threat alone until they were nearly destroyed. Now, the Ixal have summoned Garuda once more, tormenting Coerthas, and Baldesion colleagues believe she surpasses Ifrit and Titan in strength—but defeating her could warn the other beast tribes that even their mightiest gods can be felled.</p>
+      <p>To confront her, Alphinaud says, they must first circumvent the tempest around her sanctuary—and for that they need an airship: Cid’s airship. Cid stares at the idea as if it were someone else’s life, yet the need in Alphinaud’s voice leaves him wavering; the name “Enterprise” surfaces like a half-remembered echo, and with it the first fragile hint that the past may not stay buried.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Marques <small class="muted">Eastern Thanalan (X:11.2, Y:21.3)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="bury-me-not-on-the-lone-prairie.html">Bury Me Not on the Lone Prairie</a></div>
+      <div class="row">All classes and jobs (excluding limited jobs) (Level 35 or above)</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="he-who-waited-behind.html">He Who Waited Behind</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'彼方より来たりて',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>マルケズは、決して気のせいではないと、震える声であなたに訴える。自分は見られているのだという感覚があり、それは不気味で、まるで誰かに観察されているかのようだと。気配は現れては消えるが、先ほど外へ出たときにも確かに感じたのだと言い、ほんの少しでいいから外を見てきてほしいと頼む。</p>
+      <p>あなたが外へ出ると、その不安は現実となる。確かめようとした矢先、何者かに襲われ、あなたは身を守って急ぎ戻ることになる。</p>
+      <p>戻ったあなたを見たマルケズは、すぐに異変を察し、無事かと問い、安堵の言葉を漏らす。やはり見張られていたのだと確信する一方で、なぜ自分が狙われるのか、その理由がわからずに怯えを深める。</p>
+      <p>マルケズは、相手が何を望んでいたのか、自分の過去を知っていたのかもしれないと呟くが、問いただす機会は失われたままだ。ひとりで考える時間がほしいと頼みつつも、同じことがまた起きるかもしれないと恐れ、イリュド神父に知らせねばならないとして、あなたに伝言を託す。</p>
+      <p>あなたの報告を受けたイリュドは、聖なる地でそのようなことが起きた事実に愕然とし、相手の特徴や所持品について問いただす。あなたが差し出したものを見た彼は、それがガレマール帝国の鋼であると見抜き、マルケズを見張っていた男の正体へと思い至る。</p>
+      <p>イリュドは、これ以上の帝国兵が来る前に不滅隊を呼ばねばならないとして、キャンプ・ドライボーンへ急ぐよう告げる。だがその場に、アルフィノが姿を現し、あなたに先を越された無念を洩らしながらも、帝国の使いではないと明言する。彼は「暁の血盟」を再興するために来たのだと言い、伝説の工学士、シド・ガーロンドを求めてここへ来たのだと告げる。</p>
+      <p>イリュドは誤解だと訴え、静かにしてほしいと懇願するが、アルフィノはなおもシドに呼びかける。マルケズはその名に動揺し、記憶の奥が揺れるように「どこかで……」と呟く。イリュドは彼に品々を返し、偉大さの徴を感じていたのだと語り、短い時であっても亡き息子が戻ったかのように思えた、と静かに感謝を告げたうえで、本当に助けを必要とする者たちのために力を貸してほしいと背を押す。</p>
+      <p>シドが名乗りも知らぬまま問い返すと、アルフィノは自らの名と立場を明かし、砂の家で暁の血盟が襲撃を受けたこと、災厄の後に各国が復興に注力した結果、暁の血盟が蛮神への対処を独力で担わざるを得なかったことを語る。さらにイクサル族が蛮神ガルーダを再び召喚し、コエルザスを蹂躙している現状、そして彼女がイフリートやタイタンをも上回る力を持つ可能性を示しつつ、それでも討ち果たせば他の蛮族への警告となるのだと説く。</p>
+      <p>そのためには、祭壇を覆う嵐を突破する手段が必要であり、求めるのは飛空艇――シドの飛空艇だとアルフィノは言う。シドは自分に飛空艇があるのかと戸惑いながらも、必要とされている現実に揺れ、そして「エンタープライズ」という名が、かすかな既視感のように胸の奥へ浮かび上がる。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> マルケズ　<small class="muted">ザナラーン：東ザナラーン (X:11.2, Y:21.3)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="bury-me-not-on-the-lone-prairie.html">小さな勇者の帰還</a></div>
+      <div class="row">すべて（リミテッドジョブを除く）Lv 35～</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="he-who-waited-behind.html">飛空艇エンタープライズの行方</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'來自彼方',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Marques 用顫抖的聲音對你說，他不是在胡思亂想——他知道自己正在被監視。那種感覺陰沉而不祥，彷彿有人正把他當成「觀察」的對象；氣息時有時無，但他很確定自己剛剛外出時也感覺到了。他請你替他到外面看一眼——只要一下子就好。</p>
+      <p>你走到外頭，那份不安立刻變成現實。你才剛試著確認周遭，就遭到襲擊，只能先保住自己，立刻返回。</p>
+      <p>你一回來，Marques 便看出你遭遇了什麼。他急切地問你是不是被攻擊、是否受傷，在確認你平安後才像鬆了一口氣。可同時，他也更加篤定：那個人確實在盯著他——只是他完全想不出理由。</p>
+      <p>Marques 追問般地自言自語：對方想從他身上得到什麼？是不是……知道他的過去？如果能當面問清楚就好了。可如今他只能請你讓他獨處片刻，好好整理思緒；然而恐懼很快又壓回來——Father Iliud 必須知道這件事。他請你代為轉告，因為他覺得，其他人可能還會再來找他。</p>
+      <p>Iliud 聽完你的話後震驚不已，難以接受這種事竟發生在聖地之上。他追問那名男子是誰、身上是否有任何特徵或物品；當你把線索交出時，他立刻辨認出那是 Garlean 的鋼材，這也意味著：監視 Marques 的人，恐怕並非尋常之輩。</p>
+      <p>Iliud 要你立刻趕往 Camp Drybone，必須在更多 imperials 前來之前召集 Immortal Flames。可就在此時，Alphinaud 現身，帶著一絲不快說他本希望能第一個與你交談——但他也明確表示，他並非代表 Empire 而來。相反地，他打算重建 Scions of the Seventh Dawn，並為此追尋一位傳奇人物：當代最偉大的工程師，Master Cid Garlond——他要找的正是他。</p>
+      <p>Iliud 懇求 Alphinaud 離開，說他弄錯了；但 Alphinaud 仍堅定呼喚 Cid。Marques 在聽見那個名字時動搖了，你看見他的神情像被某段失落的記憶拉扯，卻只能說「很熟悉……一切都很模糊」。Iliud 取出一批物品交還給他，語氣近乎溫柔地說這些本就屬於他，也坦承與他相處的時間雖短，卻像自己的兒子回到身邊般帶來安慰——然而現在，他必須去幫助真正需要他的人。</p>
+      <p>當 Cid 問 Alphinaud 是誰，Alphinaud 報上姓名，並以 Scions 的身分說明如今的局勢：Waking Sands 發生的事早已傳遍 Eorzea；在 Calamity 之後，三大城邦把心力全放在重建，讓 Scions 被迫在沒有支援的情況下獨自面對 primal 的威脅，結果幾乎全軍覆沒。如今 Ixal 再次召喚 Garuda，正折磨著 Coerthas，而 Baldesion 的同僚甚至認為她的力量超越 Ifrit 與 Titan；但若能擊敗她，就能向其他 beast tribes 證明——即使最強大的神祇也能被斬落。</p>
+      <p>要做到這一步，首先必須繞過守護她聖域的暴風，而那需要一艘飛空艇——Cid 的飛空艇。Cid 對「自己的飛空艇」感到茫然，卻也在那份迫切的需求裡動搖；他喃喃說出自己似曾聽過的名字——Enterprise——像是被埋藏的過去，終於在此刻露出一點點縫隙。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 馬奎斯　<small class="muted">薩納蘭 - 東薩納蘭 (X:11.2, Y:21.3)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="bury-me-not-on-the-lone-prairie.html">孤寂草原的勇者歸來</a></div>
+      <div class="row">所有職業（不含限定職） 等級 35 以上</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="he-who-waited-behind.html">飛空艇「Enterprise」的去向</a></div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem('ffxiv-guide-lang') || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem('ffxiv-guide-lang', next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
