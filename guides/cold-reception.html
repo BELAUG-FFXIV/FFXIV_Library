@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cold Reception | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Cold Reception (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/9WTOP90OwlM"
+              title="Cold Reception" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Cold Reception</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Cold Reception',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Eluned tells you that rites can be performed for most of the fallen Scions—but there is one they cannot accept. She asks you to return Noraxia to her own people, the sylphs of Little Solace, so she may be mourned in accordance with sylphic traditions. Before you depart, Eluned speaks with quiet bitterness of how people so often seek a better life at the cost of others, and how that hope can still give rise to suffering and death.</p>
+      <p>When you arrive in Little Solace, Komuxio stares at you in surprise and asks why you have come. Then the sight of Noraxia steals the breath from the sylph, and grief breaks through the words. Hearing the commotion, Frixio comes at once, demanding to know what has happened—and when you tell him, he takes in not only Noraxia’s fate, but the many losses you have suffered as well.</p>
+      <p>Frixio admits that Noraxia went to Thanalan at his behest, and his voice turns urgent as he asks you to tell him the truth: that she was brave, and that she did not suffer. When you answer him, he accepts your words with visible relief, thanks you for bringing her home, and asks that you also convey the sylphs’ gratitude to the praying ones who aided them.</p>
+      <p>Komuxio’s sorrow soon hardens into fury. The sylph demands vengeance, swearing that the imperials must pay, and that when the day comes for you to face them, you must not forget the sylphs—Noraxia’s death must not be for naught. Yet even then, Komuxio looks to you with warmth, saying you have shown a kindness rare in many moons, and begging you to return again to make merry with them.</p>
+      <p>Back in Drybone, Eluned thanks you for what you have done for the church and for the sylphs, and tells you that while you were away, the remaining Scions were interred in the lichyard. She knows you may wish to do more, but gently reminds you that you have already carried so much for your friends—and asks you, for now, to set your burdens down and rest.</p>
+      <p>Not long after, Marques confides that he is certain he is being watched—something sinister, as if he is under observation. The feeling comes and goes, but he felt it again when he last went outside, and he pleads with you to look outside for him. When you do, an attacker strikes, and you return to find Marques shaken but unharmed, thanking the gods for your safety.</p>
+      <p>Marques can only ask why—why someone was watching him, what the man wanted, and whether the answer lies in a past he can no longer grasp. Needing time to think, he asks to be left alone, then insists that Father Iliud must be told at once, fearing others may come for him again. Iliud is horrified that such violence occurred on holy ground, questions you for anything distinctive, and when he finds Garlean steel among what was left behind, he realizes what it means. He orders you to hurry to Camp Drybone, so the Immortal Flames can be summoned before more imperials come.</p>
+      <p>Then Alphinaud arrives, displeased that he was not the first to speak with you, and makes his purpose plain: he has not come on the Empire’s behalf—he means to revive the Scions of the Seventh Dawn. He declares he has come seeking a legend, the greatest engineer of their time, and calls out to Master Cid Garlond. Iliud protests that the man here is only a poor soul who witnessed the horrors at Carteneau, but Alphinaud presses on, and the truth stirs—Marques falters, dazed by familiarity he cannot name. Iliud returns belongings that once belonged to Cid and, with heartfelt parting words, tells him it is time to help those who truly need him.</p>
+      <p>Alphinaud introduces himself and explains what has happened: the Scions were struck down at the Waking Sands, and while the city-states turned to rebuilding after the Calamity, the primal threat was left to the Scions alone—until they were nearly destroyed. Now the Ixal have summoned Garuda again, and she torments the people of Coerthas; her hunger for destruction is worse than other primals, and those who study such things believe she now surpasses both Ifrit and Titan in strength. Yet if Garuda could be defeated, it would warn the beast tribes that even their mightiest gods can fall. To reach her, they must circumvent the tempest that guards her sanctuary—and for that they need an airship: Cid’s airship, last seen over Gridania not long before the Calamity. Cid can barely comprehend it, but the words take hold all the same: they need his airship—and they need him.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Vortefaurt <small class="muted">North Shroud (X:15.4, Y:25.4)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="he-who-waited-behind.html">He Who Waited Behind</a></div>
+      <div class="row">All classes and jobs (excluding limited jobs) (Level 36 or above)</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="the-unending-war.html">The Unending War</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'あの山を越えて',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>エルネドは、倒れた「暁の血盟」の仲間たちの多くには弔いの儀を行えるが、ひとりだけ受け入れられない者がいるのだと告げる。それはノラクシアであり、彼女を「シルフの仮宿」の仲間たちのもとへ返し、シルフのしきたりに従って弔ってもらいたいという。旅立つあなたに、エルネドは、人はよりよく生きようとして、しばしば他者を踏みにじってきたこと、その望みが苦しみと死を生むこともあるという、悔やましくも否定できない現実を語る。</p>
+      <p>「シルフの仮宿」に着くと、コムシオはあなたの来訪に驚き、何用かと問う。しかしノラクシアのことを知った瞬間、言葉は途切れ、涙混じりの息が漏れる。騒ぎを聞きつけたフリクシオが現れ、何が起きたのかと厳しく問いただし、あなたの説明を聞いて、ノラクシアだけでなく、あなたの仲間たちにも多くの犠牲が出たことを知る。</p>
+      <p>フリクシオは、ノラクシアが自分の命でザナラーンへ向かったのだと明かし、そして切実に求める。最期に彼女と共にいたのなら、勇敢だったと、苦しまなかったと、この身に言い聞かせてほしいのだと。あなたがその言葉を返すと、フリクシオは安堵をにじませ、ノラクシアを連れ帰ってくれたことに礼を述べる。さらに、祈る者たちにも感謝していること、この恩は忘れないと伝えてほしいと頼む。</p>
+      <p>だがコムシオの悲しみはやがて怒りへ変わる。帝国の者たちに報いを、痛みを、と叫び、いずれあなたが帝国兵と相まみえる時が来たなら、シルフのことも忘れるなと誓いを迫る。ノラクシアの死を無駄にしないため、シルフも戦うのだと言い切る。それでも最後にコムシオは、長い月日でこれほど親切な「歩く者」には会っていないと告げ、また戻ってきて共に楽しく過ごしてほしいと願う。</p>
+      <p>その後、あなたがドライボーンへ戻ると、エルネドは教会とシルフのための働きに礼を述べ、不在の間に、残る「暁の血盟」の仲間たちを墓地へ葬ったと知らせる。まだ友のために何かをしたいと思うかもしれないが、それでもあなたは十分に背負ってきたのだと諭し、今だけは重荷を下ろして休むよう静かに勧める。</p>
+      <p>やがてマルケズは、誰かに見られているという確信をあなたに打ち明ける。それはただの気のせいではなく、邪悪で、監視されているかのような感覚だという。感じたり消えたりするが、外へ出た時にも確かにあったのだと繰り返し、ほんの少しでいい、外を見てきてほしいと懇願する。あなたが応じると襲撃が起こり、戻ってきたあなたを見たマルケズは、無事でよかったと神に感謝しながらも、なぜ狙われたのかと震える声で問う。</p>
+      <p>マルケズは、あの男はなぜ自分を見張っていたのか、何を望んでいたのか、失われた過去と関わりがあるのかもしれないと、答えのない疑問に囚われる。そしてひとりで考える時間を求めた直後、やはりイリュド神父に知らせねばならないと訴え、また帝国の者が来るかもしれないと怯える。イリュドは聖地での凶行に愕然とし、手がかりを求めるが、残された品がガレマール帝国の鋼だと分かった瞬間、その意味を悟る。これ以上の帝国兵を招く前に、不滅隊を呼ばねばならないとして、あなたにキャンプ・ドライボーンへ急ぐよう命じる。</p>
+      <p>そこへアルフィノが現れ、あなたに先んじて言葉を交わせなかったことを不満げにしつつ、帝国のためではないと明言する。彼は「暁の血盟」を復活させるために来たのだと言い、伝説の技術者、シド・ガーロンドを探していると告げて、マルケズへ呼びかける。イリュドは、彼はカルテノーの惨禍を目撃した哀れな男に過ぎないと庇い、立ち去るよう頼むが、アルフィノは引かない。揺らぐ記憶の中で、マルケズは言い知れぬ既視感に呑まれ、イリュドはシドの持ち物を手渡し、短い間でも息子が戻ってきたようだったと告げたうえで、本当に助けを必要とする者のために力を貸してほしいと背中を押す。</p>
+      <p>アルフィノは名乗り、「暁の血盟」が砂の家で襲撃され、霊災後の復興に注力する三国が蛮神への対処を血盟に任せきりにした結果、組織が壊滅寸前に追い込まれたことを語る。いまイクサル族はガルーダを再び呼び出し、クルザスの人々を苦しめている。破壊への渇望は他の蛮神を凌ぎ、研究者たちは、その力がイフリートやタイタンをも上回ると見ているという。だがガルーダを討てれば、獣人たちに「最強の神ですら倒せる」という警告となる。そのためには、聖域を守る暴風を突破せねばならず、必要なのは飛空艇――シドの飛空艇だ。霊災の少し前、グリダニア上空で目撃されたというその機体を探すため、まずは手がかりを追うことになる。シドは戸惑いながらも、その言葉に引き寄せられ、必要とされているのは飛空艇だけではなく、自分自身なのだと呟く。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> ヴォルトゥフォール少牙士　<small class="muted">黒衣森：北部森林 (X:15.4, Y:25.4)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="he-who-waited-behind.html">飛空艇エンタープライズの行方</a></div>
+      <div class="row">すべて（リミテッドジョブを除く）Lv 36～</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="the-unending-war.html">凍てつく大地</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'冷眼相待：翻越過那座山',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Eluned 告訴你，大多數倒下的 Scions 都能在教會接受安葬與儀式，但其中有一位卻無法被收容。她請你把 Noraxia 送回她的族人——Little Solace 的 sylphs——讓她能依照 sylph 的傳統，由朋友與同族好好哀悼。臨行前，Eluned 低聲說起：人們總想讓日子變得更好，卻常常以傷害他人為代價；而那份渴望與希望，最終也可能催生痛苦與死亡——令人遺憾，卻無法否認。</p>
+      <p>你抵達 Little Solace 時，Komuxio 驚訝地看著你，詢問你為何會出現在這裡。可當 Noraxia 的事實擺在眼前，Komuxio 的聲音瞬間斷裂，哽咽與震驚一起湧上來。Frixio 聽見騷動立刻趕來，急切追問究竟發生了什麼；而當你把經過說清楚，他不只聽見 Noraxia 的結局，也明白你失去的並不只有她，還有許多同伴。</p>
+      <p>Frixio 坦承，是他讓 Noraxia 前往 Thanalan。得知你曾陪在她最後的時刻，他近乎懇求地要你說出那句他最想聽見的真相——她很勇敢，她沒有受苦。你把能回答的都如實說出後，Frixio 像是終於能喘一口氣般接受了你的話，向你道謝，感謝你把 Noraxia 帶回來；他也請你轉告那些祈禱者，sylphs 會記得這份善意。</p>
+      <p>然而 Komuxio 的悲傷很快轉為憤怒。他喊著要復仇，說 imperial ones 必須付出代價、必須承受痛苦；他要你答應，等到你與 imperials 正面交鋒的那一天，不要忘了 sylphs——Noraxia 的死不能白費，sylphs 也會戰鬥。可在怒火之外，Komuxio 仍對你流露出罕見的親近：他說自己許多個月來都沒遇過像你這樣善良的外來者，並希望你還會再回來，和他們一起歡笑。</p>
+      <p>你回到 Drybone 後，Eluned 感謝你為教會與 sylphs 所做的一切，並告訴你在你離開期間，其餘的 Scions 已被安葬在墓園裡。她知道你或許還想為朋友做更多事，但也溫柔提醒：你已經為他們背負太多了——現在先把重擔放下，讓自己休息一下。</p>
+      <p>不久後，Marques 私下向你吐露：他確信自己被人盯上了。那不是普通的不安，而是一種陰沉、彷彿被監視的感覺；時有時無，但他在上次外出時又清楚感受到了。他請你幫他往外看看，說只要一會兒就好。你照做後遭到襲擊，回到他面前時，Marques 先是慶幸你沒有受傷，隨即又被更深的恐懼吞沒——他知道那個人確實在看著他，卻想不出原因。</p>
+      <p>Marques 反覆追問：那人究竟想從他身上得到什麼？是否知道他失去記憶前的過去？他懊惱自己沒能問出答案，想要獨處片刻理清思緒，卻又立刻改口，說 Father Iliud 必須知道這件事——他擔心還會有其他人再來。Iliud 得知在聖地竟發生襲擊，震驚又憤怒，追問你是否注意到對方的裝束或物品；當他辨認出留下的是 Garlean steel，他立刻明白事態的嚴重性，催促你趕往 Camp Drybone，召集 Immortal Flames，以免更多 imperials 再度出現。</p>
+      <p>就在此時，Alphinaud 現身，帶著不悅說自己原本希望能先一步與你談話。他明確表示自己不是為 Empire 而來，正相反——他要讓 Scions of the Seventh Dawn 重獲新生。為此，他前來尋找一位傳奇般的工程師：Master Cid Garlond。Iliud 認為他弄錯了，說教會裡的這名男子只是親眼見過 Carteneau 慘劇的可憐人，請他離開；但 Alphinaud 仍堅持呼喚 Cid。Marques 也被那些話撼動，熟悉感在腦中翻攪卻抓不住形狀。Iliud 取出屬於 Cid 的物品交還給他，帶著不捨與期盼說：短暫相處像是兒子回到了自己身邊，但現在，是時候去幫助真正需要你的人了。</p>
+      <p>Alphinaud 隨即說明現況：自 the Waking Sands 的襲擊後，Scions 幾乎被摧毀；在 Calamity 之後，三大城邦將心力都放在重建，使得 primal 的威脅長期由 Scions 獨自承受。如今 Ixal 再次召喚 Garuda，她正在 Coerthas 折磨百姓；她的破壞欲遠勝其他 primal，而研究者更認為她的力量已超過 Ifrit 與 Titan。可若能擊敗 Garuda，便能警告各族：就算是他們最強大的神祇也能被擊倒。問題在於，她的領域被暴風守護，若想突破那道風暴，就需要一艘飛空艇——Cid 的飛空艇。那艘飛空艇在 Calamity 前不久曾於 Gridania 上空出現，因此你們將從追尋它的線索開始。Cid 雖仍困惑，卻也被迫承認：他們需要的不只是那艘飛空艇——他們也需要他。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 沃爾特福爾特 <small class="muted">黑衣森 - 北部森林 (X:15.4, Y:25.4)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="he-who-waited-behind.html">飛空艇「Enterprise」的去向</a></div>
+      <div class="row">所有職業（不含限定職） 等級 36 以上</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="the-unending-war.html">無盡的戰火：冰封的大地</a></div>
+    </div>`
+  }
+};
+
+const LANG_KEY = 'ffxiv-guide-lang';
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
