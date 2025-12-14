@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bringing out the Dead | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Bringing out the Dead (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/u1Sc7cjmEXs"
+              title="Bringing out the Dead" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Bringing out the Dead</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Bringing out the Dead',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Eluned looks at you and says she recognizes you now. She offers her deepest condolences for those who died in the attack, then apologizes for raising the subject—but tells you that the bodies of your comrades are being removed from the Waking Sands and prepared to be brought here.</p>
+      <p>She says she will understand if you wish to leave the work to others, yet suggests that taking part might help you find closure. Then she speaks more broadly: people have always sought to better their lives, too often at the expense of others—and that such desire and hope can give rise to suffering and death, a regrettable but undeniable truth.</p>
+      <p>In Vesper Bay, a shopkeep eyes you and says you do not look like one of the churchfolk, though he will not turn you away. He points out a pile of unidentified bodies and says no one has come to claim them, so they will be taken to the lichyard. He tells you to be thankful you did not have to go inside to see the carnage, calls it nightmares made real, and spits at the thought of the imperials. He says he does not know what quarrel drove them, and does not want to—only that the sooner it is behind them, the better. He pauses as if your face seems familiar, then brushes it aside.</p>
+      <p>He tells you a carriage is waiting by the east gate to haul the bodies to the lichyard, and only eight remain to be loaded. Exhausted from carrying the rest, he leaves the remainder to you and warns you to cover your nose—some are beginning to turn. When you bring the bodies to the coachman, he urges you to hurry, tells you to toss them in the back, and says it is not as though they will complain if you are rough. When you return with more than expected in a single trip, he remarks on your strength and decides he need not lend a hand.</p>
+      <p>The coachman pushes you to finish before he “dies of old age,” then declares that should be all of them and thanks you for the help. He says it should not take long to deliver the corpses to the lichyard, but tells you to hurry back and report that the work here is done. When you linger, he cracks a grim joke about why he is still there—there is no need to rush, for the dead have no pressing appointments to keep.</p>
+      <p>Back in Drybone, Eluned says you chose to heed her advice, and she prays that doing so brought you some small measure of peace. The first carriage from Vesper Bay arrived not long ago, and they have begun preparing your comrades for burial; she took part in the initial rites, and she wants you to know that for many, death came quickly. She assures you they will be treated with the utmost respect, and that everything will be done to shepherd them to Thal’s realm.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Eluned <small class="muted">Eastern Thanalan (X:11.5, Y:22.2)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="you-cant-take-it-with-you.html">You Can’t Take It with You</a></div>
+      <div class="row">All classes and jobs (excluding limited jobs) (Level 35 or above)</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="bury-me-not-on-the-lone-prairie.html">Bury Me Not on the Lone Prairie</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'静かなる葬送',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>エルネドはあなたの姿を見て、今になって思い当たったように言う。襲撃で命を落とした者たちへの深い哀悼を述べ、話題にすることであなたを動揺させてしまうかもしれないと詫びながらも、砂の家から仲間たちの遺体が運び出され、ここへ移送するための準備が進められているのだと告げる。</p>
+      <p>その作業を他の者に任せたいと思うなら理解すると言いつつ、手を貸すことで気持ちに区切りがつくかもしれない、とエルネドは静かに促す。さらに彼女は、人はよりよい暮らしを求め、その代償を同胞に負わせてしまうことがあまりに多いのだと語り、そうした欲望や希望が苦しみと死を生むのは悔やまれるが否定できない真実だと言う。</p>
+      <p>あなたがベスパーベイへ向かうと、店の者はあなたを見て、教会の人間には見えないが追い返しはしないと告げる。近くには身元不明の遺体が積まれており、引き取り手が現れないため共同墓地へ送られるのだと説明される。店の者は、建物の中へ入って惨状を見ずに済んだだけでも幸いだと言い、悪夢のようだったと吐き捨てて帝国兵を呪う。何の因縁があったのかは知りたくもないし、知る気もない、早く終わらせてしまいたいのだと続け、あなたの顔に見覚えがある気もすると言いかけて、すぐに打ち消す。</p>
+      <p>店の者は、東門の外に遺体を共同墓地へ運ぶ荷馬車が来ており、積み残しは八体だけだと教える。ほかを運び続けて疲れ切ったから残りはあなたに任せたいと言い、腐りはじめている者もいるので鼻を覆ったほうがいいと忠告する。御者は次を持って来いと急かし、後ろへ放り込めと言い放つ。荒っぽくしても文句は出ないのだと割り切った口調で言い、あなたが一度に多く運ぶと、その力なら自分が手を貸す必要はないだろうと判断する。</p>
+      <p>御者はさらに急き立て、年寄りになる前に終わらせようとせかす。やがてこれで全部だと言い切って礼を述べ、共同墓地へ届けるのに長くはかからないはずだが、作業が終わったことを伝えに戻ったほうがいいとも促す。あなたがなお見ていると、御者は急ぐ必要はない、死者に差し迫った用事などないのだから、と不謹慎な冗談を口にする。</p>
+      <p>ドライボーンでエルネドのもとへ戻ると、彼女はあなたが忠告に従ったのだと受け取り、少しでも安らぎが得られたのならと祈る。ベスパーベイからの最初の荷がほどなく到着し、仲間たちの埋葬の準備を始めたこと、そして彼女が初めの儀式に携わったことを伝える。さらに多くは苦しむ間もなく息を引き取ったのだと、あなたに知ってほしいと言い、最大限の敬意をもって送り出し、ナルザルの御許へ導くためにできる限りのことをすると約束する。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> エルネド　<small class="muted">ザナラーン：東ザナラーン (X:11.5, Y:22.2)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="you-cant-take-it-with-you.html">止まったままの時間</a></div>
+      <div class="row">すべて（リミテッドジョブを除く）Lv 35～</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="bury-me-not-on-the-lone-prairie.html">小さな勇者の帰還</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'靜默送別',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Eluned 望著你，說她現在認出你了，也為襲擊中失去性命的人向你致上最深的哀悼。她先向你道歉，擔心這話題會讓你難受，但仍告訴你：你的同伴遺體正在從 Waking Sands 被移出，並準備送往這裡。</p>
+      <p>她說，如果你想把這份工作交給其他人，她完全能理解；但她也提醒你，親自參與或許能幫助你得到一點「了結」。接著，Eluned 低聲感嘆，人總想讓生活變得更好，卻往往以同胞為代價；而那份欲望與希望，確實可能孕育出痛苦與死亡——令人惋惜，卻無法否認。</p>
+      <p>你前往 Vesper Bay 時，一名店家看著你，說你看起來不像教會的人，不過他也不會趕你走。他指向不遠處那堆身分未明的遺體，說沒有人前來認領，所以只能送往共同墓地。他要你慶幸自己不必走進去親眼看那場慘狀，說那簡直是噩夢，並啐了一口，痛罵那些帝國兵。他說自己不知道、也不想知道這些人和對方究竟有什麼仇怨，只希望越快把這一切拋到身後越好；他又忽然打量你的臉，像是覺得在哪見過你，卻很快把這念頭丟開。</p>
+      <p>店家告訴你，運屍的馬車已經在東門外準備把遺體送往共同墓地，而現在只剩八具需要搬上車。因為他先前已經搬到精疲力竭，乾脆把剩下的都交給你，並提醒你做事時最好遮住鼻子——有些人已經開始腐敗。你把遺體送到車伕那裡時，他不停催促你把下一批帶來，叫你直接丟進車後，說反正他們也不會因為你粗魯就抱怨；當你一次搬來比他預想更多的遺體時，他讚你力氣驚人，甚至覺得自己不必再插手。</p>
+      <p>車伕又催你快點收尾，說再拖下去他都要老死在這裡了。隨後他宣布這就全都搬完了，並向你道謝；他說把遺體送到共同墓地應該不會花太久，但仍要你快些回去告訴那邊工作已經完成。當你還看著他時，他半開玩笑地說自己不需要急——畢竟這些人也沒有什麼「趕著赴約」的行程。</p>
+      <p>你回到 Drybone，Eluned 說你終究採納了她的建議，她祈願你至少因此得到一點安寧；從 Vesper Bay 出發的第一輛馬車不久前就已抵達，他們也已開始為你的同伴準備安葬。她告訴你，她參與了最初的儀式，也希望你知道：對許多人而言，死亡來得很快。她向你保證，他們會以最高的敬意對待每一位亡者，並盡其所能引領他們前往 Thal 的國度。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 艾露內德　<small class="muted">薩納蘭 - 東薩納蘭 (X:11.5, Y:22.2)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="you-cant-take-it-with-you.html">停滯之時，帶不走的一切</a></div>
+      <div class="row">所有職業（不含限定職） 等級 35 以上</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="bury-me-not-on-the-lone-prairie.html">孤寂草原的勇者歸來</a></div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
