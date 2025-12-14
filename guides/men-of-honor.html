@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Men of Honor | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Men of Honor (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/XgRDTFSEFRI"
+              title="Men of Honor" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Men of Honor</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Men of Honor',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Jocea calls out to you after overhearing your exchange with the chief astrologian. She says there may be a way she can assist you, but only if you will do a favor in return: an associate of hers has not come back from an expedition to the cliffs east of the Observatorium. He insisted on working alone despite Ixal in the area, and she asks you to find him and confirm he is safe.</p>
+      <p>You head out as requested, and the missing astrologian all but pours his relief onto you the moment you appear—anything is better than another “birdman,” he says. He admits he thought he could finish his observations while the Ixal were away, only for them to return far sooner than he expected, leaving him no choice but to hide and hope they would leave again before the cold took him.</p>
+      <p>But the relief snaps into alarm as he actually looks at you. You are not one of their knights, and he recoils from the implication of being seen with you. He insists that a man of House Durendaire cannot be caught in the company of an unbeliever, and he cuts the encounter short with a sharp dismissal.</p>
+      <p>When you return to Jocea, she tells you the arrogant fool came back not long before you did—grumbling about the disgrace of having been rescued by an unbeliever. She has little sympathy, saying it serves him right for underestimating the dangers their knights face every day.</p>
+      <p>Jocea then turns your attention back to the airship you seek. She says it may surprise you, but by saving that man, you have already helped your own cause. House Durendaire is quick to suspect outsiders because it is their duty to raise the alarm at the first sign of Dravanian aggression, yet you have aided them more than once—and honor demands they repay such debts.</p>
+      <p>Even so, she warns that they still will not grant you access to the Observatorium’s records. That may be for the best, she adds, because there are other ways to pursue your missing airship. What she proposes is that you petition Lord Portelaine for an official introduction to the other High Houses—House Durendaire’s word carries tremendous weight in Ishgard, and if their captain consents, you should have far less trouble obtaining information elsewhere.</p>
+      <p>Portelaine receives you with measured interest and says you have caused quite a stir in the short time you have been there. He recounts what he has heard—your deeds, and the rescues—and assumes you must want something for your troubles. He does not deny you have given them no cause to distrust you, but he notes the imbalance all the same: you have performed two acts, and you would have him endorse you to three High Houses. If you want that much from them, he says, then it is only fitting you aid them one final time.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Jocea <small class="muted">Coerthas Central Highlands (X:25.5, Y:29.8)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-unending-war.html">The Unending War</a></div>
+      <div class="row">All classes and jobs (excluding limited jobs) (Level 36 or above)</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="three-for-three.html">Three for Three</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'デュランデル家の流儀',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>ジョセアは、台長とのやり取りを耳にしたのだと言ってあなたに声をかける。助ける手立てがないわけではないが、その代わりに頼みを聞いてほしいという。仲間の占星術師が、占星台の東側にある崖へ観測に出たまま戻ってこない。周辺にはイクサル族がいるのに、ひとりで十分だと強情を張ったらしく、無事かどうか確かめてきてほしい、と。</p>
+      <p>あなたが現地へ向かうと、その占星術師は、あなたの姿を見て安堵の声を漏らす。あの忌々しい鳥人間ではない相手に会えたことが、何より救いだと言う。イクサル族が留守の間に作業を終えられると思ったのに、戻ってくるのが予想以上に早く、隠れて、去ってくれるのを祈るしかなかった――凍え死ぬかと思った、と息をつく。</p>
+      <p>ところが彼は、あなたを見定めると急に態度を硬くする。あなたは騎士ではない、と。さらに、デュランデル家の者が不信仰者と一緒にいるところなど見られてはならない、と言い放ち、取りつく島もなく別れを告げる。</p>
+      <p>占星台へ戻ってジョセアに報告すると、彼女はその男があなたの到着より少し前に戻ってきたと告げる。口にしていたのは、不信仰者に助けられた屈辱だという愚痴ばかりだったらしい。ジョセアは冷ややかに、日々騎士たちが向き合っている危険を甘く見た報いだ、と言う。</p>
+      <p>それでもジョセアは、あなたが飛空艇を探していることを忘れてはいないと言い、助けたことが無駄ではないと続ける。デュランデル家は、ドラヴァニアの動きをいち早く察知する責務ゆえに、よそ者へ疑い深い。だがあなたはすでに彼らを幾度も助けており、その恩に報いるのは名誉に関わる、と。</p>
+      <p>ただし、それでも天文台の記録を閲覧させることはないだろう、と彼女は釘を刺す。だが別の道はある。彼女が提案するのは、デュランデル家のポルトゥレーン卿に、他の高位貴族への正式な紹介を願い出ることだ。デュランデル家の言葉はイシュガルドで重く、同意が得られれば、他家からも情報を引き出しやすくなるという。</p>
+      <p>ポルトゥレーンはあなたを迎え、短い間にずいぶん騒ぎを起こしたものだと言う。異端者を討ち、騎士を救い、さらにデュランデル家の者まで救った――それほど働いたのなら、何か望みがあるのだろう、と。彼は、あなたが疑うべき理由を示していないことは認めるが、あなたが求めるのは高位貴族への紹介だ。二度の働きで三家への保証を求めるのなら、最後にもう一度、こちらへ力を貸すのが筋ではないか、と言う。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> ヨシア　<small class="muted">クルザス中央高地 (X:25.5, Y:29.8)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-unending-war.html">凍てつく大地</a></div>
+      <div class="row">すべて（リミテッドジョブを除く）Lv 36～</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="three-for-three.html">砦に宛てられた荷物</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'榮譽之士：Durandel 家的門風',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Jocea 叫住你，說她剛才聽見你與 Chief Astrologian 的對話。她表示也許有辦法幫上你，但需要你先答應一件事作為交換：她的一位同伴占星術師，前往 Observatorium 以東的峭壁進行觀測後遲遲未歸。那一帶有 Ixal 出沒，他卻堅持能獨自完成工作；若你能去找人並確認他平安，Jocea 才能放心。</p>
+      <p>你依言前往，失聯的占星術師一見到你，立刻像是撿回一條命般鬆了口氣。他說能看到的不是那些該死的「鳥人」，真是太好了。他原以為趁 Ixal 不在就能把觀測做完，沒想到對方回來得比預想更快，他只能躲起來祈禱他們離開，否則他差點就要在寒冷裡撐不下去。</p>
+      <p>然而這份慶幸很快變成警戒——他突然反應過來，你不是他們的 knight。緊接著，他用近乎斷然的口氣撇清關係，聲稱 House Durendaire 的人絕不能被看見與不信者同行，然後毫不客氣地向你道別，轉身離去。</p>
+      <p>你回到 Jocea 面前，她告訴你那個自負的傢伙其實在你抵達前不久就回來了，一邊喃喃抱怨自己竟被不信者救了，彷彿那才是最大的恥辱。Jocea 冷冷地說，他低估了那些 knight 每天面對的危險，如今吃到教訓也是活該。</p>
+      <p>話鋒一轉，Jocea 提醒你別忘了自己真正急著找的是 airship。她說你救了那個人，反而已經在幫自己鋪路。House Durendaire 的職責是第一時間警戒 Dravanian 的威脅，因此對外人向來多疑；但你已經兩次出手相助，依照他們的榮譽觀念，欠下的恩情就必須償還。</p>
+      <p>即便如此，她仍直言 House Durendaire 不會讓你翻閱 Observatorium 的 records——但這也未必是壞事，因為找 airship 並不只有這一條路。她提出的辦法，是請你去向 Lord Portelaine 申請一份正式引薦，讓你能以官方身分接觸其他 High Houses。House Durendaire 在 Ishgard 的分量極重；只要他願意點頭，你要從其他貴族家門取得情報就容易得多。</p>
+      <p>Portelaine 見到你，語氣裡帶著審視，說你在這裡待的時間不長，卻已經鬧出不小動靜：先是擊殺 heretics、救回一名 knight，如今又救了 House Durendaire 的人。他推測你應該想要些什麼作為回報。對於你要求引薦到其他 High Houses，他承認你確實沒有讓他們不信任的理由——但你做了兩件事，卻要他替你向三個貴族家門背書。若你要他做出這種承諾，那麼再替他們完成最後一次的協助，才算合理。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 喬希亞 <small class="muted">庫爾札斯中央高地 (X:25.5, Y:29.8)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-unending-war.html">無盡的戰火：冰封的大地</a></div>
+      <div class="row">所有職業（不含限定職） 等級 36 以上</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="three-for-three.html">寄往堡壘的包裹</a></div>
+    </div>`
+  }
+};
+
+const LANG_KEY = 'ffxiv-guide-lang';
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
