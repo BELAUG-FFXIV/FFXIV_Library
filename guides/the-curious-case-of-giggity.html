@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Curious Case of Giggity | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – The Curious Case of Giggity (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/UdJJDEg9q5U"
+              title="The Curious Case of Giggity" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">The Curious Case of Giggity</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'The Curious Case of Giggity',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Ceana quickly waves away your frustration and tells you not to worry—she knows exactly where to find a corrupted crystal rich with ice-aspected aether. An associate of hers in Gridania has been studying one firsthand, and she insists this is not another pointless chase.</p>
+      <p>She adds that this time you won’t even need your warded pot. Based on Hedyn’s findings, the crystal’s energies are safe to approach, thanks to a “unique process” that makes the usual precautions unnecessary.</p>
+      <p>With that reassurance, Ceana sends you on your way. If you want the crystal you actually need, you’re to head for Gridania and speak with Hedyn.</p>
+      <p>In Old Gridania, Hedyn greets you with brisk formality and acknowledges the tales Ceana has shared—along with an apology for the earlier misunderstanding. He brushes it off with a scientist’s excuse: even missteps made in the name of research are not truly wasted.</p>
+      <p>Then he gets to the point. After the Calamity, crystals like the one you seek could once be found in abundance at the Standing Corses. That is no longer the case—and the reason is as absurd as it is inconvenient.</p>
+      <p>Hedyn explains that a single spriggan, notorious for an insatiable appetite—Giggity—has devoured every corrupted crystal in the Twelveswood. The good news, he says, is that such crystals take an eternity to digest, if they can be digested at all. He is confident that one still remains in the creature’s gut, waiting to be retrieved.</p>
+      <p>Giggity, however, rarely shows himself unless tempted by something irresistible. Hedyn produces a lure for the task: a “true heart,” promising to save the story behind the peculiar name for another time. Your job is simple—place it outside the spriggans’ lair, wait, and strike at the right moment. As for how you extract the crystal afterward…he leaves that detail to you.</p>
+      <p>When you return, Hedyn startles as you approach—then freezes, sniffing the air in dawning horror at the stench clinging to you. Even so, his eyes catch on what you’re holding, and his tone turns awed: the crystal is breathtakingly beautiful, and it proves his supposition was correct.</p>
+      <p>He grimaces at what you clearly had to do to obtain it, yet points out the practical silver lining: the thick coating of digestive fluids is shielding you from the crystal’s harmful effects, much like your warded pot once did.</p>
+      <p>And then—seeing your expression—Hedyn tries to lighten the moment with a joke, claiming you’ve finally secured a crystal overflowing with earth-aspected aether. Before the disappointment can settle, he immediately relents, assuring you it is indeed ice-aspected. He concedes the jest was poor taste, especially after your earlier attempts came to nothing.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Ceana <small class="muted">Western La Noscea (X:27.9, Y:27.0)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="history-repeating.html">History Repeating</a></div>
+      <div class="row">All classes and jobs (excluding limited jobs) (Level 43 or above)</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="better-late-than-never.html">Better Late than Never</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'最後の偏属性クリスタル',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>シアーナは、あなたの焦りを見てすぐに首を振り、「心配いらない」と言い切る。氷属性のエーテルを宿す汚染されたクリスタルなら、確かな当てがあるのだという。グリダニアにいる知人が、その結晶の影響を生きた対象で研究しているのだと、彼女は胸を張る。そしてこれは無駄足ではない、と念を押した。</p>
+      <p>さらに彼女は、今回は守りの壺を使う必要もない、と続ける。ヘディンの調査によれば、その結晶は近づいても安全であり、用心を要しない「特別な過程」を経ているのだという。</p>
+      <p>シアーナはそれ以上を語らず、あなたを引き留めもしない。必要な結晶を得たいなら、グリダニアへ向かい、ヘディンに会うこと――それが彼女の結論だった。</p>
+      <p>旧市街でヘディンはあなたに挨拶し、シアーナから話を聞いていると告げる。アレポートでの行き違いについては申し訳ない、と形だけでも詫び、学の世界では研究のための行動に無駄はない、と言って話を前へ進めた。</p>
+      <p>そして本題に入る。第七霊災の直後、枯骨の森には目的の性質を持つ汚染されたクリスタルが大量に見られた。だが今は違う。黒衣森のどこにあるのかを追うこと自体が難しくなっているのだと、彼は淡々と説明する。</p>
+      <p>原因は、常識外れの食欲を持つスプリガンが一体で、黒衣森にある汚染されたクリスタルをすべて食い尽くしたからだという。名はゴギー。もっとも、結晶の消化には途方もない時間がかかり、そもそも消化できるかも怪しい。だからこそ、あなたが求める一個が腹の中に残っている可能性は高い――ヘディンはそう見立てる。</p>
+      <p>ただし、ゴギーはよほどの餌がなければ姿を見せない。そこでヘディンは、スプリガンの巣の外に置くための誘い餌を用意していた。彼はそれを「トゥルーハート」と呼び、名の由来はまた今度語ると言って、今は手順だけを示す。置いて待ち、機を見て襲いかかれ。腹の中から結晶を取り出す方法は――あなたの判断に任せる、と。</p>
+      <p>戻ってきたあなたに、ヘディンは不意を突かれて身を固くする。だが次の瞬間、鼻をひくつかせ、まとわりつく悪臭に顔をしかめた。それでも彼の視線は、あなたが持ち帰った結晶へ吸い寄せられ、思わず息をのむ。美しい。推測は正しかった、と彼は確信する。</p>
+      <p>あなたがスプリガンの内臓を探ったのだろう、とヘディンは苦々しく言いながらも、同時に利点を告げる。その粘つく消化液の膜が、結晶の有害な影響からあなたを守っている。かつての壺と同じ役目を果たしているのだ、と。</p>
+      <p>そして、あなたの沈んだ顔を見て、ヘディンは場を和らげようと冗談を口にする。土属性のエーテルに満ちた結晶を手に入れたのだ、と。だがすぐに言い直し、氷属性だ、安心しろ、と断言した。これまでの失敗を思えば悪趣味だった――そう認めて、彼は結晶を改めて見つめた。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> シアーナ　<small class="muted">西ラノシア (X:27.9, Y:27.0)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="history-repeating.html">狂気の歌声</a></div>
+      <div class="row">すべて（リミテッドジョブを除く）Lv 43～</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="better-late-than-never.html">始動！ エンタープライズ</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'追查 Giggity 離奇怪案，尋得最後的偏屬性水晶',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Ceana 看出你的焦躁，立刻要你別擔心——她很清楚哪裡能找到富含 ice-aspected aether 的 corrupted crystal。她說自己在 Gridania 有位熟識的研究者，正好在觀察這類 crystal 對活體造成的影響，而且這次絕不是又一次白跑。</p>
+      <p>更好的消息是，Ceana 表示你不必再依賴那只 warded pot 來自保。根據 Hedyn 的研究結果，這顆 crystal 的能量已經「安全到不需要防護」，因為它經過某種獨特的處理，讓那些多餘的顧慮變得不再必要。</p>
+      <p>她沒有再多解釋，只催促你快去。要拿到真正需要的 crystal，就去 Gridania 找 Hedyn——這一次，她要你相信她。</p>
+      <p>到了 Old Gridania，Hedyn 以一本正經的口吻向你致意，表示 Ceana 已經把你在 Aleport 的經歷告訴他了。他也為那場誤會道了歉，並用學者式的語氣帶過：正如某位教授常說的，為了科學而採取的行動，從來不算真正的浪費。</p>
+      <p>接著他把話題拉回你要的 corrupted crystal。Hedyn 說，在 Calamity 之後，像你要找的那種 crystal 曾經在 The Standing Corses 隨處可見；但如今情況不同了，就算仍然存在於 Twelveswood，也很難判定它此刻究竟落在何處。</p>
+      <p>原因聽起來荒謬，卻偏偏合理：Hedyn 解釋，spriggan 會四處尋找礦石與石塊，而其中有一隻以貪吃惡名昭彰的 spriggan——Giggity——竟然把 Twelveswood 裡所有的 corrupted crystal 都「一口口吞了下去」。不過這些 crystal 幾乎不可能被消化，就算能消化也需要極久的時間；因此 Hedyn 相當肯定，至少還有一顆仍卡在牠的肚子裡。</p>
+      <p>麻煩在於，Giggity 很少現身，除非有特別上等的「餌」。於是 Hedyn 拿出一樣誘餌，要你把它放在 spriggans’ lair 外，等到時機成熟就出手。他把這個誘餌稱作「true heart」，還說它名字由來很特別，但故事改天再談——現在你只要照做即可。至於要怎麼從牠的肚子裡把 crystal 取出來，他乾脆把選擇權丟回給你。</p>
+      <p>當你回到 Old Gridania，Hedyn 被你突然靠近嚇了一跳，隨即皺起眉頭——他聞到了你身上那股令人作嘔的味道。可下一秒，他的視線又被你帶回來的 crystal 牢牢抓住：那晶體美得驚人，也讓他確信自己的推測沒有錯。</p>
+      <p>Hedyn 一邊嫌惡地指出你顯然不介意翻找 spriggan 的內臟，一邊又冷靜補上一句：那層厚厚的消化液覆膜，正好在保護你，抵消 crystal 原本可能造成的傷害——效果就和你先前用過的 warded pot 一樣。</p>
+      <p>看你神色沉下去，Hedyn 試圖用玩笑緩一緩氣氛，故意說你終於拿到了充滿 earth-aspected aether 的 crystal。話才出口，他就立刻收回，連聲要你冷靜：這顆確實是 ice-aspected aether，別擔心。他也承認，想到你前兩次的努力都落空，這玩笑確實有點不合時宜。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 西艾娜　<small class="muted">拉諾西亞 - 西拉諾西亞 (X:27.9, Y:27.0)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="history-repeating.html">舊事重演，狂亂歌聲再起</a></div>
+      <div class="row">所有職業（不含限定職） 等級 43 以上</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="better-late-than-never.html">遲來總比不到好，「Enterprise」終於啟動</a></div>
+    </div>`
+  }
+};
+
+const tabBtns = [...document.querySelectorAll('.tab-btn')];
+const pageTitle = document.getElementById('pageTitle');
+const langToggle = document.getElementById('langToggle');
+const panels = {
+  story: document.getElementById('panel-story'),
+  acq: document.getElementById('panel-acq'),
+  unlockq: document.getElementById('panel-unlockq'),
+  followq: document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem('ffxiv-guide-lang') || 'EN'; }
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem('ffxiv-guide-lang', next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
