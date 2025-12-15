@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Better Late than Never | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Better Late than Never (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/0zWnTo3oMLA"
+              title="Better Late than Never" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Better Late than Never</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Better Late than Never',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>You catch Hedyn at the last moment, and he startles as if he has only just remembered something important. With an awkward apology, he hurriedly returns the crystal to you—admitting he nearly let it slip his mind—then adds that Professor Lamberteint also left a message. It mentioned a man named Marques, and something about the professor missing the “intellectual stimulation,” but Hedyn confesses he failed to write the details down and can only offer the gist.</p>
+      <p>As he talks, another thought strikes him: he never actually asked what you needed the crystal for. A note of caution creeps into his voice as he wonders aloud whether you intend anything nefarious—because if the crystal were used for evil ends, it would cast a shadow over him and his research as well.</p>
+      <p>But the suspicion doesn’t last. Hedyn quickly decides that ignorance is safer, and he retreats behind the logic that made him the professor’s greatest pupil: he did not get there by cluttering his head with information he didn’t strictly need. With that, he leaves you with the crystal and no further questions, letting you go.</p>
+      <p>When you reach the airship landing in New Gridania, Lionnellais greets you with practiced courtesy and asks whether you wish to proceed to your vessel, as if the world is continuing on its ordinary rhythm while you carry something far from ordinary in your hands.</p>
+      <p>Cid is already there, all focus and momentum. He tells you the repairs and modifications are complete, and that once you bring him the crystal, nothing will stand between the two of you and Garuda.</p>
+      <p>He takes the crystal and studies it with a professional eye, saying he will still run tests to be sure—but everything about it suggests it is exactly what you need. He promises your hard work will not be wasted, then looks beyond the immediate task to what comes next: the Enterprise is already more than a common airship, and soon it will become something greater—something extraordinary. The conviction turns personal, and he states it plainly: this is who he is, and this is what he was born to do.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Hedyn <small class="muted">Old Gridania (X:8.7, Y:8.2)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-curious-case-of-giggity.html">The Curious Case of Giggity</a></div>
+      <div class="row">All classes and jobs (excluding limited jobs) (Level 43 or above)</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="lady-of-the-vortex.html">Lady of the Vortex</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'始動！ エンタープライズ',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>ヘディンは、あなたに呼び止められてはっとし、しまったという顔で頭を下げる。渡すべき結晶を返し忘れていたらしく、あわててあなたの手へ汚染されたクリスタルを戻すと、続けてランベルテイント教授からの伝言があると言う。マルケズという男の名が出て、教授が「知的な刺激」を恋しがっている、そんな趣旨だったらしいが、ヘディンは書き留めていなかったことを詫び、曖昧な内容しか伝えられないと認める。</p>
+      <p>話しながら、ヘディンは今さら一つの疑問に行き当たる。あなたはなぜその結晶を必要としているのか。彼は用心深く、邪な目的ではないだろうな、と探るように言う。もし悪しき用途に使われれば、自分と研究の名にも傷がつくのだ、と。</p>
+      <p>だがその警戒はすぐに引っ込められる。ヘディンは、知らぬが吉だと自分で結論づけ、余計な情報で頭を満たさないからこそ教授の最大の弟子になれたのだ、と言って話を切り上げる。そして結晶をあなたに託したまま、これ以上は踏み込まずに送り出す。</p>
+      <p>グリダニア新市街の飛空艇発着場へ向かうと、リオネルレが慇懃に挨拶し、あなたに船へ進むかどうかを確かめる。周囲は平穏そのもので、あなたの手の中の結晶だけが異質な重みを持っているかのようだ。</p>
+      <p>そこにはシドが待っており、修理と改修はすべて完了したと告げる。あとはその結晶を持って来れば、あなたと彼をガルーダへ向かわせる障害は何も残らない――彼は迷いなく言い切る。</p>
+      <p>シドは結晶を受け取り、念のため試験は必要だと言い添えつつも、これはまさしく必要なものだと見て取る。あなたの労は無駄にしないと約束し、さらにエンタープライズ号はすでにただの飛空艇ではない、やがてもっと偉大で並外れた存在になるのだと語る。その確信は次第に彼自身の言葉へ変わり、これは自分であり、自分が生まれた理由そのものだと、強く言い切った。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> ヘディン　<small class="muted">グリダニア：旧市街 (X:8.7, Y:8.2)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-curious-case-of-giggity.html">最後の偏属性クリスタル</a></div>
+      <div class="row">すべて（リミテッドジョブを除く）Lv 43～</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="lady-of-the-vortex.html">暴虐の嵐神ガルーダ</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'遲來總比不到好，「Enterprise」終於啟動',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>你才剛要離開，Hedyn 就像忽然想起什麼似的，急忙把你叫住，連聲道歉說自己差點忘了把 crystal 還給你。他把那顆你辛苦得來的晶體塞回你手裡，接著又補上一句：Professor Lamberteint 也有話要轉達。訊息裡似乎提到一個叫 Marques 的男人，還說教授最近想念那種「智識上的刺激」——但 Hedyn 坦白自己沒把內容記下來，只能把記得的部分勉強說給你聽。</p>
+      <p>說著說著，Hedyn 才意識到自己一直沒問：你究竟為什麼需要這顆 corrupted crystal？他語氣一緊，帶著審視的戒心試探你，問你該不會打算拿它去做什麼不正當的事吧；要是它被用在邪惡的目的上，丟臉的不只是你，也會連帶讓他的研究蒙上污點。</p>
+      <p>然而這份警戒很快就被他自己收起。Hedyn 像是刻意把那道門關上，說或許他最好保持無知——他之所以能成為教授最得意的弟子，正是因為不把不必要的資訊塞進腦袋裡。於是他不再追問，只讓你帶著 crystal 離開。</p>
+      <p>你抵達 New Gridania 的飛空艇起降場時，Lionnellais 依舊以一貫的禮節向你致意，詢問你是否要前往你的船艦。四周的一切看起來都很尋常，彷彿只有你手裡那顆晶體仍在提醒你，接下來要做的事並不尋常。</p>
+      <p>Cid 已經在那裡等著你。他告訴你，所有修理與改裝都已完成——只要你把 crystal 交給他，你們就再也沒有任何阻礙，能夠直面 Garuda。</p>
+      <p>Cid 接過 crystal，仍以謹慎的口吻說需要再做測試才能完全確認，但他一眼就看出它很可能正是你們需要的東西。他要你放心，保證你的努力不會白費。隨後他的目光越過眼前的工作，落到更遠的地方：Enterprise 早已不是普通的飛空艇，很快就會成為更偉大、更非凡的存在。那份篤定像是從他心底湧上來，他說得很直接——這就是他自己，這就是他生來要做的事。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 赫丁　<small class="muted">舊格里達尼亞 (X:8.7, Y:8.2)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-curious-case-of-giggity.html">追查 Giggity 離奇怪案，尋得最後的偏屬性水晶</a></div>
+      <div class="row">所有職業（不含限定職） 等級 43 以上</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="lady-of-the-vortex.html">暴風女王 Garuda 現身，暴虐席捲而來</a></div>
+    </div>`
+  }
+};
+
+const tabBtns = [...document.querySelectorAll('.tab-btn')];
+const pageTitle = document.getElementById('pageTitle');
+const langToggle = document.getElementById('langToggle');
+const panels = {
+  story: document.getElementById('panel-story'),
+  acq: document.getElementById('panel-acq'),
+  unlockq: document.getElementById('panel-unlockq'),
+  followq: document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem('ffxiv-guide-lang') || 'EN'; }
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem('ffxiv-guide-lang', next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
