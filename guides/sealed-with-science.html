@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sealed with Science | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Sealed with Science (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/PU6O92BoT98"
+              title="Sealed with Science" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Sealed with Science</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Sealed with Science',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Lamberteint greets you with an almost theatrical delight, remarking on how rare it is to meet fellow intellectuals in this region—rarer still, someone who can grasp the true nature of corrupted crystals. He even recalls that there was once another such mind: a hermit the church had sheltered, an odd and unsociable fellow at first glance, yet astonishingly attuned to scientific pursuits.</p>
+      <p>He quickly brings the talk back to why you are here. You are not seeking to merely observe these phenomena in the field—you intend to harvest a corrupted crystal. The scholar balks at the idea, scolding you to take proper precautions so you do not suffer exposure to the crystal’s harmful energies, and wondering aloud whether you truly have the qualifications to handle such hazardous materials.</p>
+      <p>Even so, he finds your lack of knowledge strangely endearing—and, more importantly, he has a solution ready. He gives you a pot protected by wards and tells you to store the crystal inside it, so you may shield yourself from its deleterious effects. Until you manage that, he warns, you will still be battered by its energies—perhaps a motivation to work quickly.</p>
+      <p>With the vessel in hand, you are sent onward to Highbridge, where Lamberteint’s student Hahasako is monitoring the flow of aether. You are to explain your purpose to him, and he will instruct you in the finer points of harvesting the crystal.</p>
+      <p>When you arrive, you are met not by calm instruction, but by an outburst. Hahasako snaps at someone—demanding to know how many times he must explain himself—and insists he is not contemplating suicide. He chose this precise position for scientific measurements, nothing more.</p>
+      <p>Then his attention shifts to what you carry. He recognizes the containment vessel at once as Lamberteint’s handiwork and rounds on you as a thief, ready to call for help—until you explain that the professor himself lent it to you. In an instant, his anger twists into pride: if you were sent here by instruction, then Lamberteint must consider him experienced enough to pass on those explanations. At last, he declares, the recognition he has long deserved.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Lamberteint <small class="muted">Eastern Thanalan (X:12.7, Y:23.4)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="into-the-eye-of-the-storm.html">Into the Eye of the Storm</a></div>
+      <div class="row">All classes and jobs (excluding limited jobs) (Level 41 or above)</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="with-the-utmost-care.html">With the Utmost Care</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'ハイブリッジの一番弟子',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>ランベルタンは、あなたを見て大げさなほどに喜び、こんな土地で知性ある同類に出会えるのは稀だと言う。ましてや、変質したクリスタルの本質を理解できる者となれば、なおさらだと。そういえば教会が庇護していた隠者にも、似た雰囲気があったらしい。人付き合いが悪く、第一印象はどこか頼りないのに、科学の道に対して驚くほどの適性を秘めていた――そんな人物だったと語る。</p>
+      <p>だが本題は別だ。あなたが望んでいるのは現地観察ではなく、変質したクリスタルの採取だと聞き、ランベルタンは思わず声を上げる。危険な物質なのだから、曝露による有害な影響を受けぬよう必要な予防策を取れ、と叱りつけ、そもそも扱う資格があるのかと疑いすら向けてくる。</p>
+      <p>それでも彼は、あなたの無知をどこか憎めないと言い、危険を避ける手段があると続ける。求めるクリスタルを、この結界を施した壺に収めれば、身体を蝕む影響から身を守れるのだという。もっとも、壺へ収めるまでの間は、その力を浴びることになる――だからこそ手早く済ませよ、と。</p>
+      <p>あなたは壺を受け取り、東ザナラーンのハイブリッジへ向かうよう指示される。そこでは弟子のハハサコが、以太の流れを観測しているという。目的を伝えれば、採取の要点を教えてくれるはずだ。</p>
+      <p>現地に着くと、まず耳に飛び込んできたのは怒号だった。ハハサコは誰かに向かって、何度説明させるつもりだと吐き捨て、自殺など考えていないと断言する。科学的な測定のために、ここが最適だからこそこの位置を選んだのだ、と。</p>
+      <p>そしてあなたの手元に気づく。封じ込め用の容器だと見て取った彼は、ランベルタンの作だと即座に言い当て、盗人呼ばわりして助けを呼ぼうとする。だが、教授から貸し与えられたのだと伝えた途端、態度は一変する。指示を受けてあなたが来たのなら、教授は自分を説明役に足る者と認めたのだ――ようやく正当に評価されたのだと、誇らしげに言い放つ。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> ランベルタン　<small class="muted">ザナラーン：東ザナラーン (X:12.7, Y:23.4)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="into-the-eye-of-the-storm.html">嵐を越える突破口</a></div>
+      <div class="row">すべて（リミテッドジョブを除く）Lv 41～</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="with-the-utmost-care.html">バーニングウォールを踏破せよ</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'以科學封緘，Highbridge 的大弟子登場',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Lamberteint 一見到你就顯得格外振奮，說在這一帶要遇到「同樣是知識分子的人」已經很罕見，而能理解變質水晶本質的人更是少之又少。他甚至忽然想起另一位——曾被 church 收容的隱居者。那人古怪又不合群，第一眼看起來甚至有點遲鈍，可一談到科學研究，卻展現出令人驚訝的天賦。</p>
+      <p>話鋒一轉，他把重點拉回你來此的目的。你不是要做什麼野外觀測，而是要「採集」一枚變質水晶。這句話讓他大受震動，連聲要你至少做好必要的防護，免得暴露在水晶有害的能量之下；他甚至開始懷疑，你是否真的具備處理這類危險材料的資格。</p>
+      <p>可在責備之外，他又像是被你的無知逗樂了似的，說你運氣很好——他正好有辦法迴避那些天生的危險。他交給你一只設有結界的壺，要你把你要的變質水晶立刻收進去，如此便能隔絕它對身體的侵蝕。只是，在你把水晶放進壺裡之前，你仍會被那股能量衝擊；也許，這會逼得你動作更快。</p>
+      <p>他要你帶著壺前往 Thanalan 的 Highbridge，去找他的學生 Hahasako。對方正在那裡監測以太的流動；你只要說明來意，他就會教你採集變質水晶時必須注意的細節。</p>
+      <p>當你抵達時，迎面而來的不是冷靜的講解，而是一陣怒吼。Hahasako 對著某人不耐地質問：到底還要他解釋幾次？他不是在尋死——他只是為了科學測量，才刻意選了這個精準的位置。</p>
+      <p>直到他看見你手上的容器，才把矛頭轉向你。他一眼認出那是 Lamberteint 的作品，立刻把你當成偷竊者，正要呼喊求援——你趕緊說明，是 Lamberteint 親手把壺借給你。那一刻，他的怒氣猛然收住，取而代之的是按捺不住的得意：既然你是照指示來找他，就代表 Lamberteint 認可他有足夠經驗可以轉述教授的解釋。終於，他宣稱，自己理所當然該得到的肯定來了。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 朗貝爾坦　<small class="muted">薩納蘭 - 東薩納蘭 (X:12.7, Y:23.4)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="into-the-eye-of-the-storm.html">直闖風暴之眼</a></div>
+      <div class="row">所有職業（不含限定職） 等級 41 以上</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="with-the-utmost-care.html">慎之又慎，踏破燃燒之牆</a></div>
+    </div>`
+  }
+};
+
+const tabBtns = [...document.querySelectorAll('.tab-btn')];
+const pageTitle = document.getElementById('pageTitle');
+const langToggle = document.getElementById('langToggle');
+const panels = {
+  story: document.getElementById('panel-story'),
+  acq: document.getElementById('panel-acq'),
+  unlockq: document.getElementById('panel-unlockq'),
+  followq: document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem('ffxiv-guide-lang') || 'EN'; }
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem('ffxiv-guide-lang', next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
