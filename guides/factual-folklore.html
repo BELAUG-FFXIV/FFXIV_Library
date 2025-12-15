@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Factual Folklore | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Factual Folklore (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/5DBwgGgiEyU"
+              title="Factual Folklore" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Factual Folklore</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Factual Folklore',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Haustefort stops you with a knowing look—word has already spread through Whitebrim Front about the commotion upstairs. He guesses you still intend to change Lord Drillemont’s mind, and tells you what he has learned during his time here: Drillemont listens to, and respects, the opinions of those under his command. If you can win over the barracks, Drillemont is sure to take notice.</p>
+      <p>When you ask how, Haustefort makes it sound simple—give the poor souls a decent meal for once. The last supply shipments, he says, contained no meat whatsoever, and the knights have every right to complain. He proposes steaks made from mudpuppy tail meat; it will not be a quality meal, but it will be far better than nothing. If you are willing to help, he tells you to wait for a lurking mudpuppy in Daniffen Pass—and he presses a bottle of vinegar into your hand, saying locals claim it weakens mudpuppies by clogging their mucous glands and drying their skin.</p>
+      <p>In Daniffen Pass, a ravenous mudpuppy rises from the depths to meet you.</p>
+      <p>When you return, Haustefort takes one look and knows the vinegar did not work. He admits he thought it was an idiotic idea—and dryly adds that you should never wander near mudpuppy spawning grounds without a bottle of vinegar. Then, without lingering, he gets to work, moving with practiced speed until three steaks are ready. He hands them to you and tells you to distribute them to the hungry knights below and up above.</p>
+      <p>The change in the hall is immediate. Ombeline mutters that you should at least be given a hearty meal before marching off to die in this godsforsaken waste—then freezes when she sees a fresh-cooked steak. She blesses you in Halone’s name, declaring that mudpuppy meat or not, it is the most delicious food she has had in a fortnight. Theophilain calls you out, saying he saw you conspiring with the cook, and insists you should not think you can buy his trust with a steak—though he adds, with relish, that it would be his pleasure to oblige you. Laughing, he claims he feels invigorated and refreshed, as if he has the strength and wits of ten men, and boasts that he should have no trouble inventing a new reason to avoid sentry duty. Ignemortel, still focused on duty, complains that they must train constantly to keep their skill at arms, yet are never given proper sustenance—then calls you a godsend, saying too few appreciate that House Durendaire must do more than its fair share for Ishgard.</p>
+      <p>Haustefort watches the knights brighten and says it is wonderful to see everyone in such high spirits. It is amazing what good food can do for morale, he remarks—then remembers the chirurgeons in the infirmary, who rarely take their meals in the hall. He asks you to take another steak to Cenota, certain she is so preoccupied with her patients’ health that she has neglected her own.</p>
+      <p>Upstairs, Cenota asks your pardon, saying she is busy tending to a man and will be with you in a moment. Then she catches the scent, pauses, and admits it has been quite a while since she last ate—perhaps it would not hurt to have a nibble. After the first taste, she is delighted, calling it fantastic and thanking you warmly, promising she will finish the rest right away.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Haustefort <small class="muted">Coerthas Central Highlands (X:12.9, Y:17.5)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="ye-of-little-faith.html">Ye of Little Faith</a></div>
+      <div class="row">All classes and jobs (excluding limited jobs) (Level 39 or above)</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="the-best-inventions.html">The Best Inventions</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'炊事場最前線',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>ホストフォールトはあなたを見るなり声をかける。上階の騒ぎの張本人はおまえか、と。ホワイトブリムでは噂が広まるのが早いらしい。それでもなおドリルモン卿の考えを変えたいのだろう、と彼は言う。そしてここで学んだことがある――ドリルモン卿は部下の意見に耳を傾け、それを尊重する男だ。兵舎の者たちの支持を得れば、必ず卿も気づくはずだ、と。</p>
+      <p>ではどうすればよいのかと問うあなたに、ホストフォールトは肩をすくめる。簡単だ、哀れな者たちにまともな食事を出してやれ、と。最近届いた補給には肉がまったく入っておらず、騎士たちが不満を漏らすのも当然だという。そこでマッドパピーの尾の肉でステーキを用意しよう、と彼は提案する。上等とは言えないが、無いよりずっとましだ。手を貸す気があるなら、ダニフェン峠で潜むマッドパピーを待て、と告げ、さらに酢の瓶を渡す。地元では、酢が粘液腺を詰まらせて皮膚を乾かし、マッドパピーを弱らせると言われているのだ、と。</p>
+      <p>ダニフェン峠では、飢えたマッドパピーが深みから姿を現し、あなたに襲いかかってくる。</p>
+      <p>あなたが戻ると、ホストフォールトは一目で察する。酢は効かなかったのだな、と。自分でも馬鹿げた考えだと思っていた、と彼は苦々しく言い、さらに冗談めかして、酢の瓶なしにマッドパピーの産卵場の近くをうろつくのは二度とやめろ、と付け加える。だが彼は長居せず、手早く調理を始め、あっという間に三枚のステーキを焼き上げる。出来上がった肉をあなたに渡し、ここにいる者たちと上の階の空腹の騎士たちに配ってこい、と命じる。</p>
+      <p>食堂の空気はすぐに変わる。オンベリンは、この呪われた荒野で死にに行く前くらい、せめて腹いっぱいの食事を寄越せ、とこぼしていたが、焼きたてのステーキを見て言葉を失う。ハルオーネの加護を、とあなたに礼を述べ、マッドパピーの肉であろうと、この二週間で一番うまい食事だと言い切る。テオフィランは、おまえと料理人が何か企んでいるのを見たぞ、と騒ぎ立て、ステーキで信頼を買おうなどと思うな、と念を押す。だが同時に、それなら喜んで買われてやる、と言わんばかりに笑い、活力が湧いた、十人分の力と知恵を得た気分だと誇張し、新たに見張りをサボる理由を考えるのも容易い、と豪語する。イグネモルテルは、武芸の鍛錬は求められるのに、まともな糧は与えられないのか、と憤りながらも、あなたを天の救いだと称え、デュランデル家がイシュガルドのために身を削っていることを理解する者は少ないのだと言う。</p>
+      <p>ホストフォールトは皆の表情が明るくなるのを見て、気分がいいな、と満足げに言う。うまい食事が士気に与える影響は大きいだろう、と。そして彼はふと思い出す――治療室で働く衛生士たちは、食堂で食事を取ることがほとんどない。彼らの中でも特に忙しいであろうセノタに、このステーキを届けてやってくれ、とあなたに頼む。患者の健康に気を取られて、自分のことは後回しにしているに違いない、と。</p>
+      <p>上階でセノタに声をかけると、彼女は患者の世話で手が離せない、少し待ってほしいと告げる。だが香りに気づき、鼻を鳴らしてから、そういえば最後に食事を取ってから随分経った、と口にする。少しつまむくらいなら問題ないだろう、と。ひと口食べた彼女は驚き、これは素晴らしい、とあなたに礼を言い、残りもすぐに食べると約束する。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> オストゥフォル　<small class="muted">クルザス中央高地 (X:12.9, Y:17.5)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="ye-of-little-faith.html">前哨地の歓待</a></div>
+      <div class="row">すべて（リミテッドジョブを除く）Lv 39～</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="the-best-inventions.html">野戦病院の蒸留器</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'傳聞求真',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Haustefort 一看到你就開口，說你就是上面那場騷動的始作俑者吧——在 Whitebrim Front，消息傳得特別快。他看得出來，你仍然想改變 Lord Drillemont 的想法，便告訴你他在這裡學到的一件事：Drillemont 會傾聽、也會尊重自己麾下之人的意見。只要你能贏得 barracks 的支持，他一定會注意到你。</p>
+      <p>你問要怎麼做，Haustefort 說其實很簡單——讓這些可憐的人終於能吃上一頓像樣的飯。最近幾次的補給完全沒有肉，騎士們開始抱怨是理所當然。他提出用 mudpuppy 的尾肉做成 steaks；他承認這不算什麼好料，但總比什麼都沒有強得多。你若願意幫忙，就去 Daniffen Pass 等一隻埋伏的 mudpuppy。他還把一瓶 vinegar 交到你手上，說當地人相信 vinegar 能堵住 mudpuppy 的黏液腺，讓皮膚乾燥，從而削弱牠。</p>
+      <p>你照他說的前往 Daniffen Pass，一隻飢餓的 mudpuppy 從深處竄出，朝你撲了上來。</p>
+      <p>你回到 Whitebrim Front，Haustefort 看你一眼就懂了——vinegar 沒起作用，對吧？他乾笑一聲，說自己也覺得那主意蠢透了，還叮囑你以後別再靠近 mudpuppy 的繁殖地，除非身上帶著 vinegar。接著他不再多說，立刻動手處理，手法快得驚人，轉眼就做出了三份 steaks。他把成品交給你，要你把這三份分給這裡和樓上的飢餓騎士。</p>
+      <p>當你把 steaks 送出去，反應立刻變了。Ombeline 原本還在抱怨：至少該在他們踏上這片該死的荒原、走去送死之前，讓他們吃上一頓飽飯。可一看到熱騰騰的 steak，她立刻改口，向你獻上 Halone 的祝福，說不管是不是 mudpuppy 肉，這都是她兩週以來吃過最美味的食物。Theophilain 也衝你喊，說他看見你和廚子在「密謀」，要你聽清楚：如果你想用一塊 steak 來買他的信任，那他很樂意配合。接著他大笑起來，說自己覺得精神百倍、像是同時擁有十個人的力氣與腦袋，還誇口自己一定能再想出一個新理由，繼續躲掉站哨。Ignemortel 則憤憤不平地說，他們總是被要求訓練以維持武技，卻從來得不到應有的糧食；可他也立刻稱你是天降救星，說很少有人懂得 House Durendaire 為了 Ishgard 付出的遠不止表面所見。</p>
+      <p>Haustefort 看著眾人情緒高漲，說能看到大家這麼有精神真是太好了，並感嘆好食物對士氣的影響驚人。可他隨即想起 infirmary 裡那些忙碌的 chirurgeons——他們很少在大廳吃飯。他請你把另一份 steak 送去給 Cenota，說她一定忙著照顧病患，結果把自己的飲食都拋在腦後。</p>
+      <p>你把 steak 帶到 Cenota 面前時，她先向你致歉，說自己正忙著照顧這名傷者，等一下才會理你。可隨著香味飄近，她忍不住停下來嗅了嗅，承認自己也想起來：確實已經很久沒吃東西了，稍微吃一口應該無妨。她嘗過後立刻驚喜，說這真是太棒了，連聲向你道謝，並表示自己會馬上把剩下的也吃完。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 豪斯特福爾特　<small class="muted">庫爾札斯中央高地 (X:12.9, Y:17.5)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="ye-of-little-faith.html">信心薄弱之人</a></div>
+      <div class="row">所有職業（不含限定職） 等級 39 以上</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="the-best-inventions.html">野戰醫院的蒸餾器，堪稱最佳發明</a></div>
+    </div>`
+  }
+};
+
+const tabBtns = [...document.querySelectorAll('.tab-btn')];
+const pageTitle = document.getElementById('pageTitle');
+const langToggle = document.getElementById('langToggle');
+const panels = {
+  story: document.getElementById('panel-story'),
+  acq: document.getElementById('panel-acq'),
+  unlockq: document.getElementById('panel-unlockq'),
+  followq: document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem('ffxiv-guide-lang') || 'EN'; }
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem('ffxiv-guide-lang', next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
