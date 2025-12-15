@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>It’s Probably Not Pirates | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – It’s Probably Not Pirates (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/X_eQl1devs8"
+              title="It’s Probably Not Pirates" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">It’s Probably Not Pirates</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'It’s Probably Not Pirates',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Ceana tells you she has written to the professor again and again with the same conviction: the waters around Pharos Sirius should be rich with corrupted crystals of exceptional strength. Yet conviction is not proof, and she admits she has been unable to test her hypothesis for one simple reason—access to the Isles of Umbra is currently forbidden, and she has no idea why.</p>
+      <p>She has tried to learn the reason, but every attempt ends the same way: annoyance, disdain, doors closed in her face. She cannot understand it, because she always takes care to explain her motivations in painstaking detail to whoever she questions. Still, she has reached the end of her patience. Perhaps, she says, you will have better luck prying answers from the Yellowjackets. She has all but given up.</p>
+      <p>You turn to the people who might know. One answer you receive is a blunt question in return—why would you want anything to do with that godsforsaken place? Ever since Pharos Sirius was abandoned, the Isles of Umbra have become a graveyard for ships that cannot navigate the shores, and a purgatory for the souls dragged down with them. Another voice reacts with open disbelief: are you drunk, or simply mad? There is nothing there but death, death, and more death.</p>
+      <p>Even those who insist they know the tales are nonsense cannot quite shake them. One person startles at your approach and scolds you for sneaking up at a time like this, when the docks are thick with gossip of spirits and specters haunting the Isles of Umbra. They call it fatuous talk—but admit it is frightening all the same.</p>
+      <p>When you return to Ceana, she greets you eagerly and demands to hear what you learned. The moment you tell her what you heard—that the isles are infested with the undead—her voice catches. She stammers in disbelief, then forces the words out: that is…very, very interesting. She asks you to excuse her for a moment while she gathers her thoughts.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Ceana <small class="muted">Western La Noscea (X:27.9, Y:27.0)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="a-promising-prospect.html">A Promising Prospect</a></div>
+      <div class="row">All classes and jobs (excluding limited jobs) (Level 42 or above)</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="representing-the-representative.html">Representing the Representative</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'船はいまだ港に',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>シアーナは、教授へ何度も書簡を送って伝えてきたと語る。ファロス・シリウス周辺には、格別に強力な偏属性クリスタルが豊富に存在するはずだ、と。だが彼女は、その仮説をまだ検証できていない。ウンブラ諸島への立ち入りが、理由も知らされぬまま禁じられているからだという。</p>
+      <p>理由を調べようとしても、返ってくるのは苛立ちや侮蔑ばかりで、誰もまともに取り合ってくれない。なぜそんな反応をされるのか、彼女には理解できない。彼女はいつも、問いかけの相手に動機を細部まで丁寧に説明しているつもりなのだから。それでも今や、彼女はほとんど諦めている。ならばイエロージャケットから情報を引き出すのは、あなたのほうが向いているかもしれない――そう言って、あなたを送り出す。</p>
+      <p>あなたが聞き込みを始めると、まず返ってきたのは険しい言葉だった。ウンブラ諸島など、なぜあの忌まわしい場所に興味があるのか。ファロス・シリウスを放棄して以来、諸島は岸を読み違えた船の墓場となり、海へ引きずり込まれた者たちの魂が沈む煉獄になったのだ、と。</p>
+      <p>別の者は、島へ渡りたいというあなたの言葉にあからさまな呆れを向ける。酔っているのか、それとも正気を失ったのか――そこにあるのは死、死、そして死だけだ、と吐き捨てる。</p>
+      <p>さらに、幽霊だの亡霊だのという噂話は馬鹿げていると分かっている者でさえ、怯えを隠せない。あなたが近づいた瞬間、驚いて声を上げ、こんな時に背後から忍び寄るなと叱りつける。ウンブラ諸島に霊が出るというくだらない噂が飛び交っているのだから、理屈では否定していても怖いものは怖いのだ、と。</p>
+      <p>あなたが戻ると、シアーナは待ちきれない様子で駆け寄り、聞き出したことを語れと迫る。諸島がアンデッドに侵されていると告げた途端、彼女は言葉を詰まらせ、震える声で聞き返す――本当なのか、と。それから、これは非常に、非常に興味深い展開だと呟き、少し考えをまとめるから待ってほしい、とあなたに頼む。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> シアーナ　<small class="muted">ラノシア：西ラノシア (X:27.9, Y:27.0)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="a-promising-prospect.html">偏属性クリスタルを求めて</a></div>
+      <div class="row">すべて（リミテッドジョブを除く）Lv 42～</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="representing-the-representative.html">幻影諸島奇談</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'看來不是海盜',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Ceana 說，她在寄給教授的一封又一封信裡，反覆表明同一個判斷：Pharos Sirius 周邊的區域，很可能充滿「強度異常出眾」的變質水晶。只是她也承認，自己至今仍無法驗證——因為目前 Isles of Umbra 的所有出入都被禁止，而她甚至不知道原因。</p>
+      <p>她不是沒試過打聽，可每一次的追問都只換來不耐與輕蔑。這讓她很困惑，因為她明明總會花很多時間，把自己的動機解釋得鉅細靡遺。可到最後，她也只能無奈地說：她幾乎已經放棄了。或許你會更有辦法，從 Yellowjackets 那裡硬是問出答案。</p>
+      <p>你轉而向可能知情的人探聽，卻先被反問：你對那個「不祥之地」有什麼興趣？自從 Pharos Sirius 被迫放棄之後，Isles of Umbra 就成了無法靠岸的船隻墳場——也是那些連船一起被拖進深海的靈魂所受困的煉獄。另一個聲音更是直接嘲諷：你是喝醉了，還是瘋了？那裡除了死亡、死亡、還是死亡，什麼都沒有。</p>
+      <p>就連有人口中說著那只是荒唐的流言，也仍難掩恐懼。你一靠近，對方便被你嚇到，責怪你偏偏挑這種時候從背後冒出來——如今到處都是 Isles of Umbra 有幽靈與妖魅出沒的傳聞；就算他明知那是胡說，也依舊覺得可怕。</p>
+      <p>你回到 Ceana 身邊時，她立刻迎上前，急著要你把打聽到的事全都說清楚。當你告訴她：那些島嶼似乎被 undead 侵擾時，她的聲音立刻結巴起來，像是被這句話擊中一般。她顫聲重複確認，接著勉強擠出結論——這……這真是非常、非常有意思的發展。她請你稍等片刻，讓她先整理一下思緒。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 西艾娜　<small class="muted">拉諾西亞 - 西拉諾西亞 (X:27.9, Y:27.0)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="a-promising-prospect.html">前景可期，踏上尋求偏屬性水晶之途</a></div>
+      <div class="row">所有職業（不含限定職） 等級 42 以上</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="representing-the-representative.html">踏入幻影諸島</a></div>
+    </div>`
+  }
+};
+
+const tabBtns = [...document.querySelectorAll('.tab-btn')];
+const pageTitle = document.getElementById('pageTitle');
+const langToggle = document.getElementById('langToggle');
+const panels = {
+  story: document.getElementById('panel-story'),
+  acq: document.getElementById('panel-acq'),
+  unlockq: document.getElementById('panel-unlockq'),
+  followq: document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem('ffxiv-guide-lang') || 'EN'; }
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem('ffxiv-guide-lang', next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
