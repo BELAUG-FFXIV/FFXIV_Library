@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ye of Little Faith | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Ye of Little Faith (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/3h_Mb_JgZQI"
+              title="Ye of Little Faith" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Ye of Little Faith</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Ye of Little Faith',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Your attempt to seek an audience begins poorly. Brunadier tells you your timing could not be worse—Lord Drillemont’s attention is fixed on the Stone Vigil, and escorting visitors is not his concern. He curtly dismisses the task, telling you to take your letters and show them to Ser Alboise in a storeroom across the yard.</p>
+      <p>When you find Alboise, she offers no comfort. She admits Brunadier sent you to her, but says he is mistaken if he thinks she can help. Drillemont has no time for low-ranking knights like her, she explains—but he always has a moment for the head chirurgeon, Astidien. She directs you upstairs to the infirmary, urging you to show your letters there.</p>
+      <p>Astidien receives you with a practical air, assuming you have come to visit a patient—until he sees the letters of introduction from House Fortemps and House Haillenarte. With documents like these, he says, you have no need to seek an escort. Instead, he sends you to the barracks to speak with Ser Goudernoux, who should know where Drillemont is.</p>
+      <p>Goudernoux bristles at your entrance, then checks himself when he sees the letters. He tells you that you are in luck—Lord Drillemont is just up the stairs—but warns you not to expect much. House Durendaire does not hold adventurers in high regard, letters or no. You should state your intentions quickly and succinctly, he advises, and show proper respect if you want any returned in kind.</p>
+      <p>At last you are allowed before Drillemont. He confirms Goudernoux permitted your passage, then cuts straight to the point: speak. When you explain what you seek, his disbelief turns sharp—he repeats it back to you as if to test whether you truly mean it. You would brave a ruined outpost crawling with scalekin to secure an airship that may or may not be there—are you the avatar of the Fury Herself?</p>
+      <p>Alphinaud answers for you. He names you and your companions as the Scions of the Seventh Dawn, reminding Drillemont that he knows the name and the deeds. You have come to Coerthas to slay Garuda, Lady of the Vortex, and for that purpose you seek the Enterprise, the airship of Cid nan Garlond—who stands before Drillemont now.</p>
+      <p>Drillemont’s shock is immediate. He stares at Cid and blurts that it cannot be—Master Garlond is alive? But that is impossible. Before the moment can settle, Inquisitor Guillaime interjects, agreeing that it is indeed impossible and warning Drillemont not to be deceived. He insists these foreigners cannot be trusted, pointing to the timing: as House Durendaire marshals its forces to retake the Stone Vigil, three mysterious strangers appear at Whitebrim Front—Cid Garlond, missing and presumed dead since before the Calamity, and two Scions of the Seventh Dawn, a defunct band of misfits said to have been exterminated by the Empire.</p>
+      <p>Guillaime claims the lesser houses may have been duped by grandiose lies, but House Durendaire should know better. He says he does not know why you seek the Stone Vigil—only that you cannot be permitted to pass. Drillemont thanks him for the counsel, admitting that for a moment he nearly believed what he calls a mummer’s farce. He declares you will not enter the outpost until House Durendaire has reclaimed it—and until you declare your true intentions as well.</p>
+      <p>Alphinaud protests that it could be moons before House Durendaire purges the dragons from the Stone Vigil, and you cannot afford to wait that long. He turns to you and Cid, telling you plainly that you must do whatever it takes to earn Lord Drillemont’s trust.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Brunadier <small class="muted">Coerthas Central Highlands (X:11.9, Y:17.4)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-final-flight-of-the-enterprise.html">The Final Flight of the Enterprise</a></div>
+      <div class="row">All classes and jobs (excluding limited jobs) (Level 39 or above)</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="factual-folklore.html">Factual Folklore</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'前哨地の歓待',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>あなたが面会を求めた途端、ブリュナディエは不機嫌そうに告げる。いまは最悪の時期だ――ドリルモン卿の関心はただ「スノークローク大巡察路」の奪還に向けられており、来客の案内など彼の責務ではないという。彼は書状を手渡したまま、庭の反対側にある物置でアルボワーズという騎士を探し、そちらに示せと言い捨てる。</p>
+      <p>あなたがアルボワーズに会うと、彼女はブリュナディエに言われて来たのかと確認しつつも、自分が助けになれるとは思えないと即座に否定する。ドリルモン卿は自分のような下級騎士に割く時間などないが、主任衛生士アスティディアンには必ず時間を取る――だから上階の治療室へ行き、彼に書状を見せるよう勧める。</p>
+      <p>治療室でアスティディアンは、あなたが患者の見舞いに来たのかと問いかける。だがフォルタン家とエレンヴィル家からの紹介状だと分かると、態度を改め、これほどの書状があるなら護衛を求める必要はないと言う。そして兵舎へ向かい、グデルヌーという騎士に会えと指示する。彼ならドリルモン卿の所在を把握しているはずだ、と。</p>
+      <p>兵舎でグデルヌーは、あなたが押し入ったことに苛立ちを見せるが、書状を確認すると応対を切り替える。幸運だ、ドリルモン卿はこの階段の上にいる――だが書状があっても多くは期待するな、と彼は忠告する。デュランデル家は冒険者を高く評価していない。用件は簡潔に、そして敬意を示せば相応に返ってくるだろう、と。</p>
+      <p>やがてあなたはドリルモン卿の前に通される。グデルヌーが通したのかと確かめたうえで、彼は短く命じる――話せ。あなたの目的を聞くと、彼は疑いを隠さず言い返す。鱗の軍勢がはびこる廃墟に踏み込み、あるかどうかも分からぬ飛空艇を確保するつもりなのか――まるで戦神ハルオーネの化身ではないか、と。</p>
+      <p>そこへアルフィノが名乗りを上げる。あなたたちは「暁の血盟」であり、ドリルモン卿もその名と働きを知っているはずだと言う。目的は渦のガルーダを討つことで、そのために求めているのがシド・ナン・ガーロンドの飛空艇「エンタープライズ」だ。そして当のシドがいま、あなたたちと共にここに立っているのだ、と。</p>
+      <p>ドリルモン卿は驚愕し、シドを見て言葉を失いかける。ガーロンドが生きているなどありえない、と。だがその瞬間、ギヨーム審問官が割って入り、確かにありえないと同意したうえで、甘言に惑わされるなと警告する。デュランデル家がスノークローク大巡察路奪還のため兵を集めるこの重要な局面に、正体不明の三人がホワイトブリムに現れた――大災厄以前から行方不明で死亡したと見なされていたシド・ガーロンド、そして帝国により壊滅したとされる「暁の血盟」の二人だ、と彼は列挙する。</p>
+      <p>審問官は、下位の家々は大仰な話に騙されたのかもしれないが、デュランデル家には分別があるはずだと言い、彼らがなぜスノークローク大巡察路を求めるのかは分からない、だが通すわけにはいかないと断じる。ドリルモン卿は助言に礼を述べ、危うく道化芝居を信じかけた、と吐き捨てる。そして宣言する――奪還が終わるまでは、そしてあなたたちが真の意図を明かすまでは、前哨地へ入ることは許さない、と。</p>
+      <p>アルフィノは反論する。デュランデル家がスノークローク大巡察路から竜を一掃するには月日がかかるかもしれず、あなたたちにはそんな時間はないのだ。彼はあなたとシドに向き直り、ドリルモン卿の信頼を得るために、できることは何でもするしかない、と言い切る。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> ブルナディエ　<small class="muted">クルザス中央高地 (X:11.9, Y:17.4)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-final-flight-of-the-enterprise.html">あの日の空に見たものは</a></div>
+      <div class="row">すべて（リミテッドジョブを除く）Lv 39～</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="factual-folklore.html">炊事場最前線</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'信心薄弱之人',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>你前去求見時，迎面而來的是冷淡與不耐。Brunadier 直言你的時機糟透了——此刻 Lord Drillemont 的注意力全都放在 Stone Vigil 上，根本無心理會其他事。再者，引導訪客也不是他的責任。他把你擋在外頭，要你拿著信件去找 Ser Alboise，說她應該能接待你，讓你去庭院另一側的儲藏室找人。</p>
+      <p>你見到 Alboise 後，她先確認你是被 Brunadier 打發過來的，隨即坦承自己也不明白對方為何認定她能幫上忙。她說 Brunadier 想錯了——Lord Drillemont 沒有時間與她這種低階騎士多談半句。不過他總會願意撥空見 head chirurgeon Astidien。於是她要你上樓去 infirmary，把你的信件交給 Astidien 看。</p>
+      <p>在 infirmary，Astidien 起初以為你是來探視病人的；可當他看見你帶著來自 House Fortemps 與 House Haillenarte 的介紹信，立刻改口說：有這樣的文件，你不需要再尋求護送。他讓你直接去 barracks，找 Ser Goudernoux——那人應該知道 Lord Drillemont 目前在哪裡。</p>
+      <p>你到了 barracks，Goudernoux 一開始對你闖入的舉動滿臉不悅，直到看清你手上的信件才收斂語氣。他告訴你，你運氣不錯——Lord Drillemont 就在樓梯上方。不過他也警告你：就算有信件，也別抱太大期待。整個 House Durendaire 對 adventurers 的評價都不高。你最好把目的說得又快又清楚，並且保持應有的尊重——如此對方才可能以同等態度回應你。</p>
+      <p>終於，你被准許站在 Drillemont 面前。他確認 Ser Goudernoux 讓你通行後，沒有寒暄，只簡短命令你開口。當你的目的被說出來，他用近乎嘲諷的語氣複述：你打算闖進一座被 scalekin 佔據的荒廢據點，只為了找一艘「可能存在、也可能不存在」的 airship——你難道是 Fury 的化身嗎？</p>
+      <p>Alphinaud 代你回應。他表明你們是 Scions of the Seventh Dawn，並提醒 Drillemont：你們的名字與事蹟，他不可能不知道。你們來到 Coerthas，是為了討伐 Garuda——Lady of the Vortex。為此，你們需要 Enterprise，也就是 Cid nan Garlond 的 airship，而 Cid 本人此刻就站在你們身旁。</p>
+      <p>Drillemont 當場震驚，脫口而出：Master Garlond 還活著？那不可能。就在這一瞬間，Inquisitor Guillaime 插話，冷冷附和「確實不可能」，並警告 Drillemont 別被甜言蜜語蒙騙。他指出此刻正是 Ishgard 的關鍵時局：House Durendaire 正在集結兵力，準備奪回 Stone Vigil，偏偏就在 Whitebrim Front 出現三個來歷不明的陌生人——在 Calamity 之前就失蹤、被認定已死的 Cid Garlond，以及兩名 Scions of the Seventh Dawn；而那個組織又被傳為早已遭 Empire 剷除的烏合之眾。</p>
+      <p>Guillaime 說，較小的家族也許會被這些誇張的說詞欺騙，但他希望 House Durendaire 更有判斷力。他表示自己不知道你們為何要去 Stone Vigil，但他知道你們不能被放行。Drillemont 感謝他的建言，承認自己剛才差點信了這場「拙劣的鬧劇」。他隨即下令：在 House Durendaire 收復 Stone Vigil 之前，你們三人不得進入據點——同時，你們也必須先宣告你們真正的意圖。</p>
+      <p>Alphinaud 立刻反駁：若要等 House Durendaire 把 Stone Vigil 的 dragons 全數清除，可能得耗上好幾個月，你們根本等不起。他轉向你與 Cid，語氣堅定地要求：無論如何，你們都必須設法贏得 Lord Drillemont 的信任。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 布魯納迪耶　<small class="muted">庫爾札斯中央高地 (X:11.9, Y:17.4)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-final-flight-of-the-enterprise.html">「Enterprise」最後航程，那一天的天空所見之物</a></div>
+      <div class="row">所有職業（不含限定職） 等級 39 以上</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="factual-folklore.html">傳聞求真</a></div>
+    </div>`
+  }
+};
+
+const tabBtns = [...document.querySelectorAll('.tab-btn')];
+const pageTitle = document.getElementById('pageTitle');
+const langToggle = document.getElementById('langToggle');
+const panels = {
+  story: document.getElementById('panel-story'),
+  acq: document.getElementById('panel-acq'),
+  unlockq: document.getElementById('panel-unlockq'),
+  followq: document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem('ffxiv-guide-lang') || 'EN'; }
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem('ffxiv-guide-lang', next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
