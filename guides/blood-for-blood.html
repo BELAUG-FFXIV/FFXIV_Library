@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Blood for Blood | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Blood for Blood (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/Ish8_rUgsEY"
+              title="Blood for Blood" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Blood for Blood</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Blood for Blood',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Alphinaud warns you that the encyclical alone will not be enough. Lord Drillemont has already been turned against you, and he brushed aside endorsements from two High Houses without hesitation. If you want him to believe what you have uncovered, Alphinaud says you will need something he cannot so easily dismiss.</p>
+      <p>He recalls what the cook told you—that Drillemont listens to and respects the opinions of the knights under his command. If one of those knights were to offer testimony that supports your claim, it might be the only path left. Alphinaud tells you to confront Ser Joellaut with the evidence and see whether it helps him remember what truly happened that night, even if the truth is too horrible for a man of faith to bear.</p>
+      <p>When you approach Joellaut again, he greets you warily and asks what more you want. The moment you tell him the inquisitor is an impostor, he recoils and rejects it outright. To him, Guillaime is a paragon of virtue—a devoted servant of the Fury—and he cannot accept that such righteousness could be a lie.</p>
+      <p>Joellaut insists that if you are so certain of your “ludicrous story,” then you should speak with Ser Prunilla. She was at the eastern gate that night, he says, and she helped the inquisitor carry him inside. But he draws a hard line: he will never speak against the man who saved his life.</p>
+      <p>You find Prunilla and try to show her what you discovered. She refuses to acknowledge you, tells you to move along, and snaps at you for handing a bloodstained document to a stranger. She insists she knows nothing—nothing at all—and orders you away when you press her. Then her defiance cracks, and she admits she has been waiting for this day to come.</p>
+      <p>Prunilla tells you what happened when Joellaut gave chase: she followed close behind. He did not fall—one of the Dravanian abominations struck him from the darkness and nearly killed him on the spot. She drew her sword and rushed to his side, straining to see the enemy, but what answered them was not a beast. It was a voice—one that knew secrets about her and her family that she had never told another. The man threatened her: keep his confidence, and she and Joellaut would be spared; defy him, and everyone she loved would suffer horrors before they died. When she finally agreed, he stepped forward in robes that marked him as an inquisitor, though she knew he was false. Together, they carried Joellaut to the infirmary, and on his very first night in Whitebrim Front, “Inquisitor Guillaime” was celebrated as a hero.</p>
+      <p>After that came the accusations—good men and women seized and condemned, draconian rosaries produced as proof. Prunilla says she knew he was sending innocents to their deaths. She wanted to tell Lord Drillemont and end the madness, but the threats kept her silent—until Lord Francel was accused. Then she followed the inquisitor and discovered he kept draconian rosaries in a chest hidden southeast of Whitebrim Front. She stole several and planted them in shipments bound for Skyfire Locks, hoping they would be found and treated as evidence of a conspiracy against House Haillenarte—enough to exonerate Francel and cast doubt on the other recent trials. She swears that is the whole truth and begs you not to make her say it aloud again, terrified that even now he could be watching and listening.</p>
+      <p>Armed with the encyclical, the rosaries, and Prunilla’s testimony, you face Lord Drillemont once more. He demands to know why you persist, refusing again to grant you access to the Stone Vigil—until he sees what you have brought, and hears what can no longer be explained away. Fury take him, he says: the inquisitor is a heretic. The tale is unbelievable, but the evidence and the testimony leave no other conclusion. Drillemont admits he misjudged you and offers a deep apology. He will permit you to enter the outpost—but first, he begs your help: stand with him and his knights, and bring the infernal impostor to justice.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Alphinaud <small class="muted">Coerthas Central Highlands (X:12.7, Y:16.5)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="by-the-lights-of-ishgard.html">By the Lights of Ishgard</a></div>
+      <div class="row">All classes and jobs (excluding limited jobs) (Level 40 or above)</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="the-heretic-among-us.html">The Heretic among Us</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'吹雪の夜の追想',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>アルフィノは、教皇回勅だけでは足りないと言う。すでにドリルモン卿はあなたたちに反感を抱いており、上級貴族ふたつの後ろ盾さえあっさり退けた。そんな相手に信じさせるには、もはや別の決定打が必要だ、と。</p>
+      <p>彼は思い出す。料理人が言っていたとおり、ドリルモン卿は配下の騎士たちの意見に耳を傾け、そしてそれを尊重する。ならば、その騎士の誰かがあなたたちの主張を裏づける証言をすれば、それが唯一残された道になるかもしれない。アルフィノは、ジョエローに証拠を突きつけ、その夜の真実を思い出せるか確かめろと言う。信仰を持つ者には耐えがたい真相かもしれないが、それでもエンタープライズを得るために、できる限りのことをしなければならない、と。</p>
+      <p>あなたが再びジョエローのもとを訪ねると、彼は警戒しつつも用件を問う。そこで審問官が偽者だと告げた瞬間、彼は強く否定する。ギヨーム審問官は徳の模範であり、戦神ハルオーネに仕える献身的な者だ――それがすべて嘘だなど、信じられるはずがないのだと。</p>
+      <p>ジョエローは、あなたの話が本当だと言い張るなら、東門にいたプルニラに会えと言う。あの夜、彼女は門のところにいて、審問官とともに負傷した自分をここまで運んだのだ、と。だがジョエローは言い切る。命を救ってくれた男を、決して悪く言うつもりはない、と。</p>
+      <p>あなたがプルニラに近づき、血の付いた文書を見せようとすると、彼女はあなたを知らないと言って追い払い、見知らぬ相手にそんな恐ろしいものを突きつけるなと声を荒らげる。何も知らない、何も知らないのだと繰り返し、疑うならなおさら消えろと拒む。だが、やがて彼女は震える声で、ついにこの日が来たのだとこぼす。</p>
+      <p>プルニラは語る。ジョエローが追いかけたとき、自分もすぐ後ろを追った。彼は転落したのではない。闇の中からドラヴァニアの怪物が襲いかかり、その場で命を奪いかねないほどの傷を負わせたのだ。彼女は剣を抜いて駆け寄り、敵を探したが、闇から現れたのは獣ではなく声だった。その声は、彼女と家族の秘密を知っていた。黙って従えばジョエローと自分は助かるが、逆らえば愛する者たちは死ぬまで想像を絶する苦しみを味わう、と脅したのだ。彼女がついに条件を呑むと、男は審問官の法衣をまとって姿を現した。だが彼女には、それが偽りだと分かった。ふたりでジョエローを治療室へ運び込み、その夜のうちに「ギヨーム審問官」は英雄として迎えられた。</p>
+      <p>その後に続いたのは告発だった。善良な者たちが次々と拘束され、ドラゴンのロザリオを所持していたという理由で裁かれていく。プルニラは、無実の人々が死へ送られていると分かっていた。ドリルモン卿に告白して狂気を止めたかったが、脅しが彼女を縛った――フランセル卿が告発されるまでは。やがて彼女は審問官の後を追い、ホワイトブリム前哨地の南東に隠された箱に、ドラゴンのロザリオが保管されているのを見つける。彼女はそこからいくつかを盗み、スカイファイア・ロック行きの荷に紛れ込ませた。ハイエンナルト家への陰謀の証拠として発見されれば、フランセル卿の嫌疑は晴れ、最近の裁きにも疑いが生まれるはずだと信じたのだ、と。彼女はこれがすべての真実だと誓い、もう二度と口に出させないでほしいと懇願する。今この瞬間にも、あの男が見張り、言葉を聞いているかもしれないのだと。</p>
+      <p>教皇回勅とロザリオ、そしてプルニラの証言を携え、あなたは再びドリルモン卿の前に立つ。卿はなおも愚行をやめろと突き放し、ストーンヴィジルへの立ち入りは許さないと言う。だが、ロザリオを持っていた理由と、教皇回勅をどこで得たのかを問いただすうち、もはや説明のつかない現実を前に言葉を失う。審問官が異端者だなど、信じがたい――だが証拠と証言は、それ以外の結論を許さない。ドリルモン卿はあなたたちを誤解していたと認め、深く詫びる。そして前哨地への立ち入りを許すと告げるが、その前に助力を乞う。自分と騎士たちに力を貸し、この忌まわしき偽りの審問官を裁きにかけるのだ、と。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> アルフィノ　<small class="muted">クルザス中央高地 (X:12.7, Y:16.5)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="by-the-lights-of-ishgard.html">沈黙する真実</a></div>
+      <div class="row">すべて（リミテッドジョブを除く）Lv 40～</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="the-heretic-among-us.html">竜の力、戦いの歴史</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'吹雪之夜的追憶，血債終須血償',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Alphinaud 說，就算你們握有那份教皇通諭，恐怕也不足以讓 Lord Drillemont 相信你們的主張。Drillemont 已經被挑撥得站到你們的對立面，甚至連兩個 High Houses 的背書都能輕易無視。要動搖這樣的人，光靠文件恐怕不夠。</p>
+      <p>他想起先前那位廚子說過的話：Drillemont 會傾聽、也會尊重自己麾下騎士的意見。若能讓某位騎士站出來作證，替你們的說法背書，也許這就是最後的路。Alphinaud 要你拿著你發現的證據去找 Ser Joellaut，看看是否能讓他想起那一夜真正發生的事；即使那真相對一個虔信者而言極其殘酷，你們也必須不惜一切取得 Enterprise。</p>
+      <p>你再次找到 Joellaut，他先是客氣地問你是否還想追問什麼。可當你說出「Guillaime 審問官是冒牌貨」時，他立刻激烈反駁，說這根本荒唐至極、不可能為真。對他而言，那位審問官是德行的典範，是戰神 Halone 忠誠的僕人；你竟要他相信這一切都是謊言，他無論如何都做不到。</p>
+      <p>Joellaut 說，若你真那麼篤定自己那套荒謬的說法，就去找 Ser Prunilla。那一夜她在東門，而且她還幫著審問官一起把他抬回來。可 Joellaut 也把話說死：他絕不會說救命恩人的壞話，永遠不會。</p>
+      <p>你轉而去找 Prunilla，把那份帶血的文件遞到她面前，她卻像被刺痛般退開，說自己不認識你，要你別再糾纏。她質問你是否習慣把這種可怕的東西塞給陌生人，並一口咬定自己什麼都不知道。你再逼問，她就怒斥你是在誣衊，叫你立刻走開。可就在她一再驅趕你之後，她終於崩潰般吐出一句：你早就知道了吧——她也曾祈禱這一天永遠不要到來。</p>
+      <p>Prunilla 告訴你，那一夜 Joellaut 追出去時，她也緊跟在後。Joellaut 並不是失足摔落——有一頭 Dravanian 的怪物從黑暗中猛然襲擊，幾乎當場要了他的命。她拔劍衝上去，努力想看清敵人，可黑暗裡回應她的不是野獸，而是一道聲音。那人知道她、也知道她的家人，甚至說出她從未告訴任何人的祕密；他威脅她：若她守住他的秘密，Joellaut 和她都能活下來，但若她敢違抗，所有她所愛的人都會在死前遭受難以想像的折磨。等她終於點頭，那人才走出來——身上的長袍看似審問官的制服，可她知道他是假的。她與那名冒牌者一起把 Joellaut 抬進 infirmary，而在 Whitebrim Front 的第一夜，「Guillaime 審問官」就被奉為英雄。</p>
+      <p>之後便是接連不斷的指控：許多品行端正的男女被逮捕，只因身上被搜出 draconian rosaries 便被當作證據。Prunilla 說她早就明白，那個人是在把無辜者送上死路。她曾想向 Lord Drillemont 坦白、終結這場瘋狂，但每次都會想起那些威脅，於是只能沉默——直到 Lord Francel 也被指控。她後來跟蹤那名冒牌者，發現他在 Whitebrim Front 東南方藏了一只箱子，裡頭存放著 draconian rosaries。她從箱子裡偷走幾個，塞進送往 Skyfire Locks 的貨運補給裡，盼它們被發現後能被視為針對 House Haillenarte 的陰謀證據，從而替 Lord Francel 洗清嫌疑，也讓其他近期審理的案子蒙上疑點。她發誓這就是全部真相，並求你別逼她再說一次——因為就算現在，那人也可能正在某處看著、聽著，對你們而言或許早已太遲。</p>
+      <p>你帶著教皇通諭、那些念珠，以及 Prunilla 的證言再度面對 Lord Drillemont。起初他仍斥你們執迷不悟，堅稱不會讓你們進入 Stone Vigil，並追問你們為何會持有這些念珠、又是從哪裡得來那份教皇通諭。可當證據與證言被攤開，他終於無法再否認：戰神在上——那名審問官竟是異端者。這故事荒謬得令人難以置信，但眼前的一切卻沒有其他解釋。Drillemont 承認自己誤會了你們，並為此鄭重道歉；他願意放你們進入據點，但在那之前，他請求你協助他與騎士們，將那個可憎的冒牌者繩之以法。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 阿爾菲諾　<small class="muted">庫爾札斯中央高地 (X:12.7, Y:16.5)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="by-the-lights-of-ishgard.html">Ishgard 燈火之下，沉默的真相</a></div>
+      <div class="row">所有職業（不含限定職） 等級 40 以上</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="the-heretic-among-us.html">異端潛伏其中，龍之力牽動戰史</a></div>
+    </div>`
+  }
+};
+
+const tabBtns = [...document.querySelectorAll('.tab-btn')];
+const pageTitle = document.getElementById('pageTitle');
+const langToggle = document.getElementById('langToggle');
+const panels = {
+  story: document.getElementById('panel-story'),
+  acq: document.getElementById('panel-acq'),
+  unlockq: document.getElementById('panel-unlockq'),
+  followq: document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem('ffxiv-guide-lang') || 'EN'; }
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem('ffxiv-guide-lang', next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
