@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Road to Redemption | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Road to Redemption (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/7R91zoaaQJI"
+              title="Road to Redemption" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Road to Redemption</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Road to Redemption',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Back at Camp Dragonhead, Haurchefant makes another personal request. Rumors about Lord Francel have only grown louder, and he has received word that Francel and three knights were seen heading north toward the Steel Vigil. The outpost was long ago overrun by the Dravanian Horde, and Haurchefant cannot fathom what Francel hopes to achieve with so small a force—whatever the motive, he fears for the man’s safety, and asks you to go to the Steel Vigil at once and see if the party needs help.</p>
+      <p>When you arrive near the Steel Vigil, Francel’s voice snaps out in alarm. He demands to know who approaches, then recognizes you—and urgently warns you to keep back, for the fiend is still there.</p>
+      <p>Once the threat is dealt with, Francel’s relief spills out in praise. Yet it turns at once to panic as he looks around and asks after the three knights who came with him, demanding to know where they are.</p>
+      <p>One by one, the knights emerge—breathless and shaken. One insists it is not safe and that you must flee, while another can only whisper that the foe was too fast, too strong, and that they were no match. Another, gasping, begs you to find Francel, fearing he has been lost—until the truth reaches them, and gratitude replaces terror. Even so, the bitterness remains: they curse the fiends and mutter that it was as though the enemy knew they were coming. One laments that House Haillenarte cannot redeem itself if it cannot even slay a single aevis, and they admit how fortunate they were that you arrived when you did—promising the house will remember your kindness.</p>
+      <p>Francel does not deny the recklessness. He confesses he had hoped to prove devotion by slaying a number of the scalekin—and that it was House Haillenarte that yielded the Steel Vigil to the Horde years ago, a defeat that seemed to herald the slow decline of their once-great name. Now, he says, the despicable accusations of heresy have dragged them lower still, and despite his efforts he has achieved nothing to improve their standing. His trial draws near, and he must soon accept whatever judgment the inquisitors deliver—but even if his protests fall on deaf ears, he swears he will proclaim his innocence to his dying breath.</p>
+      <p>You return to Haurchefant and can tell him little beyond the truth: it was reckless, but at least Francel and his knights survived. Haurchefant, in turn, shares new information—someone who witnessed the Enterprise’s final flight has been found, yet there is a complication. Word has spread that you visited Francel at Skyfire Locks, and the witness has become reluctant to meet you, fearing association with a man who may later be declared a heretic. With the zeal Inquisitor Guillaime has shown in his investigations, the fear is not unreasonable. If you wish to secure the testimony, Haurchefant concludes, you must first clear Lord Francel’s name—and, by association, your own.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Haurchefant <small class="muted">Coerthas Central Highlands (X:26.7, Y:17.4)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-talk-of-coerthas.html">The Talk of Coerthas</a></div>
+      <div class="row">All classes and jobs (excluding limited jobs) (Level 38 or above)</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="following-the-evidence.html">Following the Evidence</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'潔白の証明',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>キャンプ・ドラゴンヘッドで、オルシュファンはあなたに、さらに個人的な頼みがあると言う。近ごろ何かと噂の絶えないフランセル卿について、彼と三人の騎士がスチールヴィジルへ向かった姿が目撃されたという報告が入ったのだ。そこは昔、ドラヴァニアの邪竜軍に制圧された前哨地であり、少数の手勢で何を成そうとしているのか見当もつかない。</p>
+      <p>動機がどうであれ、オルシュファンは彼の身を案じている。どうかスチールヴィジルへ赴き、フランセル卿の一行が助けを必要としていないか確かめてほしい――そう告げて、あなたを送り出した。</p>
+      <p>スチールヴィジル付近へ辿り着くと、フランセル卿は鋭い声で呼び止める。誰だと問い、あなたの姿を認めると、下がれと制する――まだ魔物がいるのだ、と。</p>
+      <p>脅威が退いたあと、彼はハルオーネに感謝し、あなたの働きを讃える。だが安堵はすぐに焦りへ変わり、同行した三人の騎士はどこへ行ったのかと、彼は声を荒げて探し求める。</p>
+      <p>やがて騎士たちは、息を切らし、動揺を隠せぬまま姿を現す。ここは危険だ、逃げねばならないと訴える者もいれば、あまりに速く強く、歯が立たなかったと震える者もいる。主君の行方を案じて必死に名を呼ぶ者もいたが、フランセル卿の無事を知ると、恐れは感謝へと変わり、あなたに礼を述べた。とはいえ憤りは残り、まるで敵がこちらの来訪を知っていたかのようだと呟き、呪いの言葉を吐く。ある騎士は、アエヴィス一体すら討てぬのならアインハルト家は贖えぬと嘆きつつも、あなたが来てくれたことを幸運だと認め、家はその恩を忘れないと誓った。</p>
+      <p>フランセル卿は、自分の企てが愚かであったと認める。鱗の民を討ち、忠誠を示せると願っていたのだという。さらに、かつてスチールヴィジルを邪竜軍に明け渡したのはアインハルト家であり、その敗北が栄華の衰えを告げるものだったと語る。そこへ異端の卑劣な告発が追い打ちをかけ、状況を好転させようとしても何ひとつ成せなかった。審問の日は近い――いずれどのような裁きが下ろうとも受け入れねばならない。だが、たとえ訴えが届かずとも、命尽きるその瞬間まで無実を叫び続けるのだと、彼は言い切った。</p>
+      <p>あなたがキャンプ・ドラゴンヘッドへ戻ると、オルシュファンは問いかける。無謀だったが、卿も騎士たちも命を落とさずに済んだのだろう、と彼は察したように頷く。続けて彼は、別の知らせを口にする――エンタープライズの最終航行を目撃した証人が見つかったのだが、厄介な問題がある。あなたが以前アートボルグ砦群でフランセル卿と接触したことが知れ渡り、証人は、後に異端と断じられるかもしれぬ人物と関わりがあると見られるのを恐れて、面会を渋っているという。審問官ギイェームの苛烈な捜査ぶりを思えば、その恐れは理解できる。証言を得るには、まずフランセル卿の汚名を晴らし――ひいては、あなた自身の疑いも払わねばならない、と。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> オルシュファン　<small class="muted">クルザス中央高地 (X:26.7, Y:17.4)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-talk-of-coerthas.html">四大名家に訊く</a></div>
+      <div class="row">すべて（リミテッドジョブを除く）Lv 38～</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="following-the-evidence.html">嫌疑の審理</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'以清白為證的救贖之路',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>在 Camp Dragonhead，Haurchefant 又向你提出一個私人的請求。最近關於 Lord Francel 的流言四起，而他剛收到回報：Francel 與三名騎士被人看見往北邊、朝 Steel Vigil 的方向前進。那座前哨早在多年前就被 Dravanian Horde 佔據，Haurchefant 無法確定 Francel 打算用這麼小的兵力達成什麼。</p>
+      <p>不論 Francel 的動機為何，Haurchefant 都擔心他的安危。他請你立即前往 Steel Vigil，確認 Francel 一行是否需要協助。</p>
+      <p>你抵達 Steel Vigil 附近時，Francel 的聲音先一步劃破寒風。他喝問來者是誰，隨即認出你——卻立刻要你退後，因為那頭兇物還在。</p>
+      <p>當危險被排除，Francel 以感謝與讚嘆回應你的出手，但他隨即焦急地追問：那三名陪他而來的騎士在哪裡，他們人呢？</p>
+      <p>騎士們很快現身，卻個個氣息紊亂、神色驚惶。有人喘著氣說這裡不安全、必須撤退；有人只能低聲說對手太快、太強，他們根本不是對手；也有人急切地要你去找 Francel，深怕他已遭不測。當他們得知 Francel 仍然平安，恐懼才被感激取代，連聲向你道謝。然而怒火仍未散去：他們咒罵那些兇物，甚至覺得對方彷彿早就知道他們會來。有人痛苦地嘆道，若連一隻 aevis 都殺不掉，House Haillenarte 要如何贖回名聲；但他也承認你來得及時，並說 House Haillenarte 會記住你的恩情。</p>
+      <p>Francel 也坦承這是魯莽之舉。他原本希望藉由獵殺一批 scalekin，來證明自己的忠誠與決心。更何況，多年前正是 House Haillenarte 將 Steel Vigil 拱手讓給 Horde——那場敗北彷彿宣告了家族昔日榮光的緩慢衰落。如今，卑劣的異端指控又把他們拉得更低；即使他竭盡所能，也未能扭轉局勢。審判之日逼近，他很快就得接受 inquisitors 的裁決，不論結果如何；但就算他的辯白無人願聽，他也會直到生命的最後一刻，都宣告自己無罪。</p>
+      <p>你回到 Camp Dragonhead，Haurchefant 從你的回報中明白：計畫雖然冒進，至少 Francel 與三名騎士都保住了性命。接著他告訴你另一則消息——關於 Enterprise 最終航行的目擊者已經找到了，但情況並不單純。你不久前曾在 Skyfire Locks 拜訪 Francel 的事已成眾所皆知；目擊者因此不願與你見面，因為他害怕被人看見與一位可能被宣判為異端的人同行。考慮到 Inquisitor Guillaime 近來查辦時所展現的狂熱，這份顧慮並不難理解。若要取得那人的證詞，Haurchefant 說，你們必須先洗清 Lord Francel 的名聲——也連帶洗清你自己的嫌疑。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 歐爾什方　<small class="muted">庫爾札斯中央高地 (X:26.7, Y:17.4)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-talk-of-coerthas.html">為探Coerthas 風聲而訪四大名家</a></div>
+      <div class="row">所有職業（不含限定職） 等級 38 以上</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="following-the-evidence.html">循線追查以審嫌疑</a></div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
