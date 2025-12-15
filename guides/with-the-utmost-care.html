@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>With the Utmost Care | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – With the Utmost Care (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/CopTEajrAP8"
+              title="With the Utmost Care" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">With the Utmost Care</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'With the Utmost Care',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Hahasako practically sings with delight as he announces that fate has chosen him—Hahasako, greatest of Professor Lamberteint’s pupils—to guide you. With flamboyant confidence, he vows to see you “quarry your quarry” and succeed.</p>
+      <p>Your arrival, he insists, could not be better timed. He was already preparing to procure corrupted crystals from the Burning Wall for his own research, and he praises the Calamity’s devastation for leaving behind a bounty of remarkable specimens.</p>
+      <p>Yet he quickly decides that you won’t be satisfied with anything less than perfection. For that, he says, you must descend to the deepest depths—where flowing waters run and murderous mirrorknights prowl—and seek out the most extraordinary formation he has discovered.</p>
+      <p>He presses a highly advanced researcher’s tool into your hands and instructs you to separate a small fragment from the great cluster. Seal the fragment within the warded pot, then bring it back to him for inspection—and when you set out from Burgundy Falls toward the base of the Burning Wall, he warns you to advance with careful caution along the treacherous path.</p>
+      <p>When you return, Hahasako eyes you with eager expectation and asks if you have the crystal. Seeing what you’ve brought, he bursts with admiration at its prodigious size and beauty, declaring that Professor Lamberteint will surely chortle with joy when you present it in person—so long as you remember to recount just how much help Hahasako provided.</p>
+      <p>Back with Lamberteint, he studies you and correctly senses what you’ve obtained. He examines the crystal and confirms it is precisely as you desired: a corrupted crystal overflowing with wind-aspected aether—then falters when he learns you meant to use it to breach a barrier of wind-aspected aether, because this crystal would only strengthen such a barrier. He faults himself for not asking your purpose sooner, yet insists that science is trial and error, and that you have learned something vital: the safe method to collect a corrupted crystal. The sample can still serve the aetherial studies of the Students of Baldesion—an organization he claims a professional relationship with—and after a brief pause to ask if you are all right when your eyes glaze over, he sends you on, reminding you that you still have a corrupted crystal to find.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Hahasako <small class="muted">Eastern Thanalan (X:21.4, Y:21.9)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="sealed-with-science.html">Sealed with Science</a></div>
+      <div class="row">All classes and jobs (excluding limited jobs) (Level 41 or above)</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="a-promising-prospect.html">A Promising Prospect</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'バーニングウォールを踏破せよ',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>ハハサコは大げさな喜色満面で、あなたを導く役目に選ばれたのが自分であることを高らかに宣言する。教授ランベルタンの弟子の中でも最も優秀なこのハハサコが、あなたの採石を必ず成功へ導いてみせる、と。</p>
+      <p>しかもタイミングは完璧だという。彼はちょうど、自身の研究のためにバーニングウォールから偏属性クリスタルを採取しようとしていたところだった。第七霊災の破壊が残した地が、極上の標本を豊富に生み出したのだと、彼は得意げに語る。</p>
+      <p>だが、あなたの求めるものは並の欠片では満足できないだろう、と彼は続ける。ならば、最深部へ降りねばならない。流れる水のそば、凶悪なミラーナイトがうろつく場所に、彼がこれまで見つけた中で最も見事な偏属性クリスタル塊があるのだという。</p>
+      <p>ハハサコは研究者用の道具をあなたに渡し、巨大な塊から小さな欠片を切り出すよう指示する。その欠片を絶霊体の壺に収め、彼のもとへ持ち帰って確認を受けるのだ。さらに、バーガンディ滝からバーニングウォールの麓へ至る道は危険で恐ろしいから、慎重に進めと念を押す。</p>
+      <p>やがて戻ったあなたを見ると、ハハサコは勢いよく駆け寄り、偏属性クリスタルを手に入れたのかと問いかける。あなたの持ち帰った大きく美しい標本を目にして、これは教授ランベルタンが面白がって大喜びするに違いないと断言し、そして帰還したら自分が採取を助けたことも忘れずに語れ、とちゃっかり言い添える。</p>
+      <p>ランベルタンのもとへ戻ると、彼はあなたを見ただけで偏属性クリスタルを得たと見抜き、実際に調べて風属性のエーテルを湛えた標本であることを認める。ところが、それを風属性エーテルで構成された障壁の突破に使うつもりだと聞いた途端、彼は困惑する――その標本は障壁を強めるだけだというのだ。目的を最初に確かめなかった自分の落ち度だと悔やみつつも、科学とは試行錯誤であり、失敗が無意味だったとは言えないと語る。あなたは偏属性クリスタルを安全に採取する手順を理解したのだから、次はきっと難なく成し遂げられる。さらにその標本は、バルデシオン委員会が行うエーテル研究にも貴重な資源となる――彼はその組織と仕事上のつながりがあると控えめに述べ、あなたの目が一瞬うつろになったことを気にしつつも、まだ探すべき偏属性クリスタルがあるのだと告げて、あなたを先へ促す。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> ハハサコ　<small class="muted">ザナラーン：東ザナラーン (X:21.4, Y:21.9)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="sealed-with-science.html">ハイブリッジの一番弟子</a></div>
+      <div class="row">すべて（リミテッドジョブを除く）Lv 41～</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="a-promising-prospect.html">偏属性クリスタルを求めて</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'慎之又慎，踏破燃燒之牆',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Hahasako 幾乎像在歡呼般高聲宣告：能被選中引導你的人，正是他——Hahasako，Professor Lamberteint 最得意的門生。他自信滿滿地保證，一定會讓你順利「採到你要的採石成果」。</p>
+      <p>他說你的到來恰到好處，因為他正準備為了自己的研究，前往 Burning Wall 取得偏屬性水晶。對他而言，第七靈災帶來的毀滅反倒讓那片大地留下了大量珍貴標本，足以稱得上是「恩賜」。</p>
+      <p>但他很快又斷言：你要的恐怕不是隨便一塊就能交差的品質。若想取得能符合你「高標準」的完美樣本，你必須一路下探到最深處——在流水穿行、Mirrorknights 徘徊的危險地帶，那裡有他目前見過最驚人的偏屬性水晶群。</p>
+      <p>他把一件自稱「高度先進」的研究工具交到你手上，要求你從巨大的水晶群中分離出一小塊碎片，再把碎片放進已施加護封的陶壺裡，帶回來交給他檢視。他也提醒你，從 Burgundy Falls 通往 Burning Wall 山麓的路既險又難，務必步步小心，才能平安走完。</p>
+      <p>當你回到他面前時，Hahasako 一眼就盯著你手中的成果，迫不及待地問你是否已取得水晶。看到你帶回來那塊巨大又漂亮的樣本，他興奮得讚不絕口，說你親手把它交給 Professor Lamberteint 時，對方肯定會笑得合不攏嘴——而且你回去時可別忘了提起，這次的採集有多少是 Hahasako 的功勞。</p>
+      <p>回到 Professor Lamberteint 那裡，他僅憑你的狀態就敏銳察覺你已取得偏屬性水晶，並立刻動手檢視，確認那是一塊充滿風屬性以太的樣本。可當他問出你的用途、得知你打算用它去突破由風屬性以太構成的屏障時，他立刻改口——這種樣本只會強化那道屏障，根本幫不上忙。他承認自己一開始沒問清楚目的才把你交給 Hahasako，但又強調科學本就是反覆試驗；至少你已經確實學會如何安全採集偏屬性水晶，下次再做一次也不會困難。更何況，你帶回來的樣本仍能成為 Students of Baldesion 進行以太研究的珍貴資源——他還含蓄提到自己與該組織有工作上的往來。察覺你有一瞬間眼神發直後，他沒有再耽擱你，只提醒你：你還有新的偏屬性水晶必須去找。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 哈哈薩科　<small class="muted">薩納蘭 - 東薩納蘭 (X:21.4, Y:21.9)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="sealed-with-science.html">以科學封緘，Highbridge 的大弟子登場</a></div>
+      <div class="row">所有職業（不含限定職） 等級 41 以上</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="a-promising-prospect.html">前景可期，踏上尋求偏屬性水晶之途</a></div>
+    </div>`
+  }
+};
+
+const tabBtns = [...document.querySelectorAll('.tab-btn')];
+const pageTitle = document.getElementById('pageTitle');
+const langToggle = document.getElementById('langToggle');
+const panels = {
+  story: document.getElementById('panel-story'),
+  acq: document.getElementById('panel-acq'),
+  unlockq: document.getElementById('panel-unlockq'),
+  followq: document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem('ffxiv-guide-lang') || 'EN'; }
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem('ffxiv-guide-lang', next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
