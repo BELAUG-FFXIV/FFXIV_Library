@@ -68,11 +68,12 @@ themeToggle?.addEventListener('click', ()=>{
 fetch('data/library.json')
   .then(r => r.json())
   .then(json => {
-state.data = (json.items || [])
-  .slice()          // 複製一份
-  .reverse()        // 最新的排前面
-  .map(deriveFields);
-     applyFilters();
+    state.data = (json.items || [])
+      .slice()          // 複製一份
+      .reverse()        // 最新的排前面
+      .map(deriveFields);
+
+    applyFilters();
     renderFeatured();
   })
   .catch(err => {
@@ -127,6 +128,89 @@ function applyFilters(){
   render();
 }
 
+/* =========================
+   Pagination helpers（✅ 已改成省略號視窗式分頁）
+   ========================= */
+function getPagerDelta(){
+  return window.matchMedia("(max-width: 520px)").matches ? 1 : 2;
+}
+
+// 回傳像 [1, "…", 9, 10, 11, "…", 21]
+function getPaginationItems(current, total, delta){
+  if (total <= 1) return [1];
+
+  const items = [];
+  const left  = Math.max(2, current - delta);
+  const right = Math.min(total - 1, current + delta);
+
+  items.push(1);
+
+  if (left > 2) items.push("…");
+  for (let i = left; i <= right; i++) items.push(i);
+  if (right < total - 1) items.push("…");
+
+  items.push(total);
+  return items;
+}
+
+function renderPagerUI(totalPages){
+  pager.innerHTML = '';
+  if (totalPages <= 1) return;
+
+  const delta = getPagerDelta();
+
+  const makeBtn = (label, page, { disabled=false, active=false, ellipsis=false, ariaLabel='' } = {}) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    // 沿用你原本的 .pagebtn / .active
+    b.className = `pagebtn${active ? ' active' : ''}${ellipsis ? ' ellipsis' : ''}`;
+    b.textContent = label;
+    if (ariaLabel) b.setAttribute('aria-label', ariaLabel);
+
+    if (disabled || ellipsis) {
+      b.disabled = true;
+    } else {
+      b.dataset.page = String(page);
+      b.addEventListener('click', () => {
+        state.page = page;
+        render();
+        grid?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+    return b;
+  };
+
+  // « ‹
+  pager.appendChild(makeBtn('«', 1, {
+    disabled: state.page === 1,
+    ariaLabel: 'First page'
+  }));
+  pager.appendChild(makeBtn('‹', Math.max(1, state.page - 1), {
+    disabled: state.page === 1,
+    ariaLabel: 'Previous page'
+  }));
+
+  // 1 … window … last
+  const items = getPaginationItems(state.page, totalPages, delta);
+  for (const it of items) {
+    if (it === "…") {
+      pager.appendChild(makeBtn('…', 0, { ellipsis: true }));
+    } else {
+      pager.appendChild(makeBtn(String(it), it, { active: it === state.page }));
+    }
+  }
+
+  // › »
+  pager.appendChild(makeBtn('›', Math.min(totalPages, state.page + 1), {
+    disabled: state.page === totalPages,
+    ariaLabel: 'Next page'
+  }));
+  pager.appendChild(makeBtn('»', totalPages, {
+    disabled: state.page === totalPages,
+    ariaLabel: 'Last page'
+  }));
+}
+
 function render(){
   resultCount.textContent = state.filtered.length;
 
@@ -135,13 +219,9 @@ function render(){
 
   grid.innerHTML = view.map(cardHTML).join('') || `<p>沒有符合的內容。</p>`;
 
+  // ✅ 新分頁：不再畫一長串 1..N，而是省略號視窗式
   const pages = Math.ceil(state.filtered.length / state.perPage);
-  pager.innerHTML = pages > 1
-    ? Array.from({length: pages}, (_,i)=>{
-        const p = i+1;
-        return `<button class="pagebtn ${p===state.page?'active':''}" data-page="${p}">${p}</button>`;
-      }).join('')
-    : '';
+  renderPagerUI(pages);
 
   // ▶ 播放按鈕（同時送 GA 事件，若 gtag 存在）
   grid.querySelectorAll('[data-play]').forEach(btn=>{
@@ -163,14 +243,6 @@ function render(){
   // Tag 點擊
   grid.querySelectorAll('[data-tag]').forEach(t =>
     t.addEventListener('click', ()=> addTag(t.dataset.tag))
-  );
-
-  // 分頁
-  pager.querySelectorAll('[data-page]').forEach(b =>
-    b.addEventListener('click', ()=>{
-      state.page = +b.dataset.page;
-      render();
-    })
   );
 
   renderActiveTags();
@@ -222,7 +294,7 @@ function cardHTML(it){
   const youtubeBtn = it.videoUrl
     ? `<a class="btn ghost yt-only" href="${it.videoUrl}" target="_blank" rel="noopener" aria-label="YouTube">
          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" class="yt-icon">
-           <path d="M23.5 6.2s-.2-1.7-.8-2.5c-.8-.9-1.7-.9-2.1-1-3-.2-7.6-.2-7.6-.2h-.1s-4.6 0-7.6.2c-.4 0-1.3 0-2.1-1-.6.8-.8 2.5-.8 2.5S2 8.1 2 10v1.9c0 1.9.2 3.8.2 3.8s.2 1.7.8 2.5c.8.9 1.9.9 2.4 1 1.7.2 7.2.2 7.2.2s4.6 0 7.6-.2c.4 0 1.3 0 2.1-1 .6-.8.8-2.5.8-2.5s.2-1.9.2-3.8V10c0-1.9-.2-3.8-.2-3.8zM9.8 13.6V8.4l5.9 2.6-5.9 2.6z"/>
+           <path d="M23.5 6.2s-.2-1.7-.8-2.5c-.8-.9-1.7-.9-2.1-1-3-.2-7.6-.2-7.6-.2h-.1s-4.6 0-7.6.2c-.4 0-1.3 0-2.1 1-.6.8-.8 2.5-.8 2.5S2 8.1 2 10v1.9c0 1.9.2 3.8.2 3.8s.2 1.7.8 2.5c.8.9 1.9.9 2.4 1 1.7.2 7.2.2 7.2.2s4.6 0 7.6-.2c.4 0 1.3 0 2.1-1 .6-.8.8-2.5.8-2.5s.2-1.9.2-3.8V10c0-1.9-.2-3.8-.2-3.8zM9.8 13.6V8.4l5.9 2.6-5.9 2.6z"/>
          </svg>
        </a>`
     : '';
@@ -497,8 +569,8 @@ function applyLangUI(lang) {
   if (!dict) return;
 
   if (langToggle) langToggle.textContent = `🌐 ${dict.langLabel}`;
-if (taglineEl)   taglineEl.innerHTML   = dict.tagline;
-   if (q)           q.placeholder           = dict.searchPH;
+  if (taglineEl)   taglineEl.innerHTML   = dict.tagline;
+  if (q)           q.placeholder         = dict.searchPH;
   if (itemsSuffixEl && dict.itemsSuffix) itemsSuffixEl.textContent = ` ${dict.itemsSuffix}`;
 
   refillSelect(categorySel, dict.categories, true);
@@ -525,3 +597,9 @@ langToggle?.addEventListener('click', cycleLang);
 
 // 初始化語言
 applyLangUI(getLang());
+
+// ✅ 可選：視窗寬度變化時，重新渲染分頁（手機/桌機 delta 會不同）
+window.addEventListener('resize', () => {
+  const pages = Math.ceil(state.filtered.length / state.perPage);
+  renderPagerUI(pages);
+});
