@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>History Repeating | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – History Repeating (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/H-WhjMFgmnU"
+              title="History Repeating" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">History Repeating</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'History Repeating',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Davyd catches himself mid-thought and awkwardly apologizes, admitting he was only lost in his own worries. Then he refocuses and tells you he has received word that Master Mimidoa will be arriving any moment—and that he has apparently grown tired of waiting for the “lanky young lad with the thousand-yalm stare” to return.</p>
+      <p>Davyd doesn’t know what arrangement you made, but he urges you to go and explain yourself before Mimidoa’s patience runs out.</p>
+      <p>Mimidoa greets you with a gruff complaint about being kept waiting, but the moment you mention the rumor—a honey-voiced temptress calling to those who wander near the Ship Graveyard, stirring up the dead—his tone shifts. The story drags him back to old seafaring days and to the lesson learned the last time this happened.</p>
+      <p>He names the threat for what it is: a siren, the feathered kind that lures sailors to a watery grave with sweet song. Drowning is only the beginning, he warns—men can remain bound even in death, forced to do her bidding until their corpses can move no more. He swears he won’t let her take another soul, and presses earplugs into your hands, telling you she holds no power over someone who cannot hear her tune.</p>
+      <p>At the Ship Graveyard, Mimidoa sets a campfire and watches the shoreline, sure the light will draw her close if she passes near. Time stretches; doubt creeps in—until he snaps at you to listen. Out over the water, she comes. He orders you to shove the plugs in your ears and ready yourself, because once she realizes you’re deaf to her song, she will call on her thralls.</p>
+      <p>Her voice drifts across the waves in broken, beckoning fragments—pleas, laments, threats of regret, a melody that tastes of death—but you do not hear it. Instead you face what she summons: the thralls she commands. You fight through the oncoming corpses and bring the struggle to an end.</p>
+      <p>Afterward, Mimidoa laughs off any concern for his well-being, boasting he’s fine—only a little sour that you didn’t gut the songstress herself. Still, he’s confident she won’t come crooning around again for a while, and if she does, you both know what to do. He thanks you, promptly forgets your name, and blunders his way into a rough farewell.</p>
+      <p>When you return, Davyd is stunned that it truly was a siren and finally understands why Mimidoa carries earplugs; then he gives you the corrupted crystal you requested, sealed safely in its pot. Back in Aleport, Ceana eagerly inspects the specimen and praises its volatile overabundance of fire-aspected aether—only to laugh when you remind her you needed ice-aspected aether to counteract raging wind, and this one won’t help. For that, she tells you, you must keep looking.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Davyd <small class="muted">Western La Noscea (X:16.1, Y:30.7)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="sweet-somethings.html">Sweet Somethings</a></div>
+      <div class="row">All classes and jobs (excluding limited jobs) (Level 42 or above)</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="the-curious-case-of-giggity.html">The Curious Case of Giggity</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'狂気の歌声',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>ダヴィドは、何かを考え込んでいたのか言葉を濁して謝り、ただ少し思案していただけだと取り繕う。すぐに彼は本題へ戻り、ミミドアがもう間もなく到着すると告げたうえで、「千ヤルム先を見つめる、ひょろ長い若造」の帰りを待つのに飽きたらしい――それはあなたのことだろう、と言う。</p>
+      <p>ダヴィドはあなたとミミドアの取り決めまでは知らない。それでも、今のうちに出向いて事情を説明したほうがいい、とあなたを促す。</p>
+      <p>ミミドアは、あなたを待たせたことへの小言から始める。だがあなたが、船の墓場の近くで甘い声が旅人を呼び、死者まで騒がせているという噂を伝えると、彼の表情は険しくなり、遠い昔の海の記憶へ引き戻される。</p>
+      <p>彼は、それが作り話で終わるはずがないと吐き捨て、相手はセイレーンだと断言する。羽を持ち、甘い歌で船乗りを溺死へ誘う魔物であり、溺れは始まりに過ぎない――死してなお男は縛られ、屍が動かなくなるまで命じられるままに使役されるのだと語る。</p>
+      <p>そんな末路をこれ以上生ませない、とミミドアは誓い、あなたに耳栓を渡す。歌が聞こえなければセイレーンは力を及ぼせないのだと告げ、彼はあなたを船の墓場へ連れて行く。</p>
+      <p>船の墓場に着くと、ミミドアは焚き火を用意し、岸へ寄れば火を見て必ず来るはずだと身構える。待ち続けるうち、彼は誰かの作り話ではないかと疑いかける――だが次の瞬間、音がした。沖を指さし、来たぞと息を詰める彼の声に、あなたも海上の影を見る。耳栓を押し込み、歌が通じぬと悟ったセイレーンが手駒を呼ぶ前に備えろと、ミミドアは命じる。</p>
+      <p>波間から届く歌は、抱擁を求める囁きや嘆き、後悔を突きつける言葉、死を刻む旋律となって断片的に漂う。だがあなたはそれを聞かず、彼女が呼び寄せた手駒――屍の群れを迎え撃ち、次々と打ち倒していく。</p>
+      <p>戦いが終わると、ミミドアは大丈夫だと豪語し、できれば歌姫を仕留めたかったと悪態をつく。それでも、しばらくここへは近づけまい、また現れても対処は分かっているな、と言って笑う。礼を言いかけた彼はあなたの名を忘れて首をひねり、結局は深く考えずに別れを告げる。</p>
+      <p>戻ったダヴィドは、相手が本当にセイレーンだったと知って驚き、耳栓で退けたと聞いてようやく合点がいく。そして彼は、あなたが求めていた汚染されたクリスタルを壺に封じて渡す。エールポートへ戻れば、シアーナは標本を確かめて火属性のエーテルが過剰に宿ると称賛するが、あなたが必要としていたのは風を抑えるための氷属性だと聞くと笑って首を振り、これは役に立たないのだから探し続けるしかないと言う。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> ダヴィッド　<small class="muted">西ラノシア (X:16.1, Y:30.7)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="sweet-somethings.html">波間よりいずる者</a></div>
+      <div class="row">すべて（リミテッドジョブを除く）Lv 42～</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="the-curious-case-of-giggity.html">最後の偏属性クリスタル</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'舊事重演，狂亂歌聲再起',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Davyd 像是突然從某個念頭裡回過神來，尷尬地道歉，說自己只是想事情想過頭了。接著他立刻回到正事——他收到消息，Master Mimidoa 隨時會抵達，而且他似乎已經等得不耐煩，抱怨那個「目光像望到千亞爾姆外的高瘦年輕人」怎麼還不回來。</p>
+      <p>Davyd 說他不清楚你和 Mimidoa 之間究竟有什麼約定，但他很直接地提醒你：最好立刻去把話說清楚。</p>
+      <p>Mimidoa 見到你，先用粗魯的口氣抱怨你讓他久等。可當你提起 Ship Graveyard 的傳聞——有人用甜膩的嗓音呼喚靠近的人，甚至把死者都攪得不安寧——他的語氣立刻沉了下來，像被海風拉回某段舊日的記憶。</p>
+      <p>他說這事讓他想起年輕時在海上討生活的日子，也想起上一次付出的代價。他不相信這只是嚇人的閒話，反而像早就知道終有一天會再發生：第一次的清剿不可能永遠把麻煩清乾淨。</p>
+      <p>Mimidoa 直接點出那東西的真面目——海妖。長著羽翼，用甜美歌聲把水手引向溺亡；而溺死只是開始，因為就算人已死，仍可能被束縛在她手裡，被迫照她的意思行動，直到屍身再也動不了為止。他說不能再讓她奪走下一條性命，於是把一副耳塞塞到你手上，告訴你：聽不見她的歌，她就奈何不了你。</p>
+      <p>你跟著他前往 Ship Graveyard。Mimidoa 生起營火，盯著岸邊與海面，說只要她靠近，一定會看見火光而來。等待拉長，他甚至開始懷疑是不是有人胡扯——就在這時，他猛地叫你安靜，指向海上：她來了。你立刻把耳塞塞進耳裡，照他的警告準備迎戰，因為一旦她發現你聽不見歌聲，就會召來她的爪牙。</p>
+      <p>海面上飄來的歌聲支離破碎，像在哀求擁抱、控訴被辜負的愛、威脅永恆的後悔，把死亡唱成節拍——但你什麼也聽不見。你只看見她喚出的爪牙逼近，於是迎上那些被驅使的屍群，將它們一一擊倒，直到戰鬥終結。</p>
+      <p>事後，Mimidoa 大笑說自己好得很，還不忘抱怨沒能把那個歌姬親手宰了。不過他也認為她短時間內不會再回來唱歌；若她再出現，你們也已經知道該怎麼做。他向你道謝，卻又把你的名字忘得一乾二淨，嘀咕幾句後乾脆不追究，轉身道別。</p>
+      <p>你回去找 Davyd，他聽見真的是海妖，先是震驚，隨即理解為什麼 Mimidoa 會隨身帶著耳塞；然後他把你要的 corrupted crystal 交給你，已依照你的要求封在容器裡。你回到 Aleport，Ceana 迫不及待檢查標本，稱讚其中火屬性以太暴烈而過盛；可當你提醒她，你需要的是能抵銷狂暴之風的冰屬性以太時，她失笑搖頭，坦言這顆派不上用場——你只能繼續找下去。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 戴維德　<small class="muted">拉諾西亞 - 西拉諾西亞 (X:16.1, Y:30.7)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="sweet-somethings.html">佈下甜蜜陷阱，誰自浪間現身</a></div>
+      <div class="row">所有職業（不含限定職） 等級 42 以上</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="the-curious-case-of-giggity.html">追查 Giggity 離奇怪案，尋得最後的偏屬性水晶</a></div>
+    </div>`
+  }
+};
+
+const tabBtns = [...document.querySelectorAll('.tab-btn')];
+const pageTitle = document.getElementById('pageTitle');
+const langToggle = document.getElementById('langToggle');
+const panels = {
+  story: document.getElementById('panel-story'),
+  acq: document.getElementById('panel-acq'),
+  unlockq: document.getElementById('panel-unlockq'),
+  followq: document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem('ffxiv-guide-lang') || 'EN'; }
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem('ffxiv-guide-lang', next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
