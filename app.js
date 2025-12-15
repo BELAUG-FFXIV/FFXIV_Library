@@ -11,7 +11,7 @@ const state = {
   category: '',
   expac: '',
   patch: '',
-  sort: 'addedAsc', // ✅ 預設：故事順序（舊 → 新）
+  sort: 'addedAsc', // ✅ 預設：舊 → 新（從頭到尾看）
 };
 
 const grid         = document.getElementById('grid');
@@ -21,11 +21,13 @@ const q            = document.getElementById('q');
 const categorySel  = document.getElementById('category');
 const expacSel     = document.getElementById('expac');
 const patchSel     = document.getElementById('patch');
-const sortSel      = document.getElementById('sort');   // ✅ 新增
+const sortSel      = document.getElementById('sort'); // ✅ 新增
 const clearBtnEl   = document.getElementById('clear');
 const activeTags   = document.getElementById('activeTags');
 const themeToggle  = document.getElementById('themeToggle');
 const langToggle   = document.getElementById('langToggle');
+
+console.log('[FFXIV Library] app.js loaded', new Date().toISOString()); // ✅ 檢查用（你確定OK後可刪）
 
 /* =========================
    推薦影片設定
@@ -71,10 +73,9 @@ fetch('data/library.json')
     // ✅ 不改 JSON：用 idx 當「新增順序」的排序依據
     state.data = (json.items || [])
       .slice()
-      .reverse() // 最新排前面（你原本的習慣保留）
+      .reverse() // 最新排前面（保留你原本習慣）
       .map((it, idx) => deriveFields({ ...it, _addedIndex: idx }));
 
-    // ✅ 若 sort 下拉存在，讓它跟 state.sort 同步
     if (sortSel) sortSel.value = state.sort;
 
     applyFilters();
@@ -100,7 +101,6 @@ function applyFilters(){
     const byCat  = state.category ? it.category === state.category : true;
     const byExp  = state.expac ? it.expac === state.expac : true;
 
-    // Patch 篩選：支援 7.x 這種大版本
     let byPatch = true;
     if (state.patch) {
       const itemPatch = (it.patch || '');
@@ -124,19 +124,19 @@ function applyFilters(){
     return byCat && byExp && byPatch && byTags && byQuery && visible;
   });
 
-  // ✅ 依使用者選擇排序（不用改 JSON）
+  // ✅ 排序：addedAsc / addedDesc / dateAsc / dateDesc
   switch (state.sort) {
     case 'addedAsc':   // 舊 → 新（從頭到尾看）
-      // reverse 後 idx: 0 是最新，所以「舊 → 新」要 idx 大到小
+      // reverse 後 idx: 0 是最新，所以「舊→新」要 idx 大到小
       arr.sort((a,b)=> (b._addedIndex - a._addedIndex));
       break;
     case 'addedDesc':  // 新 → 舊（回看最近）
       arr.sort((a,b)=> (a._addedIndex - b._addedIndex));
       break;
-    case 'dateAsc':    // 最舊 → 最新
+    case 'dateAsc':
       arr.sort((a,b)=> a._dateNum - b._dateNum);
       break;
-    case 'dateDesc':   // 最新 → 最舊
+    case 'dateDesc':
     default:
       arr.sort((a,b)=> b._dateNum - a._dateNum);
       break;
@@ -148,13 +148,12 @@ function applyFilters(){
 }
 
 /* =========================
-   Pagination helpers（✅ 省略號視窗式分頁）
+   Pagination helpers（省略號視窗式分頁）
    ========================= */
 function getPagerDelta(){
   return window.matchMedia("(max-width: 520px)").matches ? 1 : 2;
 }
 
-// 回傳像 [1, "…", 9, 10, 11, "…", 21]
 function getPaginationItems(current, total, delta){
   if (total <= 1) return [1];
 
@@ -198,32 +197,17 @@ function renderPagerUI(totalPages){
     return b;
   };
 
-  pager.appendChild(makeBtn('«', 1, {
-    disabled: state.page === 1,
-    ariaLabel: 'First page'
-  }));
-  pager.appendChild(makeBtn('‹', Math.max(1, state.page - 1), {
-    disabled: state.page === 1,
-    ariaLabel: 'Previous page'
-  }));
+  pager.appendChild(makeBtn('«', 1, { disabled: state.page === 1, ariaLabel: 'First page' }));
+  pager.appendChild(makeBtn('‹', Math.max(1, state.page - 1), { disabled: state.page === 1, ariaLabel: 'Previous page' }));
 
   const items = getPaginationItems(state.page, totalPages, delta);
   for (const it of items) {
-    if (it === "…") {
-      pager.appendChild(makeBtn('…', 0, { ellipsis: true }));
-    } else {
-      pager.appendChild(makeBtn(String(it), it, { active: it === state.page }));
-    }
+    if (it === "…") pager.appendChild(makeBtn('…', 0, { ellipsis: true }));
+    else pager.appendChild(makeBtn(String(it), it, { active: it === state.page }));
   }
 
-  pager.appendChild(makeBtn('›', Math.min(totalPages, state.page + 1), {
-    disabled: state.page === totalPages,
-    ariaLabel: 'Next page'
-  }));
-  pager.appendChild(makeBtn('»', totalPages, {
-    disabled: state.page === totalPages,
-    ariaLabel: 'Last page'
-  }));
+  pager.appendChild(makeBtn('›', Math.min(totalPages, state.page + 1), { disabled: state.page === totalPages, ariaLabel: 'Next page' }));
+  pager.appendChild(makeBtn('»', totalPages, { disabled: state.page === totalPages, ariaLabel: 'Last page' }));
 }
 
 function render(){
@@ -237,7 +221,6 @@ function render(){
   const pages = Math.ceil(state.filtered.length / state.perPage);
   renderPagerUI(pages);
 
-  // ▶ 播放按鈕（同時送 GA 事件，若 gtag 存在）
   grid.querySelectorAll('[data-play]').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       const ytId  = btn.dataset.play;
@@ -254,7 +237,6 @@ function render(){
     });
   });
 
-  // Tag 點擊
   grid.querySelectorAll('[data-tag]').forEach(t =>
     t.addEventListener('click', ()=> addTag(t.dataset.tag))
   );
@@ -263,7 +245,7 @@ function render(){
 }
 
 /* =========================
-   卡片 HTML（標題隨語言切換）
+   卡片 HTML
    ========================= */
 function cardHTML(it){
   const thumb = it.thumb || `https://i.ytimg.com/vi/${it.ytId}/hqdefault.jpg`;
@@ -323,7 +305,7 @@ function cardHTML(it){
 }
 
 /* =========================
-   推薦影片渲染（跟語言同步）
+   推薦影片
    ========================= */
 function renderFeatured(){
   const box = document.getElementById('featured');
@@ -383,17 +365,17 @@ function renderActiveTags(){
 }
 
 /* =========================
-   事件綁定
+   事件綁定（✅ 搜尋保底：input + search + change）
    ========================= */
 q?.addEventListener('input', e => { state.query = e.target.value; applyFilters(); });
+q?.addEventListener('search', e => { state.query = e.target.value; applyFilters(); });
+q?.addEventListener('change', e => { state.query = e.target.value; applyFilters(); });
+
 categorySel?.addEventListener('change', e => { state.category = e.target.value; applyFilters(); });
 expacSel?.addEventListener('change', e => { state.expac = e.target.value; applyFilters(); });
 patchSel?.addEventListener('change', e => { state.patch = e.target.value; applyFilters(); });
 
-sortSel?.addEventListener('change', e => {          // ✅ 新增
-  state.sort = e.target.value;
-  applyFilters();
-});
+sortSel?.addEventListener('change', e => { state.sort = e.target.value; applyFilters(); });
 
 clearBtnEl?.addEventListener('click', () => {
   state.query=''; state.category=''; state.expac=''; state.patch='';
@@ -402,7 +384,6 @@ clearBtnEl?.addEventListener('click', () => {
   if(categorySel) categorySel.value='';
   if(expacSel) expacSel.value='';
   if(patchSel) patchSel.value='';
-  // sort 不強制清掉（讓使用者保持偏好）
   applyFilters();
 });
 
@@ -416,6 +397,7 @@ const itemsSuffixEl= document.getElementById('itemsSuffix');
 const i18n = {
   EN: {
     langLabel: 'EN',
+    sortAria: 'Sort order',
     tagline: `<b>FFXIV Library</b> is an extension of my YouTube channel.<br>
 Here you’ll find additional story details — quest records, background notes, and elements that couldn’t be fully shown in each video.<br>
 Every entry also has a message board where you can share your thoughts and connect with fellow travelers.<br>
@@ -428,7 +410,7 @@ If you enjoy your time here, feel free to visit <a href="https://ko-fi.com/belau
       { value: 'dateDesc',  label: 'Newest' },
       { value: 'dateAsc',   label: 'Oldest' },
     ],
-    categories: [ /* 你的原本內容不變 */ 
+    categories: [
       { value: '',               label: 'All Categories' },
       { value: 'MSQ',            label: 'Main Story (MSQ)' },
       { value: 'AllianceRaid24', label: 'Alliance Raid (24-player)' },
@@ -473,6 +455,7 @@ If you enjoy your time here, feel free to visit <a href="https://ko-fi.com/belau
 
   JP: {
     langLabel: 'JP',
+    sortAria: '並び替え',
     tagline: `<b>FFXIV Library</b> は、私の YouTube チャンネルを補完する資料館です。<br>
 映像だけでは伝えきれない物語の細部──クエスト記録や背景設定などをここに収めています。<br>
 各ページにはメッセージボードもあり、感じたことを旅人同士で共有できます。<br>
@@ -530,6 +513,7 @@ If you enjoy your time here, feel free to visit <a href="https://ko-fi.com/belau
 
   ZH: {
     langLabel: 'ZH',
+    sortAria: '排序',
     tagline: `<b>FFXIV Library</b> 是我 YouTube 頻道的延伸資料館。<br>
 這裡收錄了更多在影片中無法完整呈現的內容──任務紀錄、背景資料與細節補充。<br>
 每部影片下方也設有留言板，歡迎留下你的想法與感受，與其他旅人一同分享。<br>
@@ -607,8 +591,10 @@ function applyLangUI(lang) {
   refillSelect(expacSel,    dict.expansions, true);
   refillSelect(patchSel,    dict.patches,    true);
 
-  // ✅ sort 也跟語言同步（保持目前選擇）
-  if (sortSel && dict.sortOptions) refillSelect(sortSel, dict.sortOptions, true);
+  if (sortSel && dict.sortOptions) {
+    refillSelect(sortSel, dict.sortOptions, true);
+    if (dict.sortAria) sortSel.setAttribute('aria-label', dict.sortAria);
+  }
 
   if (clearBtnEl) clearBtnEl.textContent = dict.clear;
 }
@@ -631,7 +617,7 @@ langToggle?.addEventListener('click', cycleLang);
 // 初始化語言
 applyLangUI(getLang());
 
-// ✅ 視窗寬度變化時，重新渲染分頁
+// 視窗寬度變化時，重新渲染分頁
 window.addEventListener('resize', () => {
   const pages = Math.ceil(state.filtered.length / state.perPage);
   renderPagerUI(pages);
