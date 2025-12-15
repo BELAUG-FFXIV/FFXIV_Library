@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Following the Evidence | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Following the Evidence (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/_V_C-NaeaGE"
+              title="Following the Evidence" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Following the Evidence</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Following the Evidence',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>At Camp Dragonhead, Haurchefant lays out his thinking with clarity: the surest way to prove Lord Francel’s innocence is to discredit the evidence that condemns him. He speaks of the draconian rosary found in the chest you recovered, and asks you to recount what happened.</p>
+      <p>When you explain that the rosary was discovered inside a locked chest labeled as Lord Francel’s property, Haurchefant draws the obvious conclusion. If the rosary was not Francel’s, then someone with access must have planted it. He sends you back to Skyfire Locks to speak with Rickeman, a man who works closely with the porters who ferry goods across Coerthas and may have some sense of who could be responsible.</p>
+      <p>At Skyfire Locks, Rickeman reacts with a mix of alarm and indignation. The thought that rosaries found among Ishgardians’ possessions might have been planted shakes him, but he bristles at any suspicion toward himself. He declares he is a man of House Haillenarte, and that this heresy business threatens him and his family as much as anyone.</p>
+      <p>He refuses to accuse the porters outright. He knows most of those who work the trade routes and says he has never had reason to doubt their faith. Yet if it was not them, he cannot name another culprit. He begins to reason it through: every shipment is inspected before it moves on—and that thought makes him hesitate. Could those responsible be the ones conducting the inspections?</p>
+      <p>The idea earns only a bitter laugh. Ishgardian knights and inquisitors, he scoffs—men like that would never turn their cloaks. With a weary sigh, he circles back to the conclusion he hates: if it was not inspectors, then the porters remain the most likely suspects. He tells you there will be a crew arriving at Camp Dragonhead from Whitebrim Front that evening, and suggests you question them.</p>
+      <p>Back at Camp Dragonhead, Cid is relieved to have left the Observatorium behind. The people there were not friendly, and even here he feels eyes upon you—an unease that makes him insist you are not safe. Alphinaud can scarcely believe how far things have drifted: you came to find an airship, yet now you are entangled in Ishgardian affairs of state. He can already imagine what Alisaie would say, were she here to witness it.</p>
+      <p>You approach the porters, but one brusquely claims there is no time to talk—they are on a tight schedule, and once their deliveries here are done, they are bound for Skyfire Locks. When you confront them with suspicion, another porter snaps back in offense, daring you to search their parcels if you truly believe such an accusation. With a yawn and a cold calm, he insists his conscience is clear.</p>
+      <p>You search the parcels—and find draconian rosaries hidden inside. Not one, but more than one. The discovery shreds the porter’s confidence. He demands to know how this could be possible, protesting that after a knight at Whitebrim Front completed her inspection, he personally loaded the parcels into the wagon. He argues that if he had been the culprit, he would never have allowed you to search his shipments at all. Yet he refuses responsibility all the same, insisting you tell Lord Haurchefant what you will—he will not be held accountable for this.</p>
+      <p>You return to Haurchefant amid the aftermath, and he asks if something happened outside—he thought he heard shouting. But he presses for the important matter: what did Rickeman say? When you report what you found—draconian rosaries in every parcel bound for Skyfire Locks—Haurchefant is stunned. It beggars belief.</p>
+      <p>And then his judgment hardens into certainty. Even the inquisitors, he says, must acknowledge that this is nothing more than a crude attempt to smear House Haillenarte’s reputation. Whoever is responsible has overplayed his hand. He offers a grim praise for that mistake—because Lord Francel’s trial is upon you, and you must act now if you are to clear his name.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Haurchefant <small class="muted">Coerthas Central Highlands (X:26.7, Y:17.4)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="road-to-redemption.html">Road to Redemption</a></div>
+      <div class="row">All classes and jobs (excluding limited jobs) (Level 38 or above)</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="in-the-eyes-of-gods-and-men.html">In the Eyes of Gods and Men</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'嫌疑の審理',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>キャンプ・ドラゴンヘッドで、オルシュファンは言う。フランセル卿の潔白を証明する鍵は、彼を罪に落とす証拠そのものの信用を崩すことだと。彼が示すのは、あなたが回収した宝箱の中から見つかったドラゴン教のロザリオであり、その一件について詳しく話してほしいと求めた。</p>
+      <p>あなたが、ロザリオは施錠された宝箱の中にあり、その宝箱にはフランセル卿の所持品である旨の表示があったと伝えると、オルシュファンは結論を導く。もしロザリオが卿のものではないのなら、宝箱に触れられる立場の誰かが、そこへ紛れ込ませたのだろう。彼はあなたに、アートボルグ砦群へ戻ってリケマンに会うよう命じる。クルザスを行き来する荷運び人足と密に働く男であり、犯人に心当たりがあるかもしれないという。</p>
+      <p>アートボルグ砦群でリケマンに話を向けると、彼は驚きと憤りを隠さない。もし人々の所持品から見つかったロザリオが仕組まれたものだとしたら――その可能性に動揺しつつも、疑いの目を向けられれば即座に反発する。自分はアインハルト家の人間であり、この異端騒ぎは自分と家族にとっても害でしかないのだと、彼は強く言い切った。</p>
+      <p>彼は、荷運び人足がやったと決めつける気はないとも語る。交易路に携わる者の多くを知っており、信仰を疑う理由などなかったという。だが、彼らでないのなら誰がやったのか――そこまでは分からない。ほとんどの荷は出発前に入念な検分を受けるのだと口にしかけて、彼はふと考え込む。もし手が入ったのだとしたら、その検分を担う側ではないのか。</p>
+      <p>だがその可能性は、彼自身の苦い笑いで打ち消される。検分に関わるのはイシュガルドの騎士や審問官――そんな連中が寝返るはずがない、と。そうして疲れた溜息とともに、彼は嫌でも結論へ戻る。検分側でないのなら、やはり疑われるのは荷運び人足だろう。今夜、ホワイトブリム前哨地からキャンプ・ドラゴンヘッドへ来る一団がいるから、話を聞いてみるといい、と彼は告げた。</p>
+      <p>キャンプ・ドラゴンヘッドに戻ると、シドは観測所を離れられたことに安堵している。あそこにいた者たちは友好的ではなく、ここに来てもなお視線を感じるという。彼は、あなたたちは安全ではないと不安を吐露する。アルフィノは、飛空艇を探しに来たはずが、いつの間にかイシュガルドの国政に関わる揉め事へ踏み込んでいる現状に言葉を失い、もしアリゼーがここにいたらと思うだけで気が重いと漏らした。</p>
+      <p>あなたが荷運び人足に声をかけると、ある者は忙しいと突き放す。ここでの荷下ろしを終えたら、次はアートボルグ砦群へ届けねばならないのだという。あなたが疑いを告げると、別の者は不敬だと憤り、信じるなら荷を改めてみろと強く迫る。欠伸混じりに、己の良心は曇りないと言い放つ者もいた。</p>
+      <p>あなたは荷を調べ、荷の中にドラゴン教のロザリオが隠されているのを見つける。ひとつではなく、複数だ。荷運び人足の態度は崩れ、あり得ないと声を上げる。ホワイトブリム前哨地の騎士が検分を終えたあと、自分が荷を荷車へ積み込んだのだと主張し、もし自分が犯人なら、最初から荷を調べさせるはずがないとも言い立てる。だがそれでも責任は負わないと突っぱね、オルシュファンには好きに報告しろ、自分は罪を被らないと言い捨てた。</p>
+      <p>あなたが戻ると、オルシュファンは外で何かあったのかと問いかける。叫び声が聞こえた気がしたのだという。だが彼は、まずリケマンの話を確かめようとする。あなたが、アートボルグ砦群行きの荷すべてからロザリオが見つかったと告げると、彼は息を呑む。到底信じがたいことだ、と。</p>
+      <p>そして彼は言い切る。これはアインハルト家の名誉を汚すための、あまりに露骨な仕掛けにすぎない。審問官でさえ認めざるを得ないはずだ。仕組んだ者は手を広げすぎた――そしてそれは、今この時にこそ都合がいい。フランセル卿の審問は目前であり、潔白を示すために、いま動かねばならないのだと。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> オルシュファン　<small class="muted">クルザス中央高地 (X:26.7, Y:17.4)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="road-to-redemption.html">潔白の証明</a></div>
+      <div class="row">すべて（リミテッドジョブを除く）Lv 38～</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="in-the-eyes-of-gods-and-men.html">異端は魔女の谷に消ゆ</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'循線追查以審嫌疑',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>在 Camp Dragonhead，Haurchefant 說得很明白：要證明 Lord Francel 的清白，關鍵在於推翻用來定罪的證據。他指的正是你親手取回的那只箱子——裡頭被找到的 draconian rosary——並請你把當時的情況完整說一遍。</p>
+      <p>當你說明，那串 rosary 是在一只上了鎖、且標示為 Lord Francel 財物的箱子裡被發現時，Haurchefant 立即推斷：如果 rosary 不是 Francel 的，那就表示有人能接觸那只箱子，並把它栽贓進去。接著他交給你新的任務——回到 Skyfire Locks，去找 Rickeman。Rickeman 與負責在 Coerthas 來回運送貨物的搬運工合作密切，也許能聽到誰可能做了手腳的風聲。</p>
+      <p>在 Skyfire Locks，Rickeman 先是愣住，隨即被那個可能性震住：有人動了貨運、甚至在貨物裡塞入 rosary？他忍不住想，如果那些在 Ishgard 人們身上或物品裡被找到的 rosary 都是被栽贓的……然而當你帶著懷疑看向他，他立刻回嗆，強調自己是徹頭徹尾的 House Haillenarte 的人，這場異端風波同樣在傷害他和他的家人。</p>
+      <p>他並沒有直接把矛頭指向搬運工。Rickeman 說他認得大多數跑商路的人，從沒理由質疑他們的信仰。但如果不是搬運工，那就更難猜到是誰。話說到一半，他想起每一批貨物在運送前都會被仔細檢查——這讓他停了下來，轉而提出另一個可能：會不會是負責檢查的人動的手？</p>
+      <p>但這念頭很快又被他自己苦笑否決。那些做檢查的不是 Ishgard 的騎士，就是 inquisitors；他嘲諷地說，那種人怎麼可能「倒戈」。他長嘆一聲，只能回到他最不願承認的結論：既然不是檢查者，那麼搬運工就成了最可疑的人選。他告訴你，今晚會有一組搬運工從 Whitebrim Front 抵達 Camp Dragonhead，你或許可以去找他們問話。</p>
+      <p>回到 Camp Dragonhead，Cid 說他很高興離開了 Observatorium——那裡的人並不友善。可就算回到這裡，他仍覺得有人在盯著你們，他不安地說，你們並不安全。Alphinaud 也忍不住感嘆：你們明明是來找飛空艇，卻已經捲入 Ishgard 的政務糾葛；他甚至提到，如果 Alisaie 在場，自己肯定會被唸個沒完。</p>
+      <p>你上前攔住搬運工，其中一人冷冷回絕，說他們時間很緊，這裡交完貨之後，還得把包裹送往 Skyfire Locks。當你提出懷疑，另一名搬運工勃然大怒，反問你竟敢指控搬運工在 House Haillenarte 的貨物裡塞入 draconian rosary，若你真信這種話，那就搜他們的包裹，看能搜出什麼。隨後他又打了個呵欠，說你愛怎麼講都行，他問心無愧。</p>
+      <p>你照他所說去搜查，結果在包裹裡找到了被藏起來的 draconian rosary——而且不只一個。對方的態度瞬間崩潰：他喊著不可能，並辯稱 Whitebrim Front 的騎士完成檢查後，是他親自把包裹裝上貨車；他還反過來強調，若自己才是犯人，根本不可能讓你搜他的貨。即便如此，他仍拒絕背鍋，說你要怎麼向 Haurchefant 報告都隨便，他不會為此負責。</p>
+      <p>你回到 Haurchefant 身邊時，他先問外頭是不是出了什麼事——他好像聽見有人在吵。可他更在意的是 Rickeman 的線索。當你回報：所有準備送往 Skyfire Locks 的包裹裡都搜出了 draconian rosary，Haurchefant 也被這結果震住，直說難以置信。</p>
+      <p>隨即，他的判斷變得篤定：這根本是拙劣而粗暴的抹黑，目的只是要玷污 House Haillenarte 的名聲。就連 inquisitors 也必須承認，這種手法太明顯，做得過頭了。Haurchefant 甚至感嘆這人「用力過猛」反而是好事——因為 Lord Francel 的審判迫在眉睫，如果你們要洗清他的罪名，就必須立刻行動。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 歐爾什方　<small class="muted">庫爾札斯中央高地 (X:26.7, Y:17.4)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="road-to-redemption.html">以清白為證的救贖之路</a></div>
+      <div class="row">所有職業（不含限定職） 等級 38 以上</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="in-the-eyes-of-gods-and-men.html">在神與人注視下，異端消逝於魔女之谷</a></div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
