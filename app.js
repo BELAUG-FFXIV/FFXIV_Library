@@ -11,7 +11,7 @@ const state = {
   category: '',
   expac: '',
   patch: '',
-  sort: 'addedAsc', // ✅ 預設：舊 → 新（從頭到尾看）
+  sort: 'addedAsc', // ✅ 預設：新增順序（舊 → 新）
 };
 
 const grid         = document.getElementById('grid');
@@ -26,8 +26,6 @@ const clearBtnEl   = document.getElementById('clear');
 const activeTags   = document.getElementById('activeTags');
 const themeToggle  = document.getElementById('themeToggle');
 const langToggle   = document.getElementById('langToggle');
-
-console.log('[FFXIV Library] app.js loaded', new Date().toISOString()); // ✅ 檢查用（你確定OK後可刪）
 
 /* =========================
    推薦影片設定
@@ -70,16 +68,16 @@ themeToggle?.addEventListener('click', ()=>{
 fetch('data/library.json')
   .then(r => r.json())
   .then(json => {
-    // ✅ 不改 JSON：用 idx 當「新增順序」的排序依據
-    state.data = (json.items || [])
-      .slice()
-      .reverse() // 最新排前面（保留你原本習慣）
-      .map((it, idx) => deriveFields({ ...it, _addedIndex: idx }));
-
-    if (sortSel) sortSel.value = state.sort;
+    // ✅ 用 JSON 原始順序當作「新增順序」
+    //    _addedIndex: 0(最早) ... n-1(最新)
+    state.data = (json.items || []).map((it, idx) => deriveFields({ ...it, _addedIndex: idx }));
 
     applyFilters();
     renderFeatured();
+
+    // 年份（可有可無，但你 footer 有 id="year"）
+    const yearEl = document.getElementById('year');
+    if (yearEl) yearEl.textContent = String(new Date().getFullYear());
   })
   .catch(err => {
     grid.innerHTML = `<p>載入資料失敗：${err?.message || err}</p>`;
@@ -88,7 +86,8 @@ fetch('data/library.json')
 function deriveFields(it){
   const patchNum = parseFloat((it.patch || '0').replace(/[^\d.]/g,'') || 0);
   const dateNum  = it.date ? +new Date(it.date) : 0;
-  return {...it, _patchNum: patchNum, _dateNum: dateNum};
+  const addedIdx = Number.isFinite(it._addedIndex) ? it._addedIndex : 0;
+  return {...it, _patchNum: patchNum, _dateNum: dateNum, _addedIndex: addedIdx};
 }
 
 /* =========================
@@ -101,6 +100,7 @@ function applyFilters(){
     const byCat  = state.category ? it.category === state.category : true;
     const byExp  = state.expac ? it.expac === state.expac : true;
 
+    // Patch 篩選：支援 7.x 這種大版本
     let byPatch = true;
     if (state.patch) {
       const itemPatch = (it.patch || '');
@@ -124,21 +124,31 @@ function applyFilters(){
     return byCat && byExp && byPatch && byTags && byQuery && visible;
   });
 
-  // ✅ 排序：addedAsc / addedDesc / dateAsc / dateDesc
+  // ✅ 排序：新增順序 / 日期（含缺 date 的穩定排序）
   switch (state.sort) {
-    case 'addedAsc':   // 舊 → 新（從頭到尾看）
-      // reverse 後 idx: 0 是最新，所以「舊→新」要 idx 大到小
-      arr.sort((a,b)=> (b._addedIndex - a._addedIndex));
+    case 'addedAsc':   // 舊 → 新
+      arr.sort((a,b)=> a._addedIndex - b._addedIndex);
       break;
-    case 'addedDesc':  // 新 → 舊（回看最近）
-      arr.sort((a,b)=> (a._addedIndex - b._addedIndex));
+
+    case 'addedDesc':  // 新 → 舊
+      arr.sort((a,b)=> b._addedIndex - a._addedIndex);
       break;
-    case 'dateAsc':
-      arr.sort((a,b)=> a._dateNum - b._dateNum);
+
+    case 'dateAsc':    // 最舊 → 最新（缺 date 的放最後）
+      arr.sort((a,b)=>{
+        const ad = a._dateNum || Number.POSITIVE_INFINITY;
+        const bd = b._dateNum || Number.POSITIVE_INFINITY;
+        return ad - bd || (a._addedIndex - b._addedIndex);
+      });
       break;
-    case 'dateDesc':
+
+    case 'dateDesc':   // 最新 → 最舊（缺 date 的放最後）
     default:
-      arr.sort((a,b)=> b._dateNum - a._dateNum);
+      arr.sort((a,b)=>{
+        const ad = a._dateNum || 0;
+        const bd = b._dateNum || 0;
+        return bd - ad || (b._addedIndex - a._addedIndex);
+      });
       break;
   }
 
@@ -197,17 +207,32 @@ function renderPagerUI(totalPages){
     return b;
   };
 
-  pager.appendChild(makeBtn('«', 1, { disabled: state.page === 1, ariaLabel: 'First page' }));
-  pager.appendChild(makeBtn('‹', Math.max(1, state.page - 1), { disabled: state.page === 1, ariaLabel: 'Previous page' }));
+  pager.appendChild(makeBtn('«', 1, {
+    disabled: state.page === 1,
+    ariaLabel: 'First page'
+  }));
+  pager.appendChild(makeBtn('‹', Math.max(1, state.page - 1), {
+    disabled: state.page === 1,
+    ariaLabel: 'Previous page'
+  }));
 
   const items = getPaginationItems(state.page, totalPages, delta);
   for (const it of items) {
-    if (it === "…") pager.appendChild(makeBtn('…', 0, { ellipsis: true }));
-    else pager.appendChild(makeBtn(String(it), it, { active: it === state.page }));
+    if (it === "…") {
+      pager.appendChild(makeBtn('…', 0, { ellipsis: true }));
+    } else {
+      pager.appendChild(makeBtn(String(it), it, { active: it === state.page }));
+    }
   }
 
-  pager.appendChild(makeBtn('›', Math.min(totalPages, state.page + 1), { disabled: state.page === totalPages, ariaLabel: 'Next page' }));
-  pager.appendChild(makeBtn('»', totalPages, { disabled: state.page === totalPages, ariaLabel: 'Last page' }));
+  pager.appendChild(makeBtn('›', Math.min(totalPages, state.page + 1), {
+    disabled: state.page === totalPages,
+    ariaLabel: 'Next page'
+  }));
+  pager.appendChild(makeBtn('»', totalPages, {
+    disabled: state.page === totalPages,
+    ariaLabel: 'Last page'
+  }));
 }
 
 function render(){
@@ -245,7 +270,7 @@ function render(){
 }
 
 /* =========================
-   卡片 HTML
+   卡片 HTML（標題隨語言切換）
    ========================= */
 function cardHTML(it){
   const thumb = it.thumb || `https://i.ytimg.com/vi/${it.ytId}/hqdefault.jpg`;
@@ -281,7 +306,7 @@ function cardHTML(it){
   const youtubeBtn = it.videoUrl
     ? `<a class="btn ghost yt-only" href="${it.videoUrl}" target="_blank" rel="noopener" aria-label="YouTube">
          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" class="yt-icon">
-           <path d="M23.5 6.2s-.2-1.7-.8-2.5c-.8-.9-1.7-.9-2.1-1-3-.2-7.6-.2-7.6-.2h-.1s-4.6 0-7.6.2c-.4 0-1.3 0-2.1-1-.6.8-.8 2.5-.8 2.5S2 8.1 2 10v1.9c0 1.9.2 3.8.2 3.8s.2 1.7.8 2.5c.8.9 1.9.9 2.4 1 1.7.2 7.2.2 7.2.2s4.6 0 7.6-.2c.4 0 1.3 0 2.1-1 .6-.8.8-2.5.8-2.5s.2-1.9.2-3.8V10c0-1.9-.2-3.8-.2-3.8zM9.8 13.6V8.4l5.9 2.6-5.9 2.6z"/>
+           <path d="M23.5 6.2s-.2-1.7-.8-2.5c-.8-.9-1.7-.9-2.1-1-3-.2-7.6-.2-7.6-.2h-.1s-4.6 0-7.6.2c-.4 0-1.3 0-2.1 1-.6.8-.8 2.5-.8 2.5S2 8.1 2 10v1.9c0 1.9.2 3.8.2 3.8s.2 1.7.8 2.5c.8.9 1.9.9 2.4 1 1.7.2 7.2.2 7.2.2s4.6 0 7.6-.2c.4 0 1.3 0 2.1-1 .6-.8.8-2.5.8-2.5s.2-1.9.2-3.8V10c0-1.9-.2-3.8-.2-3.8zM9.8 13.6V8.4l5.9 2.6-5.9 2.6z"/>
          </svg>
        </a>`
     : '';
@@ -305,7 +330,7 @@ function cardHTML(it){
 }
 
 /* =========================
-   推薦影片
+   推薦影片渲染（跟語言同步）
    ========================= */
 function renderFeatured(){
   const box = document.getElementById('featured');
@@ -365,25 +390,24 @@ function renderActiveTags(){
 }
 
 /* =========================
-   事件綁定（✅ 搜尋保底：input + search + change）
+   事件綁定
    ========================= */
 q?.addEventListener('input', e => { state.query = e.target.value; applyFilters(); });
-q?.addEventListener('search', e => { state.query = e.target.value; applyFilters(); });
-q?.addEventListener('change', e => { state.query = e.target.value; applyFilters(); });
-
 categorySel?.addEventListener('change', e => { state.category = e.target.value; applyFilters(); });
 expacSel?.addEventListener('change', e => { state.expac = e.target.value; applyFilters(); });
 patchSel?.addEventListener('change', e => { state.patch = e.target.value; applyFilters(); });
 
-sortSel?.addEventListener('change', e => { state.sort = e.target.value; applyFilters(); });
+sortSel?.addEventListener('change', e => {
+  state.sort = e.target.value || 'addedAsc';
+  applyFilters();
+});
 
 clearBtnEl?.addEventListener('click', () => {
   state.query=''; state.category=''; state.expac=''; state.patch='';
   state.tags=[];
-  if(q) q.value='';
-  if(categorySel) categorySel.value='';
-  if(expacSel) expacSel.value='';
-  if(patchSel) patchSel.value='';
+  if(q) q.value=''; if(categorySel) categorySel.value='';
+  if(expacSel) expacSel.value=''; if(patchSel) patchSel.value='';
+  if(sortSel) { sortSel.value = state.sort; }
   applyFilters();
 });
 
@@ -397,7 +421,6 @@ const itemsSuffixEl= document.getElementById('itemsSuffix');
 const i18n = {
   EN: {
     langLabel: 'EN',
-    sortAria: 'Sort order',
     tagline: `<b>FFXIV Library</b> is an extension of my YouTube channel.<br>
 Here you’ll find additional story details — quest records, background notes, and elements that couldn’t be fully shown in each video.<br>
 Every entry also has a message board where you can share your thoughts and connect with fellow travelers.<br>
@@ -405,10 +428,10 @@ If you enjoy your time here, feel free to visit <a href="https://ko-fi.com/belau
     searchPH: 'Search title, series, tags, chapter…',
     itemsSuffix: 'items',
     sortOptions: [
-      { value: 'addedAsc',  label: 'Story order (Old → New)' },
-      { value: 'addedDesc', label: 'Story order (New → Old)' },
-      { value: 'dateDesc',  label: 'Newest' },
-      { value: 'dateAsc',   label: 'Oldest' },
+      { value: 'addedAsc',  label: 'Added order (Old → New)' },
+      { value: 'addedDesc', label: 'Added order (New → Old)' },
+      { value: 'dateDesc',  label: 'Date: Newest' },
+      { value: 'dateAsc',   label: 'Date: Oldest' },
     ],
     categories: [
       { value: '',               label: 'All Categories' },
@@ -455,7 +478,6 @@ If you enjoy your time here, feel free to visit <a href="https://ko-fi.com/belau
 
   JP: {
     langLabel: 'JP',
-    sortAria: '並び替え',
     tagline: `<b>FFXIV Library</b> は、私の YouTube チャンネルを補完する資料館です。<br>
 映像だけでは伝えきれない物語の細部──クエスト記録や背景設定などをここに収めています。<br>
 各ページにはメッセージボードもあり、感じたことを旅人同士で共有できます。<br>
@@ -463,10 +485,10 @@ If you enjoy your time here, feel free to visit <a href="https://ko-fi.com/belau
     searchPH: 'タイトル・シリーズ・タグ・章… を検索',
     itemsSuffix: '件',
     sortOptions: [
-      { value: 'addedAsc',  label: '物語順（古い → 新しい）' },
-      { value: 'addedDesc', label: '物語順（新しい → 古い）' },
-      { value: 'dateDesc',  label: '新しい順' },
-      { value: 'dateAsc',   label: '古い順' },
+      { value: 'addedAsc',  label: '追加順（古 → 新）' },
+      { value: 'addedDesc', label: '追加順（新 → 古）' },
+      { value: 'dateDesc',  label: '日付：新しい順' },
+      { value: 'dateAsc',   label: '日付：古い順' },
     ],
     categories: [
       { value: '',               label: 'すべての分類' },
@@ -513,7 +535,6 @@ If you enjoy your time here, feel free to visit <a href="https://ko-fi.com/belau
 
   ZH: {
     langLabel: 'ZH',
-    sortAria: '排序',
     tagline: `<b>FFXIV Library</b> 是我 YouTube 頻道的延伸資料館。<br>
 這裡收錄了更多在影片中無法完整呈現的內容──任務紀錄、背景資料與細節補充。<br>
 每部影片下方也設有留言板，歡迎留下你的想法與感受，與其他旅人一同分享。<br>
@@ -521,10 +542,10 @@ If you enjoy your time here, feel free to visit <a href="https://ko-fi.com/belau
     searchPH: '搜尋標題、系列、標籤、章節…',
     itemsSuffix: '項內容',
     sortOptions: [
-      { value: 'addedAsc',  label: '故事順序（舊 → 新）' },
-      { value: 'addedDesc', label: '故事順序（新 → 舊）' },
-      { value: 'dateDesc',  label: '最新' },
-      { value: 'dateAsc',   label: '最舊' },
+      { value: 'addedAsc',  label: '新增順序（舊 → 新）' },
+      { value: 'addedDesc', label: '新增順序（新 → 舊）' },
+      { value: 'dateDesc',  label: '日期：最新' },
+      { value: 'dateAsc',   label: '日期：最舊' },
     ],
     categories: [
       { value: '',               label: '全部分類' },
@@ -583,18 +604,16 @@ function applyLangUI(lang) {
   if (!dict) return;
 
   if (langToggle) langToggle.textContent = `🌐 ${dict.langLabel}`;
-  if (taglineEl)  taglineEl.innerHTML = dict.tagline;
-  if (q)          q.placeholder = dict.searchPH;
+  if (taglineEl)   taglineEl.innerHTML   = dict.tagline;
+  if (q)           q.placeholder         = dict.searchPH;
   if (itemsSuffixEl && dict.itemsSuffix) itemsSuffixEl.textContent = ` ${dict.itemsSuffix}`;
 
   refillSelect(categorySel, dict.categories, true);
   refillSelect(expacSel,    dict.expansions, true);
   refillSelect(patchSel,    dict.patches,    true);
 
-  if (sortSel && dict.sortOptions) {
-    refillSelect(sortSel, dict.sortOptions, true);
-    if (dict.sortAria) sortSel.setAttribute('aria-label', dict.sortAria);
-  }
+  // ✅ 讓排序選單也跟著語言更新（但保留目前選擇）
+  if (dict.sortOptions) refillSelect(sortSel, dict.sortOptions, true);
 
   if (clearBtnEl) clearBtnEl.textContent = dict.clear;
 }
@@ -613,11 +632,9 @@ function cycleLang() {
 }
 
 langToggle?.addEventListener('click', cycleLang);
-
-// 初始化語言
 applyLangUI(getLang());
 
-// 視窗寬度變化時，重新渲染分頁
+// ✅ 視窗寬度變化時，重新渲染分頁（手機/桌機 delta 會不同）
 window.addEventListener('resize', () => {
   const pages = Math.ceil(state.filtered.length / state.perPage);
   renderPagerUI(pages);
