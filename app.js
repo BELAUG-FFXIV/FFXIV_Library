@@ -11,7 +11,7 @@ const state = {
   category: '',
   expac: '',
   patch: '',
-  sort: 'latest', // 固定用最新，無 UI
+  sort: 'addedAsc', // ✅ 預設：故事順序（舊 → 新）
 };
 
 const grid         = document.getElementById('grid');
@@ -21,8 +21,8 @@ const q            = document.getElementById('q');
 const categorySel  = document.getElementById('category');
 const expacSel     = document.getElementById('expac');
 const patchSel     = document.getElementById('patch');
+const sortSel      = document.getElementById('sort');   // ✅ 新增
 const clearBtnEl   = document.getElementById('clear');
-// ⚠️ 移除 sortSel
 const activeTags   = document.getElementById('activeTags');
 const themeToggle  = document.getElementById('themeToggle');
 const langToggle   = document.getElementById('langToggle');
@@ -68,10 +68,14 @@ themeToggle?.addEventListener('click', ()=>{
 fetch('data/library.json')
   .then(r => r.json())
   .then(json => {
+    // ✅ 不改 JSON：用 idx 當「新增順序」的排序依據
     state.data = (json.items || [])
-      .slice()          // 複製一份
-      .reverse()        // 最新的排前面
-      .map(deriveFields);
+      .slice()
+      .reverse() // 最新排前面（你原本的習慣保留）
+      .map((it, idx) => deriveFields({ ...it, _addedIndex: idx }));
+
+    // ✅ 若 sort 下拉存在，讓它跟 state.sort 同步
+    if (sortSel) sortSel.value = state.sort;
 
     applyFilters();
     renderFeatured();
@@ -120,8 +124,23 @@ function applyFilters(){
     return byCat && byExp && byPatch && byTags && byQuery && visible;
   });
 
-  // 固定以「最新」排序（依 date）
-  arr.sort((a,b)=> b._dateNum - a._dateNum);
+  // ✅ 依使用者選擇排序（不用改 JSON）
+  switch (state.sort) {
+    case 'addedAsc':   // 舊 → 新（從頭到尾看）
+      // reverse 後 idx: 0 是最新，所以「舊 → 新」要 idx 大到小
+      arr.sort((a,b)=> (b._addedIndex - a._addedIndex));
+      break;
+    case 'addedDesc':  // 新 → 舊（回看最近）
+      arr.sort((a,b)=> (a._addedIndex - b._addedIndex));
+      break;
+    case 'dateAsc':    // 最舊 → 最新
+      arr.sort((a,b)=> a._dateNum - b._dateNum);
+      break;
+    case 'dateDesc':   // 最新 → 最舊
+    default:
+      arr.sort((a,b)=> b._dateNum - a._dateNum);
+      break;
+  }
 
   state.filtered = arr;
   state.page = 1;
@@ -129,7 +148,7 @@ function applyFilters(){
 }
 
 /* =========================
-   Pagination helpers（✅ 已改成省略號視窗式分頁）
+   Pagination helpers（✅ 省略號視窗式分頁）
    ========================= */
 function getPagerDelta(){
   return window.matchMedia("(max-width: 520px)").matches ? 1 : 2;
@@ -162,7 +181,6 @@ function renderPagerUI(totalPages){
   const makeBtn = (label, page, { disabled=false, active=false, ellipsis=false, ariaLabel='' } = {}) => {
     const b = document.createElement('button');
     b.type = 'button';
-    // 沿用你原本的 .pagebtn / .active
     b.className = `pagebtn${active ? ' active' : ''}${ellipsis ? ' ellipsis' : ''}`;
     b.textContent = label;
     if (ariaLabel) b.setAttribute('aria-label', ariaLabel);
@@ -180,7 +198,6 @@ function renderPagerUI(totalPages){
     return b;
   };
 
-  // « ‹
   pager.appendChild(makeBtn('«', 1, {
     disabled: state.page === 1,
     ariaLabel: 'First page'
@@ -190,7 +207,6 @@ function renderPagerUI(totalPages){
     ariaLabel: 'Previous page'
   }));
 
-  // 1 … window … last
   const items = getPaginationItems(state.page, totalPages, delta);
   for (const it of items) {
     if (it === "…") {
@@ -200,7 +216,6 @@ function renderPagerUI(totalPages){
     }
   }
 
-  // › »
   pager.appendChild(makeBtn('›', Math.min(totalPages, state.page + 1), {
     disabled: state.page === totalPages,
     ariaLabel: 'Next page'
@@ -219,7 +234,6 @@ function render(){
 
   grid.innerHTML = view.map(cardHTML).join('') || `<p>沒有符合的內容。</p>`;
 
-  // ✅ 新分頁：不再畫一長串 1..N，而是省略號視窗式
   const pages = Math.ceil(state.filtered.length / state.perPage);
   renderPagerUI(pages);
 
@@ -246,15 +260,6 @@ function render(){
   );
 
   renderActiveTags();
-}
-
-/* =========================
-   工具：產生單頁連結
-   ========================= */
-function getPageHref(it){
-  if (it.slug) return `guides/${it.slug}.html`;
-  if (it.pageUrl) return it.pageUrl;
-  return '';
 }
 
 /* =========================
@@ -294,7 +299,7 @@ function cardHTML(it){
   const youtubeBtn = it.videoUrl
     ? `<a class="btn ghost yt-only" href="${it.videoUrl}" target="_blank" rel="noopener" aria-label="YouTube">
          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" class="yt-icon">
-           <path d="M23.5 6.2s-.2-1.7-.8-2.5c-.8-.9-1.7-.9-2.1-1-3-.2-7.6-.2-7.6-.2h-.1s-4.6 0-7.6.2c-.4 0-1.3 0-2.1 1-.6.8-.8 2.5-.8 2.5S2 8.1 2 10v1.9c0 1.9.2 3.8.2 3.8s.2 1.7.8 2.5c.8.9 1.9.9 2.4 1 1.7.2 7.2.2 7.2.2s4.6 0 7.6-.2c.4 0 1.3 0 2.1-1 .6-.8.8-2.5.8-2.5s.2-1.9.2-3.8V10c0-1.9-.2-3.8-.2-3.8zM9.8 13.6V8.4l5.9 2.6-5.9 2.6z"/>
+           <path d="M23.5 6.2s-.2-1.7-.8-2.5c-.8-.9-1.7-.9-2.1-1-3-.2-7.6-.2-7.6-.2h-.1s-4.6 0-7.6.2c-.4 0-1.3 0-2.1-1-.6.8-.8 2.5-.8 2.5S2 8.1 2 10v1.9c0 1.9.2 3.8.2 3.8s.2 1.7.8 2.5c.8.9 1.9.9 2.4 1 1.7.2 7.2.2 7.2.2s4.6 0 7.6-.2c.4 0 1.3 0 2.1-1 .6-.8.8-2.5.8-2.5s.2-1.9.2-3.8V10c0-1.9-.2-3.8-.2-3.8zM9.8 13.6V8.4l5.9 2.6-5.9 2.6z"/>
          </svg>
        </a>`
     : '';
@@ -384,12 +389,20 @@ q?.addEventListener('input', e => { state.query = e.target.value; applyFilters()
 categorySel?.addEventListener('change', e => { state.category = e.target.value; applyFilters(); });
 expacSel?.addEventListener('change', e => { state.expac = e.target.value; applyFilters(); });
 patchSel?.addEventListener('change', e => { state.patch = e.target.value; applyFilters(); });
-// ⚠️ 已移除 sortSel 監聽
+
+sortSel?.addEventListener('change', e => {          // ✅ 新增
+  state.sort = e.target.value;
+  applyFilters();
+});
+
 clearBtnEl?.addEventListener('click', () => {
   state.query=''; state.category=''; state.expac=''; state.patch='';
   state.tags=[];
-  if(q) q.value=''; if(categorySel) categorySel.value='';
-  if(expacSel) expacSel.value=''; if(patchSel) patchSel.value='';
+  if(q) q.value='';
+  if(categorySel) categorySel.value='';
+  if(expacSel) expacSel.value='';
+  if(patchSel) patchSel.value='';
+  // sort 不強制清掉（讓使用者保持偏好）
   applyFilters();
 });
 
@@ -398,7 +411,6 @@ clearBtnEl?.addEventListener('click', () => {
    ========================= */
 const LANG_KEY = 'ffxiv-lib-lang';
 const taglineEl    = document.getElementById('tagline');
-// ⚠️ 已移除 sortLabelEl
 const itemsSuffixEl= document.getElementById('itemsSuffix');
 
 const i18n = {
@@ -410,7 +422,13 @@ Every entry also has a message board where you can share your thoughts and conne
 If you enjoy your time here, feel free to visit <a href="https://ko-fi.com/belaug" target="_blank" rel="noopener">Ko-fi</a> and buy me a cup of coffee — a small resting spot along the journey. ☕`,
     searchPH: 'Search title, series, tags, chapter…',
     itemsSuffix: 'items',
-    categories: [
+    sortOptions: [
+      { value: 'addedAsc',  label: 'Story order (Old → New)' },
+      { value: 'addedDesc', label: 'Story order (New → Old)' },
+      { value: 'dateDesc',  label: 'Newest' },
+      { value: 'dateAsc',   label: 'Oldest' },
+    ],
+    categories: [ /* 你的原本內容不變 */ 
       { value: '',               label: 'All Categories' },
       { value: 'MSQ',            label: 'Main Story (MSQ)' },
       { value: 'AllianceRaid24', label: 'Alliance Raid (24-player)' },
@@ -461,6 +479,12 @@ If you enjoy your time here, feel free to visit <a href="https://ko-fi.com/belau
 もしこの場所を気に入っていただけたなら、<a href="https://ko-fi.com/belaug" target="_blank" rel="noopener">Ko-fi</a> でコーヒーをごちそうください。旅の途中の小さな休憩所として。☕`,
     searchPH: 'タイトル・シリーズ・タグ・章… を検索',
     itemsSuffix: '件',
+    sortOptions: [
+      { value: 'addedAsc',  label: '物語順（古い → 新しい）' },
+      { value: 'addedDesc', label: '物語順（新しい → 古い）' },
+      { value: 'dateDesc',  label: '新しい順' },
+      { value: 'dateAsc',   label: '古い順' },
+    ],
     categories: [
       { value: '',               label: 'すべての分類' },
       { value: 'MSQ',            label: 'メインクエスト（MSQ）' },
@@ -512,6 +536,12 @@ If you enjoy your time here, feel free to visit <a href="https://ko-fi.com/belau
 若你喜歡這裡的內容，也歡迎到 <a href="https://ko-fi.com/belaug" target="_blank" rel="noopener">Ko-fi</a> 請我喝杯咖啡，就當作旅途中一個小小的休息站。☕`,
     searchPH: '搜尋標題、系列、標籤、章節…',
     itemsSuffix: '項內容',
+    sortOptions: [
+      { value: 'addedAsc',  label: '故事順序（舊 → 新）' },
+      { value: 'addedDesc', label: '故事順序（新 → 舊）' },
+      { value: 'dateDesc',  label: '最新' },
+      { value: 'dateAsc',   label: '最舊' },
+    ],
     categories: [
       { value: '',               label: '全部分類' },
       { value: 'MSQ',            label: '主線任務（MSQ）' },
@@ -569,13 +599,16 @@ function applyLangUI(lang) {
   if (!dict) return;
 
   if (langToggle) langToggle.textContent = `🌐 ${dict.langLabel}`;
-  if (taglineEl)   taglineEl.innerHTML   = dict.tagline;
-  if (q)           q.placeholder         = dict.searchPH;
+  if (taglineEl)  taglineEl.innerHTML = dict.tagline;
+  if (q)          q.placeholder = dict.searchPH;
   if (itemsSuffixEl && dict.itemsSuffix) itemsSuffixEl.textContent = ` ${dict.itemsSuffix}`;
 
   refillSelect(categorySel, dict.categories, true);
   refillSelect(expacSel,    dict.expansions, true);
   refillSelect(patchSel,    dict.patches,    true);
+
+  // ✅ sort 也跟語言同步（保持目前選擇）
+  if (sortSel && dict.sortOptions) refillSelect(sortSel, dict.sortOptions, true);
 
   if (clearBtnEl) clearBtnEl.textContent = dict.clear;
 }
@@ -598,7 +631,7 @@ langToggle?.addEventListener('click', cycleLang);
 // 初始化語言
 applyLangUI(getLang());
 
-// ✅ 可選：視窗寬度變化時，重新渲染分頁（手機/桌機 delta 會不同）
+// ✅ 視窗寬度變化時，重新渲染分頁
 window.addEventListener('resize', () => {
   const pages = Math.ceil(state.filtered.length / state.perPage);
   renderPagerUI(pages);
