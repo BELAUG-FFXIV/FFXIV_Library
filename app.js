@@ -11,7 +11,7 @@ const state = {
   category: '',
   expac: '',
   patch: '',
-  sort: 'addedAsc', // ✅ 預設：新增順序（舊 → 新）
+  sort: 'addedAsc', // ✅ 預設：新增順序（新 → 舊）
 };
 
 const grid         = document.getElementById('grid');
@@ -126,11 +126,11 @@ function applyFilters(){
 
   // ✅ 排序：新增順序 / 日期（含缺 date 的穩定排序）
   switch (state.sort) {
-    case 'addedAsc':   // 舊 → 新
+    case 'addedAsc':   // 新 → 舊
       arr.sort((a,b)=> a._addedIndex - b._addedIndex);
       break;
 
-    case 'addedDesc':  // 新 → 舊
+    case 'addedDesc':  // 舊 → 新
       arr.sort((a,b)=> b._addedIndex - a._addedIndex);
       break;
 
