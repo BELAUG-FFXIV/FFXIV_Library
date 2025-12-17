@@ -11,7 +11,7 @@ const state = {
   category: '',
   expac: '',
   patch: '',
-  sort: 'addedAsc', // ✅ 預設：新增順序（新 → 舊）
+  sort: 'addedDesc', // ✅ 預設：新增順序（新 → 舊）
 };
 
 const grid         = document.getElementById('grid');
