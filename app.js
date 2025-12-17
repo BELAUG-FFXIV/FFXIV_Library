@@ -428,8 +428,8 @@ If you enjoy your time here, feel free to visit <a href="https://ko-fi.com/belau
     searchPH: 'Search title, series, tags, chapter…',
     itemsSuffix: 'items',
     sortOptions: [
-      { value: 'addedAsc',  label: 'Added order (Old → New)' },
-      { value: 'addedDesc', label: 'Added order (New → Old)' },
+      { value: 'addedAsc',  label: 'Added order (New → Old)' },
+      { value: 'addedDesc', label: 'Added order (Old → New)' },
       { value: 'dateDesc',  label: 'Date: Newest' },
       { value: 'dateAsc',   label: 'Date: Oldest' },
     ],
@@ -485,8 +485,8 @@ If you enjoy your time here, feel free to visit <a href="https://ko-fi.com/belau
     searchPH: 'タイトル・シリーズ・タグ・章… を検索',
     itemsSuffix: '件',
     sortOptions: [
-      { value: 'addedAsc',  label: '追加順（古 → 新）' },
       { value: 'addedDesc', label: '追加順（新 → 古）' },
+      { value: 'addedAsc',  label: '追加順（古 → 新）' },
       { value: 'dateDesc',  label: '日付：新しい順' },
       { value: 'dateAsc',   label: '日付：古い順' },
     ],
@@ -542,8 +542,8 @@ If you enjoy your time here, feel free to visit <a href="https://ko-fi.com/belau
     searchPH: '搜尋標題、系列、標籤、章節…',
     itemsSuffix: '項內容',
     sortOptions: [
-      { value: 'addedAsc',  label: '新增順序（舊 → 新）' },
       { value: 'addedDesc', label: '新增順序（新 → 舊）' },
+      { value: 'addedAsc',  label: '新增順序（舊 → 新）' },
       { value: 'dateDesc',  label: '日期：最新' },
       { value: 'dateAsc',   label: '日期：最舊' },
     ],
