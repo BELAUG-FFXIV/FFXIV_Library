@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lady of the Vortex | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Lady of the Vortex (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:140px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/PqZNggoUx6M"
+              title="Lady of the Vortex" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Lady of the Vortex</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Lady of the Vortex',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>You tell Cid you’re ready, and he answers with measured confidence: his tests show the device now works in perfect harmony with the crystal, and you can depart whenever you choose. Yet he doesn’t pretend certainty—tests only go so far, and until you draw near the Howling Eye and try to breach the barrier itself, he cannot be sure it will hold. He starts to warn you about a small but statistically significant chance of catastrophic failure, then stops himself and insists it’s better to stay positive.</p>
+      <p>Before the mission begins, Cid turns earnest and thanks you—reuniting him with his airship, trusting him to build this plan, helping him rediscover a part of himself he’d forgotten. He admits he isn’t the man he once was and may never be again, but he knows this path feels right. He apologizes for the sudden outpouring, saying he would have waited until after the mission, but you understand why he speaks now.</p>
+      <p>At the airship landing, the Enterprise answers his call. As the engine stirs and the ship rouses, Alphinaud watches with relief and urgency—Coerthas, and an audience with Garuda. Cid forces a breath, then the past hits him: he has flown in this airship before, and he was not alone—there were adventurers aboard, adventurers like you.</p>
+      <p>The Echo pulls his memories into focus. He hears himself mocking the goggles he’s worn for so long, remembers the gifted youth admired by all, born and raised in Garlemald, steered into engineering as his father was. He remembers the rift with his father—how “Meteor” became everything, how loved ones ceased to matter—and how Gaius, too, proved consumed by obsession. He remembers running, leaving the Empire for Eorzea, building the Ironworks, donning the goggles for the first time, and choosing to fight beside people whose hopes were worth saving—wanting his knowledge to serve a nobler purpose, wanting to prove there was another way.</p>
+      <p>The Echo fades, and Cid steadies himself in the present. He speaks of the wind and the endless sky, and of a light he recognizes in you—surprised at how few know pureblood Garleans possess a third eye, wondering if it helped him recognize you, or if it was luck. He says the Enterprise was made to carry Eorzea’s protectors into battle, and he is proud to call her his own. When Alphinaud asks what he remembers, Cid answers simply: everything—his name, his people, his purpose.</p>
+      <p>As you close on the ceaselessly swirling wall of wind, Cid refuses to gamble your lives until you are absolutely certain you’re ready. Alphinaud gathers the weight of all you’ve endured into a single moment and asks if you’re prepared to face what lies beyond. Inside the Howling Eye, Garuda’s voice shrieks through the air, furious at your intrusion, towering beyond Alphinaud’s expectation. Cid spots Amalj’aa and kobold prisoners and questions why the Ixal brought them here, even as Garuda mocks you as landwalkers and declares herself the wind.</p>
+      <p>You answer her challenge, slipping her defenses and refusing to be bound by the earth. Garuda promises blood and entrails, and the Ixal chieftain screams for your deaths as an offering. Cid orders you to focus on Garuda while he and Alphinaud keep the Ixal distracted, and Alphinaud urges you to fight for the Scions and for Eorzea. You strike Garuda down, but she refuses to yield—boasting that this is her realm, that her children are legion, that crystals and worship sustain her. When it becomes clear the Ixal’s prayers keep her from falling, you and your allies turn to stop them—and when Garuda tries to claim you, you withstand her insistence that your life should belong to her.</p>
+      <p>When the battle finally breaks her, Alphinaud cries that you’ve done it—only for the air to split with a new voice. Gaius van Baelsar appears and laughs at the spectacle, calling Garuda “Lady of the Vortex” and demanding to know if that is all she can do. He recognizes Cid and taunts him for forsaking kin and country, then declares he will accomplish far more. As Ifrit and Titan are invoked in the chaos, Gaius unveils an Allagan weapon meant to deal with beings like her, and Garuda is forced into despair as it consumes her. Lahabrea speaks beside him, praising how the weapon grows stronger with each primal it devours, and Gaius warns that there will be no Warriors of Light to save Eorzea this time.</p>
+      <p>In the aftermath, Alphinaud and Cid trade grim understanding: Garuda is no longer the immediate threat, but Gaius’s new weapon is a far greater danger, and it must be destroyed—first by learning all you can. Alphinaud proposes you make for Vesper Bay and rebuild the Scions, insisting all is not yet lost so long as you bear the light. Later, still shaken, he admits something troubled him—when Garuda tried to claim you, he thought he saw something—but he forces the thought away, saying stress can mislead even a keen eye, and asks you to forget he mentioned it. For now, he says, the matter of primal summoning will lie quiet under the shadow of that weapon—an unnerving deterrent that makes even the thought of destroying it feel like a paradox.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Cid <small class="muted">New Gridania (X:11.3, Y:13.6)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="better-late-than-never.html">Better Late than Never</a></div>
+      <div class="row">All classes and jobs (excluding limited jobs) (Level 44 or above)</div>
+      <div class="row"><b>Unlock Trial</b> <a class="link" href="the-howling-eye.html">The Howling Eye</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="reclamation.html">Reclamation</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'暴虐の嵐神ガルーダ',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>あなたが出発の意思を示すと、シドは慎重な確信をもって答える。試験の結果、装置はクリスタルと完全に調和し、あなたが望むならいつでも発てるという。だが、試験でわかることには限りがある。ハウリングアイへ接近し、あの結界そのものを突破してみるまでは、成功を断言できないと正直に告げる。クリスタルが大規模な異変を引き起こす可能性が、わずかだが統計的に無視できない程度にはある――そう言いかけて彼は言葉を切り、今は前向きでいたい、と自らを戒める。</p>
+      <p>任務の前に、シドはあなたへまっすぐに感謝を向ける。エンタープライズを取り戻させてくれたこと、自分を信じて計画の完成を託してくれたこと、そのすべてに。忘れていた自分の一部を、あなたが取り戻させてくれたのだと言う。かつての自分ではないし、元に戻れるかもわからない――それでも、この選択は正しいと感じるのだと。急に感情をこぼしてしまったことを詫び、任務の後まで待つつもりだったが、あなたならわかるだろう、と結ぶ。</p>
+      <p>飛空艇発着場で、エンタープライズが目を覚ます。機関がうなり、船体が震えるのを見て、アルフィノは安堵と焦りを同時に滲ませる。クルザスへ――そして、ガルーダという「ハーピークイーン」と相まみえるために。シドは息をつき、だが胸の奥で何かが軋む。自分はかつて、この飛空艇に乗っていた。そして、ひとりではなかった。あなたのような冒険者が、同じ船にいたのだ。</p>
+      <p>エコーが、失われていた記憶を引き寄せる。どれほど長く、このゴーグルをつけてきたのかと、自分で毒づく声が聞こえる。若き天才としてもてはやされ、ガレマールで生まれ育ち、父と同じく技術者の道へ進んだこと。だがいつから、父と分かり合えなくなったのか。いつから「メテオル」がすべてとなり、家族や愛する者が顧みられなくなったのか。父に見捨てられた自分を支えた男がいた――だがガイウスもまた、執念に呑まれた男だった。だからこそ自分は帝国を捨て、エオルゼアへ逃れ、ガーロンド・アイアンワークスを築いた。初めてゴーグルをかけたのも、その頃だ。多くの人々の希望と夢を見て、守る価値のある人々のために戦い、知識をより高い目的へ役立てたいと願い、別の道があることを証明したいと願った――すべては、新しい故郷を得たあの日から始まった。</p>
+      <p>エコーが去り、シドは今の空へ視線を戻す。髪を撫でる風と、果てのない蒼穹の素晴らしさを語り、あの光はあなたではないか、と確かめるように言う。純血のガレアンには第三の目がある――驚くほど知られていない事実だと添え、第三の目があなたを見分けたのか、ただの幸運だったのかはわからない、とも。エンタープライズは、エオルゼアを守る者たちを戦場へ運ぶためにある。自分の船として誇りに思う、と。アルフィノが何を思い出したのか問うと、シドは短く答える。すべてだ――名も、民も、使命も。</p>
+      <p>やがて、絶え間なく渦巻く風の壁が迫る。シドは、エンタープライズをその中へ導くのは容易ではないと告げ、あなたが「絶対に」準備できたと確信するまで、再び命を危険にさらしたくないと言う。アルフィノは、これまでの苦難のすべてがこの瞬間のためだったと噛みしめ、あなたに覚悟を問う。ハウリングアイの内側で、侵入者を許さぬ怒号が響き、ガルーダの巨体にアルフィノは言葉を失う。シドは、アマルジャとコボルドの捕虜を見つけ、なぜイクサルが彼らをここへ連れてきたのかと訝しむ。ガルーダは嘲笑し、地を歩く者を見下し、己こそ風であると宣言する。</p>
+      <p>あなたは、空を取り、防壁をすり抜けたと突きつけ、何ものにも縛られないと返す。ガルーダは血と内臓を誇示するように脅し、イクサルの長はあなたたちを捧げ物にすると叫ぶ。シドは、イクサルは自分たちが引き受ける、あなたはガルーダに集中しろと命じ、アルフィノは暁の血盟とエオルゼアのために戦えと背を押す。あなたがガルーダを退けても、彼女はなお高笑いし、ここは自分の領域であり、子らの献じるクリスタルと信仰が力を支えるのだと吠える。イクサルの祈りが続く限り倒れないと悟ったあなたたちは彼らを止めにかかり、ガルーダがあなたを「我がもの」にしようと迫っても、あなたはその支配を拒む。</p>
+      <p>勝利の気配が生まれた瞬間、空気を切り裂く新たな声が響く。ガイウス・ヴァン・バエサルが現れ、渦のガルーダに向かって、それがすべてかと嘲る。シドを見つけると、祖国も血縁も捨てた者だと皮肉り、今日あなたたちが何を成し遂げるつもりだったのかと問う。そして自分は、はるかに大きな成果を得ると言い放つ。混乱の中でイフリートとタイタンの名が叫ばれるなか、ガイウスは古代アラグの究極兵器を示し、ガルーダは絶望とともにその力に呑まれていく。ラハブレアが傍らで、兵器がプリマルを喰らうほど強大になると語り、ガイウスは、今度は光の戦士など現れない、エオルゼアは屈するほかないと突きつける。</p>
+      <p>事が収まったあと、アルフィノとシドは冷えた現実を受け止める。ガルーダはもはや目前の脅威ではない――だが、ガイウスの新たな兵器こそ最大の脅威であり、必ず破壊しなければならない。そのためにまず、知り得る限りの情報を集める必要がある。アルフィノはベスパーベイへ向かい、暁の血盟を立て直そうと提案し、光を携える自分たちは闇から民を導けると断言する。やがて彼は、ひとつ気がかりがあったとあなたへ漏らす。ガルーダがあなたを奪おうとした瞬間、何かを見た気がした――だが、極限の緊張は目の証を誤らせる、と言ってその話を引っ込め、忘れてくれと頼む。そして今は、あの兵器がある限り、部族が神を呼び出すこともためらうだろうと述べる。その抑止力の不気味さを思いながら、いつか必ず破壊しなければならないという結論へ、あなたを連れていく。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> シド　<small class="muted">グリダニア：新市街 (X:11.3, Y:13.6)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="better-late-than-never.html">始動！ エンタープライズ</a></div>
+      <div class="row">すべて（リミテッドジョブを除く）Lv 44～</div>
+      <div class="row"><b>討伐戦開放</b> <a class="link" href="the-howling-eye.html">ガルーダ討伐戦</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="reclamation.html">かすかな灯火</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'暴風女王 Garuda 現身，暴虐席捲而來',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>你點頭表示可以出發時，Cid 先用一種克制的把握回應你：依照他的測試，裝置如今已經能與 crystal 完全協調運作，你只要準備好，就能立刻動身。可他也不願把不確定藏起來——測試能告訴你的有限；在真正接近 Howling Eye、嘗試突破那道屏障之前，他無法保證一定成功。他甚至提到有一個很小、但在統計上仍不能忽視的機率，crystal 可能引發嚴重的結果，說到一半又停下來，改口要你們保持正面。</p>
+      <p>接著，Cid 把話說得更直接。他向你道謝：讓他與自己的飛空艇重逢、願意信任他把計畫做下去、還有一路以來的所有支持。他坦言自己早已不是從前那個人，也不知道是否還能回到那個自己，但他很確定一件事——此刻的選擇讓他覺得「對」。他為自己突然流露情緒向你道歉，說原本打算等任務結束後再開口，可你一定明白他為什麼現在就必須說出來。</p>
+      <p>在空艇停泊處，Enterprise 隨著指令甦醒，機關聲回到船身裡。Alphinaud 望著那動靜，語氣既振奮又急切：去 Coerthas——去見那位被稱作「harpy queen」的 Garuda。Cid 深吸一口氣，卻在下一瞬間被回憶擊中：他曾經坐在這艘飛空艇上，而且並非獨自一人。船上有冒險者——像你一樣的冒險者。</p>
+      <p>Echo 將他遺失的記憶一股腦拉回來。他聽見自己咒罵戴了太久的護目鏡，想起年少時把自己當成引領潮流的天才，想起自己在 Garlemald 出生長大、理所當然地走上工程師之路，就像父親一樣。也想起與父親決裂的時刻：從什麼時候開始，Meteor 成了父親的一切，而身邊的人不再重要？父親離開了他們，但曾有另一個人站在他身邊——然而 Gaius 也同樣被某種吞噬一切的執念支配。於是他逃離帝國，來到 Eorzea，建立了 Ironworks；也是那時他第一次戴上護目鏡。Eorzea 讓他看見形形色色的人們與各自的希望與夢，他選擇與他們並肩而戰，想證明自己的知識能用在更高尚的目的上，想證明還有別的道路——而一切都從他找到新家園的那一天開始。</p>
+      <p>Echo 退去後，Cid 把目光拉回眼前的天空。他說自己幾乎忘了這感覺有多好：風掠過髮梢、天空無邊無際。接著他看著你，提到那道「光」——那是你，對吧？他說很少人知道，純血的 Garleans 都有第三隻眼；或許那幫助他認出你，也可能只是幸運。他又說，Enterprise 本來就是為了把 Eorzea 的守護者送上戰場而存在的，而他能稱它為自己的船，感到驕傲。當 Alphinaud 問他到底想起了什麼，Cid 只回答：一切——名字、族群、目的，全都想起來了。</p>
+      <p>當你們接近那道不斷翻攪的風之高牆時，Cid 先提醒你：要駕駛 Enterprise 穿過那種旋風屏障並不容易，他不想在你沒有「絕對確定」準備好之前，再把命拿去冒險。他問你是否真的準備好了；Alphinaud 也把你們所有的奔走與苦難都收束到這一刻，提醒你們所做的一切都是為了現在，並再次確認你是否願意踏過那道門。踏入 Howling Eye 後，Garuda 以狂怒的聲音質問誰敢闖入她的領域，巨大的身影讓 Alphinaud 驚愕得幾乎說不出話。Cid 看到被帶來的 Amalj’aa 與 kobolds 囚犯，困惑 Ixal 為何會把他們帶到這裡，而 Garuda 已經一邊大笑、一邊把你們斥為地上的蠢徒，宣稱自己就是風。</p>
+      <p>你回敬她：你們已經飛上天空、越過她的防線，你們不受任何束縛。Garuda 以最殘酷的話威脅你，Ixal 的首領也尖叫著要把你們當作獻給她的祭品。Cid 立刻要你專心對付 Garuda，他與 Alphinaud 會牽制 Ixal；Alphinaud 則催促你記住自己是為了 Scions 而戰、為了 Eorzea 而戰。你一度將 Garuda 壓制下去，她卻再次狂笑，宣稱這裡是她的領域，她的子民眾多無盡，晶石的供奉與信仰會讓她永遠不倒。當你們意識到只要 Ixal 持續膜拜，她就不會真正倒下，你們便轉而阻止他們——而當 Garuda 試圖把你「據為己有」時，你撐住了她的壓迫，拒絕把自己的生命交出去。</p>
+      <p>就在你們以為終於結束時，一個新的聲音闖入戰場。Gaius van Baelsar 現身，嘲笑 Garuda 的「威能」是否就到此為止，還當面認出 Cid，譏諷他背棄家國與同族，追問你們今天到底想達成什麼。Gaius 宣稱自己將完成更大的成就；混亂之中，Ifrit 與 Titan 的呼喊此起彼落，而他拿出 Ancient Allag（古代亞拉戈帝國）用來對付這類存在的終極兵器。Garuda 在驚恐中被那武器吞噬，Lahabrea 甚至在旁冷冷評價：每吞噬一個 primal，它就會變得更強。Gaius 隨後警告你們，這次不會再有 Warriors of Light 來拯救 Eorzea。</p>
+      <p>事後，你與 Alphinaud、Cid 只能面對新的現實：Garuda 已經不再是當下的威脅，但 Gaius 的新武器才是更大的災難，必須被摧毀——而在那之前，你們得先查清它的真相。Alphinaud 提議前往 Vesper Bay，重建 Scions，並堅持只要你們仍承載那道光，一切就還沒完。稍後，他又遲疑地向你坦白：在 Garuda 試圖奪走你的那一瞬間，他彷彿看見了什麼——但他很快收回話，說極度壓力會讓人的眼睛誤判，要你忘了他提過。就目前而言，他認為 primal 的問題會暫時沉寂，因為那武器成了任何部族都不敢輕易挑戰的威懾；然而你們也明白，正因如此，你們終究必須找到擊碎它的方法。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> 希德　<small class="muted">新格里達尼亞 (X:11.3, Y:13.6)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="better-late-than-never.html">遲來總比不到好，「Enterprise」終於啟動</a></div>
+      <div class="row">所有職業（不含限定職） 等級 44 以上</div>
+      <div class="row"><b>解鎖試煉</b> <a class="link" href="the-howling-eye.html">在咆哮之眼決戰 Garuda</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="reclamation.html">在微弱燈火下收復失地</a></div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
