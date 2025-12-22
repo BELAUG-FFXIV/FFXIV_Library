@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Don’t Do the Dewprism | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Hildibrand – Don’t Do the Dewprism (SB Patch 4.56)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/6YRypfwSEqU"
+              title="Don’t Do the Dewprism" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Don’t Do the Dewprism</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Don’t Do the Dewprism',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Shigure finds you in Kugane and thanks you—without your timely arrival, he says, he would not be standing here. He has just returned from the gaol after speaking with the Wolf Burglar, and he wastes no time: not long after the thief was handed over to the Sekiseigumi, Master Akebono burst in, raging at the gaoler and demanding the return of what had been taken from his safe.</p>
+      <p>Shigure reminds you that Akebono was cagey when you first questioned him about the theft. The Wolf Burglar, however, described the prize plainly—an unmarked satchel filled with white powder. Because Akebono is known for dealing in medicines, the “chivalrous” thief claims he stole it for the poor, yet kept it afterward since there was no label to say what it was. Shigure can only conclude it is no ordinary remedy, else Akebono would not clamor for it so desperately.</p>
+      <p>Hildibrand’s instincts flare, and Shigure tells you where the satchel has gone: into the hands of those who lurk in the waterways. They will deny everything unless you speak the correct password—“As above, so below.” With that, you head for their hideaway, where Koju greets you warily and sizes up the company you keep. Shigure asks after the satchel, and Koju makes it clear that words are the price of trust. When the moment comes, you give the password—yet the wrong words earn only mockery, and Shigure snaps that this is no time to antagonize the man. With the proper phrase finally spoken, Koju relents, though his gut tells him no honest man locks away such a powder, and he warns that rich folk do not hide harmless medicines behind truncheons and bars.</p>
+      <p>With the satchel in hand, Shigure insists suspicion is not proof; you must learn what the substance truly is. The thought comes quickly—seek a Hannish alchemist, or someone steeped in their reagents, perhaps through the Thavnairian Consulate. Hildibrand declares he reached the same conclusion, and you push onward, even as Shigure groans that you cannot simply hammer at a foreign consulate’s gates and demand answers. At the consulate, Mulnith refuses you entry without an appointment, no matter Shigure’s plea that public safety is at stake—until Godbert appears, and fortune turns again. A representative of the Sahjattra Concern of Radz–at–Han offers assistance, honored to aid Godbert’s son and his comrades, and you withdraw to speak elsewhere. There, the representative studies the powder and reveals the truth: it is an ingredient of Radz–at–Han, forbidden for sale, meant not for healing but for creating dewprism—a drug so potent a thimbleful can muddle the senses and make even the strong-willed pliant to any command, leaving little trace beyond a fleeting glimmer in the eyes.</p>
+      <p>Shigure swears he has seen that glimmer before, and you add that you have seen it too—this is Akebono’s doing, and Master Kumode is being manipulated. The pieces lock into place: the chief coincounter of the Sekiseigumi pressed to end the investigation because he was drugged during his meeting with Akebono. You rush to Akebono’s residence, only to find it empty—until the Wolf Burglar returns, having slipped his cell, determined not to miss the chance to bring his nemesis to justice and to reclaim the Soboro Sukehiro. He tells you Akebono is bound for the Isle of Bekko to meet a silent partner, and you set out at once.</p>
+      <p>At the rendezvous in the Ruby Sea, you watch Akebono thank the Sahjattra representative for discretion, then boast of dewprism’s “perfection”—tasteless, odorless, colorless, and already used to turn the chief coincounter into a tool for steering the Sekiseigumi. He dreams aloud of bigger prizes and even of becoming magistrate, declaring all Kugane his for the taking. Then the representative unveils the promised “gift” from Manderville & Manderville: Godbert himself, placed under dewprism’s influence, pledged to serve Akebono without question. Shigure cries that Godbert is enthralled, and before you can stay hidden, Hildibrand calls out to his father—only for the representative to summon “the Hammer” to crush you. What follows is as overwhelming as it is absurd: Godbert unleashes the full force of Manderville might, and Hildibrand panics as his father’s “Reverse Manderville Meteor Strike” bears down. Just as suddenly, Godbert comes to himself, spent and bewildered, offering a flood of apologies for the excessive display and declaring that Manderville & Manderville will sever all ties with the Sahjattra Concern.</p>
+      <p>In the aftermath, you reclaim the Soboro Sukehiro—Akebono kept it so close he carried it to the secret meeting—and the Wolf Burglar asks one final favor: lay it at his father’s grave. Shigure, bound by duty yet changed by what he has seen, tells the thief he will report to his superiors that he saw neither hide nor hair of the Wolf Burglar, and urges him to go to his father. Even as that choice grants the burglar his chance at closure, chaos refuses to end neatly. Gilgamesh watches all this with rare solemnity, speaking of holding fast to justice while knowing when rigid adherence would cause greater wrong, and he mourns Enkidu—then falters, struck by a horrible question about what he ate that fateful day. The Sahjattra representative, furious, seizes the moment and barks at Gilgamesh to spirit him far, far away; Gilgamesh repeats the words as if compelled, and the pair vanish beyond the rift. Hildibrand lunges after them, Nashu races to follow, and Godbert laughs with pride at his son’s latest impossible exit—this time not into the sky, but into the earth.</p>
+      <p>Back at the barracks in Kugane, Shigure thanks you from the bottom of his heart, unable to imagine where he would be had your paths never crossed. The Sekiseigumi conclude that even before the chief coincounter fell under dewprism’s thrall, he willingly conspired with Akebono, and he will be held to account. Akebono’s enterprise collapses, and the Thavnairian Consulate agrees to intercede for its countrymen to broker fairer dealings so no new monopoly takes root—whatever their motives, more medicine will reach the sick and needy, and debts forced upon people by Akebono’s extortionate prices will be wiped clean.</p>
+      <p>Shigure admits the world is not the simple ledger he once imagined; good and evil, innocence and crime are not so easy to separate. You and the inspector taught him to look beyond appearance and hearsay, and he believes he is worthy of the Sekiseigumi only because of what he learned at your side. When he asks what became of Hildibrand, you answer calmly enough that Shigure accepts this vanishing act as a “regular occurrence,” and he asks only that, when you meet the inspector again, you pass along his regards. He wonders about the Wolf Burglar as well—whether he keeps watch for the next Akebono, or pays his respects to his father—and before duty calls him away, he tells you to visit him at the barracks whenever you pass through Kugane again.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Hildibrand <small class="muted">Kugane (X:11.7, Y:8.8)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-past-is-never-past.html">The Past Is Never Past</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="the-sleeping-gentleman.html">The Sleeping Gentleman</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'薬に侵されし最強の男',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>シグレはクガネであなたたちを見つけると、助けに駆けつけてくれたことへの礼を述べ、言葉を重ねる暇もなく切り出す。彼は牢獄から戻ったばかりで、「狼狽賊」から聞いた話があるという。赤誠組に引き渡されてほどなく、アケボノが牢へ怒鳴り込み、看守を罵って金庫から盗まれた品を返せと迫ったのだ。</p>
+      <p>あなたたちが最初に盗難を聞いたとき、アケボノは中身をひどく隠したがった。だが「狼狽賊」は、それが白い粉の入った無印の袋だと明かしたという。薬種商として名のあるアケボノが相手なら、貧しい者のために盗むのが自分の流儀だと言い張り、正体が分からぬゆえに保管していた。だが、だからこそ明らかになる──この粉は、ありふれた薬ではない。そうでなければ、アケボノがあれほど取り乱す理由がない。</p>
+      <p>ヒルディブランドの勘が騒ぎ、シグレは袋の行方を告げる。今それは、水道に巣くう連中の手にある。だが、合言葉を言わない限り、彼らは決して認めない。その合言葉は「上なるものは下なるものの如し」だ。あなたたちは急いで水道へ向かい、そこにいるコージュに警戒されながらも用件を伝える。</p>
+      <p>シグレが袋を求めると、コージュは合言葉を求める。ここで余計な言葉を口にすれば、嘲笑され、シグレにたしなめられるだけだ。あなたが正しい合言葉を告げると、コージュは渋々ながら応じる。とはいえ彼は、こんなものを金庫に隠す時点でろくな品ではないと言い、金持ちは棒を持った連中に守らせてまで、ただの薬など隠さないのだと警告する。</p>
+      <p>袋を手にしても、シグレは疑いだけでは罪にできないと言い切る。まずは正体を突き止めなければならない。あなたは、ラザハンの錬金術に通じた者を頼るべきだと考え、サベネア領事館を思い浮かべる。ヒルディブランドも同じ結論に達していたと胸を張り、あなたたちは領事館へ向かうが、シグレは「外国の領事館の門を叩けば済む話ではない」とため息をつく。</p>
+      <p>領事館ではムルニスが面会の約束がない以上は手続きが必要だと言い、シグレが公衆の安全を訴えても首を縦に振らない。そこへゴッドベルトが現れ、さらに運が巡る。ラザハンのサージャトラ商会の代表が、自分は錬金術の品を扱っていると名乗り、ゴッドベルトの息子と仲間を助けるのは最大の名誉だと申し出る。場所を移して粉を調べさせると、それはラザハン由来の試薬だが治療用ではなく、危険な用途のため販売が禁じられているという。熟練の錬金術師が扱えば「デュープリズム」を作れる──わずかな量で感覚を惑わせ、強い意志を持つ者すら命令に従わせる強力な薬で、痕跡はほとんど残らず、目の色が一瞬変わるような光だけが手掛かりだと告げられる。</p>
+      <p>シグレは、その光を以前に見たと断言し、あなたも見たと重ねる。アケボノがデュープリズムでクモデを操っているのだ、と。赤誠組首席勘定方が小商人への捜査を強く打ち切らせた理由も、面会の場で薬を盛られたからに他ならない。あなたたちは急いでアケボノを追うが家は空で、そこへ牢を脱け出した「狼狽賊」が現れる。彼は、宿敵を裁く好機を逃すつもりはないと言い、ソボロ・スケヒロも取り戻すためには助けが必要だと告げる。アケボノはベッコウ島へ向かい、密かな相棒と会うらしい──あなたたちは時間を惜しまず出発する。</p>
+      <p>紅玉海の待ち合わせ場所で、あなたはアケボノと商会の代表のやり取りを目撃する。アケボノはデュープリズムが無味無臭無色で、赤誠組首席勘定方の飲み物に混ぜても気づかれなかったと笑い、赤誠組を操るのに役立ったと豪語する。ソボロ・スケヒロを取り戻した今、次は奉行所、そしてクガネそのものを手に入れるとまで言い出す。代表は、マンダヴィル＆マンダヴィルからの贈り物だとしてゴッドベルトを差し出し、デュープリズムで従順にされた彼にアケボノへ忠実に仕えろと命じる。シグレが薬の影響だと叫ぶ間もなく、あなたたちの存在が露見し、代表は「ハンマー」を呼び出して排除せよと命令する。</p>
+      <p>圧倒的な力と騒がしさの中で、ゴッドベルトはマンダヴィルの武威を振るい、ヒルディブランドは必死に父に呼びかける。やがてゴッドベルトは我に返り、疲れ果てた様子で何が起きたのかと戸惑いながら、過剰な武勇を詫び、サージャトラ商会とは一切の関係を断つと宣言する。あなたたちはソボロ・スケヒロを取り戻し、アケボノが手放すことを嫌って密会の場へ持ち込んだことにヒルディブランドは勝利を確信する。「狼狽賊」は最後の願いとして、それを父の墓に供えてほしいと頼み、罪は罪だとして牢へ戻される覚悟を見せる。だがシグレは、上司には「狼狽賊の姿は見ていない」と報告すると告げ、彼に父のもとへ行けと背を押す。</p>
+      <p>それでも騒動は終わらない。ギルガメッシュは、正義を守りつつも硬直した規律がより大きな不正を生むことがあると語り、亡きエンキドゥへの悔恨を漏らした直後、恐ろしい疑問に凍りつく。そこへ商会の代表が吠え、ギルガメッシュに「遠くへ連れて行け」と命じると、ギルガメッシュはその言葉をなぞるように笑い、ふたりは裂け目の向こうへ消える。ヒルディブランドは追い、ナシュも続き、ゴッドベルトは息子の成長を誇らしげに見送る──今度の消え方は空ではなく、地の底だった。</p>
+      <p>クガネの屯所に戻ると、シグレは心からの感謝を告げる。赤誠組は、首席勘定方が薬で操られる前からアケボノと進んで不正に手を染めていたと結論づけ、責任を負わせるという。アケボノの商いは崩れ、サベネア領事館は自国の者たちのために仲介し、ラザハン側の供給とヒンガシ側の取引がより公平になるよう取り計らうことになった。新たな独占は誰の利益にもならず、結果として病む者や困窮する者に薬が行き渡るなら、より良い変化だとシグレは語る。さらに、法外な価格で支払いを強いられていた者たちの借金は帳消しになるという。</p>
+      <p>シグレは、善悪や無実と罪が机上のように単純ではないと認め、あなたとヒルディブランドから、見た目や噂だけで人を裁かないことを学んだと言う。ヒルディブランドの行方を案じるが、あなたがいずれ無事に戻ると受け合うと、それが「いつものこと」だと納得し、再会したらよろしく伝えてほしいと頼む。さらに「狼狽賊」についても思いを巡らせ、次のアケボノを警戒しているのか、父に弔いを捧げているのかと問いかける。呼び出しがかかり、彼は慌てて職務へ戻るが、クガネを通るときはいつでも屯所に寄ってくれとあなたに言い残す。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> ヒルディブランド　<small class="muted">クガネ (X:11.7, Y:8.8)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-past-is-never-past.html">秘められた証拠品</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="the-sleeping-gentleman.html">紳士の長い眠り</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'最強的男人卻敵不過藥物侵蝕',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Shigure 在 Kugane 找到你們，先把感謝壓在心口——要不是你們趕到得及時，他說自己恐怕已經不可能站在這裡。他剛從牢獄回來，才和那位「狼狽賊」談過；他帶回來的消息令人不安：你們把狼狽賊交給 Sekiseigumi 後沒多久，Master Akebono 就衝進牢裡，怒斥看守，逼他們把從自己金庫裡被偷走的東西還回來。</p>
+      <p>Shigure 提醒你，那起竊案剛發生、你們第一次去問 Master Akebono 的時候，他對「被偷的內容物」遮遮掩掩；但狼狽賊說得很清楚——那是一個沒有任何標記的袋子，裡頭裝著白色粉末。因為 Master Akebono 以販售藥品出名，狼狽賊自稱是為了窮人與弱者才去偷那包粉末，可又因為無從辨識它到底是什麼藥，便暫時留在手上保管。可越是如此，就越像不尋常——若只是普通藥材，Master Akebono 不可能這樣急著索回。</p>
+      <p>Hildibrand 的「偵探直覺」立刻起了反應，Shigure 也把線索說得明白：那個袋子現在在「水道裡的人」手上。但那些人不會承認，除非你們能說出正確的暗號——“As above, so below.” 你們於是趕往他們的藏身處，Koju 站在陰影裡迎上來，語氣戒備，卻也像在衡量你們到底想做什麼。Shigure 問他那個裝白色粉末的袋子，Koju 不遮不掩地回敬：既然你們能找到這裡，那就該也知道「暗號」。輪到你開口時，錯的話只換來取笑，Shigure 立刻阻止你繼續胡鬧，警告你別刻意激怒對方。當你說出正確的那句 “As above, so below.”，Koju 才終於點頭，但他仍不放心——他說自己雖不知道那是什麼，卻直覺那不會是什麼正當人會鎖在金庫裡的東西；富人也不會把普通藥品藏得像要防賊防刀棍一樣。</p>
+      <p>袋子拿到了，Shigure 仍堅持你們不能只靠「可疑」就定罪：白色粉末不足以成為確鑿證據，必須先弄清楚它到底是什麼。你想到也許該找懂 Hannish 鍊金傳統的人幫忙，甚至可能要去 Thavnairian Consulate；Hildibrand 立刻表示自己也「剛好」得出同樣結論。Shigure 嘆氣說你們不能就這樣去敲外國領事館的大門——但你們仍決定試試看，因為時間不等人。到了 Thavnairian Consulate，Mulnith 冷冷地問你們有沒有預約；Shigure 說沒有，對方就以程序與文件為由拒絕通融。Shigure 只好把「公共安全與福祉」搬出來求一個例外，卻仍換不到一句點頭。就在此時，Godbert 出現了，氣氛瞬間翻轉；緊接著，一名自稱來自 Radz-at-Han 的 Sahjattra Concern 代表主動上前，表示他們經營各式鍊金商品，若你們需要相關專業，他願意協助——能幫助 Godbert 的兒子與同伴，是莫大的榮幸。你們換了地方讓他檢驗粉末，他很快得出結論：這確實是 Hannish 來源的材料，但絕非醫藥用途，而是危險用途；因此禁止販售。若由高手鍊金師操作，它可以製成 dewprism——只要一小小一口量，就足以擾亂感官，甚至讓最意志堅定的人也變得容易聽命行事，而且幾乎無法察覺，只有偶爾會在眼中掠過一瞬的微光、像顏色短暫改變。</p>
+      <p>Shigure 立刻說自己見過那樣的微光，你也附和：你同樣看見過，而且你懷疑 Master Akebono 正用 dewprism 操控 Master Kumode。這時一切終於對上：為什麼 Sekiseigumi 的首席勘定方會強烈要求結束對一名小商人的調查——因為他在與 Master Akebono 會面時就被下了藥。你們衝去找 Master Akebono，卻發現屋裡空無一人；狼狽賊也在此刻現身，嘲笑你們以為他會乖乖待在牢裡，同時坦白自己不會錯過把宿敵送上正義審判的機會，更要把 Soboro Sukehiro 一併取回。他說 Master Akebono 正前往 Isle of Bekko，準備與「沉默的合夥人」會面——你們沒有時間猶豫，只能立刻出發。</p>
+      <p>在 The Ruby Sea 的 Rasen Kaikyo，你們終於看見那場密會：Master Akebono 感謝 Sahjattra Concern 代表的謹慎，接著得意洋洋地談起 dewprism 的效果——無味、無臭、無色，首席勘定方甚至不知道自己的飲品被動了手腳；如今那人已成為他操弄 Sekiseigumi 的工具，足以讓他付出「定期維持」也值得。Soboro Sukehiro 回到手上後，他甚至開始幻想更大的獵物，連奉行所乃至整個 Kugane 都要據為己有。代表此時又帶來所謂 Manderville & Manderville 的「贈禮」：Godbert 被 dewprism 影響，站在那裡，順從地被要求「忠誠且毫不質疑」地侍奉 Master Akebono。Shigure 驚喊 Godbert 受到 dewprism 的影響，而你們的藏身也在瞬間被戳破；代表呼喚「The Hammer」出手，Akebono 則狂笑著要你們全都被收拾乾淨。接下來的場面既可怕又荒唐：Godbert 的力量排山倒海，Hildibrand 拼命呼喚父親，卻只能眼睜睜看著攻勢落下，甚至被迫哀求別再來那招「Reverse Manderville Meteor Strike」。直到 Godbert 終於力竭清醒，茫然問起發生了什麼，又急忙向你們道歉，說自己剛才的武勇展示實在太過分；他也當場宣布 Manderville & Manderville 將與 Sahjattra Concern 斷絕所有往來。你們重新奪回 Soboro Sukehiro——Hildibrand 說，Akebono 捨不得放下它，才會連密會都帶在身邊。狼狽賊提出最後的請求：把它放到他父親的墓前。按理你們該把他送回牢裡，但 Shigure 最終選擇告訴上級：他既沒看見狼狽賊的人，也沒看見他的影子，並催促他去見自己的父親。</p>
+      <p>然而混亂仍未真正收束。Gilgamesh 目睹你們的選擇，感慨「堅守正義」與「不讓僵硬規矩造成更大不義」之間的微妙；他提起 Enkidu，說自己也渴望在哀悼中找到安寧，卻又被一個可怕的念頭刺中——如果 Enkidu 還在，那他當年到底吃了什麼？就在此刻，Sahjattra Concern 代表怒吼著命令 Gilgamesh 把他帶去「很遠、很遠的地方」，Gilgamesh 竟像被牽動般重複那句話，兩人一起越過裂隙消失。Hildibrand 追了上去，Nashu 也立刻跟著衝出；Godbert 放聲大笑，說自己的兒子又一次用最離譜的方式離開——這次不是飛向天空，而是「消失進大地」。</p>
+      <p>回到 Kugane 的駐屯所，Shigure 幾乎說不出更多話，只能再次由衷感謝你——若沒有遇見你與同伴，他不敢想自己會走到哪裡。Sekiseigumi 的結論也很明確：即便在首席勘定方被 dewprism 操控之前，他也曾心甘情願地與 Master Akebono 共謀不法，因此必須被追究責任。至於 Master Akebono 與他如今瓦解的生意，Thavnairian Consulate 同意替本國人士出面協調，讓 Hannish 供應與 Hingan 商人之間的交易更公平，避免再出現任何新的壟斷——不管出發點是什麼，只要能讓更多藥品落到病患與窮困者手裡，Shigure 認為這就是更好的改變；更重要的是，過去被迫以高價向 Akebono 買藥的人，所有欠債都將被一筆勾銷。</p>
+      <p>Shigure 坦言自己曾以為善惡、清白與罪行都能簡單劃分，但現實並非如此；你與那位調查官讓他學會別只憑外表與流言就下判斷。他問起 Hildibrand 的下落，你用平靜的語氣讓他明白：這似乎是「常有的事」，他也只好接受，說等你們再度重逢時請代他問候。至於狼狽賊，他好奇他此刻究竟在做什麼——是守望下一個 Akebono，還是去向父親致意；他一邊自嘲可能會對方法有意見，一邊仍立誓：若對方真成了尋常竊賊，他會親手將其繩之以法。就在此時，Sekiseigumi 的同僚催促他別再逗留，Shigure 匆匆告別，最後只留下一句：無論何時你路過 Kugane，都別忘了來駐屯所找他。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 希爾迪布蘭德　<small class="muted">Kugane (X:11.7, Y:8.8)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-past-is-never-past.html">封存於過去的關鍵證物</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="the-sleeping-gentleman.html">沉睡的紳士</a></div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
