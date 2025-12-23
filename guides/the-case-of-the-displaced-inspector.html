@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Case of the Displaced Inspector | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Hildibrand Adventures – The Case of the Displaced Inspector (DT Patch 7.15)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/BwubFzwFk1k"
+              title="The Case of the Displaced Inspector" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">The Case of the Displaced Inspector</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'The Case of the Displaced Inspector',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+<p>You run into Nashu in this far-flung nation, and she greets you with bright relief—she’s needed help for a while now. Ever since Mister PuPu’s starship whisked the inspector away to gods only know where, she’s been doing everything she can to track him down, chasing any hint that might lead to his next appearance.</p>
+<p>Her best lead came from The Thavnairian Truth: the latest issue carried eyewitness accounts of a shiny craft headed west across the ocean. She followed that trail as far west as she could manage, arriving here after a handful of inquiries and—by her own insistence—an “essential” period of acclimating to the local cuisine.</p>
+<p>Since fate has put you at her side, she presses on with the investigation at once. She hands you an illustration of the starship clipped from Dorian’s publication, confident it will make it easier to explain what you’re looking for, and proposes you split up—she’ll question the stallkeepers, while you go practically anywhere else and ask the city guards if they’ve seen anything similar. With the Landsguard tasked to stay vigilant for unusual threats, it seems prudent to visit Brightploom Post and question the soldiers there.</p>
+<p>At Brightploom Post, you show the illustration to the guards. Mobeel Ja tells you he’s seen a vessel like it—long before Zoraal Ja’s flying ships appeared—limping north through the skies over Tuliyollal, wobbling as though it might crash at any moment. By the way it reeled, he doubts it stayed aloft much longer.</p>
+<p>Shcoahe confirms another sighting from a patrol in Shaaloani: a flying disk drifting slowly toward the ground, coming down somewhere in Yyasulani. Searching his memory, he offers the name of the place now covered by the dome—Heritage Found—and urges you to look there if you’re determined to find where the craft went down.</p>
+<p>You return to Nashu, who admits her market questioning produced nothing—nothing starship-shaped, anyway. When you share the soldiers’ leads, she latches onto them immediately: the ship was malfunctioning, and it likely came down somewhere north. She even mistakes the name in her excitement, calling it “Hostage Found,” but with you guiding her, she’s certain you’ll reach the right place in the end—even if anything involving the inspector rarely stays simple.</p>
+<p>In Heritage Found, the air itself feels crackly and zappy, and Nashu insists on standard investigative procedure—start by questioning the residents. An Outskirts resident tells you that someone with such a distinctive look would not have gone unnoticed in their small settlement, and suggests the inspector might be wandering somewhere inside Solution Nine, where crowds could swallow a stranger whole. If Nashu is to enter as well, you’ll need to make arrangements with the sentry at the tower entrance.</p>
+<p>At the tower, a mechanical sentry verifies your access—then scans Nashu and blares a warning about an explosive device, denying her entry. Nashu protests that she carries no explosives, only medicine for treating Inspector Hildibrand’s condition, and tries to explain—at length—that the inspector was sucked up by Mister PuPu’s malfunctioning starship, dragged thousands of malms away, and deposited here, so she must be allowed through to “blow away his brain cobwebs.” The machine’s logic circuits overload, it initiates an emergency shutdown, and Nashu takes the opening with a satisfied shrug: nap time, then—straight inside.</p>
+<p>Inside Solution Nine, Nashu stares up at the city’s sheer scale and declares there’s one sure way to find the inspector in a place like this: find an ongoing case, and you’ll find him. You head for the lively part of town—True Vue—asking around for nefarious incidents. You hear talk of a recent theft, rumors of an odd squealing creature, and word of soldiers mobilizing for some disturbance nearby, and Nashu seizes on the robbery at a tavern as your next lead.</p>
+<p>At Neon Stein, the tavernkeep rages about a stolen, aged bottle of spirits, only for a gravelly-voiced man in an overcoat to cut through the noise and point the finger at a worker. He explains how, with the supply of souls cut off, black-market trades have become common, and a top-shelf bottle makes fine currency; he notes how regulator logs can reveal contraband, and he calls out tampered locks and scorch marks on amateur electro-picking hands. The worker breaks under the pressure, and as authorities take him away, Nashu stares—certain the man in the overcoat was the inspector, even if something about him felt…off.</p>
+<p>You follow before he can vanish into the crowd. He notices the tail at once, warns that bombs aren’t toys, and remarks that without regulators you should be careful with the only lives you’ve got. Nashu tries to snap him back into himself—declaring him Hildibrand, agent of enquiry, gentleman inspector extraordinaire—but he rejects the very idea of being a “gentleman,” calling himself a weathered fool with too many debts and regrets: Detective Hardiboiled. Nashu offers him a hard-boiled egg anyway; he accepts with easy charm, and though Nashu hesitates, the resemblance and that stubborn Manderville-like durability keep the doubt alive. When you float the possibilities—another case of “twin persons” within the dome, or someone sharing the same soul—Hardiboiled offers to help find the missing lookalike, mangling the name into “Phildigrand” as if it hardly matters, while Nashu decides the search must continue. Before you part, he promises he can feel a hunch coming on—leaving you with the uneasy certainty that the inspector’s trail has only just begun.</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+<div class="row"><b>Quest Giver</b> Nashu Mhakaracca <small class="muted">Tuliyollal (X:14.5, Y:12.5)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+<div class="row"><a class="link" href="gentlemen-at-heart.html">Gentlemen at Heart</a></div>
+</div>`,
+    followq:`<div class="stack">
+<div class="row"><a class="link" href="wizened-testimony.html">Wizened Testimony</a></div>
+</div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'事件屋の行方',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+<p>遠い異国の地で、あなたはナシュ・マカラッカとばったり出会う。彼女は運命めいた再会を喜びつつ、今まさに助けが必要だと訴える。ププの宇宙船が巡視員をどこかへ連れ去って以来、彼女は手掛かりを求めて必死に追い続けてきたのだという。</p>
+<p>最大の手掛かりは月刊誌『ザ・サヴナイリアン・トゥルース』だった。最新号の目撃談には、海の上を西へ向かう光る機体が描かれており、彼女は荷物をまとめて行ける限り西へ向かった。ここに辿り着いてからも聞き込みはしたが、まずは土地の料理に馴染むことが大事だと力説し、しっかり「順応」してきたらしい。</p>
+<p>あなたが来てくれた以上、未確認飛行紳士の聞き込みを再開するとナシュは決める。彼女はドリアンの出版物から切り抜いた宇宙船の挿絵をあなたに渡し、これがあれば説明がしやすいと胸を張る。彼女は市場で聞き込みを続けるので、あなたは食べ物屋台以外の場所で衛兵に挿絵を見せ、似たものを目撃していないか尋ねてほしいという。異変への警戒を担うランドガードの兵に話を聞くため、ブライトプルーム・ポストへ向かうのが得策だ。</p>
+<p>ブライトプルーム・ポストで挿絵を示すと、モビール・ジャは同じような機体を見たことがあると言う。ゾラージャの飛空艇が現れるより前、トライヨラの上空を北へ向かって飛び去るのを見届けたが、墜落しそうなほどふらついており、とても長くは飛べなかっただろうと首を振った。</p>
+<p>さらにショコエも、シャーローニでの巡回中に同じような飛行円盤を目撃したと語る。ゆっくりと地面へ降りていき、ヤースラニのどこかへ落ちたように見えたという。いまはドームで覆われた場所の名を思い出し、ヘリテージファウンドを探してみるべきだとあなたを促す。</p>
+<p>あなたが報告に戻ると、ナシュは市場での聞き込みは成果なしだったと肩を落とす。だが手に入れた情報を聞くや否や、宇宙船は故障して北のどこかへ墜ちたのだと確信し、勢い余って地名を言い間違えながらも、あなたが一緒なら必ず辿り着けると笑う。巡視員が絡む以上、すんなりとはいかないだろうと分かっていても、彼女は前へ進む。</p>
+<p>ヘリテージファウンドでは、空気がぱちぱちと騒がしく、ナシュはまず住民への聞き込みを提案する。アウトスカーツの住人は、特徴的な男が小さな集落にいれば見逃すはずがないと言い、より人の多いソリューション・ナインなら群衆に紛れて気づかれないかもしれないと示唆した。だがナシュも入るなら、塔の入口の番兵を説得して通行の手配が必要だとも釘を刺す。</p>
+<p>塔の入口で機械の番兵はあなたの権限を確認する一方、ナシュを走査すると爆発物の所持を警告し、入場を拒否する。ナシュはこれは爆発物ではなく巡視員ヒルディブランドの治療薬だと反論し、ププの故障した宇宙船に吸い上げられ、はるか遠くまで引きずられてここへ落とされたのだから通してほしいと論理立てて訴える。だが番兵の回路は悲鳴を上げ、緊急停止に至った。ナシュはそれを「お昼寝」と受け取り、あなたとともに中へ入っていく。</p>
+<p>ソリューション・ナインの規模に目を丸くしたナシュは、こんな街で巡視員を探すなら事件の匂いを追うのが一番だと言い切る。あなたは東区のトゥルービューへ向かい、住民から最近の騒動を聞き出す。窃盗の噂、奇妙な鳴き声の生き物の話、兵が出動したという目撃談が集まり、ナシュは近くの酒場で起きた盗難事件へ急ぐ決断をする。</p>
+<p>ネオンスタインの酒場では、店主が高価な年代物の酒を盗まれたと怒鳴り散らす中、外套の男が現れて犯人は目の前にいると言い放つ。魂の供給が絶たれたことで闇取引が増え、上等な酒は取引の代価になり得ると指摘し、レギュレーターの記録や鍵のこじ開け痕、素人のエレクトロピッキングが残す火傷跡を根拠に従業員を追い詰める。従業員が弱さを認めて連行されると、ナシュは声と雰囲気に確信を持ち、外套の男こそ巡視員だとあなたに目を向ける。</p>
+<p>あなたが追跡すると、男はすぐに尾行に気づき、爆弾は玩具ではないと釘を刺す。レギュレーターを持たないあなたたちに、残された命は少ないのだから慎重に扱えとも言う。ナシュが「紳士なる巡視員」ヒルディブランドだと呼びかけても、男は紳士など侮辱だと吐き捨て、自分は借金と後悔を抱えた年季の入った愚か者、探偵ハルディボイルドだと名乗る。それでもナシュがゆで卵を差し出すと、男は軽口とともに受け取り、あなたがドーム内で起きる「双子のような現象」や魂の共有の可能性を口にすると、ハルディボイルドは行方不明者捜しなら任せろと請け負う。名前を言い間違えながらも、勘が働いたと言って去っていく――その背に、次の騒動の影が伸びる。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+<div class="row"><b>クエスト発行</b> ナシュ・マカラッカ <small class="muted">トライヨラ (X:14.5, Y:12.5)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+<div class="row"><a class="link" href="gentlemen-at-heart.html">マンダヴィル家の謎</a></div>
+</div>`,
+    followq:`<div class="stack">
+<div class="row"><a class="link" href="wizened-testimony.html">実直な探偵</a></div>
+</div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'流落他方的偵探疑案，追尋偵探的去向',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+<p>你在遙遠的異國與 Nashu Mhakaracca 不期而遇。她一眼看到你就像抓到救命繩般鬆了口氣，直說你來得正好——她真的需要幫忙。自從 Mister PuPu 的星船把那位巡視員捲走、送去誰也說不清的地方以後，她就拼了命追著線索跑，只求把人找回來。</p>
+<p>她說，最像樣的突破口來自《The Thavnairian Truth》。最新一期的目擊報導提到，有一艘閃亮的飛行器往海的西方飛去；她收拾了行李，一路往西追到走不下去的地方，最後就來到了這裡。到達後她也打聽過消息，只是——她鄭重其事地補充——先「適應當地料理」是必要步驟。</p>
+<p>既然命運把你送來支援，她決定立刻恢復調查，繼續追問「不明飛行紳士」的去向。她把一張從 Dorian 的刊物中剪下的星船插圖交給你，說有了這張圖，要跟人解釋你們在找什麼會容易得多。她要在市場向攤商打聽，你則去找城裡的守衛出示插圖，問他們是否見過類似的東西；而負責警戒異常動向的守備隊也許掌握更多消息，你最好去 Brightploom Post 問問那裡的士兵。</p>
+<p>你到了 Brightploom Post，把插圖遞給守衛看。Mobeel Ja 說他確實見過那樣的飛行器——而且是在 Zoraal Ja 的飛行船出現之前很久——他親眼看著它在 Tuliyollal 上空踉蹌著往北飛，晃得像隨時會摔下來一樣。依那種搖搖欲墜的狀態，他不認為那艘船還能在空中撐太久。</p>
+<p>另一名士兵 Shcoahe 也承認見過：他在 Shaaloani 巡邏時看到一個幾乎一模一樣的飛行圓盤，緩緩往地面飄落，似乎墜在 Yyasulani 的某處。他想起那片如今被圓頂覆蓋的地帶叫 Heritage Found，並勸你如果真想找到墜落點，就去那裡找找看。</p>
+<p>你帶著這些情報回去找 Nashu Mhakaracca，她垂頭喪氣地承認自己在市場毫無收穫——至少沒收穫到「星船形狀」的線索。但一聽完你的回報，她又立刻精神大振：那艘星船顯然出了故障，最後大概在這裡以北的某處墜落。她興奮到把地名說錯，還把希望全押在你剛提到的地方上；你提醒她應該是 Heritage Found，她也毫不氣餒，只說有你護送，怎樣都能走到正確的地方。</p>
+<p>到了 Heritage Found，空氣像帶著電流般噼啪作響，Nashu Mhakaracca 宣布要照「標準偵查流程」行事：先問居民有沒有見過疑似巡視員的「紳士身影」。The Outskirts 的居民表示，這裡是個小聚落，大家彼此都熟得很，若真有那種外表與舉止都很顯眼的人出現，他不可能沒注意到；反倒是 Solution Nine 人多雜沓，對方更可能混在人群裡不被發現。不過他也提醒你：若 Nashu 也要進城，你得先去塔入口說服哨兵放行。</p>
+<p>你們來到入口的機械哨兵前，它先確認你擁有通行權，接著掃描 Nashu，立刻警告偵測到爆炸裝置並拒絕入內。Nashu 立刻反駁那不是爆炸物，而是用來治療巡視員 Hildibrand 症狀的藥；她還試圖把事情講得「很簡單」——巡視員被 Mister PuPu 的故障星船吸走，接著被拖行了數千 malm，最後丟在這裡，所以你們必須放她進去，好讓她把他的腦袋「敲醒」。機械哨兵的邏輯迴路當場超載，啟動緊急停機；Nashu 乾脆把它當成「午睡時間」，拉著你直接往裡走。</p>
+<p>進到 Solution Nine，Nashu Mhakaracca 抬頭望著這座巨大的城市，信誓旦旦地說：要在這種地方找巡視員，最可靠的方法就是找「正在發生的案件」——有案子就有他。你們趕往較熱鬧的 True Vue，一邊聽人聊天一邊探路：有人提到最近發生了竊案，有人聽過某種怪異、會尖叫的生物傳聞，也有人說剛才看見士兵匆匆出動去處理騷動。Nashu 很快把線索串在一起，說附近的酒館發生失竊案，你們就去那裡。</p>
+<p>在 Neon Stein，酒館老闆氣急敗壞地吼著：店裡最昂貴、年份最老的烈酒被偷了，必須立刻把犯人抓回來。此時一個披著大衣、聲音低沉粗礪的男人冷冷插話，說犯人就在眼前；他提起魂的供給被切斷後，人們轉向黑市交易，而高級酒正好能當作交換的籌碼，又指出可以用 regulator 的紀錄查出走私魂的痕跡。他還看過酒櫃的鎖被動過手腳，並用「電撬工具」留下的灼痕當場拆穿那名員工，逼得對方承認只是一時軟弱。當人被帶走時，Nashu 盯著那個大衣男，幾乎可以肯定——那聽起來、看起來，就是巡視員本人。</p>
+<p>你們立刻追上去。男人一下就察覺尾隨，警告你們別把炸彈當玩具，還提醒你們身上沒有 regulator，就更該小心珍惜僅有的性命。Nashu 忍不住喊他「巡視員 Hildibrand」，甚至連「紳士」那套稱號都搬出來，可對方嗤之以鼻，說自己被叫過很多稱呼，從沒聽過比「紳士」更侮辱人的。他自嘲只是背負債務與悔恨的老糊塗，並自稱「偵探 Hardiboiled」。Nashu 仍硬塞給他一顆水煮蛋，他居然也順手接下、帶著幾分油滑的客氣；你在旁指出，也許圓頂內確實存在某種「雙生」現象，或者這人可能與 Hildibrand 共享同一個魂。Hardiboiled 聽完反倒說，找失蹤者就交給他，還把名字說得亂七八糟，卻一副已經嗅到線索的模樣——而 Nashu 只能壓下不安，決定繼續追查下去，因為你們的「不可思議事件」才剛真正開始。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+<div class="row"><b>任務發布</b> 娜修・馬卡拉卡 <small class="muted">Tuliyollal (X:14.5, Y:12.5)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+<div class="row"><a class="link" href="gentlemen-at-heart.html">懷抱紳士之心，揭開 Mandeville 家的謎團</a></div>
+</div>`,
+    followq:`<div class="stack">
+<div class="row"><a class="link" href="wizened-testimony.html">老成之證，道出正直偵探</a></div>
+</div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
