@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Primal Awakening | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Raid8 – Primal Awakening (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/lLCQuZuSTUY"
+              title="Primal Awakening" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Primal Awakening</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Primal Awakening',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>When the sixth moon waned, a bloodcurdling roar rang out across the realm. The signs, Urianger says, point to a new primal stirring—yet its true identity still lies beyond what you can name.</p><p>By your hand, three primals have since been vanquished. And each time one returned to the aether, the tremors that heralded this fourth grew stronger and more frequent—an omen that the being now quickens, and will in time become a scourge upon the land.</p><p>Even as the Scions weighed what must be done, a benevolent soul stepped forward to forestall the threat: a maiden young in years, yet true of heart and steadfast of resolve. She asks for your aid, should you be willing to give it.</p><p>Lest you wonder why the request carries such weight, Urianger tells you she is of their order—and the Antecedent has already consented that you should assist her however you can. When you are able, you are to make for Wineport, where your petitioner awaits, her visage certain to strike you as familiar.</p><p>At Wineport, Alisaie greets you with measured formality—she recalls that her brother, Alphinaud, introduced you when you first, and last, met, yet she offers her name anew: Alisaie Leveilleur, and thanks you for coming. She has heard of your deeds: the Black Wolf slain, the Ultima Weapon destroyed—and she is frank that she will need the strength and courage you have proven, if she is to see her mission through.</p><p>She turns your attention to what changed when Dalamud fell: not only the face of the realm, but its very foundations. The aetheric currents were thrown into chaos, vast confluences forming beneath the surface, and subterranean caverns opening at points of stress. One such cavern, she explains, lies beneath Castrum Occidens and stretches to only the gods know where—and that fortress, despite appearances, serves as a research facility as much as a stronghold, chosen by Gaius van Baelsar so the depths could be probed without interference.</p><p>As you went about felling Ifrit, Titan, and Garuda, Alisaie observed a repeating wave pattern in the aether—matching exactly the dates you were reported to have triumphed, and emanating from deep beneath Castrum Occidens. She recorded the same pattern during the recent celebrations, and what troubles her most is this: she has been told it bears a disquieting similarity to a phenomenon seen shortly before the Calamity. Five years ago, she says, her grandfather invoked the power of the Twelve to contain Bahamut—yet the attempt failed, and he vanished, together with his foe. She seeks the truth of that day, of her grandfather’s fate, and of the metamorphosis that swept across the land—believing the answers lie hidden in the cavern’s depths, and that bringing them to light will help heal what ails this world.</p><p>Alisaie asks you to infiltrate Castrum Occidens first and find a path down into the depths—only then can she hope to reach the cavern alive. When you have succeeded, you return to Wineport and report to her assistant, Storm Private J’brohka. J’brohka has been expecting you, and your discovery delights her; she introduces herself as one who serves Lady Alisaie, while also serving the Maelstrom for convenience—her uniform granting access to regional scouting reports rich with local knowledge, including secret passages. She will inform Alisaie at once, but she leaves you with a warning: none can say what dangers lurk beneath Castrum Occidens, so for Alisaie’s sake—and your own—you must spare neither preparation nor caution, and choose your companions well.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Urianger <small class="muted">The Waking Sands (X:6.0, Y:4.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-a-titan-spot.html">In a Titan Spot</a></div><div class="row">Disciples of War or Magic Lv. 50</div><div class="row"><b>Unlock Raid</b></div><div class="row"><a class="link" href="the-binding-coil-of-bahamut-turn-1.html">The Binding Coil of Bahamut - Turn 1</a></div><div class="row"><a class="link" href="the-binding-coil-of-bahamut-turn-2.html">The Binding Coil of Bahamut - Turn 2</a></div><div class="row"><a class="link" href="the-binding-coil-of-bahamut-turn-3.html">The Binding Coil of Bahamut - Turn 3</a></div><div class="row"><a class="link" href="the-binding-coil-of-bahamut-turn-4.html">The Binding Coil of Bahamut - Turn 4</a></div><div class="row"><a class="link" href="the-binding-coil-of-bahamut-turn-5.html">The Binding Coil of Bahamut - Turn 5</a></div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="alisaies-pledge.html">Alisaie’s Pledge</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'新たな蛮神',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>第六の月が欠けゆく頃、背筋を凍らせる咆哮が響いた。ウリエンジェは告げる――兆しが示すのは、新たな蛮神の目覚め。しかし、その正体はいまだ知れぬままだ。</p><p>あなたの手で、すでに三柱の蛮神は討ち果たされた。そして、それぞれがエーテルへと還るたび、第四の存在を予兆する震動は強さと頻度を増していった。いまその“何か”は胎動し、いずれ大地を蝕む災厄となるだろう、と。</p><p>だが方策を思案する最中、その脅威を食い止めんとする善き魂が立ち上がった。年若くとも心は真っ直ぐで、決意は揺るがぬ娘――彼女は、あなたに力を貸してほしいと願っている。あなたが応じるのであれば、と。</p><p>その娘がなぜここまで重く扱われるのか。ウリエンジェは、彼女が我らの同胞であることを明かす。ゆえに盟主は、あなたが可能な限り彼女を助けるよう、ただちに認めたのだという。手が空き次第、ワインポートへ向かえ――いまもそこで、あなたを待っている。その面差しは、きっと見覚えのあるものだ。</p><p>ワインポートであなたを迎えたのはアリゼーだった。以前の面会は、兄アルフィノが取り計らった一度きり――そう振り返りつつも、礼節のために名を改めて名乗る。「アリゼー・ルヴェユール。来てくれてありがとう。」黒狼を討ち、アルテマウェポンを砕いた武勲も耳にしていると言い、あなたの力と勇気が必要だと率直に語る。己の使命を最後まで貫くために、と。</p><p>彼女は続ける。ダラガブの落下は、世界の姿だけでなく、その基盤さえ変えた。エーテルの流れは乱れ、地中に膨大なエーテルの集積が生まれ、各所の歪みに沿って地下洞窟が形成された。そのひとつが、カストルム・オクシデンスの地下にあり、神のみぞ知る彼方へ続いているという。外見は要塞でも、そこは研究施設でもある――ガイウス・ヴァン・バエサルが、干渉を避けて洞窟を探るために選んだ場所だ、と。</p><p>あなたがイフリート、タイタン、ガルーダを討った日付と一致する、反復する波形をアリゼーはエーテルに見いだした。その特異な波形は、カストルム・オクシデンスの地下深くから発せられている。さらに近頃の祝祭の最中にも同じ波形を記録し、それが霊災の直前に観測された現象と不穏なほど似ていると知ったという。五年前、祖父ルイゾワ・ルヴェユールはバハムートを封じるため、エオルゼア十二神の力を顕現させた――しかし失敗し、祖父は宿敵とともに消え去った。あの日に何が起きたのか、祖父の行方はどうなったのか、そして大地を覆った変貌の真実は何か。アリゼーはその答えが洞窟の深奥に隠されていると信じ、世界を蝕むものを癒やす道を見つけたいのだと語る。</p><p>だからこそ彼女は求める。まずあなたがカストルム・オクシデンスへ潜入し、地下へ至る道を見つけてほしい――そうでなければ、自分が生きて辿り着く望みはない。あなたが入口を突き止めてワインポートへ戻ると、待っていたのは彼女の補佐役、黒渦団の兵士ジェ・ブローカだった。あなたの報告に目を輝かせ、改めて自己紹介する――今は便宜上、黒渦団に籍を置き、地域の偵察報告に容易く触れられる。そこには隠し通路の情報もあるのだという。発見はすぐにアリゼーへ伝えるが、ひとつだけ釘を刺す。カストルム・オクシデンスの地下に何が潜むかは誰にもわからない。彼女のためにも、あなた自身のためにも、準備と警戒を怠らず、同行者は慎重に選べ、と。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ウリエンジェ <small class="muted">砂の家 (X:6.0, Y:4.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-a-titan-spot.html">真なる岩神タイタン</a></div><div class="row">ファイター ソーサラー Lv 50～</div><div class="row"><b>レイドダンジョン開放</b></div><div class="row"><a class="link" href="the-binding-coil-of-bahamut-turn-1.html">大迷宮バハムート：邂逅編1</a></div><div class="row"><a class="link" href="the-binding-coil-of-bahamut-turn-2.html">大迷宮バハムート：邂逅編2</a></div><div class="row"><a class="link" href="the-binding-coil-of-bahamut-turn-3.html">大迷宮バハムート：邂逅編3</a></div><div class="row"><a class="link" href="the-binding-coil-of-bahamut-turn-4.html">大迷宮バハムート：邂逅編4</a></div><div class="row"><a class="link" href="the-binding-coil-of-bahamut-turn-5.html">大迷宮バハムート：邂逅編5</a></div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="alisaies-pledge.html">第七霊災の真実を求めて</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'Primal 甦醒',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>當第六顆月球漸漸轉虧，一聲令人毛骨悚然的咆哮劃破空氣。Urianger 告訴你，徵兆指向一個全新的 primal 正在甦醒——只是它的真正身分，仍在你們所知之外。</p><p>你親手擊敗了三個 primal。每當其中一個回歸以太，那些預示著「第四個」存在的震動，就變得更強、更頻繁。那個存在正在加速成形；再過些時日，它便會成為吞噬大地的災厄。</p><p>然而在你們思索對策時，一名善意之人挺身而出，願意先一步阻止這場威脅。她年紀尚輕，卻心意真誠、意志堅定。只要你願意伸出援手，她希望能得到你的協助。</p><p>Urianger 也不讓你多猜：那名少女屬於他們的同一個組織，因此盟主已立刻同意——你可以盡你所能去幫她。只要你一有空，便前往 Wineport；那名請求者此刻就在那裡等著你，而你一定會覺得她的面容格外熟悉。</p><p>在 Wineport 迎接你的人正是 Alisaie。她提起，當初你們第一次、也是最後一次見面，是 Alphinaud 主動替你們引介；但為了禮節，她仍再次報上姓名：Alisaie Leveilleur，並向你道謝。她說自己聽聞你的功績——Black Wolf 已被你擊倒，Ultima Weapon 也在你手中毀滅。你的力量與勇氣無庸置疑，而她若要把使命一路走到終點，就需要像你這樣的人。</p><p>她把話題帶到 Dalamud 墜落後的改變：不只改寫了地表的樣貌，也撼動了這片大地的根基。以太流被攪亂，地底形成龐大的以太匯聚，並在受力最劇烈的要點撕開了地下洞窟。其中一座洞窟位於 Castrum Occidens 正下方，延伸到只有神明才知道的深處。她強調，那裡看似是要塞，實則也是研究設施——Gaius van Baelsar 選擇此處，正是為了不受干擾地探查洞窟。</p><p>當你先後擊敗 Ifrit、Titan、Garuda 時，Alisaie 在以太中觀測到一種重複的波形，日期與你被通報的討伐時間完全吻合；而那獨特的波形，源頭正是 Castrum Occidens 的地底深處。更關鍵的是，她在近期的慶典期間也記錄到同樣的現象，並得知它與大災變前不久曾出現的徵兆有著令人不安的相似。五年前，她的祖父曾召喚 Twelve 的力量試圖封印 Bahamut，卻以失敗告終——祖父與敵人一同在光芒中消失，從此下落不明。她想知道那一天究竟發生了什麼、祖父的命運如何、以及那場改變席捲大地的真相；她相信答案就藏在洞窟深處，而唯有揭開它們，才可能找到治癒這個世界病灶的方法。</p><p>因此她請你先行潛入 Castrum Occidens，找出通往地底的入口——否則她根本不可能活著抵達。當你找到入口並返回 Wineport 匯報時，迎接你的是她在此地的助手、黑渦團的士兵 J’brohka。她確認你的發現後欣喜不已，並正式自我介紹：她以侍奉 Alisaie 為榮，而眼下為了行事方便也隸屬黑渦團；這身制服讓她能直接取得地區偵察報告，其中包含許多在地情報，甚至有祕密通道的線索。她會立刻把你的發現通知 Alisaie，但也鄭重提醒你——Castrum Occidens 的地底藏著什麼，沒人能斷言；為了 Alisaie，也為了你自己，請務必做好萬全準備、保持警戒，並慎重挑選同行的夥伴。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>任務發布</b> 烏里昂熱 <small class="muted">沙之家 (X:6.0, Y:4.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-a-titan-spot.html">真岩神泰坦甦醒</a></div><div class="row">戰鬥／魔法職業 Lv.50～</div><div class="row"><b>解鎖團隊副本</b></div><div class="row"><a class="link" href="the-binding-coil-of-bahamut-turn-1.html">巴哈姆特大迷宮：邂逅篇 1</a></div><div class="row"><a class="link" href="the-binding-coil-of-bahamut-turn-2.html">巴哈姆特大迷宮：邂逅篇 2</a></div><div class="row"><a class="link" href="the-binding-coil-of-bahamut-turn-3.html">巴哈姆特大迷宮：邂逅篇 3</a></div><div class="row"><a class="link" href="the-binding-coil-of-bahamut-turn-4.html">巴哈姆特大迷宮：邂逅篇 4</a></div><div class="row"><a class="link" href="the-binding-coil-of-bahamut-turn-5.html">巴哈姆特大迷宮：邂逅篇 5</a></div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="alisaies-pledge.html">Alisaie 立誓追尋第七靈災的真相</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
