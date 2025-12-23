@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A Soulful Reunion | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Hildibrand – A Soulful Reunion (EW Patch 6.15)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/Zt72pqaaycc"
+              title="A Soulful Reunion" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">A Soulful Reunion</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'A Soulful Reunion',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Theyler eyes everything that has led you here and admits it feels wrong to use the Echo for matters like this. Vonard, still amazed, can only marvel that explosions and dwarven deckings have failed to break your bedridden inspector. Hildibrand, for his part, says that while he has enjoyed what he can remember of this far-flung First, it is time to return to your own world—and he asks if you know how.</p>
+      <p>When you describe restoring a soul with a “spirit vessel,” Hildibrand declares he understands perfectly, likening it to brewing the perfect cup of coffee. If that is the method, he insists, then what you need is a skilled “soul sommelier.” You tell him you know one—Beq Lugg—and Hildibrand brightens at once, pleased that even here you have such connections. Though Theyler is wary of what you mean to do with souls, both dwarves agree that if you need Beq Lugg’s help, they will guide you to the Cabinet of Curiosity.</p>
+      <p>Back in Radz-at-Han, Nashu anxiously asks whether you were able to find the inspector’s soul, while Parigha frets over running low on amenities. With the dwarves’ help, you make your way to the Cabinet of Curiosity in the Crystarium. Vonard, hearing Hildibrand is a friend of the Warrior of Darkness, admits he should have known this would be no ordinary man. Hildibrand speaks of wanting to go home, yet confesses he will miss this strange world—and even muses about returning someday to solve cases here. When Theyler calls for Beq Lugg, the famed scholar arrives with a porxie, and Hildibrand’s enthusiastic greeting immediately goes awry when he mistakes it for an “adorable little puppy.”</p>
+      <p>Beq Lugg bristles at the insult, but quickly grasps the situation: Hildibrand is present only in soul, and you want to send him back to the Source as you have done before. Beq Lugg reminds you how complex the process is, then asks the practical question—do you already have another spirit vessel? When you say you carry one entrusted to you by the Crystal Exarch, Beq Lugg snorts at the thought of how it is being used and decides a porxie will serve for the procedure. One warning remains: the strain can tear a soul apart if it lacks resilience. You accept the risk, and Hildibrand laughs, insisting that you know him too well to doubt his endurance. With that, Beq Lugg takes him to the apparatus and orders the rest of you to wait.</p>
+      <p>Beq Lugg soon returns, almost disappointed to report that everything was smooth and uneventful. All that remains, you are told, is to take the spirit vessel back to the Source and bring it into contact with Hildibrand’s corporeal body—he should awaken at once, soul and memories intact. Theyler and Vonard take their leave, saying they must return to their duties, and Though they cannot claim to understand what they witnessed, they are glad they were part of it, and they promise to keep looking after the people of the First until you meet again.</p>
+      <p>You hurry back to Radz-at-Han, only to find Parigha panicked and Nashu desperate: the inspector’s soul is safely in the vessel, but his body has vanished. They swear they left him alone only a moment while they went to the markets, and though every door was locked, there is no sign of forced entry. Nashu declares a new case—the case of the evaporating inspector—and drags you into an urgent search for witnesses. One person admits they were too busy with stocktaking to notice anything; another recalls a man struggling under the weight of an enormous sack, large enough to hide a full-grown person. When a stranger steps forward, Nashu demands answers—and Delion, editor in chief of a monthly journal devoted to the unexplained, launches into a breathless claim that he knows the truth.</p>
+      <p>Delion insists the kidnapper is not of this star: aliens in saucer-shaped airships, Sharlayans in league with them, even the Final Days as part of their plot. He paints a lurid picture of your friend laid out on a sterile bed on the moon while “floppy ears” twitch with delight, then abruptly cuts himself off and hurries away to “investigate in secret.” Nashu is horrified and wants to race to the moon, but you make it clear you do not buy the story—though you can’t help noticing he got at least one detail right. With the lead of the heavy sack in hand, Nashu refocuses at once: if someone carried off the body, that is where you start.</p>
+      <p>Nashu insists on staying with you as you comb the area, and on a bridge a keen observer admits they noticed the sack-bearer trying very hard to look inconspicuous. The man descended to Alzadaal’s Path and met a merchant by the fountain. You track the merchant down, and he laughs about the “unexpected windfall”—he sold the man his chocobo after a generous offer. Pressed for details, he recalls the buyer muttering that he had to reach Saltwind’s Welcome in a hurry, and that he could hardly manage the distance on foot with such a burden. Nashu doesn’t hesitate: you have to go now.</p>
+      <p>At Saltwind’s Welcome, you keep out of sight and watch as Jubraca completes a handoff and addresses Doctor Lugae with practiced deference. Lugae delights in the prize—Hildibrand’s body—and Jubraca boasts of your inspector’s legendary resilience, assuring the doctor that the coma will never end and that he may do as he pleases. Lugae cackles that, with the Telophoroi gone and House Brutus’s fortune in his grasp, he will build a new “child” that is all but invincible and take his revenge. Jubraca presses for payment; Lugae promises riches and then bolts when pressed further—only for everything to unravel as Nashu rushes in and Hildibrand suddenly stirs awake, blinking out a stunned realization that the world is no longer purple before crying out in alarm.</p>
+      <p>Lugae screams as his “comatose centerpiece” refuses to stay asleep, and Hildibrand protests at the nightmare of yet another mummy-adjacent ordeal. Then, as abruptly as he returned, he declares himself back in his own world and offers you and Nashu an earnest apology—followed immediately by triumphant self-congratulation. Delion appears on the scene, convinced he has witnessed an alien abduction after all, already dreaming of his next issue. Nashu, meanwhile, can only stare as the inspector drifts away yet again, disappointed despite herself. Back in Radz-at-Han, she forces herself to straighten up: there is a case to be solved, and she vows she will unravel the mystery of his disappearance—again—and that you will be the first to hear when she finds a new lead.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Hildibrand <small class="muted">Lakeland (X:25.8, Y:26.0)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-sleeping-gentleman.html">The Sleeping Gentleman</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="lunar-conspiracy.html">Lunar Conspiracy</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'士女の再会',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>テイラーは、ここまでの一連の出来事を振り返りながら、エコーが本来こうした事態のためにある力ではないのではないかとこぼす。ヴォナードは、爆発にもドワーフ式の甲板張りにも耐えてきたというその男のしぶとさに、もはや呆れるほど感心している。ヒルディブランドは、覚えている限りでは第一世界での時間を楽しめたとしつつも、そろそろ自分たちの世界へ戻るべきだと言い、どうすれば帰還できるのかとあなたに尋ねる。</p>
+      <p>あなたが「魂魄器」で魂を戻す話をすると、ヒルディブランドはそれだけで合点がいったと言わんばかりに胸を張り、完璧な一杯の珈琲を淹れるのと同じだと例える。ならば必要なのは「魂のソムリエ」だと断言し、腕利きの助力を求める。あなたがベック・ラグの名を挙げると、ヒルディブランドはこの世界でも一流と肩を並べているのだなと嬉しそうに笑う。テイラーは魂をどう扱うつもりかと訝しみながらも、ベック・ラグの助けが要るなら協力できると言い、ヴォナードも同意して、珍品堂へ案内すると約束する。</p>
+      <p>ラザハンへ戻ると、ナシュは「魂は見つかったのか」と落ち着かない様子で問い、パリガは日用品が足りなくなってきたと気にしている。あなたは案内を受けてクリスタリウムの珍品堂へ向かい、ヴォナードは「闇の戦士の友だという時点で察するべきだった」と、ヒルディブランドが並の男ではないことを改めて実感する。ヒルディブランドは帰郷を望みながらも、この奇妙な世界を恋しく思うだろうと言い、いつかまた事件を解くために訪れたいとまで口にする。テイラーがベック・ラグを呼ぶと、相手はポークシーを連れて現れ、ヒルディブランドがそれを「愛らしい子犬」と持ち上げた途端、空気が一気に険しくなる。</p>
+      <p>ベック・ラグは苛立ちを隠さず、しかし状況はすぐに理解する。ヒルディブランドは魂だけがここに在り、あなたは彼を原初世界へ送り返したいのだと。ベック・ラグは、前に同じことを成し遂げた時の困難さを思い出せと言い放ちつつ、まずは魂魄器がもう一つ必要だと告げる。あなたが、クリスタルエクサークから託された魂魄器を持っていると答えると、ベック・ラグは鼻で笑い、その使われ方を知ったらどう思うかと皮肉る。それでも手元のポークシーが役に立つと言い、食罪に変じかけた者の治療に使っていたが、今回は別の役目を与えると決める。ただし負荷の問題は残る。魂に大きな負担がかかり、耐えきれなければ魂そのものが引き裂かれかねない。あなたがその危険を引き受けると、ヒルディブランドは豪快に笑い、自分のしぶとさを疑う必要はないと胸を張る。ベック・ラグは、ならばついて来いと言い、他の者にはここで待つよう命じる。</p>
+      <p>やがてベック・ラグは戻り、手順は驚くほど滞りなく終わったと告げる。あとは魂魄器を原初世界へ持ち帰り、ヒルディブランドの肉体に触れさせればよい。魂も記憶も保たれたまま、すぐに目覚めるはずだという。テイラーとヴォナードは、これ以上用がないなら任務へ戻らねばならないと言い、理解しきれなかったとしても立ち会えたことを喜び、あなたが不在の間もこちらの人々を守ると誓って別れる。</p>
+      <p>あなたがラザハンへ急ぐと、パリガは取り乱し、ナシュは焦りきった声で叫ぶ。魂魄器に魂はあるのに、ヒルディブランドの肉体が消えたのだという。買い物のためにほんの少し目を離しただけで、戻った時には姿がなかった。扉はすべて施錠していたはずで、こじ開けられた形跡もない。ナシュは「消えたインスペクター事件」だと宣言し、証言集めを始める。棚卸しに気を取られて何も見ていない者もいれば、やたら重そうな大袋を抱えていた男を見た者もいる。その袋は大人が入っていてもおかしくないほど大きかったという。そこへ現れた男に、ナシュが食い下がると、名乗り出たのはデリオンだった。</p>
+      <p>デリオンは、不可思議を扱う月刊誌の編集長だと名乗り、犯人はこの星の者ではないと断言する。円盤状の飛空艇で降り立つ宇宙人、彼らに協力するシャーレアン人、さらには終末さえも侵略の布石だったのだと、止まらぬ勢いで語り立てる。月面の基地で寝台に固定され、得体の知れない器具で弄ばれる友の姿まで語ったところで、彼は言い過ぎたと言って立ち去ってしまう。ナシュは真に受けて月へ行こうとするが、あなたはその話を信じないと示し、少なくとも大袋の目撃談を手掛かりにするべきだと判断する。</p>
+      <p>ナシュはあなたに付き添い、橋の上で人の動きを眺めていた者が、例の男が不自然なほど目立たぬように振る舞っていたと教えてくれる。男はアルザダールズ・パスへ下り、噴水のそばで商人と会っていたという。あなたがその商人を突き止めると、彼は思わぬ儲けに笑い、男にチョコボを売ったと明かす。情に流されるわけにはいかない商売だが、提示された額があまりにも良かったという。男は「ソルトウィンド・ウェルカムへ急がねばならない」とぶつぶつ言っており、大袋を抱えたままでは徒歩では無理だろう、と。ナシュは迷わず、今すぐ向かおうと言う。</p>
+      <p>ソルトウィンド・ウェルカムであなたは身を潜め、ジュブラカが取引を終えてドクター・ルガエに恭しく応じるのを目撃する。ルガエは、手に入れたのがヒルディブランドの肉体だと知ると歓喜し、眠ったままならどんな強者も抗えないと嘲笑う。ジュブラカは、爆発や数多の荒事に耐え、ダラガブに至る旅や落下さえ無傷で乗り越えたとまで吹聴し、この男は決して目覚めない昏睡に落ちたのだと保証する。ルガエは、テロフォロイが消えた今こそブルートゥス家の財を思うままにできると語り、次なる「子」を不敗の存在にして復讐を果たすと息巻く。ジュブラカが報酬の残りを催促すると、ルガエは金を約束しながら逃げ出し、混乱は一気に加速する。</p>
+      <p>ナシュが飛び出して叫ぶのと同時に、ヒルディブランドが動いた。世界が紫ではなくなっていると呟いたかと思うと、唐突に悲鳴を上げ、またしても「ミイラ」に怯える。ルガエは想定外の目覚めに絶叫し、逃げ去ってしまう。ヒルディブランドは、回り道はあったが自分は元の世界へ戻ったのだと言い、迷惑をかけたと詫びつつも、インスペクターの凱旋だと高らかに宣言する。現場に現れたデリオンは、やはり宇宙人の誘拐だったのだと興奮し、記事の出来を確信する。ナシュは、ようやく戻ったと思った矢先にまた離れていくその背を見送り、落胆を押し殺す。</p>
+      <p>ラザハンへ戻ったナシュは、飛んでいくインスペクターを嘆いても仕方がないと自分に言い聞かせる。それでも、あなたの前で気持ちを立て直し、事件は終わっていないと宣言する。あなたには、次の手掛かりを掴んだら真っ先に知らせると約束し、再び「消えたヒルディブランド」の謎を追う決意を固める。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> ヒルディブランド <small class="muted">レイクランド (X:25.8, Y:26.0)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-sleeping-gentleman.html">紳士の長い眠り</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="lunar-conspiracy.html">のめり込んだ男</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'深情重逢',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Theyler 說，你把 Echo 用在這種事上，總讓人覺得它本不該為此而存在。Vonard 仍對 Hildibrand 的韌性驚嘆不已……</p>
+      <p>你提到要用「收魂器」把魂找回來，Hildibrand 立刻說自己完全懂了，還把這件事比作沖出一杯完美的咖啡：既然概念已經清楚，你們真正需要的，是一位懂得品鑑與處理魂的專家——一位「soul sommelier」。你說你認識 Beq Lugg，Hildibrand 聽了欣喜不已，說就連在這個世界，你也能和「最上層的人」有交情。Theyler 雖然對你打算怎麼處理魂仍抱持戒心，但也表示，如果你需要 Beq Lugg 的協助，他們願意幫忙，並帶你前往 The Cabinet of Curiosity。</p>
+      <p>回到 Radz-at-Han，Nashu Mhakaracca 緊張地問你，有沒有找到偵探的魂；Parigha 則因為生活用品快不夠而憂心。你隨著 Theyler 和 Vonard 前往 The Crystarium 的 The Cabinet of Curiosity。Vonard 聽說 Hildibrand 是 Warrior of Darkness 的朋友，忍不住感嘆：早該想到這人不可能普通。Hildibrand 一邊說自己急著回家，一邊又坦白，他會想念這個奇異的世界，甚至還說也許哪天能再來辦案。當 Theyler 去請 Beq Lugg 出面時，Beq Lugg 帶著一隻 porxie 現身，而 Hildibrand 一開口就把它誇成「可愛的小狗」，瞬間把氣氛弄得尷尬又緊繃。</p>
+      <p>Beq Lugg 立刻炸毛，卻也很快掌握狀況：Hildibrand 只有魂在此，而你想把他送回 The Source——就像你以前做過的那樣。Beq Lugg 不客氣地提醒你，上一次到底有多複雜、多困難，然後直接問：你還需要一個收魂器，你手上有嗎？你說，那個收魂器是 Crystal Exarch 託付給你的。Beq Lugg 冷哼一聲，嘲諷要是 Crystal Exarch 知道你拿它來做什麼，恐怕不會太高興；但他也表示，手邊正好有 porxie 可以用來完成這次的程序——原本是拿來治療那些有可能變成 eaters 的病患。接著他嚴肅地補上一句：這個過程會對魂造成極大負擔，如果 Hildibrand 的意志不夠強韌，他的魂有可能撐不住、甚至被撕裂。你表示願意承擔風險，Hildibrand 則大笑著說你太了解他了，根本不用擔心；Beq Lugg 也只能點頭，帶他去進行程序，並要你們其他人留在原地等待。</p>
+      <p>不久後，Beq Lugg 回來報告：過程順利得令人無聊。接下來你只要把收魂器帶回 The Source，讓它接觸到 Hildibrand 的肉體——他應該就會立刻醒來，而且魂與記憶都會完整無缺。Theyler 和 Vonard 表示若沒有其他事，他們得回去執行職務；他們承認自己幾乎沒弄懂剛才到底發生了什麼，但仍很高興能親眼見證，並承諾你不在的時候，他們會盡力照看 The First 的人們。</p>
+      <p>你趕回 Radz-at-Han，卻迎來更糟的消息。Parigha 驚慌失措，Nashu Mhakaracca 幾乎是衝上前來：你帶回了偵探的魂，沒錯，但他的身體不見了。她說你們只是去 markets 買個東西，回來後 Hildibrand 就消失得無影無蹤；Parigha 強調離開前每扇門都鎖好了，現場也沒有任何被闖入的痕跡。Nashu 立刻宣布這是一樁新案件——「蒸發的偵探之謎」，要你立刻和她去找目擊者。有人忙著盤點貨物，什麼也沒注意到；也有人想起一名男子搬著一個巨大又沉重的袋子，重到他抬起來都很吃力——那個大小，的確可能塞得下一個成年人。就在你們追問線索時，一名自稱 Delion 的男人出現，說他手上有「關鍵情報」。</p>
+      <p>Delion 自我介紹為 The Thavnairian Truth 的主編，這本月刊專門探討島上的超常與異界現象。他語氣篤定地說，綁走你朋友的「不是這顆星的存在」——是從天而降、搭乘碟形飛空艇來研究你們世界的 aliens。接著他越說越誇張，聲稱 Sharlayans 與 aliens 勾結，還把 Final Days 也扯成對方的陰謀；甚至描繪 Hildibrand 此刻正躺在月球基地的無菌床上，被古怪儀器戳來戳去，而那些「floppy ears」正因惡意而顫動。說到一半，他又突然說自己講太多了，匆匆離去。Nashu 被嚇得說要立刻去月球救人，但你顯然不相信這套說法——就算其中某些細節聽起來離奇地貼近現實。你把重點拉回那個「大袋子」：如果有人帶走了身體，這才是最扎實的線索。</p>
+      <p>Nashu 堅持要跟著你行動，一路陪你詢問與追查。在一座橋上，一名愛觀察路人的目擊者說，那個背著大袋子的男人刻意裝得很不顯眼，反而讓人更注意；他往 Alzadaal’s Path 下去，接著在噴水池旁和一位 merchant 交談。你們追到那位旅行商人，他笑著說這真是「意外之財」：那名男子向他買走了 chocobo——原本他還不想賣，但對方太急、出價又太高，他終究點頭。至於去向，那人嘴裡一直念著必須趕去 Saltwind’s Welcome——背著那麼沉的袋子，要走過去實在太遠了。Nashu 立刻催你出發，說你們得搶在對方離開前追上。</p>
+      <p>到了 Saltwind’s Welcome，你和 Nashu 先躲起來觀察。Nashu 一眼認出交易另一方竟是 Jubraca——她甚至還喊出「Mister Chupacabra」，彷彿不敢相信他又回到這種勾當。Jubraca 把「貨」交給 Doctor Lugae，Lugae 看著眼前的身體發出得意的笑聲；Jubraca 則誇口說這具身體屬於「世上最強韌的人」——Hildibrand，並細數他撐過的爆炸與種種摔打，甚至連去過 Dalamud、又在那顆較小的月亮墜落時毫髮無傷都拿來炫耀。他保證 Hildibrand 已陷入永不甦醒的昏迷，Lugae 想怎麼使用都行。Lugae 立刻狂喜，說就算最強者也無法在沉睡時反抗；他還宣稱 Telophoroi 已經滅亡，House Brutus 的巨額財富全由他支配，他要打造一個幾乎無敵的「新孩子」，並用這具身體報復一切。</p>
+      <p>Jubraca 追問剩餘的報酬，Lugae 口頭答應要用金錢「淹沒」他，卻在被逼得更緊時轉身就跑。下一秒，Nashu 忍不住衝出去大喊要救偵探，而你們眼前的「昏迷」也突然破功——Hildibrand 動了。他迷迷糊糊地說了一句「世界不再是紫色了」，緊接著驚叫出聲，像是被某個熟悉的噩夢迎頭撞上；Lugae 則崩潰大叫，咒罵他不該醒來。混亂之中，Hildibrand 驚恐地喊出「Mummy！」又痛苦地哀嚎「不要再來一次！」；Lugae 只能在絕望的尖叫中逃離。</p>
+      <p>Hildibrand 很快恢復那副誇張又自信的腔調，說自己醒來就遇到一連串戲劇性的事件，但更重要的是——繞了一圈後，他總算回到了自己的世界。他向你和 Nashu 道歉讓你們操心，卻又立刻高喊自己「凱旋歸來」。Delion 也在此時現身，激動地說自己親眼目睹了 alien abduction，並宣稱本月的 The Thavnairian Truth 將會是史上最好的一期。Nashu 卻只覺得又好氣又好笑：你們才剛以為把他找回來了，他卻又跑了，還來回折騰，最後甚至又飄走。回到 Radz-at-Han，她強迫自己振作，說就算偵探又飛走了也沒有哭的時間——案件還在，她一定會再一次解開他失蹤的謎團；而只要她有新的線索，就會第一時間通知你。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 希爾迪布蘭德 <small class="muted">Lakeland (X:25.8, Y:26.0)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-sleeping-gentleman.html">沉睡的紳士</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="lunar-conspiracy.html">月之陰謀下，那個越陷越深的男人</a></div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
