@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Sleeping Gentleman | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Hildibrand – The Sleeping Gentleman (EW Patch 6.15)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/lJEZmcPZYoE"
+              title="The Sleeping Gentleman" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">The Sleeping Gentleman</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'The Sleeping Gentleman',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>The excitable youth spots you in Radz–at–Han and rushes over, insisting you must remember him—the self-proclaimed silent guardian who once asked you to look after the “love of his life,” Nashu. He admits he’s been searching ever since she vanished into a strange portal in the Far East, and he finally found her here. Nashu, he says, is frantic over her inspector friend: Hildibrand is here as well, bedridden and not waking. Whatever he thinks of the inspector, he can’t stand to see Nashu work herself to the bone, so he begs you to go to her at the High Crucible.</p>
+      <p>You find Nashu in her workshop, delighted to see you and quick to answer the look on your face—yes, the portal incident is exactly what brought her here. Back at the Ruby Sea, Greg was drenched in dewprism and forced to whisk everyone “far away,” and a rift opened that pulled Hildibrand in; she followed without hesitation. They ended up in a bewildering in-between where directions meant nothing, until Greg regained his senses, named it the Interspectorial Rift, and brought them home the same way—though he chose to stay behind for some private score. Now they’re back, but Hildibrand hasn’t opened his eyes once, and every medicine she’s tried has failed. She introduces the former mastermind who’s been helping her: Jubraca, chairman of the Sahjattra Concern, who claims the journey changed him and that he now runs a humble apothecary—and he excuses himself to attend to business.</p>
+      <p>Nashu takes you to the room where Hildibrand rests and urges you to look closely. You study him from head to toe: the rugged face that still carries a cultured gentleness, the powerful build, the fine Manderville craftsmanship in his shoes—and the unsettling signs that something is wrong. His limbs are stiff and cold, and the state he’s trapped in feels disturbingly similar to those who were once summoned away to the First. When Nashu presses you for a theory, you tell her it doesn’t feel like ordinary sleep at all—that his soul may have been drawn to another reflection. She seizes on that answer at once, leaving the soul-searching to you and sending you off with her very particular brand of “medicine,” warning you not to be surprised if Hildibrand is asleep or missing memories when you find him.</p>
+      <p>You cross into the First and ask around at the Wandering Stairs. Glynard doesn’t recognize the man himself, but he calls over Giott, who recalls a burly monocled fellow from a battle with spectral warriors—glowing, striking poses, and getting driven off when she refused to take chances. Before you can chase the lead further, Theyler and Vonard approach: they’ve been tracking the same bizarre “poser” through Lakeland, trying to calm the locals before the strange behavior escalates. When you admit their “miscreant” might be the one you’re looking for, they suggest you join forces, and you head out to gather testimony in Sullen.</p>
+      <p>The villagers’ stories don’t match a simple villain. One was terrified when the man sprang out to strike an incomprehensible pose; another says the same man quietly guided him out of the forest after he got lost; a third claims he warned her about beasts in the woods and seemed, against all appearances, genuinely gentlemanly. The sightings point to a single place—the Forest of the Lost Shepherd—so you go there with Theyler and Vonard, and when they ask how you intend to search an entire forest, you answer the only way that makes sense in this situation: you perform the Manderville.</p>
+      <p>A familiar voice answers, and the hunters panic—until you see the truth. The “sin eater” is no sin eater at all, but Hildibrand himself, convinced he is the “Forgiven Gentleman,” a Lightwarden and devourer of sins. You challenge the delusion, trying to anchor him to who he is, and the confusion cracks just enough for fragments of memory to surface: people recoiling, shouting “sin eater,” someone driving him away as if he were a ghost. With those flashes returned, he stares at the purple world around him and demands to know where he is. When you tell him it’s the First—an entirely different world—he swells with renewed conviction, declaring that no boundary of time or space will keep an inspector extraordinaire from returning to his fans, and that he will make his way back forthwith.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Excitable Youth <small class="muted">Radz-at-Han (X:11.8, Y:11.2)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="dont-do-the-dewprism.html">Don’t Do the Dewprism</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="a-soulful-reunion.html">A Soulful Reunion</a></div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'紳士の長い眠り',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>ラザハンで興奮した青年があなたに駆け寄り、クガネで会ったと一方的に言い募る。かつてナシュの「恋人」を見守るよう頼んだ相手があなたで、あなたと自分には「つながり」があったのだと主張し、さらにナシュが東方で奇妙な裂け目に吸い込まれて以来、手がかりを求めて世界中を探し回ってきたのだと言う。ようやくラザハンでナシュを見つけたものの、今度はヒルディブランドがここで倒れたまま目を覚まさず、ナシュがそのことで深く思い悩んでいるらしい。青年は、彼のことはどうでもよくてもナシュが潰れてしまうのは耐えられないと訴え、アル・キミヤ大精錬所にいるはずのナシュを助けてほしいとあなたに頼む。</p>
+      <p>工房でナシュはあなたを見つけて歓声を上げ、あなたの視線の意味を察して、あの裂け目の一件から話し始める。紅玉海でグレッグがデュープリズムを浴び、「遠くへ」連れ去るよう強いられたことで不思議な裂け目が開き、ヒルディブランドが吸い込まれ、ナシュも後を追った。上下左右の感覚すら曖昧な奇妙な狭間を彷徨った末、正気を取り戻したグレッグがそこをインタースペクトリアル・リフトだと説明し、同じ手段で帰還させてくれたのだという。だが彼自身は、決着をつける用事があると言って残った。戻ってきたのに、ヒルディブランドだけが一度も目を開かず、ナシュは目覚めさせようと薬を作り続けているが成果はない。そこへサジャトラ商会の会長ジュブラカが現れ、長い旅で改心したと口にしつつ、誰にでも役立つ薬師として働き、ナシュのためにも力を尽くすと告げ、用事があるとして立ち去っていく。</p>
+      <p>ナシュに案内され、あなたは眠り続けるヒルディブランドのもとへ行く。顔には荒々しさの奥に紳士の気配が残り、体躯は見事だが、触れれば四肢はこわばり冷たい。マンダヴィル家の意匠が刻まれた靴の留め具は上等で、その姿は確かに息をしているのに、どこかが欠けているように見える。あなたは、かつて仲間たちが第一世界へ呼び寄せられたときの状態を思い出し、これはただの眠りではなく、魂が別の鏡像世界へ引き寄せられたのではないかとナシュに伝える。ナシュはその可能性にすがり、魂探しはあなたに任せると言い、向こうで情報を集めること、そして必要なら自分の薬も使うことを念押しして送り出す。</p>
+      <p>あなたは第一世界へ渡り、彷徨う階段亭で手がかりを求める。店主は本人を見てはいないが、戦場で光る男が妙なポーズを取っていたと聞いたと言い、ギオットを呼び寄せる。ギオットは、あの場で見かけた男が襲ってくるのかと思ったが、結局は不気味に構えるだけで、危険を避けて追い払ったのだと話す。そこへ巡回中のタイラーとヴォナードが現れ、レイクランドで出没する「ポーズを取る怪しい男」を追っていると説明する。人々の不安を鎮めるための任務であり、あなたの探す相手と同じ可能性があるなら協力しようと持ちかけ、あなたは二人とともにサレン郷で聞き込みを始める。</p>
+      <p>村人たちの証言は矛盾していた。突然飛び出して奇妙な身振りを見せたから恐ろしかったという者もいれば、森で迷ったところを静かに導かれたという者もいる。魔物に気をつけろと声をかけられ、見た目に反して紳士的だったと語る者までいた。だが目撃場所は共通している。迷える羊飼いの森だ。あなたたちは森へ向かい、タイラーとヴォナードが途方に暮れる中、あなたは捜索の糸口としてマンダヴィルの舞いを披露する。</p>
+      <p>すると聞き覚えのある声が応じ、二人は罪喰いだと身構えるが、あなたはそれがヒルディブランドだと見抜く。彼は自分を「赦された紳士」、罪を喰らうライトウォーデンだと言い張り、あなたが真実を告げても、罪喰いと紳士の間で混乱するばかりだ。けれど記憶の断片がよみがえる。人々が怯え、罪喰いだと叫び、誰かが彼を幽霊のように追い払った光景だ。あなたがここが第一世界だと伝えると、彼は紫に染まる景色を見回し、時空の境界を越えたのだと高らかに宣言する。そして、捜査官にして名探偵たる自分は必ず帰還すると、あなたに向けて断言するのだった。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> 小さな少年 <small class="muted">ラザハン (X:11.8, Y:11.2)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="dont-do-the-dewprism.html">薬に侵されし最強の男</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="a-soulful-reunion.html">士女の再会</a></div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'沉睡的紳士',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>你在 Radz-at-Han 被一名激動的年輕人攔下。他指著你說自己記得你——你們曾在 Kugane 見過面，他甚至厚著臉皮宣稱你們之間「有過連結」。但他很快把話題拉回正事：自從 Nashu 被那道古怪的裂隙捲走後，他一路追著線索奔走，終於在這裡找到她。現在她卻為了巡查官 Hildibrand 的狀況焦慮得快要崩潰——Hildibrand 人也在 Radz-at-Han，卻一直昏睡不醒。年輕人說他不在乎那位巡查官怎樣，但他受不了看到 Nashu 把自己逼到撐不下去，所以求你去 High Crucible 找她。</p>
+      <p>你趕到工房時，Nashu 一見到你就開心得不得了，還立刻看懂你那個「你是不是要問裂隙那件事」的眼神。她把經過說得很清楚：在 Ruby Sea，Greg 被 dewprism 淋到，被迫把你們「帶到很遠的地方」，隨後那道詭異的裂隙打開，巡查官 Hildibrand 被吸了進去，她也跟著追入。你們落在一個上下左右都分不清的怪地方，迷失徬徨了好一陣子，直到 Greg 清醒過來，說那裡叫做 Interspectorial Rift，並用同樣的方法把你們帶回來——只是他自己留在那邊，說還有一筆帳要算。人都回來了，偏偏 Hildibrand 從那之後一次也沒睜開眼；Nashu 試了各種藥都沒用。她又把你介紹給協助她的人：Jubraca，自稱是 Sahjattra Concern 的會長，說自己在那段旅程後「變了個人」，現在只想當個藥師，還會盡力幫 Nashu 讓 Hildibrand 恢復。說完他便去忙別的事了。</p>
+      <p>Nashu 帶你去看昏睡的 Hildibrand，讓你仔細確認他的狀態。你從他的臉到四肢、再到那雙帶著 House Manderville 獨特設計的鞋都看過一遍——他仍在呼吸，卻像被鎖在過深的沉睡裡；更令人不安的是，他的肢體僵硬而冰冷，彷彿血液都失了溫度。那種異樣感讓你想起曾有人被牽引到 The First 時的狀態：身體留在原處，真正的「他」卻不在這裡。你告訴 Nashu，你懷疑他的靈魂被帶往另一個「映照世界」。Nashu 抓住這條線索，乾脆把「找回靈魂」的任務交給你，還叮囑你到了那個世界就去打聽消息——而且以 Hildibrand 的風格來看，你找到他時他可能仍在睡，或是什麼都不記得；必要時就用她準備的「藥」把他叫醒。</p>
+      <p>你抵達 The First，在 The Crystarium 的 The Wandering Stairs 打探線索。酒館的 Glynard 沒親眼見到人，但他說有人在與幽影般的戰士交戰時看見過一個發光、又愛擺姿勢的男人，於是把 Giott 叫來。Giott 說她當時以為那男人要攻擊她，結果對方只是擺出奇怪的姿勢，讓她一時分不清是在嚇人還是在勾引；他身上還發著光，她不想冒險，直接把他當成不祥之物趕走。這時 Theyler 與 Vonard 出面，自稱一直在 Lakeland 追查一個會突然現身、擺出令人不安姿勢的「可疑男子」，因為人們開始害怕他的行為會變本加厲。你承認他們口中的人很可能就是你在找的對象，於是三方決定合作，前往 Sullen 進一步蒐集目擊證詞。</p>
+      <p>在 Sullen，你聽到的故事彼此衝突：有人說那男人突然跳到面前、扭頭握拳擺出難以理解的姿勢，嚇得他轉身就跑；也有人說自己喝醉迷路，是那個怪男人拉著他走出 Forest of the Lost Shepherd，把他帶回正路，卻一句話也不說，只在最後擺了個姿勢就離開；還有人說那男人甚至開口警告她森林裡有兇猛的野獸，雖然外表嚇人，卻意外地很有禮。線索指向同一個地點——Forest of the Lost Shepherd。你們進入森林後，Theyler 與 Vonard 正苦惱要怎麼在一整片林子裡找人，你卻用最「合理」的方式開始搜尋：你表演起 Manderville 的招牌動作。</p>
+      <p>一個熟悉的聲音立刻回應。Theyler 一度以為出現的是罪喰い，但你看得更清楚：站在那裡的正是 Hildibrand——只是他竟堅稱自己是「Forgiven Gentleman」，自稱是吞噬罪孽的 Lightwarden。你試著把他拉回現實，逼他面對自己真正的身分；混亂之中，記憶的片段翻湧而出——有人尖叫他是罪喰い，有人把他當成幽靈般的威脅趕走。當你告訴他這裡是 The First，是一個與你們的世界不同、卻又相互呼應的地方時，他望著那片紫色的天地，像是終於抓到方向般昂起頭，宣告自己跨越了時空的界線。然後他用一貫誇張卻又認真的語氣對你保證：不管身在何處，他這位「名偵探巡查官」都會設法回到你們身邊。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 興奮的少年 <small class="muted">Radz-at-Han (X:11.8, Y:11.2)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="dont-do-the-dewprism.html">最強的男人卻敵不過藥物侵蝕</a></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="a-soulful-reunion.html">深情重逢</a></div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
