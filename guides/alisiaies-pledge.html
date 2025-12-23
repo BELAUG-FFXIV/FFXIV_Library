@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Alisaie’s Pledge | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Raid8 – Alisaie’s Pledge (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/W4yvm54XEV0"
+              title="Alisaie’s Pledge" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Alisaie’s Pledge</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Alisaie’s Pledge',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+<p>Alisaie is glad to see you again. She tells you she has already shared the fruits of your expedition with Urianger, and asks that the three of you consider what they might mean.</p>
+<p>Urianger is relieved to see you returned safely, and says Alisaie has recounted all you endured. He reminds you that Master Louisoix was her grandfather, admits he feared for her safety, and thanks you from the heart for watching over her. Then he urges you to speak with Alisaie about what transpired within the Binding Coil, that it may bring you closer to the truth of the Calamity.</p>
+<p>Alisaie proposes you begin at once, and asks Urianger to share the report he has prepared. Urianger tells you that even as you emerged from the depths, an aetheric disturbance—one that betokens primal activity—was observed.</p>
+<p>He says it was first marked in Mor Dhona, and that by comparing time and magnitude, they have since deduced the origin: the Carteneau Flats. Alisaie finds it strange—there have been no reports of primal activity there—and concludes it could only have been Bahamut. That, she adds, would explain how you came to be in northern Thanalan: somehow, the cavern carried you all the way from Vylbrand to the heart of Aldenard.</p>
+<p>Alisaie speaks the conclusion aloud—after Bahamut vanished five years ago, he must have hidden deep beneath Carteneau, lying dormant as he regenerated. Urianger agrees, and together with your account of Bahamut’s continued presence, the land’s slowness to heal and the disorder of the aetheric currents point to one end: Bahamut stirs. If left unchecked, the primal will drink of Eorzea’s life force until he wakes to rain ruin upon the land.</p>
+<p>Yet Alisaie will not yield. Bahamut may still live, she says, but so too does her grandfather—keeping vigil over his nemesis these five years, ensuring the primal does not escape. Urianger can scarcely believe it, and asks if what she claims might be nothing more than grief given shape. Alisaie insists she saw him with her own eyes—and you saw him as well—yet he vanished deeper into the labyrinth before you could speak.</p>
+<p>She presses on with what remains to be done: when the lesser moon fell, more fragments of Dalamud pierced the earth, and she believes there are two more like the one you have already seen. If you can find the other two, she is certain you will find her grandfather too. Urianger offers to notify the Grand Companies so all Eorzea may stand united, but Alisaie refuses—Alphinaud will pursue unity of his own accord, and she believes that effort is already well underway. She asks you to leave diplomacy to the diplomat while you continue the investigation, and swears that no matter what it takes, you will find her grandfather and uncover the whole truth of the Calamity. She reminds you that without your strength, she cannot hope to make good on that vow—and asks you, for the sake of all who live in Eorzea, to remain your allies’ sword in the darkness.</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+<div class="row"><b>Quest Giver</b> Urianger <small class="muted">The Waking Sands (X:6.0, Y:4.9)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+<div class="row"><a class="link" href="primal-awakening.html">Primal Awakening</a></div>
+<div class="row"><a class="link" href="the-binding-coil-of-bahamut-turn-5.html">The Binding Coil of Bahamut - Turn 5</a></div>
+<div class="row">Disciples of War or Magic Lv. 50</div>
+</div>`,
+    followq:`<div class="stack">
+<div class="row"><a class="link" href="another-turn-in-the-coil.html">Another Turn in the Coil</a></div>
+</div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'第七霊災の真実を求めて',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+<p>アリゼーはあなたとの再会を喜び、遠征で得た成果はすでにウリエンジェに伝えたと告げる。だからこそ、その意味を共に考えようとあなたに促す。</p>
+<p>ウリエンジェはあなたの無事を心から喜び、アリゼーからあなたが経験した数々を聞いたと言う。ルイゾワは彼女の祖父であり、彼女の身を案じていたが杞憂だったようだと述べ、あなたが彼女を見守ってくれたことに深く感謝する。そして大迷宮バハムートで起きたことを、アリゼーに語ってほしいと求める――第七霊災の真実へ近づくために。</p>
+<p>アリゼーは話を始めようと言い、ウリエンジェにも報告があるのだろうと問いかける。ウリエンジェは、あなたが深奥から姿を現したまさにその時、蛮神の活動を示すエーテルの乱れが観測されたと告げる。</p>
+<p>最初に確認されたのはモードゥナで、時刻と規模を照合した結果、その発生源はカルテノー平原だと推定したという。アリゼーは奇妙だと言う――その地で蛮神の動きなど報告されていないのだから、考えられるのはバハムートしかない。そうであれば、北ザナラーンに至った理由も説明がつく。洞窟がヴィルブランドからアルデナードの中枢へと、あなたたちを運んだのだろうと。</p>
+<p>アリゼーは結論を重ねる。五年前に消えたバハムートは、カルテノーの地下深くに身を潜め、休眠しながら再生していたのではないか。ウリエンジェも同意し、あなたの証言と合わせれば、土地の癒えの遅さとエーテルの流れの乱れが示す答えはひとつだと言う――バハムートが動き始めている。このまま放置すれば、蛮神はエオルゼアの生命力を啜り、目覚めて大地に破滅をもたらすだろう、と。</p>
+<p>それでもアリゼーは諦めない。バハムートが生きているのなら、祖父もまた生きているはずだと言い、祖父はこの五年間、宿敵を見張り、蛮神が逃れぬよう見張り続けてきたのだと断言する。ウリエンジェは希望すら抱けなかったと動揺し、それが悲嘆の生んだ幻ではないのかと問う。だがアリゼーは、自分の目で確かに見たと言い切り、あなたも同じく目撃したと重ねる。しかし祖父は言葉を交わす間もなく、迷宮のさらに奥へと姿を消したのだという。</p>
+<p>アリゼーは次の手掛かりへ踏み出す。小さき月が落ちた時、ダラガブの欠片のようなものがさらに地を穿った――あなたたちはそのひとつを見たにすぎず、残るふたつを見つければ祖父にも辿り着けるはずだと。ウリエンジェは各国のグランドカンパニーへ知らせ、再び霊災を招かぬよう一致団結すべきだと申し出るが、アリゼーは不要だと言う。アルフィノが自らエオルゼアの統一を目指すだろうし、その動きはすでに始まっているはずだ、と。外交は外交官に任せ、あなたと自分たちはバハムートの調査を続けよう――何があろうと祖父を見つけ、第七霊災の真実を暴くと誓う。だがその誓いを果たすにはあなたの力が欠かせない。危機は去っていないのだから、エオルゼアに生きるすべてのために、闇を斬る剣として共に在ってほしいと。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+<div class="row"><b>クエスト発行</b> ウリエンジェ　<small class="muted">砂の家 (X:6.0, Y:4.9)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+<div class="row"><a class="link" href="primal-awakening.html">新たな蛮神</a></div>
+<div class="row"><a class="link" href="the-binding-coil-of-bahamut-turn-5.html">大迷宮バハムート：邂逅編5</a></div>
+<div class="row">ファイター ソーサラー Lv 50～</div>
+</div>`,
+    followq:`<div class="stack">
+<div class="row"><a class="link" href="another-turn-in-the-coil.html">再び深き淵へ</a></div>
+</div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'Alisaie 立誓追尋第七靈災的真相',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+<p>Alisaie 見到你再次出現，明顯鬆了一口氣。她說，你們遠征帶回的成果她已經先與 Urianger 分享過了——接下來，就一起思考這些發現究竟意味著什麼。</p>
+<p>Urianger 也為你的平安歸來感到由衷欣慰，並說 Alisaie 已將你經歷的一切告訴他。他提醒你，Master Louisoix 是她的祖父；他曾深深擔心她的安危，但看來這份憂慮是多餘的。於是他真誠地向你致謝，感謝你一路照看著她，並請你與 Alisaie 好好談談在 Binding Coil 裡發生的事——也許能讓你們更靠近 Calamity 的真相。</p>
+<p>Alisaie 立刻要把話說清楚，並問 Urianger 是否也有自己的報告要補上。Urianger 回答，就在你們從深處現身的同時，出現了一道能指向 primal 活動的以太異動。</p>
+<p>他說，這股異動最先在 Mor Dhona 被記錄到；經由時間與強度的比對，他們已推得它的源頭——Carteneau Flats。Alisaie 覺得這很不尋常：那一帶並沒有任何 primal 活動的通報，因此能解釋的只剩 Bahamut。也正因如此，你們才會出現在 northern Thanalan——那條地底洞窟竟把你們從 Vylbrand 一路帶到 Aldenard 的核心地帶。</p>
+<p>Alisaie 幾乎已經確信：Bahamut 在五年前消失之後，便藏匿於 Carteneau 的地底深處，長時間沉眠並逐步再生。Urianger 也認同，並說再加上你們親眼確認 Bahamut 仍然存在，土地復原得如此緩慢、以太流又如此紊亂——這些都指向同一個結論：Bahamut 正在甦醒。若再放任不管，這個 primal 會汲取 Eorzea 的生命力，直到完全醒來，將毀滅重新灑向大地。</p>
+<p>但 Alisaie 並不打算退縮。她說，既然 Bahamut 還活著，那她的祖父也一定還活著——這五年來，他一直守在宿敵身旁，確保那個 primal 無法逃脫。Urianger 幾乎不敢相信，甚至問她：那會不會只是悲傷過度而產生的幻象。Alisaie 卻堅定地說，她親眼看見了——而你也同樣看見了。只是你們還來不及開口，他就往迷宮更深處消失了。</p>
+<p>她接著把目標指向下一步：當小月球墜落時，還有更多像 Dalamud 碎片一樣的東西刺入地底；你們已經見過其中之一，而她相信另外還有兩個。只要找出那兩個碎片，她就能找到祖父。Urianger 提議通知 Grand Companies，讓整個 Eorzea 為了避免重演 Calamity 而團結一致，但 Alisaie 立刻拒絕——她說 Alphinaud 會以自己的方式去促成團結，而且若傳聞屬實，那項努力早已開始。她要把外交交給外交官，你們則繼續追查 Bahamut；她向你發誓，無論付出什麼代價，都要找回祖父、揭開 Calamity 的全部真相。但她也直白地告訴你：沒有你的力量，她無法實現這個誓言。危機仍未遠離，為了所有仍生活在 Eorzea 的人，她祈求你繼續成為你們的「黑暗中的劍」。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+<div class="row"><b>任務發布</b> 烏里昂熱　<small class="muted">沙之家 (X:6.0, Y:4.9)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+<div class="row"><a class="link" href="primal-awakening.html">Primal 甦醒</a></div>
+<div class="row"><a class="link" href="the-binding-coil-of-bahamut-turn-5.html">巴哈姆特大迷宮：邂逅篇 5</a></div>
+<div class="row">戰鬥／魔法職業 Lv.50～</div>
+</div>`,
+    followq:`<div class="stack">
+<div class="row"><a class="link" href="another-turn-in-the-coil.html">再下一層，踏入更深的淵底</a></div>
+</div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
