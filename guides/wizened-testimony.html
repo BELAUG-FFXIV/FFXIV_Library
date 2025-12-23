@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Wizened Testimony | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Hildibrand Adventures – Wizened Testimony (DT Patch 7.15)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/VIkZ6YuiegA"
+              title="Wizened Testimony" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Wizened Testimony</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Wizened Testimony',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+<p>You find Nashu still waiting for news, and she brightens when she sees you—until Detective Hardiboiled steps in as if on cue. Since you last parted, he says, he’s combed every alley and dive bar in Everkeep for any sign of the “Phildigrand” you described. Nashu corrects him—Hildibrand—but Hardiboiled only shrugs. However you pronounce it, the man wasn’t there.</p>
+<p>Hardiboiled tells Nashu to keep her chin up: the case isn’t over, and he always gets his man. When a trail goes cold, you go back to the beginning—so he demands the full story again, leaving nothing out. You followed rumors of a shiny flying disc that snatched your friend, and those rumors led you here, where the craft likely crashed. You also claim he was caught inside the dome when it appeared, and from your perspective, thirty years passed in the blink of an eye—absurd on its face, but Hardiboiled has seen enough strangeness to give you the benefit of the doubt.</p>
+<p>With no lead on the man himself, Hardiboiled argues you should jog memories about the starship instead. You head to a park outside the residential radii to question older folk—people native to your world who might have witnessed the original crash landing three decades ago. Nashu produces the starship illustration again, and, eager to help, adds a portrait of Hildibrand’s face to the page so it’s “even easier.” There are only two copies, so you and Hardiboiled will have to share, and he can’t resist calling her art the masterpiece of a finger-painting toddler.</p>
+<p>You begin showing the picture around. One middle-aged Hhetsarro man apologizes—thirty years ago he was practically an infant—and, with an innocent smile, asks if your child drew it. An elderly Hyune woman can’t recall anything useful either, though she warmly compliments the “lovely drawing” of Hardiboiled. Another elderly Hyune man remembers Hardiboiled—the clever detective who once recovered his stolen tonic—and talks about routines and the comfort of familiar scents, but Hardiboiled realizes the truth: the man is Alexandrian, born and bred inside Everkeep, and couldn’t have seen the crash you’re chasing.</p>
+<p>Hardiboiled refuses to be discouraged. He spots a Shetona man heading toward the 9–14 radius and points out that with their long lives, age is hard to judge—maybe this time you’ll get lucky. The Shetona admits the portrait is too simple to recognize the man, but the flying disc itself is another matter. He remembers it clearly from a time when flying machines were rare: he saw it during a hunt, and it seemed to crash somewhere north, near Yuweyawata. He’d meant to search for the wreckage, but the dome appeared, and far stranger concerns swallowed everything.</p>
+<p>You bring the news back to Nashu, who mangles the place name in her excitement but understands the implication: if a shiny unidentified object fell near a research facility, someone likely scooped it up quickly. The only problem is crossing the lake—until you suggest a solution. Between reforgers and hover cargos, Hardiboiled recognizes the practical answer at once, claiming he knows a cooperative reforger who can arrange transport. As you prepare to move, he presses you about how you already know of Yuweyawata when he’s only just learned it exists, and you answer plainly: you’re an adventurer by trade.</p>
+<p>At the driftdowns, the reforger confirms a hover cargo is ready, and you travel to Yuweyawata—into a dark facility where even Nashu remarks they must like it dim. With no monsters roaming the halls, you split up to search. In the records you uncover confidential addenda: the recovered vessel entered the region shortly before the dome manifested, and its wreckage contained not a sliver of electrope—proof it was built with technology unlike their own. Within the craft, they found a lone Hyune male survivor with no visible injuries, yet trapped in a comatose state; every attempt to wake him—shock, hot baths, even a sharp slap—failed, suggesting temporal stasis. Their excitement over his preternatural resilience is tempered by caution: rather than extreme measures, they suspend the research and preserve the specimen in a bio-capsule in Sector 51 under observation.</p>
+<p>Hardiboiled returns, admitting the records pulled him onto another floor, and he had to secure a verification key—so he hasn’t chased your starship mystery directly. When you tell him about Sector 51, he produces the key he found and urges you to grab Nashu and move now. In Sector 51, Nashu rushes to the preserved figure—Inspector Hildibrand at last—and Hardiboiled stares, incredulous that this “clown” looks nothing like him. Still, the missing person is found, and Nashu presses a hard-boiled egg into your hands so you can pass it to the detective; he accepts it with quiet gratitude, admitting he can never refuse the kindness of strangers.</p>
+<p>Then Hildibrand stirs—bold as ever—and declares there’s no need for fists or firearms, because he will resolve this in a way befitting a gentleman. He addresses the room as if it were an audience, congratulates everyone on proper comportment, and admits he may have overslept a trifle. Bright-eyed and bushy-tailed, he introduces himself anew and immediately wonders who the stern-looking fellow might be. Nashu proclaims it’s Detective Hardiboiled, his soul-twin from another world; both men dismiss the resemblance with equal certainty, while Nashu insists they look practically identical. Hardiboiled can’t make sense of it—how you look too young for someone who’s been “sleeping” thirty years, and how you managed to charm shambling corpses—while Nashu answers with the only explanation she has: Hildibrand’s physique is unique, and he’s had remarkable rapport with the undead since an infamous stint as an undead overlord. Case closed or not, Hardiboiled says he smells something new brewing and intends to follow it—and when Hildibrand eagerly offers his services, Hardiboiled bites, challenging this “inspector” to prove his sleuthing chops as you all set your sights on the next case.</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+<div class="row"><b>Quest Giver</b> Nashu Mhakaracca <small class="muted">Solution Nine (X:18.5, Y:13.6)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+<div class="row"><a class="link" href="the-case-of-the-displaced-inspector.html">The Case of the Displaced Inspector</a></div>
+</div>`,
+    followq:`<div class="stack">
+<div class="row"><a class="link" href="the-case-of-the-fiendish-fugitives.html">The Case of the Fiendish Fugitives</a></div>
+</div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'実直な探偵',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+<p>あなたがナシュ・マカラッカのもとへ戻ると、彼女はまだ知らせを待っていた。だが言い終える前に、探偵ハルディボイルドが当然のように割り込んでくる。別れてからというもの、彼はエバーキープの路地も安酒場も片っ端から当たり、「フィルディグランド」なる人物の痕跡を探したと言う。ナシュが発音は「ヒルディブランド」だと訂正しても、彼は気にしない。呼び方はどうあれ、見つからなかったのだ。</p>
+<p>落ち込むナシュに、ハルディボイルドは顔を上げろと言う。事件はまだ終わっていないし、彼は必ず獲物を仕留める。手掛かりが途切れたなら、始まりに戻るのがコツだ――だから、あなたたちが辿った経緯を最初から全部話せ、些細なことでも省くな、と。</p>
+<p>あなたは、友をさらった光る飛行円盤の噂を追い、墜落したはずの場所としてここへ辿り着いたことを改めて伝える。さらに、ドームが現れたとき彼が中に取り残され、あなたの感覚では瞬きほどの間に三十年が過ぎた――そんな荒唐無稽な話も、ハルディボイルドは仕事柄の経験から、依頼人の言葉を頭ごなしには否定しない。</p>
+<p>本人の手掛かりがないなら、宇宙船の記憶を掘り起こすべきだと彼は言う。三十年前の墜落を目撃した可能性があるのは、あなたの世界の古くからの住人――年配者だ。年寄りは公園が好きだろう、と彼は住宅区画の外にある公園へ向かう提案をする。ナシュは例の挿絵を取り出し、さらに分かりやすくするためにヒルディブランドの顔まで描き足したと言い張る。写しは二枚しかなく、あなたとハルディボイルドで共有だと告げられた彼は、その出来栄えを遠回しに酷評せずにはいられない。</p>
+<p>あなたたちは公園で挿絵を見せて回る。ヘッツァロの男性は三十年前は赤子同然で覚えていないと謝り、絵がかわいいから子どもが描いたのかと尋ねる。ヒューンの老婦人も記憶は薄いと言いながら、ハルディボイルドの肖像を褒めちぎり、本人は思わず顔をしかめる。別のヒューンの老人は宇宙船は知らないが、ハルディボイルドがかつて奪われた薬を取り戻したことだけは覚えており、日々の習慣の大切さを語る。だが彼がエバーキープ生まれのアレクサンドリア人だと分かった時点で、彼が目撃者ではないことも明らかになる。</p>
+<p>それでもハルディボイルドは粘る。長命なシェトナなら年齢が読みづらいが、運が向くかもしれないと言い、９―１４区画へ向かった男に狙いを定める。シェトナの男は、顔の絵は簡素すぎて判別できないと苦笑するが、飛行円盤そのものは覚えていると言う。飛行機械が珍しかった頃、狩りの最中に目撃し、北のユウェヤワータ近辺へ墜ちたように見えた。残骸を探すつもりだったが、ドームが突然現れ、それどころではなくなったのだ。</p>
+<p>あなたたちは情報をナシュに伝える。彼女は地名を言い間違えながらも、研究施設の近くに正体不明の光る物体が落ちたなら、先に回収されているはずだと理解する。問題は湖をどう渡るかだが、あなたが移動手段を提案すると、ハルディボイルドはホバー・カーゴの存在を思い出し、都合のいいリフォージャーに心当たりがあると言い切る。あなたが冒険者だと名乗ると、彼は納得したようにうなずき、次の聞き込みへ向けて動き出す。</p>
+<p>ドリフトダウンズでリフォージャーがホバー・カーゴの準備を整え、あなたたちはユウェヤワータへ渡る。薄暗い施設の中で、危険な気配がないことを確認すると、手分けして探索する。あなたが見つけた機密資料には、ドーム発現の直前に回収した機体が異質な技術で作られていたこと、残骸からエレクトロープが一片も出なかったこと、そして機内からヒューンの男性生存者が発見されたことが記されていた。外傷はないのに昏睡状態で、電撃も熱い風呂も平手打ちも効果なし――時間停止の兆候だという。さらに、その異常な耐久性を巡る研究は一時停止され、被験体はセクター５１で生体カプセルに保存されるとある。</p>
+<p>やがてハルディボイルドが戻ってくる。別の記録に目を奪われ、認証キーを確保していたため宇宙船の件に手が回らなかったと詫びるが、セクター５１という言葉を聞くと、見つけたキーでそこへ入れると告げ、ナシュを連れて急げと言う。セクター５１でナシュはついにヒルディブランドを見つけて駆け寄り、ハルディボイルドは納得できない顔で「自分に似ていない」と吐き捨てる。それでも行方不明者は発見され、ナシュがあなたにゆで卵を託すと、彼は静かに受け取り、知らない者の親切を拒めないとつぶやく。</p>
+<p>そしてヒルディブランドが目を覚ます。彼は銃も拳も不要だと言い、紳士にふさわしいやり方で事態を収めると宣言する。皆に号令をかけ、紳士的な振る舞いを称え、自分は少し寝過ぎたようだと軽く笑う。ナシュは探偵ハルディボイルドを別世界の魂の双子だと紹介するが、当の本人同士は似ていないと言い合い、ナシュだけが瓜二つだと言い張る。不可解さが残る中、ハルディボイルドは新たな事件の匂いを嗅ぎ取り、鼻が向くまま追うと言う。そこへヒルディブランドが「巡視員」として名乗りを上げ、あなたたちは次なる事件へ踏み出していく。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+<div class="row"><b>クエスト発行</b> ナシュ・マカラッカ <small class="muted">ソリューション・ナイン (X:18.5, Y:13.6)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+<div class="row"><a class="link" href="the-case-of-the-displaced-inspector.html">事件屋の行方</a></div>
+</div>`,
+    followq:`<div class="stack">
+<div class="row"><a class="link" href="the-case-of-the-fiendish-fugitives.html">はなたれた魔物</a></div>
+</div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'老成之證，道出正直偵探',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+<p>你回到 Nashu Mhakaracca 身邊時，她還在等消息，看到你就像終於等到援軍一樣鬆了口氣——可話才起頭，偵探 Hardiboiled 便像理所當然般接上。自從上次分開，他把 Everkeep 的巷弄與破酒吧都翻了個遍，只為找出那個「Phildigrand」的下落。Nashu 立刻糾正發音是「Hildibrand」，但 Hardiboiled 只是聳肩：不管怎麼叫，人就是找不到。</p>
+<p>Nashu 忍不住低落，Hardiboiled 卻要她抬起頭來——案子還沒結束，而他總會把人逮到。線索一冷，就回到起點；他要你把整件事從頭再講一次，任何看似不重要的細節都不能漏。你再次說明：你們追著那個擄走同伴的閃亮飛行圓盤的傳聞，最後追到這裡——最可能墜毀的地點。至於「圓頂出現後，你眼中的一瞬就是三十年」這種聽來荒唐的說法，Hardiboiled 雖然皺眉，卻也承認自己見過太多怪事，至少會先給委託人一點信任。</p>
+<p>既然找不到人，那就改找「星船」的記憶。Hardiboiled 判斷，三十年前的墜毀若真發生過，目擊者更可能是你們世界裡、年紀夠大的人；而這種人往往愛待在公園——住宅區外的那座公園正合適。Nashu 把你上次借她的星船插圖拿出來，還說她為了讓大家更好理解，乾脆在紙上加畫了 Hildibrand 的臉。她只做了兩份，你跟 Hardiboiled 得共用一張；Hardiboiled 看著那幅「好心的畫作」，嘴上不饒人，卻也承認有圖總比空口問三十年前的事要好。</p>
+<p>你們在公園裡把插圖拿給人看。中年的 Hhetsarro 男子尷尬地道歉：三十年前他還小得像嬰兒，根本不可能記得什麼，還反過來誇那張圖很可愛，問是不是你家孩子畫的。年長的 Hyune 女子同樣想不起來當年的事，只說記憶早就模糊，卻又笑著稱讚那幅「你的肖像」很傳神——讓 Hardiboiled 當場嫌棄得要命。另一位年長的 Hyune 男子不認得星船，卻記得 Hardiboiled 曾替他取回被偷走的藥水，還談起每日儀式般的習慣與香氣；Hardiboiled 聽著聽著就抓到關鍵——對方是 Alexandrian、在 Everkeep 長大的人，根本不可能目擊你們要找的那場墜毀，只能為打擾致歉。</p>
+<p>Hardiboiled 不肯就此放手，他說這種事拼的就是韌性與耐性。他注意到有個 Shetona 的男人往 9–14 區走去，Shetona 壽命長、外表難以判斷年齡，也許反而有機會。那名 Shetona 男子看了插圖，對「人像」搖頭：畫得太簡單，實在認不出是誰；但談到飛行圓盤，他卻記得很清楚——在飛行機械還很稀罕的年代，他在狩獵時看見它，最後像是墜在北方、靠近 Yuweyawata 的某處。他本想去找殘骸，可圓頂突然出現，接踵而來的怪事把一切都打亂了。</p>
+<p>你們把這條關鍵證詞帶回給 Nashu。她一時興奮把地名講得亂七八糟，但意思很明白：如果不明的閃亮物體落在研究設施附近，那裡的人多半早就把東西撿走。接著只剩一個問題——湖要怎麼過。你提出可行的移動方式後，Hardiboiled 立刻想起有「懸浮貨運車」可用，並說自己剛好認識一位好說話的再鑄師，能在 The Driftdowns 幫你們把交通安排妥當。至於他好奇你怎麼早就知道 Yuweyawata 的存在，你只簡單回應：你靠冒險吃飯，這種地名你並不陌生。</p>
+<p>再鑄師果然備好懸浮貨運車，你們順利抵達 Yuweyawata，走進一座昏暗的設施，連 Nashu 都忍不住嘀咕：他們一定很愛黑。走廊裡沒有怪物遊蕩，Hardiboiled 判斷可以分頭搜查。你在文件櫃裡翻到機密附錄：他們回收的那艘不明飛行器是在圓頂顯現前不久飛入此地，殘骸檢查更證實裡頭找不到任何 electrope 的碎片，技術路線與他們截然不同。更驚人的是，機內還有一名 Hyune 男性生還者——撞擊力道看似不小，對方卻毫髮無傷；然而他雖然「有魂」，卻始終昏迷不醒，對任何刺激都沒有反應，甚至電擊、熱水浴、狠狠一巴掌都叫不醒，判定疑似「時間停滯」。研究者對他那近乎超常的身體韌性著迷，卻也決定暫停研究，把樣本保存於 Sector 51 的生體膠囊中觀察，等待有朝一日恢復意識。</p>
+<p>Hardiboiled 這時回來找你，坦白說有別的紀錄吸走了他的注意力，他先去弄到驗證鑰匙，所以沒追星船那條線。你一提到 Sector 51，他立刻拿出剛到手的鑰匙，要你把 Nashu 叫上，馬上前往。到了 Sector 51，Nashu 一眼就看到保存中的 Hildibrand，當場衝上前喊他；Hardiboiled 卻瞪著那張臉，忍不住嘀咕你們是不是在耍他——這傢伙哪裡像他。儘管嘴上不服，失蹤者確實找回來了；Nashu 又把一顆水煮蛋塞給你，示意你交給偵探，你照做後，Hardiboiled 低聲道謝，說他一向拒絕不了陌生人的好意。</p>
+<p>接著，Hildibrand 竟真的醒了過來。他大言不慚地表示不需要槍也不需要拳頭，自己會用「符合紳士身分」的方式解決眼前的衝突，還一本正經地號令眾人跟著他做，稱讚大家要保持紳士風度，順便承認自己似乎睡過頭了一點。精神奕奕的他轉眼就把視線放到 Hardiboiled 身上，問這位面容嚴峻的男人是誰；Nashu 立刻宣布那是來自另一個世界、與他「同魂雙生」的偵探 Hardiboiled。兩個當事人卻一致否認相像，Nashu 反倒堅持你們看起來幾乎一模一樣；Hardiboiled 更困惑你這個「睡了三十年」的人怎麼還這麼年輕，還吐槽你居然能讓那些搖晃的屍體聽話，像是在挑戰自然法則。Nashu 只好用她唯一能拿得出手的解釋回應：Hildibrand 的體質本來就很特殊，而他也確實在某段「不死君王」的經歷後，對不死生物有著異常的默契。就算這起失蹤案算是告一段落，Hardiboiled 仍說自己聞到了新案子的味道——他要循著嗅覺追下去；而 Hildibrand 立刻興致勃勃地自薦要加入調查，於是你們順勢把腳步轉向下一樁不可思議的事件。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+<div class="row"><b>任務發布</b> 娜修・馬卡拉卡 <small class="muted">Solution Nine (X:18.5, Y:13.6)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+<div class="row"><a class="link" href="the-case-of-the-displaced-inspector.html">流落他方的偵探疑案，追尋偵探的去向</a></div>
+</div>`,
+    followq:`<div class="stack">
+<div class="row"><a class="link" href="the-case-of-the-fiendish-fugitives.html">追查邪魔逃犯，流鼻涕的魔物現身</a></div>
+</div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
