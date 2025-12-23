@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Imperfect Gentleman | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Hildibrand Adventures – The Imperfect Gentleman (EW Patch 6.25)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/0evUonQmrSY"
+              title="The Imperfect Gentleman" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">The Imperfect Gentleman</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'The Imperfect Gentleman',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+<p>Nashu blinks hard and rubs at her eyes, saying PuPu’s swirling gaze makes her dizzy. Delion, meanwhile, can barely contain himself—your Echo sounds extraordinary, and once this whole moon business is behind you, he insists you let him interview you. PuPu simply says he’s relieved you’re here, so there won’t be any more…PuPu…misunderstandings.</p>
+<p>Hildibrand declares that a new investigation has begun: “The Case of the Silent Correspondent.” Delion immediately points out that “a friend stopped sending messages” is precious little to go on, even for someone who’s chased the supernatural for years. Nashu answers with complete confidence—Hildibrand will do what he always does, solving the case with flawless perception and panache—while Hildibrand cheerfully claims he only needs to surrender to his investigative instincts and the clues will come rushing in. Delion gasps at the sight, convinced he’s witnessing some kind of channeling.</p>
+<p>Before Hildibrand can drift any further into his “deductive current,” a laconic Loporrit hurries over with news: he just spotted the well-muscled gentleman in tattered clothes—up in the north of Mare Lamentorum—and the fellow ran the moment he was called out. That can’t be Hildibrand, because you’re standing right here with him. Nashu immediately suspects an impostor and asks you to have PuPu confirm whether more “inspectors” were grown on the moon. PuPu admits it: he only made one batch, but one imperfect clone escaped the vaporization beam—unpredictable, a flaw in the process.</p>
+<p>Hildibrand decides this cannot stand. A defective double roaming free would stain the Manderville name, so he asks PuPu to help hunt down and eliminate the impostor first—even if it means postponing the search for PuPu’s missing friend. PuPu agrees, taking responsibility for the mistake, and Hildibrand proudly announces a new chapter: “The Case of the Impostor Inspector.” The Loporrit offers to come along and lead you to the place where he saw the impostor, and the search begins in the northern wastes.</p>
+<p>You spread out to cover ground—Hildibrand and Nashu head with you, while the Loporrit takes Delion and PuPu in the other direction. Delion protests about being left “with the aliens,” but the Loporrit breezily promises a pleasant chat and a chance to dispel his conspiracy theories. As you move across the moon’s stark terrain, Hildibrand waxes nostalgic about the time he was blasted all the way to Dalamud, while Nashu sings about the world below like a pizza pie, lighthearted even in the cold.</p>
+<p>Following the trail, you take in strange sights—what Nashu thinks is a hot spring, Hildibrand insists is a natural reservoir of ceruleum—and then you find unsettling evidence: creatures felled by single, brutal blows from goldsmithing hammers. Hildibrand grows oddly rattled and urges you onward, refusing to linger. Soon, in the moondust, you spot tracks that mirror Hildibrand’s own perfectly—the impostor is close.</p>
+<p>At last you find him: the clone stands apart, haunted by shame, unable to understand why he fled. Nashu can tell at a glance he’s wrong—sad, downcast, nothing like the flamboyant confidence she expects from a true inspector. Godbert appears in the midst of the commotion, overjoyed to hear his son has awakened, then immediately realizes something is off—this isn’t the Hildibrand he knows. The clone, stung by his own cowardice, steels himself and declares he won’t run this time. When the dust settles, Godbert thanks you for returning Hildibrand’s soul and for standing by his side, and he apologizes to PuPu for damaging his starship in the excitement—only for PuPu to confirm it was a temporary malfunction, with no major structural harm.</p>
+<p>Back on the star of your birth in Radz–at–Han, Hildibrand and Nashu rush to resume “The Case of the Silent Correspondent,” while Delion—now convinced the Loporrits aren’t plotting an invasion—fixates instead on PuPu and his devices, asking for your help and even offering a retainer fee. Godbert then calls you aside for a different matter entirely: a family legacy—the recreation of Manderville weapons, based on an ancestral manual preserved through generations. He explains why he’s doing this now, recalling the horror that struck Radz–at–Han when the sky burned and lives were lost, and how your resolve inspired him to act. He has already secured a rare meteorite metal—manderium ore—by seeking it on the moon, but he needs more materials and a dependable ally to see the project through. As the conversation ends, a sudden shout cuts through the plaza—someone yells that a prisoner is escaping.</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+<div class="row"><b>Quest Giver</b> Hildibrand <small class="muted">Mare Lamentorum (X:27.9, Y:35.7)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+<div class="row"><a class="link" href="lunar-conspiracy.html">Lunar Conspiracy</a></div>
+</div>`,
+    followq:`<div class="stack">
+<div class="row"><a class="link" href="the-spectacle-of-inspection.html">The Spectacle of Inspection</a></div>
+</div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'出奔した複製',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+<p>ナシュ・マカラッカはふらふらと目をこすり、ププの渦を巻く瞳を見ていると目が回ると言う。デリオンは興奮を隠せず、あなたのエコーの力は途方もないものだ、月での一件が片づいたらぜひ取材させてくれと迫る。ププは、これ以上の……ププ……誤解を防ぐためにも、あなたがいてくれて助かると静かに告げる。</p>
+<p>ヒルディブランドは高らかに宣言する。ここに新たな事件――「沈黙した通信員事件」の開幕だ、と。だがデリオンは水を差すように言う。「この星のどこかにいる友が連絡を絶った」だけでは手掛かりが少なすぎる、と。ナシュは即座に反論し、ヒルディブランドなら無数の事件を解決してきた通り、揺るがぬ洞察と華麗さで必ず真相へ辿り着くと胸を張る。ヒルディブランドは「意識的な思考を手放せば、捜査の本能が勝手に働き、手掛かりが流れ込んでくる」と笑い、デリオンはそれを見て「高次の力への交信」だと息を呑む。</p>
+<p>そこへ無口なレポリットが駆けつける。あなたたちが探していた、筋骨たくましく、服がぼろぼろで、歯がきらりと光る男を見かけたという。北の嘆きの海で声をかけたら、相手は反対方向へ走って逃げたらしい。だが今、ヒルディブランドはあなたの目の前にいる。ナシュはすぐに「見たのは偽物だ」と察し、あなたに頼む――月で探偵を増やしたのか、ププに確かめてほしい、と。ププは認める。作ったのは一度きりだが、蒸発光線から不完全な個体がひとつ逃げてしまった。挙動が予測できず、複製の過程に欠陥があったのだという。</p>
+<p>ヒルディブランドは顔を引き締める。欠陥を抱えた偽の探偵が野放しでは、マンダヴィルの名に泥を塗る。まずはその偽物を追い、処分しなければならない――ププの友を探す件は、その後でもよいかと尋ねる。ププは自分の過失だとして、先に償いを果たすのが筋だと同意する。ヒルディブランドは新たな題を掲げる――「偽物探偵事件」だ。無口なレポリットも同行を申し出て、偽者を目撃した場所へ案内すると言い、あなたたちは北へ向かう。</p>
+<p>捜索のため一行は分かれる。あなたはヒルディブランドとナシュとともに進み、レポリットはデリオンとププを連れて別方向へ向かう。デリオンは「また分断するのか、しかも宇宙人と一緒だ」と騒ぐが、レポリットは落ち着けと笑い、妙な陰謀論を正してやると軽く受け流す。月面を進むうち、ヒルディブランドはダラガブへ吹き飛ばされた時のことを思い出し、距離としては自己最高記録だったと冗談めかす。ナシュは空の上から見える世界を歌い、寒さの中でも場を明るくする。</p>
+<p>やがて道中で奇妙な光景に出くわす。ナシュが温泉だと思ったものを、ヒルディブランドは天然の青燐水の貯留地だと言い、うっかり浸かろうとする彼女を止める。その後、金槌が突き刺さったまま倒れた生き物を見つける。どれも一撃で仕留められた痕で、ただならぬ力がうかがえる。ヒルディブランドは明らかに動揺し、これは事件と無関係だと言い張って先を急がせる。それでもあなたは月塵の上に残る足跡を見つける――妙に気取った歩み方まで、ヒルディブランドのそれと寸分違わない。偽者は近い。</p>
+<p>ついにあなたは不完全な複製体と向き合う。彼はなぜ逃げたのかと自問し、誇りも衣服もぼろぼろだと沈んでいる。ナシュはひと目で「本物らしくない」と感じ取り、ヒルディブランドは「真のマンダヴィルの心にそんな負の感情はない」と断じる。そこへゴッドベルトが現れ、息子が目覚めたと喜ぶ一方で、目の前の存在が息子ではないと気づく。複製体は今度は逃げないと叫び、事態は収束へ向かう。ゴッドベルトはあなたが魂を連れ戻したこと、仲間として支えたことに礼を述べ、興奮のあまりププの宇宙船を壊してしまったと詫びる。だがププは一時的な不具合だっただけで、大きな損傷はないと答える。</p>
+<p>ラザハンへ戻ると、ヒルディブランドとナシュは「沈黙した通信員事件」を続けようと急き立てる。デリオンはレポリットたちに侵略の意思がないと認めつつも、今度はププとその装置こそが脅威だと疑い、あなたに解釈の助けを求め、手当まで払うと言い出す。そんな中、ゴッドベルトはあなたを呼び止め、家の遺産に関わる話を切り出す――マンダヴィル武器の再興だ。空が燃え、命が失われたラザハンの惨禍を思い出し、あなたの闘いに背中を押されて、人々を守るための武器を鍛える決意を固めたのだという。彼は月で希少な金属マンダリウム鉱を手に入れたが、必要な素材はまだ多く、志を同じくする助力が欠かせない。そう語り終える寸前、広場に叫び声が走る――囚人が逃げた、という怒号が響く。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+<div class="row"><b>クエスト発行</b> ヒルディブランド <small class="muted">嘆きの海 (X:27.9, Y:35.7)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+<div class="row"><a class="link" href="lunar-conspiracy.html">のめり込んだ男</a></div>
+</div>`,
+    followq:`<div class="stack">
+<div class="row"><a class="link" href="the-spectacle-of-inspection.html">自己流の捜査</a></div>
+</div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'叛逃的複製體',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+<p>Nashu Mhakaracca 一邊晃著腦袋一邊嘟囔，說 PuPu 那雙像漩渦一樣打轉的眼睛看得她頭暈。Delion 卻興奮得不得了，直說你的 Echo 聽起來太不可思議，等月球這邊的事告一段落，他一定要採訪你。PuPu 則像鬆了口氣，說你在這裡就能幫忙擋下更多……PuPu……誤會。</p>
+<p>Hildibrand 立刻把話題拉回來，宣布新的案件就此展開——「沉默的通訊員之謎」。Delion 馬上潑冷水，說「朋友在你們的星球某處突然不再傳訊」實在太少線索，就算他研究外星人多年也很難憑這點找到人。Nashu 卻完全不擔心，反而把你推向前，說你根本不懂偵探 Hildibrand：他會像過去解決無數案件那樣，用毫不出錯的洞察力與派頭把真相抓出來。Hildibrand 也笑得自信，說自己只要放空腦袋、把身心交給辦案本能，線索就會自己湧上來。Delion 看得倒抽一口氣，硬把這種狀態當成在「通靈」。</p>
+<p>就在他們還要繼續鬧下去時，Laconic Loporrit 急匆匆跑來，說他剛在 Mare Lamentorum 北邊看見你們要找的那個人——肌肉結實、衣服破破爛爛、牙齒閃得發亮；他喊了一聲，對方居然拔腿往另一個方向逃了。可 Hildibrand 明明就在你身邊，這顯然不對。Nashu 立刻判斷那是冒牌貨，轉頭要你問 PuPu：他是不是在月球又「做出了更多偵探」。PuPu 承認確有其事——他只做過一批，但有一個不完美的複製體竟然躲過蒸發光線逃掉了；那個個體行為難以預測，是複製過程的瑕疵。</p>
+<p>Hildibrand 的笑意瞬間收起來，說這可不行：放任一個有缺陷的冒牌偵探到處亂跑，只會玷污 Manderville 的名聲。他要求 PuPu 先和你們一起把那個「另一個自己」追出來並處理掉，至於 PuPu 要找的失聯友人，可否等這件事辦完再說。PuPu 說這個不完美的複製體是他造成的錯，理應先把錯補回來。Hildibrand 於是大聲宣布新案件名稱——「冒牌偵探之謎」。Laconic Loporrit 也興致勃勃要同行，說他可以帶你們去他目擊冒牌偵探的位置，你們便啟程往北邊搜索。</p>
+<p>為了更快找人，隊伍分開行動：你和 Hildibrand、Nashu 往西北查，Laconic Loporrit 則帶著 Delion 和 PuPu 往東北。Delion 一聽又要分隊就崩潰，還抱怨自己被丟去跟外星人一組；Laconic Loporrit 卻輕描淡寫地說會跟他好好聊聊，順便把那些陰謀論矯正回來。你們在月球荒涼的地貌上前進，Hildibrand 忽然聊起自己以前被炸飛到 Dalamud 的事，還說那大概是他被「拋飛距離」的個人紀錄。Nashu 則哼著歌，把遠在下方的世界唱成像披薩一樣漂亮，努力讓氣氛別被寒意吞掉。</p>
+<p>沿路你們看見一些奇景——Nashu 以為下方有溫泉，Hildibrand 卻說那不是溫泉，而是天然的 ceruleum 蓄積池，嚇得 Nashu 直呼還好有他提醒。接著，你們又發現被一擊打死的生物，身上竟插著金匠用的鐵鎚；同樣的鐵鎚、同樣乾脆俐落的一擊，像是在炫耀某種不講理的怪力。Hildibrand 明顯不自在，硬說這和案件無關，催你們別看了快走。直到你在月塵裡看見一串足跡——那種刻意講究、帶著「紳士氣」的步伐，連輪廓都像是 Hildibrand 自己的翻版——你才確信目標就在前方。</p>
+<p>你們終於追上那個不完美的複製體。他站在那裡失魂落魄，反覆問自己為什麼要逃，像是被羞愧壓得抬不起頭。Nashu 一眼就看出不對勁，說他看起來太沮喪、太不像偵探。Hildibrand 則斷言這正是瑕疵——真正的 Manderville 絕不會被這種陰暗情緒玷汙。就在此時，Godbert 出現了：他先因為聽見兒子醒來而欣喜若狂，隨即又察覺眼前這個「兒子」不對。複製體咬牙宣告這次不會再逃，他要像偵探一樣挺身而出，混亂也因此收束。Godbert 向你道謝，說你把 Hildibrand 的靈魂從裂隙彼端帶回來，Nashu 也守在床邊不曾退縮；他還向 PuPu 道歉，說自己一時太激動恐怕把他的星際船弄壞了。PuPu 回答只是短暫故障，結構沒有受到嚴重損傷，Godbert 這才真正鬆口氣。</p>
+<p>回到 Radz–at–Han 後，Hildibrand 和 Nashu 馬上又要投入「沉默的通訊員之謎」，急著往下一個方向追查。Delion 則改口承認 Loporrit 並沒有入侵你們星球的打算，但他又把矛頭轉向 PuPu，認定這個狡猾的 PuPu 和那些裝置才是威脅，還說需要你幫忙翻譯與理解，甚至願意付你一筆「顧問費」要你陪他追真相。此時，Godbert 把你請到一旁，說他要談的是家族傳承——重現 Manderville 武器。當初他在 Radz–at–Han 目睹天空燃燒、災厄降臨，拼命保護人們卻仍救不了太多性命，那份記憶讓他日夜難安；直到他聽說你們如何挺過絕望、走到最後，他才下定決心：要用自己的技藝打造能守護眾人的武器。他已經為此上月球尋得稀有的 manderium ore，但材料清單還很長，若要趕上進度，就需要可靠的夥伴相助。話音未落，廣場忽然傳來急促的喊聲——有人高聲警告，有囚犯正在逃跑。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+<div class="row"><b>任務發布</b> 希爾迪布蘭德 <small class="muted">Mare Lamentorum (X:27.9, Y:35.7)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+<div class="row"><a class="link" href="lunar-conspiracy.html">月之陰謀下，那個越陷越深的男人</a></div>
+</div>`,
+    followq:`<div class="stack">
+<div class="row"><a class="link" href="the-spectacle-of-inspection.html">偵探秀登場，展開自成一派的搜查</a></div>
+</div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
