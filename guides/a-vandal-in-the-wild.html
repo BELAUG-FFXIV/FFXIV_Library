@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A Vandal in the Wild | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Hildibrand Adventures – A Vandal in the Wild (DT Patch 7.35)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/sCmF8rxzc44"
+              title="A Vandal in the Wild" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">A Vandal in the Wild</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'A Vandal in the Wild',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+<p>Hardiboiled greets you like a fellow professional, asking if you’ve kept yourself sharp. However you answer, he seems satisfied—and says you arrived at the perfect time. He has recovered more data from the damaged device, and this time it concerns another experimental subject: a criminal whose soul was put into a cauahealoa, a two-legged wolf. Before the transfer, the man was a notorious vandal who destroyed anything from shops to government facilities—not for a cause, but for the thrill. Hardiboiled figures the fiend is still chasing that same rush in a new body, and still serving as the mysterious researcher’s pawn.</p>
+<p>Hildibrand reasons that a destructive fiend rampaging in a densely populated city would draw attention immediately, so the vandal is more likely to strike outside Solution Nine. Hardiboiled actually praises the logic—surprised it came from “a soft-boiled dope”—but admits there are no solid leads. With nothing else, he decides to consult a trusted source: a man named Mymond, whose trade is “knowing everyone else’s business.”</p>
+<p>You meet Mymond in the Recreation Zone, and the resemblance is uncanny—so much so that Hildibrand and Nashu can’t stop comparing him to Wymond, even joking about whether a “Yourmond” exists too. Mymond hasn’t heard rumors of vandalism in or around Everkeep, but he does have something: a hunter recently spotted a solitary cauahealoa near the barrier. It entered Vanguard and didn’t come back out, so the hunter assumed it headed for Shaaloani. The hunter also noted the way it moved—more man than beast. Hardiboiled immediately bets that this lone wolf is your vandal, since cauahealoas are territorial pack creatures. As you prepare to leave, Mymond remarks on the odd coincidence—same faces, similar names, same line of work—and even says Hildibrand looks like Hardiboiled, only younger or better moisturized. Both detectives explode in synchronized outrage and deny any resemblance at all.</p>
+<p>You gather at Vanguard, with Nashu calling the wolf fiend “adorable” thanks to its spiky leg armor and giant sword, while Hardiboiled mutters about this being his first time beyond the barrier—and wonders whether the outside world has a quiet bar that doesn’t water down its drinks. In Vanguard, Hildibrand is still “glowy-tingly” from Hardiboiled’s lightning shot, yet insists it’s only improved his circulation and left him feeling healthier than he has in ages. Then Hardiboiled suddenly panics at the sight of insects—oglops, “bringers of death and disease”—and spirals hard enough that Nashu decides the only cure is an egg. When she asks how long you’ll boil it, your choice matters: Hardiboiled takes the bite, judges the texture like a seasoned cynic, and begrudgingly admits he feels like himself again.</p>
+<p>In Shaaloani, under an open sky that Hardiboiled isn’t used to, you head to Sheshenewezi Springs and split up to ask locals about vandalism. The answers line up: a barn was smashed to pieces, drilling equipment was busted, and a Tonawawtan officer confirms a spate of vandalism targeting barns and equipment. The culprit strikes when no one’s around and leaves no trace; a generous bounty has been posted for capture—or even for information. When you regroup, Hardiboiled admits the vandal has been busy, but Hildibrand suddenly realizes Nashu is missing. Hardiboiled is incredulous that Hildibrand can lose track of his own assistant, and you split up to find her.</p>
+<p>You discover Nashu in trouble: a pair of ruffians accuse her of being the vandal because they saw her polishing what they believe are bombs. Nashu insists—again—that they’re medicine. Hildibrand tries to defend her in the most Hildibrand way possible: yes, they look like bombs, and yes, they explode like bombs, but they are “potent restoratives.” The ruffians laugh it off and demand to take her in for the bounty. Hardiboiled steps in, tries to talk them down, and when they refuse, he decides on an “old-fashioned” settlement—while Hildibrand protests that he’s opposed to violence and begs for a gentlemanly resolution. Hardiboiled dismisses that these kids wouldn’t recognize a gentleman if one shot them in the backside, and insists they’ll take it elsewhere for witnesses—nonlethal, not to the death.</p>
+<p>In the chaos, a Tonawawtan authority figure—Kemakka—arrives and shuts it down. Dueling in town is forbidden; even with nonlethal rounds, it’s treated as an illegal gunfight, and blame falls on whoever drew first. The ruffians are taken into custody. Kemakka then turns to the “bombs,” saying he wants to examine them, because they do look like bombs. Hildibrand laughs nervously and insists it’s bespoke medicine that rejuvenates him when he feels poorly. Kemakka is unmoved—“That’s a bomb, or I was born yesterday”—and despite the misunderstanding not proving Nashu is the vandal, he decides to hold her in the jailhouse until more is known. Nashu immediately asks the practical question: do they serve meals in the jailhouse? When Kemakka awkwardly admits they do, Nashu cheerfully agrees to go. As she’s taken away, Hildibrand swears he will find the true criminal and clear her name.</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+<div class="row"><b>Quest Giver</b> Hardiboiled <small class="muted">Solution Nine (X:17.0, Y:18.3)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+<div class="row"><a class="link" href="the-case-of-the-fiendish-fugitives.html">The Case of the Fiendish Fugitives</a></div>
+</div>`,
+    followq:`<div class="stack">
+<div class="row"><a class="link" href="on-the-trail-of-destruction.html">On the Trail of Destruction</a></div>
+</div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'いかしたタフガイ',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+<p>ハルディボイルドは、あなたに「腕は鈍ってないだろうな」と言わんばかりに声をかける。返事がどうであれ、彼は満足げにうなずき、ちょうどいいタイミングで来たと告げる。壊れた記憶媒体から、さらにデータの復旧に成功したのだ。今回判明した実験体は、魂を「カウアヘアロア」――二足歩行の狼の魔物――に移された犯罪者だった。元の男は悪名高い破壊魔で、店から公的施設まで見境なく壊して回り、動機は大義ではなく、ただスリルのためだけ。ハルディボイルドは、そいつが今も新しい身体で同じ衝動のまま暴れていて、例の研究者の駒になっていると見る。</p>
+<p>ヒルディブランドは、人口密集地で大暴れすればすぐ目立つから、標的はソリューション・ナインの外だろうと推理する。ハルディボイルドは皮肉を交えつつも「悪くない」と認め、だが決定的な手掛かりがない以上、信頼する情報屋に会いに行くと言う。名はマイモンド。商売は「他人のことを知り尽くす」ことだ。</p>
+<p>レクリエーション区画で会ったマイモンドは、顔も雰囲気もワイモンドそっくりで、ヒルディブランドもナシュも驚きを隠せない。マイモンドはエバーキープ周辺で破壊行為の噂は聞いていないが、ひとつ気になる話を持っていた。結界付近で単独のカウアヘアロアが目撃され、ヴァンガードへ入ったきり戻らず、シャーローニへ向かったのではないか――しかも動きが獣というより人間じみていたという。カウアヘアロアは群れで縄張りを守る生き物だ。単独行動なら怪しい。ハルディボイルドは「そいつが破壊魔だ」と踏み、すぐ向かうと決める。なおマイモンドが「顔も名前も似てて同業、さらにあんた（ヒルディブランド）は探偵に似てる」と言った瞬間、ヒルディブランドとハルディボイルドは同時に全力否定して大騒ぎになる。</p>
+<p>あなたたちはヴァンガード前で合流し、結界の外へ。ナシュは「トゲトゲの脚装備と大剣がかわいい」とまで言い出し、耳の後ろを撫でたら喜ぶかなどと無邪気に想像する。ハルディボイルドは初めて結界の外へ出る緊張をごまかすように、薄めていない酒が飲める静かな酒場を探せるだろうかとぼやく。ヴァンガードでは、ヒルディブランドがまだ雷撃の余波で“ビリビリして光っている”のに、本人は血行が良くなっただけで元気だと言い張る。ところが次の瞬間、ハルディボイルドが虫――オグロップ――を見て取り乱し、卵がないと正気に戻れないと嘆き始める。ナシュは卵を用意し、あなたに「何分ゆでる？」と聞く。あなたの選択次第で、ハルディボイルドの評価が飛び出し、結局は渋々ながら感謝して先へ進むことになる。</p>
+<p>シャーローニへ到着すると、空に限りがない外の世界にハルディボイルドは戸惑いながらも、まずは住民への聞き込みを提案する。シェシェネウェジ・スプリングスで手分けして尋ねると、納屋が粉々に壊された、掘削設備が破壊された、という証言が続く。トナワウタンの士官は、納屋や設備を狙った破壊行為が続発していること、犯人は人のいない時に動き痕跡も残さないこと、そして高額の懸賞金がかけられていることを教える。戻って報告し合うと、ハルディボイルドは「やっぱり忙しく暴れてるな」と言うが、ここでヒルディブランドがナシュの姿が見えないことに気づく。ハルディボイルドは呆れつつ、あなたたちは再び手分けして彼女を探す。</p>
+<p>やがて見つけたナシュは、ならず者たちに取り囲まれていた。彼らはナシュが“爆弾”を磨いていたのを見たと言い、破壊魔はこいつだと決めつけ、懸賞金目当てで連行しようとする。ナシュは「爆弾じゃない、薬だ」と何度も主張し、ヒルディブランドも「見た目も爆発も爆弾だが、強力な回復薬なのだ」と必死に弁護する。もちろん相手は信じない。ハルディボイルドは一度は話し合いで収めようとするが、通じないと見るや“昔ながらのやり方”で片をつけると言い出す。ヒルディブランドは暴力反対を訴えるが、ハルディボイルドは「こいつらに紳士は通じねえ」と突っぱね、目撃者のいる場所へ移して非致死で決着をつけると言う。</p>
+<p>そこへケマッカが現れ、町中での決闘は禁じられていると告げる。非致死弾であっても違法な銃撃戦として扱われ、先に抜いた側が悪い――そうしてならず者たちは連行される。さらにケマッカは、問題の“爆弾”も念のため調べたいと言い、見た目は爆弾にしか見えないと断じる。ヒルディブランドは笑ってごまかしつつ「特注の薬です」と言うが、ケマッカは「爆弾だ」と一蹴する。破壊魔だと決まったわけではないが、真相が分かるまでナシュは留置する――そう判断される。ナシュは即座に「ごはん出る？」と尋ね、出ると聞くと嬉しそうに入っていく。ヒルディブランドは彼女の潔白を証明すると誓い、あなたたちは真犯人を追うため動き出す。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+<div class="row"><b>クエスト発行</b> ハルディボイルド <small class="muted">ソリューション・ナイン (X:17.0, Y:18.3)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+<div class="row"><a class="link" href="the-case-of-the-fiendish-fugitives.html">はなたれた魔物</a></div>
+</div>`,
+    followq:`<div class="stack">
+<div class="row"><a class="link" href="on-the-trail-of-destruction.html">つかえる紳士</a></div>
+</div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'荒野破壞魔遇上有型硬漢',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+<p>Hardiboiled 見到你就像在確認你有沒有怠惰，問你最近是不是還夠「銳利」。不管你怎麼回答，他都點頭說這行吃飯得隨時保持巔峰狀態，因為你永遠不知道下一秒會遇到什麼。更重要的是——你來得正好：他又從那個破損的儲存裝置裡救回更多資料，查到另一名實驗體的線索。</p>
+<p>這一次，被移植靈魂的罪犯被塞進了 cauahealoa 的身體——Hardiboiled 還補一句，免得你不熟：那就是二足步行的狼。這名罪犯在變成怪物之前，是惡名昭彰的破壞魔，從商店到公家機關都照砸不誤；他沒有什麼崇高目的，純粹就是為了刺激、為了爽。Hardiboiled 推斷，他現在換了身體也不會改掉老毛病，而且仍然是那個神祕研究者手中的棋子。</p>
+<p>Hildibrand 罕見地給出一個像樣的推理：如果這種破壞型的怪物在人口密集的地方胡鬧，很快就會引人注目；因此那個「狼男」要作怪，多半會選在 Solution Nine 之外的地方。Hardiboiled 竟然笑了一聲，說這推理對「軟趴趴的笨蛋」來講算不錯——可惜你們仍沒有更具體的線索。於是他決定去拜訪一個可靠的消息來源：Mymond，一個以「知道別人的事」為生的人。</p>
+<p>在 Recreation Zone，你們找到 Mymond。Hildibrand 一眼就愣住：他長得跟 Wymond 幾乎一模一樣；Nashu 更是激動到想起 Mister PuPu 以前做過的那些「複製」鬧劇。Mymond 倒沒聽說 Everkeep 內外有破壞事件，但他帶來一條關鍵目擊：有獵人最近在 barrier 附近看見一隻單獨的 cauahealoa。那隻怪物進了 Vanguard 之後就沒再出來，獵人便推測它可能往 Shaaloani 去了。最令獵人不舒服的是它的動作——不像野獸，更像人。Hardiboiled 立刻抓住這點：cauahealoa 通常群居而且領地性強，單獨行動的「孤狼」很不尋常，他敢把槍押上，這就是你們要找的破壞魔。</p>
+<p>臨走前，Hildibrand 還客氣地跟 Mymond 提起你們認識的 Wymond，說對方也是靠情報吃飯。Mymond 聽完一臉不可思議，嘟囔著怎麼臉、名字、行業都像，接著還補一刀：你看起來也很像那位偵探，只是更年輕或保養更好。Hildibrand 與 Hardiboiled 立刻同時炸毛，大喊荒謬，互相嫌棄到不行；Mymond 連忙說自己只是隨口一提，別生氣。但他也看著 Nashu，說她讓他想起 Hardiboiled 的某位助手，語氣一瞬間變得像是回到很久以前。</p>
+<p>你們在 Vanguard 前集合，準備越過 barrier。一路上 Hildibrand 與 Nashu 還在聊剛剛路上看到的那種「狼型怪物」有多可愛——Nashu 甚至說那身帶刺的腿甲和巨大的劍很萌，還好奇牠們會不會喜歡被搔耳後。Hardiboiled 則一邊嘀咕這是他第一次走出 barrier，一邊想著外頭能不能找到不會把酒稀釋的安靜酒吧。</p>
+<p>進到 Vanguard 後，Hildibrand 因為之前被 Hardiboiled 的雷擊打中，還帶著一種「發亮發麻」的感覺。Nashu 看得擔心，Hardiboiled 說那是後效，會留一陣子；Hildibrand 卻反倒精神奕奕，說雷電讓他的血液循環更好了，整個人比近期任何時候都健康。可下一秒，Hardiboiled 竟被昆蟲嚇得失控——他指著 oglops，說那不是普通蟲子，是帶來死亡與疾病的東西，喘到需要靠「蛋」才能鎮定。Nashu 乾脆把蛋交到你手上，問你要煮多久；Hardiboiled 嘴上懷疑你又想整他，卻還是硬著頭皮吃下去，接著用那套「老江湖」的毒舌評語把口感批得一無是處，但最後仍承認自己恢復正常，勉強向你道謝。</p>
+<p>抵達 Shaaloani 後，Hardiboiled 站在沒有邊界的天空下，一邊說得慢慢習慣外頭的世界，一邊要你們從問話開始。他帶你們去 Sheshenewezi Springs，讓大家分頭打聽最近是否發生破壞事件。你們很快得到一致答案：有穀倉被砸成碎片，有鑽井設備被人弄壞；有人氣得發抖，說 ceruleum 是大家的命脈，犯人不可能是本地人，一定是外來者。Tonawawtan 的 officer 也證實：近期確實連續發生破壞，目標就是穀倉與設備；犯人總在沒人的時候下手，什麼痕跡也不留，所以他們連線索都沒有。為了抓到人，已經貼出高額懸賞，哪怕只是提供情報也可能得到報酬。</p>
+<p>你回到 Hardiboiled 那裡報告，他說他也聽到同樣的消息，表示你們的破壞魔確實在活動。可 Hildibrand 忽然發現 Nashu 不見了。Hardiboiled 先是一愣，接著不敢置信地問他怎麼會連自己的助手去哪都不知道；最後還是嘆氣，說你們必須分頭把人找回來。</p>
+<p>你們找到 Nashu 時，她正被幾個粗魯的傢伙圍住。對方認定她就是破壞魔，因為他們親眼看見她在擦拭「炸彈」。Nashu 又一次強調那不是炸彈，是藥；Hildibrand 也硬著頭皮替她辯護，甚至說這東西「看起來像、而且確實會爆炸像」炸彈，但本質上是能讓他恢復精神的強效補品。粗魯的傢伙聽完只覺得荒唐，說什麼「會爆炸的藥」根本是最蠢的藉口，堅持要把 Nashu 抓去領懸賞。</p>
+<p>Hardiboiled 試著先用談的，叫大家冷靜，說可以和平解決；但對方完全不買帳，甚至威脅你們識相就讓開。Hardiboiled 立刻換了一套做法，說既然不願意講理，那就用老方式解決；Hildibrand 仍然堅持反對暴力，要求用「紳士的方法」處理，Hardiboiled 卻回他：這些小子根本不懂紳士，你白費口舌。為了有目擊者，他說要把決鬥移到別處，而且不是生死鬥。</p>
+<p>就在局面要失控時，Kemakka 介入喝止。他指出城鎮內禁止決鬥，就算用非致命子彈也一樣會被當作非法槍戰處理，責任落在先拔槍的一方。那幾個鬧事的傢伙因此被他帶走。接著 Kemakka 把視線落在 Nashu 的「藥」上，說既然一開始就是因為那看起來像炸彈的東西才鬧起來，他得檢查一下；他也直白表示：這看起來就是炸彈。Hildibrand 只能尷尬地笑，硬說那是為他量身打造的補藥；Kemakka 完全不信，回一句「那是炸彈，不然我就是昨天才出生」。最後他裁定：雖然這還不能證明 Nashu 就是破壞魔，但在弄清楚之前，她得先在拘留所待著。</p>
+<p>Nashu 聽到要進牢房，第一句竟是問：拘留所會供餐嗎？Kemakka 結結巴巴承認會，Nashu 就像得到保證一樣，爽快地說「那我去啦」。她被帶走時，Hildibrand 立刻向你發誓：他一定會找出真正的罪犯，洗清 Nashu 的冤屈。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+<div class="row"><b>任務發布</b> 哈爾迪博伊爾德 <small class="muted">Solution Nine (X:17.0, Y:18.3)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+<div class="row"><a class="link" href="the-case-of-the-fiendish-fugitives.html">追查邪魔逃犯，流鼻涕的魔物現身</a></div>
+</div>`,
+    followq:`<div class="stack">
+<div class="row"><a class="link" href="on-the-trail-of-destruction.html">追循破壞足跡，盡責紳士前來相助</a></div>
+</div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
