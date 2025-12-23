@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Alisaie’s Resolve | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Raid8 – Alisaie’s Resolve (ARR Patch 2.2)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/uQbnLn2dozI" title="Alisaie’s Resolve" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Alisaie’s Resolve</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true" data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story" class="tab-panel active"></div>
+          <div id="panel-acq" class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel"><div id="giscus_container" style="min-height:320px;"></div></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Alisaie’s Resolve',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Fresh air hits your lungs as you escape the stifling depths—and Alisaie realizes, with a faint edge of disbelief, that you have returned to northern Thanalan once again. She thanks you plainly: without your bravery, she doubts she would still be standing here.</p><p>She tells you not to linger for her sake—the danger has passed. You are to go on ahead and apprise Urianger of everything that occurred. She will follow soon, but her thoughts are still unruly, and she needs to rest where she is for a while.</p><p>When you return to the Waking Sands, Urianger hails you as a triumphant hero. He reads the completion in your eyes: the dread task is done, and the second coil now lies dormant. Yet he senses your news is not wholly glad, and asks what ill has cast the shadow across your brow.</p><p>As you speak, Urianger’s understanding hardens into grief: what Alisaie beheld was not Master Louisoix returned, but his aetherial shadow—an unnatural conjuration held in thrall to the elder primal. He admits that even knowing the truth, facing such a thing would be hard to weather, and he cannot help but think of what torment Alisaie must have endured. He even suggests it might be better if she stayed away from further forays into the coils.</p><p>But Alisaie cuts through that thought. She says she has come too far to surrender to grief, and she is resolved to defeat these fiends—nothing will sway her from her path. At her insistence, Urianger turns the discussion toward what you have learned, beginning with the coil’s late guardian, Nael van Darnus.</p><p>Urianger tells you he will not burden you with a long history of the one you have now defeated twice. He recalls the lunar transmitter—the device you destroyed—which was only a crude substitute for the ancients’ Crystal Tower, lacking both subtlety and safety as a means to command the red moon. Before the transmitter was complete, he believes Nael sought to make contact with Dalamud, only to rouse the satellite’s slumbering prisoner—and from that point on, the White Raven’s soul belonged to Bahamut.</p><p>Alisaie answers with bitter clarity: Bahamut was fortunate to gain so powerful a thrall by chance, and it is no wonder he would not part with such a pawn just because death should claim it. If Bahamut bungled Nael’s resurrection, she says, he seemed just as content to have a handmaiden as a manservant. Yet Nael’s words trouble her—the “beloved children” he spoke of. If Bahamut has enslaved other mortals, then you must remove this source of worship, or your efforts to disable the coils will be for naught.</p><p>Urianger asks Alisaie to forgive his indelicacy—she is wise to speak of expunging the primal’s thralls, but can she truly pursue a course that would cost her her own grandfather? Alisaie answers without flinching: her heart and mind are as one. Her grandfather’s salvation can be won by only a single method—the destruction of Bahamut, and anything that might sustain him. While she and Urianger work to determine whether further thralls exist, she tells you to take a moment’s respite, promising she will contact you the moment she needs your inimitable talents—because all you have achieved so far, she owes to you, and she fears your trials have barely begun.</p><p>Left with that resolve, Urianger confesses that time had dulled the pain of Louisoix’s passing, but now he is wounded afresh. He questions what good can come of this unending search for knowledge and truth—if every revelation only heaps further anguish upon those you would protect, must you truly reach for more? And then Alphinaud’s voice joins the moment: he notes that Alisaie has found her resolve, and asks whether she will now find a use for the secret—the key that only the two of them hold—reminding her that keys can seal doors as well as unlock them, and that Bahamut is an unwelcome guest for whom the door should never have been opened.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Alisaie <small class="muted">Northern Thanalan (X:20.2, Y:17.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="another-turn-in-the-coil.html">Another Turn in the Coil</a></div><div class="row">Disciples of War or Magic Lv. 50</div><div class="row"><b>Unlock Raid</b></div><div class="row"><a class="link" href="the-second-coil-of-bahamut-turn-4.html">The Second Coil of Bahamut - Turn 4</a></div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="fragments-of-truth.html">Fragments of Truth</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'真実と決断',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>息苦しい深層を抜け、あなたは外の空気を胸いっぱいに吸い込む。アリゼーは、どうやらまた北ザナラーンへ戻ってきたらしいとこぼし、そして率直に礼を告げる。あなたの勇気がなければ、自分はいまここに立っていないはずだ、と。</p><p>彼女は言う。自分のことで足を止める必要はない、危険は去ったのだから先に行き、起きたことのすべてをウリエンジェへ伝えてほしい。自分も後から合流するが、思考がまだまとまらず、少しここで休みたいのだと。</p><p>あなたが砂の家へ戻ると、ウリエンジェは勝利の帰還を喜ぶ。あなたの眼差しが語っている――恐るべき務めは果たされ、第二のコイルは沈黙した。だが彼は、もたらされた報せが決して喜びばかりではないと悟り、いまあなたの眉間に落ちる影の正体を問う。</p><p>話を聞いたウリエンジェは、苦い確信に至る。アリゼーが見たのはルイゾワ本人ではなく、エーテルの影――古き蛮神に隷属する不自然な造作だったのだ。真実を知ってなお、その対面に耐えるのは容易ではないと彼は認め、アリゼーが受けたであろう苦痛を思って胸を痛める。そしてこれからのコイル探索は、彼女が身を引いたほうがよいのではないかと口にする。</p><p>だがアリゼーは、悲嘆に屈して引き返すには来すぎたと言い切る。自分はあの怪物どもを討つと決めた、何ものにも揺らがない――そう宣言し、さらに発見を深く掘り下げようと促す。ウリエンジェは彼女の望みに従い、まずはコイルの最後の守護者、ナエル・ヴァン・ダーナスについて語り始める。</p><p>彼は言う。あなたに長々とした来歴は語らない、あなたはすでにこの者を二度打ち倒したのだから。彼は月の送信機を思い起こさせる――あなたが破壊した装置は、古代のクリスタルタワーの粗雑な代用品に過ぎず、赤き月を操るには繊細さも安全性も欠いていた。送信機が完成する前、ナエルはダラガブへ接触を試み、結果として眠れる囚人を目覚めさせてしまったのだろう。そこから白き鴉の魂は、バハムートのものとなったのだと。</p><p>アリゼーは苦く言う。バハムートは偶然に強大な傀儡を得たのだから、手放したくないのも当然だ。死ごときが便利な駒を奪うのを許すはずがない――たとえ復活が不格好でも、女の従者でも男の従者でも構わなかったのだろう、と。だが彼女の心に残るのは、ナエルが口にした「愛し子」だ。もしバハムートが他の人間まで隷属させているのなら、その崇拝の源を断たねばならない。さもなくば、コイルを止める努力は無に帰すのだと。</p><p>ウリエンジェは遠慮を詫びつつ問う。蛮神の傀儡を断つという判断は賢明だが、その道はあなた自身の祖父を代償にするかもしれない――それでも進めるのか。アリゼーは迷いなく答える。心と理は一致している、祖父を救う唯一の手段はバハムートと、それを支えるすべてを滅ぼすことだ。彼女とウリエンジェが更なる傀儡の有無を探る間、あなたには束の間の休息を勧め、必要になった瞬間に必ず連絡すると約束する。そして、ここまで成し得たことはあなたのおかげだが、試練はまだ始まったばかりだと告げる。</p><p>残されたウリエンジェは、時が癒やしたはずの痛みが再び裂けるのを感じると言う。ルイゾワの喪失を前に、果てのない知と真実の探求は何をもたらすのか――新たな啓示がただ守るべき者に苦悩を積み重ねるだけなら、それでも手を伸ばすべきなのか。そこへアルフィノが言葉を添える。アリゼーは覚悟を得たのだ、と。そしてあなたと彼女だけが持つ秘密、その鍵をどう使うのかを問う。鍵は扉を開くためだけでなく、閉ざすためにもある――バハムートは招かれざる客であり、その扉は決して開かれるべきではなかったのだと。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> アリゼー　<small class="muted">ザナラーン：北ザナラーン (X:20.2, Y:17.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="another-turn-in-the-coil.html">再び深き淵へ</a></div><div class="row">ファイター ソーサラー Lv 50～</div><div class="row"><b>レイドダンジョン開放</b></div><div class="row"><a class="link" href="the-second-coil-of-bahamut-turn-4.html">大迷宮バハムート：侵攻編4</a></div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="fragments-of-truth.html">ふたつの欠片</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'面對真相，Alisaie 作出決斷',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你終於從那片令人窒息的空氣裡脫身，重新吸到外頭的風。Alisaie 低聲感嘆，說你們竟然又回到了 northern Thanalan。她隨即向你道謝——若不是你的勇敢，她很懷疑自己還能不能站在這裡。</p><p>她要你別為她耽擱，說危險已經過去，請你先回去把一切經過告訴 Urianger。她晚點就會跟上，但她的思緒仍舊紛亂，想先在這裡稍作休息。</p><p>你回到 Waking Sands，Urianger 迎上來，說你像凱旋的英雄般歸來；你眼裡已經寫明那場艱難任務的完成——第二個拘束環如今已沉寂。然而他也察覺，你帶回來的消息並非全然喜悅，便問你：究竟是什麼讓陰影落在你眉間？</p><p>當你把經過說出口，Urianger 的心沉了下去。他明白了：Alisaie 看到的並不是 Louisoix 本人，而是 Louisoix 的以太影子——一種不自然的造作，受制於那個古老 primal。即便知道那影子並非真正的 Louisoix，他也承認自己很難承受那樣的對峙；而 Alisaie 所承受的折磨，更讓他難以釋懷。他甚至說，也許接下來的拘束環遠征，Alisaie 最好不要再參與。</p><p>但 Alisaie 立刻回應你們：她走到這裡，已不可能向悲傷投降。她已下定決心要擊敗那些怪物，沒有任何事能讓她偏離道路；現在，該更深入地審視你們的發現了。Urianger 依她所願，先談起拘束環的最後守護者——Nael van Darnus。</p><p>Urianger 說他不會長篇大論去回顧那人的過去，畢竟你已經親手兩度擊敗他。他讓你想起那個「月球送信裝置」：你摧毀的那台裝置，只是古代 Crystal Tower 的粗糙替代品，想用來操控紅色月球，既不精細也不安全。他推測，在送信裝置尚未完成之前，Nael 便試圖與 Dalamud 接觸，結果喚醒了衛星中沉睡的囚徒；從那一刻起，「White Raven」的靈魂就屬於 Bahamut。</p><p>Alisaie 帶著尖銳的冷意回應：Bahamut 偶然得到如此強大的傀儡，當然不可能輕易放手；怎麼會讓「死亡」這種小事，奪走如此好用的棋子？就算 Bahamut 在復活 Nael 的過程裡出了差錯，他大概也同樣滿意——有女僕也好，有男僕也罷。然而她仍無法忽視 Nael 提到的「beloved children」。她原本以為那指的是月球碎片裡那些獸形守衛，但如果 Bahamut 還奴役了其他凡人，你們就必須清除這種「崇拜」的來源，否則你們讓拘束環停轉的努力將會前功盡棄。</p><p>Urianger 請 Alisaie 原諒他的唐突——她談到清除 primal 的傀儡確實明智，但她真的能走上一條可能會付出自己祖父代價的路嗎？Alisaie 不再迴避，說她的心與理在這件事上完全一致：Louisoix 的「救贖」只能靠一種方法——摧毀 Bahamut，並摧毀一切用來維繫他的東西。她要你先給自己一點喘息；在她與 Urianger 釐清是否還有其他傀儡之前，她會在需要你那無可取代的力量時立刻聯絡你。她也坦白，你們能走到這一步，她都欠你一份情；但她擔心，你們的試煉其實才剛開始。</p><p>當話音落下，Urianger 低聲說，即使時間曾讓 Louisoix 離去的痛楚變得鈍化，如今他仍像再次受傷一般。他開始懷疑這場無止境追逐知識與真相的路究竟能帶來什麼——若每一次新的揭露，都只是把痛苦堆到你們想守護的人身上，你們真的還要繼續伸手去碰嗎？就在此時，Alphinaud 的聲音加入：他說 Alisaie 終於找到了自己的決心；那麼，她是否也會運用那個「祕密」——那把只有她與他握在手中的「鑰匙」？他提醒她，鑰匙既能開門，也能把門鎖上；而 Bahamut 是最不受歡迎的客人，那扇門本不該被打開。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>任務發布</b> 阿莉塞　<small class="muted">薩納蘭 - 北薩納蘭 (X:20.2, Y:17.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="another-turn-in-the-coil.html">再下一層，踏入更深的淵底</a></div><div class="row">戰鬥／魔法職業 Lv.50～</div><div class="row"><b>解鎖團隊副本</b></div><div class="row"><a class="link" href="the-second-coil-of-bahamut-turn-4.html">巴哈姆特大迷宮：侵攻篇 4</a></div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="fragments-of-truth.html">兩塊碎片，拼回真相</a></div></div>`
+  }
+};
+
+const langToggle = document.getElementById('langToggle');
+const pageTitle = document.getElementById('pageTitle');
+const tabBtns = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story: document.getElementById('panel-story'),
+  acq: document.getElementById('panel-acq'),
+  unlockq: document.getElementById('panel-unlockq'),
+  followq: document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
