@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gentlemen at Heart | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Hildibrand Adventures – Gentlemen at Heart (EW Patch 6.55)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+    .subblock{margin-top:10px;padding-top:10px;border-top:1px dashed var(--border)}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/ibDVuFc12as"
+              title="Gentlemen at Heart" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Gentlemen at Heart</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Gentlemen at Heart',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+<p>You head to meet Vanhudi’s pilot, and a private airship carries you to his treasure tower. The pilot hesitates at the size of your party, but Godbert smoothly calls you an “entourage,” and the invitation stands.</p>
+<p>Vanhudi welcomes you with practiced charm and immediately drops the pretense when Hildibrand accuses him. He admits he has PuPu’s missing companion and admits to duplicating an obscene amount of gold—but says that was only the beginning.</p>
+<p>He makes his true offer: with you as the template, he could create a clone army of the Warrior of Light and seize every land. You refuse without hesitation, and he declares you an obstacle he planned for from the start.</p>
+<p>Vanhudi triggers Lugae’s “ritual of manifestation,” boasting that his tower is stocked with crystals and that he solved the problem of worshipers by cloning himself. He invokes Asura, and you are forced to confront the primal and put it down.</p>
+<p>When you return, Vanhudi tries to flee—only to rage that someone is flying the starship without his permission. PuPu recognizes the ship at once: it is his friend’s vessel. PuPu’s missing companion finally appears, safe and free.</p>
+<p>The companion tells you how Vanhudi first rescued him and had the ship repaired, then took advantage of him when he was weakened by a unique pathogen of this star—stealing the ship and abandoning him in the jungle. He returned for revenge and, consumed by fear and bitterness, declares that Etheirys’s people are cruel and unfit for coexistence, and that invasion is the only path to survival—until PuPu insists you and your allies prove otherwise.</p>
+<p>A new disaster interrupts the argument: the reactor core has been breached, and an explosion would atomize everyone nearby. Brandihild can see no logical way to reach the ship in time, so you launch him with a desperate Manderville throw—he adjusts midair, accepts there is only one way to stop the blast, and sacrifices himself to save everyone.</p>
+<p>In the aftermath, PuPu and his companion finally explain the truth: their home world was lost to the Final Days, and their search for refuge led them from star to star, finding only ruin. Despair pushed them toward the idea of taking a home by force, but your kindness brings them back to their senses, and PuPu asks to live on your star. Back in Radz-at-Han, you receive a replica starship key as thanks, Delion ends his investigation—crediting you for keeping him from being blinded by conspiracy—and then immediately fixates on his next mystery, insisting someone must uncover the source of Hildibrand’s impossible physiology.</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+<div class="row"><b>Quest Giver</b> Delion <small class="muted">Radz-at-Han (X:11.4, Y:11.5)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+<div class="row">
+  <a class="link" href="of-duplicity-and-duplication.html">Of Duplicity and Duplication</a>
+  <div class="subblock">
+    <div><b>Unlock Trial</b></div>
+    <div><a class="link" href="the-gilded-araya.html">The Gilded Araya</a></div>
+  </div>
+</div>
+</div>`,
+    followq:`<div class="stack">
+<div class="row"><a class="link" href="the-case-of-the-displaced-inspector.html">The Case of the Displaced Inspector</a></div>
+</div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'マンダヴィル家の謎',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+<p>あなたはヴァンフーディの操縦士と合流し、私用飛空艇で宝物の塔へ向かう。操縦士は「お連れの方々」に戸惑うが、ゴッドベルトがうまく取り繕い、招待はそのまま通る。</p>
+<p>ヴァンフーディは歓待の言葉を並べるが、ヒルディブランドに糾弾されるとあっさり認める。ププの同胞を確かに囲っていること、そして莫大な黄金を複製したことまで、隠そうとしない――ただし「始まりにすぎない」と言い切る。</p>
+<p>彼の本命は、最凶の武器を複製し尽くすことだという。そしてあなたを勧誘する。光の戦士であるあなたを雛型にすれば、複製軍であらゆる地を征服できる、と。あなたが即座に拒むと、彼は「想定通り」と笑い、障害を排除する段階に移る。</p>
+<p>ヴァンフーディはルガエの「顕現の儀式」を起動し、塔に水晶を備蓄してきたこと、そして信徒の数は自分を複製して揃えたことを誇示する。こうしてアスラを呼び出し、あなたは蛮神を鎮めるため戦うことになる。</p>
+<p>戦いの後、ヴァンフーディは逃走を図るが、星船が勝手に動き出し「誰が許可なく操縦している！」と激昂する。ププはその船が友のものだと見抜き、ついに行方不明の同胞が姿を現す。</p>
+<p>同胞は語る。ヴァンフーディは最初こそ救い、修理にも力を貸した。だがこの星特有の病原体で弱った隙に、船を奪い、密林へ連れ出して見捨てた。生還して取り戻した同胞は、知的生命体の残酷さを断じ、侵略こそ生存の道だと言い放つ――しかしププは、あなたたちの善意こそが真実だと必死に訴える。</p>
+<p>言い争いは、炉心損傷という最悪の事態で断ち切られる。爆発すれば周囲は原子化される。ブランディヒルドは距離の壁に絶望するが、あなたは起死回生の投擲で彼を星船へ放つ。彼は空中で姿勢を修正し、唯一の手段を選び、爆発を止めるために自らを投げ出す。</p>
+<p>その後、ププたちは故郷が「終末の災厄」で滅び、避難先を求めて星々を巡ったことを明かす。絶望が「奪うしかない」という考えを生んだが、あなたの振る舞いが理性を取り戻させたという。ラザハンに戻ると、あなたは複製された星船の鍵を受け取り、デリオンは調査の終結を宣言しつつも、次の謎としてヒルディブランドの異常な身体の秘密へと執着していく。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+<div class="row"><b>クエスト発行</b> デリオン <small class="muted">ラザハン (X:11.4, Y:11.5)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+<div class="row">
+  <a class="link" href="of-duplicity-and-duplication.html">ママこそ最強</a>
+  <div class="subblock">
+    <div><b>討伐戦開放</b></div>
+    <div><a class="link" href="the-gilded-araya.html">アスラ討滅戦</a></div>
+  </div>
+</div>
+</div>`,
+    followq:`<div class="stack">
+<div class="row"><a class="link" href="the-case-of-the-displaced-inspector.html">事件屋の行方</a></div>
+</div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'懷抱紳士之心，揭開 Mandeville 家的謎團',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+<p>你前往與 Vanhudi 的私人飛空艇駕駛會合，並搭乘私用飛空艇被直接帶往他的寶物高塔。駕駛對你們一行人的人數露出遲疑，但 Godbert 把你們說成是「隨行人員」，邀請仍舊有效。</p>
+<p>Vanhudi 一開始還端著客氣的姿態，可當偵探 Hildibrand 當面指控時，他立刻不再裝模作樣。他承認 PuPu 的同伴確實在他手上，也承認自己用外星技術複製了多到荒唐的黃金——但他說那不過是起點。</p>
+<p>他真正想要的是無止盡地複製最致命的武器，讓世界任他奪取。接著他把目標放在你身上：只要以你這位光之戰士作為模板，他就能打造一支複製軍團，征服所有土地。你斷然拒絕，他則冷笑說早就把你算進「障礙」之列。</p>
+<p>Vanhudi 啟動 Lugae 的「顯現儀式」，誇口高塔裡囤積了大量 crystals，而儀式所需的「信徒聚集」也被他用複製自己解決。他呼喚 Asura 降臨，你被迫迎戰並擊敗那個 primal。</p>
+<p>戰後，Vanhudi 想要撤退，卻驚怒大喊有人未經允許操縱星船、還把他的財寶當成自己的。PuPu 立刻認出那艘船：那是他朋友的星船。你也終於親眼見到 PuPu 失聯的同伴，確定他平安現身。</p>
+<p>同伴向你說明背叛的始末：Vanhudi 起初救了他、協助修復星船，他也因此複製各種小物回報，甚至教了對方星船技術的基礎。但當他感染這顆星特有的病原體、身體虛弱時，Vanhudi 便奪走星船，把他載到叢林裡丟下等死。他忍痛合成解藥、奪回星船後，被恐懼與憤怒吞沒，斷言 Etheirys 的主導智慧種殘酷又不適合共存，只有侵略才能確保生存——直到 PuPu 指著你與同伴們，堅持你們的善意才是真實。</p>
+<p>爭執立刻被更可怕的危機打斷：reactor core 已破裂，若爆炸，附近所有人都會被原子化。Brandihild 逼自己思考卻仍看不到可行解法，你只能用 Manderville 的投擲把他拋向星船；他在半空中調整姿勢，承認只剩唯一手段，並為了阻止爆炸而選擇犧牲自己。</p>
+<p>混亂落定後，PuPu 與同伴把真相說得更清楚：他們的故鄉行星已在 Final Days（終末）中毀滅，只因當時外出探索才得以倖存；他們在宇宙間尋找避難所，卻一顆星又一顆星只看見同樣的崩壞。絕望逼得他們一度認為只能以武力奪取新家，但你們的作為讓同伴恢復理智，PuPu 也因此鼓起勇氣請求能否在你們的星上生活。回到 Radz-at-Han，你收到作為謝禮的複製星船鑰匙，Delion 宣布結束調查並感謝你一路拉住他不被陰謀論蒙蔽，卻又立刻把目光轉向下一個謎團——他堅持必須有人查清偵探 Hildibrand 那不合常理的強韌究竟從何而來。</p>
+</div>
+<div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+<div class="row"><b>任務發布</b> 德利昂 <small class="muted">Radz-at-Han (X:11.4, Y:11.5)</small></div>
+</div>`,
+    unlockq:`<div class="stack">
+<div class="row">
+  <a class="link" href="of-duplicity-and-duplication.html">最強老媽與雙重騙局</a>
+  <div class="subblock">
+    <div><b>解鎖試煉</b></div>
+    <div><a class="link" href="the-gilded-araya.html">阿修羅討滅戰</a></div>
+  </div>
+</div>
+</div>`,
+    followq:`<div class="stack">
+<div class="row"><a class="link" href="the-case-of-the-displaced-inspector.html">流落他方的偵探疑案，追尋偵探的去向</a></div>
+</div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
