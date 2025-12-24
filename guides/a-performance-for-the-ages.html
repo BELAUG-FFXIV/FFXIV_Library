@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A Performance for the Ages | BELAUG · FFXIV Library</title>
+  <meta name="description" content="AllianceRaid24 – A Performance for the Ages (ARR Patch 2.1)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/2LFpO0I5-DM"
+              title="A Performance for the Ages" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">A Performance for the Ages</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'A Performance for the Ages',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Rammbroes admits he must finally explain the arrangements he made for the last two varieties of aethersand. Days ago, he asked a Sharlayan acquaintance to go to Gridania and gather what was needed, but since then he has heard nothing. The silence is not entirely out of character for the man, yet Rammbroes cannot dismiss the possibility that something ill has happened. Even so, there is no time to investigate—every delay increases the chance that the Crystal Tower’s secrets will fall into the wrong hands—so he entrusts you with the same mission: go to the Black Shroud and seek Parsemontret, Gridania’s master of the markets, for any lead on where aethersand might be obtained.</p><p>Parsemontret is blunt when you ask to purchase aethersand. He calls it rare beyond measure, saying he has not seen even a grain in the markets for many long years. He can, however, tell you where one might mine the ore from which the water-aspected abrasive is derived—though only a desperate fool would willingly set foot there. When your resolve does not waver, he sighs and names the place: Urth’s Gift, where the ore is found in an area haunted by a particularly pernicious hog. If you meet that tusked nightmare, he warns, you will know you are in the right place—if at the wrong time.</p><p>At Urth’s Gift, a voice reaches you from nowhere you can see. It tells you that you are too late: the water-blessed mineral you sought is gone, taken by the speaker, leaving not even a speck behind. You will not find the thief by staring into the foliage, the voice says—you must trust your ears. Yet the speaker, flush with victory, offers an alternative: the location of wind-touched aethersand. A band of Ixal in the North Shroud keeps a quantity of the abrasive to strip impurities from lesser crystals. If you mean to claim it, you must hurry—before the voice snatches another prize from under your nose. It will be a race, with the Ixali logging grounds in the North Shroud as the destination, and the promise that the real amusement begins there.</p><p>When you reach the Ixali logging grounds, the same unseen voice returns in applause, praising the show you put on—so enthralling, it claims, that it forgot all about the aethersand. By that lapse, it has forfeited the race, and the wind-touched abrasive is yours. But the voice insists the greater prize is still its own for having witnessed your performance, and demands the imbalance be corrected: you must accept a token of appreciation. Payment for your entertainment will be waiting to the east in a clearing within Proud Creek, and you are urged to retrieve it before it is crushed beneath the iron feet of dullahans.</p><p>When you return to Urth’s Gift, the voice reveals what you were not expecting. It took the liberty of refining the ore from Urth’s Gift into aethersand and tells you to keep it safe. It denies playing games and admits it never intended to relinquish its prize—until it saw you in action, deeds it deems worthy of reward. It calls its vocation the recording of history as it is made by mortal men, and says it prefers to chronicle the accomplishments of the bold and mighty. With that, it urges you to continue with the same courage and zeal, promising that you will meet again—sooner than you might imagine.</p><p>Back at Saint Coinach’s Find, Rammbroes can scarcely believe you have brought both remaining abrasives, and immediately has Cid begin work. In short order, the crystals are prepared, and Rammbroes declares that all four “fangs” needed to pierce the Crystal Tower’s defenses are now in hand. Cid dismisses his own work as trifling and says you are the one who deserves thanks—by his reckoning, nothing now stops you from striding up to the Allagans’ front door.</p><p>Biggs and Wedge arrive insisting you cannot go without them, eager for the chance to study Allagan wonders and marveling that such technology makes Garlemald’s look ancient. Cid acknowledges their enthusiasm but draws a hard line: you are not here to claim knowledge for yourselves. Twice in the last decade, men chasing unimaginable power meddled with technology they did not understand, and on both occasions the realm was dragged to the brink of oblivion. You will not risk a third. He makes Wedge recite the company creed—“Freedom through Technology”—and reminds them that when they forsook their homeland, they swore to have no truck with machines that could be used to promote tyranny. The wonders of the all-knowing Allagan Empire did not save their civilization and have nearly doomed yours—twice. That is why the Crystal Tower must be explored, and, if need be, its secrets sealed away.</p><p>A familiar voice answers that this is a compelling viewpoint, and that unyielding wills like Cid’s have shaped history’s course. Rammbroes turns sharply to the source of the long silence, and the man finally appears: G’raha Tia. He says he was carrying out the task assigned—surely Rammbroes remembers the aethersand—and that he entrusted delivery to a passing adventurer he judged an ideal courier. He greets you, noting he told you the two of you would meet again, and introduces himself as a Student of Baldesion, eager to join the expedition as an observer. Rammbroes asks that his eccentricities be forgiven, and G’raha Tia declares your fellowship complete and ready to step into the unknown—three cheers for “NOAH.”</p><p>Cid repeats the name in disbelief, but G’raha Tia explains it is what he has chosen for your collective. With your differing backgrounds, you cannot rightly call yourselves the Sons of Saint Coinach, and if your venture is to be remembered, you need a memorable appellation. “NOAH” can stand for “Nominated Observers of Artifacts Historical,” technically, but his true reason is that the name is shared by a vaunted Allagan archmagus. Wedge is immediately taken with the idea, Rammbroes grudgingly accepts that the matter is settled, and with names and preparations in place, he calls the group to depart to brave the Crystal Tower’s outer defenses. The answer comes as one: ready.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Rammbroes <small class="muted">Mor Dhona (X:30.4, Y:12.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="sanding-it-down.html">Sanding It Down</a></div><div class="row">Disciples of War or Magic Lv. 50</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="labyrinth-of-the-ancients.html">Labyrinth of the Ancients</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'霊砂と過去を記す者',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ラムブルースは、残る二属性のエーテルサンドを得るために自分が施した手配について語り始める。数日前、シャーレアンの知人に頼み、グリダニアで必要な素材を集めてもらうはずだった。しかしその後、彼からは一切の音沙汰がない。連絡がないこと自体は彼らしい面もあるが、ラムブルースは不吉な可能性も否定できないという。それでも今は行方を追う時間がない。遠征が遅れれば遅れるほど、クリスタルタワーの秘密が悪しき手に渡る危険が増す――だからこそ、彼はあなたに同じ任務を託す。黒衣森へ赴き、グリダニアの市場を取り仕切るパースモンレを訪ね、エーテルサンドの入手先を探れ、と。</p><p>パースモンレは、エーテルサンドを買いたいというあなたの申し出に驚き、素材の希少さを問い返す。長い年月、市場で一粒たりとも見たことがないほどだという。それでも水属性の研磨材の元となる鉱石が採れる場所なら教えられるが、そこへ自ら足を踏み入れるのは余程の愚か者だけだ、と突き放す。あなたが退かないのを見て、彼はため息をつき、場所を告げる。ウルズの恵み――そこには鉱石があり、しかも凶悪な猪が棲みついている。二本牙の悪夢に遭遇したなら、目的地は正しいが、時機が悪いのだと理解しろ、と言い残して去っていく。</p><p>ウルズの恵みに着くと、どこからともなく声が届く。あなたは遅かった、と声は告げる。求めていた水の加護を受けた鉱石は、つい先ほどまでそこにあったのに、いまは一片たりとも残っていない――自分が奪ったのだ、と。姿を探して葉陰を睨んでも無駄だ、今は耳の証拠を信じろ、と声は嘲る。だが勝者の余裕なのか、代替の手がかりを与えると言い、今度は風属性のエーテルサンドの在処を明かす。北部森林のイクサル族が、質の劣るクリスタルの不純物を取り除くために一定量の研磨材を保管しているのだという。ぐずぐずしている暇はない、次の獲物も奪ってやる――これは競争だ、と声は煽る。目的地は北部森林のイクサル族伐採場、そして本当の愉しみはそこで始まる。勝つのはどちらか、と。</p><p>あなたがイクサル族伐採場へ辿り着くと、声は拍手で迎え、あなたの働きぶりを見事な見世物だったと讃える。あまりに魅入って、エーテルサンドのことを忘れてしまった――つまり自分は競争に負けたのだ、と認め、風属性の研磨材はあなたのものだと宣言する。だがそれでも、忘れがたい演目を見た自分こそがより大きな獲物を得た気分だと言い、その不公平を正すため、あなたに礼を受け取れと迫る。代金はプラウドクリークの東、開けた場所に用意してあるから、デュラハンの鉄の足で踏み潰される前に回収しろ、と。</p><p>その後、ウルズの恵みで再び声が告げる。意外だったか、と。ウルズの恵みで得られる鉱石を精製し、エーテルサンドにしておいたのだという。安全に保管しろ、と念を押し、最初から獲物を手放す気などなかったが、あなたの働きを見て考えが変わったのだと明かす。大胆で力ある者の功績を記録することが自分の務めであり、歴史が刻まれる瞬間を好んで書き留める――だからこそ、今日のような勇気と熱意をもって進め、と言い、あなたとはまた会う、しかも思うより早く会うだろうと告げて声は途切れる。</p><p>聖コイナク財団の調査地へ戻ると、ラムブルースは残る研磨材の成果を問うが、あなたが二種類とも持ち帰ったと知ると驚き、すぐにシドへ加工を依頼する。ほどなくして準備は整い、ラムブルースはクリスタルタワーの防衛を貫くための四つの「牙」が揃ったと宣言する。シドは自分の仕事は些細だと言い、礼を言うべきはあなたのほうだと強調し、これでもうアラグの正面入口へ進む妨げはないと見立てる。</p><p>そこへビッグスとウェッジが駆けつけ、自分たち抜きで行くなと主張する。アラグ帝国の驚異を研究できる機会は滅多にないし、その技術はガレマールのものが古臭く見えるほどだと興奮する。だがシドは熱意を認めつつも、ここで知識を私するために来たのではないと釘を刺す。この十年で二度、想像を絶する力の誘惑が人々を突き動かし、理解できぬ技術に手を出した結果、世界は二度とも滅亡寸前まで追い詰められた。三度目は許されない、と。彼はウェッジに社是を言わせ、「技術による自由」だと確認すると、祖国を捨てたとき、圧政を促すために利用されうる機械とは関わらないと誓ったことを思い出せと言う。全知を誇ったアラグ帝国の驚異は文明を救えず、こちらの世界も二度、危機へ追い込んだ――だからこそ、クリスタルタワーを探索し、必要なら秘密を封印するのだと。</p><p>そのとき、聞き覚えのある声がその見解を称え、揺るがぬ意志こそが歴史の流れを定めてきたのだと告げる。ラムブルースはついに戻った相手へ鋭く問いただし、姿を現したのはグ・ラハ・ティアだった。彼は任務どおりエーテルサンドの件を進めていたと言い、運搬は通りすがりの冒険者に託した、これ以上の使者はいないと判断したのだと語る。そしてあなたに挨拶し、また会うと言っただろうと告げ、自己紹介をする。自分はバルデシオン委員会の一員、グ・ラハ・ティアであり、この画期的遠征に観察者として加わるのだ、と。ラムブルースは彼の奇矯さを許し、仲間として迎えてほしいと頼む。</p><p>グ・ラハ・ティアは、これで一座は完成し、未知へ踏み出す準備が整ったと高らかに宣言し、「ノア」に万歳を唱えようと言う。シドがその名を反芻すると、グ・ラハ・ティアは、出自の異なる者が集う以上、聖コイナク財団の名をそのまま名乗るわけにはいかないし、歴史に刻まれるなら覚えやすい呼称が必要だと説明する。「ノア」は一応「歴史的遺物観察者」に由来すると言えるが、本当の理由は、名高いアラグの大魔道士と同じ名だからだという。ウェッジはその響きを気に入り、ラムブルースは渋々ながらも受け入れる。呼称が定まったいま、彼はクリスタルタワー外郭の防衛へ挑むため出発しようと呼びかけ、全員が準備完了だと声を揃える。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ラムブルース　<small class="muted">モードゥナ (X:30.4, Y:12.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="sanding-it-down.html">霊砂と未来を造る者</a></div><div class="row">ファイター ソーサラー Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="labyrinth-of-the-ancients.html">古代の民の迷宮</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'靈砂與記錄過去之人',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Rammbroes 點頭承認，你確實該知道他先前為了取得最後兩種以太砂所做的安排。幾天前，他請一位 Sharlayan 的熟人前往 Gridania，在那裡收集所需材料；可從那之後，他沒有再收到任何消息。這種「不聯絡」對那人而言並非完全反常，但 Rammbroes 仍無法排除壞事已經發生的可能。</p><p>然而他也坦白，現在根本沒有時間去追查那人的下落。遠征每拖延一天，Crystal Tower 的秘密就越可能落入錯誤之手。因此他把同樣的任務交給你：前往 Black Shroud，去找 Gridania 市集的掌舵者 Parsemontret。若世上有人知道哪裡買得到以太砂，那就只能是他。</p><p>Parsemontret 聽見你要購買以太砂，先是愣住，隨即反問你是否明白自己在找什麼。他說這種材料稀有到不可思議，自己多年來在市場上連一粒都沒見過。不過他也表示，若你真要追尋，他可以告訴你一處地點——那裡能開採出製作「水屬性以太砂」所需的礦石，只是任何願意踏進去的人，都得是走投無路的蠢蛋。你沒有退縮，他只能嘆氣讓步。</p><p>他問你是否知道 Urth’s Gift，並說礦石就在那裡——而那片區域也棲息著一頭格外兇惡的野豬。若你遇見那個長著巨牙的惡夢，你就會知道自己找對地方了——同時也意味著你來得不是時候。說完，他便讓你自己去面對結果。</p><p>你抵達 Urth’s Gift，還來不及搜查，一道看不見來源的聲音就先一步抵達你耳邊。那聲音告訴你，你來晚了——不只是錯過「娛樂」。你想找的水屬性礦石不久前還在此處，如今已被他拿走，連一點碎屑都不剩。他還嘲弄你別再眯著眼盯著樹叢，因為你不可能從那裡看見他；至少在這段時間，你只能相信「耳朵」所聽見的證據。</p><p>他又說，自己因為勝利而變得寬宏大量，所以願意分享另一個以太砂來源——風屬性的那種。北 Black Shroud 有一群 Ixal 會存放以太砂，用來替品質較差的水晶去除雜質。他催促你別在這裡耗著，否則他就會再一次從你眼皮底下奪走獵物；這會是一場競賽，目的地是北 Black Shroud 的 Ixali Logging Grounds，而真正的樂趣，將在那裡開始。他要你加快腳步，因為他也會用同樣的速度前進。</p><p>當你趕到 Ixali Logging Grounds，那道聲音以掌聲迎接你，稱讚你剛才的表現精彩得讓他一度把以太砂都忘了。他承認自己因此等於放棄了這場小競賽，恭喜你——風屬性以太砂是你的了。可他又說，自己看見那樣的表演反而覺得「更大的獎賞」落在他手裡，這種不公平必須被修正，所以他堅持要你收下謝禮。報酬會放在 Proud Creek 東側的一處空地，他要你盡快去取回，免得被 dullahan 沉重的鐵足踩成碎片。</p><p>你再回到 Urth’s Gift，聲音如同早已預料到你的疑問般開口：這不是你以為會拿到的東西嗎？他自作主張，把 Urth’s Gift 的礦石直接提煉成了以太砂，要你務必妥善保管。他也說得明白——你若懷疑他在玩弄你，就該知道他原本從沒打算交出自己的獵物；直到他親眼看見你出手，他才改變念頭，因為那樣的行動理應得到回報。</p><p>他解釋自己的職責，是記錄凡人創造的歷史，而他更願意書寫的，是勇敢者與強者的功績。因此他希望你能延續今日展現出的勇氣與熱度，繼續走下去；他還說你們會再見面，而且會比你想像得更快。話音落下，聲音也隨之沉寂。</p><p>你把兩種以太砂帶回 Saint Coinach’s Find，Rammbroes 立刻追問結果，等聽見你竟然兩種都帶回來，他當場要 Cid 立刻開始處理水晶。很快，Cid 宣告加工完成，Rammbroes 也鄭重表示：如今他們已擁有穿透 Crystal Tower 防禦所需的四枚「獠牙」。Cid 誇口說這只是小事，真正該感謝的是你；照他的估算，現在已沒有任何東西能阻止你們走向 Allagan（古代亞拉戈帝國）的正門。</p><p>Biggs 與 Wedge 這時趕來，堅持你們不能丟下他們。Biggs 興奮地說，能研究 Allagan（古代亞拉戈帝國）的奇蹟不是天天都有，而那種技術甚至讓 Garlemald 看起來像古董。Cid 雖肯定他們的熱情，卻立刻劃清界線：你們不是為了把知識據為己有而來。他提醒眾人，在過去十年裡，曾有兩次因為「難以想像的力量」誘惑，人們去擺弄自己不了解的技術，結果世界兩度被拖到幾乎毀滅的邊緣；你們不會再冒第三次風險。</p><p>他要 Wedge 回答公司的信條，Wedge 立刻說出「Freedom through Technology」。Cid 便接著提醒：當他們捨棄故鄉時，就發誓不與可能被用來推動暴政的機械為伍；這個誓言從未改變。甚至連全知全能的 Allagan（古代亞拉戈帝国）帝國都無法被自己的奇蹟拯救，反倒讓你們的世界兩度差點走向末路。正因如此，你們必須探索 Crystal Tower，必要時還得把其中的秘密封存起來。</p><p>就在此刻，一道熟悉的聲音插入，稱這是個令人信服的觀點，並說正是像他這樣堅定不移的意志，才塑造了歷史的走向。Rammbroes 立刻轉向那個終於現身的人，質問他為何遲遲不回報進度。對方自若地回答：他當然是在執行任務——以太砂的事你們難道忘了嗎？他還說自己已把以太砂交給一位路過的冒険者代為送達，因為他想不到比那人更可靠的信使。接著他轉向你，向你打招呼，語氣像是在確認一件早已說過的事：他不是告訴過你，你們會再見面嗎？</p><p>他自我介紹，說自己名叫 G’raha Tia，是 Students of Baldesion 的一員，將以觀察者的身分加入這場開創性的遠征。Rammbroes 也補上一句，G’raha Tia 被指派來擔任觀察者，希望你能包容他的……古怪之處，並把他當作自己人。G’raha Tia 則宣布你們的同伴關係至此完整，眾人已準備好踏入未知，並高喊要為「NOAH」歡呼。</p><p>Cid 皺著眉重複那個名字，而 G’raha Tia 解釋，既然成員背景不同，就不適合繼續以 Sons of Saint Coinach 自稱；而若要在歷史上留下痕跡，就需要一個容易被記住的稱號。他說「NOAH」在技術上可以解釋成「Nominated Observers of Artifacts Historical」，但他真正選這個名字，是因為那也是一位著名的 Allagan（古代亞拉戈帝國）大魔導士的名字。Wedge 立刻喜歡上「大魔導士」這個說法，Rammbroes 也只能勉強接受，表示既然名稱已定，就該出發去面對 Crystal Tower 的外部防禦。當他問大家是否準備好啟程時，眾人齊聲回應：準備好了。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>任務發布</b> 拉姆布羅斯　<small class="muted">摩杜納 (X:30.4, Y:12.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="sanding-it-down.html">以靈砂打磨未來</a></div><div class="row">戰鬥／魔法職業 Lv.50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="labyrinth-of-the-ancients.html">遠古迷宮</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
