@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sanding It Down | BELAUG · FFXIV Library</title>
+  <meta name="description" content="AllianceRaid24 – Sanding It Down (ARR Patch 2.1)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/8EbGCl0W79A"
+              title="Sanding It Down" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Sanding It Down</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Sanding It Down',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Rammbroes explains that shaping the flawless crystals without tainting their elemental purity will require a precise abrasive—“aethersand”—found in four elemental varieties. It is rare and expensive enough that the abrasive often costs more than the gemstones it polishes. He had tried to buy what the Sons need through the Goldsmiths’ Guild in Ul’dah, but was told none was available, and only apologies have followed—despite the order being placed well before you ever delivered the crystals.</p><p>He admits he is not an impatient man, yet the longer the investigation is delayed, the greater the risk that the Crystal Tower’s secrets will be claimed by less savory parties. So he entrusts you with the payment and asks you to speak directly with Guildmaster Serendipity, hoping your presence will spur action—and that you will return with at least one of the four varieties of aethersand.</p><p>At the Goldsmiths’ Guild, Serendipity welcomes you and, with striking timing, reveals that a quantity of fire-aspected aethersand has finally been secured. The other three varieties may take longer, but you can settle for what they have now—until another customer’s dispute spills into view, with Biggs pressing for help and Jemime insisting the sand is already spoken for.</p><p>Biggs recognizes you at once and quickly admits the truth: he and Wedge are building a new airship design and, after hard struggle, have produced a prototype crystal-powered propulsion system—an idea sparked by hearing how a corrupted crystal was used aboard the Enterprise. Their design requires all four varieties of aethersand, and he refuses to relinquish this batch even for you. Jemime calmly notes that you represent the organization that reserved the aethersand, and that your purse is considerably larger; with a resigned sigh, Biggs yields the batch to you, but insists it is only fair that he be given a role in your project. He speaks with open excitement at the chance to experiment with the wonders of the ancients.</p><p>Once the immediate matter is settled, Biggs turns practical. Since you will need the remaining three varieties, he argues you should not wait on shipments that may never come—better to search for them yourself. He shares a lead: a peddler in northern Thanalan is rumored to very occasionally handle earth-aspected aethersand, and Wedge has gone to confirm it. Biggs remarks that Wedge has been emboldened by your heroic example, even hiring an adventurer as a bodyguard, and urges you to catch up with him at Bluefog.</p><p>At Bluefog, the hired adventurer offers no warmth—only a warning and a weary story. A Lalafellin employer came seeking special sand worth a small fortune; the peddler claimed bandits stole his stock, and they crept into the bandits’ stronghold to recover it. Alarms rang out, rogues woke, and the pair fled in blind panic; the adventurer was separated from the employer and has not seen him since. He fears the Lalafellin may still be lost inside the old Amajina mythril mine—where the bandits have made their lair.</p><p>Inside, you find Wedge in a panic, berating himself for sneaking into a bandits’ den and trying—desperately—to be brave enough to walk out. When he realizes you are there, he blurts out startled questions, then admits what happened: he did manage to snatch the stolen aethersand, but his bodyguard fled, and bandits swarmed after him with weapons improvised and cruel. In the frantic escape, the aethersand slipped away, likely dropped during evasive maneuvers, leaving him trapped and afraid to move. He begs you to search in his stead, and when you do find it, he brightens with relief—then, learning you are gathering aethersand for Rammbroes and the chief in pursuit of a “treasure trove of Allagan knowledge,” he insists you should be the one to keep it. He declares his own intent to join the expedition, and urges you to return quickly—keeping a close eye on your pockets.</p><p>Back at Saint Coinach’s Find, Rammbroes takes your return as proof of success and listens as you present two varieties. He calls it more than could reasonably be expected—and less than he had hoped—then apologizes for the flippancy and praises the result: if all goes to plan, the party need no longer fear death by fire or earth. He asks Cid to prepare the relevant crystals, and Cid sets to work at once, eager to handle materials like these, before demanding to know how you managed to procure aethersand at all.</p><p>When Cid learns Biggs and Wedge helped—and now intend to join—he grumbles about their relentless inventiveness, then admits it will be good to have them around. Still, out of professional pride, he suggests procuring the remaining two varieties before they arrive, and presses Rammbroes for any information on water- and wind-aspected aethersand. Rammbroes has none yet, but hints at arrangements he has made, while Cid notes a lack of enthusiasm and urges that any complication be discussed before it jeopardizes the expedition. Rammbroes agrees an explanation is in order—but asks, for the moment, that you all savor the preliminary victory you have won.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Rammbroes <small class="muted">Mor Dhona (X:30.4, Y:12.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="legacy-of-allag.html">Legacy of Allag</a></div><div class="row">Disciples of War or Magic Lv. 50</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-performance-for-the-ages.html">A Performance for the Ages</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'霊砂と未来を造る者',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ラムブルースは、あなたが集めてきた無垢なクリスタルを加工しても属性の純度を損なわないためには、特別な研磨材が必要だと告げる。それは四つの属性を持つ「エーテルサンド」であり、希少で高価なため、磨かれる宝石より研磨材のほうが高くつくことすら珍しくないという。彼はウルダハの彫金師ギルドで必要量を購入しようとしたが、在庫はないと言われ、入荷次第連絡するとの返事も謝罪ばかりで、しかも注文はあなたがクリスタルを持ち帰るより前に出していたのだと明かす。</p><p>焦れる性分ではないとしながらも、調査が遅れれば遅れるほど、クリスタルタワーの秘密が別の胡乱な者どもの手に落ちる危険が増す――そう語るラムブルースは、支払いをあなたに託し、ギルドマスターのセレンディピティに直接会ってほしいと頼む。あなたほどの名声ある人物が出向けば、状況が動くかもしれない。次に会うときには、四種のうち少なくとも一つのエーテルサンドを手にしていてほしい、と。</p><p>彫金師ギルドでセレンディピティはあなたを迎え、まさに連絡しようとしていたところだと言う。ようやく火属性のエーテルサンドを確保できたのだ。他の三種はしばらく先になるかもしれないが、今ある分の精算は可能だと話を進めかけたところで、別の客の揉め事が目に入る。ジェマイムは、そのエーテルサンドはすでに押さえられていると繰り返し、次の便を予約するなら内金を受け取れると告げる。</p><p>そこにいたビッグスはあなたに気づき、結局のところ自分たちもそのエーテルサンドを必要としているのだと打ち明ける。ビッグスとウェッジは新型飛空艇の設計に没頭し、苦闘の末にクリスタルを動力とする推進機構の試作までこぎつけた。発想のきっかけは、エンタープライズの船上で不浄なクリスタルが用いられたという話を聞いたことだという。だが設計には四属性すべてのエーテルサンドが要るため、この一括分だけは譲れないと強情を張る。</p><p>しかしジェマイムは、あなたが当該のエーテルサンドを予約した組織の代表であること、そしてあなたの懐のほうがはるかに深いことを淡々と指摘する。ビッグスは観念し、この一括分をあなたに渡す代わりに、あなたたちの計画に自分の役割を求める。古代の驚異を実験できる機会など滅多にない――その高揚を隠そうともしない。</p><p>揉め事が片付くと、ビッグスは次の現実へ話を移す。あなたが残り三種も必要なら、入荷を待ち続けるより自分で探したほうが早いと言い、手がかりを示す。北ザナラーンに、ごく稀に土属性のエーテルサンドを扱う行商がいるという噂があり、ウェッジが確認に向かった最中だという。ビッグスは、ウェッジがあなたの英雄的な姿に触発され、冒険者を護衛に雇ってまで動き出したのだと半ば呆れ、ブルーフォグで合流するよう促す。</p><p>ブルーフォグで出会った護衛の冒険者は、挨拶もそこそこに疲れ切った口調で事情を語る。雇い主の小柄な男は、途方もない値がつく特別な砂を求めて行商を訪ねたが、品は山賊に奪われたと言われた。取り戻そうと山賊の根城に忍び込んだ結果、警報が鳴り、ならず者どもが目を覚まし、二人は我を忘れて逃げることになった。混乱の中で雇い主とははぐれ、以来姿を見ていない。山賊の巣となっているアマジナ廃坑に取り残されているかもしれない――そう告げ、最悪を覚悟しろと冷たく忠告する。</p><p>あなたが廃坑の奥で見つけたウェッジは、山賊の巣に忍び込むなど自分のすることではないと震え、今にも死んでしまうと嘆きながらも、必死に落ち着こうとしていた。あなたの姿を見て驚き、どうしてここまで来たのかと狼狽しつつ、盗まれたエーテルサンドを回収しようとしたのだと白状する。護衛は逃げ出し、山賊が刃物や凶器を手に押し寄せる中、砂は確かに奪い返した――だが逃走の最中に落としてしまったらしく、今はその場を動けないという。あなたに代わりに探してほしいと懇願し、あなたが見つけ出すと、安堵と感謝をあらわにする。</p><p>さらにあなたが、ラムブルースやシドと共に、アラグ帝国の知の宝庫に迫るためエーテルサンドを集めていると知ったウェッジは、その砂は自分ではなくあなたが持つべきだと言い切る。ビッグスたちはまだ飛空艇の工夫を続けられるが、あなたたちの計画は他に代えがきかない――そう判断し、遠征そのものにも加わると宣言する。そして急いでモードゥナへ戻るよう促し、今度は懐から落とさぬよう気をつけろと念押しする。</p><p>聖コイナク財団の調査地に戻ると、ラムブルースはあなたが二種のエーテルサンドを持ち帰ったことを確認し、想定以上の成果だと称える。冗談めいた軽口を詫びつつ、これで火と土による死の危険は大きく減るだろうと言い、シドに該当のクリスタル準備を頼む。シドは滅多に触れぬ素材だと喜びながらも、どうやって手に入れたのかと問い詰め、ビッグスとウェッジが関わったと聞くと、二人の発想力に悪態をつきつつも、加わるのは心強いと認める。だが職人の矜持として、二人が到着する前に残る二属性も確保しようと提案し、水属性と風属性の手がかりをラムブルースに求める。ラムブルースはまだ情報はないが手配はしてあると含ませ、シドはその歯切れの悪さを指摘して、遠征を危うくする前に問題があるなら今話すべきだと迫る。ラムブルースは説明が必要だと認めつつ、まずはあなたがもたらしたこの小さな勝利を、ほんのひととき味わおうと言う。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ラムブルース　<small class="muted">モードゥナ (X:30.4, Y:12.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="legacy-of-allag.html">古代アラグ文明の遺産</a></div><div class="row">ファイター ソーサラー Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-performance-for-the-ages.html">霊砂と過去を記す者</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'以靈砂打磨未來',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Rammbroes 告訴你，若要讓那些無瑕水晶在塑形加工時仍能保持各自的屬性純度，就必須使用一套特定的研磨材料。他說是「一套材料」，其實核心只有一種——以太砂，但它分成火、水、風、土四種屬性。以太砂既稀有又昂貴，甚至常見到「研磨用的砂」比「被磨的寶石」還值錢的情況。</p><p>他原本就認為，購買所需份量最可能的管道是 Ul’dah 的 Goldsmiths’ Guild；然而他聯絡 Guildmaster 後得到的答覆卻是：目前完全沒有現貨。雖然對方承諾一補貨就會通知，但至今除了道歉什麼也沒等到——而且那筆訂單，其實早在你把無瑕水晶交回來之前就已經下了。</p><p>Rammbroes 說自己並不急躁，可他同樣清楚，調查拖得越久，Crystal Tower 的秘密就越可能落入其他「不那麼乾淨」的人手中。正因如此，他決定把購買的款項交給你，請你親自去找 Guildmaster Serendipity 談談；也許像你這樣的名望能讓對方真正動起來。無論如何，他希望你下次回來時，至少能帶回四種以太砂中的其中一種。</p><p>在 Goldsmiths’ Guild，Serendipity 一見到你就說時機正好——你是代表 Sons of Saint Coinach 而來，而她正準備通知 Rammbroes：他們終於弄到一批火屬性的以太砂。其他三種恐怕還要一段時間，但目前這批可以先結帳交付。她話還沒說完，就被另一樁爭執打斷：Biggs 情急地要求幫忙，而 Jemime 只能反覆強調，這批以太砂早就被人預訂了。</p><p>Biggs 很快就把你攔下，語氣雖不客氣，內容卻坦白——他和 Wedge 正忙著折騰一款新型飛空艇設計，辛苦到像是在「摔角」一樣，但總算做出了以水晶驅動的推進系統原型。靈感來自你們曾在 Enterprise 上使用過「受汙染的水晶」的傳聞；而要讓設計成形，他們需要火、水、風、土四種屬性的以太砂，所以他說自己不能把這批砂讓出去，就算是你也不行。</p><p>Jemime 咳了一聲，提醒 Biggs：你是預訂這批以太砂的組織代表，更何況你帶來的錢袋明顯比他的大得多。Biggs 沉默片刻，只能嘆氣退讓，把這批火屬性以太砂交給你；但他也立刻提出條件——既然你要拿走他的砂，那就該讓他在你們的計畫裡扮演一個角色。他說得理直氣壯，還難掩興奮：能親手實驗古代文明的奇蹟，並不是天天都有的機會。</p><p>事情定下後，Biggs 又把話題拉回現實：你們不只需要火屬性，還需要其他三種，與其坐著等下一批也許永遠不會來的貨，不如乾脆自己去找。他給你一個線索——北 Thanalan 有個行商「偶爾」會經手土屬性的以太砂，Wedge 正在確認這個傳聞。Biggs 還提到，Wedge 似乎受你的英雄事蹟影響，居然不再等他牽著手才敢行動，甚至雇了個冒險者當護衛；他要你去 Bluefog 找人會合。</p><p>到了 Bluefog，你見到那名受雇的冒險者，對方連寒暄都懶得給，只丟出一段疲憊的經過：他的雇主是一名 Lalafell 小子，想去找一個據說在賣「很貴的特殊砂」的行商；但行商說貨被盜賊搶走了。雇主不肯空手回去，兩人就潛入盜賊的巢穴尋找失物，結果警報大作、盜賊驚醒，他們只能慌亂逃竄，混亂中他和雇主走散，至今沒再見到人。他推測那名 Lalafell 可能還困在舊 Amajina mythril mine——而那裡正是盜賊的據點。</p><p>你在 Abandoned Amajina Mythril Mine 裡找到 Wedge 時，他正被恐懼壓得喘不過氣，嘴上罵自己愚蠢，卻又逼著自己冷靜、逼著自己站起來走出去。看到你出現，他又驚又慌，急著解釋自己為什麼會在這裡：他確實闖進來取回被偷的以太砂，甚至成功把砂搶到手，可護衛卻逃跑了，接著一大群盜賊拿著刀斧與粗糙的凶器追上來。他在逃命中把以太砂弄丟，現在只能躲著不敢動，於是請你替他把砂找回來——也提醒你，盜賊顯然不歡迎訪客。</p><p>當你把以太砂找回來，Wedge 立刻鬆了一口氣，急著要回去把消息帶給 Biggs。可他又從你口中得知，你同時也在替 Rammbroes 和 Cid 收集以太砂，為的是探索一座蘊藏 Allagan（古代亞拉戈帝國）知識的寶庫——他短暫沉默後，直接說這份以太砂你更需要。Biggs 和他仍能繼續尋找飛空艇的創新，但你們的問題沒有其他替代方法；他甚至當場表示，這趟遠征聽起來太值得一看，他也要加入。最後他催你立刻回 Mor Dhona，還特地提醒你把口袋看緊一點，別再出現「小意外」。</p><p>回到 Saint Coinach’s Find，Rammbroes 看見你回來便判定你確實帶回了以太砂，並在聽完後確認你帶回的是兩種屬性。他先用一句半玩笑的話說「比合理期待的還多兩種、也比他希望聽到的少兩種」，隨即為自己的輕佻道歉，認真稱讚你做得很好；若一切順利，他們至少不必再擔心被火或土的防禦力量奪命。他請 Cid 準備相應的水晶，Cid 立刻動手，坦言這類材料並不常見，正好讓他大展身手——但他也忍不住追問你究竟是怎麼弄到以太砂的，因為那絕不是「在稀有寶石櫃後頭翻一翻」就會出現的東西。</p><p>當 Cid 聽到 Biggs 和 Wedge 也幫了忙，甚至還打算加入時，他先是不甘心地抱怨兩人一轉眼就又弄出「革命性的引擎」，讓人根本沒法安心歇著；可話鋒一轉，他也承認有他們在會更好。只是他出於專業自尊，提議在兩人抵達前先把剩下兩種以太砂也找齊，並追問 Rammbroes 是否已有水與風屬性的線索。Rammbroes 表示目前還沒有，但他已做了安排，很快就能知道是否有成果；Cid 察覺他語氣不太積極，要求若有任何變數就該現在說清楚，以免危及遠征。Rammbroes 嘆了口氣，承認確實需要解釋——但在那之前，他希望你們先把你帶回來的這場初步勝利，好好留住片刻。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>任務發布</b> 拉姆布羅斯　<small class="muted">摩杜納 (X:30.4, Y:12.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="legacy-of-allag.html">Allag（古代亞拉戈帝國）文明遺產</a></div><div class="row">戰鬥／魔法職業 Lv.50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-performance-for-the-ages.html">靈砂與記錄過去之人</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
