@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Alisaie’s Path | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Raid8 – Alisaie’s Path (ARR Patch 2.4)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/913K3PJeVvA"
+              title="Alisaie’s Path" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Alisaie’s Path</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Alisaie’s Path',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Alphinaud admits that even with you there, there were moments when he feared the worst—yet in the end you pulled them from the flames and carried them safely to victory, as you always have. He says he has never been more proud to call Alisaie his sister.</p><p>Alisaie, looking out over northern Thanalan after the descent into darkness, says the desolation now seems almost paradisal. She promises she will not reveal the truth of the Calamity to a single soul, yet the nations of Eorzea will need assurances that the threat of a new primal is gone. Left in the dark too long, they will seek answers in time; so she proposes that the fragments of Dalamud be sealed off, that the truth may rest undisturbed. Before anything else, she insists you go to Urianger—certain you will find him pacing at the Ceruleum Processing Plant.</p><p>At the plant, Urianger greets you as the Warrior of Light returned undimmed from the depths. From your triumphant bearing he believes you succeeded—yet he is startled that you appear alone, and asks after Alphinaud and Alisaie. Alphinaud answers at once, apologizing for the lateness and saying you took the scenic route, and Alisaie delivers the simplest verdict: Bahamut is no more; the realm is safe.</p><p>Urianger’s relief breaks into alarm as he looks at them—he imagines what horrors their young eyes have seen and what suffering their bodies have borne, and tries to fuss over wounds and poultices. Alisaie laughs him down and assures him they are hale and whole, the worst already healed—and she believes they have her grandfather to thank for that. Urianger is shaken: Master Louisoix? You met him again? And why would one enthralled to Bahamut ease your suffering? Alisaie promises she will reveal all in due course, but says there is an urgent matter first: now that Bahamut is defeated, it is best to bar entry to every fragment of Dalamud. To that end, they will convince the leaders of the nations that the danger has passed, and secure their cooperation so the fragments are never disturbed again.</p><p>Alphinaud stops Alisaie and tells her she need not take that burden—Urianger and he will suffice, and she should rest, for she has earned it. Alisaie insists she is fine and points out he endured as much as she did—then realizes what he is doing and accuses him of wanting her out of the way so he can play his game of diplomacy. Alphinaud protests, and Urianger adds that he truly believes Alphinaud has her best interests at heart, wanting only to spare her a burden he can carry. Alphinaud leans into it—he has experience with dignitaries, and since she never misses a chance to tease his fondness for diplomacy, he reminds her of her own aversion to it. With that, he declares it settled and asks Urianger to arrange a chocobo carriage so they have time to prepare their story.</p><p>Alisaie relents, and tells Alphinaud that though their paths differ, they share the same goal. Alphinaud agrees—what you achieved together proves it, and whatever paths you choose, he is certain your hearts will lead you to the same end. Alisaie thanks him, then turns to you: there is a place she wishes to visit, and she asks you to accompany her—after a quick change of garments.</p><p>At the Burning Wall, Alisaie looks upon the land and says it is unchanged, as it should be. It would be poetic if the fragments vanished, but they will remain long after you and she are gone; the world may change irrevocably, but life will go on. She trusts Alphinaud to conceal the truth of the Calamity, and knows that what was revealed in those dark depths will never see the light of day—she herself agreed it must be so. Yet she cannot bear the injustice of Eorzea remaining forever ignorant of its savior—of your deeds. Still, she says, it is typical of you—ever the hero—and your reassurance makes her feel better.</p><p>Then she makes you a promise: she will never forget. You freed her grandfather’s soul and saved Eorzea from Bahamut’s wrath. Even if those deeds are never remembered in song, their consequences will be felt forever by every soul who calls this realm home. She chooses the spot and dedicates it—for her grandfather, for Nael, and for the dragons of Meracydia, and for all taken by the Calamity. At last, she says, your struggle with Bahamut is over, and the realm—given new life through the prayers and sacrifices of countless souls—may look to a brighter tomorrow.</p><p>When the dust settles, Alisaie says she will set out on a journey. She means to find her own reason to fight for Eorzea, and when she does, she will fight with all her being. She tells you that you have done so much for her, and she hopes one day to repay you in kind. She has no doubt you will continue to help those in need and grow stronger, and she will strive to do the same—hoping, if the Twelve are kind, to become Eorzea’s sword in the darkness as you are. She adds with a spark that she will not be outdone by Alphinaud, and promises that when you next meet, she will not disappoint you. Until then, she bids you farewell, and thanks you from the bottom of her heart.</p><p>Later, Urianger tells you that with Bahamut’s banishment to the aether, the Seventh Umbral Calamity has truly come to an end. In the abyssal depths of the dread primal’s domain, you cast light upon the truth of Eorzea’s rebirth—yet until lasting peace visits the realm, that knowledge must remain locked within your hearts. Even so, he says, one mystery remains: the haze that shrouds the people’s memory of the Calamity. He offers half-formed theories, if you will listen.</p><p>Urianger reminds you that when the combined might of the Twelve failed to contain Bahamut, Master Louisoix gathered his remaining strength and entrusted hope to the future—something Urianger believes he intended from the first, judging by Louisoix’s final words to the Antecedent. Urianger believes Louisoix invoked the power of the Keeper, sending you to a place outside of time, beyond the reach of the primal’s wrath. Taken from where you properly existed, you left behind a rent in the fabric of reality. At that same juncture, Louisoix struck down Bahamut, triggering the realm’s dramatic regeneration—and the rapid succession of these events, Urianger theorizes, gave rise to the people’s clouded recollection. Five years after that fateful day, you returned to become Eorzea’s valiant blade once more; though Urianger’s beloved master is gone, his hopes and dreams live on within you, Warrior of Light.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Alisaie <small class="muted">Northern Thanalan (X:20.2, Y:17.4)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="fragments-of-truth.html">Fragments of Truth</a></div>
+      <div class="row">Disciples of War or Magic Lv. 50</div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-end.html">The End</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'真成を胸に……',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>アルフィノは告白する。あなたがいても、最悪の結末を恐れた瞬間があった――だが最後には、あなたが炎の中から自分たちを救い上げ、いつも通り勝利へと導いてくれたのだと。そしてアリゼーについては、妹と呼べることをこれほど誇らしく思ったことはないと言う。</p><p>アリゼーは、闇への降下を経た今、北ザナラーンの荒涼でさえ楽園のように見えると口にする。第七霊災の真実は誰にも明かさないと約束するが、エオルゼアの諸国には新たな蛮神の脅威が去ったという保証が必要だ、と。長く闇に置かれれば、いずれ彼らは自ら答えを求め始めるだろう。だからダラガブの破片は封鎖し、真実を眠らせようと提案する。その前に、ウリエンジェへ報告しなければならない――セリウム精製所で落ち着きなく歩き回っているはずだと。</p><p>精製所でウリエンジェは、闇の深奥からなお輝きを失わず帰還したあなたを迎える。勝ち誇る気配から任務の成功を悟るが、あなたがひとりでいることに驚き、アルフィノとアリゼーはどこだと問う。すぐにアルフィノが姿を現し、遠回りしたせいで遅れたと詫び、アリゼーは端的に告げる――バハムートは消え去り、世界は安全だと。</p><p>安堵したウリエンジェは、今度は二人の様子に取り乱す。若い目が見た恐怖、若い身体が負った苦痛を思い、傷はどこだと問い、薬を作ると言い出す。アリゼーは慌てさせまいと、無事だと断言し、転んだ程度で最悪の傷は癒えていると言う。祖父のおかげだと思う、と。ウリエンジェは驚愕する。ルイゾワと再び会ったのか――だがなぜ、バハムートの僕である者が苦しみを和らげるのか。アリゼーは、いずれすべて話すと約束しつつ、まず急ぐべきことがあると言う。バハムートが倒れた今、ダラガブの破片すべてへの立ち入りを禁じるのが最善だ。諸国の首脳に危険が去ったと納得させ、破片が二度と荒らされぬよう協力を取り付けよう、と。</p><p>アルフィノはアリゼーを制し、その役目を背負う必要はないと言う。ウリエンジェと自分で十分で、今こそ休むべきだ――神々もあなたの働きを認めるだろう、と。アリゼーは自分は平気だと言い返し、兄も同じだけ経験したはずだと続けるが、やがて気づいて睨む。外交の駆け引きをしたいから自分を遠ざけたいのだろう、と。アルフィノは否定し、ウリエンジェも、兄は妹のためを思って負担を引き受けたいだけだと諭す。アルフィノは、自分には要人との折衝の経験があると言い、妹が自分の外交好きに口うるさいのだから、こちらも外交嫌いを思い出させるのが公平だと返す。そして結論として、ウリエンジェにチョコボ馬車の手配を頼み、道中で口裏合わせをしようと言う。</p><p>アリゼーはなお不満を滲ませつつも、道は違えど目指すものは同じだろうとアルフィノに問いかける。アルフィノはもちろんだと答え、共に成し遂げたことがその証だと言い、どんな道を選んでも心は同じ終着へ導くと確信していると語る。アリゼーは礼を言い、あなたに向き直って、訪れたい場所があるから同行してほしいと頼む。ただしその前に着替えが必要だ、と。</p><p>灼熱の壁でアリゼーは景色を見つめ、変わらぬのは当然だと言う。破片が魔法のように消えるなら詩的だが、あなたと自分がいなくなった後も残り続けるだろう。世界が取り返しのつかぬほど変わっても、命は続くのだと。そしてアルフィノが霊災の真実を隠すだろうこと、闇の深奥で明かされた真実が表に出ることはないこと、自分もそうあるべきだと同意したことを認める。だが人々が救い主の存在――あなたの働き――を永遠に知らぬままでいる不条理が、耐えがたいとも言う。それでもあなたはいつも英雄で、その言葉に救われるのだと。</p><p>アリゼーは誓う。自分は決して忘れない。あなたは祖父の魂を解き放ち、バハムートの怒りからエオルゼアを救った。歌に残らずとも、その結果はこの地を故郷と呼ぶすべての者に永遠に届く。彼女は場所を選び、祖父、ナール、メラシディアの竜たち、そして霊災で失われたすべての者のために捧げる。ついにバハムートとの戦いは終わり、無数の祈りと犠牲で新たな命を得た世界は、より明るい明日へ目を向けられるのだと。</p><p>やがてアリゼーは、落ち着いたら旅に出ると言う。エオルゼアのために戦う、自分自身の理由を見つけたいのだ。見つけたら、全身全霊で戦う。あなたがしてくれた数々に礼を述べ、いつか恩返ししたいと語る。あなたは困っている人を助け続け、そのたびに強くなるだろうと信じ、自分も同じように努めると言う。もし十二神が慈悲深いなら、いつかあなたのように闇を裂く剣になりたい、と。そしてアルフィノに負けるつもりはないと告げ、次に会う時は期待を裏切らないと約束し、心の底から感謝して別れを告げる。</p><p>その後ウリエンジェは、バハムートがエーテルへ追放されたことで第七霊災は真に終結したと語る。蛮神の深奥で、あなたは世界の再生の真実に光を当てたが、恒久の平和が訪れるまでは胸の内に封じねばならないとも言う。それでもなお、人々の霊災の記憶を曇らせる靄は説明がつかず、半ば形になった仮説をあなたに語りたいと申し出る。</p><p>ウリエンジェは、十二神の力を合わせてもバハムートを封じられなかった時、ルイゾワが残る力を振り絞り希望を未来へ託したと振り返る。盟主への最期の言葉から、それは最初から意図されたことだと確信していると言う。そしてルイゾワは守護神の力を呼び起こし、あなたを時の外、蛮神の怒りの届かぬ場所へ送ったのではないかと推測する。本来あるべき場所から取り去られたあなたは、現実の織り目に裂け目を残した。その同じ瞬間にルイゾワがバハムートを打ち倒し、世界の劇的な再生が引き起こされた――その連続が、人々の記憶を曇らせたのだろうと。五年後、あなたは再び戻り、エオルゼアの勇敢なる刃となった。愛する師は去っても、その希望と夢はあなたの内に生き続けるのだと、ウリエンジェはあなたを戦士として見つめる。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>依頼人</b> アリゼー　<small class="muted">ザナラーン：北ザナラーン (X:20.2, Y:17.4)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="fragments-of-truth.html">ふたつの欠片</a></div>
+      <div class="row">ファイター ソーサラー Lv 50～</div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-end.html">おわり</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'終於成形的真相——藏在心底，Alisaie 繼續前行',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Alphinaud 坦白說，即使你在場，他也曾有幾次怕到以為會迎來最糟的結局；但最後你仍像一直以來那樣，把他們從火焰之中救起，帶著所有人平安走向勝利。至於 Alisaie——他說自己從未像此刻這樣，以她是自己的妹妹為傲。</p><p>Alisaie 望著北ザナラーン的荒涼，說在那次墜入黑暗之後，眼前的寂寥竟像樂園一般。她承諾自己不會把 Calamity 的真相告訴任何人，但 Eorzea 的各國仍需要某種保證，好確認「新 primal 的威脅」已經消失。若長久被蒙在鼓裡，他們遲早會自行追問答案；所以她提議把 Dalamud 的碎片全數封鎖起來，讓真相得以安靜沉睡。可在那之前，你們得先去向 Urianger 報告——她篤定你們會在 Ceruleum Processing Plant 找到他，正焦躁地來回踱步。</p><p>在 Ceruleum Processing Plant，Urianger 看見你從黑暗深處歸來，仍帶著不減的光彩；他從你的氣勢判斷任務已成功，卻又驚訝你似乎獨自一人，急忙詢問 Alphinaud 與 Alisaie 在哪裡。Alphinaud 立刻現身，笑著為遲到致歉，說你們只是繞了更「好看的路」。接著 Alisaie 直接下結論：Bahamut 已不復存在，這片大地已經安全。</p><p>Urianger 的鬆口氣瞬間又變成慌亂——他望著你們，忍不住想到你們年少的雙眼究竟看過多少恐怖、身體又承受了多少苦痛，立刻追問傷在哪裡、要替你們清理包紮。Alisaie 趕緊要他放心，說你們毫髮無傷；雖然摔了幾下，但最嚴重的傷都已經痊癒，她相信得感謝祖父。Urianger 震驚地問：Master Louisoix？你們竟又見到他了？可為什麼一個被 Bahamut 奴役的人，反而會去緩解你們的痛苦？Alisaie 說她會在適當的時候把一切都告訴他，但眼下有件事必須立刻處理——既然 Bahamut 已被擊敗，你們認為最好禁止任何人再進入所有 Dalamud 碎片。為此，你們會說服各國領袖危險已過，並請他們合作，確保碎片永遠不再被驚擾。</p><p>Alphinaud 卻在此時叫住她，說她不必把這件事也扛在身上，Urianger 與他足以應付；她是否能趁現在好好休息？Alisaie 說自己沒事，並指出他也經歷了同樣的事——隨即她忽然明白了，瞪著他說：他是想玩自己的外交遊戲，所以才希望她別礙事。Alphinaud 急忙否認，Urianger 也勸她：他真心相信兄長是為她著想，她已經做得夠多，只是他想把自己能獨力承擔的負擔接過去。Alphinaud 也順勢說自己確實更有與權貴交涉的經驗，而且既然她總愛提醒他有多喜歡外交，那他也該提醒她有多討厭外交；於是他宣布就這麼決定，請 Urianger 安排一輛 chocobo 馬車，好讓你們在路上有充足時間把說法準備好。</p><p>Alisaie 仍不甘心地喊他一聲，卻也承認：你們的道路或許不同，但目標是一樣的，不是嗎？Alphinaud 回答當然——你們方才一同達成的事就是證明；無論選哪條路，你們的心都會引向同一個終點。Alisaie 道謝後轉向你，說她想去一個地方，希望你能陪她一起去；只是出發前，她想先換套衣服，說這不會花太久。</p><p>來到 The Burning Wall，Alisaie 看著那片土地說，一切仍舊如昔，理應如此。若碎片能像詩篇那樣憑空消失固然美好，但她很清楚它們會在你與她都離去之後依然存在——世界也許會不可逆地改變，可生命終究會繼續。她說自己毫不懷疑 Alphinaud 會把 Calamity 的真相隱藏得滴水不漏，而那些在黑暗深處被揭露的事，也永遠不會見到天日；她其實也同意必須如此。只是想到 Eorzea 的人們將永遠不知道拯救他們的人是誰——永遠不知道你的功績——那份不公幾乎令她難以承受。即便如此，你的安撫仍讓她感覺好受一些。</p><p>接著她鄭重告訴你：她永遠不會忘記。是你解放了祖父的靈魂，也讓 Eorzea 免於 Bahamut 的怒火。縱使這些偉業不會被寫進歌裡，它們帶來的結果仍會永遠影響每一個把這片大地當作家的人。她選定了位置，為了祖父、Nael、以及 Meracydia 的龍族，也為了所有在 Calamity 中被奪走的人。直到此刻，你們與 Bahamut 的糾葛終於結束；這片大地靠著無數靈魂的祈禱與犧牲獲得新生，如今可以望向更光明的明天。</p><p>等一切塵埃落定後，Alisaie 說她會踏上旅途，去尋找「屬於她自己的理由」，讓她能為 Eorzea 而戰；而一旦找到，她會用盡全部去戰鬥。她說你為她做了太多，有一天她也希望能回報你。她深信你會繼續幫助需要幫助的人，並在一次次伸手之中變得更強；她也會努力做到同樣的事。她希望有朝一日能成為像你一樣的「Eorzea 黑暗中的劍」，並補上一句：無論如何，她不會輸給 Alphinaud。下次再見時，她保證不會讓你失望——直到那天，她向你道別，並從心底感謝你。</p><p>之後，Urianger 說，隨著 Bahamut 被放逐回以太，第七靈災確實已告終結。你在那位可怖 primal 的深淵領域裡，把 Eorzea 重生的真相照亮了；但在真正的長久和平來臨之前，那些知識必須鎖在你們心中。他也承認，儘管許多謎團已被揭開，人們對 Calamity 的記憶仍被迷霧遮蔽，至今無法解釋；他願意把自己尚未成形的推論分享給你，若你願意聽。</p><p>Urianger 回顧：當 Twelve 的合力仍無法封住 Bahamut 時，Master Louisoix 便聚起最後的力量，把希望託付給未來——他相信從 Louisoix 對盟主說的最後一句話來看，這一切打從一開始就是他的用意。Urianger 推測 Louisoix 召喚了 Keeper 的力量，把你送往一個時間之外、超出 primal 怒火所及的地方；你從自己本應存在的位置被帶走，於現實的紋理上留下了一道裂口。就在同一個關鍵點上，Louisoix 擊倒了 Bahamut，觸發了這片大地劇烈的再生；而這些事情接連發生，才導致人們對 Calamity 的記憶變得模糊。五年後，你回到眾人身邊，再次成為 Eorzea 英勇的利刃；即使他所敬愛的師長已離去，Louisoix 的希望與夢想仍在你體內延續——Urianger 以那樣的目光凝視著你，稱你為 Warrior of Light。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>任務發布</b> 阿莉塞　<small class="muted">薩納蘭 - 北薩納蘭 (X:20.2, Y:17.4)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="fragments-of-truth.html">兩塊碎片，拼回真相</a></div>
+      <div class="row">戰鬥／魔法職業 Lv.50～</div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-end.html">完結</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
