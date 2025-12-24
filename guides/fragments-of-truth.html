@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fragments of Truth | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Raid8 – Fragments of Truth (ARR Patch 2.4)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/WDyEZPRmEME"
+              title="Fragments of Truth" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Fragments of Truth</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Fragments of Truth',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Urianger reflects that mankind cannot help but cast light into the darkness where secrets hide, even though what is revealed so rarely brings joy. So it is, he says, with the unhappy truths concealed beneath Bahamut’s immense shadow. Yet Alisaie continues onward, undeterred by the weight of knowledge upon her heart. He calls her chosen path perilous and painful, and asks you to remain at her side as her valiant blade, that she may see her quest through to its end.</p><p>Alisaie turns to you and says it is good that you are here. She tells Urianger she has met with difficulty: Bahamut’s physical form is regenerating beneath the Carteneau Flats even now, and to prevent his return you must disable the two remaining internment hulks that sustain him. Every moment of delay pushes the realm closer to destruction—but though she has identified the fragments of Dalamud that lead to the hulks, she has been unable to find a way inside.</p><p>Urianger warns that gaining entry is only the first step. When you last descended, you discovered Bahamut had bound the shade of Nael van Darnus to his will; and even after you consigned the fallen legatus to oblivion, Nael was not alone. Bahamut’s other thralls will surely try to bar your passage. Alisaie tells him he can speak her grandfather’s name—she has not forgotten who is waiting for you.</p><p>Urianger answers with painful care: the man you both loved is no more, and what remains is only a shade that defiles his memory. The vile words that spill from his lips must not be heeded, for they come not from her grandsire, but from Bahamut himself. Alisaie insists she will not stray from her course, and she will not let her grandfather’s sacrifice be in vain—but she returns to the problem at hand: words alone will not open the way into the fragments.</p><p>Urianger suggests she visit the fragments again in your company. Time and again, he says, the Warrior of Light has set events in motion by presence alone; perhaps it will happen again. While you do that, he will search for answers of his own, and together your efforts will reveal the path. Alisaie concedes that if it were anyone else she would question such advice, but she cannot deny what he says about you. She lays out the two targets: one fragment at the Burning Wall in eastern Thanalan, and one at the Singing Shards in Mor Dhona. She left an assistant at each site to keep searching for a means of ingress; you will begin with her man at the Burning Wall—Deks, she believes.</p><p>At the Burning Wall, you are greeted by Sinis, who recognizes you as Alisaie’s most faithful companion and stumbles through eager introductions. Alisaie calls him “Deks,” and he admits, ashamed, that he has found no viable path to the fragment—though it stands before your eyes, the way has proven impassable. When the fragment fell and pierced the land, it spewed a prodigious amount of aether, twisting the terrain into a shape that seems made to thwart you; even if an opening existed, he fears you would struggle to reach it. Alisaie orders him not to give up, then decides there is nothing to be gained by staring—so you will go to Mor Dhona and try the other fragment, hoping Sinis has fared better.</p><p>Sinis panics and blurts out that he lost contact with his brother just over a bell ago. The Singing Shards are home to many fell creatures—ogres among them—and though he does not wish to alarm her, he fears something unspeakable may have happened to Deks. Alisaie erupts, demanding to know why he did not say so sooner, and immediately urges you to hurry to her assistant’s aid. Sinis begs you to find his brother and keep Alisaie safe.</p><p>At the Singing Shards, you find Deks alive and shaken, thanking you—he truly thought his bones would be ground up and used to bake bread. Alisaie is relieved and admits it was wrong of her to press such danger upon him. Deks protests that her worry is wasted, then reports: though the tip of the fragment is exposed, the rest is encased in rock and crystal, making entry impossible. You could try excavating, but it would take time, and you have no idea how deep you would need to dig before finding a point of ingress. He is forced to conclude that entering this fragment is unrealistic, and asks her forgiveness. Alisaie curses the lost time and asks what you can do now.</p><p>Urianger’s voice reaches you at that moment, speaking through a linkpearl. He brings glad tidings: a way has been found to enter the remaining fragments of Dalamud. He tells you to escort Alisaie to the Ceruleum Processing Plant in northern Thanalan, where all will be made clear. Alisaie, startled and urgent, says Urianger has found a way and insists you go to him at once. Deks tells you not to linger—if Urianger’s method works, he will put many malms between himself and this place.</p><p>At the processing plant, Urianger apologizes for summoning Alisaie from afar, but says it is here that her journey may finally begin. Alisaie objects that there are no fragments in northern Thanalan. Urianger agrees—but a pathway exists, one she has used before. After your forays into the Binding Coil, you emerged at the crystal formation north of this place, borne back to the surface by an aetherial stream. Alisaie realizes that much, and asks if he means to use it to return underground—and if so, would it not only lead back to places already explored?</p><p>Urianger explains that it need not. From your experiences, it seems two internment hulks can share the same aetherial egress; therefore others may be connected in like wise. They labored to verify further tributaries feeding the same stream, and succeeded. The remaining problem is traveling to an unattuned destination. To reach what he calls the headwater, they propose using a modified aetheryte that amplifies the ripples originating from that source; by focusing one’s essence upon those ripples, the journey should be possible. But he warns her plainly: as with all untried aetherial travel, it is dangerous—merely attempting it could cost her life. Alisaie answers at once that she is willing to take the risk, calls Urianger brilliant, and then asks—pointedly—whether he had assistance, because of his repeated “we.”</p><p>Urianger admits he was not alone. Alisaie accepts that others now know of the mission, and says it cannot be helped—preventing Bahamut’s return is what matters, even if secrecy must be sacrificed. Later, Urianger confesses that he did not wish to withhold the source of the aid, and prays Alisaie will forgive him when she learns it.</p><p>At the modified aetheryte site, Alisaie spots Immortal Flames and asks what they are doing here. A voice answers that they may be Flames of Ul’dah, but first and foremost they are faithful retainers of House Leveilleur. Alisaie realizes it is Alphinaud—and accuses him of helping Urianger. Alphinaud confirms it, saying he has no intention of making details public, preferring to avoid panic, but given what is at stake—the survival of the realm—you must accept help when offered. He asks her not to be angry with Urianger; it was at Alphinaud’s behest that he kept silent.</p><p>Alisaie snaps that they will speak later. Urianger apologizes, saying he judged it right to inform Alphinaud, knowing her intent; and since her grandsire’s noble blood still runs in both their veins, if he must be struck down— Alisaie interrupts, shouting so Alphinaud will hear: she means to strike down her grandfather, and when she has done so, she will banish Bahamut to the aether. Nothing will sway her—she will protect Eorzea and uphold her grandfather’s legacy.</p><p>Alphinaud challenges her: if she speaks of legacy, she still does not know what she herself desires; her actions are driven by borrowed resolve. Alisaie bristles—what does that even mean? Protecting Eorzea was their grandfather’s goal, and they made it theirs, both of them—that is why you are here. Alphinaud insists he does not doubt her resolve, only its source. If it were truly her own, she could tell him precisely why she so fervently desires to protect Eorzea—but she cannot, because it is not hers, but her grandfather’s. Borrowed resolve will never be as strong as what springs from within. He ends the dispute for now: preventing Bahamut’s return matters most. He has no objection to striking down whatever remains of their grandfather, but he will accompany you this time, that as a child of House Leveilleur he may be present for the final moments.</p><p>Alisaie agrees on one condition: she makes the decisions. Erkenrad introduces himself, says preparations are nearly complete, and tells her to give the word when ready—he will be waiting at the Ceruleum Processing Plant. Alisaie tells you to pay Alphinaud no heed and assures you that you can rely on her; you have come far together, and together you will see the journey to its end.</p><p>Back at the plant, Erkenrad tells you the aetheryte is primed and ready. The remaining internment hulks are connected to the fragments in eastern Thanalan and Mor Dhona, and you will be sent first to the former. You will be starting inside the hulk, which means less ground to cover—at the cost of fighting for your life from the moment you arrive. For Alisaie’s sake if not your own, he urges you to be prepared for anything, and tells you to give the word when you are ready—he may even offer a prayer for your speedy return.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Urianger <small class="muted">The Waking Sands (X:6.0, Y:4.9)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="alisiaies-resolve.html">Alisaie’s Resolve</a></div>
+      <div class="row">Disciples of War or Magic Lv. 50</div>
+      <div class="row"><b>Unlock Raid</b></div>
+      <div class="row"><a class="link" href="the-final-coil-of-bahamut-turn-1.html">The Final Coil of Bahamut - Turn 1</a></div>
+      <div class="row"><a class="link" href="the-final-coil-of-bahamut-turn-2.html">The Final Coil of Bahamut - Turn 2</a></div>
+      <div class="row"><a class="link" href="the-final-coil-of-bahamut-turn-3.html">The Final Coil of Bahamut - Turn 3</a></div>
+      <div class="row"><a class="link" href="the-final-coil-of-bahamut-turn-4.html">The Final Coil of Bahamut - Turn 4</a></div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="alisiaies-path.html">Alisaie’s Path</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'ふたつの欠片',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ウリエンジェは語る。人は闇に隠れた秘密を見つければ、光を当てずにはいられない――だが照らし出したものが喜びをもたらすことは稀であり、バハムートの巨大な影が覆い隠す不幸な真実もまた同じだと。それでもアリゼーは、胸に重くのしかかる知の負担に屈せず歩みを止めない。彼女が選んだ道は危険で痛ましいゆえ、あなたに願う――勇敢なる刃として彼女の傍らに立ち、探求を結末まで導いてほしいと。</p><p>アリゼーはあなたを見て、ここにいてくれてよかったと言う。そしてウリエンジェに助言を求める。バハムートの肉体はカルテノー平原の地下でいまこの瞬間にも再生しており、復活を防ぐには彼を支える残る二基の拘束艦を停止させねばならない。遅れれば遅れるほど、世界は破滅の淵へ追いやられる――だが彼女は、拘束艦へ通じるダラガブの落片の位置を突き止めながらも、侵入の手段を見つけられずにいるのだと。</p><p>ウリエンジェは、入ること自体が危険な試みの第一歩に過ぎないと告げる。前回、あなたはバハムートがナエル・ヴァン・ダーナスの影を支配下に置いていたことを知った。そしてあなたがその堕ちた将を葬り去ったとしても、彼は一人ではなかった――他の傀儡があなたの行く手を阻むだろうと。アリゼーは、祖父の名を口にしてよいと言う。待っている者を忘れてなどいないのだと。</p><p>ウリエンジェは苦悩を押し殺して諭す。あなたたちが敬愛した人はすでにいない。残っているのは、その記憶を汚す影に過ぎないのだ。そこから吐き出される醜悪な言葉は、祖父からではなくバハムートから来るものゆえ、決して耳を貸してはならないと。アリゼーは心配はいらないと言い、何があろうと進路を逸れない、祖父の犠牲を無駄にはしないと誓う。だが言葉だけでは進めない――ダラガブの落片へ入る道が見つからないのだと繰り返す。</p><p>そこでウリエンジェは提案する。あなたと共に、再び落片を訪ねてはどうか。光の戦士は、ただそこにいるだけで事態を動かしてきた――今回もそうなるかもしれない。自分はその間に別の手掛かりを探す、双方の尽力が合わされば、ほどなく道は示されるはずだと。アリゼーは、相手が他人ならその助言を疑っただろうが、あなたについての指摘は否定できないと言い、同意する。そして目標を二つ示す。東ザナラーンのバーニングウォールにある落片と、モードゥナのシンギングシャードにある落片だ。彼女はそれぞれの場所に助手を残し、侵入口の捜索を続けさせている。まずはバーニングウォールの担当――デクスのもとへ向かうと言う。</p><p>バーニングウォールでは、助手シニスがあなたに気づき、アリゼーの忠実なる同伴者だと持ち上げて名乗る。アリゼーが調査の進捗を問うと、彼は恥じ入りながら、落片へ至る有効な道が見つからないと告げる。目の前に見えていても道が塞がれ、落下の際に噴き出した膨大なエーテルが地形を歪め、進入を阻むような有様になったのだという。仮に入口があっても辿り着くのは難しいだろう。アリゼーは諦めるなと命じ、ここで見上げていても仕方がないと切り替えて、モードゥナの落片へ向かうことにする。シニスがもっと成果を得ているかもしれないからだと。</p><p>だがその場でシニスは慌てて告げる。ほんの一刻ほど前に、兄と連絡が取れなくなったのだと。シンギングシャードには凶悪な獣が多く、オーガもいる――不吉なことが起きたのではと恐れる。アリゼーは激しく叱責し、すぐに助けに向かうようあなたに促す。シニスも、兄を探し出し、アリゼーの身を守ってほしいと頼む。</p><p>シンギングシャードでは、デクスが生きており、あなたに感謝しながら、骨を砕かれてパンにされるところだったと震える。アリゼーは無事を喜び、危険な任務を押しつけたのは間違いだったと詫びる。デクスは慌てて否定しつつ報告する。落片の先端は露出しているが、残りは岩と水晶に包まれており、内部へ入ることは不可能だ。周辺を掘削する案はあるが時間がかかり、どれほど掘れば入口が見つかるかも分からない。ゆえに、この落片への侵入は現実的ではないと結論づけ、許しを請う。アリゼーは焦りを露わにし、貴重な時間を失っている、どうすればいいのかと苦しむ。</p><p>その時、リンクパール越しにウリエンジェの声が届く。残るダラガブの落片へ入る道が見つかったという吉報だ。あなたはアリゼーを連れて北ザナラーンのセレラム精製所へ来てほしい、そこで全てが明らかになると。アリゼーは驚きつつも即断し、今すぐ向かうと言う。デクスは引き留めるなと告げ、方法が有効なら自分はここから遠く離れるつもりだと口にする。</p><p>精製所でウリエンジェは、遠方から呼びつけたことを詫びつつ、旅はここから始められると言う。アリゼーは、北ザナラーンに落片はないはずだと疑う。ウリエンジェはその通りだと認めるが、道は存在する――あなたたちがかつて使った道だ。拘束環の探索を終えた後、ここの北にある水晶の形成地帯から地上へ出たのを覚えているか、と。アリゼーは、エーテルの流れが地上へ運んだのだろうと見当をつけ、逆にそれを使って地下へ戻れるのかと問う。だがそれでは既知の地点へ戻るだけではないかとも疑う。</p><p>ウリエンジェは説明する。二基の拘束艦が同じ脱出口を共有していた事実から、他も同様につながっている可能性がある。そこで同じ流れに注ぐ別の支流の存在を検証し、ついに確証を得た。残る課題は、未調律の目的地へ渡る方法だ。源流と呼べる地点へ届くため、源から生じる波紋を増幅する改造エーテライトを用い、その波紋に己の存在を集中させれば旅が可能になるはずだという。だが試したことのないエーテル移動には危険が伴い、試みるだけで命を落とす恐れがあると警告する。アリゼーは迷わず、その危険を引き受けると宣言し、ウリエンジェを称賛する。そして、彼が繰り返し「我々」と言うのに気づき、誰かの助力があったのではないかと問い詰める。</p><p>ウリエンジェは、ひとりではなかったと認める。アリゼーは、他者に知られたのは仕方がないと言い、重要なのはバハムートの復活阻止であり、目的のために秘密を多少犠牲にするのもやむを得ないと受け止める。後にウリエンジェは、助力の出所を隠したくはなかったが、彼女が知った時に許してくれるよう祈ると漏らす。</p><p>改造エーテライトの前で、アリゼーは不滅隊がいることに気づく。すると声が答える。彼らはウルダハの不滅隊である前に、ルヴェユール家の忠実なる従者なのだと。アリゼーはアルフィノの名を叫び、ウリエンジェを手助けしていたのはあなたなのかと迫る。アルフィノは認め、詳細を公表して混乱を招くつもりはないが、世界の生存が懸かっている以上、差し伸べられた助けは受け入れるべきだと言う。そしてウリエンジェを責めないでほしい、沈黙は自分の求めだったのだと。アリゼーは後で話すと吐き捨てる。</p><p>ウリエンジェは謝罪し、彼女の意図を知るからこそアルフィノに知らせたと言う。祖父は傀儡となっていても、気高き血は二人の中に流れている、もし祖父を斬らねばならないなら――そこをアリゼーが遮り、祖父を討つつもりだと叫ぶ。そして成し遂げた後、バハムートをエーテルへ還すのだ、誰の言葉も自分を止められない、エオルゼアを守り祖父の遺志を継ぐのだと宣言する。</p><p>アルフィノは反論する。遺志と言うが、あなたはまだ自分が何を望むのか分かっていない、行動は借り物の決意に駆られているのだと。アリゼーは激昂し、守ることは祖父の目的であり、それを自分たちの目的にした、二人とも同じだと訴える。アルフィノは、決意の強さを疑っているのではなく、その出所を問うているのだと言う。もし自分自身の決意なら、なぜそこまで守りたいのかを明確に語れるはずだが、あなたにはできない――それは祖父の決意であり、内から湧くものではない。借り物の決意は、内から生まれる決意ほど強くはなれないのだと。だが今は争う時ではなく、バハムートの復活阻止が最優先だと話を切り上げる。そして祖父の残滓を討つことに異論はないが、ルヴェユール家の一員として最期の瞬間に立ち会うため、今回は同行すると言う。</p><p>アリゼーは条件付きで了承する――決めるのは自分だ。そこへエルケンラドが名乗り、準備はほぼ整ったと告げ、任務に出るならセレラム精製所で待つと言う。アリゼーは兄の言葉に惑わされるなとあなたに言い、あなたと自分はここまで共に進んできたのだから、最後まで共に旅を終えようと誓う。</p><p>精製所に戻ると、エルケンラドは改造エーテライトが起動準備完了だと言う。残る拘束艦は東ザナラーンとモードゥナの落片につながっており、まずは東ザナラーンへ送る。あなたは拘束艦の内部から開始するため移動は少ないが、到着した瞬間から命懸けの戦いになる。アリゼーのため、そして自分のためにも、何が起きても対応できるよう備えるべきだと念を押し、準備が整ったら合図してほしいと言う。念のため、早い帰還を祈っておくかもしれないとも付け加える。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ウリエンジェ　<small class="muted">砂の家 (X:6.0, Y:4.9)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="alisiaies-resolve.html">真実と決断</a></div>
+      <div class="row">ファイター ソーサラー Lv 50～</div>
+      <div class="row"><b>レイドダンジョン開放</b></div>
+      <div class="row"><a class="link" href="the-final-coil-of-bahamut-turn-1.html">大迷宮バハムート：真成編1</a></div>
+      <div class="row"><a class="link" href="the-final-coil-of-bahamut-turn-2.html">大迷宮バハムート：真成編2</a></div>
+      <div class="row"><a class="link" href="the-final-coil-of-bahamut-turn-3.html">大迷宮バハムート：真成編3</a></div>
+      <div class="row"><a class="link" href="the-final-coil-of-bahamut-turn-4.html">大迷宮バハムート：真成編4</a></div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="alisiaies-path.html">真成を胸に……</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'兩塊碎片，拼回真相',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Urianger 說，人總會忍不住把光投向黑暗裡藏著的秘密——可被照亮的東西，往往不會帶來喜悅。Bahamut 那龐大的陰影所遮掩的，正是這樣令人不願直視的真相。然而 Alisaie 仍繼續向前，她沒有被沉重的知識壓垮，哪怕那份重量正緊緊壓在她心上。Urianger 說，她選的是一條危險又痛苦的路，所以他請你別離開她身邊——作為她勇敢的刀鋒，陪她走到最後。</p><p>Alisaie 轉向你，說你在這裡正好。她向 Urianger 坦白，自己的行動遇到了阻礙：Bahamut 的肉體仍在 Carteneau Flats 地底持續再生；若要阻止他復活，就必須讓剩下的兩具拘束艦停轉，因為正是它們在維繫他。每拖延一刻，世界就更靠近毀滅邊緣。可即便她已確認通往拘束艦的 Dalamud 碎片位置，她仍找不到任何進入的方法。</p><p>Urianger 警告她，即便找到入口，也只是危險旅途的第一步。你們上一次下到 Bahamut 的地底巢穴時，便發現那個可怕的 primal 已把 Nael van Darnus 的影子綁在自己的意志之下；即使你已讓那位墮落的 legatus 得到終結，你也記得他並非孤身一人。Urianger 說，Bahamut 的其他傀儡必定還會來阻撓你們的行進。Alisaie 回應他：祖父的名字可以說出口，她沒有忘記他正在等著你們。</p><p>Urianger 卻以近乎哀傷的克制提醒她：你們敬愛的那個人已經不在了，如今留下的只是一道影子——那影子玷污著他的記憶。從那張嘴裡吐出的惡毒言語，不該被聽進去，因為那不是祖父的聲音，而是 Bahamut 借他之口說出來的。Alisaie 說他不必擔心，無論如何她都不會偏離道路；她不會讓祖父的犧牲白費。可她也承認，光靠決心沒有用——正如她所說，她仍找不到進入 Dalamud 碎片的路。</p><p>Urianger 於是提出建議：讓她和你一起再去碎片現場一次。很多時候，你只要出現就能讓事情開始轉動——也許這次也會如此。而他會同時尋找自己的線索；兩邊合力，通路應該很快就會被揭開。Alisaie 承認，若不是你，她會質疑這樣的建議，但她無法否認 Urianger 對你的判斷。她列出目標：一塊碎片在 eastern Thanalan 的 Burning Wall，另一塊在 Mor Dhona 的 Singing Shards。她在兩處各留了一名助手，命他們持續尋找入口；你們先去 Burning Wall，找她的人——Deks。</p><p>在 Burning Wall，你被一位名叫 Sinis 的助手迎上。他認出你是 Alisaie 最忠實的同行者，急忙自我介紹，語氣既激動又拘謹。Alisaie 問他調查進度，他卻羞愧承認，自己找不到任何能通往碎片的可行道路——碎片明明就在眼前，卻始終無法抵達。當碎片墜落刺入地底時，噴出大量以太，扭曲了地形，彷彿注定要阻擋你們；就算真有入口，他也擔心你們根本到不了。Alisaie 要他別放棄，隨即斷言站著盯它看毫無助益，決定立刻前往 Mor Dhona 試另一塊碎片，看看 Deks 是否有更好的進展。</p><p>可就在這時，Sinis 忽然驚慌說，自己在一刻左右前失去了和哥哥的聯繫。Singing Shards 有許多凶惡生物，甚至有 ogre；他不想讓她過度緊張，卻又害怕 Deks 已遭遇不測。Alisaie 當場失聲，質問他為何不早說，隨即要你立刻趕去救人。Sinis 也請你務必找到哥哥，同時保護 Alisaie 的安全。</p><p>你們趕到 Singing Shards，Deks 還活著，卻驚魂未定地向你道謝，說他剛剛一度以為自己會被磨碎骨頭拿去烤麵包。Alisaie 看到他平安才放下心，並承認自己不該把如此危險的任務壓在他身上。Deks 連忙否認，接著回報結果：碎片的尖端雖露在外，但其餘部分被岩石與水晶包覆，根本不可能進入。你們也許能嘗試挖掘周遭，可那會耗費時間，而且你們不知道要挖多深才能找到入口；他因此只能下結論——想從這塊碎片進入並不現實，並向她請罪。Alisaie 氣惱自己正在失去寶貴時間，問你們接下來該怎麼辦。</p><p>就在此刻，Urianger 的聲音透過 linkpearl 傳來。他說自己帶來好消息：已找到了能進入剩餘 Dalamud 碎片的方法。請你護送 Alisaie 前往 northern Thanalan 的 Ceruleum Processing Plant，到了那裡，一切就會明白。Alisaie 又驚又急，喊著「Urianger 找到方法了！？」立刻要你們動身。Deks 也表示你們不必為他停留——若方法可行，他保證自己會離這裡遠遠的。</p><p>在 Ceruleum Processing Plant，Urianger 向 Alisaie 道歉，說自己把她從遠處叫來，但她的旅程也許正能在這裡真正開始。Alisaie 表示疑惑：她所知北方並沒有碎片。Urianger 說她沒有錯，但確實存在一條路——而且是她以前用過的路。每次你們完成 Binding Coil 的探索後，都是從此地北側的水晶地帶被一股以太洪流送回地表。Alisaie 說自己也推測過那是以太之流，並問：他是不是打算用那條流再把你們送回地下？可即便能做到，是否也只會回到你們已探索過的地方？</p><p>Urianger 回答：未必。他依你們過往的經驗推斷，兩具拘束艦可能共用同一個「出口」；由此可推，其他拘束艦也可能以相同方式連結到同一條以太之流。你們因此花了很久去驗證是否存在更多支流，最後終於成功確認。剩下的問題，是如何前往「尚未調律」的目的地；為了抵達可稱為「源頭」的位置，他們準備使用一座「改造過的 aetheryte」，用來放大源頭所產生的波紋。只要將自身集中在那些波紋上，就有可能完成旅程。但他嚴正警告：任何未經嘗試的以太移動都伴隨巨大危險——光是嘗試，就可能丟掉性命。Alisaie 立刻說，她願意承擔這個風險，並讚嘆 Urianger 的才智；接著她敏銳地追問：他一直說「我們」，難道不是他一個人完成的？</p><p>Urianger 承認自己並非單獨行動。Alisaie 聽後沉默片刻，便說事到如今也只能接受：阻止 Bahamut 復活才是最重要的；若為了達成目標必須犧牲一些保密性，那也無可奈何。隨後 Urianger 低聲說，他並非有意隱瞞幫助的來源，只希望 Alisaie 知道真相時能原諒他。</p><p>你們來到改造 aetheryte 的地點，Alisaie 看到 Immortal Flames 的人馬，驚訝他們為何會在這裡。一道聲音答道：那些人或許宣誓效忠 Ul’dah 的 Immortal Flames，但他們首先是 House Leveilleur 忠誠的家臣。Alisaie 立刻喊出 Alphinaud 的名字，質問：原來是他在幫 Urianger？Alphinaud 直接承認，並說他不打算把行動細節公開，以免引發恐慌；但既然賭注是世界的存亡，就該在有人伸手時接受幫助。他也請 Alisaie 別怪 Urianger——讓他保持沉默，是出於自己的要求。</p><p>Alisaie 冷哼，說晚點再談。Urianger 向她致歉，解釋自己明知她的意圖，仍判斷必須告知 Alphinaud；即使祖父已成為 Bahamut 的傀儡，他高貴的血脈仍流在你們兄妹體內，若他終究必須被——話還沒說完，Alisaie 就大聲打斷，刻意讓 Alphinaud 聽清楚：她就是要親手擊倒祖父；在那之後，她會把 Bahamut 放逐回以太。任何人都無法動搖她——她要守護 Eorzea，也要捍衛祖父留下的一切。</p><p>Alphinaud 反擊：她口口聲聲說「legacy」，其實仍不知道自己真正想要什麼；她的行動只是被「借來的決心」推著走。Alisaie 怒斥這種說法，說守護 Eorzea 本就是祖父的目標，而你們兄妹都把它變成了自己的目標——這就是你們來到此處的理由。Alphinaud 說他並不質疑她的決心，只質疑它的來源；如果那決心真屬於她自己，她就能清楚說出為何如此渴望守護 Eorzea，但她做不到，因為那並不是她的，而是祖父的。借來的決心，永遠不會像從心底生出的那樣強。只是他也把話先收住：此刻最重要的，仍是阻止 Bahamut 復活。</p><p>他接著明說，自己並不反對擊倒「祖父殘留的那一部分」，但這次他會同行——作為 House Leveilleur 的一員，他要在祖父的最後一刻到場。Alisaie 最終點頭，卻提出條件：由她來做決定。Erkenrad 這時上前報上名字，說準備幾乎完成；你們只要準備好出發，就去 Ceruleum Processing Plant 找他。Alisaie 叫你別理會兄長，並再次向你保證：你可以信任她。你們一路走到這裡，接下來也會一起走到旅程的終點。</p><p>回到 Ceruleum Processing Plant，Erkenrad 告訴你改造 aetheryte 已就緒。剩下的拘束艦分別連結到 eastern Thanalan 與 Mor Dhona 的碎片，而你們會先被送往前者。你們將直接從拘束艦內部開始，路程雖短，但代價是——你一抵達就得為性命而戰。無論是為了 Alisaie 還是為了自己，他都要你做好萬全準備；等你一聲令下，他就會把你送上路——他甚至說，為了保險起見，自己也許還會順便替你祈禱你能快點平安歸來。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>任務發布</b> 烏里昂熱　<small class="muted">沙之家 (X:6.0, Y:4.9)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="alisiaies-resolve.html">面對真相，Alisaie 作出決斷</a></div>
+      <div class="row">戰鬥／魔法職業 Lv.50～</div>
+      <div class="row"><b>解鎖團隊副本</b></div>
+      <div class="row"><a class="link" href="the-final-coil-of-bahamut-turn-1.html">巴哈姆特大迷宮：真成篇 1</a></div>
+      <div class="row"><a class="link" href="the-final-coil-of-bahamut-turn-2.html">巴哈姆特大迷宮：真成篇 2</a></div>
+      <div class="row"><a class="link" href="the-final-coil-of-bahamut-turn-3.html">巴哈姆特大迷宮：真成篇 3</a></div>
+      <div class="row"><a class="link" href="the-final-coil-of-bahamut-turn-4.html">巴哈姆特大迷宮：真成篇 4</a></div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="alisiaies-path.html">終於成形的真相——藏在心底，Alisaie 繼續前行</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
