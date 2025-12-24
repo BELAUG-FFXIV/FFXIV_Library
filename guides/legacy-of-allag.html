@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Legacy of Allag | BELAUG · FFXIV Library</title>
+  <meta name="description" content="AllianceRaid24 – Legacy of Allag (ARR Patch 2.1)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/Q_Kr0EGoUTs"
+              title="Legacy of Allag" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Legacy of Allag</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Legacy of Allag',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>A man in foreign garb stops you and studies your face, then breaks into recognition—surely you are the famed adventurer who brought down a Garlean general. He calls the meeting serendipity, even fate, and speaks of a singular opportunity fit only for someone of your proven worth: a venture where the reward is the accumulated knowledge of a fallen civilization, and a single misstep could cost your life.</p><p>He insists he wants no payment for bringing this to your attention. The discoveries you will make, he says, are reward enough. If his words have stoked your curiosity, he bids you seek Rammbroes at Saint Coinach’s Find—the man who waits at the threshold of untold marvels for a champion bold enough to cross it.</p><p>At Saint Coinach’s Find, Rammbroes welcomes you with clear surprise at so celebrated a guest. When you explain that a foreign-clad man directed you here, Rammbroes connects it at once to an ongoing endeavor—yet admits it should have been known only within his organization. Whatever the leak, he sets it aside: your presence now would be invaluable, though he warns the venture is no simple excavation, and an unprepared adventurer could find the next step an unwanted journey to Thal’s solemn halls. Knowing that, you still offer your cooperation.</p><p>Before he can begin, Cid arrives, recognizing you immediately and teasing you about whether you have come for yet another realm-shaking mission. Rammbroes notes that you are already acquainted, and Cid, with a wry edge, points out you may not truly know what you have volunteered for—then starts from the beginning.</p><p>Cid explains that the Sons of Saint Coinach seek to unearth the secrets of the long-fallen Allagan Empire, and this endeavor aims to delve deeper than ever before. And if you think you lack the background for Allagan archaeology, he reminds you of your encounter with the Ultima Weapon—an engineering marvel beyond anything Garlemald can achieve today, merely awakened by Nero tol Scaeva. By firsthand experience alone, Cid insists, you are “practically an archaeologist.”</p><p>Here in Mor Dhona stands an entire Allagan structure still uninvestigated: the Crystal Tower. After the devastation of the Ultima Weapon—and of the lesser moon, Dalamud—it would be folly to treat relics of that era lightly. They must be analyzed, monitored, and kept from the wrong hands; Cid has no wish to see another megalomaniacal legatus wield such power, and that fear is what drove him to propose the tower’s exploration.</p><p>For millennia the Crystal Tower lay buried, but the upheaval of the Seventh Umbral Era tore it free, leaving a gleaming spear of crystal aimed at the heavens. The Sons believe it houses much of the ancients’ wisdom, yet formidable defenses guard its entrance—so strong they cannot even peer within. Chief among them are statues carved as giant swordsmen: “the Eight Sentinels.” Flying over is no answer; any airship that ventures too close is blasted from the sky. Either the statues fall, or the front door remains forever beyond reach.</p><p>Rammbroes admits that he and his colleagues are ill-suited to such hazards, and so must rely on an experienced adventurer. He calls it difficult and dangerous, yet says he can think of no finer person for the task, and Cid—half amused, half admiring—says he looks forward to working with you again. Still, there is much to do before the expedition proper, and Rammbroes asks you to prepare while he lays out the challenges ahead.</p><p>The first objective is simply reaching the entrance. Four defense mechanisms stand guard, each wielding one of the elements—fire, water, wind, or earth—and anyone who tries to stroll past invites swift obliteration. Yet based on Cid’s analyses, the attacks can be reflected with a crystal of the corresponding element, provided it is of surpassing clarity, free of the slightest impurity—like the flawless specimens used in beastmen primal-summoning rituals. There is no gentler way to say it: you must enter beast tribe strongholds and “liberate” their perfect crystals, beginning with two from La Noscea—one at the Sapsa Spawning Grounds, and one at U’Ghamaro Mines—taking whatever precautions you deem necessary.</p><p>When you return, Rammbroes can scarcely hide his awe at the crystals’ purity—nothing in countless excavations compares. With these secured, he says, only fire and wind remain: fire from Zahar’ak, the Amalj’aa war camp in Thanalan, and wind from Natalan, the Ixal roost in the hills of Coerthas. You can expect even tighter defenses, but he awaits word of your success. And when you bring the last two, he confirms the next stage—yet makes clear the journey to the Crystal Tower will still not begin: the flawless crystals must be cut and polished to serve their purpose, and procuring the required materials will be a challenge in itself. Once again, he will be needing your help.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Outlandish Man <small class="muted">Mor Dhona (X:21.8, Y:8.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-ultimate-weapon.html">The Ultimate Weapon</a></div><div class="row">Disciples of War or Magic Lv. 50</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="sanding-it-down.html">Sanding It Down</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'古代アラグ文明の遺産',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>異国風の装いの男があなたを呼び止め、顔を確かめるように見つめたのち、思い当たったように声を弾ませる。ガレマール帝国の将軍を退けた、名高き冒険者ではないか――そう語る彼は、この出会いを偶然ではなく運命だと言い、あなたほどの実績を持つ者にしか掴めない「またとない機会」が届いたのだと切り出す。</p><p>報酬は、滅びた文明が積み上げた知のすべて。だが危険もまた同等で、たった一度の過ちが命取りになりうる。それでも、数々の武勲を刻んできた英雄にとって、危険など些細なものだろう――男はそう言い切り、自分の取り分など要らないと告げる。あなたが歴史的発見を成し遂げること、それこそが十分な報いなのだと。</p><p>もし興味を掻き立てられたのなら、モードゥナの「聖コイナク財団の調査地」へ向かい、ラムブルースという男を訪ねるように――異国風の男はそう言い残す。そこには、計り知れぬ驚異への入口があり、それを越えるだけの胆力を持つ者の到着を、彼が待っているのだという。</p><p>聖コイナク財団の調査地でラムブルースは、名高い客の訪問に驚きつつも丁重に迎える。異国風の装いの男に導かれたと聞くと、彼が口にした機会は最新の人類地理学的調査計画のことだろうと察するが、本来は組織内に秘されるべき計画だったはずだと眉をひそめる。だが今は詮索よりも優先すべきことがあるとして、あなたの助力は必ずや大きな力になると告げ、同時に、これは単なる発掘ではなく、不用意な冒険者なら冥府――死者を司るザル神の御許へ、望まぬ旅をすることになりかねないと警告する。それでもあなたは協力を申し出る。</p><p>話を進めようとした矢先、シドが駆けつけてあなたを見つけ、思わず声を上げる。世界を揺るがす使命でまた呼び出されたのか、と半ば冗談めかして問いかけるが、違うと分かると興味深そうに目を細める。ラムブルースは、あなたとシドがすでに面識があることを喜び、あなたが遠征に協力してくれると伝える。シドは、あなたが何に志願したのか分かっていないだろうと釘を刺し、最初から説明すると言って語り始める。</p><p>シドによれば、聖コイナク財団は滅びたアラグ帝国の秘密を掘り起こすことを使命としており、今回の計画はこれまで以上に深くその謎へ踏み込むものだ。もしアラグ考古学に自信がなくとも、かつてあなたがアルテマウェポンと相対したことを思い出せと言う。あれはガレマールが今なお到達できない工学の結晶であり、ネロ・トル・スカエウァが起動したにすぎない。あなたは強力なアラグの遺物を現場で見てきた――つまり、実地経験という点では十分に「考古学者同然」だと。</p><p>そして問題の核心として、モードゥナには未調査の巨大なアラグ構造物がそびえていると示す。クリスタルタワーだ。アルテマウェポンの破壊力や、かつての小さき月ダラガブの惨禍を思えば、同時代の遺産は最大限の警戒のもとに分析し、監視し、そして何より悪しき手に渡させてはならない。シドは、あの力を利用するような野望家が再び現れることを恐れ、だからこそ塔の調査を財団に持ちかけたのだと明かす。</p><p>クリスタルタワーは長らく地中深くに埋もれていたが、第七霊災の大変動によって岩の牢獄から解き放たれ、天を衝く水晶の槍として姿を現した。古代の叡智を収める宝庫である可能性が高い一方、入口は強固な防衛機構に守られ、鍵穴を覗くことすら叶わない。最初の障壁は、巨大な剣士の姿を刻まれた石像群――財団が「八つの守護者」と呼ぶものだ。飛空艇で越える策も試されたが、近づいた船は撃ち落とされる。石像を破壊できなければ、正面入口は永遠に閉ざされたままだ。</p><p>ラムブルースは、自分たち学者はそのような致命的危険を越えるには不向きであり、熟練の冒険者の助けが不可欠だと述べる。困難で危険だが、あなたほど適任はいない――そう言い、シドもまた、危険な仕事に惹かれる性分なのかと笑いながら、再び共に働けることを楽しみにすると告げる。ただし遠征の開始にはまだ準備が要り、まずは備えを整えるようにとラムブルースは言い、続けて具体的な課題を示すと約束する。</p><p>最初の目標は、クリスタルタワーの入口に到達することだ。だが入口は、火・水・風・土の四属性を用いる強力な防衛機構に守られており、通り抜けようとすれば瞬く間に消し飛ばされる。ところがシドの解析によれば、それらの攻撃は同じ属性のクリスタルで反射できる可能性が高い。ただし必要なのは、ほんのわずかな不純物も許さない超高純度の結晶であり、蛮族がプライマルを降ろす儀式に用いる無垢な結晶と同等のものだという。ゆえにあなたは、蛮族の拠点に踏み込み、完全無欠のクリスタルを「確保」しなければならない。まずはラノシアで二つ――外地ラノシアのサプサ産卵地と、西ラノシアのウ・ガマロ武装鉱山で手に入れるよう頼まれる。</p><p>あなたが持ち帰った結晶を前に、ラムブルースはその純度に息を呑む。数え切れぬ発掘で見てきた標本のどれとも比べものにならない、と称え、残るは火と風だけだと告げる。火はザナラーンのアマルジャ族の戦陣ザハラク戦神に、風はクルザスの丘陵にあるイクサル族の根城ナタラン入植地にある。守りはさらに堅いはずだが、あなたなら成し遂げるだろうと期待を寄せる。四つを揃えて戻ると、次の段階へ進めるとしつつ、すぐに塔へ向かうわけではないとも釘を刺す。結晶はそのままでは役に立たず、属性の力を反射させるには切断と研磨が必要で、その加工には特殊な素材が欠かせない――それを集めること自体が新たな難題であり、あなたの力をまた借りることになるのだ。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> 異国風の男　<small class="muted">モードゥナ (X:21.8, Y:8.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-ultimate-weapon.html">究極幻想アルテマウェポン</a></div><div class="row">ファイター ソーサラー Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="sanding-it-down.html">霊砂と未来を造る者</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'Allag（古代亞拉戈帝國）文明遺產',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>一名穿著異國服飾的男人攔下你，先是打量、隨即露出恍然的神色。他說自己應該沒有認錯——你就是那位名聲遠播的冒險者，曾經擊敗 Garlean Empire 的將軍。這場相遇在他口中不是巧合，而是某種「命運」；他剛收到一個真正罕見的機會，而這種機會，只有像你這樣早已證明實力的人才配得上。</p><p>他把報酬說得直白而誘人：那將是某個覆滅文明所累積的全部知識；同時風險也毫不掩飾——只要一步走錯，你就可能付出性命。他卻又用輕描淡寫的語氣反問：對你這種戰功赫赫的英雄而言，一點危險又算得了什麼？他強調自己不求回報，能看見你親手挖掘出歷史的發現，就已經足夠。</p><p>若他的話點燃了你的好奇心，他便要你前往 Saint Coinach’s Find，去找名叫 Rammbroes 的男人。那人正站在通往無數奇蹟的門口，等待一位敢於跨過門檻的勇者——而他相信，你正是那個人。</p><p>抵達 Saint Coinach’s Find 後，Rammbroes 對你的到來顯得意外又慎重。他聽你提到，是一名穿著異國服飾的男人引導你前來，立刻聯想到某項最新的計畫，卻也困惑那人怎會知情——因為按理說，這個計畫只應限於組織內部。Rammbroes 把疑問暫時壓下，轉而告訴你：你的協助必定至關重要，但這絕非簡單的挖掘工作，若沒有準備、若稍有大意，你很可能就會踏上通往 Thal 冷寂殿堂的「不情願之旅」。明知如此，你依然選擇伸出援手。</p><p>他正要開始說明時，Cid 忽然趕來，認出你後驚喜地喊住你，還半開玩笑地問你是不是又被派去執行什麼足以撼動世界、改寫歷史的大任務。Rammbroes 也看出你們早已認識，便直接說明：你已經聽聞即將展開的遠征，並願意提供協助。Cid 聽完先是咕噥一句你可能根本不知道自己答應了什麼，隨即說要從頭講起。</p><p>Cid 表示，Sons of Saint Coinach 的使命是挖掘早已滅亡的 Allagan（古代亞拉戈帝國）帝國之祕，而這次的計畫，將比以往任何一次都更深入那個文明的謎團。你若覺得自己對 Allagan（古代亞拉戈帝國）考古談不上能幫什麼忙，他要你回想與 Ultima Weapon 的遭遇——那頭機械怪物所展現的工學成就，遠超 Garlemald 現今所能企及，Nero tol Scaeva 也只是把它「喚醒」而已。你曾在第一線親眼接觸過強大的 Allagan（古代亞拉戈帝國）遺物，光憑這份經驗，Cid 甚至說你幾乎可以算是考古學者。</p><p>接著他把重點放在 Mor Dhona 仍未被徹底調查的一座 Allagan（古代亞拉戈帝國）建築上——Crystal Tower。經歷 Ultima Weapon 的破壞，以及更早之前那顆「小月球」Dalamud 的災禍後，Cid 認為對同一時代遺留之物必須保持最大程度的戒心：必須分析、監控，最重要的是，絕不能讓它落入錯誤之手。他說自己不想再看見任何野心勃勃的軍團長把那種武器握在手中，而這份警惕正是他聯絡 Sons of Saint Coinach、提議探索 Crystal Tower 的起點。</p><p>Crystal Tower 曾在地底深處沉眠數千年，直到第七靈災帶來的大動盪將它從岩層牢籠中解放出來；如今它以晶光閃耀的姿態直刺天空，像一柄指向天穹的水晶長槍。眾人相信塔內保存著古人的智慧，但入口被可怕的防禦機制守護，甚至連往內窺探都做不到。第一道障壁是一群雕成巨劍士的石像——Sons of Saint Coinach 稱之為「Eight Sentinels」。想用飛空艇繞過去並不可行，任何過於接近塔身的飛行器都會被擊落；若不先摧毀那些石像，正門就永遠無法觸及。</p><p>Rammbroes 坦言自己與同伴並不適合去應付這種致命危險，因此若想接近塔的秘密，勢必得仰賴經驗豐富的冒險者。他說任務將會艱難而危險，但他想不到比你更合適的人選；Cid 也笑著說，你似乎總對這類驚險的差事有種莫名的緣分，並期待再次與你並肩。只是正式遠征前仍有許多準備要做，Rammbroes 要你先整備自身，接下來他會說明眼前的挑戰。</p><p>第一個目標，是抵達 Crystal Tower 的入口。然而入口周邊有四個強大的防禦機構，分別運用火、水、風、土四種元素；任何想硬闖過去的人，都只會迎來瞬間的毀滅。幸而依據 Cid 的分析，他們合理推測：只要使用對應元素的水晶，就能把那些致命攻擊反射回去——但前提是水晶必須極度純淨，不能有一絲雜質，就像獸人族在進行 primal 召喚儀式時所使用的完美結晶。Rammbroes 無奈地表示，若有其他方法，他們也不願提出這種要求，但現在你必須深入獸人族據點，去「取得」那些無瑕水晶；眼下先收集四種中的兩種，前往 La Noscea 的 Sapsa Spawning Grounds 與 U’Ghamaro Mines。你可以自行決定獨行或與同伴同行，但無論如何都務必小心。</p><p>當你帶回那兩顆無瑕水晶時，Rammbroes 看著它們的純度幾乎說不出話來——他自認看過無數出土標本，卻從未見過能相提並論的品質。他稱讚你做得很好，並告訴你還缺火與風兩種：火在 Thanalan 的 Zahar’ak——Amalj’aa 的戰營；風在 Coerthas 山丘的 Natalan——Ixal 的據點。那裡的守備只會更嚴密，但他仍期待你再度凱旋。等你終於帶回四顆水晶，Rammbroes 宣布下一階段準備可以開始，卻也提醒你：這並不代表立刻啟程前往 Crystal Tower。水晶雖完美，卻還不能直接使用；若要反射塔的元素力量，就必須切割與拋光，而這道加工需要一組極其特殊的材料——要把它們湊齊，本身就是另一場考驗。因此，他只能再次請你出手相助。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>任務發布</b> 異國風的男人　<small class="muted">摩杜納 (X:21.8, Y:8.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-ultimate-weapon.html">究極幻想：終極武器</a></div><div class="row">戰鬥／魔法職業 Lv.50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="sanding-it-down.html">以靈砂打磨未來</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
