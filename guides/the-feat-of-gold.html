@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Feat of Gold | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – The Feat of Gold (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+
+    /* 展開/收合 */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/SUEumx7KSzo"
+              title="The Feat of Gold" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">The Feat of Gold</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'The Feat of Gold',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Wuk Lamat hesitates, then asks you—awkwardly but earnestly—whether you can still smell it. Alphinaud, hearing the force of her earlier scream, dryly concludes that alpaca spit must reek, and says he’s perfectly happy never learning the truth. Nearby, Alisaie compares Zoraal Ja to Garlemald’s own “exalted son,” adding that Zenos was the more arrogant of the two. As Tobli finishes assigning each claimant their feat, Mablu admits she was both impressed and a little frightened by how quickly Zoraal Ja tracked Tobli down, and Krile quietly sizes up the elector you came to meet—while the wild-eyed alpaca watches you with a twitching jaw, warning written all over its wary stare.</p><p>Erenville explains the problem plainly: valley alpacas are skittish around people, and getting close enough to catch one won’t be easy. Wuk Lamat snaps that she could’ve used that warning before taking a faceful of spit—tame alpacas are bad enough, so how is she supposed to wrangle a wild one? Tobli says the answer is a proper saddle, treated with a relaxing scent to soothe the spitting beast. Wuk Lamat demands one immediately, only to be reminded that Tobli’s clan are merchants—if she wants a taming saddle, she’ll have to find a saddler and make an offer. The price lands like a blow: ten pel in the thousands column. Ten thousand pel. Alphinaud converts it to gil and gets “around a million,” and Wuk Lamat recoils—then insists this is her feat and she won’t have others pay. Tobli hands over a basket of wool worth one pel in the hundreds column and lays out the plan: trade up, step by step, until you have something worthy of a saddle. Wuk Lamat protests that turning a hundred pel into a million is impossible, only for Erenville to correct her—ten thousand pel, so a hundredfold increase. Mablu volunteers to help, calling herself a ranch hand with experience in peddling, and Tobli confirms Wuk Lamat may accept assistance as long as she captures the alpaca herself. Krile suggests you go with Wuk Lamat, and Erenville tells you to hold onto the wool so it isn’t lost or soiled—so Wuk Lamat shoves it into your care “to keep her hands free.”</p><p>With Mablu leading, you find the saddler, Havli, and Wuk Lamat tries the bold approach: a special taming saddle in exchange for a basket of fine alpaca wool. Havli scoffs—wool is useless to a saddlemaker, barely enough for a strap buckle—and tells you to bring him something he actually wants. He names mezcal: one good jug to end his day with, and the saddle is yours. Mablu brightens—quality mezcal is only five pel in the thousands column—until Havli hears Wuk Lamat is the third claimant. Then his terms change: premium mezcal, aged three years at least. Ten thousand pel or more. Mablu demands to know why the price doubled, and Havli answers without shame: Zoraal Ja intends war, and war means cavalry, and cavalry means saddles—profit. It’s nothing personal, he says, but he won’t part with his craft for less.</p><p>Wuk Lamat grimly admits she can’t blame him—she’s known for championing peace, and peace won’t bring him customers. Mablu explains the divide in Tuliyollal: elders remember the wars between clans and pray for Wuk Lamat’s victory, while many younger folk treat bloodshed like children’s stories and take peace for granted. Others hunger for a “future” promised by another claimant, intoxicated by innovations like the dirigibles that made trade swift and easy. And then there are people like Havli, convinced Zoraal Ja’s conquest will pay. When Wuk Lamat asks about Mablu herself, Mablu says she was raised on old tales—she memorized what it was like when the Yok Huy ruled her village—and that’s why she’s helping. She wants Wuk Lamat to become Dawnservant, so the nation never slides back into those days. Wuk Lamat steels herself: ten thousand pel was always the goal; nothing has changed. She may not have a head for trade or the stomach for alpacas, but she won’t give up with Tuliyollal’s peace on the line. Mablu agrees—and proposes the smart first step: find someone who needs alpaca wool and will trade at a loss because they support Wuk Lamat’s bid. Wuk Lamat remembers the weaver, Bol Noq’, who openly backed her vision and came here to buy wool, and you head out to find him.</p><p>At Icuvlo’s Inn, Bol Noq’ listens as Wuk Lamat explains the plan: turn a basket of wool into a jug of three-year premium mezcal. He calls it an investment in peace—peace is what lets him cross freely to his suppliers—and offers a wool poncho as a token he hopes will aid her victory. Mablu appraises it at five pel in the hundreds column, and Wuk Lamat promises she won’t let him down. Mablu praises the leap from one hundred to five hundred, and when Wuk Lamat credits you for remembering the weaver, Mablu insists connections are the heart of trading—and says Wuk Lamat has grasped that principle instinctively. To keep it safe, Wuk Lamat has you hold the poncho as well, wary of giving Erenville another reason to scold her.</p><p>With the poncho secured, Mablu urges you to think in terms of supply and demand: someone who urgently needs a good poncho will trade more than a merchant stocking shelves. Wuk Lamat agrees—so you look for a traveler without proper outerwear, but not a fighter who keeps the chest bare for mobility. Inside the inn you spot a shaken toolmaker who admits beasts attacked him on the road and ruined his coat; he came dressed to impress Pelu merchants, and now he’s humiliated. Wuk Lamat offers the poncho, and he lights up—perfect replacement. He proposes a trade: a hatchet he crafted himself. Mablu judges it worth one pel in the thousands column, and Wuk Lamat happily seals the deal—five hundred to a thousand, another step up. The toolmaker mentions he meant to impress Miplu of Miplu’s Mate Garden, whose field hands use hatchets to harvest mate, and Wuk Lamat seizes the lead: your next buyer is already waiting. Mablu points out the distance and suggests taking alpacas, and Wuk Lamat—trying very hard to believe it—hopes these ones will be the calm type.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Erenville <small class="muted">(Urqopacha, X:25.6, Y:12.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="traders-of-happiness.html">Traders of Happiness</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 90</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="mablus-dream.html">Mablu’s Dream</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'金の試練',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ウクラマトが、気まずそうにあなたへ問いかける──まだ匂いが残っているか、正直に言ってくれ、と。アルフィノは、彼女の悲鳴の大きさからしてアルパカの唾は相当な悪臭に違いないと判断し、においなど知らないままでいたいと淡々と言う。アリゼーはゾラージャをガレマルドの「誉れ高き御曹司」に重ねつつ、傲慢さではゼノスのほうが上だったと切り捨てた。トーブリが継承戦の課題を割り振り終え、マーブルはゾラージャがトーブリを見つけ出した手際に感心しながらも、どこか怯えを覗かせる。クルルが求めていた選定者を前に状況を確かめる一方で、荒々しい目つきのアルパカはあなたを警戒し、顎を小刻みに動かしながら近づくなと語るように睨んでくる。</p><p>エレンヴィルは現実を突きつける。谷のアルパカは人に慣れておらず、捕まえるほど近づくのは容易ではない。ウクラマトは、そんなことは先に言ってほしかったと声を荒らげ、飼い慣らされた相手ですら苦手なのに野生を相手にどうしろと言うのかと憤る。トーブリは「適切な鞍だ」と告げ、革に落ち着く香りを染み込ませて吐きかける獣を鎮めるのだと説明する。ウクラマトが今すぐ寄こせと言いかけたところで、トーブリは商人の一族だと釘を刺し、鞍職人を探して対価を示せと言う。必要額は、千の位で十ペル──すなわち一万ペル。アルフィノはギル換算で百万前後だろうと口にし、ウクラマトは青ざめるが、これは自分の課題だと譲らず他人の金には頼らないと決める。トーブリは百の位で一ペルのアルパカ毛を渡し、これを元手により価値の高い品へ交換を重ねて鞍に見合うものへ到達せよと提案した。ウクラマトは百ペルから百万など無理だと騒ぐが、エレンヴィルに一万ペルだから百倍だと正され、言い間違いに気づいて黙る。そこへマーブルが名乗り出る。牧場の手伝いをしているが行商の知識もある、と。トーブリは、捕獲はウクラマトが一人で行うことを条件に、援助は受けてよいと認めた。クルルはあなたが同行すべきだと言い、エレンヴィルは毛が汚れたり失くなったりすれば交渉材料が消えると告げる。ウクラマトは反論しつつも、手を空けたいからと結局あなたに毛を預けた。</p><p>マーブルに導かれ、鞍職人ハーベリのもとへ向かう。ウクラマトは野生のアルパカを捕らえるための特製の鞍が必要だと言い、支払いとしてアルパカ毛の籠を差し出した。しかしハーベリは一蹴する。鞍職人に毛など不要で、せいぜい留め具一つ分にもならない──本当に欲しいものを持ってこい、と。そして彼が求めたのはメスカル酒だった。仕事終わりに杯を傾けながら出来栄えを確かめるのが好きだと言い、上質な一壺を持参すれば取引成立だと告げる。マーブルは五千ペルほどで手に入ると見込みを口にするが、ハーベリはウクラマトが継承戦の参加者だと知るや条件を変更し、三年以上熟成の最上級を要求する。価値は一万ペル以上。マーブルが値を吊り上げる理由を問うと、ハーベリはあけすけに答えた。ゾラージャは戦を望み、戦となれば騎兵が必要で、鞍の需要は膨れ上がる。個人的な恨みではないが、最低でもその条件でなければ売れない、と。</p><p>ウクラマトは、平和を掲げる自分が客を増やすとは思われないのだろうと渋々受け止める。マーブルはトライヨラルの空気を語った。年長者は氏族間の戦乱を覚えており、ウクラマトの勝利を願う者も多い。だが若い世代の中には血なまぐさい時代を物語のようにしか知らず、今の平和を当たり前に受け取る者がいる。さらに、交易を加速させた飛行船のような新技術に心を奪われ、別の継承者が描く未来に期待する者もいる。そしてハーベリのように、ゾラージャの征服が利益を生むと信じる者もいるのだ。ウクラマトがマーブルの考えを問うと、マーブルは古い話を叩き込まれて育ち、ヨクフイに支配されていた頃の記録を暗記していると言う。だからこそ手を貸したい、あなたにドーンサーヴァントになってほしい、と。ウクラマトは腹を括る。一万ペルは最初から必要だった、変わったことはない。商いの才もなく、アルパカも苦手だが、トライヨラルの平和が懸かっている以上諦めない。マーブルも同意し、まずは毛を必要とする相手を探し、支持者の好意で損をしてでも交換してくれる者を当たろうと提案する。ウクラマトは、毛を買いに来ていて自分の理想に賛同すると言った織工ボロノックを思い出し、彼を追うことにした。</p><p>イクヴロの宿でボロノックを見つけ、ウクラマトは事情を話す。目標はアルパカ毛の籠を三年熟成の最上級メスカル酒へ変えること。ボロノックはそれを「投資」だと言い切った。平和があるからこそ供給地へ自由に足を運べる、ゆえに平和を守る者が王位に就くべきだ、と。そして彼は羊毛のポンチョを差し出す。勝利の一助になれば、と。マーブルは百の位で五ペルほどの価値があると見立て、ウクラマトは礼を言って必ず期待に応えると誓う。マーブルは初手で百ペルが五百ペルになったと喜ぶが、ウクラマトはあなたが織工を覚えていたおかげだと言う。するとマーブルは、人とのつながりこそ商いの要諦であり、ウクラマトはそれを本能で掴んでいるのだと持ち上げた。失くせば叱られるから、とウクラマトはポンチョもあなたに預け、次の取引先を探しに動き出す。</p><p>マーブルは供給と需要を考えようと言う。急いでポンチョを必要としている者なら、棚に並べたいだけの商人より高く交換してくれる。ウクラマトは納得し、宿の中で「上着を失った者」を探す。ただし、動きやすさを優先して上半身を軽装にする戦士は対象外だ。やがて、道中で獣に襲われ外套を失ったという道具職人が見つかる。ペルペルの商人に体裁を示すため身なりを整えていたのに台無しだと嘆く彼に、ウクラマトはポンチョを差し出した。職人は目を輝かせ、代わりに自作の手斧を提示する。マーブルは千の位で一ペルの価値があると評価し、ウクラマトは五百から千へと積み上がったことに勢いづいて取引を成立させた。職人は、ミープル・マテ茶園の主人ミープルに見せるつもりだったのだと漏らす。畑の手伝いがマテ茶の収穫に手斧を使うから、と。ウクラマトは次の相手を掴んだと即断し、マーブルは距離があるからアルパカで行こうと提案する。ウクラマトは顔を引きつらせながらも、今度こそ大人しい相手であってほしいと願うのだった。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> エレンヴィル <small class="muted">（オルコ・パチャ, X:25.6, Y:12.1）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="traders-of-happiness.html">行商の民、ペルペル族</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 90</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="mablus-dream.html">マーブルの夢</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'金之試煉',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Wuk Lamat 有點尷尬地問你──老實說，你現在還聞得到嗎？Alphinaud 聽她剛才那聲尖叫的音量，就判斷「羊駝的噴吐物」肯定臭得要命，並表示自己很滿意永遠不知道那到底是什麼味道。Alisaie 也插話，說 Zoraal Ja 讓她想到 Garlemald 那位「受人尊崇的兒子」，不過要論傲慢，Zenos 絕對更勝一籌。Tobli 把各位継承者的課題分派完後，Mablu 一邊佩服 Zoraal Ja 找到 Tobli 的速度，一邊又覺得有點害怕；Krile 則看著你們苦苦尋找的選定者，而那隻野性的羊駝瞪著你，顎骨微顫、眼神警戒，彷彿在提醒你：現在後退，才是最明智的做法。</p><p>Erenville 把狀況說得很直白：山谷裡的羊駝對人充滿戒心，要靠近到能抓住牠並不容易。Wuk Lamat 氣得回嘴，早點提醒她就好了──連馴養過的羊駝她都吃不消，怎麼可能去制服野生的？Tobli 卻說關鍵在「合適的鞍」，皮革會浸入能安撫牠們的放鬆氣味，好讓那種會吐口水的野獸乖下來。Wuk Lamat 立刻要他給一個，Tobli 便提醒她：他們是商人一族，想要馴服鞍就去找鞍匠開價。價格一報出來，Wuk Lamat 直接炸裂──一萬佩爾。Alphinaud 換算成 gil 說差不多要一百萬，Wuk Lamat 更是差點當場崩潰，但她仍咬著牙說這是她自己的課題，不想讓別人替她付錢。Tobli 於是給了你們一籃「一百佩爾」的羊駝毛，說從這個開始一路交換成更值錢的東西，最後就能拿去談鞍。Wuk Lamat 以為要把一百佩爾變成一百萬，Erenville 立刻糾正──目標是「一萬佩爾」，也就是一百倍。這時 Mablu 自告奮勇要幫忙，說自己雖是牧場幫工，也學過不少行商技巧；Tobli 也同意，只要最後抓羊駝的那一步由 Wuk Lamat 親自完成，她想收誰的幫忙都行。Krile 建議你陪 Wuk Lamat 一起去，而 Erenville 則要你把羊駝毛好好收著──一旦弄丟或弄髒，就什麼都談不成。Wuk Lamat 嘴上逞強，最後還是把羊駝毛塞到你手上，說這樣她比較能空出手來。</p><p>在 Mablu 帶路下，你們找到鞍匠 Havli。Wuk Lamat 開門見山：她需要能抓野生羊駝的特製馴服鞍，付款就用這籃上等羊駝毛。Havli 直接嗤之以鼻──鞍匠要羊毛做什麼？這點量連一個扣帶的成本都不夠，想交易就拿他真正想要的東西來。Havli 點名要的是 mezcal（梅斯卡爾酒）：他喜歡在一天結束後捧著一杯檢視成品，只要帶來一壺夠好的，就成交。Mablu 聽了很振奮，說品質不差的梅斯卡爾酒只要五千佩爾左右；然而 Havli 一聽到 Wuk Lamat 是継承者之一，立刻改口要「至少熟成三年」的頂級貨，價值一萬佩爾以上。Mablu 氣得質問為什麼突然翻倍，Havli 的回答卻毫不遮掩──因為 Zoraal Ja 會打仗，而戰爭意味著騎兵、意味著大量鞍具、意味著他的生意會興旺。他說這不是針對 Wuk Lamat，只是他不會用更低的代價賣出自己的手藝。</p><p>Wuk Lamat 聽完反而沉了下來，說她也不能怪他──大家都知道她主張和平，而和平未必能讓他多賺到一分錢。Mablu 便把 Tuliyollal 的分歧說得很清楚：老一輩記得氏族戰亂的黑暗日子，很多人因此希望 Wuk Lamat 勝出；年輕一代卻把流血衝突當成故事，對眼前的和平習以為常。還有人渴望另一位継承者描繪的「未來」，沉迷於像氣球式飛行器那樣讓貿易更快更方便的新發明；也有人像 Havli 一樣，堅信 Zoraal Ja 的征服會帶來暴利。Wuk Lamat 轉而問 Mablu 怎麼想，Mablu 說自己從小聽著舊故事長大，甚至背得出 Yok Huy 統治村落時的紀錄，所以她才會站出來幫忙──她希望 Wuk Lamat 成為 Dawnservant，讓國家不再回到那種日子。Wuk Lamat 立刻打起精神：反正一開始就知道要一萬佩爾，現在只是照做而已。她或許不擅長交易、也受不了羊駝，但 Tuliyollal 的和平就押在這裡，她不會放棄。Mablu 也表示絕不退縮，並提出第一步：先找一個「真的需要羊駝毛」且願意吃虧交換的人，最好是支持 Wuk Lamat 的人。Wuk Lamat 想起那位織工 Bol Noq’──他曾明白表示認同她的理念，還說自己就是來買羊毛的──於是你們決定去把他找回來。</p><p>你們在 Icuvlo’s Inn 找到 Bol Noq’，Wuk Lamat 說明目標：把這籃羊駝毛一路換成「三年熟成的頂級梅斯卡爾酒」。Bol Noq’ 聽完就說這是他願意投入的一筆「投資」──因為唯有和平，才能讓他自由穿梭於供應地之間，所以他希望守護和平的人登上王座。於是他把一件羊毛斗篷披衣交給 Wuk Lamat，說只盼它能成為她勝利的一點助力。Mablu 立刻估價：至少值五百佩爾。Wuk Lamat 感謝他的慷慨，也承諾不會讓他失望；Mablu 更是興奮地說第一筆交易就把一百佩爾變成五百佩爾，簡直是完美開局。Wuk Lamat 卻把功勞推給你，說是你記得那位織工，她只是把羊毛交出去而已。Mablu 馬上反駁，說與人建立連結本來就是交易最重要的根本，而 Wuk Lamat 其實已經本能地掌握了這條鐵則。為了避免弄丟被 Erenville 碎念，Wuk Lamat 乾脆也把那件斗篷披衣交給你保管，然後催著繼續下一步。</p><p>Mablu 提醒你們要用「供需」思考：真正急需一件保暖披衣的人，會比只想囤貨的商人願意付出更多。Wuk Lamat 點頭，便在旅人之間尋找「明顯缺外套」的對象，同時排除那些為了作戰方便而刻意裸露肩背的戰士。很快，一名驚魂未定的工匠坦承自己途中被野獸襲擊，外套毀了，原本打算穿得體面些，好在 Pelu 商人面前展現對外表與作品的自豪，如今卻狼狽不堪。Wuk Lamat 立刻把斗篷披衣拿出來，他一看就說這正好能取代失去的外套，並提出用自己親手打造的小斧交換。Mablu 檢視後判斷那把斧頭至少值一千佩爾，Wuk Lamat 當場拍板成交──從五百到一千，又往前跨了一步。那名工匠提到，他本想拿這把斧頭去打動 Miplu’s Mate Garden 的主人 Miplu，因為那裡的工人會用斧頭收割 mate。Wuk Lamat 立刻抓住線索，說下一位交易對象已經出現了；Mablu 則提醒路程不近，最好騎羊駝過去。Wuk Lamat 臉色一僵，卻還是勉強相信：這次的羊駝……應該會比較溫和吧。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 艾倫維爾 <small class="muted">(奧闊帕恰山, X:25.6, Y:12.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="traders-of-happiness.html">行商之民：佩魯佩魯族</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.90</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="mablus-dream.html">馬布魯的夢</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
