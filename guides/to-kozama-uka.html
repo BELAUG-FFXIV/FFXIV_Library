@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>To Kozama'uka | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – To Kozama'uka (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/SpEWKgHur_k"
+              title="To Kozama'uka" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">To Kozama'uka</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`To Kozama'uka`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>You sit with Wuk Lamat’s party at Xbalyav Ty’e, and when you finally turn to the Helpful Hanu, he answers without ceremony. The route to Ok’hanu, he says, runs south through the Arch of the Dawn and follows the road beside the Kozama’uka river—but a recent storm has made the path worse than usual. The footing is treacherous, and the damage to the Hanuhanu is worse still: homes destroyed, people hurt or killed, and even their beloved festival at risk of being called off. Even so, you reassure him you’ll take care, and Wuk Lamat promises you’ll return to speak again when the time is right, leaving the merchant to eat and drink his fill as arranged.</p><p>At the Arch of the Dawn, the others linger a moment longer—Alphinaud regrets the lost chance to witness the festival, Alisaie can’t help staring up at the gate’s scale, and Krile steels herself for the road ahead. Erenville’s warning comes again: the ground will be unforgiving, and a single misstep could send you into a bog. When the sentry asks if you’re bound for Kozama’uka, Wuk Lamat looks to the group, checks that everyone is ready, and calls for the way to be opened.</p><p>Beyond the gate, Kozama’uka unfolds as a land of rainbow terraces—its beauty impossible to ignore and its presence impossible to deny. Water pours in endless torrents over sheer cliffs, shaping the wetlands below; everything living here must yield to the relentless flow. Walking beside Wuk Lamat, you follow the same marshy trail once trodden by the Dawnservant and his companions, feeling the road’s weight even as it leads you onward.</p><p>Alisaie can’t tear her eyes from the distant falls, and Wuk Lamat points out that Tuliyollal is rich in wonders of this kind. Yet the splendor does nothing to dry the ground beneath your feet. Erenville keeps you close to the facts—swampy earth, slick mud, and the risk of a careless fall—while Wuk Lamat insists she’s been here before and urges everyone forward, certain that Ok’hanu lies just ahead.</p><p>The wetlands live up to their name, and the farther you go, the more saturated the land becomes. Alisaie dreams aloud of standing at the base of those towering waterfalls, even as their distance makes it impossible. Krile watches Wuk Lamat press on without slowing, noting that it’s a good thing Erenville is here to keep her from losing the path—and that, for all his grumbling, he never truly leaves her side.</p><p>At last, the village comes into view. Wuk Lamat stumbles once, cursing the distracting waterfalls under her breath, and Erenville wastes no time pointing out that someone slipped in the mud despite explicit warnings. Wuk Lamat tries to stop him from saying more, then forces the moment onward—because this is Ok’hanu, the Hanuhanu village she promised to show you, and somewhere here should be one of the Dawnservant’s 選定者.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Helpful Hanu <small class="muted">(Tuliyollal, X:12.7, Y:13.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-rite-of-succession.html">The Rite of Succession</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 90</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-festive-people.html">A Festive People</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'コザマル・カ',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>あなたたちはシュバリャヴ・ティエでひと息つき、ようやく親切なハヌに問いかける。ウクラマトが確認すると、オック・ハヌへ向かう道は「暁のアーチ」を南へ抜け、コザマル・カの川沿いの街道を辿ればよいという。だが近ごろの嵐で道はいつも以上にぬかるみ、足場の悪い箇所も増えているらしい。それ以上に深刻なのはハヌハヌ族の被害で、家々は損壊し、負傷者や命を落とした者も出て、今年の祭りさえ中止になりかねないという。あなたたちは注意して進むと約束し、ウクラマトは「また改めて話を聞きに来る」と告げ、手配済みのもてなしを勧めてその場を後にする。</p><p>暁のアーチの前で、仲間たちはそれぞれ思いを口にする。アルフィノは祭りを見られないことを惜しみ、アリゼーは門の巨大さに目を見張り、クリルはこの門を抜ければ南のコザマル・カへ向かうのだと気を引き締める。エレンヴィルは、足元が悪いから気をつけろと念を押し、沼地に落ちるなと警告する。見張りが行き先を問うと、ウクラマトは皆の準備を確かめ、コザマル・カへ向けて出発すると告げて門を開かせる。</p><p>門の向こうに広がるコザマル・カは、虹色の段丘の地――誰もが否応なく目を奪われる、多彩な景観の世界だ。絶え間ない水が断崖を流れ落ち、その力で下の湿地を形づくっている。容赦ない流れの前では、あらゆる命が従うしかない。あなたはウクラマトとともに、かつてドーンサーヴァントと仲間たちが辿ったというぬかるんだ道を進み、その土地の重みを感じながら歩みを進める。</p><p>アリゼーは遠くの滝を見上げ、その水の圧をここからでも感じると言う。ウクラマトは、トライヨラにも自然の驚異が尽きないのだと胸を張る。だが景色がどうであれ、足元は乾かない。エレンヴィルは地面が湿っていることを繰り返し注意し、うっかりすれば泥沼に沈むと釘を刺す。ウクラマトは自分は来たことがあるのだと言い、オック・ハヌはもう近いと先を急がせる。</p><p>湿地という名は伊達ではなく、地面はどこまでも水を含んでいる。アリゼーは滝の下に立ってその威容を浴びたいと口にするが、距離がありすぎて叶わない。クリルは、ウクラマトの勢いは止まりそうにないと見つめ、迷わぬようエレンヴィルがついているのは幸いだと思う。そして、文句を言いながらも彼が彼女を支えているのだと、あなたははっきりと見て取る。</p><p>やがて村が見えてくる。ウクラマトは一度足を取られ、気を散らす滝が悪いのだと悔しがる。エレンヴィルは、はっきり警告したのに泥に滑った者がいると皮肉り、ウクラマトは言うなと抗議する。だがすぐに取り繕い、ここがハヌハヌ族の村――オック・ハヌだとあなたに示す。そして、この村のどこかに、ドーンサーヴァントの選定者がいるはずだと、皆の視線が同じ場所へ向かう。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ハヌハヌ族の協力者 <small class="muted">（トライヨラ, X:12.7, Y:13.9）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-rite-of-succession.html">継承の儀</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 90</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-festive-people.html">祭祀の民、ハヌハヌ族</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'前往Kozama&#39;uka',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你和 Wuk Lamat 一行人在 Xbalyav Ty’e 坐下歇口氣，終於轉向 Helpful Hanu 問個明白。Wuk Lamat 確認路線後，對方說得很清楚：要去 Ok’hanu，就從 Arch of the Dawn 往南走，再沿著 Kozama’uka 河邊的道路前進——只是最近那場暴風雨讓路比平常更泥濘，某些地方幾乎站不穩。更糟的是，Hanu 族的家園遭到破壞，房屋被撕裂般拆散，有人受傷、甚至可能有人喪命；就連他們最珍視的祭典，今年也可能被迫取消。你答應會小心行走，Wuk Lamat 也說好會再回來詳談，並把「商人先生」的吃喝都先安排妥當，讓他先在這裡放心享用。</p><p>來到 Arch of the Dawn 前，大家各自說出心思。Alphinaud 惋惜沒機會看看那場祭典，Alisaie 盯著那道巨門，覺得它每次看都更宏偉；Krile 則把注意力放在前路——穿過這裡，就是往南去 Kozama’uka。Erenville 再次提醒你腳下濕滑，別一不留神就跌進泥沼。守衛確認你們是否要前往 Kozama’uka 後，Wuk Lamat 看向眾人，確定大家都準備好了，便開口下令把路打開。</p><p>穿過門後，Kozama’uka 以「彩虹梯田之地」的姿態展開——無論誰來，都會被它的景色牢牢抓住目光。瀑布的水勢無止盡地自峭壁奔落，塑造出下方一整片濕地；在那股不停歇的洪流面前，所有生命都只能順著它的規律生存。你跟著 Wuk Lamat 走在這條潮濕泥濘的小徑上——據說 Dawnservant 曾與同伴走過同一條路——每一步都在提醒你，這片土地的力量從不溫柔。</p><p>Alisaie 遠遠望著瀑布就覺得水勢沉重，Wuk Lamat 則說 Tuliyollal 從不缺這樣的自然奇景。可再壯麗的景象也改變不了腳下的濕滑。Erenville 要你留意沼澤般的地面，別讓自己摔進泥坑；Wuk Lamat 卻拍著胸口說她來過這裡，催你們快走，因為 Ok’hanu 已經不遠。</p><p>「濕地」這個詞一點也不誇張——越往前走，地面越像被水浸透。Alisaie 說她真想站到那些巨大瀑布的底下，好好感受那份壯觀，卻也只能無奈承認距離太遠。Krile 看著 Wuk Lamat 一路不停，心想幸好有 Erenville 在旁邊，不然她恐怕會走到別的岔路去；而你也看得出來，Erenville 嘴上抱怨，腳步卻始終沒離她太遠。</p><p>終於，村落出現在前方。Wuk Lamat 一個踉蹌，氣得怪那瀑布太吸引人分心；Erenville 立刻補上一句：明明再三警告過，還是有人滑進泥裡。Wuk Lamat 叫他別說了，卻很快把話題拉回正事——這裡就是她說過的 Hanu 族村落 Ok’hanu。你抬起眼，明白接下來要找的人就在這裡：Dawnservant 的那位「選定者」。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 哈努哈努族的協力者 <small class="muted">(圖萊尤拉, X:12.7, Y:13.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-rite-of-succession.html">繼承的儀式</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.90</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-festive-people.html">祭祀與歡慶之民：哈努哈努族</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
