@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A City of Stairs | BELAUG · FFXIV Library</title>
+  <meta name="description" content="FFXIV MSQ — A City of Stairs (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/6AYuV-tAemc"
+              title="A City of Stairs" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">A City of Stairs</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'A City of Stairs',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Krile turns a legend over in her mind and wonders aloud whether creation stories sometimes begin as true events—whether Tural’s own tale, with its striking similarities, might have been inspired by Hydaelyn’s clash with Zodiark. Wuk Lamat answers by pressing the journey onward: you’ll head west, toward the Arch of the Dawn, and the dirigible landing lies on the way. Krile blinks at that—Tuliyollal has dirigibles as well? Wuk Lamat only grins and urges you to say when you’ve seen enough, so you can continue.</p><p>As you set out, Wuk Lamat calls over her shoulder that the Arch of the Dawn sits on the far side of the city, and that you should speak up if anything catches your eye along the walk. She keeps an upbeat pace and checks on you with bright insistence, hoping you aren’t too tired—Tuliyollal still has plenty of sights to show. Beside her, Krile counsels restraint, recalling Erenville’s advice to take things slowly where you can; the contest ahead may demand all your strength.</p><p>Moving through the city, Krile admits she can scarcely imagine how an entire settlement could be built into a mountainside. Wuk Lamat explains that this place began as a Yok Huy temple, raised by giants when they first built the bridge to Xak Tural—an offering meant to appease the god who sleeps within the great ocean trench. After the Yok Huy withdrew, the temple stood empty for centuries, until Wuk Lamat’s father founded his new nation and saw a structure that could be restored into a palace, set practically at the center of Tural. Artisans were gathered, the work began, and the houses they built for themselves became the foundation of the city now spreading around you. She points out your route next: you’ll pass through the Resplendent Quarter, Tuliyollal’s largest residential district, and you’ll be climbing—stairs upon stairs—until you reach it.</p><p>When your eyes are drawn to the towering palace, Wuk Lamat tells you its name: Vollok Shoonsa, which roughly means “invincible resilience.” You may want a closer look, she says, but you’ll return later—best to keep moving for now. Krile, still staring upward, can only marvel at the scale and wonder what the carving at the top might represent.</p><p>In the Resplendent Quarter, Krile asks what kind of people live here, and Wuk Lamat answers with an easy roll call of clans: Mamool Ja, Xbr’aal, Pelupelu, Moblin, Hanuhanu—and others who moved south from ancestral lands in Xak Tural, like the Tonawawta, Hhetsarro, and Shetona. In essence, she says, it’s a gathering of people from every corner of Tural. Krile takes it in as a living portrait of Tuliyollal’s diverse character—the adornments on each building blending into an eclectic, beautiful cultural aesthetic—and Wuk Lamat seems genuinely pleased that you feel it too.</p><p>A massive drum draws your attention, and Wuk Lamat introduces it as the Dawnherald, played on formal occasions—such as honoring the Landsguard’s return from a dangerous duty. She admits, with the air of someone who learned the hard way, that she once tried striking it with her axe and tore the skin, earning a thorough scolding. From there she leads you on to the dirigibles: balloons, she explains, are all you’ll find in Tuliyollal, even if other nations sail the skies in airships. The purpose is the same as the aetherytes—Koana brought the plans back from Sharlayan, her father loved the idea, and commissioned their construction about three years ago. Since then, flights have been added to other settlements, and trade with frontier communities has never been easier. Still, Wuk Lamat is quick to add that flying isn’t for her—it’s not fear, of course, it simply feels…unnatural. Krile, meanwhile, can’t help comparing what she’s heard to the Ixal’s flying vessels, noting that where Ixal designs use multiple bladders, Turali craft rely on a single large envelope for lift.</p><p>At last, the Arch of the Dawn rises before you. Wuk Lamat tells you that when the giants still lived here, it was called the Yok Tural landgate—but when her father founded Tuliyollal, people began using the current name to honor his great achievement. Beyond the gate lies Kozama’uka, wetlands south of the city, and depending on what the rite of succession demands, you may end up heading that way. Krile repeats the name with interest, then asks about the fluffy animals you passed earlier. Wuk Lamat names them—alpacas—then, with a perfectly straight face, calls them fearsome four-legged fiends. Krile can only protest that they seemed placid, but Wuk Lamat insists Krile will learn soon enough. Then she pushes the joke aside as if it were nothing and urges you onward—there is something far more important she wants to show you.</p><p>You arrive before a set of stone pillars, and Krile asks if these are what Wuk Lamat meant. Wuk Lamat answers simply: if you want to learn the history of Tuliyollal, you need look no further. Krile’s gaze returns to the weathered stone—these pillars, then…?</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Wuk Lamat <small class="muted">Tuliyollal (X:14.2, Y:2.7)</small></div><div class="row"><b>Requirements</b> Any Disciple of War or Magic (excluding limited jobs) Lv. 90</div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-nation-of-tuliyollal.html">The Nation of Tuliyollal</a></div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-saga-in-stone.html">A Saga in Stone</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'王都遊覧',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>クルルは、創世の物語はしばしば真実の出来事に根ざしているのだろうか、と考えを巡らせる。似通った点が多い以上、トラルの伝承も、ハイデリンとゾディアークの衝突に由来している可能性があるのではないか――彼女はそう口にする。ウクラマトは旅程を告げ、次は西へ、「暁の門」へ向かうと言う。その途中に飛空艇乗り場があると聞き、クルルは驚く。トライヨラにも飛空艇があるのか、と。ウクラマトは「なんとかやってる」と応じ、見物が十分なら先へ進もうと促す。</p><p>歩き出したウクラマトは、「暁の門」は街の反対側にあるから、道すがら気になるものがあれば遠慮なく言え、と声をかける。彼女はあなたの様子を気遣い、疲れていないかと尋ねる。トライヨラにはまだまだ見せたい景色があるのだと言う。隣を歩くクルルは、エレンヴィルの助言どおり、進めるところはゆっくり進むべきだと話す。いずれ来る継承の競争に備え、力を温存しておきたいのだ。</p><p>街を進みながら、クルルは山肌に都市を築くなど想像もつかないと漏らす。ウクラマトは、ここは元々ヨクフイの神殿だったと説明する。巨人たちがサクトラルへ橋を架け始めた頃、大海溝に眠る神を鎮めるために建てたものだという。ヨクフイが退いた後、神殿は何世紀も放置されていた。だが父が新たな国を興すとき、トラルのほぼ中心に位置するその建物を宮殿へ改修できると見込み、職人たちを集めて工事を進めた。彼らが自分たちの住まいとして建てた家々が、いま目の前に広がる街の礎になったのだと。</p><p>やがて宮殿に視線が向くと、ウクラマトは名を教える。ヴォロク・ショーンサ――おおよそ「不屈の強靭さ」を意味するのだと言う。近くで見たくなるだろうが、ここへは後で戻るから、いまは先へ進もうと促す。クルルはその規模に圧倒され、頂の彫刻が何を表すのかと目を凝らす。</p><p>「輝きの居住区」に入ると、クルルはどんな人々が住んでいるのかと尋ねる。ウクラマトは、ヨクトラル各氏族の住民がいると答える。マムージャ、エクブラーアル、ペルペル、モブリン、ハヌハヌ……さらにサクトラルの祖地から南へ移り住んだトナワウタ、ヘッツァロ、シェトナもいる。要するにトラル各地の人々が集う場所だという。クルルは、それこそがトライヨラの多様性を象徴していると感嘆し、建物ごとの装飾が混ざり合って独特で美しい文化的景観を形作っていると喜ぶ。ウクラマトも嬉しそうに頷き、階段を下りて先へ進もうと誘う。</p><p>やがて巨大な太鼓が目に留まり、ウクラマトはそれが「暁告げの太鼓」であると教える。ランドガードが危険な任務から帰還した際に讃えるなど、儀礼の場で打ち鳴らされるのだという。彼女は昔、斧で叩いて皮を破いてしまい、ひどく叱られたと笑い交じりに語る。続いて案内されたのは、トライヨラの気球だ。ほかの国では飛空艇で空を行くと聞くが、ここにあるのは気球だけだという。だが目的はエーテライトと同じで、コアナがシャーレアンから設計図を持ち帰り、父が気に入って建造を命じたのが三年前ほど。以来、ほかの集落への便も増え、辺境との交易は格段に楽になった。とはいえウクラマトは、空を飛ぶのは自分には合わないと言う。怖いわけではないが、どうにも不自然に感じるのだと。クルルは、イクサルの飛行艇を思い出しつつ、イクサルが複数の浮嚢を用いるのに対し、トラルの気球は大きな一枚の気嚢で浮力を得ているようだと述べる。</p><p>ついに「暁の門」へ辿り着く。ウクラマトは、巨人たちがいた頃は「ヨクトラルの陸門」と呼ばれていたが、父がトライヨラを建国してからは、その偉業を讃えて今の名で呼ばれるようになったと語る。門の向こうは都市南方の湿地帯コザマウカであり、継承の儀が何を求めるか次第では、そちらへ向かうことになるかもしれない。クルルはその名に興味を示し、先ほど通り過ぎたふわふわした動物について尋ねる。ウクラマトはアルパカだと答え、四つ足の恐るべき魔獣だと言ってみせる。温厚に見えたと返すクルルに、ウクラマトは「すぐにわかる」と意味ありげに繰り返す。だが彼女はすぐに話題を切り替え、もっと大事なものを見せたいとあなたを促す。</p><p>やがて石の柱が並ぶ場所へ着き、クルルはこれが見せたかったものなのかと確認する。ウクラマトは言う――トライヨラの歴史を知りたいなら、これ以上のものはない。クルルは風化した石に視線を落とし、これらの柱が語るものを探ろうとする。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ウクラマト <small class="muted">トライヨラ (X:14.2, Y:2.7)</small></div><div class="row"><b>受注条件</b> ファイター ソーサラー（リミテッドジョブを除く）Lv 90</div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-nation-of-tuliyollal.html">トライヨラ連王国</a></div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-saga-in-stone.html">王が歩んだ旅路</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'走訪階梯之都，巡覽王都風光',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Krile 想著那些流傳已久的創世神話，忍不住問：許多創世神話往往是由真實事件發展而來；既然相似之處這麼多，Tural 的傳說會不會其實是受到 Hydaelyn 與 Zodiark 衝突的啟發？Wuk Lamat 沒有在這裡停留太久，她說你們接下來要往西走，朝著 Arch of the Dawn 前進，途中會經過飛艇的停靠處。Krile 聽了很意外——Tuliyollal 也有飛艇？Wuk Lamat 只說「我們也能過日子啦」，並要你如果已經看夠這一帶，就開口，她好帶你繼續走。</p><p>一路上，Wuk Lamat 提醒你：Arch of the Dawn 在城市的另一側，所以邊走邊看，有什麼感興趣的就說出來。她語氣輕快，還不忘關心你累不累，因為 Tuliyollal 還有很多景色可以看。Krile 則更謹慎，她說你們應該聽 Erenville 的建議，能慢就慢，畢竟接下來的王位競爭恐怕會需要你們保持完整的體力。</p><p>走著走著，Krile 仍難以想像：怎麼可能在山壁上建起一整座城市。Wuk Lamat 解釋，這裡原本是 Yok Huy 的神殿。那些巨人最初在修築通往 Xak Tural 的橋時，為了安撫沉睡於巨大海溝之中的神明，才建立了這座神殿。後來 Yok Huy 退去，神殿空置了好幾個世紀；等到「爸爸」要建立新國家時，他看中了這個幾乎位在 Tural 中心的結構，認為可以整修成王宮。爸爸 召集工匠來做工，而他們為自己建起的房舍，便成了你現在所見這座城市的根基。Wuk Lamat 說著，順勢指出你們接下來會穿過 Resplendent Quarter——Tuliyollal 最大的居住區，而要到那裡，就得一路往上爬這些階梯。</p><p>當你的視線被那座壓倒性的王宮吸引時，Wuk Lamat 告訴你它的名字是 Vollok Shoonsa，大致可譯作「不屈不撓」。她說你大概會想靠近多看幾眼，但之後還會回來，現在先往前走。Krile 抬頭望著那驚人的規模，忍不住想：頂端的雕刻究竟代表什麼？</p><p>進入 Resplendent Quarter 後，Krile 問這裡住的是什麼樣的人。Wuk Lamat 說，Yok Tural 各氏族的居民都有：Mamool Ja、Xbr’aal、Pelupelu、Moblin、Hanuhanu……也有從 Xak Tural 的祖地南遷的人，例如 Tonawawta、Hhetsarro、Shetona。簡單說，這裡聚集了來自 Tural 各個角落的人。Krile 聽了感嘆，這正是 Tuliyollal 多元性格的縮影；每棟建築上的裝飾交織出混合而美麗的文化風貌。Wuk Lamat 聽你們這麼說顯得很高興，催你們繼續往下走。</p><p>你們注意到一面巨大的鼓，Wuk Lamat 介紹那叫 Dawnherald，會在正式場合敲響，例如在 Landsguard 從危險任務歸來時用來致敬。她還提到自己曾經用斧頭敲它，結果把鼓皮打破，被狠狠罵了一頓。接著她帶你們看到 Tuliyollal 的飛艇：她說別的國家會用飛空艇航行天空，但 Tuliyollal 只有氣球。用途其實跟以太水晶一樣——Koana 從 Sharlayan 帶回設計圖，爸爸 覺得非常棒，大約三年前就下令建造。之後又陸續增加了通往其他聚落的航線，與邊境社群的貿易也因此變得前所未有地便利。不過 Wuk Lamat 立刻補上一句：氣球雖然不錯，但在空中飛行並不適合她；她不是害怕，只是覺得……不太自然。Krile 則想起 Ixal 的飛行船，並指出：Ixal 的設計依賴多個囊袋，而 Tural 的飛行器似乎是靠一個巨大的外囊提供升力。</p><p>終於，你們來到 Arch of the Dawn。Wuk Lamat 指著那座巨大的門形建築說，巨人仍在的年代，它被稱作 Yok Tural 陸門；而當爸爸 建立 Tuliyollal 後，人們為了紀念他的偉業，便開始用現在的名字呼喚它。穿過這道門就是 Kozama’uka——城市南方的濕地；至於繼承儀式會要求你們做什麼，現在還不確定，但你們也可能會往那個方向去。Krile 聽見地名便覺得有趣，隨即又問起剛才路過的那些毛茸茸動物。Wuk Lamat 說那是羊駝，還一本正經地稱牠們是「可怕的四足惡獸」。Krile 忍不住反駁，牠們看起來明明很溫順；Wuk Lamat 卻意味深長地說，Krile 很快就會明白。只是她馬上把話題打住，說有更重要的東西要給你們看，催你們跟上。</p><p>你們走到一排石柱前，Krile 問這是不是 Wuk Lamat 想展示的。Wuk Lamat 回答得很直接：如果你想了解 Tuliyollal 的歷史，那就不用再找別的了。Krile 望著那些石柱，仍帶著疑問——也就是這些石柱嗎？</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>任務發布</b> Wuk Lamat <small class="muted">Tuliyollal (X:14.2, Y:2.7)</small></div><div class="row"><b>需求條件</b> 任一戰鬥／魔法職（不含限制職業）Lv.90</div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-nation-of-tuliyollal.html">圖利約拉聯王國</a></div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-saga-in-stone.html">王所走過的旅路</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
