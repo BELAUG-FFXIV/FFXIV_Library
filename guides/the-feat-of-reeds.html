@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Feat of Reeds | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – The Feat of Reeds (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/GGt1mSGEEGw"
+              title="The Feat of Reeds" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">The Feat of Reeds</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`The Feat of Reeds`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>You arrive in Kozama’uka with a heavy feeling in the air—Ok’hanu is still shaking off the storm’s damage, and even the normally bright Hanuhanu seem drained. Still, you press on, because one of the Dawnservant’s electors should be here, waiting to set the next trial.</p><p>At the village, Elder Zanuhali steps forward to greet the Third Promise and her companions, confirming your suspicion: he will serve as the elector for this leg of the rite. He asks you to enjoy the village’s hospitality for a time before the challenge begins, and you decide to use the wait wisely—split up, look around, and learn what you can about Ok’hanu before the feat is revealed.</p><p>Walking the settlement, you see the storm’s scars everywhere: gaps in walls, roof sections torn away, repairs still in progress. In the fields, the paddies look clean at first glance—the water is clear, the mud rich and moist—yet the reeds are visibly wilted, and even the small creatures that live among them move with unsettling sluggishness.</p><p>When you gather to compare notes, Erenville points out the shared thread: the reeds and the animals alike are affected, though nothing obvious taints the water or soil. With no clear lead, Wuk Lamat connects the fields to the village’s mood—Ok’hanu’s festival was meant to be a season of renewal, and without it, the people’s spirits have sunk even even lower. If the festival can be restored, maybe it will help the village recover…and perhaps reveal what’s wrong with the harvest.</p><p>You find the festival float—the reed-woven bird-boat Wuk Lamat remembers—but it’s in rough shape: an eye’s gemstone is missing, carrying poles are snapped, and the tail feathers are bedraggled. Linuhanu, this year’s festival leader, bristles at the idea of holding celebrations amid ruin, yet admits the truth: without materials to repair the float, there can be no Lifting of Wings, no Ihih’hana.</p><p>As Linuhanu lists what’s needed—abokixa for the eye, uyuipo wood for the poles, and feathers from the Wind’s Chosen—Alphinaud begins to see the pattern. These aren’t random decorations: stone used in arcane equipment, timber used for ceremonial instruments, feathers prized for aetherial conductivity. The float may have become an arcane focus over generations, shaped by hope, ritual, and repeated trial. With that theory in mind, you commit to the plan: Wuk Lamat will meet the shipwright to secure the remaining parts, while Alphinaud and Alisaie help the village revive the competition for the Wind’s Chosen—so the festival, and the reeds, can be given a chance to breathe again.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Wuk Lamat <small class="muted">(Kozama’uka, X:19.0, Y:12.6)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-festive-people.html">A Festive People</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 90</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-well-mannered-shipwright.html">A Well-mannered Shipwright</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'葦の試練',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>コザマウカに足を踏み入れると、空気は重く、オクハヌの人々の表情にも嵐の爪痕が残っている。だが、立ち止まるわけにはいかない。ドーンサーヴァントの「選定者」が、この地で次の試練を授けるはずだ。</p><p>村に着くと、長老ザヌハリが第三誓約と一行を迎え、自らが継承の儀における選定者であると告げる。すぐに試練を始めるのではなく、まずは村のもてなしを受けてほしいと言われ、あなたたちは待ち時間を無駄にしないことにする。周囲を見て回り、オクハヌを知り、試練に備えるためだ。</p><p>集落を歩けば、壁の穴や屋根の欠けた家が目に入り、修復は続いている。田へ向かうと、水は澄み、泥も潤っていて異常は見当たらない。それなのに、葦はしおれ、カエルや虫さえも妙に動きが鈍い。目に見えない何かが、作物だけでなく生き物にまで影を落としている。</p><p>情報を持ち寄ると、エレンヴィルは生き物の「倦怠」を指摘する。水も泥も問題なさそうなのに、葦も小動物も活気を失っている。行き詰まる中で、ウクラマトは村人の沈んだ様子を思い出す。嵐の被害に加えて、季節の祝祭が行えないことが回復をさらに遅らせているのではないか、と。</p><p>あなたたちは、かつて見た祭りの山車――葦で編まれた鳥のような舟を確かめに行く。だが、宝石の眼は欠け、担ぎ棒は折れ、尾羽は色あせている。祭りの指導者であるリヌハヌは、家も壊れた状況で収穫祭など無理だと反発しつつも、山車を修理する材料が足りないために「翼揚げ」も「イヒヒハナ」も行えないと打ち明ける。</p><p>必要なのは、眼の宝石となるアボキサ、棒に使うウユイポ材、そして「ウィンズ・チョーズン」の羽根。話を聞いたアルフィノは、素材の偏りに気づく。魔具に用いる石、儀式具に適した木材、そして以太の通りが良い羽根――山車は飾りではなく、長い年月の祈りと試行錯誤で「収穫祈願の焦点」へと磨かれてきたのかもしれない。確かめるには、修理して祭りを取り戻すしかない。あなたたちは役割を分け、ウクラマトは造船職人のもとへ、アルフィノとアリゼーは村人たちを集めてウィンズ・チョーズンの競い合いを復活させるために動き出す。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ウクラマト <small class="muted">（コザマル・カ, X:19.0, Y:12.6）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-festive-people.html">祭祀の民、ハヌハヌ族</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 90</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-well-mannered-shipwright.html">船大工のウケブ</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'蘆葦試煉',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你踏進 Kozama’uka 的那一刻，就能感覺到 Ok’hanu 的空氣和以往不同——風暴的痕跡仍留在村子裡，連 Hanuhanu 的笑容也像被削弱了幾分。但你們沒有時間停下來，因為如果推測沒錯，Dawnservant 的「選定者」就在這裡，等著在繼承之儀中給出下一道考驗。</p><p>抵達村中後，長老 Zanuhali 現身迎接，坦言自己正是這一站的選定者。他要你們先暫時接受村子的招待，還不能立刻開始試煉。於是你們決定趁等待的空檔分頭行動：多看看、多聽聽，把 Ok’hanu 的現況摸清楚，至少別在試煉開始時一頭霧水。</p><p>你走在聚落裡，看到牆上被風撕開的破洞、屋頂缺了一大塊的空隙，修繕雖在進行，卻遠談不上恢復如初。到了田裡，水看起來清澈，泥也濕潤厚實，照理說不該出問題——可蘆葦卻明顯枯萎，連田裡的青蛙與昆蟲都懶洋洋地不對勁，像是被什麼看不見的東西壓住了活力。</p><p>你們集合交換發現後，Erenville 指出關鍵：受影響的不只是蘆葦，連棲在田裡的生物也一樣萎靡。既然水與土都看不出污染，真正的原因可能更隱蔽。就在眾人一時沒有頭緒時，Wuk Lamat 把目光放回村子——她想起村民同樣提不起精神，而這不只是災後悲傷。對 Hanuhanu 而言，收穫季的節慶本該是「重振」的時刻，如今節慶停擺，只會讓他們更難走出陰影。</p><p>你們循著記憶找到那艘節慶用的「鳥舟」——用蘆葦編成、外形像鳥的花車。可它早已受損：一隻眼睛少了寶石，抬運的木桿折斷，尾羽也變得狼狽黯淡。負責今年節慶的 Linuhanu 一開始很難接受「在家園破碎時還辦收穫祭」這種提案，但她也不得不承認，沒有材料修復花車，就不可能舉行「Lifting of Wings」，也不可能舉行 Ihih’hana。</p><p>Linuhanu 說出修復所需：補回眼睛的 abokixa、修復木桿的 uyuipo 木材，以及用來裝飾尾羽、必須由 Wind’s Chosen 得主取得的羽毛。聽到這些，Alphinaud 立刻抓到線索：這些材料不是隨便挑的——abokixa 是奧術器具用的寶石，uyuipo 木材常用於儀式器物，而得主羽毛則可能具有更好的以太導通性。花車也許早已不只是裝飾，而是在一代又一代的祈願與儀式中，被打磨成「能引導收穫祈禱的焦點」。要驗證，就得先把花車修好、把節慶找回來。於是你們分工：Wuk Lamat 這邊去找維護花車的工匠，Alphinaud 和 Alisaie 則去協助村民重啟 Wind’s Chosen 的競賽——讓 Ok’hanu 有機會再次振作，也讓枯萎的蘆葦看見轉機。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 烏克·拉瑪特 <small class="muted">(克扎瑪烏卡濕地, X:19.0, Y:12.6)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-festive-people.html">祭祀與歡慶之民：哈努哈努族</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.90</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-well-mannered-shipwright.html">懂禮數的船匠：烏克布</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
