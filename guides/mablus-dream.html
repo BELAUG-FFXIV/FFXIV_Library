@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mablu’s Dream | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Mablu’s Dream (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+
+    /* 展開/收合 */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/5dBdQQpMMP0"
+              title="Mablu’s Dream" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Mablu’s Dream</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Mablu’s Dream',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Mablu can’t help smiling at how far you’ve come—surely even Tobli would admit you’re doing well. Before you set off, Wuk Lamat presses an item into your hands and insists you be the one to carry it, then steels herself for what comes next: riding the alpacas Mablu has provided.</p><p>The moment you mount up, Wuk Lamat’s confidence wobbles. She swears she isn’t afraid—she’s only… wary of the alpacas and their foul, foul spit. Mablu urges her on, promising these ones are used to people, and as the ride begins you feel Wuk Lamat tense with every breath, silently begging the beasts not to spit.</p><p>As the path stretches ahead, Mablu chatters to keep the mood light. She says the Pelupelu could never have become traveling merchants without alpacas—crossing Tural on foot would be unthinkable. Wuk Lamat, eyeing the towering landscape, mutters that one mountain looks too tall to be real, and Mablu admits it’s a daunting sight up close—reached only by taking the long way around the cliffs toward the highlands.</p><p>When Wuk Lamat asks why she’s studying the peddler’s trade, Mablu blurts out the truth: she loves ranch work and loves alpacas, but becoming a merchant has always been her dream. Still, she worries she lacks the talent. If she can help secure the taming saddle Wuk Lamat needs, she tells you, that success would prove she can do this—and Wuk Lamat laughs that she’d better get ready to be a merchant, then, because the destination is already in sight.</p><p>At the mate fields, the alpacas are sent back ahead and you head in on foot. Mablu quietly asks about Wuk Lamat being adopted by the Dawnservant, then admits she was an orphan too—Tobli took her in, and not only her, but every ranch hand who works there. She stumbles over her own confession, apologizing for saying it aloud, and forces herself back to business: you’re here to bargain your way toward a saddle, and harvest season means tools matter—so she tells you to hand Wuk Lamat the hatchet and let her do the talking.</p><p>The field’s owner is willing to trade, but only at a fair, flat price—and when Mablu tries to argue that harvest demand should raise the hatchet’s value, she’s shut down: the tools were bought in advance. Mablu pivots, appealing to connections and favor, but learns the owner backs the second claimant and expects reforms that will make hatchets unnecessary. Wuk Lamat doesn’t flinch—she offers labor instead, and you join her in the fields, picking healthy leaves until you’ve brought back acceptable bundles. With your work added to the bargain, the offer changes: a full sack of the highest-grade mate leaves. Yet when the trade is done, Mablu’s doubt returns—she hasn’t told Tobli she plans to leave, because she wanted proof first. Wuk Lamat tells her to live by her own choice and speak to him, and Mablu straightens, deciding she’ll earn one more success before she does. With new resolve, she declares it’s time to trade up again—straight for premium mezcal—while Wuk Lamat forces a brave grin and reminds herself, out loud, that she can hold her own.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Wuk Lamat <small class="muted">(Urqopacha, X:29.4, Y:17.0)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-feat-of-gold.html">The Feat of Gold</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 90</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-premium-deal.html">A Premium Deal</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'マーブルの夢',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>マーブルは、ここまで順調に進んでいることに目を細める。きっとトーブリだって認めざるを得ない――そう言いかけたところで、ウクラマトが先に立ち止まり、あなたに品物を託す。出発前に、それはあなたが持っていてほしいのだと言い、マーブルが用意してくれたアルパカに乗ろうと促す。</p><p>いざ跨った途端、ウクラマトは落ち着かない。野生のアルパカを捕まえるつもりなら、飼い慣らされた相手に尻込みしていられない――そう言い聞かせながらも、あの不快で臭う唾だけは勘弁してほしいと、必死にこらえる。マーブルは「この子たちは人に慣れている」と励まし、あなたはウクラマトが唾を警戒して身構える気配を隣で感じ取る。</p><p>道中、マーブルは明るく語る。自分たちが行商を生業にできたのは、アルパカという相棒がいたからだ、と。トラルを歩いて横断するなど考えられないのだと笑い、ウクラマトは景色を見上げて「山が高すぎて現実味がない」とこぼす。マーブルは、崖を迂回して高地へ向かうしかないのだと説明し、その険しさを「近くで見ると圧がある」と認める。</p><p>ウクラマトが、なぜ行商の技を学ぶのかと尋ねると、マーブルは少し言葉に詰まる。牧場の仕事もアルパカも大好きだ――それでも、商いをすることは昔からの夢だった。けれど自分に才覚があるのか不安で、だからこそ鞍を買うための取引を成功させたいのだと言う。ひとつ結果を掴めれば、進むべき道を自分で肯定できるからだ、と。</p><p>マテ畑に着くと、マーブルはアルパカを宿へ戻してから歩いて戻ろうと言い、ふとウクラマトの身の上に触れる。連王に引き取られた身なら分かるだろう、と前置きして、マーブルも孤児だったと明かす。トーブリは彼女だけでなく牧場の手伝い全員を受け入れたのだという。だからこそ、自分だけが外へ出て商いをしたいと思っていることが後ろめたい――そう吐き出しかけて、すぐに首を振り、鞍のための取引を進めようと話を戻す。あなたに品物をウクラマトへ渡すよう頼み、交渉は彼女に任せるのだと決める。</p><p>畑の主は取引に応じるが、提示されるのは“妥当な交換”に過ぎない。収穫の時期なら道具の価値が上がるはずだとマーブルが粘っても、道具は前もって揃えてあると言われてしまう。縁を頼みに切り替えても、相手は第二の継承候補に肩入れしており、改革が進めば道具など要らなくなるのだと告げる。そこでウクラマトは、労働を価値に加える提案をする。あなたも畑に入り、傷んでいない葉を選んで束ね、指定された分を届ける。働いた分が上乗せされ、示されたのは最高級のマテ茶葉の袋――しかし取引が終わってなお、マーブルは迷いを消せない。トーブリにはまだ話していない、まずは自分が商いでやっていける証を立てたかったのだと打ち明ける。ウクラマトは「自分の人生は自分で選べ」と背中を押し、話すべきだと言う。マーブルは頷き、まずは鞍のためにもう一度――今度は価値を倍にする取引を成し遂げるのだと宣言する。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ウクラマト <small class="muted">（オルコ・パチャ, X:29.4, Y:17.0）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-feat-of-gold.html">金の試練</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 90</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-premium-deal.html">最高の取引</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'馬布魯的夢',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Mablu 忍不住露出笑意，覺得你們一路做得不錯——就連 Tobli 也不得不承認吧。正要啟程前，Wuk Lamat 把一樣東西交到你手上，說這次應該由你來拿；接著她深吸一口氣，示意你們去騎上 Mablu 好心準備的羊駝。</p><p>一坐上去，Wuk Lamat 就明顯繃緊。她嘴上強調自己不是害怕——只是，這些羊駝那種又臭又噁心的口水實在讓人難以忍受。Mablu 在旁邊安撫她，說這些羊駝已經很習慣人類了；你則一路感覺得到 Wuk Lamat 的緊張，像是在心裡一遍遍拜託牠們千萬別吐口水。</p><p>為了轉移注意力，Mablu 一路聊個不停。她說若沒有羊駝，Pelupelu 根本不可能成為行商——你能想像靠雙腳走遍整個 Tural 嗎？Wuk Lamat 抬頭望向遠方，忍不住嘀咕有座山高得不像真的；Mablu 也承認那景象近看很有壓迫感，而要抵達那一帶，只能繞著峭壁走很長一段路，通往高地。</p><p>談到自己為什麼要學做小販、學做行商時，Mablu 先急忙否認自己討厭牧場工作。她其實很喜歡——也很喜歡跟羊駝相處；只是成為行商一直是她的夢。問題在於，她不確定自己有沒有那個本事。所以她想幫 Wuk Lamat 把馴養用的鞍弄到手；只要能成功一次，就能證明自己真的做得到。Wuk Lamat 聽完笑著回她：那你可得準備好當商人了，因為你們快到了。</p><p>抵達瑪黛茶園後，Mablu 把羊駝先送回旅店，說回程再走大路。她忽然提起 Wuk Lamat 的身世：你曾被 Dawnservant 收養，對吧？然後她也坦白自己是孤兒——Tobli 把她帶大，甚至把所有牧場的幫手都收留了。也因此，她才會覺得矛盾：大家都努力做事報答他的恩情，只有她一心想離開去做行商。她說到一半又急忙停下，提醒自己先把鞍的準備做好；接著叫你把斧頭交給 Wuk Lamat，讓她來負責談條件。</p><p>茶園主人願意交易，卻只願意給出「合理」的交換：一袋瑪黛茶葉，價值剛好等同斧頭。Mablu 想以收成季節、斧頭需求上升來抬價，卻被回絕——對方早就提前備齊工具。她改口想走人情路線，強調若讓 Wuk Lamat 欠下人情，未來也有好處，但對方坦言自己站在第二順位的繼承候補那邊，相信改革會讓農務更便利，甚至不再需要斧頭。Wuk Lamat 於是提出新條件：把勞力也算進交易。你跟她一起下田，挑健康的葉子束成一捆捆交回去；等你們都完成份量後，交易終於翻盤——對方願意拿出一整袋最高級瑪黛茶葉。可事情談成了，Mablu 的不安卻又湧上來：她其實還沒跟 Tobli 說自己想離開，因為她想先用成果證明自己有資格做行商。Wuk Lamat 勸她照自己的選擇活、去跟 Tobli 談清楚；Mablu 這才點頭，說她會先把鞍買到手，把這次成功牢牢握住，然後再做下一筆更大的交易——直接去換 premium mezcal。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 烏克·拉瑪特 <small class="muted">(奧闊帕恰山, X:29.4, Y:17.0)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-feat-of-gold.html">金之試煉</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.90</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-premium-deal.html">最棒的交易</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
