@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Traders of Happiness | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Traders of Happiness (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/65WMQEPeFmU"
+              title="Traders of Happiness" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Traders of Happiness</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Traders of Happiness',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>You hear Erenville swear under his breath—he only let Wuk Lamat out of his sight for a moment—while Alphinaud notes that the Pelupelu seem just as fond of coffee as anyone. Alisaie eyes the Pelupelu-sized houses and realizes with a start that the scale suits her, too. Krile quietly observes that Wuk Lamat is fortunate to have a friend like Erenville—someone willing to chide her when needed—while Wuk Lamat concedes it was not her finest moment and insists you focus on why you came: to find the elector.</p><p>Alphinaud lays out a plan. He, Krile, and Alisaie will question the merchants, while Wuk Lamat and Erenville will approach travelers and passersby. You are asked to investigate any other establishments that catch your eye, and to report anything useful back to Wuk Lamat.</p><p>At the Family Ranch, Mablu greets you cheerfully but admits he knows nothing about any “electors.” He does, however, urge you to admire the alpacas from a respectable distance—get too close, startle them, and you may be spat on, and it reeks. He mentions it happened to a buyer recently, and Tobli—the head rancher—was furious that Mablu failed to warn them. Mablu adds, almost in awe, that no one makes a mistake without Tobli noticing, because Tobli knows everything that happens on the ranch.</p><p>Back in Wachunpelo, an impatient porter says he has heard all about the rite of succession and declares he is rooting for Zoraal Ja. If the First Promise wins, the porter expects an expanded sphere of influence, more resources, and thousands of new customers—more chances to “spread happiness” through trade—and he tries to sell you goods inspired by the Resilient Son. When you refuse, he withholds help, dismissing you as no supporter of Zoraal Ja or his policies. Elsewhere, a worker at the mezcal distillery admits he cares little who takes the throne so long as Tural stays peaceful—no one relaxes with mezcal when arrows and spears start flying—and while he knows little of the contest, he points you to Tobli, the head ledger, as someone who would have answers.</p><p>When you rejoin Wuk Lamat, she fumes about how dangerous silver-tongued peddlers can be—she nearly bought a bottle of mezcal, a stack of blankets, and an ornament besides. Still, she learned the same thing you did: Tobli is the one to speak to about the contest. And when it becomes clear that the “head ledger” is also the head rancher, she decides you should head to the alpaca ranch at once, before the others return.</p><p>The ranch is crowded with alpacas, and Wuk Lamat shivers as she forces herself forward, insisting fear will not deter her. When she asks after Tobli, Mablu explains that Tobli likes to mingle with the ranch hands and watch everything, but refuses to identify him. He offers only hints: Tobli often talks about a favorite pungent subject, and he cannot resist a profitable trade—bring him a truly good deal, and he might let his identity slip. Wuk Lamat treats it like a game and declares she will offer Tobli a deal he cannot ignore, only to realize she cannot afford to pay everyone—so you and she agree to ask questions first and narrow the field.</p><p>You speak with the ranch hands. One warns you to keep your distance and move slowly, because alpacas will spit if startled, then hurries back to brushing coats and mopping foul spit. Another brags that none in the village have reared more alpacas than he, and insists the Third Promise must prove her worth. A third, too calm by half, claims to be Tobli and urges you to begin the contest at once. When you meet back up, Wuk Lamat presses you for your pick—and when you identify the diligent ranch hand, she immediately proposes a generous sum in exchange for confirmation. The offer is accepted, and Tobli reveals himself: head ledger of Wachunpelo, head rancher of the Family Ranch, and one of Gulool Ja Ja’s chosen electors.</p><p>Tobli calls this deduction only the first step, and Wuk Lamat tries to play it off as easy—just as Zoraal Ja arrives and names Tobli without asking a single question. With the prologue finished, Tobli announces the true challenge: the claimants must go forth and capture an alpaca. Wuk Lamat doubts this sounds difficult—until Tobli presents a wild valley breed as “the example” and asks her to approach. She tries to stay calm as Erenville advised, only to be spat on again; the stench hits immediately, and Tobli coolly explains the paradox of alpacas—curious yet cowardly—and how their reeking spit, full of half-digested food, serves as a deterrent. Mablu adds that wild breeds are especially timid and quick to lash out, and Tobli explains how they breed rugged wild stock with gentle domesticated alpacas to produce the strong-but-biddable pack animals their traveling merchants prize.</p><p>Zoraal Ja accepts the task at once, declaring that a beast is a beast and all yield to strength, ignoring Tobli’s warning that preparation matters. Wuk Lamat, still disgusted, forces herself back on track: if catching a wild alpaca proves she is fit to rule, then she will do it. When Alphinaud and the others arrive, they can tell from the outburst what happened; Erenville remarks that calm helps, but wild alpacas do not follow the same rules. And as Wuk Lamat returns—breathless after scrubbing her face clean—she asks you, dead serious, to take a sniff just to be sure the smell is truly gone.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Wuk Lamat <small class="muted">(Urqopacha, X:28.9, Y:13.6)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="to-urqopacha.html">To Urqopacha</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 90</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-feat-of-gold.html">The Feat of Gold</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'行商の民、ペルペル族',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>エレンヴィルは、ほんの一瞬目を離しただけだと嘆き、アルフィノは、ペルペル族もコーヒーが好きらしいと口にする。アリゼーは、家々も建物もペルペル族の体格に合わせて作られているのに、妙に自分にも合っていると気づく。クルルは、ウクラマトには必要なときに叱ってくれる友がいるのは幸運だと静かに言い、ウクラマトは苦い顔で認めつつも、今は目的を果たそうと切り替える――選定者を見つけるのだ、と。</p><p>アルフィノは方針を提案する。アルフィノ、クルル、アリゼーは商人に話を聞く。ウクラマトとエレンヴィルは旅人や通行人に当たる。あなたは気になる店や施設を調べ、得た情報があればウクラマトに伝えることになる。</p><p>ファミリー牧場では、マブルが明るく声をかけてくるが、「選定者」のことは知らないと言う。代わりに、誇りのアルパカは少し離れて見てくれ、と忠告する。近づきすぎれば神経質な子たちが唾を吐くことがあり、あれは強烈に臭う。ついこの前も買い付け人が被害に遭い、牧場長のトブリに、きちんと警告しなかったと叱られたのだという。マブルはさらに、トブリは牧場で起きることを何でも把握している、と半ば畏れるように言い残して仕事へ戻る。</p><p>ワチュン・ペロに戻ると、荷運びは「継承の儀」の話ならよく知っていると息巻き、ゾラージャを推すと断言する。第一誓約が勝てば勢力圏が広がり、資源も客も増え、取引の機会が何千と生まれて「幸せを広められる」のだと語り、堅毅の子にあやかった品を売りつけようとする。あなたが断ると、選定者のことは知っていても教える気はない、と突き放す。さらに蒸留所の職人は、王座に誰が就こうとトラルが平和なら構わないと言い、戦が始まれば誰もメスカルをゆっくり味わえないのだとぼやく。儀式の詳しい話は知らないが、会計長のトブリなら分かるはずだと名指しする。</p><p>ウクラマトと合流すると、彼女は口の達者な行商人には気をつけろと憤り、メスカルの瓶に毛布の束、挙げ句に飾り物まで買いかけたと吐き捨てる。それでも、継承の儀に関わる話を知るならトブリだという点は一致していた。そして「会計長」が牧場長でもあると分かると、ウクラマトは、他の面々が戻る前に牧場へ向かおうと言い出す。</p><p>牧場にはアルパカがあふれ、ウクラマトは身震いしながらも、恐れに負けるわけにはいかないと言い張る。トブリの所在を尋ねると、マブルは、トブリは牧場の手伝いに紛れて様子を見ているが、誰かは教えられないと答える。手がかりとして、トブリは好んで「鼻につく話題」を口にし、そして儲かる取引に目がない、とだけ告げる。よい条件を持ち込めば正体を漏らすかもしれない、と。ウクラマトは勝負事のように受け取り、無視できない取引を持ちかければいいと意気込むが、誰彼構わず買収できるほど所持金がないと気づく。そこであなたと彼女は、まず聞き込みで候補を絞ることにする。</p><p>あなたは牧場の手たちに話を聞く。几帳面そうな手は、驚かせれば唾を吐くから動きをゆっくりに、と忠告し、外套を磨き、臭い唾を拭く仕事があると急ぐ。自信満々の手は、この村で自分ほどアルパカを育てた者はいないと豪語し、第三誓約は価値を示さねばならないと言う。飄々とした手は自分がトブリだと言い、今すぐ儀式を始めようと迫る。合流したウクラマトはあなたの推理を求め、あなたが几帳面な手を挙げると、彼女はすぐに大金を提示して正体の確認を迫る。取引は受け入れられ、トブリは名乗りを上げる――ワチュン・ペロの会計長であり、ファミリー牧場の牧場長、そしてグルージャジャに選ばれた選定者のひとりだと。</p><p>トブリは、選定者を見抜くのは最初の一歩にすぎないと言い、ウクラマトは平然を装う。そこへゾラージャが現れ、ひとつも質問せずにトブリを言い当てる。前座は終わりだとして、トブリは本題の試練を告げる――アルパカを捕らえよ。ウクラマトは、アルパカはおとなしいのでは、と疑問を口にするが、見本として連れ出された「谷の野生種」に近づいた瞬間、唾を浴びせられ、強烈な臭いに言葉を失う。トブリは、アルパカは好奇心が強い一方で臆病でもあり、怯えたところを追い詰めれば唾を吐くのだと説明する。あの唾は半消化の餌が混ざっており、脅威を遠ざけるための強烈な防御なのだと。マブルは野生種は特に臆病で反応が早いと補足し、トブリは、野生の頑丈さと家畜の従順さを掛け合わせ、旅商人が求める強く扱いやすい荷役獣を作っているのだと言う。</p><p>ゾラージャは「獣は獣、力に屈する」と言い、準備の忠告も意に介さず出て行こうとする。ウクラマトは不快感を抱えながらも、王にふさわしいと示すためならやる、と言い切る。やがてアルフィノたちも駆けつけ、叫び声で何が起きたか察する。エレンヴィルは、落ち着きが肝心だとは言ったが、野生のアルパカには同じ理屈が通らないと釘を刺す。顔を洗い流して戻ったウクラマトは、臭いで嗅覚がやられたから確かめてくれと、あなたに半ば本気で頼み込む。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ウクラマト <small class="muted">（オルコ・パチャ, X:28.9, Y:13.6）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="to-urqopacha.html">オルコ・パチャ</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 90</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-feat-of-gold.html">金の試練</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'行商之民：佩魯佩魯族',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Erenville 低聲咒罵，說自己只是不過把 Wuk Lamat 放出視線一瞬間；Alphinaud 乾笑著補一句，看來 Pelupelu 也很愛咖啡。Alisaie 環顧四周那些按 Pelupelu 身形打造的房舍，忽然反應過來：這尺寸也剛好合她。Krile 則語氣溫和地說，Wuk Lamat 很幸運有 Erenville 這樣的朋友——需要的時候敢直接念她兩句，尤其對王族更是如此。Wuk Lamat 自己也承認那不是她最光彩的一幕，隨即把情緒收回來，催你們別再分心：既然人都到了，就做該做的事——把「選定者」找出來。</p><p>Alphinaud 立刻提出分工：Krile、Alisaie 和他去問商人；Wuk Lamat 與 Erenville 去找旅人與路人打聽。至於你，就去查查其他看起來可疑或值得問的店家與場所——只要有任何線索，就回報給 Wuk Lamat。</p><p>你先去了 The Family Ranch。Mablu 熱情打招呼，卻坦白自己不知道什麼「選定者」。但他立刻把話題帶到羊駝身上，叫你離遠點欣賞就好：靠太近、驚到那些緊張的小傢伙，牠們可能會吐你一臉口水——而且那東西臭得要命。Mablu 說不久前才有來訪的買家中招，Tobli——也就是牧場的頭頭——氣得把他罵了一頓，怪他沒有先警告清楚。臨走前他還補一句：在這座牧場，沒有人能犯錯不被 Tobli 發現，因為 Tobli 什麼都知道。</p><p>回到 Wachunpelo，你遇到一位心浮氣躁的搬運工。他說自己早就聽遍了「繼承儀式」的傳聞，還直接表態支持 Zoraal Ja：只要第一誓約贏了，他就會擴張勢力範圍，帶來更多資源與成千上萬的新客人——那可是把「快樂」透過交易傳得更遠的機會。他甚至說最近也有人被說服了，所以他已經開始做以「Resilient Son」為靈感的商品，問你要不要買。你拒絕後，他乾脆收起熱情，說他確實能幫你，但他不想——因為你顯然不支持 Zoraal Ja 或他的政策。另一邊，在 mezcal 蒸餾所，工人倒是坦率得多：他不在乎誰坐上王位，只要 Tural 保持和平就好；一旦箭矢長槍滿天飛，就沒有人有心情坐下來慢慢啜飲他們最好的 mezcal。至於「選定者」的事，他只說自己剛跑完商路，聽到有競賽在進行，但細節不多；不過他點名 Tobli——村裡的「總帳管事」——肯定知道得更多。</p><p>你把線索帶回去時，Wuk Lamat 正在氣呼呼地數落那些嘴甜的行商：她差點買下一瓶 mezcal、一疊毛毯，甚至還差點被一個精緻飾品勾走錢包。可不管怎樣，她也打聽到同一個名字——關於競賽要問 Tobli。更要命的是，別人還告訴她那個「總帳管事」同時也是牧場的頭頭。Wuk Lamat 當場拍板：羊駝牧場離這裡不遠，趁其他人還沒回來，你們先去一趟。</p><p>牧場裡擠滿羊駝，Wuk Lamat 看到那數量就打了個寒顫，卻還硬撐著說自己不會被恐懼阻住腳步——當然，她不是在害怕。她問 Mablu 這裡的工人誰是 Tobli，Mablu 卻說 Tobli 喜歡混在牧場工人之間、到處巡看，他不能直接指給你們。Mablu 只肯給提示：Tobli 常提到他最愛的「刺鼻話題」，而且他也抗拒不了「有利可圖的交易」——如果你端出一筆非常漂亮的買賣，他或許就會不小心露出破綻。Wuk Lamat 聽完反而笑了，說這就像遊戲一樣：只要開出 Tobli 無法忽視的條件，他就一定會現身。可下一秒她又皺眉——她的錢袋不可能讓她對每個疑似 Tobli 的人都砸錢。於是她決定先問個仔細，縮小範圍，再回來會合比對。</p><p>你依序和幾名牧場工人交談。那位忙著刷外套、拖地收拾「臭口水」的工人警告你：羊駝如果受驚就會吐口水，動作務必放慢、別突然靠近。另一位工人則洋洋得意地說，整個村子裡沒有誰養過比他更多的羊駝，還強調第三誓約必須證明自己的價值。還有一位態度過分悠哉的工人，甚至直接宣稱自己就是 Tobli，催你們立刻開始競賽。你回到 Wuk Lamat 身邊，她要你選出你最懷疑的人；當你指向那位最勤勉、最專注於牧場雜務的工人時，Wuk Lamat 立刻開出一筆不小的金額，要求他確認真實身分。對方毫不猶豫接受交易，隨即自報其名：他正是 Tobli——Wachunpelo 的總帳管事，同時也是 The Family Ranch 的牧場頭頭，而且還是 Gulool Ja Ja 親自選出的「選定者」之一。</p><p>Tobli 說，能推理出 Dawnservant 的選定者只是「偉業」的第一步，對想成為統治者的人來說未免太簡單。Wuk Lamat 只好硬著頭皮回一句「對啊，一點也不難」。就在這時，Zoraal Ja 抵達，他連問題都不問就直接點出 Tobli 的身分，讓 Tobli 都不得不承認「確實厲害」。前奏既然結束，Tobli 宣布真正的試煉：你們必須出去，替他「抓一隻羊駝」。Wuk Lamat 先覺得莫名其妙——羊駝不是通常很溫順嗎？這算什麼挑戰？直到 Tobli 要人牽出「示範用的例子」，並請第三誓約親自靠近。Wuk Lamat 想照 Erenville 說的保持冷靜，結果才靠近就被那隻「小怪物」一口口水噴了滿臉，臭味瞬間衝上來，讓她當場作嘔。Tobli 冷靜解釋：羊駝既好奇又膽小，牠們一旦害怕，你若還硬逼近，就會得到一臉口水；那股惡臭是因為口水裡混著半消化的食物，是牠們用來驅趕威脅的手段。Mablu 補充，像這種山谷野生品種特別膽小，也就特別容易出手；Tobli 則說他們會把野生種的強韌與家養種的溫順配對培育，才能得到旅商最愛的「強壯但聽話」的負重羊駝。</p><p>Zoraal Ja 聽完只說「野獸就是野獸」，一切都會屈服於力量，甚至不理會 Tobli 提醒的「先做好準備」。Wuk Lamat 雖然滿臉嫌惡，還是咬牙把話說死：要她去追一隻毛茸茸、會吐口水的惡魔來證明自己適合統治——那她就照做。等 Alphinaud 一行人趕回來，從剛才那聲喊叫就大概猜到發生了什麼；Erenville 也提醒你：保持冷靜確實重要，但野生羊駝並不一定吃這套。Wuk Lamat 洗完臉、喘著氣回來，還一本正經地要你幫她「聞一下」確認味道是不是都洗掉了——因為那股惡臭幾乎把她的嗅覺都毀了。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 烏克·拉瑪特 <small class="muted">(奧闊帕恰山, X:28.9, Y:13.6)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="to-urqopacha.html">前往 Urqopacha</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.90</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-feat-of-gold.html">金之試煉</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
