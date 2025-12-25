@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Knowing the Pelupelu | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Knowing the Pelupelu (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/nPvSsMmc4L4"
+              title="Knowing the Pelupelu" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Knowing the Pelupelu</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Knowing the Pelupelu',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>You slow your pace to match Wuk Lamat’s unsteady steps, and Mablu darts ahead to the ranch with a promise that mate tea will “melt away fatigue like magic.” With Alphinaud’s calm insistence, you keep the group together and give your exhausted companion the time she needs to make it back.</p><p>By the time you arrive, Mablu is already moving again—tea in hand, hurrying out to meet you. Wuk Lamat drinks, exhales in relief, and admits she feels better. As she watches the alpaca she tamed, she talks through what the night taught her—what they eat, what sounds they react to, the small habits that make them oddly endearing—and you hear her surprise at how quickly discomfort can turn into fondness once you truly learn something.</p><p>Tobli welcomes Wuk Lamat back and recognizes at a glance that she brought back a valley alpaca. He commends her for completing the Feat of Gold, then explains why her brother’s shining prize was so extraordinary: golden alpacas are born only once every few decades, elusive and solitary, and difficult to capture thanks to their natural physical and magical gifts. Only one other person is known to have caught one before—Gulool Ja Ja himself.</p><p>When Wuk Lamat blurts out that her father chased alpacas too, Tobli answers with a story passed down from his grandfather—of the days before Tuliyollal, when the mountain giants, the Yok Huy, held the Pelupelu in subjugation. Your forebears rode alpaca mounts up into the highlands to deliver food and tribute, and the misery of it colored every retelling. Then a young Gulool Ja Ja arrived—two-headed, imposing, trailed by companions of many kinds. Some feared a new conqueror, but he sat among the Pelupelu, accepted cups of mate tea, listened to their plight, and then climbed the cliffs to face the giants and free them. Afterward, he looked at their riders and urged them to take to the road and peddle their beverages—an idea born of someone who traveled to foster amity between clans. In a handful of words, he changed the Pelupelu into a clan of itinerant merchants.</p><p>Wuk Lamat admits she never heard that bond spoken of with such detail, and when she learns Gulool Ja Ja captured a golden alpaca to serve as a sure-footed guide, she can’t hide the sting of comparison—both brother and father claiming the rarest of creatures, while she managed “an ordinary one.” Mablu quickly reminds her the feat asked no more than that, and Tobli adds what matters most: Wuk Lamat not only completed the feat, she made trades, brought joy, and won people over in true Pelupelu fashion—something her sibling could scarcely replicate. With your encouragement close at hand, she sets the keystone into the tablet and steadies herself with the proof of what she’s earned.</p><p>As the moment settles, Mablu gathers her courage and tells Tobli she wants to leave the ranch and become a merchant. Tobli answers as a parent—he has tried to give his wards a happy life, but never wanted that to be the only happiness they knew. He gives her his blessing to walk the path she chooses, certain she will become an exceptional peddler. Before you depart, Mablu offers one last lead: if Wuk Lamat must follow the saga toward the golden city, she should speak with the Yok Huy, who once ruled far more than this land and once commanded the Pelupelu to search for that fabled place. Krile’s curiosity sharpens at the legend’s origins, Erenville agrees there’s nothing to lose by asking, and when Mablu notices Krile’s earring—common in Yok Tural for about twenty years as a charm for safe travel—she offers to learn how it first came to be crafted. With the Feat of Gold complete and new questions in hand, you set your sights back on Tuliyollal and the next step in the contest.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Mablu <small class="muted">(Urqopacha, X:21.0, Y:8.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="wuk-lamat-in-the-saddle.html">Wuk Lamat in the Saddle</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 90</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-success-of-others.html">The Success of Others</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'ペルペル族を知る',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>あなたは疲れ切ったウクラマトの歩調に合わせ、無理をさせないように道中の速度を落とす。マーブルは先回りして牧場へ走り、「疲れなんて魔法みたいに溶ける」と言ってマテ茶を淹れておくと約束する。アルフィノの提案もあり、あなたたちは消耗した第三王女の体調を優先し、ゆっくりと帰路につく。</p><p>牧場へ戻るころには、マーブルはすでに準備を整えていた。差し出されたマテ茶を口にしたウクラマトは、ようやく肩の力を抜き、「本当に効く」とこぼす。手なずけたアルパカを見つめながら、草や果実の好み、反応する音、愛らしい癖を語り、理解が進むほど苦手意識が薄れていくことを、あなたに率直に認める。</p><p>そこへトーブリが現れ、第三王女の帰還を迎える。彼は、ウクラマトが成し遂げた偉業を認め、連れて帰ったのが谷のアルパカであると即座に言い当てる。そして、黄金のアルパカがいかに稀少で、身体的にも魔法的にも優れ、滅多に姿を見せず、捕らえることが困難な孤高の存在かを語る。かつてそれを捕らえた者は、グルージャジャ様ただひとり――そう言われているのだと。</p><p>「お父さんもアルパカを追っていたの？」と驚くウクラマトに、トーブリは祖父から聞いた昔語りを続ける。トライヨラ建国以前、山の巨人たるヨカフイ族が人々を支配し、ペルペル族はアルパカに乗って高地へ貢ぎ物を運ばされていた。そんな惨めな時代に、まだドーンサーヴァントとしての重荷を負う前の若きグルージャジャ様が現れる。二つの頭を持つ巨躯と、さまざまな姿の仲間たちに、人々は怯え、新たな征服者かと誤解した者すらいた。だが彼は違った。ペルペル族が差し出したマテ茶を飲み、窮状を知ると、崖を登って巨人に挑み、ペルペル族を隷属から解放したのだという。</p><p>さらにグルージャジャ様は、騎乗の技に目を留め、飲み物を売り歩くことを提案した。部族同士の友好を育みながら旅をする者らしい発想であり、たった数言が、ペルペル族を行商の民へと変えた――そうトーブリは語る。続けて、彼は高地へ向かうための確かな案内役を求め、グルージャジャ様が黄金のアルパカを捕らえたことにも触れる。</p><p>ウクラマトは、兄も父も稀なる獣を捕らえたのに、自分は「普通」だと落ち込む。だがマーブルは、偉業が求めたのはそれで十分だと言い、トーブリもまた、あなたの前で第三王女の価値を言葉にする。偉業を成し遂げただけでなく、交易を重ね、多くの者を喜ばせ、ペルペル族らしく人々の心を動かした――それは兄弟には難しいことだ、と。あなたたちに見守られながら、ウクラマトは要石を石板へはめ込み、次へ進む覚悟を確かめる。</p><p>そしてマーブルは、トーブリに牧場を離れて商人になりたいと告げる。トーブリは親としての想いを語り、守ってきた幸福だけがすべてではないと伝え、マーブルが選ぶ道を祝福する。さらにマーブルは、黄金郷を追うならヨカフイ族に話を聞くべきだと提案し、クルルは伝承の起源に興味を示す。エレンヴィルも問いを投げるだけなら損はないと言い、マーブルはクルルの耳飾りがヨカ・トラルで旅の無事を願う護符として広まった品だと気づき、作られた由来を調べてみると申し出る。あなたは仲間とともに、次の選挙人と次の手掛かりを求め、再びトライヨラへ向かうことになる。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> マーブル <small class="muted">（オルコ・パチャ, X:21.0, Y:8.4）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="wuk-lamat-in-the-saddle.html">ウクラマトとアルパカ</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 90</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-success-of-others.html">本当の自分</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'深入認識佩魯佩魯族',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你放慢腳步，配合 Wuk Lamat 仍有些踉蹌的步伐。Mablu 先一步跑回 The Family Ranch，說只要一壺 瑪黛茶，就能像魔法一樣把疲憊融化掉。Alphinaud 也提醒大家別急，你就這樣陪著 Wuk Lamat 慢慢往前走，把她的體力放在最重要的事上：安全回到牧場。</p><p>回到 The Family Ranch 時，Mablu 已經把茶準備好了。Wuk Lamat 喝下去後明顯鬆了口氣，甚至笑說這茶真的「很神奇」。她看著自己馴服的 羊駝，一邊回想昨晚一路追逐學到的細節——牠們愛吃的草和果實、對哪些聲音會有反應、那些說不上來卻很可愛的小習慣——你聽得出來，她對 羊駝 的不安，正在被「理解」一點一點取代。</p><p>Tobli 隨後出現，迎接 Wuk Lamat 回來，並一眼認出她帶回的是谷地的 羊駝。他稱讚她完成了 金之試煉，也解釋為什麼 Zoraal Ja 的戰果會那麼引人側目：金色 羊駝 可能幾十年才出生一次，性情孤僻、行蹤難測，又天生擁有出眾的體魄與魔法天賦，幾乎不會被人看見，更別說捕獲。據說在此之前，唯一成功的人是 Gulool Ja Ja 本人。</p><p>Wuk Lamat 聽到「連爸爸也追過 羊駝？」忍不住追問。Tobli 便照著祖父的故事說下去：在 Tuliyollal 建國以前，山地巨人 Yok Huy 曾讓 Pelupelu 族長年屈從，族人被迫騎著 羊駝 上到高地，送去食物與各種貢品，那段日子悲苦得讓人不願回想。就在那時，還未背負 Dawnservant 名號的年輕 Gulool Ja Ja 帶著一群來歷各異的同伴來到此地；兩顆頭、巨大的身形讓不少人嚇得以為又來了一位新的征服者。可他沒有展現任何侵略的意圖——他坐下來，接過 Pelupelu 遞上的 瑪黛茶，聽完他們的遭遇後變得沉重，接著做出誰也沒料到的決定：他攀上峭壁，直面巨人，將 Pelupelu 從 Yok Huy 的支配下解放出來。</p><p>故事並沒有停在那裡。Tobli 說，Gulool Ja Ja 隨後看著 Pelupelu 的騎乘本領，提出一個出人意料卻又合情合理的建議：上路去做行商，把自家的飲品賣到各地去。那是長年旅行、致力於促進各族交好的人才會想到的方向——也正是那幾句話，讓 Pelupelu 逐漸成為四處奔走的商旅之民。Tobli 也補充，為了踏上高地需要一位穩健的引路者，Gulool Ja Ja 當年才捕獲了金色 羊駝。</p><p>聽到爸爸與哥哥都捕獲過那樣稀有的生物，Wuk Lamat 一度覺得自己只能做到「普通」的程度。Mablu 馬上提醒她，金之試煉 要求的從來不只是炫耀，而她帶回的正是一隻完全合格、甚至很棒的 羊駝。Tobli 也直言：Wuk Lamat 不只完成偉業，還一路做成交易、讓人們開心，用 Pelupelu 最重視的方式贏得了信任——那樣的成果，未必是她的兄弟能做到的。你看著 Wuk Lamat 將 keystone 嵌入石板，感覺她終於把昨晚的疲憊與不甘，換成了下一步的決心。</p><p>接著，Mablu 鼓起勇氣對 Tobli 坦白：她想離開牧場，成為真正的 小販。Tobli 以父母的立場回應——他一直想給孩子們最大的幸福，但從沒希望那成為你們唯一的幸福；他祝福 Mablu 走自己選的路，並相信她會成為出色的 小販。臨走前，Mablu 又提出最後一個方向：若 Wuk Lamat 必須追隨傳說去尋找 黃金城，就該去問問 Yok Huy，因為他們曾統治過更廣的 Yok Tural，也曾命 Pelupelu 尋找那座傳說之地。Krile 對傳說的起源產生興趣，Erenville 也同意問一問沒有損失；而 Mablu 認出 Krile 的耳環在 Yok Tural 約二十年前開始流行，被視為旅途平安的護符，便主動說願意查清它最初的由來。你和眾人就這樣收起行囊與線索，準備回到 Tuliyollal，繼續往下一位 選定者 與下一段傳說前進。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 馬布魯 <small class="muted">(奧闊帕恰山, X:21.0, Y:8.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="wuk-lamat-in-the-saddle.html">烏克·拉瑪特與羊駝同行</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.90</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-success-of-others.html">在他人的成功面前，明白真正的自己</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
