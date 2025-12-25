@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Light of Hope | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Alliance Raid Quest – The Light of Hope (ARR Patch 2.5)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/YZHNyjbBuG4"
+              title="The Light of Hope" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">The Light of Hope</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'The Light of Hope',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>You return to Rammbroes after resting, and he wastes no time: he wants to seal the tower, but first he must gather everyone and hear exactly what happened beyond the rift. As the account is shared, one truth settles in—G’raha’s Allagan Eye truly means royal blood runs in his veins. Rammbroes turns it over with unease, wondering who used ancient technology to imbue G’raha’s family with that blood, and for what purpose, and whether the entire chain of events—from discovering the tower to Unei and Doga’s blood reaching him—was fate.</p><p>When the meeting turns to the present, Biggs blurts out the question on everyone’s mind: has anyone heard from G’raha, and where is he now—and what of Nero? Cid can only say he left the tower with Nero and has no idea where he disappeared to, though he doubts Nero will scheme against you for the time being. You tell them G’raha stayed behind at the Crystal Tower, and Rammbroes assumes he is even now preparing to seal it, yet the silence gnaws at him. Before anyone can decide their next step, a member of the Sons of Saint Coinach rushes in shouting: G’raha entered the Crystal Tower and began ordering researchers out, forcibly driving them from the gates.</p><p>Rammbroes reacts with alarm and confusion, and the shaken researcher admits he was given no explanation—only insistence—so he came straight to Rammbroes for guidance. With Cid and you at his side, Rammbroes goes to speak with those cast out and get to the bottom of this strange business, worried not that G’raha means to seal the tower, but that he never once shared his plan.</p><p>Outside Syrcus Tower, the displaced researcher can only fume and confess he still does not know why G’raha demanded they leave. Yet he is certain G’raha will be honest with Rammbroes—and with you. When you approach the tower, a voice warns you to go no further, that the doors will close ere long. Rammbroes calls out to G’raha, acknowledging that he intends to seal the tower, and asks for nothing more than a hint of his plan—begging him to come speak and discuss it. G’raha refuses, apologizing, but saying he cannot.</p><p>Rammbroes snaps in disbelief and demands an explanation, insisting that if anything is wrong, you can help. G’raha answers that this time you cannot: just as Unei and Doga fulfilled their destiny, so too must he fulfill his, and his blood has awakened him to the truth his father always spoke of—that the truth lay with Allag, or rather that the wish he must grant was born there. He tells you that not all the world perished in Xande’s calamity. Survivors stood amid Allag’s ruins and looked toward the Crystal Tower, only to find it gone—yet they still prayed that its spires would once more dominate the land, and that the tower would become a beacon of hope to people everywhere.</p><p>That longing reached the sole surviving royal of Allag: Princess Salina. Moved by the people’s dearest wish, she used the finest Allagan technology to give her blood and memories to the one she trusted most—G’raha’s forebear. For millennia the line waited as Allag’s art faded and their royal blood thinned, until, before the last drop could vanish, the memory returned to G’raha. Now he must fulfill the ancients’ wish: the tower will shine again as a beacon of hope.</p><p>Cid cannot accept it without protest, warning that the Crystal Tower’s power is too great a threat to Eorzea, and that without technology as advanced as Allag’s, you barely understand the tower at all—perhaps never will. G’raha agrees, and answers that you could wait for some future age to match Allag’s knowledge, but by then the royal blood and the means to control the tower would be lost. So he proposes the only path he sees: to do as Amon did, and put the tower into a deep sleep.</p><p>Cid recoils, but G’raha insists he is serious. The tower must not be used until men rival the Allagans in understanding, and so he will slumber within Syrcus Tower until that day, to greet those who can open the gates and guide them—so the tower can finally become the beacon of hope it was meant to be. His destiny lies in the future. Yours lies outside these doors: you must go, and create a future where hope reigns and the tragedies of the past are only memories—because no one but you can.</p><p>Cid realizes there is nothing he can say to change G’raha’s mind, and he answers with resolve: onward to a brighter future, difficult as it will be, and that is exactly why you will do it. Wedge shouts that you will catch up with Allag, and Biggs swears it will be only a few years before you come knocking and wake G’raha with your accomplishments. Rammbroes asks G’raha to witness NOAH’s deeds, forgive your failures, and meet again. G’raha bids Rammbroes farewell under the Twelve’s watch, and turns to you with quiet certainty: history will remember you, and your heroism will be the star by which he charts his course when he wakes. With that, he says the recollection has left him ready to sleep, and he parts from you, eager for a future born of your courage and the ancients’ wish.</p><p>When you return to Mor Dhona, Nero remarks that the Crystal Tower slumbers again, too quiet for his taste. He says good-bye to Cid and declares he will put all of this behind him—possibility calls, and he is bound to follow. A new dawn has come for him. Later, at Saint Coinach’s Find, Rammbroes tells you that Cid has already gone, with much demanding his attention if he is to fulfill G’raha’s wishes. Yet NOAH is not at an end, no matter how lonely the place feels after your friends’ departure. You must all walk different paths now, laboring for a brighter future lit by G’raha’s beacon—sealing the Crystal Tower was only the first step. He bids you farewell, and hopes your paths will cross again.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Rammbroes <small class="muted">Mor Dhona (X:30.4, Y:12.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-world-of-darkness-quest.html">The World of Darkness</a></div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-end.html">The End</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'輝く希望',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>休息を終えて戻ったあなたに、ラムブロースは言う。塔を封じたいが、その前に皆を呼び、裂け目の向こうで何が起きたのかを詳しく聞かねばならない、と。話を聞き終えた彼は、グ・ラハの「アラグの眼」が示す意味を改めて噛みしめる。やはり彼の血には王家の血が流れていた。古代の技術で血を授けたのだとしても不思議ではないが、では誰が、何の目的で彼の家系にそれを与えたのか。塔の発見から、ウネとドーガの血を得るまでの流れは、すべて運命だったのかもしれない――ラムブロースはそう思わずにいられない。</p><p>ビッグスは堪えきれず問いかける。グ・ラハは何か言っていたのか、そもそも彼はどこにいるのか、そしてネロはどうしたのか。ガーロンドは、ネロとは塔を出たが、その後どこへ消えたのかはわからないと答える。ただ、当分はこちらに牙をむくような企みはしないだろう、と言いながらも、相手がネロであることを忘れてはいない。あなたがグ・ラハはクリスタルタワーに残ったと伝えると、ラムブロースは封印の準備をしているのだろうと考えるが、計画を語らぬ沈黙が胸に引っかかる。</p><p>そこへサンクト・コイナック財団の研究員が駆け込み、叫びながら報告する。グ・ラハがクリスタルタワーへ入るなり、研究員たちを外へ追い出し始めたというのだ。ラムブロースはなぜだと問い詰めるが、研究員は理由を聞かされていない。ただ強引なほどに退去を迫られ、門から半ば押し出されたと告げる。だからこそ急いでここへ来て、指示を仰いだのだと。ラムブロースは事態を確かめるため、追い出された者たちに話を聞きに行くことを決め、ガーロンドとあなたにも同行を求める。封印そのものよりも、グ・ラハが一言も計画を告げなかったことが不安だった。</p><p>シルクスの塔へ向かう途中、追い出された研究員は苛立ちを抑えきれず、なぜ退去を命じられたのか自分にもわからないと繰り返す。それでも彼は、ラムブロースやあなたにはグ・ラハが正直に話すはずだと信じている。塔へ近づくと、正体の知れぬ声が告げる。これ以上進むな、扉はまもなく閉じる、と。ラムブロースはグ・ラハに呼びかけ、塔を封じるつもりなのだろうと認めたうえで、せめて計画の一端だけでも示してほしい、ここへ来て話し合おうと懇願する。だがグ・ラハは謝罪しながらも拒む。今は来られない、と。</p><p>ラムブロースは苛立ちを露わにし、何が起きているのか説明しろ、助けが必要なら協力できるはずだと迫る。グ・ラハは静かに答える。今回は違う、と。ウネとドーガが運命を果たしたように、自分もまた運命を果たさねばならない。血がそれを悟らせたのだ。父が語った通り、真実はアラグにあった――いや、叶えるべき願いが生まれたのはそこだった。皇帝ザンデの災厄で世界のすべてが滅びたわけではない。生存者たちは瓦礫の中でクリスタルタワーを探したが、塔は消えていた。それでも彼らは、いつか再び尖塔が大地を支配し、あらゆる人々の希望の灯となることを願い、祈ったのだ。</p><p>その願いは、帝国を生き延びた唯一の王族、サリナ姫のもとへ届いた。姫は人々の切なる願いに心を動かされ、アラグ最高の技術を用いて、自らの血と記憶を最も信頼する者へ託した。それがグ・ラハの祖先だった。幾千年の時が流れ、アラグの技は失われ、王家の血は薄れていった。それでも最後の一滴が消える前に、すべての記憶がグ・ラハへ戻ってきた。だから今こそ、古代人の願いを叶える。塔は再び希望の灯として輝くのだ、と。</p><p>ガーロンドは反論する。クリスタルタワーの力は今のエオルゼアにとって危険すぎ、正しく扱うにはアラグに匹敵する技術が必要だ。現状では仕組みすら十分に理解できず、永遠に理解しきれないかもしれない。グ・ラハは同意した上で言う。いつか誰かがアラグに並ぶ時代を待つこともできるが、その頃には王家の血も塔を制御する手段も失われてしまう。ならば、アモンがしたように塔を深い眠りにつかせればよい、と。</p><p>ガーロンドが叫ぶように否定しても、グ・ラハは本気だと断言する。人がアラグに並ぶ知へ到達するまで、塔は使われるべきではない。自分はシルクスの塔の中で眠り、扉を開ける手段を得た者たちを迎え、導く。そうしてこそ塔は本来の目的である希望の灯となる。自分の運命は未来にある。あなたの運命はこの扉の外にある。行け、希望が支配し、過去の悲劇が記憶となる未来を創れ。それを成せるのはあなただけだ、と。</p><p>ガーロンドは悟る。何を言っても決意は変わらないのだろう。彼は前を向き、明るい未来へ進もうと告げる。容易ではないが、だからこそやるのだ。ウェッジは叫び、アラグに追いついてみせると言う。ビッグスも、数年もすれば叩き起こしに行くと約束する。ラムブロースは、ノア調査隊の成果を見届け、失敗は許し、いつか再会してほしいと願う。グ・ラハは十二神の加護を祈りつつ別れを告げ、あなたには歴史があなたを記憶すると言う。目覚めた時、自分が進む道を測る星はあなたの英雄譚になるだろう、と。そして彼は、これほどの記憶を呼び覚ました今は眠りたいと言い、勇気と古代の願いが生む未来を待ち望みながら、静かに別れを告げる。</p><p>モードゥナへ戻ると、ネロはクリスタルタワーが再び眠ったことを口にし、静けさが気に入らないと呟く。ガーロンドに別れを告げ、すべてを背負って進むと言う。可能性が呼んでおり、自分はそれに従うのだ。自分には新たな夜明けが来たのだ、と。サンクト・コイナックの探索地では、ラムブロースがあなたに告げる。ガーロンドは既に去り、グ・ラハの願いを果たすために対処すべきことが山積みらしい。それでもノア調査隊は終わらない。仲間の旅立ちでこの地が寂しくなっても、皆がそれぞれの道を歩むのだ。グ・ラハの灯す希望に照らされた明るい未来のために働き続けよ。クリスタルタワーの封印は、その第一歩に過ぎない。彼は別れを告げ、いつかまた道が交わることを願う。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ラムブルース <small class="muted">モードゥナ (X:30.4, Y:12.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-world-of-darkness-quest.html">闇の世界</a></div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-end.html">おわり</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'閃耀的希望',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你休息後回到 Rammbroes 面前，他點頭確認你已恢復精神，隨即說出下一步：他想立刻封印 Crystal Tower，但在那之前，必須先把其他人召集起來，把你們在裂縫彼端經歷的一切完整說清楚。當你把所見所聞交代完，Rammbroes 也不得不承認——G’raha 一族傳承的 Allagan Eye（古代亞拉戈帝國之眼）確實意味著王家之血流在他體內。他能理解用古代技術讓血脈延續並不奇怪，可真正令人不安的是：究竟是誰把那份血與記憶賦予他的家族，又是為了什麼目的？從你們發現塔的那一天起，到 G’raha 得到 Unei 與 Doga 的血，這一路像被某種命運推著前行。</p><p>Biggs 忍不住問出口：G’raha 有沒有說過什麼？他人到底在哪裡？Nero 又怎麼了？Cid 只能說他確實和 Nero 一起離開了塔，但之後 Nero 去了哪裡，他也說不上來；不過以他對 Nero 的了解，短時間內應該不至於回頭對你們算計——雖然他畢竟還是 Nero。你提到 G’raha 留在 Crystal Tower，Rammbroes 便猜他正準備封印塔身，但他心裡始終卡著一件事：G’raha 竟然沒有對你們透露任何計畫。</p><p>就在這時，一名 Sons of Saint Coinach 的研究員衝來大喊，說 G’raha 進入 Crystal Tower 後，開始命令研究員撤離，甚至把人硬推出大門。Rammbroes 震驚又困惑，追問他為何這麼做；研究員卻只能說自己也不知道，G’raha 什麼都不解釋，只是態度強硬到近乎把他「趕出去」。他不敢耽擱，立刻跑來請示 Rammbroes。Rammbroes 於是決定帶著 Cid 與你去查清楚——他並不是反對封印，而是擔心 G’raha 在毫無交代的情況下做出這種舉動。</p><p>你們一路前往 Syrcus Tower，那名被趕出的研究員仍氣憤難平，反覆說自己也想知道原因。可他也相信一件事：G’raha 對 Rammbroes、對你，應該會坦白。你們才靠近塔，就聽見一道不明的聲音警告你們不要再前進，說大門很快就會關閉。Rammbroes 立刻呼喚 G’raha，承認他必定是想封印塔，但仍懇求他至少透露一點點計畫，好讓大家能一起商量。G’raha 卻只是道歉，明確拒絕，說他不能出來，也不能談。</p><p>Rammbroes 終於壓不住怒意，質問這到底是什麼荒唐事，若有任何狀況，你們都能幫忙。G’raha 回答得很平靜：這次不行。就像 Unei 與 Doga 已完成他們的命運，他也必須完成自己的命運，而他的血讓他真正醒悟這點。正如父親所說，真相一直在 Allag（古代亞拉戈帝國）——更準確地說，他必須實現的那個願望，就是在那裡誕生的。他告訴你們，Emperor Xande 的災難並沒有讓全世界滅絕；倖存者站在 Allag（古代亞拉戈帝國）的廢墟之上，抬頭尋找 Crystal Tower，卻發現塔已不見蹤影。但他們仍懷抱希望，祈願塔的尖塔能再次矗立於大地之上，成為世人共同的希望燈塔。</p><p>這份願望很快傳到了帝國唯一倖存的王族——Princess Salina。Salina 被人們最深切的祈願打動，便用 Allag（古代亞拉戈帝國）最頂尖的技術，把自己的血與記憶託付給她最信任的人——那人正是 G’raha 的祖先。千年過去，Allag（古代亞拉戈帝國）的技藝與才智逐漸消散，王家血脈也越來越稀薄；然而在最後一滴血真正消失之前，這一切的記憶又回到了 G’raha 身上。如今，他必須完成古人的願望：讓 Crystal Tower 再次發光，成為新的希望燈塔。</p><p>Cid 仍試圖阻止他，指出 Crystal Tower 的力量對 Eorzea 來說太危險，若要正確運用，你們需要和 Allag（古代亞拉戈帝國）同等級的技術；而現實是，你們幾乎不了解塔的運作，也許永遠都無法完全理解。G’raha 同意這個判斷，並說你們當然可以等到某個遙遠的未來，等有人終有一天追上 Allag（古代亞拉戈帝國）的知識高度，但到了那時，王家之血與控制塔的方法也早已失去。於是他提出另一條路：像 Amon 當年一樣，讓 Crystal Tower 進入深度沉眠。</p><p>Cid 震驚反對，G’raha 卻說他是認真的。他認為塔只能在「人類的知識足以與 Allagan（古代亞拉戈帝國）匹敵」時才該被使用；在那之前，他會在 Syrcus Tower 之中沉睡，等待那些終於有能力打開大門的人到來。到那時，他會迎接他們、引導他們，讓 Crystal Tower 真正成為它本該成為的希望燈塔——這也是唯一能讓古人的願望成真的方法。他說自己的命運在未來，而你的命運在門外：你必須離開，去創造一個希望得以主宰、過去的悲劇終將成為回憶的未來，因為能做到這一點的只有你。</p><p>Cid 明白再說什麼都無法改變 G’raha 的決心，只能選擇往前：走向更明亮的未來，即使不容易，也正因為不容易才要去做。Wedge 大聲喊著，你們一定會追上 Allag（古代亞拉戈帝國），把失落的距離全部補回來。Biggs 也跟著發誓，沒幾年你們就會來敲門，把 G’raha 叫醒。Rammbroes 則請 G’raha 見證 NOAH 的成果，原諒你們的失敗，並希望有朝一日能再相見。G’raha 向 Rammbroes 道別，說期待聽見你們的事蹟；他也轉向你，說歷史一定會記得你，你的英勇會成為他醒來後指引方向的星光。說完，他坦白自己已想睡了，並以一句告別，把自己交給那個由你們的勇氣與古人願望所孕育的未來。</p><p>之後，Nero 出現，淡淡說 Crystal Tower 又沉睡了，這份寂靜讓他不太習慣。他向 Cid 告別，說自己要把這一切拋在身後——可能性正在呼喚，而他注定要追隨。對他而言，新的黎明已經到來。當你回到 Saint Coinach’s Find，Rammbroes 告訴你 Cid 已離開，因為要實現 G’raha 的願望，仍有太多事情需要他處理。儘管朋友們各自踏上不同道路，NOAH 不會就此結束；你們要記得，所有努力都是為了更光明的未來，而那未來將由 G’raha 的燈塔之光照亮。封印 Crystal Tower 只是第一步。最後，他向你道別，並希望你們終將再度相逢。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>任務發布</b> Rammbroes <small class="muted">Mor Dhona (X:30.4, Y:12.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-world-of-darkness-quest.html">闇之世界</a></div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-end.html">完結</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
