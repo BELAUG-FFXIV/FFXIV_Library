@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>To Urqopacha | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – To Urqopacha (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+
+    /* 展開/收合 */
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/AJ8Y2ip4k6c"
+              title="To Urqopacha" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">To Urqopacha</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'To Urqopacha',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>You find a Pelupelu merchant who looks as though he has been waiting forever, complaining that he has eaten enough tacos to feed an army. When Erenville asks after the road to Urqopacha beyond the Arch of the Dawn, the answer is blunt: the route is correct, but the recent downpour has left it so broken that you will do more stumbling than walking. Still, the merchant promises a dependable solution—and urges you to come along.</p><p>Back at the stables, the others share their thoughts as the plan takes shape. Alphinaud is relieved not to face a slick, treacherous trail on foot, while Alisaie admits that the Pelupelu’s small stature—and their masks—make them hard to read at a glance. Wuk Lamat, however, can only groan at the mention of alpacas, even as Krile brightens at the sight of the fluffy young mounts.</p><p>The Pelupelu presents the answer with pride: alpacas. He explains that they can carry heavy loads and take Urqopacha’s steep mountain paths as easily as level ground—so essential that merchants would be lost without them. Krile immediately likens their role to chocobos back home, and Wuk Lamat can’t help asking why Eorzea has none.</p><p>Erenville answers without fuss: alpacas are native to Yok Tural, and every region already has what suits it—chocobos in Eorzea, horses in the eastern lands. Wuk Lamat still hesitates, calling them little monsters, and Krile notices her discomfort. Pressed, Wuk Lamat admits the reason: as a mischievous child, she used to tug on their wool, until one spat on her—and the stench was unforgettable.</p><p>Even so, the practical details win out. Erenville says trained alpaca mounts are docile and easy to handle, even for novices, and you can feel Wuk Lamat forcing herself to accept what needs doing. When the Pelupelu asks whether his information proved useful, Wuk Lamat concedes it was—only to be caught off guard when he demands payment. Erenville reminds her that Pelupelu take pride in trade that benefits both sides, and Wuk Lamat pays a fair price for fair advice, muttering that she had better not be spat on again.</p><p>With that settled, you make your way into Urqopacha, where a poet’s words paint the land in towering images: a mountain that would remain when all else sinks, and the legendary Valigarmanda—the only beast said to threaten that serene summit—now imprisoned by the Dawnservant. The air turns crisp and thin among the peaks, and Erenville points out Worqor Zormor, the tallest mountain in Yok Tural, warning that its imposing height is not the only reason the ambitious keep their distance.</p><p>Along the path, Bol Noq’ introduces himself as a weaver and speaks of visiting an alpaca ranch, sharing mezcal with the head rancher while learning the finer points of wool production. Erenville explains the drink as a local specialty distilled from agave heart juice, and Bol Noq’ laughs at how it lifted his spirits enough to triple his order—though he insists the discount made it a good deal. Before he goes, he offers something more valuable than a story: support for Wuk Lamat’s bid for the throne. Erenville then warns you plainly that Pelupelu peddlers are charming by design, found across Tural with their sturdy alpacas, and many customers end up spending more than they meant to.</p><p>At Wachunpelo, home of the Pelupelu, that warning proves immediate. You arrive to find Wuk Lamat being flattered as a future Dawnservant and coaxed toward a shop full of luxurious alpaca-wool cloaks—finery, the merchant insists, for a ruler adored by her people. Wuk Lamat falters, tempted by the sweet words, until Erenville steps in and refuses firmly for both of them. Afterward, he makes the lesson explicit: Pelupelu live to spread joy through trade and won’t cheat you, but their friendly speech disarms the unwary time and again—so your only defense is a clear, unambiguous refusal.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Approachable Pelu <small class="muted">(Tuliyollal, X:12.7, Y:13.8)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-rite-of-succession.html">The Rite of Succession</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 90</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="traders-of-happiness.html">Traders of Happiness</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'オルコ・パチャ',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ペルペル族の商人は、待ちくたびれたとぼやきながら、タコスを軍隊が食べるほど食べてしまったと大げさに嘆く。エレンヴィルが、グルージャジャ凱旋門を出てオルコ・パチャへ向かう道の状況を確かめると、答えは率直だった。道順は合っているが、先日の豪雨で道は荒れ、歩くというより転びながら進むことになる。それでも商人は、頼れる手段があると胸を張り、あなたを連れて行こうとする。</p><p>厩舎へ向かう途中、仲間たちはそれぞれに反応する。アルフィノは、滑りやすい険路を徒歩で進まずに済むのは賢明だと安堵し、アリゼーは、ペルペル族は小柄なうえ仮面まで着けているから、性別も年齢も見分けがつかないとこぼす。そんな中でウクラマトだけは、アルパカという言葉を聞いた瞬間から露骨に嫌そうな顔をし、クルルはふわふわの子どもたちが乗り物になるのかと目を輝かせる。</p><p>商人は得意げに紹介する。最も頼れる相棒――アルパカだ。重い荷を背負っても、オルコ・パチャの急峻な山道を、まるで穏やかな草原のように進めるという。商人たちは彼らなしでは立ちゆかないのだと。クルルは、その役割が故郷のチョコボに似ていると言い、ウクラマトは、エオルゼアにアルパカがいないのかと不思議そうに問う。</p><p>エレンヴィルは淡々と答える。アルパカはヨク・トラル原産であり、土地には土地に適した使役獣がいる。エオルゼアにはチョコボ、東方には馬がいるのだから、性質に合わず必要もない場所で、わざわざ別の荷役獣を育てる理由はない。それでもウクラマトは渋り、こんな小さな怪物に乗らねばならないのかと不満を漏らす。クルルは、ウクラマトがアルパカを苦手としているのだと察する。</p><p>やがてウクラマトは理由を明かす。幼い頃、悪戯心で毛を引っぱって回ったことがあり、その報いに唾をかけられた。あの臭いは想像を絶するほど最悪だったのだと。クルルは笑い、場が少しだけ和らぐが、ウクラマトの顔にはなお苦い記憶が残る。</p><p>それでも現実は動かない。エレンヴィルは、乗用に育てられたアルパカは温和で扱いやすく、経験のない者でも手綱を取れると言う。あなたの前でウクラマトは、嫌々ながらも決意を固めていく。商人が情報は役に立ったかと尋ねると、ウクラマトは認めざるを得ず、そして次の要求に面食らう――代金を払え、と。エレンヴィルは、ペルペル族は交易で喜びを広めることを尊び、双方に益のある取引に誇りを持つと諭す。ウクラマトは、公正な助言には公正な対価だと支払い、二度と唾をかけられないよう祈るように呟く。エレンヴィルは、落ち着いて優しく接すれば相手もそうなる、と釘を刺す。</p><p>こうしてあなたはオルコ・パチャへ踏み入り、詩の言葉がこの地を語る。すべての土地が海に沈もうとも屹立すると歌われる山、そしてその静かな威容を脅かし得る唯一の獣――伝説のヴァリガルマンダ。しかしそれはドーンサーヴァントによって封じられているという。澄んだ空気と薄い高地の息苦しさの中で、エレンヴィルは、ヨク・トラルで最も高い山ウォーコー・ゾルモルを示し、その高さだけが人々を遠ざける理由ではないと含みを持たせる。</p><p>道中、機織り職人のボル・ノクは、アルパカ牧場を見学し、牧場主とメスカルを酌み交わしながら毛織物の話を聞いたと語る。エレンヴィルはそれが、アガベの芯の汁を蒸留して作る、この地の名産酒だと説明する。ボル・ノクは上機嫌のまま発注量を三倍にしてしまったが、値引きがあったから悪い取引ではなかったと笑い、去り際にウクラマトの理想を支持すると告げる。エレンヴィルはさらに、ペルペル族の行商はトラル各地におり、言葉巧みに相手を引き込み、気づけば想定以上に使わせることが多いのだと警告する。</p><p>そしてワチュン・ペロ――ペルペル族の故郷――に着くと、その警告はすぐ現実となる。あなたが目にしたのは、未来のドーンサーヴァントだと持ち上げられ、上質なアルパカ毛の外套を勧められているウクラマトの姿だった。統治者には民の前で相応しい装いが必要だと、商人は甘い言葉で畳みかける。ウクラマトが心を揺らしかけたところへ、エレンヴィルが割って入り、丁重だが明確に断る。後になって彼は、ペルペル族は不正を働かず、喜びを届ける取引を誇りとする一方で、親しみやすい口調で相手の警戒を解き、油断した者を何度でも買い物へ導くのだと説明する。だからこそ、あなたが取るべき手段はただ一つ――はっきりと、揺るがぬ拒絶を示すことだ。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ペルペル族の協力者 <small class="muted">（トライヨラ, X:12.7, Y:13.8）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-rite-of-succession.html">継承の儀</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 90</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="traders-of-happiness.html">行商の民、ペルペル族</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'前往 Urqopacha',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你找到一位 Pelupelu 商人，他抱怨自己等得像過了好幾天，還在 Br’uk Evu 的塔可餵飽了一整支軍隊。當 Erenville 追問通往 Urqopacha 的路況——從 Arch of the Dawn 出發、在第一個岔路往西——對方坦白說路線沒錯，但最近的暴雨把道路折騰得一塌糊塗，你走起來多半是踉蹌而不是穩穩前進。不過他很快又打起精神，說崎嶇地形有最可靠的解法，示意你跟上。</p><p>你們一路來到羊駝的厩舍。Alphinaud 聽完只覺得先問清楚是明智之舉，他可不想徒步踏上又滑又危險的山路；Alisaie 則忍不住吐槽 Pelupelu 不只個頭小，還戴著面具，想分辨男女、年紀幾乎不可能。Wuk Lamat 卻明顯不爽，光聽到「羊駝」就皺起眉；反倒是 Krile 一見那群毛茸茸的小家伙，立刻興奮起來，像是已經在想像你們要怎麼騎上去。</p><p>Pelupelu 商人驕傲地把「最可靠的夥伴」介紹給你——羊駝。他說牠們能背著重物，照樣把 Urqopacha 陡峭的山徑走得像平坦田野一樣輕鬆；沒有牠們，商隊根本撐不起來。Krile 聽著就把牠們和 Eorzea 的陸行鳥相比，覺得是同樣不可或缺的運輸夥伴；Wuk Lamat 卻忍不住問：難道你們那邊沒有羊駝嗎？</p><p>Erenville 的回答很直接：羊駝原生於 Yok Tural；Eorzea 有陸行鳥，東方有馬，既然各地都有合適的負重獸，就沒必要在不適合、也不需要的地方硬去培育另一種。可對 Wuk Lamat 來說，理性歸理性，她仍滿臉抗拒，嘴上把牠們叫成「小怪物」，像是在努力說服自己接受這個安排。Krile 看在眼裡，立刻抓住重點——你顯然不太喜歡羊駝。</p><p>被問到原因，Wuk Lamat 終於承認：她小時候調皮，曾到處去拉羊駝的毛，結果被其中一隻吐口水在身上，那股臭味簡直是她想像過最糟的東西。Krile 聽了笑出聲來，氣氛一瞬間輕了些，但你也看得出來，那段記憶對 Wuk Lamat 來說一點都不「可愛」。</p><p>然而現實不會因為討厭就改變。Erenville 告訴你，作為坐騎培育的羊駝性情好奇又溫順，就算沒有經驗也容易上手。你能感覺到 Wuk Lamat 只能硬著頭皮點頭，像是在把「不情願」吞回去。Pelupelu 商人問自己的情報是否有用，Wuk Lamat 勉強承認「很有幫助」——下一秒卻被「那就付款吧」打得措手不及。Erenville 提醒她，Pelupelu 以交易帶來喜悅為榮，講究對雙方都有益的買賣；Wuk Lamat 只得掏出相應的代價，嘴裡嘟囔著希望別再被吐一次口水，而 Erenville 也冷冷補上一句：那種下場，是你自己招來的——保持冷靜、溫和對待，牠們也會同樣回應。</p><p>你們就這麼抵達 Urqopacha。詩人的話在空氣裡迴盪：他們歌頌一座即使萬物沉入海中也仍會屹立的山，並提到只有傳說中的 Valigarmanda 才可能撼動那座山巔的寧靜；但那場會飛的災厄已被 Dawnservant 囚禁，於是想爭奪王位的人，還剩下什麼能證明自身的偉業？你在清冽、稀薄的高地空氣中前行，Erenville 指向 Worqor Zormor——Yok Tural 最高的山——並提醒你：讓野心家不敢靠近的理由，絕不只因為它高。</p><p>路上你遇見織工 Bol Noq’。他說自己才從一座羊駝牧場回來，Pelupelu 帶他參觀時，他還和牧場主一起喝了 mezcal，一邊聽對方講解羊毛產出的門道。Alisaie 聽到這陌生的飲品名發出疑問，Erenville 便解釋那是 Urqopacha 的特產烈酒，以龍舌蘭心汁蒸餾而成。Bol Noq’ 笑說也許正是那酒讓他心情大好，羊駝毛下單量直接變成平常的三倍——雖然有折扣，所以最後還算划算。臨走前，他忽然收起玩笑，表示支持 Wuk Lamat 以和平為願景爭奪王位；而 Erenville 也趁勢提醒你，Pelupelu 商人遍布 Tural 各地，擅長用熱情又親切的話術把人哄得多掏錢，你最好把這件事記在心上。</p><p>當你來到 Wachunpelo——Pelupelu 的家園——這提醒立刻派上用場。你看到 Wuk Lamat 被捧成「未來的 Dawnservant」，商人熱情推薦用頂級羊駝毛織成的斗篷，還說統治者就該用最好的華服面對仰慕她的人民。Wuk Lamat 聽著聽著竟露出動搖，甚至覺得「最美的女士」這稱呼很中聽；就在她準備「去看一眼也無妨」時，Erenville 乾脆地插話拒絕，替她把話說死。事後他向你說明得更清楚：Pelupelu 會以交易帶來快樂，也不會賣劣貨或坑你，但他們真正厲害的是用一句句漂亮話卸下你的戒心，讓你在不知不覺間點頭掏錢——而你唯一的對策，就是冷靜、明確、堅定地拒絕。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 親切的佩盧 <small class="muted">(圖萊尤拉, X:12.7, Y:13.8)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-rite-of-succession.html">繼承的儀式</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.90</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="traders-of-happiness.html">行商之民：佩魯佩魯族</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
