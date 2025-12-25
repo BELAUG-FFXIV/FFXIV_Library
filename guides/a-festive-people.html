@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A Festive People | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – A Festive People (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/GlCmAIuhSHQ"
+              title="A Festive People" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">A Festive People</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`A Festive People`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>You step into the wetlands with Erenville, Alphinaud, Alisaie, and Krile, and Erenville makes his stance clear at once—he agreed to guide you, not to dote on anyone. Alphinaud quietly notes how unlike the Vanu’s the Hanu ways already feel, while Alisaie watches the falls and the waterways, thinking aloud about how the floodwaters must feed every stream and river here. Krile keeps the purpose in view: if your read of the rite is right, one of the Dawnservant’s electors should be somewhere nearby.</p><p>The village is subdued. Wuk Lamat reads the mood the same way you do—the people have no appetite for celebration—and Krile can only assume they’re still recovering from the storm’s damage. Before long, an elderly Hanu woman calls out a bright “Ohokaliy!”, and Zanuhali appears to greet the Third Promise and her companions. As elder of the Hanu, he explains, he will also serve as elector for the rite of succession—yet he asks you to wait a little longer before the feat begins, and invites you to accept the village’s hospitality in the meantime.</p><p>Rather than bristle, Wuk Lamat decides to use the pause. You and the others can poke around, learn what you can, and maybe pick up clues before you’re tested. Alisaie admits she’s surprised to hear such prudence from her, and Wuk Lamat pushes back—she admires her father, yes, but he is not only decisive; the Head of Reason weighs possibilities, even if the Head of Resolve has lately been sleeping away restraint. With the plan set, Alphinaud suggests splitting up: you stay with him and Wuk Lamat to cover the northern half of the settlement, while Erenville, Alisaie, and Krile focus on the south.</p><p>As you walk, the storm’s work is everywhere—holes torn in walls, roofs ripped away, repairs still underway. A dispirited villager speaks of progress made with the Dawnservant’s aid, but also of losses that can’t be patched back together. Wuk Lamat listens, and the cheer she expected to find is absent; she can’t help feeling there must be something she can do, and she resolves to look harder.</p><p>Your attention shifts to what the village is built around. Alphinaud notices bundled reeds and then a boat woven from the same plants, shaped like a bird with a distinct beak and feathered tail. The reeds clearly matter here—practical, cultural, and possibly central to whatever trial awaits. Then Krile’s voice comes through, telling you they’re ready to receive you now and asking everyone to gather at the large building in the south. You set off at once.</p><p>Inside, Zanuhali begins in earnest. Ok’hanu, he says, is where his people forged their bond with the Dawnservant in their chapter of the Tuliyollal Saga, and in homage to those events he has prepared the Feat of Reeds. The Hanu rely on reeds in every part of life, yet the paddies are failing this season—and what better moment, he asks, to see whether those who would become Dawnservant can treat an ailing harvest as a trifling problem to solve? Wuk Lamat accepts that it is a ruler’s duty to answer the people’s woes. When Bakool Ja Ja talks of taking the keystone by force, Zanuhali calmly warns that any claimant who attacks a feat-giver without consent will be immediately disqualified, and he refuses to indulge bloodlust. As the feat begins and Bakool Ja Ja’s brothers size you up from the side, Wuk Lamat bristles at being dismissed—until Krile reminds her there is no time limit. Wuk Lamat exhales, steadies herself, and chooses to think this through rather than charge in.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Wuk Lamat <small class="muted">(Kozama’uka, X:16.1, Y:10.0)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="to-kozama-uka.html">To Kozama'uka</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 90</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-feat-of-reeds.html">The Feat of Reeds</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'祭祀の民、ハヌハヌ族',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>あなたはエレンヴィル、アルフィノ、アリゼー、クリルとともに湿地へ踏み込み、エレンヴィルはきっぱりと言う――案内役は引き受けたが、子守役ではない。アルフィノはひと目で、ここハヌハヌの文化がヴァヌ・ヴァヌとはまるで違うと感じ取り、アリゼーは滝の水が湿地を満たして無数の川へ流れ込む様を思い描く。クリルは目的を外さない。読みが正しければ、暁王の選定者のひとりが、このあたりにいるはずだ。</p><p>村の空気は重い。ウクラマトも同じように感じ取り、人々はいま祭りどころではないと言う。クリルは、嵐がもたらした被害からまだ立ち直れていないのだろうと推し量る。そこへ年老いたハヌの女性が「オホカリィ！」と声を上げ、続いてザヌハリが現れる。彼はハヌの長老として、そして継承の儀における選定者として、第三王位継承者一行を迎える――だが試練の開始はもう少し先だと言い、まずは村のもてなしを受けてほしいと告げた。</p><p>ウクラマトは待つことを選ぶ。せっかくの時間だ、あたりを見て回り、試練の手掛かりを拾い、備えを整えよう。意外な慎重さにアリゼーが感心すると、ウクラマトは反論しつつも説明する。父を敬い、決断の速さを学んではいるが、暁王には熟考する一面もある――理の頭が可能性を見極め、断の頭が突き進むのだ、と。方針が定まると、アルフィノが提案する。あなたとウクラマト、そして自分が北側を担当し、エレンヴィル、アリゼー、クリルが南側を調べよう。</p><p>歩くほどに、嵐の爪痕が目に刺さる。壁は抉れ、屋根は失われ、修理は続いている。気落ちした村人は、暁王が送ってくれた支援で少しずつ直してはいるが、失ったもののすべてが戻るわけではないと嘆く。ウクラマトはいつもの明るさを見いだせず、折れたのは木や葦だけではないのだと受け止める――自分にできることがあるはずだ、と。</p><p>アルフィノは束ねられた葦に目を留め、さらに葦で編まれた舟形の器を見つける。鳥を思わせる造形で、嘴や羽尾が際立っている。葦はここでは生活の糧であり、織りの素材であり、文化そのものでもあるのだろう。やがてリンクパール越しにクリルの声が届く。準備が整った、村の南にある大きな建物へ来てほしい――あなたたちは急いで向かう。</p><p>ザヌハリは語り始める。ここオック・ハヌでは、ハヌの民がトライヨラのサーガの一章で暁王と絆を結んだ。その出来事に敬意を表し、彼は「葦の試練」を用意したのだと言う。葦は食にも織りにも欠かせないが、今季は水田の作柄が悪い――暁王を目指す者なら、病んだ収穫を些事として解決できるだろう、と。ウクラマトは、民の苦しみに応えるのが統治者の務めだと受け止める。そこへバクージャジャが力ずくで要石を奪うと言い放つが、ザヌハリは即座に告げる。許しなく試練の授与者へ刃を向ければ、即刻失格が宮殿へ通達される、と。試練が始まり、バクージャジャたちがこちらを値踏みする中、ウクラマトは悔しさを噛みしめる――しかしクリルが時間制限はないと諭し、あなたたちは冷静に考える道を選ぶ。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ウクラマト <small class="muted">（コザマル・カ, X:16.1, Y:10.0）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="to-kozama-uka.html">コザマル・カ</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 90</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-feat-of-reeds.html">葦の試練</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'祭祀與歡慶之民：哈努哈努族',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你和 Erenville、Alphinaud、Alisaie、Krile 一起走進濕地，Erenville 開門見山：他答應當嚮導，不是來當保母。Alphinaud 一眼就看出 Hanu 的文化和 Vanu 完全不同；Alisaie 望著瀑布與水道，低聲猜想那水勢一定會淹沒濕地，最後分流成無數溪河。Krile 把重點拉回來——如果你們的推測沒錯，Dawnservant 的選定者之一，應該就在這附近。</p><p>村子的氣氛沉得出奇。Wuk Lamat 也感覺到了：人們一點都不像要辦節慶的樣子。Krile 只能推想，大家仍在從風暴造成的破壞裡復原。這時，一位年長的 Hanu 女人喊出「Ohokaliy!」，接著 Zanuhali 出面迎接第三誓約與你們一行。他自稱是 Hanu 的長老，也會在繼承儀式中擔任選定者——不過，試煉還沒準備好開始，他先請你們暫時享用村子的款待。</p><p>Wuk Lamat 沒有硬闖。既然有空檔，就先四處看看、摸清狀況，也許還能找到關於試煉的線索，好好做準備。Alisaie 聽了有點意外，反倒稱讚她難得謹慎；Wuk Lamat 一邊反駁，一邊解釋自己對爸爸的理解——爸爸不只是果決，還有會思考、會權衡的那一面。於是你們定下分工：你和 Wuk Lamat、Alphinaud 負責聚落北側；Erenville、Alisaie、Krile 去查南側。</p><p>你們一走開，就看見風暴留下的傷口：牆上破了大洞、屋頂少了半截，修補工程仍在進行。一名意志消沉的村民嘆著氣說，雖然 Dawnservant 送來物資與援助，大家正在慢慢修復家園，但有太多東西已經失去，再也補不回來。Wuk Lamat 聽著聽著，發現 Hanu 們的低落不只是房屋損壞——她咬著牙，覺得自己一定得再多找找，看能不能做點什麼。</p><p>Alphinaud 留意到一束束乾燥的蘆葦，接著又看見一艘用蘆葦編成的舟形小艇，造型像鳥，嘴與尾羽都很醒目。這些蘆葦顯然不只是材料——它們同時承載了生活與文化。沒多久，Krile 的聲音透過通訊珠傳來：對方已經準備好接見你們，請到村子南邊那棟最大的建築集合。你們立刻趕過去。</p><p>在眾人到齊後，Zanuhali 直接切入正題。他說，Ok’hanu 正是 Hanu 與 Dawnservant 在 Tuliyollal Saga 的某一章締結羈絆之地；為了紀念那段往事，他為你們準備了「蘆葦試煉」。Hanu 的生活離不開蘆葦——能吃、能編織——但你往附近的水田一看，這一季的收成卻出了問題。Zanuhali 問得直白：想成為 Dawnservant 的人，難道會連一場病弱的收成都解決不了嗎？Wuk Lamat 承認，統治者本就該回應人民的困境。當 Bakool Ja Ja 開口要用武力奪走要石時，Zanuhali 冷靜警告：若未經同意就對試煉授予者動手，立刻會被通報失格。試煉開始後，Bakool Ja Ja 一行在旁竊語、評估你們的威脅，Wuk Lamat 怒火上湧——但 Krile 提醒她沒有時間限制，你們必須冷靜思考。Wuk Lamat 深吸一口氣，把衝動壓下去，選擇用頭腦應戰。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 烏克·拉瑪特 <small class="muted">(克扎瑪烏卡濕地, X:16.1, Y:10.0)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="to-kozama-uka.html">前往Kozama&#39;uka</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.90</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-feat-of-reeds.html">蘆葦試煉</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
