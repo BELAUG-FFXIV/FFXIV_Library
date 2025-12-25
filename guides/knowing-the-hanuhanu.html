@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Knowing the Hanuhanu | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Knowing the Hanuhanu (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/_2tfrB9oDgg"
+              title="Knowing the Hanuhanu" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Knowing the Hanuhanu</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Knowing the Hanuhanu`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Linuhanu admits how afraid he was that Wuk Lamat would come to harm—Ok’hanu has seen enough death already. Wuk Lamat is relieved the float didn’t fall into Bakool Ja Ja’s hands, yet can’t hide her frustration at how easily he brushed her aside. Alphinaud notes that, given the nature of the rite of succession, such clashes are likely inevitable. Alisaie spits out the truth: Bakool Ja Ja waited for you to leave so he could steal the float—coward and thief. Krile is simply grateful you returned before anyone was seriously injured, and Erenville reflects on how tense it all was, thankful Alphinaud had the presence of mind to share linkpearls.</p><p>Wuk Evu breaks the mood with brisk efficiency: while that “exciting interlude” played out, his repairs were completed as well. Before the festival can begin, he insists it’s only proper to inform the villagers that Ihih’hana will be held after all—then pointedly reminds everyone not to forget their greetings. Wuk Lamat immediately proves she remembers: “Ohokaliy!”</p><p>You go out to greet the Ok’hanu villagers, and the response comes in waves. One weary soul sighs there’s nothing left to look forward to—until “Ohokaliy!” and the news of the festival snaps him upright: of course he’ll be there, tradition matters, and he refuses to brood any longer. Another admits life feels empty without Ihih’hana, grateful for the notice—but torn, because repairs still need finishing. A third, mourning what has been lost, almost can’t see the point of trying—until “Ohokaliy!” and the revelation that the float is fixed. The thought of fallen friends who would want celebration, not surrender, steels their resolve: they will go and enjoy the festival for those who no longer can.</p><p>When you return, Wuk Evu is satisfied: the Hanu were pleased to hear their festival will go ahead. Now, once everyone is assembled, the Lifting of Wings can finally begin.</p><p>At the start, Wuk Lamat is startled by how few have gathered, but Wuk Evu counsels patience: once Ihih’hana begins, no Hanu will resist joining. Linuhanu urges faith and calls Wuk Lamat to climb aboard the float—it’s time. Wuk Evu explains Ihih’hana is not only a prayer for a bountiful harvest, but also an exchange of pledges between rider and bearers—an oath of long, fruitful friendship. Linuhanu rallies the carriers with fierce affection, warning them not to drop the “savior of our beloved festival,” no matter how their shoulders burn.</p><p>The procession swells as villagers join in, drawn by the festival’s pull. Zanuhali appears, remarking on the day the Dawn’s Promise rides the boat again, and invoking the last time—when Gulool Ja Ja stood here. With enough bearers gathered, you carry on toward Kozanuakiy.</p><p>Then Wuk Evu reveals the festival’s true mechanism: the float draws upon the bearers’ life force, concentrating and amplifying that energy. Kixaihih receives it, then releases it in a great burst that showers down over the land to replenish its vital currents. When you reach the Fields of Gold, the change is unmistakable—Alphinaud exclaims that it worked, Krile compares it to a literal charm, Linuhanu can only stare, and Wuk Lamat is left breathless at what the ritual accomplished.</p><p>Afterward, Alphinaud observes that rejuvenated fields may allow the Hanuhanu to replenish their aetherial reserves as well. Alisaie admits she’d like a turn riding the float—because it looked fun. Krile notes how invigorated the Hanu seemed the moment the festival began, even before the miracle took hold. Erenville, surprised despite himself, concedes the festival was impressive; Wuk Evu calmly repeats what he promised: spectacular. Linuhanu confesses he dismissed the float’s arcane nature too quickly, wanting to believe no one understood Ihih’hana better than he did—only to realize there is still much he has yet to learn.</p><p>Wuk Lamat worries she abandoned the float in her excitement to see the reeds, but Linuhanu reassures her: festival fever has carried the villagers along, and they’ve already been taking turns at the poles on the way back. She should enjoy the sight of what she’s accomplished. Looking over the fields, Wuk Lamat still sees some sickly stalks, and Alphinaud suggests even harvest magic has limits—yet with the tradition maintained year after year, the whole field should recover.</p><p>Krile turns back to the question of the feat, but Zanuhali has no doubts: even reviving a single reed would have proved commitment, and recognizing the float’s nature and restoring Ihih’hana as a near-perfect solution demonstrates dedication. He admits the Hanu grew lax in maintaining the float, diluting its magic and reducing Ihih’hana to hollow theater—until now.</p><p>Koana arrives at that moment, delayed by an unpleasant encounter, and Zanuhali’s attention shifts. Wuk Lamat is stunned when Koana reveals his own solution: pour in a mysterious liquid, and the problem is solved. Alphinaud deduces the reeds suffered from stagnant aether; the concoction likely enhanced aetherial conductivity, using flowing water as an aetherial current to promote the transfer of life energies. Koana credits his Studium education and the cooperation of his Archon allies—then uses it to lecture Wuk Lamat on why foreign knowledge and technology must be embraced: why lug heavy floats when innovation can do the work?</p><p>Krile doesn’t let the comparison diminish Wuk Lamat’s success—her approach achieved the same result, and Linuhanu agrees. Wuk Lamat answers honestly: she enjoyed the festival, and realizes she knew far less than she thought—about the reeds, about Ihih’hana, and about the Hanu themselves. Having learned so much, she feels she’s truly come to know them—and likes them even more than before. Linuhanu returns the feeling, saying he’ll never look at the float the same way again.</p><p>Zanuhali declares both of you exceeded expectations and calls you forward to claim your stones. Wuk Lamat sets the keystone into the tablet—perfect fit—six remain. Koana is already ready to move on, and Wuk Lamat sighs that he never pauses to celebrate. Linuhanu insists she must return next season for Ihih’hana—this time as Dawnservant. Wuk Lamat bids farewell and promises she’ll see them again.</p><p>Elsewhere, Doppro Illusionist reveals to Bakool Ja Ja that the concoction was brewed by Koana himself—a test vial, but with the same reagents. Bakool Ja Ja accepts the advantage coldly: they will use whatever they must to win.</p><p>Back on the road, questions linger. Alisaie wonders where Bakool Ja Ja went, and what his follower meant by their “other” prospect. Alphinaud is troubled by Koana’s mention of Archons. Krile senses Koana keeps others at a distance, even if he seems decent. Erenville refocuses on what matters: two-headed trouble aside, Wuk Lamat completed the feat and earned a keystone.</p><p>Wuk Lamat, for her part, is bright with renewed momentum. She’s met so many wonderful people already—Wuk Evu, eccentric but deeply respectful of other cultures; Linuhanu, honoring his departed friend through Ihih’hana and helping others do the same. Excited for who she’ll meet next, she urges you onward—back to Xbalyav Ty’e, and then on toward Urqopacha, where another 「選定者」 likely awaits.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Wuk Evu <small class="muted">(Kozama’uka, X:19.5, Y:10.8)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-lifting-of-wings.html">The Lifting of Wings</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 90</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-success-of-others.html">The Success of Others</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'ハヌハヌ族を知る',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>リヌハヌは震える声で告白する。ウクラマトに何かあったらと思うと怖かった――オクハヌはすでに十分すぎるほど死を見てきたのだと。ウクラマトは山車をバクージャジャに奪われずに済んだことに安堵しつつも、あまりに容易く払いのけられた屈辱を隠せない。アルフィノは、継承の儀という性質上、こうした衝突は避けがたいのだろうと言う。アリゼーは、あなたたちが離れた隙を狙って山車を盗もうとした卑怯者で泥棒だと切り捨てる。クルルは大事に至る前に戻れたことを喜び、エレンヴィルは緊迫した状況だったと振り返り、リンクパールを分けたアルフィノの判断に感謝する。</p><p>空気を切り替えるようにウケブが告げる。「刺激的な幕間」は終わりだ――修理も完了した、と。だが祭りを始める前に、イヒーハナが予定どおり行われることを村人に伝えるのが礼儀だと強調し、挨拶を忘れるなと釘を刺す。ウクラマトは胸を張って言う。「オホカリィ！」――覚えている、と。</p><p>あなたたちはオクハヌの村人たちに声をかけて回る。落ち込んだ者は溜息をつき、もう何も楽しみがないと言いかけるが、「オホカリィ！」と祭りが始まると聞いた途端に顔を上げる。嵐の後始末は辛かったが、「翼上げ」は伝統であり喜びでもある――自分は塞ぎ込んでなどいない、支度をすると。別の者は、イヒーハナがないと空虚だと呻きつつ、知らせに礼を言う。だが修理も急がねばならず、どうすべきかと逡巡する。さらに喪に沈む者は、失ったものの大きさに心が折れかけていたが、「オホカリィ！」と山車が直ったと知り、亡くなった仲間たちも祭りの再開を喜ぶはずだと言う。失ったからこそ、祝う――祭りに行き、もう行けない者の分まで楽しむ、と。</p><p>戻ると、ウケブは満足げだ。祭りが行われると聞いて村人が喜んだのなら何よりだ、と。そして仲間が揃い次第、ついに「翼上げ」を始められると言う。</p><p>しかし始まりは静かだった。集まった者が少ないことにウクラマトは驚くが、ウケブは、始まれば誰も抗えず集まると諭す。リヌハヌは信じろと言い、ウクラマトに山車へ乗るよう促す。いよいよ「翼上げ」の時だ。ウケブは、イヒーハナは豊穣を願う祈りであると同時に、乗り手と担ぎ手が誓いを交わす儀でもある――長く実りある友情の約束だと語る。リヌハヌは担ぎ手を鼓舞し、肩が焼けようと羽根が抜け落ちようと、ウクラマトを落とすなと叫ぶ。</p><p>行列が動き出すと、祭りの熱に引き寄せられるように担ぎ手が増えていく。ザヌハリは、再び「暁の誓約」が舟に乗る日が来たかと笑い、かつてグルージャジャが訪れた時以来だと懐かしむ。担ぎ手が揃い、あなたたちはコザヌアキへ向けて進む。</p><p>そしてウケブが「真の栄光」を明かす。山車は担ぎ手の生命力を引き出し、それを集め、増幅する。キクサイヒがその力を受け取り、巨大な奔流として解き放つと、生命の流れが雨となって大地へ降り注ぐ――枯れかけた地の活力を満たすのだ。黄金の畑に到達した瞬間、変化は明らかだった。アルフィノは成功を叫び、クルルはまるで護符のようだと驚き、リヌハヌは山車が葦を助けていたのだと息を呑む。ウクラマトもまた、こんなことが可能だとはと、言葉を失う。</p><p>祭りの後、アルフィノは畑が甦ればハヌハヌ自身もエーテルの活力を取り戻せるだろうと言い、アリゼーは山車に乗ってみたいと本音を漏らす。クルルは祭りが始まった瞬間から皆が活気づいていたと語り、エレンヴィルは想像以上に見事だったと認める。ウケブは、言っただろうと淡々と返し、リヌハヌは自分が山車の魔力を軽んじていたと反省する――誰より理解していると思いたかっただけで、まだ学ぶことが多いのだと。</p><p>ウクラマトは、葦を見たい一心で山車を置いてきたことを気にするが、リヌハヌは心配無用だと笑う。村人は祭りの熱に浮かされ、戻り道ですでに担ぎ棒を交代しながら運んでいる、と。あなたたちは畑を眺め、成し遂げたことを味わう。とはいえ、まだ弱って見える葦もある。アルフィノは、収穫の魔法にも限界はあるのだろうが、年々イヒーハナを続ければ畑全体が回復すると見立てる。クルルが試練の判定を案じると、ザヌハリは心配無用だと言う。一本でも蘇らせれば責務への献身は示せたし、山車の本質を見抜き、イヒーハナというほぼ完璧な解を導いたこと自体が証明だ、と。</p><p>そこへコーナが現れる。厄介な遭遇で遅れたが、ちょうど良い時に来たと言う。ウクラマトは、液体を注ぐだけで解決したのかと驚く。アルフィノは、原因は滞留したエーテルであり、彼の調合は伝導性を高め、水の流れをエーテルの導線として生命の移動を促したのだろうと推測する。コーナは、それはストゥディウムで受けた教育と、アーコンの協力があってこそだと述べ、外来の知識と技術を受け入れるべきだとウクラマトに説く――重い山車など運ぶ必要はない、と。</p><p>だがクルルは言う。ウクラマトのやり方も同じ結果を生んだのだ、と。リヌハヌも頷き、ウクラマトは祭りが楽しかったと笑う。以前訪れたから全部知っていると思っていたが、葦もイヒーハナも、ハヌのことも、実はほとんど知らなかった。今回学んだことで、ようやく彼らを知れた気がするし、前よりもっと好きになったと言う。リヌハヌも同じ気持ちだと返し、山車を見る目が変わったと語る。ザヌハリは期待以上だと告げ、石を受け取れと促す。キーストーンは石板にぴたりと収まり、残りは六つ。コーナは次へ行こうと言い、ウクラマトは祝いの間もない兄らしさに苦笑する。リヌハヌは来季のイヒーハナに必ず戻れと頼み、今度はドーンサーヴァントとしてだと言う。ウクラマトは礼を述べ、また会おうと別れを告げる。</p><p>一方で、ドプロの幻術士はバクージャジャに、あの調合液はコーナが自ら作った試験薬だが同じ試薬が入っていると囁く。バクージャジャは、勝つためなら何でも使うと冷たく言い切る。</p><p>帰路、疑問は残る。アリゼーはバクージャジャの行方と「別の見込み」が何なのかを気にし、アルフィノはコーナが言ったアーコンが誰なのか思案する。クルルは、コーナは悪い人ではなさそうだが距離を置くタイプだと感じ、エレンヴィルは結論だけを口にする――二つ頭の問題はさておき、ウクラマトは試練を果たし、キーストーンを得た。それが全てだ、と。ウクラマトは、出会った人々を思い返しながら前を向く。異文化への敬意を貫くウケブ、亡き友をイヒーハナで偲び人々を支えたリヌハヌ。これから誰に会えるのか、その予感に胸を躍らせ、あなたに呼びかける――さあ、次へ。次の「選定者」に会いに、ウルコパチャへ向かおう。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ウケブ <small class="muted">（コザマル・カ, X:19.5, Y:10.8）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-lifting-of-wings.html">イヒーハナ祭</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 90</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-success-of-others.html">本当の自分</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'深入認識哈努哈努族',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Linuhanu 壓著顫抖的情緒承認，他剛才真的很害怕 Wuk Lamat 出事——Ok’hanu 已經死過太多人了。Wuk Lamat 也說，能把花車守住、不讓 Bakool Ja Ja 得手，至少值得慶幸；但她仍忍不住咬牙，因為對方把她像惱人的小飛蟲一樣撥開。Alphinaud 提醒，繼承儀式本來就逼得人互相碰撞，這樣的衝突恐怕在所難免。Alisaie 直接點破：Bakool Ja Ja 是等你們離開才來偷花車的懦夫，也是小偷。Krile 則只慶幸你們及時趕回來，沒有讓任何人真的受重傷。Erenville 回想那一瞬間的緊繃，還好 Alphinaud 早早分了 linkpearl，才不至於錯過求援。</p><p>Wuk Evu 很快把氣氛拉回正事：那段「刺激的插曲」結束了，而他這邊的修理也已經完成。不過在祭典開始之前，出於禮節，必須先通知村民——Ihih’hana 確定會照常舉行。他還特地叮囑：別忘了打招呼。Wuk Lamat 立刻示範：「Ohokaliy！看吧，我記得！」</p><p>你們帶著「Ohokaliy」走進村子，把消息一個個傳出去。有人低著頭嘆氣，說已經沒有任何值得期待的事了；但一聽見「Ihih’hana 要開始了」就像被拉回現實，馬上改口說當然會去——風暴後的善後雖然很苦，但「Lifting of Wings」是傳統，也是喜悅的傳統，他不會再這樣悶著過日子，得趕快去準備。也有人疲憊地說，沒有 Ihih’hana 的日子空蕩得可怕；他謝謝你告訴他，但又想到修理工作必須儘快完成，一時不知道該怎麼取捨。還有人哽咽著說失去太多，幾乎覺得努力也沒有意義；可當你說出「Ohokaliy」並告訴他花車已經修好，他立刻想起那些逝去的同伴——他們一定會希望大家用慶祝來紀念，而不是讓失去阻止自己繼續走下去。他說他要去參加祭典，替那些再也不能參加的人好好享受一次。</p><p>回到花車旁，Wuk Evu 問你們村民是否聽了很高興——很好。等同伴都到齊，Lifting of Wings 終於能開始。起初聚集的人不多，Wuk Lamat 有點失落；但 Wuk Evu 要她耐心，Ihih’hana 一旦真正展開，沒有任何 Hanu 會忍得住不加入。Linuhanu 也大聲鼓勵：相信吧，第三誓約，登上花車——Lifting of Wings 的時刻到了。Wuk Evu 補上一句更深的意義：Ihih’hana 不只是祈求豐收，它也是乘坐者與抬車者之間的誓言交換——象徵一段長久而豐盛的友誼承諾。Linuhanu 轉身向抬車的人喊話：今天你們抬著的是 Wuk Lamat——拯救了你們心愛祭典的人。就算肩膀燒得發痛、羽毛都要掉光，也絕對別想把她摔下來。</p><p>花車一動，抬車的人很快就越來越多。Zanuhali 也現身，笑說竟然能看到「Dawn’s Promise」再次乘坐你們的船——自從 Gulool Ja Ja 來過之後，就再也沒有這樣的榮耀。人手足夠後，隊伍往 Kozanuakiy 前進。Wuk Evu 讓你們看清「真正的榮光」：花車會牽引抬車者的生命力，把能量集中並放大；Kixaihih 接收後，再以巨大的爆發把力量灑向大地，補回土地的生命脈動。當你們抵達 Fields of Gold，變化立刻顯現。Alphinaud 驚呼成功了，Krile 說像是「真的護符」，Linuhanu 望著蘆葦發愣，Wuk Lamat 則只能說——太不可思議了，竟然真的做得到。</p><p>事後，Alphinaud 認為田地恢復之後，Hanuhanu 也能補回他們消耗殆盡的 aether。Alisaie 嘴硬地說她也想坐花車一趟——看起來就是很好玩。Krile 也觀察到，Hanu 在祭典一開始就像被點燃一樣精神振作；Erenville 本來不知道該期待什麼，最後也承認這場祭典確實令人印象深刻。Wuk Evu 只淡淡回一句：我不是說了嗎，壯觀。Linuhanu 則坦白，他太快否定花車可能具備魔法性——他大概只是想相信，沒有人比他更懂 Ihih’hana；結果到頭來，他還有太多要學。</p><p>Wuk Lamat 擔心自己為了看蘆葦而把花車丟在後面是不是不妥，Linuhanu 笑著叫她別多想——村民已經被祭典的熱度捲走了，回程路上甚至輪流接替抬車杆，玩得不亦樂乎。你們走近田地，仍能看到部分蘆葦有些病弱；Alphinaud 說，收穫魔法恐怕也有極限，但只要年復一年維持祭典傳統，整片田終究會恢復。Krile 想起試煉評判的事，Zanuhali 立刻讓她放心：哪怕只是復甦一株蘆葦，都足以證明你們對任務的承諾；而你們看出花車的本質，並用 Ihih’hana 找到近乎完美的解法，更是最好的證明。他也承認，Hanu 長久以來疏於維護花車，讓魔力被稀釋，Ihih’hana 幾乎淪為空洞的表演——直到今天。</p><p>就在這時 Koana 出現，說自己因為一場不愉快的遭遇而耽擱，但來得正好。Wuk Lamat 震驚地問：你只要倒進那種神秘液體，就解決了？Alphinaud 推理，問題出在停滯的 aether，而那應該是提升 aether 傳導性的鍊金調合液，利用流水形成 aether 的流向，促進生命能量的轉移。Koana 說，若沒有 Studium 的教育與 Archon 盟友的合作，他也想不出這種方法，還反過來對 Wuk Lamat 說：這就是為什麼要擁抱外來知識與技術——用得恰當，就能把原本辛苦的事變得很輕鬆，根本不必扛著那麼重的花車。</p><p>但 Krile 立刻把話拉回來：Wuk Lamat 的做法同樣有效，也達成了同樣的結果。Linuhanu 也認同，並反問她：你享受祭典了吧？Wuk Lamat 笑著說她當然享受——她以前來過這裡，以為自己什麼都懂，結果其實懂得很少：蘆葦、Ihih’hana、還有 Hanu 本身。這次學到的事，讓她覺得自己終於真正了解 Hanu，也比以前更喜歡你們了。Linuhanu 回以同樣的心情，說他也再也無法用過去的眼光看待那座花車。Zanuhali 宣布你們超出期待，讓你們上前領取石頭。Wuk Lamat 把 keystone 放進石板——完美契合，還剩六個。Koana 已經催著往下一個目標前進；Wuk Lamat 忍不住吐槽他連慶祝都不留一秒，這就是 Koana。Linuhanu 還叮囑第三誓約，明年也一定要回來參加 Ihih’hana——而且要以 Dawnservant 的身分。Wuk Lamat 道別，說她期待再見。</p><p>遠處，Doppro Illusionist 對 Bakool Ja Ja 說，那瓶調合液其實是 Koana 自己調製的試驗用小瓶，但裡面的試藥成分相同。Bakool Ja Ja 冷冷回應：為了勝利，他們會用上一切必要手段——必須贏。</p><p>回到路上，疑問還沒消散。Alisaie 想知道 Bakool Ja Ja 跑去哪了，也不懂追隨者口中的「另一個」到底是誰；Alphinaud 也在意 Koana 提到的 Archon 盟友可能是什麼人；Krile 覺得 Koana 看起來不壞，但很像習慣把人隔在距離外的人。Erenville 則再次把重點壓回來：撇開兩頭的麻煩不談，Wuk Lamat 完成了試煉，也拿到了 keystone——這才是最重要的。</p><p>Wuk Lamat 自己卻像被重新點亮。她說旅程才剛開始，就已經遇見了那麼多好人：Wuk Evu 有點怪，但對所有文化的尊重值得每個人學；Linuhanu 用 Ihih’hana 追悼逝去的朋友，也讓大家一起用慶典去面對失去。想到接下來還會遇見誰，她就忍不住興奮——於是她拉著你往前走：回到 Xbalyav Ty’e，然後繼續前往 Urqopacha，去找下一位「選定者」。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 烏克·耶伏 <small class="muted">(克扎瑪烏卡濕地, X:19.5, Y:10.8)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-lifting-of-wings.html">展翼之祭：伊希哈納祭</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.90</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-success-of-others.html">在他人的成功面前，明白真正的自己</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
