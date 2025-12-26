@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>For All Turali | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – For All Turali (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/WVMUskofg3I"
+              title="For All Turali" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">For All Turali</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`For All Turali`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Wuk Lamat can’t help but wonder if Fonjeantaine will truly follow through, and insists you go check whether he has actually gone back to speak with Ropli. When you return to Wachumeqimeqi, she calls out encouragement, and even Ropli remarks that the lurker seems like a changed man. Fonjeantaine meets you with steadier eyes and says he has found his courage.</p><p>He apologizes for his earlier behavior and introduces himself properly: Fonjeantaine, a goldsmith from Ul’dah in faraway Eorzea. Then he makes a bold request—he wishes to continue practicing his trade here in Wachumeqimeqi, if they will have him. He asks only for the chance to bring happiness to others through his creations. Ropli understands at once: he was looking for work. And just like that, Fonjeantaine is hired—Wachumeqimeqi always needs skilled artisans. Ropli will handle the paperwork and asks if he can start tomorrow; Fonjeantaine answers with breathless relief that yes, of course he can.</p><p>Fonjeantaine thanks you again for your timely, wise advice. Wuk Lamat downplays her role, but he insists that if you hadn’t come to speak with him, he would never have had the moment of self-reflection he needed. Before the moment can linger, Erenville’s voice comes through by linkpearl: the arrangements are complete, and you should meet him at the entrance of High Tide Harbor.</p><p>Wuk Lamat remembers her axe and asks Ropli if it’s ready. Ropli presents it proudly, inviting her to behold the sublime touch of a Wachumeqimeqi artisan. The restored edge feels as sharp and deadly as the first day she held it, and she thanks him with open satisfaction. Then she turns back to Fonjeantaine, wishing him luck—and telling him that if doubt creeps back in, she’ll gladly talk him out of it. With that, she urges you onward: you should head for the harbor, and not keep Erenville waiting.</p><p>After you leave, Fonjeantaine remains with his new resolve. He says he now knows better than to hold himself to an impossible standard—the only thing that matters is the joy his craft can bring to others. Ropli, pleased to add a new artisan to the ranks, invites you to let him know if there is anything else he can do.</p><p>At Bayside Bevy, your companions fill the lull with small observations. Wuk Lamat wonders what Erenville’s “alternate means of travel” will be. Alphinaud shares that he reexamined the Tuliyollal Saga—if you continue apace, you will soon come face-to-face, or rather face-to-knee, with the enormous Yok Huy, some said to tower even over the hulking Gulool Ja Ja. Alisaie admits that all the waiting made her hungry, so she tried tacos from both Xbalyav Ty’e and Aunt Tii’s; she prefers Tiisol’s spicier flavors. Krile mentions she wandered the bayside markets and found earrings almost identical to hers—common travel charms, just as Mablu described.</p><p>Wuk Lamat finally demands answers: enough secrecy—what is Erenville’s big plan? He points you to the water: a punutiy will pull your boat upriver. Wuk Lamat’s face tightens at the sight of another boat, worried it might thrash and sink you, but Erenville says they are gentle and timid—unlikely to fuss unless provoked. He explains that long ago, when clans fought, Kozama’uka’s people used these riverboats to move swiftly through hostile territory. The vessels see little use in peaceful times, so he was able to borrow one of the few that remain. He even considered a dirigible, but pilots warned that updrafts near the falls would make landing difficult.</p><p>As Alphinaud points out that there are several boats on the water, the truth surfaces: Koana is already here. Wuk Lamat is stunned, thinking he has earned two keystones despite traveling alone, but Koana answers coolly that he was never alone—he has had his own entourage from the beginning. Thancred and Urianger appear beside him, revealing themselves as Koana’s escorts. Koana explains he heard much of the incomparable Archons during his time at the Studium, and once the contest was confirmed, he contacted the scholarch to secure introductions. Urianger adds that Koana required assistants with proven survival skills and mastery of the arcane, which is why the summons came to them. Koana admits his own studies focused on technology and engineering, and that his magical learning was only foundational.</p><p>Krile suspects they had more reasons than employment for accepting. Thancred doesn’t deny it: Tuliyollal spans an entire continent, and depending on who wins the throne, the world could be plunged into instability once more. They have always striven to preserve peace, and so they made sure of who they were working with before agreeing. When Alisaie presses the hardest question—does serving Koana mean they are resolved to defeat all opponents, including you—Thancred answers plainly: they are sworn to do all in their power to win for Koana, even if it means competing against comrades, and they will hold nothing back.</p><p>Koana refuses the river route, saying he would rather walk than risk confrontation on a leaky barge with no retreat. Wuk Lamat grimaces—boats are her old nemesis—but she trusts the route Erenville chose. Erenville gives clear instructions: he will handle the punutiy, but if other wildlife attacks, he may struggle to keep her under control, so you should draw threats away—especially from the front of the boat. Alphinaud suggests at least one person stay near Erenville, just in case; Krile insists on remaining on deck to test her pictomancy and prove she can hold her own. Alisaie volunteers to keep Erenville company up front so she can respond quickly. With roles decided, Erenville tells you to secure your gear and board when ready.</p><p>From the shadows, Bakool Ja Ja’s laughter carries—“Let the hunt begin!”—and the river journey becomes a tense crossing into Ihuykatumu. After the duty, you regroup near Dock Tumu, with Wuk Lamat clinging to the last of her composure and begging for no more boats. Everyone is exhausted. Erenville leads you toward a nearby mountain shelter, and when Wuk Lamat curses herself for mewling like a sick kitten instead of leading from the front, Krile stops her—reminding her that even a Promise can be seen to struggle, and that she needn’t bear the burden alone. When you echo that leaders must learn to lean on others, Wuk Lamat finally yields: she has always believed weakness would shame Papa’s name, but if you are willing to listen, there are things she wants to talk about.</p><p>At Many Fires, the camp settles. Alisaie asks how one becomes the adopted child of the Dawnservant, and Wuk Lamat admits she remembers little—only that she was born in Iq Br’aax in Yak T’el, and never returned. As far as she is concerned, Gulool Ja Ja is her only parent. Krile understands; she has no memories of her birth parents either, and in time her curiosity faded—Galuf was the grandfather she needed. Wuk Lamat speaks of growing up alongside Koana, loved no less despite him being trueborn, and recalls being lost in the jungle until Papa rescued her: the Head of Resolve praised her survival, while the Head of Reason lectured her at length on how she could have died. Papa was kind, patient, and relentless in training—preparing her for duty as a Promise.</p><p>Now, though, she feels the gaps. She confesses how little she truly knows of her own country—alpacas, Ihih’hana, so much beyond her sheltered life. She doesn’t have Koana’s education or Zoraal Ja’s strength, and fears she is all bluff and bravado, unfit for her title. When you tell her not to measure her worth by her siblings, something shifts: she realizes her reasons for joining the contest are not about them. It has always been about the Turali, and what she can do for them. Krile adds that properly “knowing” something means hearing others’ voices, empathizing, and thinking how best to serve—step by step, becoming the person she wishes to be.</p><p>Wuk Lamat apologizes for being a fool. From this moment on, she will stop trying to be a Promise she is not, stop feigning strength to hide weakness, and instead learn—truly learn—everything she can love about Tuliyollal and her fellow Turali. Her path may not be smooth, but it will be her own. She vows to find the city of gold for all of you, and swears to help Krile find answers about her grandfather as well. Krile thanks her, but asks that burden not be added to Wuk Lamat’s shoulders; better to focus on winning the contest, and—if possible—enjoy the journey. Alphinaud echoes the sentiment: companions on the same road, bound for the same destination, nothing will stop you. Wuk Lamat, overwhelmed with relief, says she is proud to call you her friends.</p><p>Elsewhere, you glimpse other camps. Koana speaks with Thancred and Urianger about the contest and stability, reaffirming his resolve to adopt Sharlayan innovations for Tuliyollal’s prosperity, while acknowledging that victory belongs to the one who breaks the seal—not necessarily the one who completes the seven feats first. In another shadowed corner, Sareel Ja feeds Zoraal Ja visions of the city of gold as world-shaping power, pressing him to act without delay, and Zoraal Ja replies coldly that in battle everyone bleeds—including the Dawn’s Promise.</p><p>Earlier still, Bakool Ja Ja’s camp turns uglier: he boasts of an easy fight, speaks of “playthings,” and answers questions about ruling with contempt. He and his other head speak only of proving superiority and driving out the “weakling masses” once they become Dawnservant. When a Hoobigo lancer begs for rest after falling from the boat—having sacrificed everything for the blessed siblings—they refuse to wait, ordering him to march or become fodder for beasts.</p><p>Back at Many Fires, Erenville notes it is good to see Wuk Lamat more sure of herself. Krile is glad you made time to talk, and Alphinaud admits he knows something of leadership pressure—and of crumbling beneath it—hoping his failures can help others avoid the same. Alisaie insists that fear of alpacas or sickness on boats doesn’t change who Wuk Lamat is, or what she means to her people. Wuk Lamat breathes easier than she has in a long time, saying it feels like a stone has been lifted from her chest. She won’t bind herself that way again. She will be better—for herself, and for her people.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Wuk Lamat <small class="muted">(Tuliyollal, X:11.1, Y:15.0)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-success-of-others.html">The Success of Others</a></div><div class="row"><b>Unlock Dungeon</b></div><div class="row"><a class="link" href="ihuykatumu.html">Ihuykatumu</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 91</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-leaking-workpot.html">A Leaking Workpot</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'みんなのために',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ウクラマトは、フォンジャンテーヌが本当にやり遂げるのか気になってならず、ロプリのもとへ行ったか確かめに行こうと言う。ウォチュメキメキへ戻ると、彼女は声をかけて励まし、ロプリも「まるで別人のようだ」と驚く。フォンジャンテーヌは落ち着いた表情で、勇気を取り戻したと告げる。</p><p>彼は先ほどの振る舞いを詫び、改めて名乗る。遠いエオルゼアのウルダハから来た金細工師、フォンジャンテーヌだ。大胆な願いだと前置きしつつ、ここウォチュメキメキで職を続けたい――受け入れてもらえるなら、作品で人を幸せにする機会がほしい、と真っ直ぐに申し出る。ロプリは事情を理解し、職探しだったのだなと言うと、即座に採用を告げる。腕の良い職人は常に必要だ。手続きは任せろ、明日から始められるか――フォンジャンテーヌは声が弾み、もちろんだと答える。</p><p>フォンジャンテーヌはあなたたちに改めて礼を述べる。ウクラマトは大したことはしていないと照れるが、彼は、あなたたちが話しかけてくれなければ必要な内省の瞬間を得られなかったのだと断言する。そこへリンクパール越しにエレンヴィルの声が入る。手配は整った、ハイタイド・ハーバーの入口に来てくれ。</p><p>ウクラマトは斧のことを思い出し、ロプリに仕上がりを尋ねる。ロプリは誇らしげに差し出し、ウォチュメキメキ職人の妙技を見よと言う。刃は初めて握った日のように鋭く、ウクラマトは満足げに礼を言う。彼女はフォンジャンテーヌへ幸運を祈り、もしまた迷いが忍び寄ったらいつでも話を聞くと言って背中を押す。そしてエレンヴィルを待たせないよう港へ向かおうと、あなたを促す。</p><p>その後、フォンジャンテーヌは「不可能な基準で自分を縛らない」と語り、職人の喜びは人に与える喜びにあるのだと胸に刻む。ロプリも新たな職人を迎えられたことを喜び、何かあればいつでも力になると言う。</p><p>ベイサイド・ベヴィでは、仲間たちがそれぞれ待ち時間を過ごしていた。ウクラマトはエレンヴィルの「別の移動手段」が気になると言い、アルフィノはトゥリヨラル叙事詩を読み直した結果、順調に進めば間もなく巨大なヨクフイに会えるはずだと話す。アリゼーは空腹に負けて２つのタコス屋を食べ比べ、ティーソルの辛い味が好みだと笑う。クルルは市場で自分の耳飾りと同じようなものを見つけ、旅のお守りとして一般的なのだと確信する。</p><p>業を煮やしたウクラマトが計画を問うと、エレンヴィルは川面を示す。プヌティが船を曳いて遡上するのだ。ウクラマトはまた船かと顔をしかめるが、エレンヴィルは基本的に穏やかで臆病な生き物だと説明する。かつて部族同士の争いがあった頃、コザマウカの住人はこの川船で敵地を素早く抜けた。今は平和で使われなくなったため、残っていた数隻を借りられたのだという。飛空艇も考えたが、滝付近の上昇気流で着陸が難しいと止められた。</p><p>ところが水面には船が複数あり、そこにコアナが現れる。ウクラマトが「一人で二つもキーストーンを得たのか」と驚くと、コアナは最初から随行を伴っていたと淡々と言う。タンクレッドとウリエンジェが姿を見せ、彼らがコアナの護衛であることが明かされる。コアナは、スタディウムで「大賢者たち」の名を聞き及んでおり、競争が決まるや学匠に連絡して紹介を取り付けたと説明する。ウリエンジェは、求められた条件が「確かな生存能力と魔法の素養」であったため、召喚が自分たちに届いたのだと補足する。</p><p>クルルが動機を問うと、タンクレッドは認める。トゥリヨラルは大陸全土に及ぶ国家であり、誰が王座に就くかで世界が不安定になりかねない。彼らは平和のために動くべき場所がここだと判断し、協力相手を見極めた上で引き受けたのだ。アリゼーが「私たちとも戦う覚悟なのか」と問うと、タンクレッドは、コアナの勝利のため全力を尽くす――仲間と競うことになろうとも手加減はしない、と率直に答える。</p><p>コアナは川船は退路がなく危険だと判断し、歩くと言って去る。ウクラマトは船が苦手だと嘆きつつも、エレンヴィルの選んだ道を信じると言う。エレンヴィルは、プヌティの操作は自分が担うが、野生動物に襲われた場合は制御が難しくなるため、特に船首付近から敵を引き離してほしいと指示する。アルフィノは船首側に一人置くべきだと提案し、クルルは甲板で絵筆魔法を試しつつ実力を示したいと言う。アリゼーは素早く対処できるよう船首でエレンヴィルに付き添う役を買って出る。配置が決まり、出航の準備が整う。</p><p>闇の中からバクージャジャの笑い声が響き、「狩りの始まりだ」と不穏な空気が漂う。イフイカトゥムへ渡り、消耗しきって辿り着いたドックでは、ウクラマトが「もう船は嫌だ」と呻く。近くの山小屋で休むことになり、先頭に立てない自分を責める彼女をクルルが制する。「約束の子」でも苦しい時はある、背負い込まなくていい、と。あなたも、指導者には他者に頼る力が必要だと言葉を添えると、ウクラマトはついに心を開き、ずっと胸に溜めてきたことを話したいと言う。</p><p>「メニー・ファイアーズ」で夜営しながら、アリゼーは「暁王の養子になるには？」と尋ねる。ウクラマトは幼すぎて覚えていないが、ヤクテルのイク・ブラークス生まれで、今さら戻る気はないと言う。自分にとって親はグルージャジャだけだ。クルルも生みの親の記憶がなく、やがて知りたい気持ちは薄れ、ガルフが祖父で十分だったと語る。ウクラマトは、実子の兄がいてもコアナと自分を同じように愛し、森で迷った自分を救いに来たこと、そして「決意の長」が褒め、「理の長」が死に方の講義を延々としたことを思い出す。優しいが訓練には苛烈な父は、約束の子としての務めに備えさせていたのだ。</p><p>それでも今、彼女は自分の無知を痛感する。アルパカもイヒイハナも、国のことをほとんど知らない。コアナの学やゾラージャの力もない自分は虚勢ばかりで、称号に相応しくないのではないか――そう吐露する。あなたが「兄たちの成功で自分の価値を測るな」と言うと、彼女はようやく気づく。自分がこの争いに身を投じた理由は兄弟に勝つためではない。トゥラリのために、彼らに何ができるか――それだけだったのだ。クルルは「知る」とは声を聞き、共感し、どう仕えるべきか考えることだと語り、彼女を支える。</p><p>ウクラマトは謝り、これからは弱さを隠すために強がらない、自分の歩幅で学び、愛し、己の道を作ると言う。黄金郷を見つけ、クルルの祖父の手がかりも得ると誓うが、クルルはその重荷まで背負わなくていい、まずは共通の目的である勝利に集中し、できれば旅を楽しもうと微笑む。アルフィノも同意し、同じ道を歩む仲間として力を合わせれば辿り着けると励ます。ウクラマトは胸のつかえが取れたように息をつき、友だちだと言えることを誇りに思うと告げる。</p><p>一方で、他陣営の動きも見える。コアナは安定のためにシャーレアンの革新を取り入れたいと語り、勝利条件が「七つの試練を最初に終えること」ではなく「封印を破る者」である点に警戒を強める。ゾラージャ陣営では、サリールジャが黄金郷の力を煽り、苦しみを厭わぬ覚悟を迫る。ゾラージャは冷ややかに、戦いでは皆が血を流す、暁の約束の子も例外ではないと言い放つ。バクージャジャ陣営では、目的は統治ではなく優越の証明であり、弱者を排し一族を迎えるなどと語り、疲れ切った従者の嘆願すら踏みにじる。</p><p>そして再びメニー・ファイアーズへ戻ると、エレンヴィルはウクラマトが自信を取り戻しつつあることを喜び、クルルも話し合えたことに安堵する。アルフィノは自分も指導者の重圧で崩れた経験があると認め、その失敗が誰かの助けになるならと願う。アリゼーは、船酔いでもアルパカが苦手でも、ウクラマトの本質は変わらないと言い切る。ウクラマトは胸の石が下りたようだと語り、もう二度と自分を縛りつけない、そして自分と民のために必ず良くなると誓う。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ウクラマト <small class="muted">（トライヨラ, X:11.1, Y:15.0）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-success-of-others.html">本当の自分</a></div><div class="row"><b>ダンジョン開放</b></div><div class="row"><a class="link" href="ihuykatumu.html">濁流遡上 イフイカ・トゥム</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 91</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-leaking-workpot.html">捕集の民、モブリン族</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'為了Turali 的大家',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Wuk Lamat 還是忍不住擔心：Fonjeantaine 真的會說到做到嗎？她催著你去確認他是不是已經回去找 Ropli。你們回到 Wachumeqimeqi，她一邊替他打氣，一邊看著 Ropli 也訝異地說，那個總愛躲在陰影裡的人彷彿變了個樣。Fonjeantaine 這次站得很直，他說你們不用擔心——他已經找回勇氣了。</p><p>他先為自己先前的失態道歉，接著正式自我介紹：他叫 Fonjeantaine，是從遙遠的 Eorzea、Ul’dah 來的金匠。然後他鼓起勇氣提出請求：他想留在 Wachumeqimeqi 繼續做他的手藝——只要你們願意給他這個機會。他不求別的，只希望能用自己的作品，把快樂帶給別人。Ropli 一聽就明白：原來他是在找工作。於是他乾脆利落地說「錄用」，因為 Wachumeqimeqi 永遠需要有本事的工匠。他會處理必要的文件，並問 Fonjeantaine 明天能不能開始。Fonjeantaine 立刻連聲回答當然可以，語氣裡是止不住的鬆一口氣。</p><p>Fonjeantaine 再次向你們道謝，說你們的話來得正是時候。Wuk Lamat 有點不好意思，說自己也不確定有沒有幫上忙；但 Fonjeantaine 很肯定地回應：如果你們沒有來找他談，他就不會有那個迫切需要的自我反省時刻。就在這時，Erenville 的 linkpearl 傳來聲音：一切安排都完成了，叫你們到 High Tide Harbor 的入口集合。</p><p>Wuk Lamat 這才想起她的斧頭，趕緊問 Ropli 修好了沒。Ropli 得意地把斧頭交回來，叫她看看 Wachumeqimeqi 工匠的「絕妙手感」。Wuk Lamat 一握就笑了——刀刃又回到她第一次拿起它時那種又銳又狠的感覺，她誠心向 Ropli 道謝。她接著轉向 Fonjeantaine，祝他順利，還說要是哪天那股「懷疑」又爬回來了，記得來找她，她會再把他勸回正軌。然後她催你們快去港口，別讓 Erenville 久等。</p><p>離開後，Fonjeantaine 留下更踏實的決心：他說自己不會再用不可能的標準折磨自己，真正重要的只有一件事——他的手藝能帶給別人多少喜悅。Ropli 也很高興能多一位新工匠，並說若還有任何需要，隨時都可以來找他。</p><p>你們在 Bayside Bevy 與其他人會合。Wuk Lamat 猜著 Erenville 所謂的「替代交通方式」到底是什麼。Alphinaud 說他重新翻過 Tuliyollal Saga：照這個速度前進，很快就能親眼見到巨大的 Yok Huy——不是「面對面」，而是「面對膝蓋」，而且聽說有些甚至比 Gulool Ja Ja 還高大。Alisaie 則抱怨等太久害她餓了，索性把 Xbalyav Ty’e 和 Aunt Tii’s 兩家 taco 都各吃了一份，最後她更喜歡 Tiisol 那種更辣的味道。Krile 說她在海邊市集逛著逛著，發現了幾乎跟自己同款的耳環——確實是常見的旅人護身符，跟 Mablu 說的一樣。</p><p>Wuk Lamat 受不了 Erenville 一直賣關子，直接逼問他的「大計」到底是什麼。Erenville 指向河面：一隻 punutiy 會拉著你們的船逆流而上。Wuk Lamat 一看到「又是船」整個臉都垮了，還擔心那傢伙會不會發狂把你們甩翻；Erenville 則說 punutiy 通常溫順又膽小，除非你惹到牠。接著他解釋，過去 Kozama’uka 各部族仍在交戰時，居民就是靠這種河船穿越危險地帶；如今 Tural 和平了，河船幾乎不用，所以他才能借到少數還留著的船。他也曾考慮用飛空艇，但飛行員警告瀑布附近的上升氣流會讓降落變得困難。</p><p>然而河面上不只一艘船。當 Alphinaud 提到這點時，Koana 的身影出現了。Wuk Lamat 驚訝地問他是不是已經拿到兩枚 keystone——畢竟他看起來像是獨自參賽；Koana 卻淡淡表示他從來就不是一個人，他一開始就有自己的隨行隊伍。接著 Thancred 與 Urianger 也現身，證實他們正在護送 Koana。Koana 解釋，他在 Studium 求學時就聽過「Archons」的名聲，確認儀式要舉行後，他便聯絡 scholarch 促成介紹。Urianger 補充說，Koana 對助手的要求很明確：必須同時具備可靠的野外生存能力與魔法實力，因此召喚才會落到他與 Thancred 身上。Koana 也坦承，他自己的研究重心偏向 magitek 或工程技術，魔法部分只學了基礎。</p><p>Krile 問他們是不是另有理由才接下這份工作。Thancred 也不否認：Tuliyollal 橫跨整個大陸，王座落在誰手上，世界就可能再次動盪；他們向來以維護和平為志，所以在確認合作對象後才答應協助。當 Alisaie 問得最直——你們身為 Koana 的隨行者，是不是也包含「打敗所有對手」，甚至包括我們——Thancred 乾脆地回答：他們發誓要竭盡所能讓 Koana 贏下競賽，即使因此必須與昔日同伴競爭，也絕不留手，並且期待你們同樣如此。</p><p>Koana 認為河船沒有退路、遇襲也無處可逃，所以寧可走路也不願冒險同船。Wuk Lamat 皺著臉承認自己真的討厭船，但她仍選擇相信 Erenville 的路線。Erenville 交代得很清楚：他會負責控制 punutiy，但若途中有野生生物來襲，他可能會難以同時穩住牠；因此你們必須把威脅引開，尤其要盡量遠離船頭。Alphinaud 認為最好至少有一個人待在船頭以防萬一；Krile 則說她想留在甲板上試試 pictomancy，也想讓你們知道她在戰鬥中也能獨當一面。Alisaie 主動說她去船頭陪 Erenville，這樣有危險她能最快出手。分工敲定後，Erenville 要你們整理裝備，準備登船。</p><p>就在這時，Bakool Ja Ja 的低笑聲從暗處傳來：「狩獵開始了。」你們踏上前往 Ihuykatumu 的河路，氣氛立刻變得緊繃。之後在 Dock Tumu 一行人精疲力竭地靠岸，Wuk Lamat 幾乎要崩潰地說「不要……再來船了」。Erenville 建議去附近的山中休息處歇腳。Wuk Lamat 一邊咒罵自己——「誓約者本該走在最前面，不該像病貓一樣哼哼唧唧」——Krile 立刻攔住她，說就算是誓約者、就算是繼承人，也不代表不能被看見在掙扎；她不必把一切都扛在自己身上。當你也告訴她「依靠別人」是領導者必備的能力時，Wuk Lamat 終於鬆動：她一直以為這種脆弱只能自己吞下去，怕會讓爸爸的名聲蒙羞，但既然你們願意聽，她確實有些話想說。</p><p>夜裡在 Many Fires 露營，Alisaie 問她怎麼會成為 Dawnservant 的養女。Wuk Lamat 說自己那時只是「一團毛球」，記不得過程；她只知道自己出生在 Yak T’el 的 Iq Br’aax，卻從沒想過要回去。對她而言，Gulool Ja Ja 就是她唯一的親人。Krile 也說自己同樣沒有出生父母的記憶；她曾想追尋，但時間久了，那份好奇也淡了——Galuf 才是她需要的祖父。Wuk Lamat 說，就算爸爸已經有親生兒子，他仍一樣疼愛她與 Koana；她還回憶起自己曾獨自走進森林迷路，爸爸放下一切去救她。她本以為會被罵，結果 Head of Resolve 反而稱讚她撐了下來；只是 Head of Reason 也照例把叢林的危險與死法講了個沒完。她承認爸爸平時溫柔耐心，但訓練時卻像暴君——如今她明白，那是在為誓約者的責任做準備。</p><p>可她也在同一個夜晚說出最刺痛的自責：她對自己的國家了解得太少了，無論是 羊駝 還是 Ihih’hana，她都幾乎一無所知。她明明過得那麼受保護，卻一直自以為懂得 Tuliyollal 與人民。她沒有 Koana 的學識，也沒有 Zoraal Ja 的力量；她覺得自己只是在逞強、在虛張聲勢，根本不配背負稱號。當你提醒她別用兄弟的成功來衡量自己，她終於看見關鍵：她參加競賽的理由跟兄弟無關，從頭到尾都只是為了 Turali——她想知道自己能為他們做什麼。Krile 也說，「真正的『了解』」是去聽他人的聲音、共感他們的感受，並思考該如何服務——只要一步一步往那個方向走，她就會更接近自己想成為的人。</p><p>Wuk Lamat 向大家道歉，說她一直很愚蠢。從現在起，她不會再裝成自己不是的那種誓約者，不會再用假裝堅強來掩飾弱點。她會一步一步去學，去真正認識並珍惜 Tuliyollal 與她的人民——道路或許不平順，但會是她親手走出來的路。她發誓要為大家找到黃金城，也承諾會幫 Krile 找到關於祖父的答案。Krile 感謝她的心意，但也提醒她不用把那份重擔也扛起來；你們應該先專注在共同目標——贏下競賽——而且如果可以，她希望你們能享受旅程。Alphinaud 也附和：你們是走在同一條路上的同伴，朝著同一個目的地前進，合在一起就沒有什麼能阻止你們。Wuk Lamat 終於坦率地說，她很驕傲能把你們叫做朋友。</p><p>與此同時，其他陣營也在暗處成形。Koana 在營地裡談起國家的不確定性，說他主張採用 Sharlayan 的革新，讓 Tuliyollal 走向更穩定、更繁榮；他也提到勝利的條件並非「最先完成七項試煉」，而是「打破封印的人」。另一邊，Sareel Ja 對 Zoraal Ja 說黃金城的力量足以改寫歷史，催他盡快推進計畫，甚至明言「無論誰受苦」都要行動；Zoraal Ja 冷冷回覆：戰場上人人流血，Dawn’s 誓約者也不例外。更早之前，Bakool Ja Ja 陣營則露出更醜陋的面貌：他們只在乎競賽與「證明自己更優越」，甚至說要把弱者趕出去、迎接族人住進城市；當一名 Hoobigo lancer 從船上跌落後勉強追上，哀求休息、哭喊自己為「受祝福的兄弟」付出一切時，他們仍命令他要嘛繼續走，要嘛成為野獸的飼料。</p><p>回到 Many Fires，Erenville 說他很高興看到 Wuk Lamat 變得更有把握。Krile 也覺得你們能把話說開是一件好事。Alphinaud 坦承自己曾在領導壓力下崩潰過——若他的失敗能讓他幫助別人避開同樣的錯誤，他希望那會是這些經歷唯一稱得上「好的」部分。Alisaie 則斬釘截鐵地說：就算 Wuk Lamat 怕 羊駝、就算她會暈船，也不會改變她是誰，更不會改變她對人民的意義。Wuk Lamat 把那份鬆下來的呼吸吐得更深，她說把那些話說出口後像是胸口壓著的石頭終於被搬走，她不想再讓自己被那樣綁住——她會變得更好，為了她自己，也為了她的人民。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 烏克·拉瑪特 <small class="muted">(圖萊尤拉, X:11.1, Y:15.0)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-success-of-others.html">在他人的成功面前，明白真正的自己</a></div><div class="row"><b>解鎖地城</b></div><div class="row"><a class="link" href="ihuykatumu.html">逆流 Ihuykatumu 而上</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.91</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-leaking-workpot.html">採集之民：莫布林族</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
