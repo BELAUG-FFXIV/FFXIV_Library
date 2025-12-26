@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A Father First | BELAUG · FFXIV Library</title>
+  <meta name="description" content="FFXIV MSQ – A Father First（王として、父として / 身為王，也作為父親）｜Dawntrail Patch 7.0">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe src="https://www.youtube.com/embed/y6-fe6jD-dI"
+              title="A Father First" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">A Father First</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'A Father First',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Wuk Lamat says she has matters to handle at the palace and urges you to head back to the cabins to rest—after all, even heroes need sleep when a long journey still lies ahead. You return to The For’ard Cabins to pass the time, expecting nothing more than a quiet pause.</p><p>Instead, Peshekwa tells you a Landsguard messenger has been waiting in mounting anxiety. The messenger recognizes you as part of the Third Promise’s entourage and delivers a direct order: the Dawnservant summons you to the palace, and you are to present yourself to the gate guard stationed outside Sunperch as soon as possible. Then comes the strangest condition of all—this visit is not to be mentioned to Wuk Lamat.</p><p>You make your way to Vollok Shoonsa and find the guard at Sunperch. The Dawnservant awaits you within, the guard says, and though the reason for your audience is unknown, you are advised to come in full battle regalia—duty calls. With no further explanation offered, you step inside and accept what’s being asked of you.</p><p>Gulool Ja Ja greets you with an apology for the sudden summons, admitting that when he heard his daughter’s champion had returned to the city, he could not resist the chance. They call him Head of Resolve for a reason, he boasts, and he has not lost a battle worthy of the name since taking the throne. He has been craving a proper challenge—Estinien fought well, but their bout ended before a victor could be decided—and by the sailors’ gossip, you are a warrior of renown in your homeland. Then he asks the question plainly: with all your victories behind you, are you warrior enough to stand against him?</p><p>You answer with spirit, and Gulool Ja Ja laughs in approval. The battle rage takes him—he promises not to kill you, but warns you to expect no other mercy. He urges you to ready your arms and prove the truth of the tales, and the duel begins in earnest.</p><p>When it is over, he admits he has brought his full strength to bear against opponents before, but you are the first to withstand it. Even with his Head of Reason asleep, he did not expect you to give him so much trouble, and Estinien, he concedes, did not exaggerate—your strength is real. Then he confesses the deeper reason he called you: he needed to judge for himself whether you were fit to attend his beloved daughter. Hot-headed and quick to rush into danger as she is, she needs someone whose steadfast defense can shield her from harm.</p><p>He asks you to speak plainly, not to the ruler of Tuliyollal, but to a concerned father—what is your impression of Lamaty’i, whether as Third Promise or simply as a companion on the road? You give your honest assessment, and he agrees she is not ready for the throne—not yet. She believes she understands the many peoples of the realm, but has only seen what the capital has shown her, and he admits the truth extends beyond her: all four claimants are lacking. That is why he chose a rite of succession—not to pick a worthy candidate, but to cultivate one—and if no one impresses him by the end, he will yield his throne to no one. He asks you to guide Lamaty’i as you think best: walk at her side, and when needed, push her to walk ahead.</p><p>Before the moment can settle, Wuk Lamat storms in—she heard her father sent for you, and now she realizes you were dueling behind her back. Gulool Ja Ja roars with laughter and doesn’t bother denying it, assuring her he took care not to leave lasting injuries so she and you can return to the contest without disadvantage. Wuk Lamat groans that she was just starting to find new respect for her father, and she urges you to leave this battle-mad oaf before he starts calling in the rest of your companions. As you step back out, she mutters that if he had his way, her father would duel until the day he dies—and then, still curious, she asks whether he wanted anything else from you. You choose to downplay it, as if it were only a small favor…or simply a sparring partner.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Wuk Lamat <small class="muted">Tuliyollal (X:16.1, Y:11.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-feat-of-pots.html">The Feat of Pots</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 92</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-shape-of-peace.html">The Shape of Peace</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'王として、父として',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>あなたはウクラマトから、王宮で片づける用事があるので、自分の好きに時間を使っていいが、ひとまず宿舎に戻って休むよう勧められる。英雄であっても休息は必要で、まだ大きな旅が控えているのだから――そう言われ、あなたはフォーアード宿舎へ戻り、束の間の静けさを得ようとする。</p><p>ところが、ペシェクワは不穏な来客を告げる。ランドガードの伝令があなたの帰りを落ち着かない様子で待ち続けていたのだ。伝令はあなたを「第三誓約一行の者」だと確認し、連王からの召喚を伝える。サンパーチ外の門番のもとへ、できるだけ早く出頭せよ――そして、もうひとつ。今回の訪問はウクラマトに口外するな、と。</p><p>あなたはヴォロック・シューンサへ向かい、サンパーチの衛兵に迎えられる。連王は中で待っていると言い、理由は知らされていないものの、身なりは戦装束がよいだろうと助言される。呼び出しの真意は分からないまま、あなたは「務め」に従って中へ進む。</p><p>そこであなたを迎えたのは、決意の誓約者グルージャジャだった。突然の召喚を詫びつつ、娘の勇士が都へ戻ったと聞けば、この機会を逃したくなかったのだと率直に語る。即位して以来、名に値する戦いで負けたことはない――そう胸を張り、手応えのある挑戦を渇望していたのだと言う。槍使いのエスティニアンも十分に戦えたが、勝敗が決まる前に勝負は終わってしまった。船乗りたちの噂では、あなたは故郷でも名の知れた戦士らしい。そこで彼は問いかける――数々の勝利を積み重ねた今、なお自分に立ち向かうに足る戦士なのか、と。</p><p>あなたが気概を示すと、グルージャジャは豪快に笑い、戦の昂ぶりを隠さない。殺しはしないが、情けは期待するな――そう告げ、武器を構えて物語の真偽を示せと迫り、真剣勝負が始まる。</p><p>戦いの後、彼は本気の力をぶつけた相手はこれまでもいたが、それを耐え抜いたのはあなたが初めてだと認める。理の誓約者が眠っている状態でも、これほど手こずるとは思わなかった――エスティニアンの言葉は誇張ではなかった、と。そして彼は真意を明かす。あなたをここへ呼んだのは、愛する娘に付き添うにふさわしい人物か、自分の目で確かめる必要があったからだ。危うさを抱えがちな娘を守れる、揺るがぬ守りを持つ者かどうか――父として、率直に答えてほしいと言う。旅を共にしてきた今、第三誓約として、あるいは道連れとして、ラマチの印象はどうか。あなたが正直に答えると、彼は「まだ王座には早い」と同意し、娘は都で見た範囲でしか多くの民を理解していないのだと語る。さらに問題は娘だけではなく、四人の候補者はいずれも欠けている――だからこそ彼は継承の儀を定めたのだ。相応しい者を選ぶためではなく、相応しい者を育てるために。最後まで誰も心を動かさなければ、王座は誰にも譲らない。あなたには、ラマチを導いてほしい――隣を歩き、必要なら前へ押し出してやれ、と。</p><p>その空気を破るようにウクラマトが飛び込んでくる。ナミッカの料理を食べようとしていたのに、父があなたを呼び出したと聞いて駆けつけたのだと言い、あなたが自分に隠れて決闘していたことを責め立てる。グルージャジャは笑って否定もせず、後に残る傷は負わせていないから、あなたも娘も不利なく競争へ戻れると断言する。ウクラマトは、せっかく父を見直しかけたところだったのに、と呆れつつ、この戦闘狂が一行全員を呼びつける前に立ち去ろうとあなたを促す。外へ出ると、彼女は父が望むなら死ぬ日まで決闘し続けるだろうとこぼし、結局、父はあなたにほかにも何か求めたのかと尋ねる。あなたは、それとなく小さな頼みだっただけだ――あるいは、ただの手合わせだっただけだと、事を大きくしない答えを選ぶ。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ウクラマト <small class="muted">トライヨラ (X:16.1, Y:11.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-feat-of-pots.html">壺の試練</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 92</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-shape-of-peace.html">望んだ平和の形</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'身為王，也作為父親',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你聽 Wuk Lamat 說她得去王宮處理一些事，便照她的建議先回宿舍休息。她提醒你，就算是英雄也需要睡一覺，而且接下來還有很長的路要走——你帶著這句話回到 The For’ard Cabins，原以為終於能安靜地喘口氣。</p><p>沒想到你一踏進門，Peshekwa 就告訴你：有位 Landsguard 的傳令一直焦急地等你回來。對方一見到你就確認你是「第三誓約」一行中的人，隨即轉達命令——連王召見你，要求你盡快前往王宮，並在 Sunperch 外的守門人那裡報到。更離奇的是，他還加了一句：這次的到訪，不能告訴 Wuk Lamat。</p><p>你循著指示來到 Vollok Shoonsa，Sunperch 的守衛直接放你進去，說連王正在裡頭等你。守衛雖然不知道召見的原因，但仍建議你穿上全套戰裝，因為職責在召喚你。你沒有多問，只能照辦，走進那場不明所以的會面。</p><p>迎接你的人是 Gulool Ja Ja。他先為突如其來的召見致歉，坦白說一聽見自己女兒的勇士回到城裡，他就忍不住想把握機會。他自稱之所以被叫作 Head of Resolve（決意之首），是因為自從登上王座那天起，他就從未輸過一場稱得上較量的戰鬥；而他也渴望一場真正的挑戰。槍術士 Estinien 的確打得不錯，但那次交手在分出勝負前就結束了。聽著水手們的閒話，他判斷你在故鄉同樣名聲在外——於是他直截了當地問你：在經歷那麼多戰績與勝利之後，你是否仍足夠強大，能站在他面前與他一戰。</p><p>你用不服輸的回答迎上他的挑釁，Gulool Ja Ja 也放聲大笑，像是終於等到想要的回應。他說自己不會取你性命，但除此之外不會手下留情；他要你握緊武器，證明那些傳聞究竟是真是假。你們的對決就此開始。</p><p>戰鬥結束後，他承認自己曾對其他對手使出全力，但你是第一個撐住的人。即使 Head of Reason（理性之首）沉睡，他也沒想到你會讓他如此棘手；Estinien 的評價並非誇大，你確實是不可小覷的強者。接著他說出真正理由：他除了想挑戰你，也必須親眼確認你是否有資格陪在他珍愛的女兒身邊。她像他一樣火爆、也容易衝向危險，而他需要知道，你是否能用那份堅定的守護把她擋在傷害之外。</p><p>他要你別把他當成 Tuliyollal 的連王，而是當成一位憂心的父親，請你直白回答：一路同行至今，不論以「第三誓約」的立場，或只是旅途中的同伴，你對 Lamaty’i 的印象是什麼。你坦率說出你的看法，他也點頭同意：她還沒準備好登上王座——至少現在還沒有。她以為自己理解這片土地上的眾多人民、歷史、文化與信念，但她所見多半仍局限於首都；而真正令他在意的也不只她，因為作為可能的統治者，四位候選人都各有不足。正因如此，他才選擇舉行繼承儀式——不是為了選出「本來就合格」的人，而是為了培養出合格的人；若到最後仍沒有人讓他刮目相看，他就不會把王座交給任何人。作為父親，他希望孩子們能在這場試煉中成長，也希望你與同伴的外來視角能推動他們前進。他最後把話交到你手上：陪著 Lamaty’i 走在一旁，必要時就推她往前走。</p><p>就在那股嚴肅的氣氛還沒落定時，Wuk Lamat 衝了進來。她說自己正要坐下吃 Namikka 的料理，卻聽見爸爸把你叫來，這才發現你們竟然背著她決鬥。Gulool Ja Ja 大笑著也不否認，還保證自己沒有造成持久的傷勢，你和她都能毫無劣勢地回到競爭之中。Wuk Lamat 嘴上抱怨，說她才剛對爸爸生出一點新的敬意，轉眼就想把這個好戰的傢伙甩在身後，免得他又去叫來你其餘的同伴。你們離開後，她又忍不住嘀咕：要是照爸爸的意思，他會一路決鬥到死為止。接著，她仍然好奇地問你——爸爸還對你提出了別的要求嗎？你選擇把事情說得輕描淡寫，像只是個小忙，或不過是找個對練對手而已。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>任務發布</b> Wuk Lamat <small class="muted">Tuliyollal (X:16.1, Y:11.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-feat-of-pots.html">壺之試煉</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.92</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-shape-of-peace.html">和平的樣貌</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
