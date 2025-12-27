@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A Brother’s Duty | BELAUG · FFXIV Library</title>
+  <meta name="description" content="FFXIV MSQ – A Brother’s Duty（兄として / 身為兄長的責任）｜Dawntrail Patch 7.0">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe src="https://www.youtube.com/embed/vTHexFIekzs"
+              title="A Brother’s Duty" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">A Brother’s Duty</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'A Brother’s Duty',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Koana lays out the final stage of the plan: he will head toward Earthenshire alone and unarmed, playing the part of a defenseless merchant. If Wawkesa is watching, he will choose a quiet stretch of road to make his move, and Koana tells you to follow close behind—stay out of sight until it’s time to spring the trap, and make sure Wawkesa is taken alive.</p><p>You shadow Koana into Miyakabek’zoma, and Wawkesa finally shows himself, snarling that “business” must be good and demanding every coin. Koana keeps his composure, and the moment Wawkesa recognizes him as the gemstone collector, he realizes he’s been tricked and orders his men to kill you—only to slip away himself. Koana clicks his tongue at the escape and turns to you, asking you to deal with the underlings and leave them able to speak.</p><p>After you put the three bandits down and Koana binds them, he drops the polite mask and presses them for the truth about his sister’s abduction. They spit insults and refuse to cooperate until Koana’s patience snaps—he demands to know where Wuk Lamat is and makes it clear they will talk or die. One of them finally breaks: they were hired to nab the Third Promise, but they don’t know where she was taken, and only Wawkesa knows who paid for the job.</p><p>Koana says he will arrange for the Landsguard to take the criminals into custody and then call on Thancred’s tracking skills, but he asks you to pursue Wawkesa right away. He warns you not to force a confrontation—follow from a distance, and if Wawkesa leads you to where Lamaty’i is being held, you cannot risk spooking him into harming her.</p><p>You trail Wawkesa through the roadways, hearing his panic as he curses his nerves and mutters that the job was meant to be easy. When he meets a shady Hoobigo and begs for his money, the Hoobigo mocks his fear and all but tells him to run. Thancred then speaks to you over a linkpearl, confirms Koana’s report, and changes your orders: ignore Wawkesa and keep tailing the Mamool Ja—keep your distance until you’re sure they have the Third Promise, and Thancred will catch up as soon as he can.</p><p>At Dock Tumu, Thancred arrives and weighs the situation with Koana: you still can’t be certain the Hoobigo is directly tied to the abductors, but following him longer may confirm it. Thancred decides to trail them along the riverbank, even if it costs Koana the contest, and Koana agrees without hesitation—what good is a throne if he loses his sister to win it?</p><p>Once Thancred leaves to track, Koana’s restraint cracks as he recalls seeing that Hoobigo with Bakool Ja Ja and fears the keystones are the real target. He forces himself to steady down, then tells you why Lamaty’i undoes him: he was born into a nomadic Turali Miqo’te clan that herded rroneek across the plains, and during one migration his birth parents abandoned him. A kind Pelu merchant kept him alive and taught him a trade, and the Dawnservant later found him in Tuliyollal’s markets and adopted him; when Lamaty’i arrived, cast aside as well, Koana swore he would always be there as her brother. He says he will stop at nothing to rescue her, asks you to call your comrades so you can regroup at Many Fires, and reminds you that choosing her first does not mean he has surrendered the contest—if he cannot save his sister and still carry their father’s mantle, then he is not fit to inherit it.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Koana <small class="muted">Kozama’uka (X:32.3, Y:24.5)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="lost-promise.html">Lost Promise</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 92</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="feeding-the-river.html">Feeding the River</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'兄として',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>コアナは計画の最終段階を告げる。彼は武器も持たず、無防備な商人を装ってアースンシャイアへ一人で向かうという。ワウケサが見張っているなら、人気のない道で襲いかかってくるはずだ――あなたにはすぐ後ろを追い、身を潜めたまま合図の瞬間に罠を作動させてほしい。そして何より、相手は生かして捕らえる必要があると念を押す。</p><p>あなたはコアナを追ってミヤカベク・ゾマへ向かい、やがてワウケサが現れる。彼は商売がうまくいっているだろうと絡み、分け前どころか手持ちの金をすべて出せと脅す。だが次の瞬間、宝石収集家としての顔を思い出したワウケサは罠に気づき、部下に命じて襲いかからせると、自分だけは逃げ去ってしまう。コアナは舌打ちし、あなたに部下を制圧するよう求め、口がきける程度には手加減してほしいと言う。</p><p>あなたが三人の盗賊を倒し縛り上げると、コアナは遠慮なく問い詰める。妹の誘拐に関わっているのはお前たちだろう、居場所を言え――そう迫っても、相手は罵り、答えを拒む。ついにコアナは声を荒らげ、ウクラマトの所在を吐け、今すぐ話さねば殺すと突きつける。追い詰められた一人が白状し、第三誓約者をさらう仕事を受けただけで連れ去り先は知らない、雇い主も知らない、ただワウケサだけが知っているのだと言う。</p><p>コアナは犯罪者をランズガードに引き渡し、追跡の得意なサンクレッドにも協力を求めるつもりだと告げる。だがその前に、あなたには東へ逃げたワウケサを追ってほしいとも頼む。正面から追い詰めるのではなく、気づかれぬよう尾行し、ラマチが拘束されている場所へ案内させるべきだ――刺激すれば第三誓約者が危険にさらされると警告する。</p><p>あなたはワウケサを遠巻きに追い、彼が神経を尖らせながら「こんなはずじゃなかった」と弱音を吐くのを聞く。やがて彼は怪しげなフービゴと合流し、金を催促して狼狽えるが、相手は恐怖を嘲り、さっさと逃げろと言わんばかりに突き放す。そこへ通話珠越しにサンクレッドが割り込み、コアナから聞いたと伝えたうえで新たな方針を示す――ワウケサは捨て置き、マムージャの尾行を優先しろ。第三誓約者を危険に晒さぬため、確証が得られるまで距離を保て、彼もすぐ追いつくという。</p><p>ドック・トゥムでサンクレッドが合流し、コアナと状況を整理する。フービゴが誘拐犯と直接つながっているかはまだ断定できないが、もう少し追えば関係が見えるかもしれない。サンクレッドは川沿いに追跡すると決め、たとえそれでコアナが争いに不利になっても構わないのかと問う。コアナは即座に、妹を失って得る王座など無価値だと言い切り、救出を最優先にする。</p><p>追跡に向かったサンクレッドを見送り、コアナは先ほどのフービゴがバクージャジャと共にいたのを見たと吐き捨てる。要石を奪うために盗賊を雇ったのだろう、と疑い、妹が待ち伏せか欺きに遭ったのだと悔しさを滲ませる。あなたに苛立ちをぶつけかけた彼は謝り、ラマチのことになると昔から取り乱してしまうと打ち明ける。</p><p>コアナはさらに、自分の生い立ちを語る。彼は遊牧の伝統を守るトラルのミコッテの氏族に生まれ、ロネークを連れて季節ごとに移動していたが、ある移動の途中で実の両親に置き去りにされた。偶然出会った心優しいペル族の商人に救われ、商いを教わり、トゥリヨラルの市場で店を構えるようになったところを連王に見出され養子となった。後に同じく親に捨てられたラマチが宮殿に来たとき、彼は兄として必ず守ると誓ったのだと言い、何としても救い出すと断言する。川下りの準備を整え、仲間と合流してメニー・ファイアズへ向かうため、あなたに連絡を頼み、妹を優先しても争いを捨てたわけではない――救えず王座も勝ち取れぬなら父の重い役目を継ぐ資格はない、と結ぶ。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> コーナ <small class="muted">コザマル・カ (X:32.3, Y:24.5)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="lost-promise.html">消えた王女</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 92</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="feeding-the-river.html">エレンヴィルとプヌティー</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'身為兄長的責任',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Koana 向你說明計畫的最後一步：他要獨自、手無寸鐵地前往 Earthenshire，好把自己「毫無防備的商人」這場戲演到位。只要 Wawkesa 正在盯梢，他多半會挑一段僻靜的路下手；你必須緊跟在後，保持隱蔽，等時機成熟就把這位盜賊頭子一網打盡——而且一定要活捉。</p><p>你跟著 Koana 走到 Miyakabek’zoma，Wawkesa 果然冒出來，陰陽怪氣地說「生意看來很好」，要你這位「大商人」把利潤分他一點，還強調所謂「一點」就是你身上每一枚硬幣。Koana 只冷笑，Wawkesa 一認出他就是那個「收集寶石的人」，立刻明白自己被設局，氣急敗壞叫手下動手—把這些怪物宰了！。Wawkesa 自己卻趁亂溜走，Koana 只得改口，說既然抓不到主謀，就先從他的手下審起，並要你下手留情，至少讓他們還能開口。</p><p>你制伏三名盜賊後，Koana 乾脆不再拐彎抹角，直接追問：他知道這群人和他妹妹被綁走有關，叫他們吐出 Wuk Lamat 的下落。對方不但不配合，還滿口污言穢語，甚至有人嗆你「吃羊駝屎吧」，說你這種「海那邊來的混蛋」休想問出答案。Koana 終於怒斥他們別耍花樣，逼問 Wuk Lamat 在哪裡，並冷冷丟下最後通牒：現在就說，不然就死。</p><p>其中一人終於撐不住，結結巴巴承認他們只是受雇去抓「第三誓約」而已，至於人被帶到哪裡，他們根本不知道；雇主是誰也不知道，只有 Wawkesa 這個接活的人知道細節。Koana 咬牙說，果然還是得抓到首領才行——他會安排 Landsguard（陸衛隊）把這些罪犯收押，再請 Thancred 用追蹤的本事幫忙，但你最好立刻去追 Wawkesa。</p><p>Koana 提醒你，Wawkesa 是往東逃的；你如果找到他，最好只做尾隨，不要正面衝突，免得他被逼急了就不肯帶路。只要他能把你引到 Lamaty’i 被關押的地方，你們就能鎖定目標；在那之前，最重要的是別讓第三誓約陷入更大的危險。</p><p>你一路遠遠盯著 Wawkesa，聽他自言自語懊惱自己沒看穿陷阱，還抱怨這份工作「本來應該很簡單」。他驚疑不定地四處張望，最後跑到約定地點，和一名形跡可疑的 Hoobigo 接頭。Wawkesa 催著要錢，說 Landsguard（陸衛隊）可能已經在追；那名 Hoobigo 卻不耐煩地嘲弄他，叫他怕就快滾，別像被嚇壞的羊一樣亂叫。</p><p>就在你評估情勢時，Thancred 透過通訊珍珠插話，說他已經從 Koana 那裡得知消息，也確認你找到了綁架相關的人。他立刻改變策略：先別管 Wawkesa，繼續盯緊這名 Mamool Ja——你們不能冒險驚動對方、讓第三誓約受牽連，所以在確定他們確實掌握了第三誓約之前，務必保持安全距離；他會儘快趕上。</p><p>你再度跟上那名 Hoobigo，之後在 Dock Tumu 與趕來的 Thancred 會合。Thancred 和 Koana 都承認目前仍不敢斷言：這名 Hoobigo 是否就是直接綁走 Wuk Lamat 的人；但只要再跟一段路、確認他和綁匪的關聯，局面就會清楚很多。Thancred 說他可以立刻沿著河岸追蹤，Koana 也毫不猶豫同意——就算因此影響競賽，他也寧願如此，因為若要用妹妹的安危去換王座，那王座根本毫無價值。</p><p>Thancred 出發後，Koana 壓著怒火向你坦白：剛才那名 Hoobigo，他發誓曾在 Bakool Ja Ja 身邊見過。照那怪物的作風，很可能就是雇盜賊綁走 Wuk Lamat，好趁亂奪走她的要石；但他也相信，即便孤身一人，他妹妹也足以對付一群沒受過訓練的混混——她多半是遭到埋伏或被騙了。Koana 一度幾乎失控，最後仍勉強收住，向你道歉，說自己只要想到 Lamaty’i 可能身陷危險就會慌。</p><p>接著 Koana 說起自己的過去：他出生在遵循祖先遊牧傳統的 Turali Miqo’te 氏族，族人趕著 rroneek 走過平原，隨季節遷徙；可在一次遷徙中，他的親生父母竟把他拋下，什麼也沒說，就把他丟在原地。若不是偶然遇見一位善良的 Pelu 商人救了他、教他做買賣，他早就活不下來。後來他在 Tuliyollal 的市場當攤販，才被 Dawnservant 發現並收養；而當同樣被父母拋棄的 Lamaty’i 來到宮中時，他以哥哥的身分立誓要一直陪著她、保護她。也因此他說，無論付出什麼代價都要把她救回來——在等待 Thancred 的消息時，你們得先準備好順流而下的行動，並請你聯絡同伴，於 Many Fires 會合；他也重申，自己把救人放在前面並不代表放棄競賽，因為如果他連救回妹妹、同時贏得王座都做不到，那他就沒有資格繼承父親沉重的責任。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>任務發布</b> Koana <small class="muted">Kozama’uka (X:32.3, Y:24.5)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="lost-promise.html">消失的王女</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.92</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="feeding-the-river.html">河上撒餌誘敵</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
