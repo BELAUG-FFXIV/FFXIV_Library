@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>The Skyruin | BELAUG · FFXIV Library</title>
-  <meta name="description" content="FFXIV BGM — The Skyruin：Theme、Appears in、Acquisition、Additional Notes、Lyrics，附影片。">
+  <meta name="description" content="MSQ – The Skyruin (DT Patch 7.0)">
   <link rel="icon" href="../img/favicon.ico" />
   <style>
     :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
@@ -37,77 +37,62 @@
     .tab-panel{display:none}
     .tab-panel.active{display:block}
     .stack{display:flex;flex-direction:column;gap:10px}
-    .stack .row{padding:14px 16px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
     .muted{color:var(--muted)}
     .link{color:#0b60d8;text-decoration:none}
     .link:hover{text-decoration:underline}
-
-    /* TEMPLATE: Appears-in row layout (closer, not stretched) */
-    .kv{
-      display:flex;
-      align-items:center;
-      justify-content:flex-start;    /* key change: NOT space-between */
-      gap:18px;                      /* comfortable spacing */
-      flex-wrap:wrap;
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
     }
-    .kv-label{
-      font-weight:800;
-      color:var(--fg);
-      white-space:nowrap;
-      min-width:140px;               /* key change: stable left column */
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
     }
-    .kv-link{
-      font-weight:800;
-      color:#0b60d8;
-      text-decoration:none;
-      line-height:1.2;
-    }
-    .kv-link:hover{ text-decoration:underline; }
-
-    /* Slightly tighter on small screens */
-    @media (max-width:520px){
-      .kv-label{min-width:110px}
-      .stack .row{padding:12px 14px}
-    }
+    .expand-btn:hover{ background:#fffef8; }
   </style>
 </head>
 <body>
   <header class="site-header">
     <nav class="container nav">
-      <div class="left"><a class="home" href="../index.html">🏠 Home</a></div>
-      <div class="right"><button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button></div>
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
     </nav>
   </header>
 
   <main class="container main">
     <div class="grid">
-      <!-- Left: Video -->
       <section class="card video-card">
         <div class="bd">
           <div class="video-wrap">
-            <!-- EDIT HERE: YT_ID -->
-            <iframe id="ytFrame" src="https://www.youtube.com/embed/0g42N_hQRFY" title="The Skyruin" allowfullscreen></iframe>
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/aWN7NJwcKaQ"
+              title="The Skyruin" allowfullscreen></iframe>
           </div>
         </div>
       </section>
 
-      <!-- Right: Title + Tabs -->
       <section class="card">
         <div class="hd" id="pageTitle">The Skyruin</div>
         <div class="tabs" role="tablist">
-          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="theme">Theme</button>
-          <button class="tab-btn" role="tab" aria-selected="false" data-tab="appears">Appears in</button>
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
-          <button class="tab-btn" role="tab" aria-selected="false" data-tab="notes">Additional Notes</button>
-          <button class="tab-btn" role="tab" aria-selected="false" data-tab="lyrics">Lyrics</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
-          <div id="panel-theme"   class="tab-panel active"></div>
-          <div id="panel-appears" class="tab-panel"></div>
-          <div id="panel-acq"     class="tab-panel"></div>
-          <div id="panel-notes"   class="tab-panel"></div>
-          <div id="panel-lyrics"  class="tab-panel"></div>
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
           <div id="panel-comments" class="tab-panel">
             <div id="giscus_container" style="min-height:320px;"></div>
           </div>
@@ -116,154 +101,134 @@
     </div>
   </main>
 
-  <script>
-    const LANG_KEY='ffxiv-guide-lang';
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`The Skyruin`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>The aether seeker finishes recalibrating and announces it will resume tracking—this time using the latest sample. As soon as it detects the sampled aetherial signature, it switches into an accelerated pursuit mode, and you watch it snap to a clearer trail. Erenville confirms the device is now being drawn straight to the Skyruin’s fire, which proves you chose the right aetherial aspect. To push past lingering traces and find the tural vidraal itself, he raises the threshold for aetheric concentration and has the seeker recalibrate again.</p><p>The seeker pulls you through Indelible Passage, but on the far side the signature vanishes. Erenville suspects Valigarmanda may have shifted its elemental aspect—after all, it can choose among three—and yet he’s almost certain it was headed toward Worqor Lar Dor. You contact the others, and they arrive with the update that Alphinaud is helping the Yok Huy evacuate and tending the injured. Erenville explains why Worqor Lar Dor makes sense: its layered strata are rich with crystals, giving it a many-colored glow, and after eighty years of imprisonment the vidraal would be desperate for sustenance—drawn to the mountain’s energies to replenish its aether. Krile reads it the same way: Valigarmanda is seeking to restore itself.</p><p>Before you can move, Vorporlor blocks your path. He calls the mountain sacred ground and forbids entry. Wuk Lamat apologizes for the intrusion but pleads that Valigarmanda has gone there—and if it isn’t slain now, countless innocents will die as in the old days. Vorporlor refuses, calling you either fools or defilers, and Koana counters by offering to join you: the monument to Valigarmanda’s defeat bears seven heroes’ names, and together you now also number seven. Still Vorporlor scoffs—seven “weaklings” are no better than four—until Zoraal Ja and Sareel Ja appear, openly irritated at the delay to the rite of succession.</p><p>Tension spikes when Zoraal Ja prepares to force the issue, but Wuk Lamat stops him—she won’t raise arms against her own people. Sareel Ja retorts that the people here don’t even consider themselves Tuliyollal, so he wouldn’t call them “our own.” Wuk Lamat refuses that division outright: member or not, everyone in Tural belongs in the dream of peace, and if her brother wants to harm them, he must go through her. Aide to Vorporlor speaks up—she was saved by Wuk Lamat from the mountain bird, and he sees the same “eyes of stone” and “words of stone.” Vorporlor concedes there is a debt, declares it repaid by granting passage, and makes the line clear: they do not submit to Tuliyollan rule. Wuk Lamat accepts the boundary for now and insists they can talk after the contest.</p><p>With the way opened, you undertake the trial at Worqor Lar Dor and bring down Valigarmanda. Wuk Lamat bursts with triumph, declaring you achieved what even Gulool Ja Ja couldn’t—and dedicates it to her father. Koana tempers the celebration: decades of imprisonment weakened the vidraal, and in its prime you would not have fared nearly as well. Wuk Lamat sputters, then admits her father is still the best—yet she also vows she will surpass him one day. As you regroup, you notice Zoraal Ja doesn’t linger for celebration, leaving quickly with Sareel Ja.</p><p>Erenville greets your proud faces and isn’t surprised. He notes Zoraal Ja already came and went, disinclined to share in the victory. Wuk Lamat’s mood shifts—Bakool Ja Ja is the real concern now, likely far ahead and exploiting the chaos he caused. She can’t believe he would do something so evil just to slow you down, and she makes it plain: if you hadn’t slain Valigarmanda, it wouldn’t have been only Urqopacha at risk—deaths would have spread across the continent. More certain than ever, she vows Bakool Ja Ja must never rule, and she will catch him and take back her keystone.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Erenville <small class="muted">(Urqopacha, X:32.9, Y:28.6)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="pointing-the-way.html">Pointing the Way</a></div><div class="row"><b>Unlock Trial</b> <a class="link" href="worqor-lar-dor.html">Worqor Lar Dor</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 93</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-feat-of-ice.html">The Feat of Ice</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'最強のトラルヴィドラール',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>エーテル探知器は再調整を終えると、最新のサンプルに基づいて追跡を再開すると宣言する。サンプルのエーテル的な特徴を検知した瞬間、装置は加速追跡モードへ移行し、進路は先ほどまでより明確になる。エレンヴィルは、探知器がスカイルインの「火」に真っ直ぐ引き寄せられていることを確認し、属性設定は正しかったと言う。残留反応に惑わされず、tural vidraal（Yok Tural 對長命異獸的稱呼）そのものへ近づくため、彼はエーテル濃度の閾値を上げて再調整させる。</p><p>探知器に導かれて「消えぬ通路」を抜けるが、反対側へ出たところで反応が途切れる。エレンヴィルは、ヴァリガルマンダが三つの属性のいずれかへ切り替えた可能性を疑いながらも、進路はウォーコー・ラル・ドルの方角だったとほぼ確信する。あなたが仲間へ連絡すると、彼らはアルフィノがヨク・フイの避難を手伝い、負傷者の治療にあたっていると伝える。エレンヴィルは、ウォーコー・ラル・ドルが多層の地層に水晶を豊富に抱え、虹色に輝く源とされる場所であること、そして八十年の幽閉を経た tural vidraal（Yok Tural 對長命異獸的稱呼）が飢えるほどに活力を求め、山の力へ引き寄せられるはずだと説明する。クライルも、ヴァリガルマンダはエーテルを補充しようとしているのだと受け取る。</p><p>そこへヴォルポルロルが現れ、山は聖地だとして立ち入りを禁じる。第三誓約の彼女は侵入の意図はないと詫びつつも、ヴァリガルマンダが向かったのがそこだと訴え、今討たねば旧き時代のように無辜の民が大量に命を落とすと懇願する。しかし拒否は覆らず、彼はあなたたちを愚か者か冒涜者だと断じる。そこでコアナは、自分たちも加わると提案し、討伐碑に刻まれた七英雄にならい、今ここに七人が揃ったと言う。だが彼は「弱者が七人になろうと同じ」と切り捨てる。そこへゾラージャとサレージャが現れ、継承の儀に遅れが出ることへ苛立ちを隠さない。</p><p>一触即発となり、ゾラージャが力で押し通そうとするが、第三誓約の彼女が止める――同じ民に武器を向けるわけにはいかない。サレージャは、ここはトゥリヨラルの民ではないのだから「身内」とは呼べないと言い放つ。しかし彼女は、所属の有無など関係ない、トゥラルのすべてが平和の夢の一部だと譲らず、傷つけるというなら自分が立ちはだかると宣言する。やがて、彼女に山鳥から救われたという側近が口を開き、ヴォルポルロルも借りがあることを認めて通行を許す。だが同時に、トゥリヨラルの支配に従うつもりはないと釘を刺し、境界線を引く。</p><p>こうして道は開かれ、あなたたちはウォーコー・ラル・ドルでヴァリガルマンダを討ち果たす。第三誓約の彼女は歓喜し、グルール・ジャジャでさえ果たせなかった偉業だと叫び、父へ勝利を捧げる。だがコアナは冷静に、長い幽閉で弱っていたからこそ成し得たのだと言い、全盛なら同じ結果にはならなかったと指摘する。彼女は悔しさを滲ませつつも父の偉大さを認め、それでもいつか必ず超えると誓う。ゾラージャは祝勝の輪に留まらず、サレージャを連れて早々に去っていく。</p><p>エレンヴィルは、あなたたちの表情から狩りの成功を悟り、驚きはしないと言う。ゾラージャは一度戻ったが、勝利を分かち合う気はないようにすぐ去ったとも告げる。第三誓約の彼女は、いま本当に問題なのはバクージャジャだと顔を曇らせ、混乱を利用して先へ進んでいるに違いないと言う。足止めのためにここまでの悪事に踏み切ったことが許せず、もしヴァリガルマンダを討てていなければ、危険はウルコパチャだけに留まらず大陸規模の死者が出ていたと語る。そして、あの者に統治を許してはならないと改めて確信し、必ず追いついて要石を取り戻すと決意を固める。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> エレンヴィル <small class="muted">（オルコ・パチャ, X:32.9, Y:28.6）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="pointing-the-way.html">追跡！エーテルシーカー</a></div><div class="row"><b>討伐戦開放</b> <a class="link" href="worqor-lar-dor.html">ヴァリガルマンダ討滅戦</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 93</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-feat-of-ice.html">封の試練</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'天穹毀滅者',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>以太追蹤器完成樣本分析後，用那種刻意扭曲的聲音宣告重新校準，並要求你依照最新樣本繼續追蹤。一偵測到「樣本的以太特徵」，它立刻切換成加速追跡模式，像是終於抓到真正該追的味道。Erenville 確認這次沒偏題——以太追蹤器被 Skyruin（Valigarmanda 的稱號）的「火」直接吸引過去，代表你們的參數設定正確。為了把路徑從「殘留痕跡」推進到 tural vidraal（Yok Tural 對長命異獸的稱呼）本體，他又提高偵測門檻，要求以太追蹤器依照更高的以太濃度重新校準並繼續追蹤。</p><p>你們一路跟著追蹤器穿過 Indelible Passage，可一到另一側，訊號卻突然消失。Erenville 懷疑 Valigarmanda 可能切換了元素屬性——畢竟它能在三種屬性間自由選擇——但他幾乎可以肯定，它的前進方向是 Worqor Lar Dor。你立刻用通訊珠聯絡同伴，而他們趕到後告訴你：Alphinaud 正在協助 Yok Huy 疏散，也在照看傷者、幫忙治療。Erenville 接著說明 Worqor Lar Dor 的特性——那座山的層理中富含水晶，據說也因此散發多彩光芒；而被囚禁八十年的 tural vidraal（Yok Tural 對長命異獸的稱呼）必然急需補充力量，會被山的能量吸引過去。Krile 也同意：Valigarmanda 正在試圖補回它流失的以太，你們不能讓它得逞。</p><p>就在你們準備動身時，Vorporlor 橫身阻止，說那座山是聖地，禁止任何人踏入。Wuk Lamat 先道歉，表示你們無意冒犯，但也懇求他理解——Valigarmanda 就在那裡；如果現在不殺掉，它會像舊日傳說那樣屠戮無數無辜者。Vorporlor 仍然拒絕，甚至斷言你們根本不可能打贏，不是想褻瀆 Worqor Lar Dor，就是愚蠢到可笑。Koana 於是提出：如果他懷疑你們的勝算，那就讓他們加入。討伐 Valigarmanda 的紀念碑上刻著七位英雄的名字，而你們合在一起也正好是七人。可 Vorporlor 冷冷回敬：七個弱者也不會比四個好到哪裡去。</p><p>這時 Zoraal Ja 與 Sareel Ja 現身。Sareel Ja 直接嫌你們把時間浪費在 Skyruin（Valigarmanda 的稱號）身上很不明智，因為照他的盤算，這段時間本來可以拉開一個無可動搖的領先；Zoraal Ja 則只說這點延誤不會改變結果，他想親自衡量那頭連他爸爸都沒能殺死的 tural vidraal（Yok Tural 對長命異獸的稱呼）。Wuk Lamat 一瞬間振奮起來，覺得兩個哥哥都在，勝利幾乎已經到手；可 Vorporlor 立刻打斷：他可沒說會放你們通行。</p><p>衝突差點爆發，Zoraal Ja 甚至準備對 Vorporlor 動手，Wuk Lamat 立刻攔下來，堅持你們不能對「自己的人」動武。Sareel Ja 卻反駁：Chirwagur Saltern 的住民不認為自己屬於 Tuliyollal，他可不會把他們叫作「自己的人」。Wuk Lamat 當場回擊：那又怎樣？不管是不是成員，Tural 的每個人都在她追求和平的夢裡；如果他們要傷害這些人，就必須先踏過她。就在僵持不下時，Vorporlor 的部下顫聲說出真相——她曾救過他，救他脫離那隻山鳥的襲擊；他從她眼裡看見同樣堅硬的意志與同樣不退讓的話語。Vorporlor 因此承認他們仍欠她一筆債，並宣布這筆債用「放行」來償還；但他也同時劃清界線：他們不會臣服於 Tuliyollal 的統治。Wuk Lamat 接受他的立場，表示等競爭結束再談。</p><p>通行教條終於鬆動，你們得以進入 Worqor Lar Dor，並在那裡擊倒 Valigarmanda。Wuk Lamat 興奮得發顫，說你們辦到了——殺死了 Valigarmanda，甚至達成連偉大的 Gulool Ja Ja 都沒做到的事；她大笑著把勝利獻給爸爸。Koana 卻冷靜提醒：這頭 tural vidraal（Yok Tural 對長命異獸的稱呼）被囚禁了數十年，早已學會虛弱；若是全盛時期，你們不可能打得這麼順。Wuk Lamat 先不服，最後還是承認爸爸依舊最強，但她也咬牙發誓—總有一天她會超越他。</p><p>回到集合點，你們的表情早已把結果寫得明明白白。Erenville 說他一點也不意外，並提到 Zoraal Ja 先一步回來過，卻幾乎立刻就帶著 Sareel Ja 離開，像是完全不打算加入慶祝。Wuk Lamat 說這很符合 Zoraal Ja 的風格，但她的擔憂很快就轉向另一個人：Bakool Ja Ja。她認定他一定趁混亂衝在最前面，並且仍無法接受——他竟能為了拖慢你們而做出如此邪惡的事。她說得很清楚：如果你們沒有殺掉 Valigarmanda，受威脅的絕不只 Urqopacha，整個大陸都可能出現死亡。她也因此更加確信：Bakool Ja Ja 絕不能統治，她必須追上他，把 keystone 搶回來。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 艾倫維爾 <small class="muted">(奧闊帕恰山, X:32.9, Y:28.6)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="pointing-the-way.html">循線追蹤以太追蹤器</a></div><div class="row"><b>解鎖試煉</b> <a class="link" href="worqor-lar-dor.html">決戰 Worqor Lar Dor</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.93</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-feat-of-ice.html">冰封試煉</a></div></div>`
+  }
+};
 
-    // EDIT HERE (optional): default appears link target for this page
-    const appearsLinkHref = "worqor-lar-dor.html";
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
 
-    const i18n={
-      EN:{
-        langLabel:'EN',
-        pageTitle:'The Skyruin',
-        tabs:{theme:'Theme',appears:'Appears in',acq:'Acquisition',notes:'Additional Notes',lyrics:'Lyrics',comments:'Comments'},
-        theme:`<div class="stack"><div class="row">Worqor Lar Dor Theme</div></div>`,
-        appears:`
-          <div class="stack">
-            <div class="row">
-              <div class="kv">
-                <span class="kv-label">Appears in</span>
-                <a class="kv-link" href="${appearsLinkHref}">Worqor Lar Dor</a>
-              </div>
-            </div>
-          </div>
-        `,
-        acq:`<div class="stack"><div class="row">Materials for synthesis obtained from a trial in Dawntrail unlocked by the wandering minstrel.</div></div>`,
-        notes:`<div class="stack"><div class="row">Crafted by Level 100 Alchemist (Master Alchemist X) with Faded Copy of The Skyruin, dropped in Trial Worqor Lar Dor (Extreme)</div></div>`,
-        lyrics:`<div class="stack"><div class="row">None</div></div>`
-      },
-      JP:{
-        langLabel:'JP',
-        pageTitle:'The Skyruin',
-        tabs:{theme:'テーマ',appears:'登場先',acq:'入手方法',notes:'補足',lyrics:'歌詞',comments:'コメント'},
-        theme:`<div class="stack"><div class="row">ウォーコー・ラァ・ドォのテーマ</div></div>`,
-        appears:`
-          <div class="stack">
-            <div class="row">
-              <div class="kv">
-                <span class="kv-label">登場先</span>
-                <a class="kv-link" href="${appearsLinkHref}">ヴァリガルマンダ討滅戦</a>
-              </div>
-            </div>
-          </div>
-        `,
-        acq:`<div class="stack"><div class="row">異邦の詩人が解放する「黄金のレガシー」の討滅戦で入手できる製作用素材。</div></div>`,
-        notes:`<div class="stack"><div class="row">錬金術師Lv100（錬成秘伝書:第10巻）で製作。素材の「古びた譜面:The Skyruin」は討滅戦「極ヴァリガルマンダ討滅戦」で入手。</div></div>`,
-        lyrics:`<div class="stack"><div class="row">なし</div></div>`
-      },
-      ZH:{
-        langLabel:'ZH',
-        pageTitle:'天穹毀滅者',
-        tabs:{theme:'主題',appears:'登場於',acq:'取得方式',notes:'補充說明',lyrics:'歌詞',comments:'留言'},
-        theme:`<div class="stack"><div class="row">Worqor Lar Dor 主題曲</div></div>`,
-        appears:`
-          <div class="stack">
-            <div class="row">
-              <div class="kv">
-                <span class="kv-label">登場於</span>
-                <a class="kv-link" href="${appearsLinkHref}">決戰 Worqor Lar Dor</a>
-              </div>
-            </div>
-          </div>
-        `,
-        acq:`<div class="stack"><div class="row">製作材料可從「異邦的詩人」解鎖的 Dawntrail 討滅戰取得。</div></div>`,
-        notes:`<div class="stack"><div class="row">由 Lv.100 鍊金術士（需學習 Master Alchemist X／日：錬成秘伝書:第10巻）製作；主要素材 Faded Copy of The Skyruin 可從討滅戰 Worqor Lar Dor (Extreme)（日：極ヴァリガルマンダ討滅戦）取得。</div></div>`,
-        lyrics:`<div class="stack"><div class="row">無</div></div>`
-      }
-    };
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
 
-    const langToggle=document.getElementById('langToggle');
-    const pageTitle=document.getElementById('pageTitle');
-    const tabBtns=[...document.querySelectorAll('.tab-btn')];
-    const panels={
-      theme:document.getElementById('panel-theme'),
-      appears:document.getElementById('panel-appears'),
-      acq:document.getElementById('panel-acq'),
-      notes:document.getElementById('panel-notes'),
-      lyrics:document.getElementById('panel-lyrics'),
-      comments:document.getElementById('panel-comments')
-    };
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
 
-    function getLang(){ return localStorage.getItem(LANG_KEY)||'EN'; }
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
 
-    function applyLang(lang){
-      const t=i18n[lang]||i18n.EN;
-      pageTitle.textContent=t.pageTitle;
-      langToggle.textContent=`🌐 ${t.langLabel}`;
-      tabBtns.forEach(b=>{ b.textContent=t.tabs[b.dataset.tab]; });
-      const active=tabBtns.find(b=>b.getAttribute('aria-selected')==='true')||tabBtns[0];
-      renderPanel(active.dataset.tab,lang);
-      if (active && active.dataset.tab==='comments') loadGiscusForCurrentLang();
-    }
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
 
-    function renderPanel(key,lang){
-      const t=i18n[lang]||i18n.EN;
-      Object.keys(panels).forEach(k=>panels[k].classList.remove('active'));
-      panels[key].classList.add('active');
-      if(key!=='comments'){
-        panels[key].innerHTML=t[key] || `<div class="stack"><div class="row muted">No content.</div></div>`;
-      }else{
-        loadGiscusForCurrentLang();
-      }
-    }
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
 
-    tabBtns.forEach(btn=>{
-      btn.addEventListener('click',()=>{
-        tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
-        btn.setAttribute('aria-selected','true');
-        renderPanel(btn.dataset.tab,getLang());
-      });
-    });
+applyLang(getLang());
 
-    langToggle.addEventListener('click',()=>{
-      const cur=getLang();
-      const next=cur==='EN'?'JP':(cur==='JP'?'ZH':'EN');
-      localStorage.setItem(LANG_KEY,next);
-      applyLang(next);
-    });
-
-    applyLang(getLang());
-
-    const GISCUS_CFG = {
+const GISCUS_CFG = {
       repo: 'BELAUG-FFXIV/FFXIV_Library',
       repoId: 'R_kgDOPyh4Kw',
       category: 'General',
-      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      categoryId: 'DIC_kwDOPyh4Kw4CwPjL',
       theme: 'preferred_color_scheme'
-    };
-    function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
-    function loadGiscusForCurrentLang(){
-      const mount = document.getElementById('giscus_container');
-      if (!mount) return;
-      mount.innerHTML = '';
-      const langCode = getLang(); // EN / JP / ZH
-      const s = document.createElement('script');
-      s.src = 'https://giscus.app/client.js';
-      s.setAttribute('data-repo', GISCUS_CFG.repo);
-      s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
-      s.setAttribute('data-category', GISCUS_CFG.category);
-      s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
-      s.setAttribute('data-mapping', 'specific');
-      s.setAttribute('data-term', location.pathname + '｜' + langCode);
-      s.setAttribute('data-reactions-enabled', '1');
-      s.setAttribute('data-emit-metadata', '0');
-      s.setAttribute('data-input-position', 'bottom');
-      s.setAttribute('data-lang', uiLang(langCode));
-      s.setAttribute('data-theme', GISCUS_CFG.theme);
-      s.setAttribute('crossorigin', 'anonymous');
-      s.async = true;
-      mount.appendChild(s);
-    }
-  </script>
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
 </body>
 </html>
