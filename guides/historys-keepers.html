@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>History’s Keepers | BELAUG · FFXIV Library</title>
+  <meta name="description" content="FFXIV MSQ – History’s Keepers（記憶の民、ヨカフイ族 / 歷史的守護者：約卡輝族）｜Dawntrail Patch 7.0">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe src="https://www.youtube.com/embed/t4TEQLLpn8U"
+              title="History’s Keepers" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">History’s Keepers</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'History’s Keepers',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>You hear Krile remark that Koana is the very picture of composure and reason—right up until Wuk Lamat’s safety is at stake. Erenville quietly agrees in his own way, saying the Wuk Lamat he once knew would have been shattered by losing a keystone, but that this journey—and the time you’ve spent at her side—has helped her more than words can show.</p><p>With the road calling, Alphinaud points out what comes next: before you can reach the city of gold, you must wrest the stolen keystone back from Bakool Ja Ja, and he won’t give it up without a fight. Alisaie adds that seeing him up close only confirms it—despite sharing a body, the two heads reveal two distinct minds, one constantly tempering the other.</p><p>Wuk Lamat pushes everyone forward toward the Yok Huy, only for Erenville to steer you back to the mountain approach—and to needle her by reminding you of the place where you were tricked into walking off with Wawkesa. Wuk Lamat bristles, then admits she might be letting him draw her anger outward so she won’t turn it inward over the keystone. Either way, she says, you can’t waste time standing still.</p><p>As you set out, Krile checks what Erenville told you—that this route will carry you toward the highlands—and Alphinaud urges haste, warning that Zoraal Ja will not have been idle while you struggled with Bakool Ja Ja. Alisaie can’t shake the feeling that bandits had been watching from the moment you stepped off the riverboat.</p><p>Wuk Lamat insists she had to stop in Earthenshire to tell Rediroq what happened, only to discover Erenville has gone on ahead. She fumes at his timing, calls him a smug gleaner, and drags you after her, determined to catch up and give him a piece of her mind. Krile, watching her charge onward instead of spiraling, realizes her earlier worry was misplaced—and follows you upward.</p><p>The climb bites hard. Wuk Lamat pants that she’s never climbed so high, vowing she’ll scold Erenville once she can breathe again. Krile keeps your purpose in view—the Yok Huy’s ties to the legend of the golden city may finally yield answers—and Alphinaud, looking at the thinning air, wonders how much higher the summit of Worqor Zormor must be. Erenville makes you slow down, breathe deeply, and drink water until your body adjusts, and at last you reach a village with an aetheryte and a looming temple beyond even the giants’ own scale.</p><p>Wuk Lamat recognizes the place from the Lay of Proof—where her father met with the Yok Huy—and stares at the giants in disbelief, realizing most Turali only ever see them in pictures. Erenville explains that in their mountain fastness they uphold a solemn pact with the Dawnservant: to watch over the tural vidraal Valigarmanda and maintain its prison within their temple. Krile recalls what Wuk Lamat told you of the tural vidraal—long-lived creatures that awaken to strange powers—and Erenville recounts how Gulool Ja Ja finally trapped Valigarmanda, leaving even the temple’s roof scarred by the struggle.</p><p>Wuk Lamat wants to see the mighty beast for herself, and Alphinaud notes that if both the Lay of Proof and the Lay of Ice unfolded here, you may be facing more than one feat. Wuk Lamat wavers between tracking down the elector and hunting Bakool Ja Ja, but you steer her back to the contest—identifying the Dawnservant’s elector first. Taking that in, she agrees to seek the elector, and Erenville leads you toward the temple where High Luminary Gurfurlur is said to be found.</p><p>Outside the temple, the guards’ scrutiny makes it clear this is no place for casual visitors. Wuk Lamat steps forward anyway, declaring herself a claimant to the rite of succession and asking to speak with Gurfurlur—and to her surprise, the way opens. Inside, your steps carry you straight to an answer you didn’t expect to face so soon: Valigarmanda, sealed in ice. In Gurfurlur’s absence, Luminary Zurmurwur welcomes you and tells you how the Skyruin devastated the region eight decades ago, how Gulool Ja Ja and his companions fought for ten days and ten nights, and how the Head of Reason devised a final ploy—tricking Valigarmanda into losing control of its own ice magicks until it encased itself in frozen aether.</p><p>Wuk Lamat praises her father’s work, then asks the question that hangs over the temple like a shadow: what happens if the ice melts? Zurmurwur admits the prison’s sustaining magicks weaken year by year, and that Valigarmanda’s command of fire, lightning, and ice may even have bled into the recent storm. Setting that dread aside, he gives you your task: the Feat of Proof is not a duel in a hall, but a search across the forbidding mountains—find the waiting Gurfurlur. Wuk Lamat learns her brothers have already begun their expeditions, and Alphinaud tells you that before you rush off, you’ll need clues from the villagers, or you’ll be searching blind.</p><p>Back outside, Krile senses a great expulsion of aether from the prison and fears the ice may only hold a few more years. Erenville admits that even after all he has seen across the world, Valigarmanda’s presence felt like a thousand dagger points against the skin. As your group weighs the scale of what lies ahead, Wuk Lamat stares at the frozen titan and says what everyone is thinking—if the prison ever fails, no one can count on the old guard to return. When the day comes, it will be you who must stand between this calamity and the world.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Wuk Lamat <small class="muted">Kozama’uka (X:33.6, Y:25.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="sibling-rescue.html">Sibling Rescue</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 93</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-feat-of-proof.html">The Feat of Proof</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'記憶の民、ヨカフイ族',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>あなたはクライルが、コーナは冷静沈着で理性的そのものだが、ウクラマトの身の安全が絡むと途端に落ち着きを失うのだとこぼすのを聞く。エレンヴィルも、かつて知っていたウクラマトなら要石を失えば立ち直れなかったはずだと言い、しかしこの旅と、あなたが隣にいる時間が、彼女を確かに変えているのだと静かに認める。</p><p>道が呼んでいる。アルフィノは、黄金郷へ至る前にバクール・ジャジャから要石を奪い返さねばならないが、相手は戦いなしに手放すつもりはないだろうと告げる。アリゼーは、同じ身体を共有していても、片方がもう片方をなだめる様子を見れば二つの意識がはっきり分かれているのがわかる、と断じる。</p><p>ウクラマトがヨクフイへ向けて出発を促すと、エレンヴィルは山道の入口へ戻る必要があると言い、あなたがウォーケッサを持たされて歩かされた場所を覚えているだろうとわざと突いてくる。ウクラマトは顔をしかめ、怒りを自分ではなく彼に向けさせようとしているのかもしれない、と半ば悔しそうに吐き捨てる。それでも、ここで立ち止まっている暇はない、失った時間を取り戻さなければならないと、あなたを急がせる。</p><p>あなたが歩みを進めると、クライルはこの道で高地まで行けるのだろうと確かめ、アルフィノはゾラージャがこちらの足止めを待っているはずがないと警戒して急ぐよう促す。アリゼーは、川船を降りた瞬間から盗賊どもに見張られていた気配があった、と不快そうに言う。</p><p>ウクラマトは、エアルテンシャイアでレディロクに一言伝えずには出発できなかったのだと語るが、戻ってみればエレンヴィルが姿を消していたことに腹を立てる。あなたを促して追いかけ、あの得意げなグリーナーに文句を言ってやるのだと息巻く。クライルは、要石を失ったことで彼女が思い悩むのではと案じていたが、どうやら取り越し苦労だったと悟り、あなたの後に続いて登っていく。</p><p>登りは容赦なく、ウクラマトはこんな高さまで登ったことがないと息を切らし、落ち着いたらエレンヴィルを叱ってやるのだと言う。クライルは、ヨクフイが黄金郷の伝承と深く結びついているのだから、直接尋ねられる機会になるとあなたに告げる。アルフィノは薄くなる空気に目を細め、ウォルコル・ゾルモルの頂がどれほど高いのかと考える。エレンヴィルは焦らず深呼吸し、水を飲んで身体を慣らせとあなたに言い聞かせ、やがてあなたはエーテライトのある村へ辿り着き、巨人の集落の奥にさらに巨大な神殿の姿を見上げる。</p><p>ウクラマトは、ここが父とヨクフイが会したという伝承の舞台だと気づき、絵でしか見たことのなかった巨人を前に言葉を失う。エレンヴィルは、彼らが山の砦で暁王との盟約に基づく務めを果たしているのだと語り、トゥラルのヴィドラールであるヴァリガルマンダを監視し、神殿の中の牢獄を維持しているのだと言う。クライルは、ヴィドラールが長命で、目覚めると奇妙な力を得る存在だとウクラマトから聞いていたことを思い出し、エレンヴィルはグルージャジャがついに獣を封じた経緯と、誘い込まれた際に天井へ残った大穴の話をあなたに伝える。</p><p>ウクラマトは最強のヴィドラールをこの目で見たいと身を乗り出し、アルフィノはこの地が二つの伝承の舞台である以上、今回の試練も二つに及ぶのではないかとあなたに問いかける。ウクラマトは、選定者を探すべきか、まずバクール・ジャジャを引きずり出すべきか揺れるが、あなたが選定者の特定を優先すべきだと促すと、いずれぶつかるのだからと頷き、選定者を探す決意を固める。エレンヴィルは、ハイルミナリーであるグルフルルがいるはずの神殿へ向かおうと、あなたを導く。</p><p>神殿の入口では衛兵の視線が鋭く、牢獄へは容易に踏み入れられないのだと肌でわかる。ウクラマトは名乗り、トゥリヨラルの第三の誓約として王位継承の儀に臨むのだと告げ、グルフルルに会わせてほしいと求めると、許可はあっさり下りる。あなたが中へ入ると、氷に封じられたヴァリガルマンダが目の前にあり、グルフルル不在の代わりにルミナリーのズルムルウルが迎える。彼は八十年前、スカイルインが高地へ降りた時の惨禍と、十日十夜に及んだ死闘、そして理性の首が追い詰められた末に策を巡らせ、獣に自らの氷の魔法を暴走させて凍結したエーテルに閉じ込めたことを、あなたに語る。</p><p>ウクラマトが父の働きを称えつつ、氷が溶けたらどうなるのかと問うと、ズルムルウルは牢獄を支える魔法が年々弱まり、炎と雷と氷を操るヴァリガルマンダの力が最近の嵐に影響した可能性すらあると認める。それでも今は試練の話へ戻り、あなたが挑むのは証明の試練であり、険しい山々を巡って待ち受けるグルフルルを探し当てよと告げる。兄たちの探索はすでに始まっていると聞き、アルフィノは手掛かりなしに探しても無駄だ、村人から情報を集めようとあなたに言う。</p><p>外へ出ると、クライルは牢獄から大きなエーテルの放出を感じ取り、氷が保つのはせいぜい数年ではないかと不安を漏らす。エレンヴィルは、これほどの存在感に晒されたのは久しいと告白し、肌を刺すような圧に息を呑む。あなたたちはこの地で得た重い現実を胸に刻み、ウクラマトは、牢獄が破れた時に旧き英雄が駆けつけるとは限らないのだと言い切る。その時は、あなたが守る側に立たねばならないのだと。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ウクラマト <small class="muted">コザマル・カ (X:33.6, Y:25.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="sibling-rescue.html">ウクラマトを救え</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 93</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-feat-of-proof.html">墓の試練</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'歷史的守護者：約卡輝族',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你聽著 Krile 評論 Koana 總是一副冷靜理性的模樣——唯獨碰到 Wuk Lamat 的安危，就很難再維持那份從容。Erenville 也用更直白的方式點出：他以前認識的 Wuk Lamat，如果丟了 keystone，恐怕會徹底崩潰；但這趟旅程，以及你一路陪在她身邊的同伴感，正在讓她變得更堅定。</p><p>路已經在催促。Alphinaud 提醒你們，在抵達黃金城之前，必須先從 Bakool Ja Ja 手上把那顆 keystone 搶回來——而他絕不可能不打就交出來。Alisaie 也補上一句：只要親眼看過就知道，雖然他們共用同一個身體，但兩個頭明顯是兩種思考，一個不斷壓著另一個的情緒，性格差異就像兩個不同的人。</p><p>Wuk Lamat 帶頭喊著要上路去找 Yok Huy，Erenville 卻把你帶回那條翻越山脈的起點，還故意提起你曾經被騙、就這樣把 Wawkesa 帶走的那個地方。Wuk Lamat 臉都皺了，嘴上抱怨他是故意在戳她，可能是想把她的怒氣引到他身上，免得她把責備全丟回自己身上。可不管怎樣，她都說不能再浪費時間，你們得把失去的時間追回來。</p><p>沿路上，Krile 確認 Erenville 說過這條路能一路通往高地；Alphinaud 則催你快走，因為 Zoraal Ja 不可能在你們和 Bakool Ja Ja 纏鬥時什麼都不做。Alisaie 也覺得不對勁——你們一踏下河船，就像立刻被盯上了，盜賊很可能從那時候就一直在看著。</p><p>Wuk Lamat 說她不能就這樣離開，所以先在 Earthenshire 跟 Rediroq 說了幾句才繼續前進，結果回過神來才發現 Erenville 居然先走了。她悶著一肚子火，拉著你趕緊追上去，還說她要親口罵那個自以為是的採集員一頓。Krile 原本擔心她會因為失去 keystone 而反覆自責，但現在看來，她反而更像是把情緒用在往前走——你們就這樣一路往上。</p><p>攀爬的高度讓人喘不過氣，Wuk Lamat 一邊喘一邊說她從沒爬過這麼高，等她緩過氣來一定要好好唸 Erenville 幾句。Krile 則把重點拉回來：Yok Huy 和黃金城的傳說有很深的牽連，這趟拜訪能讓你們直接向他們求證。Alphinaud 看著越來越稀薄的空氣，忍不住猜 Worqor Zormor 的山頂到底還要高到什麼程度。Erenville 要你放慢腳步、深呼吸、多喝水，等身體適應後再走，而你們終於抵達一座有以太之光的村落；那裡的一切都巨大得驚人，尤其遠處那座像神殿般的建築，更是壓過所有尺度。</p><p>Wuk Lamat 認出這裡是 Lay of Proof（Yok Tural 的傳說篇章之一）裡的地方——她的爸爸曾在此與 Yok Huy 會面——而眼前的巨人，也讓她明白多數 Turali 只能在圖畫裡見到他們。Erenville 告訴你們，Yok Huy 長久以來在山中守著一項與 Dawnservant 的盟約：看守名為 Valigarmanda 的 tural vidraal（Yok Tural 對長命異獸的稱呼），並維持它被囚禁在神殿之中的牢獄。Krile 回想 Wuk Lamat 先前提過的 tural vidraal——比常理更長壽，甦醒時還會獲得奇異力量——Erenville 則補充 Valigarmanda 的可怕之處，並說當年是 Gulool Ja Ja 終於成功將其囚禁，連神殿天頂都因那次引誘而留下巨大的破口。</p><p>Wuk Lamat 想親眼看看這頭最強的 tural vidraal，甚至好奇當年究竟是怎麼打贏的；Alphinaud 也注意到這裡同時是 Lay of Proof 與 Lay of Ice（Yok Tural 的傳說篇章之一）的舞台，意味著你們這次也許要面對兩種考驗。Wuk Lamat 一度想先把 Bakool Ja Ja 揪出來、把 keystone 打回來，但你把她拉回正事——先找到 Dawnservant 的選定者才是當務之急。她想了想，承認反正遲早都得正面對上，於是同意先去找選定者，而 Erenville 便帶著你們前往神殿，說 High Luminary Gurfurlur 應該就在那裡。</p><p>站在神殿外，守衛的視線讓你立刻明白：Valigarmanda 的牢獄不是誰想進就能進的。Wuk Lamat 上前表明身分，說自己是 Tuliyollal 的第三誓約，為了繼承之儀而來，希望能見到 Gurfurlur；結果守衛竟然直接放行。你們踏入神殿，迎面就看見 Valigarmanda 被冰封在眼前。Gurfurlur 當下不在，迎接你們的是 Luminary Zurmurwur；他告訴你們 Skyruin（Valigarmanda 的稱號）在八十年前降臨此地造成的慘劇，若不是 Gulool Ja Ja 與同伴出手，你們的下場將是被屠戮殆盡。那場與 Valigarmanda 的巨戰持續十天十夜，直到 Head of Reason（理性之首）想出絕望的一步——讓 Valigarmanda 失控於自身的冰之魔法，最終反過來把自己封進冰凍的以太之中。</p><p>Wuk Lamat 讚了一句「爸爸幹得漂亮」，卻立刻問出更沉重的問題：如果冰融化了怎麼辦？Zurmurwur 承認牢獄的維持魔法一年比一年衰弱，而 Valigarmanda 同時掌握火、雷、冰的力量，有人甚至認為近期暴風的狂烈，可能就是那些能量開始外洩的結果。接著他把話題拉回試煉：你們要挑戰的是墓之試煉—在險峻山域中搜尋，找到等待中的 Gurfurlur。Wuk Lamat 得知她的兄弟們已經出發，Alphinaud 也提醒你，若沒有方向就只是瞎找，得先向村民打聽線索。</p><p>離開神殿後，Krile 感覺到 Valigarmanda 的牢獄曾排出大量以太，擔心冰封恐怕只剩幾年能撐。Erenville 則坦言自己很久沒遇過這種壓迫感—像有無數尖刃同時刺在皮膚上。你們都清楚：就算曾經的英雄不再趕來，這場危機終究會落在你們這一代身上。Wuk Lamat 望著那頭被冰封的巨影，語氣不再只是逞強—如果牢獄崩壞，最後站出來守住一切的，會是你。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>任務發布</b> Wuk Lamat <small class="muted">Kozama’uka (X:33.6, Y:25.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="sibling-rescue.html">手足救援：救出烏克·拉瑪特</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.93</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-feat-of-proof.html">墓之試煉</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
