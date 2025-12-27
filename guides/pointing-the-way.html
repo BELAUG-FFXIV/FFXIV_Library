@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pointing the Way | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Pointing the Way (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/yBQNRp47sB8"
+              title="Pointing the Way" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Pointing the Way</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Pointing the Way`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>At the village outskirts, the aether seeker demands you specify an aetherial aspect, and Erenville sets it to fire. He makes one key adjustment before you begin: Worlar’s Echo is still saturated with the Skyruin’s residual aether, so he excludes the village itself from the search area to keep the sensors from being overwhelmed. When you’re ready, he accompanies you, and the seeker chirps its way forward—its tinny voice insisting it will track the nearest source of fire-aspected aether.</p><p>The problem becomes obvious immediately. The seeker locks onto the first thing it can taste: a fire sprite. Erenville dryly notes it’s not the legendary creature you’re after, and asks you to deal with it—if you leave it alive, it will keep confusing the seeker. You put the sprite down, return, and try again…only for the seeker to latch onto another frightening source of fire-aspected aether that still isn’t Valigarmanda. Erenville repeats the warning he gave earlier: this method has flaws—once the device locks onto a source, it will follow it forever. So you snuff out the decoy, again and again, until the seeker finally leads you beyond the village.</p><p>At Naryor Gorna, it stops at a crater still burning—another remnant of Valigarmanda’s last rampage. Erenville realizes why the seeker reacted: the crater’s flames registered as corporeal aether, as though the fire itself were alive. He recalls a line from the Tuliyollal Saga—when Valigarmanda rages out of control, its fire burns forever, its ice does not thaw, and its lightning crackles without cease—and explains how the Dawnservant once turned that perpetual magic against the Skyruin, trapping it in an unmelting prison of ice. Seeing such “poetry” proven true feels strange, but it gives you what you need.</p><p>Because the fire is classified as living aether, Erenville can take a sample and feed it into the seeker, sharpening the device’s focus. The seeker analyzes the sample and recalibrates, and Erenville tells you the critical improvement: from now on, it should ignore every aetheric signature but Valigarmanda’s. He apologizes—if he’d realized earlier, you wouldn’t have needed to fight those creatures at all—and admits the journey is still teaching him, both as a gleaner and as your guide.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Erenville <small class="muted">(Urqopacha, X:28.8, Y:33.6)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="an-echo-of-madness.html">An Echo of Madness</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 93</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-skyruin.html">The Skyruin</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'追跡！エーテルシーカー',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>村の外れへ向かったあなたは、エーテル探知器に「探知したい属性を指定せよ」とせっつかれ、エレンヴィルが炎属性に設定するのを見守る。彼は追跡を始める前に一つ手を打つ――ウォーラーズ・エコーにはスカイルインの残留エーテルがなお濃く満ちているため、センサーが飽和しないよう、村そのものを探索範囲から除外したのだ。準備が整うと、あなたはエレンヴィルとともに出発し、探知器は機械じみた声で「最寄りの炎属性エーテル源を追跡する」と宣言しながら先導し始める。</p><p>だが欠点はすぐに露呈する。探知器が最初に反応したのは火精で、エレンヴィルは「伝説の獲物ではない」と淡々と告げ、あれを片づけてほしいと言う。放置すれば探知器は延々と惑わされるからだ。あなたが火精を倒して戻ると、探知器はまた別の炎属性反応へ吸い寄せられる――恐ろしい気配はあっても、ヴァリガルマンダではない。エレンヴィルは改めて、探知器の追跡は一度対象を捕捉するとそれだけを追い続ける、と欠陥を言葉にする。あなたは邪魔になる反応を断ち切りながら、何度も追跡をやり直し、ようやく村外へと導かれていく。</p><p>やがてナリョル・ゴルナで、探知器は燃え続ける巨大な火口に行き当たる。エレンヴィルはそれを、ヴァリガルマンダがかつて暴れた際に残した爪痕だと見抜き、火口の炎が「肉体的エーテル」として探知器に感知されたのだと説明する。彼はトゥリヨラルのサーガの一節を引き、ヴァリガルマンダが荒れ狂う時、その炎は永遠に燃え、氷は溶けず、雷は絶えず鳴り響くのだと言う。そして暁王は、その「永久の魔法」を逆手に取り、溶けぬ氷の牢獄へとスカイルインを閉じ込めたのだと語る。詩的な誇張と思われていた言葉が現実として証明されることに、奇妙な感慨が滲む。</p><p>だが重要なのは感傷ではない。炎が「生きたエーテル」として分類された以上、サンプルを採取して探知器へ入力すれば、精度を大きく高められる。探知器が分析と再調整を終えると、エレンヴィルはこれでヴァリガルマンダ以外の反応を無視できるはずだと言う。そして、最初からこの方法に気づけていれば余計な戦いをさせずに済んだのにと詫び、旅はまだ自分に多くを教えている――グリーナーとしても、案内役としても、と素直に認める。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> エレンヴィル <small class="muted">（オルコ・パチャ, X:28.8, Y:33.6）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="an-echo-of-madness.html">騒乱の残響</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 93</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-skyruin.html">最強のトラルヴィドラール</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'循線追蹤以太追蹤器',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你和 Erenville 先往村落外圍走去，以太追蹤器一開口就用那種故意拉長、怪腔怪調的聲音要你「指定要偵測的以太屬性」。Erenville 沒跟它鬥嘴，直接把偵測目標設成火屬性以太，並先做了一個必要的處理：Worlar’s Echo 仍被 Skyruin（Valigarmanda 的稱號）的殘留以太浸透，如果把村內也算進搜尋範圍，感測器很容易被淹沒到失真，所以他把村子排除在搜尋區域之外。等你決定出發，他就會跟著你，而以太追蹤器也開始帶路；你必須緊跟它，不能把它跟丟，否則就得回到起點重來。</p><p>一開始就看得出這方法的缺陷。以太追蹤器宣告要追蹤「最近的火屬性以太來源」，結果它第一個鎖定的不是 Valigarmanda，而是一隻火精。Erenville 乾脆地說這不是你們要找的傳說怪物，並請你把那隻火精處理掉——不然它會一直干擾以太追蹤器。你把火精打倒後回來，Erenville 讓它重新開始追蹤，但以太追蹤器又再次鎖定到另一個「夠嚇人」卻依舊不是目標的火屬性反應。Erenville 提醒你：他早就說過這工具不是沒有缺點——一旦鎖定來源，就會死追到底。你只好一次次清掉干擾的目標，才能讓追蹤繼續往前。</p><p>直到你們來到 Naryor Gorna，以太追蹤器停在一個仍在燃燒的巨大坑洞前。Erenville 一眼就認出那是 Valigarmanda 上一次暴走留下的痕跡——而坑洞裡的火焰，竟被以太追蹤器判定成「有形體的以太」，彷彿那團火本身也是活的。他引用 Tuliyollal Saga 裡的說法：當 Valigarmanda 失控狂怒時，火會永不熄滅、冰不會融化、雷也會無止盡地炸裂；也正因為這種「永續的魔法」，Dawnservant 才能反過來利用 Skyruin（Valigarmanda 的稱號）的特性，把它困進那座永不融解的冰之牢獄。看著原本像「誇張詩句」的描述被眼前的景象證實，Erenville 自己也覺得那種落差很奇妙。</p><p>不過更重要的是，這讓你們終於能把追蹤變得更精準。既然這團火被分類為「活的以太」，Erenville 就能抽取樣本輸入以太追蹤器，大幅提升它的判別能力。以太追蹤器分析完樣本後重新校準，Erenville 說從現在起，它應該會忽略除了 Valigarmanda 之外的所有以太特徵。他也向你道歉：要是他一開始就知道能這樣做，你根本不必為了清除干擾而打那麼多場；而這趟旅程仍在教他更多——不只是作為 gleaner，也作為你們的向導。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 艾倫維爾 <small class="muted">(奧闊帕恰山, X:28.8, Y:33.6)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="an-echo-of-madness.html">狂亂的回響</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.93</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-skyruin.html">天穹毀滅者</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4Kw4CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
