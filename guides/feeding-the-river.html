@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Feeding the River | BELAUG · FFXIV Library</title>
+  <meta name="description" content="FFXIV MSQ – Feeding the River（エレンヴィルとプヌティー / 河上撒餌誘敵）｜Dawntrail Patch 7.0">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe src="https://www.youtube.com/embed/i-kSxfKRMUQ"
+              title="Feeding the River" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Feeding the River</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Feeding the River',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Koana calls for everyone to gather and calmly briefs the group on what you know so far: at the very least, you believe the Hoobigo knows where Lamaty’i has been taken, and Thancred is already shadowing the boat. Koana wants to join him as quickly as possible, but there is a problem—your quarry had the foresight to release your punutiy from its harness, leaving you without a way to give chase.</p><p>Koana turns to Erenville and asks, as someone who knows wildlife, what your chances are of recapturing the animal. Erenville says it can be done with the right mix of feed, but he wants an extra hand to help scatter it. Koana asks you to go with him, while the rest of the party focuses on repairing the harness, which seems to have been damaged when the punutiy was let loose. Alphinaud notes that with so many peddlers in camp, buying replacement materials should be easy, and any metalwork can be handled by Earthenshire’s artisans just a short walk away.</p><p>Erenville reasons that an unusually aggressive herd of wild punutiys was seen downriver, so your girl likely fled the other way. He leads you upriver toward Marsh Ligaka, explaining that if she came this way, she’ll be hiding in the depths. The plan is to lure her back to the shallows with food. Wild punutiys mainly eat aquatic grasses and plants, while tame ones are often fed vegetable scraps, so Erenville has mixed leftovers into the feed to make it stand out against the marsh’s natural scents. He hands you the prepared feed and warns that Ligaka is crawling with predators, so he’ll stay near the shallows while you scatter the feed deeper in.</p><p>You spread the feed along the water’s edge and return to Erenville. He finishes laying out the last of the bait, tells you to step back out of sight, and then gently calls her in. When she appears, he speaks softly, assuring her there’s nothing to fear and coaxing her closer with treats—praising her as a good girl. Once she’s calm, he plans to give her a few more bites and then lead her back to the boat, and he tells you to inform Koana that you have your punutiy back. Even after, he keeps soothing her, noting how frightening it must have been to be alone in a strange river, while the punutiy gives a small mew and seems comforted by Erenville’s scent.</p><p>Back at Many Fires, Koana is relieved to hear Erenville has the punutiy in hand, saying he expected nothing less from a certified gleaner. He reports that the harness parts have been purchased, and the Leveilleur twins are in Earthenshire having the potsworn make the repairs. It should not take long—once Thancred sends word, you’ll be ready to embark on the rescue.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Koana <small class="muted">Kozama’uka (X:33.6, Y:25.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-brothers-duty.html">A Brother’s Duty</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 92</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="sibling-rescue.html">Sibling Rescue</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'エレンヴィルとプヌティー',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>コアナは戦力を集める必要があると言い、まず現状を皆に説明する。少なくとも、あのフービゴがラマチが連れ去られた場所を知っている可能性が高く、サンクレッドは今この瞬間も船を尾行している――だからこそ彼は一刻も早く合流したい。だが問題は、相手があなたのプヌティをハーネスから解き放ち、追跡手段を奪っていったことだった。</p><p>コアナは動物に詳しいエレンヴィルへ、あのプヌティを取り戻せる見込みがあるか尋ねる。エレンヴィルは、適切な餌を用意すれば可能だと言うが、撒く作業に手を貸してほしいとも頼む。コアナはあなたに同行を求め、残りの者にはハーネスの修理を任せる方針を示す。プヌティが放たれた際に損傷したらしく、アルフィノは野営地に行商人が多いから材料の調達は難しくない、金属加工が必要ならアースンシャイアの職人に頼めると補足する。</p><p>エレンヴィルは、川下に獰猛な野生のプヌティの群れがいたため、あなたのプヌティは逆方向へ逃げたはずだと読み、あなたを川上へ導く。もしこちらへ来ているならマーシュ・リガカの奥に潜んでいるだろうから、餌で浅瀬へ誘い出すという。野生のプヌティは水草や水辺の植物を主に食べるが、飼育された個体は野菜くずも与えられるため、彼は残り物を混ぜて匂いを強め、湿地の自然な匂いに紛れにくい餌を作っていた。あなたは餌を受け取り、リガカは捕食者だらけだから自分は浅瀬で待つ、あなたは奥で餌を撒いてほしいと頼まれる。</p><p>あなたが水際に餌を撒き終えて戻ると、エレンヴィルも最後の誘い餌を整え、姿を隠して見守れと言う。やがて彼は現れたプヌティに優しく声をかけ、怖がる必要はない、もう一度だけ手伝ってほしいのだとなだめ、餌で近づかせながら「いい子だ」と褒める。落ち着いたらさらに与えて船へ導くつもりで、あなたにはプヌティを取り戻したとコアナへ知らせてくれと伝える。孤独な見知らぬ川で心細かっただろうと語りかけると、プヌティは小さく鳴き、彼の匂いに安堵しているようだった。</p><p>メニー・ファイアズに戻ると、コアナはエレンヴィルがプヌティを確保したと聞いて安堵し、公認のギャザラーにふさわしい働きだと言ってうなずく。ハーネスの部品は揃い、ルヴェユールの双子がアースンシャイアで契約職人に修理を依頼しているため、ほどなく整うはずだ。あとはサンクレッドから連絡が入り次第、救出作戦に出航できる――そう締めくくられる。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> コーナ <small class="muted">コザマル・カ (X:33.6, Y:25.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-brothers-duty.html">兄として</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 92</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="sibling-rescue.html">ウクラマトを救え</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'河上撒餌誘敵',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Koana 說你們必須集結戰力，並先把目前情勢向所有人說清楚：至少可以確定的是，那名 Hoobigo 很可能知道 Lamaty’i 被帶去哪裡；而 Thancred 此刻正緊緊尾隨對方的船，Koana 也想立刻追上去。但你們的獵物早有準備——他們解開了你們的 punutiy 的繫具，把牠從束縛裡放走，讓你們一時失去追擊手段。</p><p>Koana 轉向 Erenville，問他以野生動物專家的角度來看，追回那隻 punutiy 有多少把握。Erenville 說只要用對飼料就做得到，但需要一個人幫忙把飼料撒開；Koana 便請你陪他去辦這件事。其餘的人則分頭處理繫具的修理——看起來是在 punutiy 被放走時受損了。Alphinaud 補充，營地裡有許多小販，要買替換材料不成問題；如果需要金屬加工，Earthenshire 的契約匠人也離得不遠。</p><p>Erenville 推斷，下游出現了一群異常兇猛的野生 punutiy，因此你們那隻「女孩」多半會往相反方向逃。他帶你往上游走，說如果牠真的跑到這裡，應該會躲在 Marsh Ligaka 的深處；你們得用食物把牠引回淺灘。野生 punutiy 主要吃水草與水生植物，而被馴養的個體常吃蔬菜邊料，所以 Erenville 把剩菜混進他調好的飼料裡，讓氣味在沼澤的自然味道中更突出。Erenville 把飼料交給你，又提醒 Ligaka 到處都是掠食者，他會留在淺灘附近等著，你則要把飼料撒得更深一些。</p><p>你沿著水邊把 Erenville 的飼料撒開，回去回報後，他也剛好把最後的誘餌擺好，叫你先退開、藏好，剩下交給他。他低聲喚著牠現身，等牠靠近便溫柔安撫，說不用害怕，只需要牠再幫最後一次；他一邊餵牠、一邊稱讚牠是乖女孩，打算再給幾口就把牠帶回船邊，並要你去告訴 Koana——你們已經把 punutiy 找回來了。之後他仍輕聲哄著牠，說牠獨自在陌生的河道一定很害怕；punutiy 小聲叫了一下，看起來也因為 Erenville 的氣味而放鬆下來。</p><p>回到 Many Fires，Koana 聽說 Erenville 已經把 punutiy 控制住，明顯鬆了一口氣，說他不愧是「公認的採集者」。至於繫具，大家已經買齊需要的零件，Leveilleur 雙胞胎正待在 Earthenshire，請契約匠人把修理做完。Koana 說應該不用等太久——只要 Thancred 傳來消息，你們就能立刻出發展開救援。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>任務發布</b> Koana <small class="muted">Kozama’uka (X:33.6, Y:25.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-brothers-duty.html">身為兄長的責任</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.92</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="sibling-rescue.html">手足救援：救出烏克·拉瑪特</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
