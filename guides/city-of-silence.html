@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>City of Silence | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – City of Silence (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/zfkNCisyAe4"
+              title="City of Silence" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">City of Silence</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`City of Silence`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>You reach a plaza where two streets converge, and the silence feels heavy. On Alphinaud’s suggestion, you split up and move in pairs to be cautious: Erenville goes with Alphinaud, Alisaie goes with Krile, and you stay with Wuk Lamat to search for the elector. Wuk Lamat tries to speak to passersby just to confirm they can hear and see her, but people either stare through her or turn away as if her words are nothing more than ambient noise.</p><p>With no one responding, Wuk Lamat leads you to what looks like a shop, certain a merchant won’t ignore you. When she greets the Hoobigo merchant and asks about the Dawnservant’s elector, he coldly tells you to move along—outsiders. Wuk Lamat is left fuming at how you’re supposed to find an elector if nobody will even speak, when Alphinaud suddenly calls over the linkpearl, urging everyone to rush to a massive stone structure on the west side of the city.</p><p>There, you arrive in time to see a shocking sight: Zoraal Ja has been bested—by a mere shade. Wuk Lamat blurts out “Papa!?” but Alphinaud explains it isn’t the man she knows; it is an arcane manifestation of the Dawnservant as he was in his prime. Koana identifies the one presiding over this trial as Zereel Ja, Autarch of Mamook and elector for the Feat of the Brotherhood, and you hear Zereel Ja chastise Zoraal Ja for spurning his retainer’s aid. Alphinaud lays out the meaning of the final feat: to prove superiority to blessed siblings by surpassing the shade of Gulool Ja Ja himself.</p><p>Zereel Ja declares that Zoraal Ja’s failure could have ended there, but instead he tried to harm an anointed elector. On the spot, Zereel Ja disqualifies him from the rite of succession and orders him gone. Sareel Ja’s voice cuts in with a vow that he will be the one to reach the golden city, and Koana tells you what happened when Zoraal Ja fell—he tried to seize the keystone by force, only to be stopped by Father’s shade. Then Zereel Ja turns his fury on Bakool Ja Ja, who stammers that he tried but could not beat her; Zereel Ja brands him useless like his siblings and drives him out as a failure, even as Bakool Ja Ja’s brother pulls him away.</p><p>When Zereel Ja presses Koana to show his tablets and demands an accounting of missing keystones, he dismisses the setback with a cruel solution: whatever keystones you lack, you can easily take. He then tells you to stand before him and fall, but Wuk Lamat refuses to do his trial—not because she is surrendering the rite, but because she insists on learning Mamook first, as her father intended: to understand the country he loves, its peoples and cultures. Koana agrees that an elector named by Father must have something to teach, and Zereel Ja allows you to do as you will—yet bars you from proceeding until you triumph over the shade. Before you can regroup, a dignified lady approaches and asks to speak with you privately, calling for you to meet on the western outskirts.</p><p>You follow that slender thread of civility through a city that has offered none. There, the woman introduces herself as Miilal Ja and says you can speak freely away from prying eyes. She asks what you think of Mamook, and all you can answer is that you’ve barely been allowed to see it—no one will even speak to you. Miilal Ja explains that those who remain in the city are devoted to traditional ways, convinced that blessed siblings are superior and alone worthy to lead; most refuse to address outsiders at all, treating them as beneath notice. She admits she is exhausted by the senselessness, and though others feel the same, they dare not speak openly—yet now, because you bested Bakool Ja Ja, she believes you have an opportunity to reclaim agency, and your triumph could force Mamook to confront whether the throne should be decided by birth…or by character.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Wuk Lamat <small class="muted">(Yak T’el, X:36.2, Y:31.7)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="into-the-traverse.html">Into the Traverse</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 94</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="blessed-siblings.html">Blessed Siblings</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'樹海の民、マムージャ族',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>二つの通りが合流する広場に足を踏み入れると、街の空気は想像以上に重く、静けさが張りつめている。アルフィノの提案で、フンム・ルルクの忠告どおり用心を優先し、行動は二人一組に分ける。エレンヴィルはアルフィノと、アリゼーはクリルと組み、あなたはウクラマトに付き添って「選定者」を探すことになる。ウクラマトは声をかけてみるが、人々はまるで聞こえていないかのように無視し、視線を合わせても言葉を受け取らない。</p><p>誰にも取り合ってもらえないまま、ウクラマトは「商人なら無視しないはずだ」と店らしき建物へあなたを連れていく。だがフービゴの商人は、用件を聞くどころか「よそ者は立ち去れ」と冷たく言い放つ。ウクラマトが「これでは選定者を探しようがない」と苛立ったそのとき、リンクパール越しにアルフィノの声が響き、街の西側にある巨大な石造りの建造物へ急いで来るよう告げられる。</p><p>指定された場所へ駆けつけると、そこには衝撃的な光景があった。ゾラージャが「影」に敗れている。ウクラマトは思わず「お父さん！？」と声を上げるが、アルフィノは「あなたの知る彼ではない」と言い、目の前の存在は全盛期の暁王を魔法で具現化した“影”なのだと説明する。コーナは、この「同胞の偉業」を司る選定者が、マムークの首長ゼリールジャであると告げ、ゼリールジャはゾラージャの愚かさと慢心を嘲る。アルフィノは、この最後の偉業の意味を言葉にする――祝福されし兄弟を超えるために、暁王グルージャジャそのものの影を打ち倒すことだ、と。</p><p>ゼリールジャは、失敗だけならまだしも、ゾラージャが「選定者」に手をかけようとしたことを許さず、その場で継承の儀から失格を宣告し、立ち去れと命じる。サリールジャは「黄金郷に辿り着くのは自分だ」と言い捨て、コーナは、ゾラージャが敗北の直後に鍵石を力ずくで奪おうとしたが、暁王の影に阻まれたのだとあなたに伝える。さらにゼリールジャはバクージャジャにも苛烈に当たり、勝てなかったと震える彼を「祝福されし兄弟と同じく役立たず」と罵って追放し、弟が兄を連れて退くしかない。</p><p>ゼリールジャはコーナに石板を示せと迫り、鍵石が揃っていないことに激昂するが、すぐに冷酷な結論へと飛びつく――足りない鍵石は、奪えばよい。あなたたちに「立て、そして倒れよ」と告げるが、ウクラマトはその試練を今すぐ受けることを拒む。継承の儀を投げ出すのではなく、暁王が望んだとおり、この国を愛する者としてマムークの民と文化を理解したいのだと言い、コーナもまた、暁王が選定者に任じた以上、学ぶべき意味があるはずだと同調する。ゼリールジャは好きにするがよいと言い放つ一方、影に勝たぬ限り先へは進ませぬと釘を刺す。すると、一人の気品ある女があなたに声をかけ、西の外れで密かに会いたいと告げる。</p><p>街で初めて向けられたその礼節を頼りに向かうと、女はミーラルジャと名乗り、人目を避けて話せる場所へ案内する。彼女はあなたに「マムークをどう思うか」と問うが、あなたが答えられるのは、誰も口を利かず、何も知る間もないという現状だけだ。ミーラルジャは、ここに残る者たちは古いしきたりに固執し、祝福されし兄弟こそが優れ、彼らだけが大陸を導くに相応しいと信じ込んでいるのだと言う。よそ者は見下され、言葉を交わす価値すらないと扱われる。ミーラルジャはその無意味さに疲れ果て、同じ思いを抱く者もいるが真実を口にできないと打ち明ける――だがバクージャジャを打ち負かしたあなたたちの勝利が、血筋ではなく資質こそが力であることを示し、この街が変わるきっかけになり得るのだと。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ウクラマト <small class="muted">（ヤクテル樹海, X:36.2, Y:31.7）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="into-the-traverse.html">ティーンベク洞道を抜けて</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 94</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="blessed-siblings.html">双血の教え</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'樹海之民：瑪姆嘉族',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你走進一座廣場，兩條街道在此匯合，四周卻異常安靜。Alphinaud 說既然 Hunmu Rruk 已提醒過要小心，你們就分頭、兩兩一組在城內搜尋：Alphinaud 與 Erenville 一組，Krile 與 Alisaie 一組，而你陪著 Wuk Lamat 去找「選定者」。Wuk Lamat 一再試著跟路人搭話，像是在確認對方聽得見、看得見她，但回應她的只有冷漠的沉默——有人把她的話當成背景雜音，有人乾脆轉身離開。</p><p>沒人願意開口，Wuk Lamat 便拉著你往一棟像商店的建物走去，認定商人總不至於也不理人。她向 Hoobigo 的商人詢問 Dawnservant 的「選定者」在哪裡，對方卻只丟下一句「外人走開」。Wuk Lamat 氣得直嘆：如果連一句話都問不到，到底要怎麼找到選定者？就在此時，Alphinaud 透過 linkpearl 呼叫大家，要求你們立刻趕往城西側那座巨大的石造建築。</p><p>你趕到後看見的景象令人心頭一沉：Zoraal Ja 被擊敗了——而且是被「影」擊敗。Wuk Lamat 脫口喊「爸爸！？」但 Alphinaud 立刻說那不是她所熟悉的爸爸；你眼前的是以祕術顯現、重現全盛時期 Dawnservant 的魔法具現。Koana 指出主持此處的人是 Zereel Ja——Mamook 的 Autarch，同時也是「同胞的試煉」的選定者。Zereel Ja 嘲諷 Zoraal Ja 自恃武勇卻不夠明智，甚至在面對更強的對手時拒絕侍從相助；而 Alphinaud 也說出最後一項試煉的本質：要證明自己凌駕於「受祝福的手足」之上，就得超越 Gulool Ja Ja 的影。</p><p>Zereel Ja 宣告 Zoraal Ja 本可把愚行止於落敗，但他卻企圖傷害被任命的選定者，因此當場取消他作為誓約者的資格，命他滾出視線。Sareel Ja 緊接著放話，表示事情還沒結束，黃金城最終會由他抵達；Koana 則告訴你，Zoraal Ja 落敗後想強奪 keystone，卻被爸爸的影擋下。接著 Zereel Ja 又把怒火轉向 Bakool Ja Ja——Bakool Ja Ja 顫抖著承認自己嘗試過，但打不贏；Zereel Ja 斥他與自己的受祝福的手足一樣無能，命他永遠別再回來，Bakool Ja Ja 的弟弟只能拉著他離開。</p><p>Zereel Ja 逼 Koana 交出石板、質問你們的keystone(鑰石)去向，怒氣翻湧之後卻冷冷下結論：缺的那些，奪來就好。他要你們站到他面前「倒下」，但 Wuk Lamat 拒絕立刻接受他的試煉——不是要放棄，而是堅持爸爸選繼承者的用意，是要繼承者真正理解他所愛的國度。她說自己一路走來學到各族群的文化與生活方式，也想在 Mamook 做同樣的事，讓這場戰鬥先等一等。Koana 也表示自己同意：爸爸把 Zereel Ja 任命為選定者必有理由，這裡一定有你們該學的事。Zereel Ja 允許你們照自己的方式行事，但也警告：在你們擊敗那道影之前，別想再往前一步。</p><p>就在你們還在消化這一連串變故時，一位舉止端莊的女士開口請「誓約者」與她私下談談，約在西側郊外見面。你們循著這城裡少得可憐的善意前往，她自稱 Miilal Ja，說在這裡可以避開耳目、自由說話。她問你怎麼看 Mamook，而你只能坦言：你們幾乎還來不及了解，因為這裡的人根本不願跟你們說話。Miilal Ja 便直白說明——留在城中的人多半奉行傳統，深信「受祝福的手足」凌駕眾人之上，只有他們才配帶領這片大陸，因此他們不屑對外人開口，甚至把外人當成不值一提的存在。她說自己早已疲憊不堪，許多人其實也同樣厭倦，卻不敢把真心話說出口；然而如今你們擊敗了 Bakool Ja Ja，她認為你們有機會讓這座城重新思考——王座該由出生決定，還是由一個人的品格與作為來證明。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 烏克·拉瑪特 <small class="muted">(Yak T’el 樹海, X:36.2, Y:31.7)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="into-the-traverse.html">穿越Traverse</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.94</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="blessed-siblings.html">受祝福的兄妹</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
