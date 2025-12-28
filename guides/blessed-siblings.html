@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Blessed Siblings | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Blessed Siblings (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/SoyCJP_DIFY"
+              title="Blessed Siblings" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Blessed Siblings</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Blessed Siblings`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>You tell the others that if using Wuk Lamat’s status as the Dawnservant’s daughter can help the people of Mamook, she’s willing—but she wants to understand Miilal Ja’s motivations first. Erenville admits that what he knows of Mamool Ja extremism is mostly rumor, much like everyone from Xak Tural. Krile wonders if Miilal Ja’s talk of “the price we pay” points to the marriages between the Hoobigo and Boonewa clans. Alphinaud reflects that Gulool Ja Ja worked to tear down walls, and it’s bitter that his very existence has instead inspired some to raise them. Alisaie suspects Bakool Ja Ja joined the rite of succession for the sake of those devotees.</p><p>Miilal Ja says there is a place, far to the west, that will help you understand their plight, and she leads you there. Along the way through Yak T’el’s Ja Tiika Heartland, you pass sights Erenville says exist nowhere else: a meteorite lodged high above, with a tree seemingly drawing strength from its strange aether. The forest grows so dark under the canopy that Krile compares it to being shut in a windowless room. You spot what looks like a hunting camp, and though Krile wants to speak with Mamool Ja hunters, she doubts they would give her the time of day. Pressing on, you reach a descent where Miilal Ja points to tunnels hidden in the Ja Tiika Heartland—secrets even Erenville never knew. A deep cavern yawns below, and Alphinaud can understand why so many Mamool Ja chose life in Tuliyollal instead of this lightless forest.</p><p>Miilal Ja brings you to a sealed passage and says what lies beyond is forbidden even to the devout—yet she will reveal it to you and accept full responsibility. She urges you to see “the truth of the blessed.” Past the passage, she indicates a stone pier below as your destination; she says it was built long ago by Yok Huy hands, and her people only altered the entrance. When Krile asks why, Miilal Ja chooses to show rather than tell—beasts will carry you down.</p><p>There, Bakool Ja Ja appears, expecting mockery for his failure, but Miilal Ja calls him out: he has always come here to cry, ever since he was little. When he calls her “Mother,” she tells him the Third Promise wants to learn about Mamook—and that this may be their chance to end what they have been powerless to stop. She orders him to speak and confess what they have done. Bakool Ja Ja agrees, bitterly invoking that you should hear it from the “blessed” themselves. He produces a vessel holding the remains of a two-headed Mamool Ja—an infant—and says the ruins were converted into a cenotaph so the souls of these children would not return as vengeful spirits.</p><p>He explains how blessed siblings are made: unions between Hoobigo and Boonewa were arranged to end infighting when the war against the Xbr’aal went poorly. Then a child was born—two-headed and tremendously powerful—and once that child could lead, the Mamool Ja became unstoppable and drove the Xbr’aal back to the trees above. Victory turned to greed. They became obsessed with conceiving more of these “superior” children, no matter the cost. Of the countless born, most die, trapped in their shells; only one in a hundred survive. If Bakool Ja Ja and his kin are called “blessed,” he says, it is only because they still live—while their brothers and sisters were sacrificed for Mamook’s glory. Wuk Lamat is horrified, and Bakool Ja Ja rages that it is an atrocity that can never be taken back. Those children died so that he could live, so he had to succeed at any cost—and to fail would mean it was all for nothing. Yet he believes he did fail and squandered their sacrifice.</p><p>When he collapses into self-loathing, saying he should never have been born, Wuk Lamat stops him. She tells him he did not choose how he was born, and he is not responsible for his siblings’ deaths—the people obsessed with blessed siblings made those choices, but they do not dictate his. She demands he say what he wants, and he finally answers: he wants it to end, and he wants no more to die. Wuk Lamat gives her word that she will help put a stop to this madness. Alphinaud adds that blessed siblings are revered by supporters as a path to dominance in Tural, and understanding their aspirations would help you treat with them. Krile hopes they will be willing to talk.</p><p>Bakool Ja Ja asks to come with you because fanatics treat his words as gospel, but Miilal Ja refuses—there will be trouble if his father learns he is still here. Instead, she names Moxutural Zooj as the place where you will gather the people so the Third Promise can ask what she wishes. Bakool Ja Ja gives you a scale—one that blends Hoobigo and Boonewa coloring—as proof of trust, saying people will obey if you show it. He apologizes for what he has said and done and does not expect forgiveness. Wuk Lamat says she’s glad she learned his reasons—and snipes that he isn’t a complete alpaca’s ass. The edge breaks; even Alisaie admits hatred is exhausting, and Alphinaud urges you to make the most of this new understanding as you bring the people of Mamook together to learn more.</p><p>Before you rejoin the others, Wuk Lamat pulls you aside and admits she hated Bakool Ja Ja completely—he tried to ruin Ihih’hana, sabotaged you on the river, kidnapped her for her keystone, and unleashed the most vicious tural vidraal imaginable. She thought she would never forgive him, but the moment she understood the pain he has carried, her anger evaporated. When you question what that means, she agrees his motives do not absolve his crimes—he must answer for them like anyone else. Yet her duty now is to ensure no one in Mamook ever feels desperate enough to go to such lengths again. With that spoken aloud, she feels ready for what comes next, and you head back toward the city—carrying Bakool Ja Ja’s scale as a sign of his faith that you will not fail him or his people.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Miilal Ja <small class="muted">(Yak T’el, X:26.1, Y:34.3)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="city-of-silence.html">City of Silence</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 94</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="scale-of-trust.html">Scale of Trust</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'双血の教え',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ウクラマトは、暁王の娘という立場を使ってマムークの人々の助けになるのなら喜んでそうしたいが、まずはミーラルジャの動機を理解したいと言う。エレンヴィルは、マムージャの過激思想について知るところは噂話程度であり、それはシャク・トラルの出身者の多くも同じだと認める。クリルは「代償」という言葉が、フービゴ族とブーニーワ族の婚姻を指しているのかと推し量り、アルフィノは、グルージャジャが壁を壊すために尽力してきたのに、その存在が逆に壁を築く者を生んでしまったのは痛ましいと嘆く。アリゼーは、バクージャジャが継承の儀に参加したのは、そうした熱狂的な支持者のためだろうと見る。</p><p>ミーラルジャは、西の彼方に、彼らの苦境を理解する助けになる場所があると言い、あなたたちを導く。ヤクテルのジャ・ティーカ奥地を進むと、エレンヴィルが「他では見られない景色だ」と言う光景が現れる。上方には隕石があり、それに寄り添う木は、隕石特有のエーテルの恩恵を受けているようだという。樹冠は太陽を遮り、クリルはまるで窓のない部屋にいるみたいだと漏らす。狩猟の野営地らしきものを見つけ、クリルはマムージャの狩人に話を聞きたいが相手にされないだろうと諦め気味だ。先へ進むと、ミーラルジャが「すぐ先だ」と告げ、エレンヴィルはこの奥地にこんな坑道があるとは知らなかったと驚く。深い洞窟を前に、アルフィノは、この暗い森を避けてトライヨラで暮らすマムージャが多いのも理解できると言う。</p><p>ミーラルジャは封じられた通路の前で、ここは敬虔な者でさえ立ち入りを許されない場所だが、あなたたちに秘密を明かし、その責任は自分が負うと断言する。そして「受祝福の真実を、自分の目で確かめよ」と促す。下方には石の桟橋があり、そこが目的地だと言う。あれを築いたのは遥か昔のヨクフイの手で、彼らは入口を手直ししただけだと説明し、理由は見せたほうが早いと続ける。獣が下まで運んでくれるという。</p><p>そこへバクージャジャが現れ、失敗者を笑いに来たのかと刺々しく言う。ミーラルジャは、彼が幼いころからずっとここへ泣きに来ていたことを指摘し、彼が「母さん」と呼ぶと、第三誓約がマムークを知りたがっているのだと告げる。これは、止められずにきたことを終わらせる機会かもしれない――だから彼女に話し、何をしてきたかを語れ、と。バクージャジャは「受祝福である自分たちが語るのが筋だ」と言い、容器を示す。そこには双頭のマムージャの遺骸――幼子の残骸が納められていた。彼らは遺跡を慰霊碑へ作り替え、子どもたちの魂が怨霊となって戻らぬようにしたのだという。</p><p>彼は「受祝福の兄弟」がどう生まれるかを語り始める。フービゴとブーニーワの婚姻は、内紛を止めるために取り決められたものだった。シブラーアルとの戦は不利で、統一が必要だった。やがて双頭で並外れた力を持つ子が生まれ、軍を率いられる年齢になると、マムージャは手がつけられないほど強くなり、シブラーアルを樹上へ追い返した。だが勝利は欲を呼び、より多くの「優れた子」を求めて妊娠と出産を重ねさせた――どれほどの代償を払ってでも。無数に生まれた子のほとんどは殻に閉じ込められたまま死に、百人に一人しか生き残らない。自分たちが「受祝福」と呼ばれるのは、ただ生き残ってしまったからであり、栄光のために捧げられた兄弟姉妹がいたからだと、彼は言い切る。</p><p>ウクラマトは言葉を失い、バクージャジャは、取り返しのつかない大罪だと叫ぶ。あの子どもたちは、自分たちが生きるために死んだ――だからこそ何があっても成功しなければならなかった、失敗すればすべてが無意味になる、と。だが彼は、自分は結局失敗し、犠牲を無駄にしたのだと崩れ落ちる。そして「自分など生まれるべきではなかった」と吐くが、ウクラマトは否定する。生まれ方を選んだのは彼ではなく、兄弟姉妹の死を背負うべきなのも彼ではない。受祝福に取り憑かれた者たちが選択したのであって、彼の選択まで決めることはできない――そう言って、彼が望むものを問い詰める。バクージャジャは、もう誰も死んでほしくない、終わらせたいのだと告げ、ウクラマトはその狂気を止めると約束する。アルフィノは、受祝福の兄弟がトラルで覇権を得る手段として崇拝されている以上、彼らの願望の根を理解できれば交渉に活かせると言い、クリルは対話に応じてもらえることを願う。</p><p>バクージャジャは、自分の言葉を狂信者が聖訓のように扱うから同行させてほしいと申し出るが、ミーラルジャは父に知られれば揉めるとして退け、モクストゥラル・ズージで民を集め、第三誓約が知りたいことを問う場を設けると言う。バクージャジャは、フービゴとブーニーワの色が混じった鱗を渡し、それを見せれば信頼の証となり、人々は従うはずだと告げる。そして自分の言動を詫び, 許しは望まないと言うが、ウクラマトは理由を知れたことがうれしいと返し、最後に彼が「羊駝の尻」みたいに救いのないやつではないと突っ込む。アリゼーは憎しみは疲れると呟き、アルフィノは、この理解を力に変えてマムークの人々をまとめ、もっと多くを知ろうと促す。</p><p>合流前、ウクラマトはあなたに打ち明ける。イヒヒハナを台無しにされ、川で妨害され、鍵石のためにさらわれ、凶悪なトゥラル・ヴィドラーを解き放たれた――そのすべてで彼を心底憎んでいた。決して許さないと思っていたのに、彼が抱えてきた痛みを理解した瞬間、怒りが消えたのだと。あなたが問い返すと、彼女は動機が罪を免じるわけではなく、彼は誰と同じく裁かれるべきだと認める。それでも今の自分の務めは、マムークで誰もが追い詰められてあのような道を選ばずに済むようにすることだと言い、言葉にしたことで前へ進める気がすると告げる。あなたは、彼の信頼の証である鱗を携え、彼と彼の民を裏切らぬ決意で、皆とともに街へ向かう。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ミーラジャ <small class="muted">（ヤクテル樹海, X:26.1, Y:34.3）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="city-of-silence.html">樹海の民、マムージャ族</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 94</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="scale-of-trust.html">託された絆</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'受祝福的兄妹',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Wuk Lamat 說，如果她能用「Dawnservant 的女兒」這個身分去幫助 Mamook 的人民，她很願意這麼做，但她想先弄清楚 Miilal Ja 的動機。Erenville 坦白自己對 Mamool Ja 的極端思想所知不多，大多也只是聽來的傳聞——而這對多數來自 Xak Tural 的人而言也是一樣。Krile 聽到 Miilal Ja 說「我們付出的代價」，便猜測那指的可能是 Hoobigo 與 Boonewa 兩個 clan 之間的婚姻。Alphinaud 想起 Gulool Ja Ja 一直努力拆掉隔閡，如今卻反而有人因他的存在而築起新的牆，令人惋惜。Alisaie 則認為 Bakool Ja Ja 參加繼承之爭，多半也是為了那些崇拜「受祝福的兄弟」的追隨者。</p><p>Miilal Ja 說有個地方能讓你們理解他們的困境，位在這裡以西很遠，便要你們跟上。你們走進 Yak T’el 的 Ja Tiika Heartland，Erenville 說這裡有些景象在別處根本看不到——你抬頭看見一塊隕石嵌在上方，而靠著隕石生長的樹似乎正受益於那股獨特的以太。森林樹冠厚得幾乎把陽光完全擋住，Krile 甚至覺得像走進沒有窗戶的房間。途中你們看到像是狩獵營地的地方，Krile 想找 Mamool Ja 的獵人聊聊卻又覺得對方大概不會理她；你們不再停留，趕緊追上前方的人。</p><p>在 Gok Draak Descent 一帶，Miilal Ja 說要帶你們看的地方就在前面。Erenville 驚訝於 Ja Tiika Heartland 竟藏著這樣的隧道，稱這確實是保得很深的秘密。你們望見一個很深的洞窟，Alphinaud 也因此更能理解為什麼許多 Mamool Ja 寧願住在 Tuliyollal——在這片幽暗的森林裡生活並不容易。當你們問究竟要看什麼，Miilal Ja 只說真相就在通道之後。</p><p>她帶你們停在一段通道前，表示這片區域連虔誠的信徒也不被允許進入；但她願意把秘密揭露給你們，責任由她一肩承擔。她要你親眼看看「受祝福的兄弟」的真相。下方有一座石造棧橋，那就是目的地；Alphinaud 感嘆把它建在那裡並非易事。Miilal Ja 說那是很久以前由 Yok Huy 之手建成，她的族人只是改造了入口。Krile 追問改造是為了什麼，Miilal Ja 說與其解釋不如直接帶你們看，並表示有能載你們下去的飛獸。</p><p>就在這時 Bakool Ja Ja 出現，冷冷地問你們是不是等不及來嘲笑他的失敗。Miilal Ja 卻指出他一直都會來這裡哭，從小就是如此；當他喊出「母親」時，她要他跟 Wuk Lamat 說話，因為第三誓約想了解 Mamook，而她或許是你們終於能結束那件無力阻止之事的機會。Bakool Ja Ja 不情願地答應了，說既然你們要知道，就該由「受祝福的兄弟」自己來說。他拿出一個容器，裡面裝著一名雙頭 Mamool Ja 嬰兒的遺骸，並說你們把遺跡改造成慰靈碑，是為了不讓這些孩子的靈魂化作怨靈回來。</p><p>接著他問你是否知道「受祝福的兄弟」是怎麼被造出來的。Krile 說她聽說那是 Hoobigo 與 Boonewa 的父母所生。Bakool Ja Ja 解釋，當初這些 clan 的結合是為了停止內鬥，因為對上 Xbr’aal 的戰爭不順利，你們必須團結。後來有一天，一個雙頭、擁有巨大力量的孩子誕生；等那孩子長到能率軍時，Mamool Ja 變得所向披靡，把 Xbr’aal 一路逼回上方的樹林。勝利的滋味喚醒了貪念，你們開始不惜代價地瘋狂追求更多這樣的孩子。無數孩子出生，但大多數都死去，被困在自己的殼裡；只有百分之一能活下來。Bakool Ja Ja 說，所謂「受祝福」，只是因為你們還活著——而你們的兄弟姊妹，早已為了 Mamook 的榮耀被犧牲。</p><p>Wuk Lamat 聽得發抖，說那太可怕了。Bakool Ja Ja 也失控地吼出那是永遠無法挽回的暴行：那些孩子死了，才換你們活著，所以你們必須不擇手段地成功，否則一切都會變成毫無意義。可他又承認自己失敗了，揮霍了那份犧牲。當你回應時，他低聲說自己根本不該出生；Wuk Lamat 立刻否定，告訴他他從未選擇成為現在的樣子，也不該為兄弟姊妹的死亡負責，真正該被追究的是那些沉迷於「受祝福的兄弟」的人——他們做出的選擇，不能決定他接下來的選擇。她逼他說出真正想要的是什麼，他終於說：他想讓一切結束，不想再有人死。Wuk Lamat 於是承諾會阻止這場瘋狂。</p><p>Alphinaud 說，「受祝福的兄弟」在支持者眼中是取得 Tural 霸權的手段；若能理解他們為何抱持這種野心，你們就更能與他們對話。Krile 也希望那些人願意談。Bakool Ja Ja 提議帶他一起走，因為那些狂熱者把他的話當作福音；Miilal Ja 卻拒絕，說若他父親發現他還在這裡一定會引發麻煩。她改口表示會在 Moxutural Zooj 集合眾人，讓第三誓約想問什麼都能問。Bakool Ja Ja 把一片融合 Hoobigo 與 Boonewa 色澤的鱗片交給你們，說那能作為你們獲得信任的證明，只要出示，大家就會照你們說的做。他為自己說過與做過的一切道歉，也不奢求你們原諒；Wuk Lamat 說她很高興能理解他的理由，最後還嘴硬地補一句：至少他不是「羊駝」一樣的混帳。氣氛終於鬆動，Alisaie 也承認仇恨很耗人；Alphinaud 則要你們把這份新理解變成力量，去把 Mamook 的人聚集起來，還有很多事要弄清楚。</p><p>在回去與眾人會合前，Wuk Lamat 拉住你，坦白她曾經用盡全身力氣去恨 Bakool Ja Ja：他企圖毀掉 Ihih’hana、在河上破壞你們的行動、為了 keystone 綁走她，甚至放出最兇殘的 tural vidraal——他能讓你們痛苦的事全都做了。她原以為自己永遠不可能原諒，但當她理解他一路背負的痛苦時，怒火卻瞬間蒸發。當你提醒她該如何看待這一切，她點頭承認：動機不能抵銷罪行，Bakool Ja Ja 仍必須為自己的行為付出代價；只是此刻她的責任，是確保 Mamook 再也沒有人絕望到走上同樣的路。說出口後，她覺得自己更能面對接下來的挑戰。你們帶著 Bakool Ja Ja 的鱗片——那象徵他對你們的信任——一同回到 Mamook，決定不辜負他與他的人民。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 米拉嘉 <small class="muted">(Yak T’el 樹海, X:26.1, Y:34.3)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="city-of-silence.html">樹海之民：瑪姆嘉族</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.94</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="scale-of-trust.html">被託付的羈絆</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
