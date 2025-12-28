@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Into the Traverse | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Into the Traverse (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/7HU57-VK_S4"
+              title="Into the Traverse" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Into the Traverse</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Into the Traverse`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Back in the Garden of the Stars, you rejoin Erenville and the others as they trade impressions of Yak T’el and its hazards. Wuk Lamat checks on the state of the Ty’iinbek Traverse, and Krile turns the conversation to the looming final feat—only for Wuk Lamat to casually announce she has already reclaimed the keystone Bakool Ja Ja stole. The group reels at the news, demanding when and how, and Wuk Lamat only shrugs it off as having “taught him a lesson” and taken it back.</p><p>Hunmu Rruk arrives with word from the excavators: the Traverse has been cleared and is now safe for travel. With Mamook finally within reach, the party prepares to depart—but Hunmu Rruk cautions you not to expect a warm welcome. Though the Dawnservant once received Ketenramm there and helped build peace between the Xbr’aal and Mamool Ja, many who supported that peace left for the capital long ago. What remains in Mamook is a cloister of traditionalists who may not take up arms, yet hold little affection for outsiders.</p><p>Wuk Lamat doesn’t waver. Whatever Mamook is like, its people are still Tuliyollal’s people—and if she is to be Dawnservant, she must know them. Hunmu Rruk’s quiet approval shows in his smile as Wuk Lamat thanks him for everything she learned here…including the mountain of xibruq pibil she managed to eat. With the route set, Erenville leads you southeast across the Xobr’it Cinderfield toward the Traverse.</p><p>As you press on, Wuk Lamat admits she packed her bag with xibruq pibil, yet she’s already down to her last serving. Krile wonders whether the First and Second Promises have reached Mamook ahead of you, and Alphinaud notes that Bakool Ja Ja likely fled this way after his loss—meaning you may still have to face him again, pride wounded and unpredictable. Even so, Alisaie can’t help marveling that peace was ever negotiated in a land that bears scars like this.</p><p>On the descent through the cleared passage, Alphinaud shares what he learned from an excavator: Bakool Ja Ja himself removed the final obstacle by simply barreling through a fallen tree. The thought only underscores how astonishing Wuk Lamat’s victory was—and why caution remains wise. Erenville adds that the very existence of this dug passage speaks to grim intent from the past, even if you now use it for the rite.</p><p>When you reach the Ja Tiika Heartland, the forest transforms around you—glowing boulders casting strange hues across the flora. At Erenville’s urging, you hold his pairing stone to the luminous rock, and it clamps on with surprising force. He explains that pairing stones act as natural magnets, and the boulder is an iron-rich meteorite—one remnant of an ancient meteor shower whose mixed aether makes the surrounding plants shine in these colors. With Krile thrilled by the blue glow and the others taking it all in, you finally arrive at Mamook—quiet, watchful, and waiting—where Wuk Lamat sets her sights on finding the elector.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Wuk Lamat <small class="muted">(Yak T’el, X:10.8, Y:12.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="taking-a-stand.html">Taking a Stand</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 94</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="city-of-silence.html">City of Silence</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'ティーンベク洞道を抜けて',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>星々の庭で合流したあなたは、ヤクテル樹海での出来事を語り合う一同の輪に戻る。ウクラマトはティーンベルク洞道の状況を確かめ、クリルは最後の試練を前に「奪われた秘石」をどうするかと切り出す。ところがウクラマトは、すでにバクージャジャから取り返したとさらりと言い放ち、周囲は揃って驚愕する。いつ、どうやって――問い詰められても、彼女は「懲らしめて取り返した」と短く返すだけだった。</p><p>そこへシュバラール族の選定者フンム・ルルクが現れ、掘削隊からの報告を告げる。洞道の啓開は完了し、通行は安全になった。ついにマムークへ向かえる――しかしフンム・ルルクは、そこで温かく迎えられるとは限らないと釘を刺す。かつて暁王はマムークでケテンラムを歓待し、シュバラール族とマムージャ族の友好にも尽力したが、平和を支持した者の多くはすでに都へ移った。残るのは閉じた伝統派であり、武器を取らずとも外から来た者を好まないという。</p><p>それでもウクラマトは退かない。どんな相手であろうと、マムークの民もまたトライヨラの民であり、暁王となるならまず知るべきだと言い切る。フンム・ルルクは静かに微笑み、ウクラマトはここで得た学び――そして食べ尽くしたシブルク・ピビルも含めて――礼を述べ、出立を宣言する。エレンヴィルは、あなたたちをショブリト灰戦場の南東へ導き、洞道へ向かう。</p><p>道中、ウクラマトはシブルク・ピビルを鞄いっぱいに詰めたのに、もう残り一人前しかないと嘆く。クリルは第一の誓約と第二の誓約がすでにマムークへ着いているかもしれないと案じ、アルフィノは、敗走したバクージャジャもこの方角へ戻ったはずだと推し量る。誇りを傷つけられた彼が次に何をするか分からない――再会を思えば、気が重いのも無理はない。</p><p>ティーンベルク洞道を下る途中、アルフィノは掘削隊の話を伝える。最後まで道を塞いでいた倒木は、バクージャジャが体当たりで粉砕して片づけたという。その怪力を思えば、ウクラマトが単独で彼を退けたことがいかに驚くべきか、改めて思い知らされる。だからこそ慎重に進むべきだ、とアルフィノは言い添える。</p><p>やがてジャティーカ央森へ入ると、森の色彩は一変する。妖しく輝く岩にエレンヴィルは惹きつけられ、あなたに自分のペアリングストーンを渡して岩へ触れさせる。すると石は強い力で岩に吸い付き、エレンヴィルはそれが隕鉄――鉄を含む隕石――であり、ペアリングストーンは天然の磁石だと説明する。異質なエーテルが周囲へ滲み、植物を独特の色で発光させているのだ。青い光景に目を輝かせるクリルの声を背に、あなたたちはついにマムークへ辿り着き、ウクラマトは選定者を探そうと前を見据える。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ウクラマト <small class="muted">（ヤクテル樹海, X:10.8, Y:12.9）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="taking-a-stand.html">笑顔を護るための戦い</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 94</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="city-of-silence.html">樹海の民、マムージャ族</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'穿越Traverse',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你在 Garden of the Stars 與 Erenville 等人會合，大家一邊交換在 Yak T’el 的見聞，一邊把話題拉回正事。Wuk Lamat 先確認 Ty’iinbek Traverse 的狀況，Krile 則提醒你們：下一個試煉就是最後一個了，得開始盤算怎麼把被 Bakool Ja Ja 偷走的鑰石拿回來。結果 Wuk Lamat 直接說她已經取回來了，眾人全都嚇了一跳，連忙追問她是何時、又是怎麼做到的，而她只輕描淡寫地表示自己「教訓了他一頓」就把鑰石拿回來。</p><p>很快，Hunmu Rruk 帶來掘鑿隊的消息：Ty’iinbek Traverse 已經清理完成，現在可以安全通行。你們終於能前往 Mamook，但 Hunmu Rruk 也警告你別抱太大期待──雖然 Dawnservant 曾在 Mamook 接見過 Ketenramm，並促成 Xbr’aal 與 Mamool Ja 的友好，可支持那份和平的人多已離開城市、搬去首都。如今留在 Mamook 的多是封閉的傳統派，他們或許不會動武，卻也不會真心歡迎外來者。</p><p>Wuk Lamat 沒有因此退縮。她說得很清楚：不論 Mamook 的人是什麼樣子，他們同樣是 Tuliyollal 的子民；如果她要成為 Dawnservant，就得先認識他們、理解他們。Hunmu Rruk 露出淡淡的笑意，Wuk Lamat 向他道謝，提起自己在這裡不只更了解了來處，也吃了滿滿的 xibruq pibil。接著你們動身，由 Erenville 領路，往東南穿越 The Xobr’it Cinderfield，朝 Ty’iinbek Traverse 前進。</p><p>路上，Wuk Lamat 一邊走一邊抱怨：她明明把 xibruq pibil 塞滿背包，現在卻只剩最後一份。Krile 想著第一誓約與第二誓約是否已經先抵達 Mamook；Alphinaud 則推測，Bakool Ja Ja 在輸給 Wuk Lamat 後很可能就是往這個方向逃回去──也意味著你們很可能還會再遇上他，而他受挫的自尊會讓局面更難預料。</p><p>下行穿過剛被打通的 Ty’iinbek Traverse 時，Alphinaud 說他從掘鑿隊那裡聽到一件事：最後那棵倒下堵路的樹，其實是 Bakool Ja Ja 直接硬闖撞碎、才被清掉的。光是想像那股蠻力，就足以明白 Wuk Lamat 能在單挑中戰勝他有多驚人──也因此，更不能掉以輕心，因為受傷的自尊往往會逼人做出更危險的事。</p><p>踏入 The Ja Tiika Heartland 後，森林的氣息徹底變了樣：一塊塊發著光的巨石把周遭染成奇異的色調。Erenville 讓你拿著他的配對石貼近那顆發光的岩塊，配對石立刻像被吸住般牢牢附著。Erenville 解釋，配對石本身就像天然磁石，而那其實是一塊富含鐵質的隕石──古老隕石雨留下的殘骸之一；它散出的混雜以太讓周圍的植物呈現出獨特的發光色澤。Krile 望著滿眼的藍光興奮不已，你們也在這份陌生與震撼中抵達 Mamook；Wuk Lamat 立刻收起玩笑，轉而專注：先找到那位選定者。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 烏克·拉瑪特 <small class="muted">(Yak T’el 樹海, X:10.8, Y:12.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="taking-a-stand.html">挺身而出為了守護笑容而戰</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.94</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="city-of-silence.html">樹海之民：瑪姆嘉族</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
