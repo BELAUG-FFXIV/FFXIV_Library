@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Leap to Yak T’el | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – The Leap to Yak T’el (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/nvHhpTdUjG0"
+              title="The Leap to Yak T’el" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">The Leap to Yak T’el</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`The Leap to Yak T’el`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>After your brief respite, Alphinaud gathers you and says he expects the others to arrive shortly, hoping everyone has truly rested. With clearer heads, he proposes you review the contest as it stands: Zoraal Ja and Koana have completed every feat so far and hold five keystones each, while Wuk Lamat would match them if not for Bakool Ja Ja’s theft—leaving your group one keystone short. Alisaie snarls that Bakool Ja Ja barely contributed to the Feat of Proof and only caused chaos during the Feat of Ice, so he can’t have more than three, but Wuk Lamat vows she will take back what is hers.</p><p>Alphinaud warns that simply reclaiming the stolen keystone may not be enough. If Bakool Ja Ja’s decision to unleash Valigarmanda proves anything, it’s that he will likely use any lead to seize the remaining keystones first—and then sabotage his rivals. The thought of claimants being forced to take from one another sits poorly with Wuk Lamat, yet she steels herself: she won’t surrender her claim easily, and if preserving her people’s happiness demands hard choices, she will do what she must.</p><p>Erenville lays out the final two keystones you need: those tied to the Lay of Repast and the Lay of the Brotherhood. The first is said to depict the end of hostilities between the Mamool Ja and Xbr’aal in the forests of Yak T’el—specifically near a village called Iq Br’aax. Wuk Lamat quietly reminds you that she was born there, and that she hasn’t returned since her father took her in as a baby. The second lay is less clear, mentioning only that a foreign explorer once sought an audience with the Dawnservant.</p><p>Alphinaud connects it to an Eorzean tale: an explorer named Ketenramm befriended a two-headed king known as the Autarch before traveling across Tural, returning several times, and eventually being lost at sea—or so people believe. To Wuk Lamat, the two-headed king sounds exactly like her father, so she assumes Ketenramm must have come to Tuliyollal. But Erenville points out that if the visit was some eighty years ago, the capital might not yet have existed, and then the word “Autarch” sparks his conclusion: Ketenramm must have met the Dawnservant in Mamook. Krile asks what Mamook is, and Erenville explains it was once one of Tural’s grandest cities and the seat of the Mamool Ja homeland—also in Yak T’el, not far from Iq Br’aax—making Yak T’el the obvious next destination.</p><p>With preparations complete, you head to the dirigible landing, and Alphinaud can barely contain his curiosity about Turali design compared to Eorzean airships. Alisaie keeps your focus sharp, insisting you can’t afford to lower your guard with Bakool Ja Ja still a threat, while Wuk Lamat tries—and fails—to sound confident about riding one of Koana’s balloons. As the attendant calls the next flight to Yak T’el, Wuk Lamat’s nerves spill out: she demands reassurance it will stay in the air the whole way, checks that you’re ready, and then admits her knees won’t stop shaking. When she asks you to hold her hand until she settles, you do—just as Mablu and Tobli rush up to stop her for a moment.</p><p>Mablu announces they’ve uncovered the origin of Krile’s earring. They found the elderly merchant credited with the first sales, and he claims the design imitates an accessory worn by a foreign mage he met at market some twenty years ago—an imitation that became a commercial triumph. Krile immediately recognizes what that means: a foreign mage with that earring could only be her grandfather, and Tobli adds the market was in Yak T’el—exactly where you’re headed. With that new lead in mind, you board at last, and after the flight you arrive in Yak T’el—the so-called azure forest, shaped long ago by meteors and tinted in mesmerizing blues and greens, a land where Xbr’aal and Mamool Ja once fought for dominance as the rite of succession draws closer to its climax. Wuk Lamat admits she’s never been good with heights, Alphinaud notes the vegetation is denser than in Kozama’uka, and Erenville warns you to watch your footing unless you want to stumble into a deep, water-filled sinkhole. When he confirms Iq Br’aax lies a short way west, you set off together, keeping one another in sight as you push onward through the thick undergrowth.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Alphinaud <small class="muted">(Tuliyollal, X:10.1, Y:15.0)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-promise-of-peace.html">The Promise of Peace</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 94</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="village-of-the-hunt.html">Village of the Hunt</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'ヤクテル樹海に翔べ！',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>休息を挟んだのち、アルフィノは「皆もすぐ合流するはずだ」と言い、あなたにしっかり休めたか気遣いながら、現状整理を始める。今の争いでは、ゾラージャとコーナがこれまでの偉業をすべて達成し、鍵石をそれぞれ五つずつ手にしている。ウクラマトも本来なら同数に並べたはずだが、バクージャジャの盗みのせいで、あなたたちは一つ足りないままだ。アリゼーは、あの男は証明の偉業でも手を動かさず、氷の偉業では混乱を招いただけだと吐き捨て、せいぜい三つ程度だろうと言うが、ウクラマトは「必ず取り返す」と誓う。</p><p>アルフィノは、奪われた鍵石を取り返すだけでは足りないかもしれないと危惧する。バクージャジャが強大な獣を解き放ったことから見ても、彼は先手を利用して残る鍵石を奪い取り、さらに競争相手の挑戦を妨害しに動くだろう――その結果、誓約者同士が互いから奪い合う状況さえ起こりうる。ウクラマトはそれを快く思えないと言いながらも、民の幸せを守るためなら簡単には退かないと腹を決める。</p><p>エレンヴィルは、残る二つの鍵石が「饗宴の詩」と「同胞の詩」に結びつくものだと説明する。「饗宴の詩」は、ヤクテルの森でマムージャとシブラーアルの争いが終結した場面を描き、イクブラアクスという村の近くが舞台だという。ウクラマトは、そこが自分の生まれた場所であり、赤子のころ父に引き取られて以来戻っていないと、あなたに静かに告げる。一方で「同胞の詩」は舞台が曖昧で、異国の探検家が暁王への謁見を求めた、ということしか語られていない。</p><p>アルフィノは、似た伝承がエオルゼアにもあると言い、探検家ケテンラムが「アウトアーク」と呼ばれる双頭の王と友となり、その後トラル各地を旅したという話を挙げる。何度かここを訪れたものの、最後は海で消息を絶った――というのが一般に信じられている筋書きだ。ウクラマトは双頭の王が父に重なると感じ、ならばケテンラムはトライヨラへ来たに違いないと言うが、エレンヴィルは八十年も前なら都そのものがまだ築かれていなかった可能性を指摘する。そこで「アウトアーク」という呼び名に思い当たり、ケテンラムが暁王に会ったのはマムークだったはずだ、と結論づける。クリルが「マムークとは都市なのか」と問うと、エレンヴィルはそれがかつてトラル屈指の大都市で、マムージャの故郷の中枢であり、イクブラアクスからも遠くないヤクテルにあるのだと答える。</p><p>次の目的地がヤクテルに定まると、エレンヴィルは安全策として飛行船で向かうべきだと言い、準備が整い次第、発着場へ向かう。アルフィノはトラル式の飛行船の構造に興奮し、エオルゼアの飛空艇と比べて性能を観察したいと意気込む。アリゼーは、バクージャジャが現実的な脅威である以上、油断できないと釘を刺し、ウクラマトは「だ、大丈夫……」と自分に言い聞かせる。出発間際、ウクラマトは不安を抑えきれず、あなたに手を握ってほしいと頼む。あなたが応じたところへ、マブルとトブリが駆け込んできて、クリルの耳飾りの由来がわかったと告げる。</p><p>彼らが突き止めたのは、最初にその意匠を広めたとされる年老いた商人の話だった。商人は、二十年ほど前に市で出会った異国の魔法使いが身につけていた装飾品を模したものだと言い、その独特な意匠が大流行を呼んだのだという。クリルは、その耳飾りをつけた異国の魔法使いが祖父以外にありえないと確信し、どの市だったのかを尋ねる。答えはヤクテル――あなたたちがまさに向かう場所だった。手がかりを胸に、あなたは揺れる心のウクラマトとともに乗り込み、やがて隕石の痕跡に刻まれ、青と緑に染まる「蒼の森」ヤクテルへ降り立つ。高所が苦手だとこぼすウクラマトをよそに、アルフィノは植生の濃さに驚き、エレンヴィルは足元を見ろと忠告する。雨水と地下水が溜まった深い陥没坑に落ちれば、簡単には這い上がれない――だから転ぶな、と。イクブラアクスは西へ少し進めば着くと言われ、あなたは仲間を見失わぬよう互いの姿を確かめながら、繁った下草をかき分けて歩き出す。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> アルフィノ <small class="muted">（トライヨラ, X:10.1, Y:15.0）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-promise-of-peace.html">ウクラマトの平和</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 94</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="village-of-the-hunt.html">森の狩人、シュバラール族</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'飛躍Yak T’el 樹海',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>稍作休整後，Alphinaud 說其他人應該很快就會到，並關心大家是否都睡得夠。等精神恢復一些，他請你一起重新盤點目前各位誓約者的局勢：Zoraal Ja 與 Koana 至今完成所有 feat，各自持有五枚 keystone；Wuk Lamat 本來也能與他們並列，卻因 Bakool Ja Ja 的偷竊而少了一枚。Alisaie 氣得直罵那個狡猾又愛吹噓的傢伙在 Feat of Proof 幾乎沒出力，還在 Feat of Ice 搞得一團亂，頂多只有三枚 keystone；Wuk Lamat 則咬牙立誓，一定會把屬於自己的那枚拿回來。</p><p>但 Alphinaud 擔心，光是取回被偷走的 keystone 可能還不夠。從 Bakool Ja Ja 放出 Valigarmanda 這件事看來，他很可能會利用領先優勢先搶走剩下的 keystone，再轉頭破壞其他誓約者的挑戰，逼得你們不得不互相奪取。Wuk Lamat 說自己不喜歡那種局面，卻也不會輕易放棄王位；若是為了守住人民的幸福，她會做該做的事。</p><p>Erenville 接著說明最後兩枚 keystone 的線索：一枚屬於 Lay of Repast，另一枚屬於 Lay of the Brotherhood。Lay of Repast 描繪的是 Mamool Ja 與 Xbr’aal 在 Yak T’el 的森林裡停戰，地點就在 Iq Br’aax 村落附近。Wuk Lamat 提醒你，那裡正是她出生的地方，自從還是嬰兒時被爸爸帶走之後，她就再也沒有回去過。至於 Lay of the Brotherhood 的舞台卻很模糊，只提到有位外國探險家前來求見 Dawnservant。</p><p>Alphinaud 想起 Eorzea 也有相似的故事：探險家 Ketenramm 曾與名為 Autarch 的雙頭之王結為友人，之後踏上穿越 Tural 的旅程；他後來又幾度造訪，最後卻在海上失蹤，至少世人普遍如此相信。Wuk Lamat 覺得那位雙頭之王聽起來就像爸爸，因此推測 Ketenramm 應該來過 Tuliyollal；但 Erenville 指出，若那是大約八十年前的事，capital 也許尚未建成。就在這時，他抓住「Autarch」這個稱呼，立刻推斷 Ketenramm 其實是在 Mamook 見到 Dawnservant。Krile 問 Mamook 是否是一座城市，Erenville 回答那曾是 Tural 最宏偉的城市之一，也是 Mamool Ja 的故鄉核心，同樣位於 Yak T’el，離 Iq Br’aax 不遠。</p><p>於是下一站自然指向 Yak T’el。Erenville 說最安全的方式是搭乘 dirigible，等準備完成就去發船處；Alphinaud 興奮地想觀察 Turali dirigible 的設計與表現，看看與 Eorzea 的飛空艇有何差異。Alisaie 則提醒你不能鬆懈，因為 Bakool Ja Ja 仍是實實在在的威脅；Wuk Lamat 口頭上說「會沒事的」，卻明顯坐立不安。就在登船前，她終於扛不住緊張，反覆確認行李與道別是否都做完，還硬撐著說自己不是在害怕，只是怕你害怕——最後又老實承認膝蓋在發抖，拜託你握住她的手，至少等她稍微穩下來。</p><p>你答應後，Mablu 與 Tobli 追了上來，說他們查到 Krile 耳環的來歷：他們找到一位年邁商人，對方聲稱這款設計源自他二十年前在市集見過的一位外國魔法師配戴的飾品，而這股「奇妙的品味」竟成了熱賣。Krile 立刻判斷那位外國魔法師只能是自己的 grandfather，並追問是哪個市集；Tobli 回答就在 Yak T’el——你們正要前往的地方。帶著這條新線索，你們終於登上 dirigible，抵達被稱為「蔚藍森林」的 Yak T’el：遠古時期遭隕石重創、又被自然染上藍與綠的迷人色澤，正是昔日 Xbr’aal 與 Mamool Ja 爭奪霸權之地，而繼承之爭也將在此走向高潮。落地後 Wuk Lamat 承認自己怕高，Alphinaud 驚嘆此地植被比 Kozama’uka 更濃密；Erenville 則警告你別只顧著看景，因為遍佈的深坑裡充滿雨水與地下水，一旦失足很難爬出來。當他說 Iq Br’aax 就在往西不遠處，你便與眾人保持彼此在視線內，小心穿過茂密的林地，朝村落方向前進。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 阿爾菲諾 <small class="muted">(圖萊尤拉, X:10.1, Y:15.0)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-promise-of-peace.html">和平的承諾</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.94</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="village-of-the-hunt.html">狩獵之村：舒巴拉爾族</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
