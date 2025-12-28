@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Promise of Peace | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – The Promise of Peace (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/GHJ0ELWrvsE"
+              title="The Promise of Peace" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">The Promise of Peace</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`The Promise of Peace`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>A heavenly land, bathed in a golden glow—Krile’s words linger as you take stock of what you’ve learned. With only two keystones remaining, Alphinaud says the legend of the golden city is finally coming into focus, while Alisaie mutters that what was supposed to be a simple task of strengthening the ice became something bigger thanks to Bakool Ja Ja’s sheer foolishness. Around you, even the locals remark on how unusual this day feels, seeing new faces appear where few ever tread.</p><p>Erenville decides it’s time to return to the city and regroup. After scaling the tallest mountain in Tural and fighting a legendary beast to the death, he says even someone as dauntless as you must be due a proper rest—especially with preparations still needed before the next destination in the saga. Alphinaud agrees at once, already dreaming of clean sheets and a soft pillow, and Alisaie insists the two remaining feats will go better if everyone faces them refreshed.</p><p>No sooner do you arrive back than exhaustion catches up with the group all at once. Krile admits the weight of recent events hits her the moment your feet are on familiar ground, and she declares herself overdue for a long nap. Peshekwa welcomes you back with practiced warmth, telling you the cabins are ready, and a waiting attendant stands by to unlock your room.</p><p>Erenville urges everyone to rest well and says he has a small errand in the city before meeting back later. He tries to ask Wuk Lamat if she’ll be heading to the palace—only to realize she’s drifted into her own thoughts and hasn’t heard a word. Peshekwa gently reminds her that the rite of succession is exhausting, and that the comforts of the cabins are there whenever she wishes to retire.</p><p>A moment later, Wuk Lamat draws you aside, clearly wanting to say something—and then blurts out that it’s simply too stuffy inside. She insists you should go outside for a walk, laughing at her own awkwardness as she drags you into the fresh air. Once you’re away from the cabin, she apologizes for pulling you from comfort, admitting she could feel the walls closing in, and says she’ll take you to one of her favorite places in the city—maybe then she can finally get her thoughts in order. On the way, she runs into Peshekwa, who refuses to stay in bed now that her back has healed, and vows her support for the claimant who loves peace most. Wuk Lamat can’t help but brighten at that smile, and even these everyday exchanges start to feel precious as the contest advances.</p><p>From a familiar overlook she used to visit as a child, Wuk Lamat looks out over the city and remembers how worries once shrank beneath this view. She returns to what she told you atop the mountain—about fighting to preserve her father’s peaceful Tural—and admits she’s been thinking hard about what “peace” truly means. If it’s more than the absence of war, then perhaps it’s the happiness of others: the laughter of family and friends, the smiles that make life worth living. She’s proud you expected an answer like that, and she speaks plainly of the leader she wants to become—listening, understanding, and serving better each day. Then she thanks you for walking beside her, and with two keystones still ahead, asks if you’re willing to keep going with her. When you give your answer, she seems lighter at once, says she needs to head to the palace, and promises to see you back at the cabins—while later Alphinaud notes your good spirits and admits he, too, was grateful for the chance to sleep.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Erenville <small class="muted">(Urqopacha, X:28.7, Y:33.5)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-feat-of-ice.html">The Feat of Ice</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 93</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-leap-to-yak-tel.html">The Leap to Yak T’el</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'ウクラマトの平和',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>黄金色の光に満ちた「天の国」――クリルの言葉を胸に、あなたは一行とともにこれまでの出来事を振り返る。残る鍵石はあとふたつ。アルフィノは、ついに「黄金郷」の伝承が、よりはっきりと形を結びはじめたと言う。アリゼーは、本来なら氷を強めるだけのはずだったのに、バクージャジャの愚かさのせいで、こちらがさらに上を行く羽目になったとこぼした。周囲では、普段は滅多に人が足を踏み入れない場所にまで来訪者が現れたことを、土地の者たちが「珍しい日だ」と語り合っている。</p><p>エレンヴィルは、いったん都へ戻ろうと決める。トラルの最も高い山を踏破し、伝説の獣と死闘を演じたのだ。どれほど肝の据わった英雄であっても、今は休息が必要だろう――次なる目的地へ向かう前に、準備もしなければならない。アルフィノはすぐに賛同し、清潔な寝具と柔らかな枕に思いを馳せる。アリゼーも、残るふたつの偉業に備えるため、万全の状態で臨みたいと言った。</p><p>都へ戻った途端、クリルは立て続けの出来事の重みが一気にのしかかるのを感じ、長い昼寝が必要だと口にする。ペシェクワはあなたたちを迎え、部屋の準備はできていると告げる。担当の係員が控えており、いつでも部屋の鍵を開けられるという。</p><p>エレンヴィルは皆に「よく休むように」と言い、自分は都で小さな用事を済ませてから、のちほどここへ戻ると伝える。そしてウクラマトに、宮殿へ向かうつもりかと尋ねようとするが――返事がない。どうやら彼女は考え事に沈み、呼びかけが耳に入っていないらしい。ペシェクワは、継承を巡る争いは心身を消耗させるものだと気遣い、部屋の安らぎはいつでも頼ってほしいと告げた。</p><p>その後、ウクラマトはあなたを呼び止め、話したいことがあると言いかけて――急に「中が息苦しい」と口走る。外の空気を吸いに行こう、と勢いよく誘い、あなたを連れ出した。落ち着いたところで彼女は、居心地のいい部屋から引っ張り出してしまったことを詫び、胸の内がまとまらず、壁が迫ってくるように感じたのだと打ち明ける。だからこそ、都の中でもお気に入りの場所へ案内したい――そこでなら、考えを整理できる気がすると。道すがら彼女はペシェクワに出会い、背の具合を気にかける。ペシェクワはもう快方に向かったから心配するなと言い、王位を目指して戦うウクラマトを支えたいのだと語る。平和を最も愛する継承者だからこそ応援したい、と。ウクラマトはその笑顔に励まされ、争いが進んだ今は、こうした日常の出会いさえ特別に感じるのだと言った。</p><p>やがて彼女は、子どもの頃によく訪れたという見晴らしのいい場所から都を見渡す。ここに来れば悩みが小さく思えたのだ、と。山の頂で語った「父の築いた平和なトラルを守る」という誓いを思い出しながら、彼女は「平和」とは何かを考え続けてきたと言う。戦がないことだけが平和なのか――そうではなく、人々の幸せ、家族や友の笑い声、そして微笑みこそが、平和を測るいちばんの物差しなのではないか。あなたがその答えを彼女らしいと言ってくれたことが嬉しい、と彼女は少し誇らしげに笑う。そして、皆の悩みに耳を傾け、気持ちを理解し、どう仕えるべきかを考え続ければ、望む指導者に近づけるはずだと語った。最後に彼女は、ここまで来られたのはあなたたちが共に歩んでくれたからだと感謝し、残る鍵石がふたつになった今も、これからも一緒に進んでくれるかと問いかける。あなたが応えると、彼女は胸のつかえが下りたように息をつき、宮殿へ向かうと言って部屋での再会を約束する――のちにアルフィノも、あなたが晴れやかな顔をしていると指摘し、自分もまた久々にしっかり眠れたのだと笑った。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> エレンヴィル <small class="muted">（オルコ・パチャ, X:28.7, Y:33.5）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-feat-of-ice.html">封の試練</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 93</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-leap-to-yak-tel.html">ヤクテル樹海に翔べ！</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'和平的承諾',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Krile 低聲感嘆那片「被金色光芒浸透的天上樂土」，而這句話也像餘韻一樣留在你心裡。隨著行程推進，Alphinaud 說如今只剩兩枚 keystone，你們終於能更完整地拼出「黃金城」傳說的輪廓。Alisaie 則冷哼著抱怨，本來只要加強冰封就好，卻因為 Bakool Ja Ja 的愚蠢，逼得你們不得不做得更徹底、更漂亮。就連當地人也說，今日的訪客格外不同尋常──許久未曾有人踏入的地方，竟也被你們闖了進去。</p><p>Erenville 認為該回到 Tuliyollal 了。你們攀上 Tural 最高的山，還與傳說中的猛獸搏命到最後一刻，就算像你這樣再無畏的人，也一定需要喘口氣；更何況在前往下一個目的地之前，仍有不少準備得先做完。Alphinaud 立刻表示贊同，說自己已經聽見乾淨床單與柔軟枕頭在呼喚；Alisaie 也提醒，還有兩項 feat 等著你們去面對，現在休息正是為了之後能以最佳狀態迎戰。</p><p>一踏回 Tuliyollal，Krile 就覺得近期累積的重量在同一瞬間全數壓了上來，忍不住說自己真的得好好睡上一覺。Peshekwa 迎上前來，告訴你們房間都已準備妥當，cabins 正等著你們回去歇腳，也有侍者待命，隨時可以替你開門。</p><p>Erenville 叮囑大家先好好休息，說他要在城裡跑一趟小差事，晚點再回來會合。他轉向 Wuk Lamat，問她是否要去 palace──卻發現她像是沉進自己的小世界裡，根本沒聽見。Erenville 也只能先作罷，並把她交給 Peshekwa 的照看；Peshekwa 則溫和地表示，繼承之爭必定令人身心俱疲，只要 Wuk Lamat 想休息，cabins 的舒適隨時都為她敞開。</p><p>沒多久，Wuk Lamat 叫住你，像是有話想說，卻又尷尬地卡在喉頭。她忽然大聲嚷著「裡面太悶了」，硬是拉你出去走走，說要呼吸點新鮮空氣才行。離開房間後，她才向你道歉，說自己明明知道你正在享受舒適的休息，卻還是忍不住覺得牆壁像在逼近，讓她無法靜下來。她說要帶你去她在 Tuliyollal 最喜歡的一個地方，或許能讓她把思緒理順。途中她遇見 Peshekwa，關心對方的背是否好些；Peshekwa 則說已經好多了，還反過來表示自己不能整天躺著，因為 Wuk Lamat 正拚盡全力爭取王位，而她願意支持那位「最愛和平的誓約者」。Wuk Lamat 被那份笑容鼓舞，也坦白說，隨著競爭逐步推進，連這些日常的相逢都變得格外珍貴。</p><p>最後你們來到一處高處，Wuk Lamat 望著整座城市，說自己小時候常來這裡，只要看見這片景色，再大的煩惱都會顯得渺小。她想起自己在山巔對你說過的話──要守住爸爸的和平 Tural──也坦承自那之後，她一直在思考「和平」到底是什麼：若和平不只是沒有戰爭，那麼真正讓她感到快樂的，其實是他人的幸福，是家人與朋友的陪伴，是笑聲與笑臉堆疊出的日常。她甚至認定，那些微笑的臉孔才是衡量和平最直接的尺度。你回應她確實像會說出這種話，她便笑得有些得意，說這是她努力忠於自己、才得出的答案。接著她談起自己的打算──等她登上王位，就要在爸爸的和平之上繼續築得更穩：願意傾聽人們的煩惱、理解他們的感受、思考如何更好地服務。她也鄭重感謝你與眾人一路同行，說若沒有你們一起聽、一起想、一起走，她不可能在這麼短的時間裡走到這一步。當她提起還剩兩枚 keystone、前路仍未可知時，她望著你問：你是否仍願意與她並肩走下去？你點頭答應後，她像終於卸下心口的重壓，說自己得去 palace 了，但會在 cabins 再見；不久後 Alphinaud 也看出你心情不錯，笑說自己同樣睡了個好覺──因為很快，你們又要再次踏上旅途。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 艾倫維爾 <small class="muted">(奧闊帕恰山, X:28.7, Y:33.5)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-feat-of-ice.html">冰封試煉</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.93</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-leap-to-yak-tel.html">飛躍Yak T’el 樹海</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
