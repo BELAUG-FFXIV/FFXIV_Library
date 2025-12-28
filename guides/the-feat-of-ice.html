@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Feat of Ice | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – The Feat of Ice (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/NVItpZiOdMg"
+              title="The Feat of Ice" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">The Feat of Ice</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`The Feat of Ice`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>You hear Erenville vent that being left alone with Sareel Ja felt like torture—no matter how clearly he showed disinterest, the man kept spitting out mean-spirited bile, to the point Erenville thinks he might have preferred standing with you amid fire and ruin on a battlefield. Wuk Lamat snaps that she’ll make Bakool Ja Ja answer for all of it, and Krile bristles at being underestimated, insisting she pulls her own weight in battle now. After seeing Zoraal Ja fight, Alisaie admits she finally understands why he’s hailed as Tuliyollal’s greatest warrior, while Koana says that, setting rivalry with your father aside, this is the best outcome you could have hoped for—never again will your people fear the looming shadow of the Skyruin. Urianger is grateful you felled the winged calamity before it could spread further suffering, and Thancred urges you to hurry back—both to calm the Yok Huy, who must be anxious about when Valigarmanda might strike next, and to ease Alphinaud’s worries as well.</p><p>When you return to Worlar’s Echo, Krile admits she expected the villagers to be in hiding, and realizes Alphinaud’s confidence in you must have steadied them. Erenville says he never imagined your journey would demand he track something like Valigarmanda, and Alphinaud welcomes you back with absolute certainty you’d return safe and sound. Alisaie, drained to the bone, lists it out—scaling a massive mountain, fighting an elector, and battling a legendary monstrosity—and decides she’s allowed to be tired. Koana, in the wake of the Skyruin’s chaos, remembers you still had the Feat of Ice to complete, and Thancred suspects that while you were dealing with the screeching menace, Bakool Ja Ja likely slipped away toward the next feat. Urianger notes that Alphinaud has used the time to tend the wounded further.</p><p>Before anything else, you go to speak with Gurfurlur—only to be told the temple won’t be necessary. Gurfurlur greets you as heroes of the hour and declares Valigarmanda is no more, a victory worthy of song, while Zurmurwur admits there had been plans for a second feat here in town, but the recklessness of a fellow claimant has made them pointless. The second trial was meant to be the Feat of Ice—fortifying Valigarmanda’s prison—but Gurfurlur cuts it short: after you defeated the Skyruin and saved who knows how many lives, there is nothing left to test. As the last claimant has arrived, he proceeds with the formalities and, in recognition of the skill and bravery you and the others showed, awards each of you a second keystone. Alphinaud counts five in hand—two left to collect—yet Wuk Lamat reminds everyone one of those keystones is still in Bakool Ja Ja’s thieving grasp, and she swears he will answer for that and for unleashing Valigarmanda. With a blessing for Tuliyollal’s new age, the moment ends as Zoraal Ja departs without much to say.</p><p>As you take stock of what’s been gained, Wuk Lamat dryly notes your brother was never much of a talker, then invites Gurfurlur to visit the capital so everyone can come to know one another better. Gurfurlur laughs that he’ll consider it—if one of you two claims the throne—and Koana promises invitations will be sent from Sunperch. Then another unusual visitor arrives: Vorporlor approaches, addresses Wuk Lamat by name, and admits he doubted she could slay Valigarmanda—yet the quiet skies proclaim her triumph. He says that if the vidraal had been left to roam free, it would have terrorized you all, and that once again his people stand in your debt. Wuk Lamat insists you’re owed nothing—you fought because you chose to—but Vorporlor refuses to let the debt stand unpaid.</p><p>When Wuk Lamat hesitates, unsure what to ask for, you watch Krile seize the opening and suggest he tell you about the dreams of the golden city. Vorporlor says the “golden dreams” are recorded—visions seen by his forebears before the Xak Tural expedition—and you listen as he describes a heavenly land drenched in golden light, where people lived like gods: never aging, never dying, free of hardship and conflict. Every building was a palace, and in the center stood a silent goddess—an immense statue so tall even his kin would have to crane their necks to see its face. Alphinaud notes how much more detailed this is than the abstract imagery you’d heard before, and Vorporlor continues: the dreamers were consumed by their visions, compelled to seek the paradise shown to them, and they journeyed to Xak Tural—where they died in droves.</p><p>You hear Vorporlor add that once his ancestors left the forest, there were no more dreams and no more dreamers, and Krile presses him on what he means. He explains the visions came only to those who worked the quarries in Yak T’el, but after disease ravaged them and fewer newborns were born, they were forced to abandon that territory. When their people’s withdrawal to Urqopacha was complete, they never again dreamed of the golden city. Wuk Lamat says you’re headed to Yak T’el next, and thanks him for sharing, but Vorporlor insists he needs no gratitude—he merely repaid a debt—and bids farewell, doubting your paths will cross again. In the hush that follows, Krile lingers on the image of a heavenly land suffused with gold, Erenville points out that Yak T’el is where the Yok Huy once had their golden dreams, and you feel the legend of the golden city sharpen into focus with only two keystones remaining. Alisaie mutters that you were only meant to strengthen the ice, but Bakool Ja Ja’s idiocy forced you to do them one better, while Gurfurlur and Zurmurwur remark on how rare—and telling—today’s visitors have been. And when Wuk Lamat says she doesn’t expect Vorporlor and his brethren to change their minds overnight about Tuliyollal, she still calls today proof that change is possible.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Thancred <small class="muted">(Urqopacha, X:5.3, Y:24.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-skyruin.html">The Skyruin</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 93</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-promise-of-peace.html">The Promise of Peace</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'封の試練',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>あなたは、エレンヴィルがサリール・ジャと二人きりで過ごすのは拷問のようだったと吐き捨てるのを聞く。露骨に興味がない態度を示しても、相手は悪意に満ちた毒を延々と垂れ流し、正直なところ戦場であなたとともに火と破滅に向き合う方がまだましだったかもしれないとまで言う。ウクラマトはバクール・ジャジャに責任を取らせると息巻き、クライルは「言ったでしょう、今は私も戦える」と自分の戦力を主張する。アリゼーはゾラージャの戦いぶりを目の当たりにして、トゥリヨラル最強の戦士と評される理由がわかったと認め、コーナは父を超える云々はさておき最善の結果だと言い切る――もう二度と民はスカイルイン（ヴァリガルマンダの異名）の影に怯えずに済むのだと。ウリエンジェは翼ある災厄をこれ以上の苦しみが広がる前に討ち果たせた幸運を語り、サンクレッドはヨクフイが次の襲来を案じているはずだから、そしてアルフィノの不安も鎮めるために、あなたは急いで戻るべきだと促す。</p><p>あなたがウォーラーズ・エコーへ戻ると、クライルは村人たちが隠れていると思っていたが、アルフィノがあなたたちを信じ抜いたことが安心につながったのだろうと言う。エレンヴィルは旅の途中で様々なものを追う覚悟はしていたが、ヴァリガルマンダだけは想定外だったと肩をすくめる。アルフィノは「無事に戻ると疑っていなかった」と迎え、アリゼーは巨大な山を登り、選定者と戦い、伝説の怪物と相まみえたのだから疲れて当然だとこぼす。コーナは混乱の中で氷の試練がまだ残っていたことを思い出し、サンクレッドはその間にバクール・ジャジャが次の試練へ向かっただろうと読む。ウリエンジェは、アルフィノが負傷者の手当てに時間を活かしたことにも目を向ける。</p><p>あなたはまずグルフルルと話そうとするが、神殿へ行く必要はないと告げられる。グルフルルは「今日の立役者」たるあなたたちを迎え、ヴァリガルマンダは討たれた、歌に値する勝利だと称える。ズルムルウルは町で第二の試練を行う予定だったが、同じ継承候補者の無謀がそれを無意味にしたと渋い顔をし、本来は牢獄を強化する「氷の試練」だったと説明する。だがグルフルルは、スカイルイン（ヴァリガルマンダの異名）を倒し数え切れぬ命を救ったあなたたちに、これ以上何を試すというのかと断じ、最後の継承候補者が揃った今、手続きを進めると宣言する。そしてあなたたち三人の技量と勇気を認め、第二の要石を授ける。アルフィノは五つになったと数え、残りは二つだと言うが、ウクラマトはそのうち一つがバクール・ジャジャの盗んだ手の中にあること、そしてヴァリガルマンダを解き放った罪も含め必ず償わせることを誓う。祝福の言葉が述べられる一方で、ゾラージャは多くを語らぬまま立ち去っていく。</p><p>あなたが場の空気を整えようとする中、ウクラマトは兄は昔から寡黙だったと皮肉り、グルフルルに都へ来てほしい、互いをもっと知り合いたいと誘う。グルフルルは笑って「お前たちのどちらかが王座を得るなら考えてやろう」と言い、コーナはサンパーチから招待状を送ると約束する。そこへさらに珍しい来訪者としてヴォルポルロルが現れ、ウクラマトの勝利を静かな空が告げていると述べ、ヴィドラールが野に放たれていれば皆が恐怖に晒されていた、再び借りができたと告げる。ウクラマトは望んで戦っただけで借りはないと言うが、ヴォルポルロルは返さずにはいられないと譲らない。</p><p>ウクラマトが何を求めればいいかわからず言い淀むと、あなたはクライルが黄金郷の夢について尋ねる案を差し出すのを見る。ヴォルポルロルは「黄金の夢」について記録があると言い、ザクトゥラル遠征より前に祖先が見た幻視を語る。黄金の光に満ちた天上の地――そこでは人々が神のように生き、老いも死もなく、苦難も争いもない。建物はすべて宮殿で、その中心には沈黙する女神が君臨し、同胞ですら見上げねば顔を拝めぬほど巨大な女神像がそびえていたという。アルフィノは、これまで聞いてきた抽象的な像よりもはるかに具体的だと受け止め、ヴォルポルロルは続けて、夢見る者たちは幻視に呑まれ、示された楽園を求めてザクトゥラルへ旅立ち、多くが倒れたのだと語る。</p><p>あなたは、森を離れて以降は夢も夢見る者も途絶えたのだという言葉に、クライルが「森とは？」と食い下がるのを見守る。ヴォルポルロルは、幻視は最初からヤクテルの採石場で働く者にだけ訪れたのだと明かし、疫病に荒らされ新生児が減ったため、その地を捨てざるを得なかったと言う。ウルコパチャへの退避が完了してからは、二度と黄金郷の夢を見なくなった――その事実にクライルは興味を深め、ウクラマトは次はヤクテルへ向かうのだから、そこでさらに確かめられるかもしれないとあなたを前へ促す。ヴォルポルロルは礼は不要だ、借りを返しただけだと言い残して去り、残されたあなたは黄金の光に満ちた天上の地の像を胸に刻む。クライルがその描写を反芻し、エレンヴィルは黄金の夢の起点がヤクテルだと整理し、アルフィノは残る要石が二つになった今、黄金郷の伝承がようやく輪郭を帯びてきたと述べる。アリゼーは本来は氷を強めるだけのはずが、バクール・ジャジャの愚かさがあなたたちに一歩先を行かせたと苦々しく言い、グルフルルとズルムルウルもまた、今日が「珍しい来訪者の日」だったと噛みしめる。ウクラマトは、ヴォルポルロルたちがすぐに心変わりするとは思わないが、変化が起こり得ることを今日が証明したのだと、あなたに言い切る。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> サンクレッド <small class="muted">（オルコ・パチャ, X:5.3, Y:24.1）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-skyruin.html">最強のトラルヴィドラール</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 93</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-promise-of-peace.html">ウクラマトの平和</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'冰封試煉',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你聽見 Erenville 抱怨，和 Sareel Ja 獨處簡直像受刑——就算他已經擺明毫無興趣，對方仍不停吐出刻薄惡毒的話。Erenville 甚至說，與其忍受那樣的折磨，他可能更寧願在戰場上和你一起面對火焰與毀滅。Wuk Lamat 氣得說她一定要 Bakool Ja Ja 為此付出代價；Krile 也立刻回嗆，別再小看她，她現在在戰鬥中也能扛起自己的份。Alisaie 則承認，看過 Zoraal Ja 的實戰後，她終於明白為什麼他會被公認為 Tuliyollal 最強的戰士。Koana 說，就算先不談要不要超越爸爸，這已經是你們所能期待的最好結果——從今以後，你們的人民再也不必畏懼 Skyruin（Valigarmanda 的稱號）籠罩而來的陰影。Urianger 慶幸你們在它造成更大苦難前就將那場災厄終結；Thancred 則催你們趕快回去安撫 Yok Huy，他們一定還在惶惶不安，擔心 Valigarmanda 會在何時何地再次襲來——也該讓 Alphinaud 放心。</p><p>當你回到 Worlar’s Echo，Krile 坦言她原以為村民會躲起來，但 Alphinaud 對你們的信心顯然安定了人心。Erenville 也說，他早就預料旅途中會被要求追蹤許多事物，唯獨沒想到會把 Valigarmanda 也算進去。Alphinaud 迎接你時毫不遲疑地說，他從沒懷疑你會平安歸來；Alisaie 則把一路的疲憊全倒出來——爬那麼高的山、和選定者交手、再去對上傳說級的怪物——她說自己會累很正常。Koana 在天墜覺醒的混亂中才想起，你們原本還有 Feat of Ice（冰封試煉）要完成；Thancred 推測你們忙著對付那個尖叫的威脅時，Bakool Ja Ja 八成已經跑去下一個試煉。Urianger 也看得出來，Alphinaud 這段時間一直在照料傷者。</p><p>你們決定先去找 Gurfurlur，卻被告知不必再跑神殿——「當下的英雄」不需要再被拒於門外。Gurfurlur 直接宣告 Valigarmanda 已經不復存在，這場勝利值得被歌頌；Zurmurwur 則皺著眉說，本來還安排了第二個試煉在鎮上進行，但某位同為繼承候補者的魯莽行徑，讓那些安排全成了多餘。那第二個試煉就是 Feat of Ice（冰封試煉），原意是要你們加固 Valigarmanda 的牢獄——可 Gurfurlur 反問，既然你們已經擊敗天墜、救下不知多少生命，還需要再試什麼？他說如今最後一位候補者也已抵達，正式程序可以往下走了，於是以你們展現出的技巧與勇氣，直接各自頒發第二顆 keystone。Alphinaud 盤點後說這樣就是五顆，還剩兩顆；但 Wuk Lamat 立刻指出，其中一顆仍在 Bakool Ja Ja 那雙偷來的手裡——而且他放出 Valigarmanda 的帳也必須一起算。祝福的話落下後，Zoraal Ja 幾乎不發一語便離開了。</p><p>你看著場面稍微緩下來，Wuk Lamat 便說你們那位兄弟向來話不多，接著邀 Gurfurlur 之後去首都走走，她想讓大家更了解彼此與 Yok Huy。Gurfurlur 大笑，說如果最後登上王座的是你們兩人之一，他才會考慮；Koana 則回應他會從 Sunperch 發出邀請。就在這時，又一位「不尋常的訪客」出現——Vorporlor 走上前，直呼 Wuk Lamat 的名字，坦言他原本不信她能殺死 Valigarmanda，但如今寧靜的天空已宣告她的凱旋。他說若讓那頭 tural vidraal（Yok Tural 對長命異獸的稱呼）繼續在外遊蕩，所有人都會被恐懼支配；因此他們再次欠下你們一份情。Wuk Lamat 說你們並不求回報，你們只是想做就做了；Vorporlor 卻堅持，這份債若不償還，他會被它糾纏不休。</p><p>Wuk Lamat 一時想不到該要求什麼，你看見 Krile 立刻抓住機會，提議不如請他談談「黃金城的夢」。Vorporlor 說他們確實留有紀錄——那是早在 Xak Tural 遠征之前，先祖曾見過的幻象。他描述一片被金色光輝浸透的天上之地，那裡的人如神祇般生活：不老、不死，沒有困苦，也沒有衝突；每一棟建築都是宮殿，而在其中央統治著一位沉默的女神——一尊高到連他的族人都得抬頭仰望才能看清面容的巨大女神像。Krile 聽見「女神像」這個細節也很意外；Alphinaud 則覺得相較於以往聽到的抽象描述，這一次明顯具體得多。Vorporlor 接著說，夢見者被幻象吞沒，被迫追尋那個被展示的樂園，於是踏上前往 Xak Tural 的旅途——卻成批死去。</p><p>你聽著 Vorporlor 又補上一句：先祖一旦離開森林，就再也沒有夢，也沒有夢見者了。Krile 追問他所說的「森林」是什麼意思，Vorporlor 便解釋，從一開始，那些幻象只會降臨在 Yak T’el 的採石場勞作者身上；但在疾病肆虐、出生數下降之後，他們被迫放棄那片土地。等到族人完全撤回 Urqopacha 之後，黃金城的夢也從此絕跡。Krile 立刻意識到：只有那個特定區域的 Yok Huy 才曾看見幻象——這點太關鍵了。Wuk Lamat 則說你們下一站正是 Yak T’el，也許到了那裡就能挖出更多線索，並向 Vorporlor 道謝；但 Vorporlor 只說他不需要感謝，他只是償還一筆債，最後向 Wuk Lamat 道別，認為你們的路不會再交會。當他離開後，你仍能聽見 Krile 低聲重複那句「被金色光輝浸透的天上之地」，而 Erenville 也把重點落在 Yak T’el——那正是 Yok Huy 曾經做過黃金之夢的地方，你們很快就可能親自查證這段傳說。Alphinaud 說只剩兩顆 keystone 時，你們總算拼起更完整的黃金城輪廓；Alisaie 則冷笑，原本你們只需要加固冰封，卻因 Bakool Ja Ja 的愚蠢被逼著「做到更徹底」。Gurfurlur 和 Zurmurwur 也各自感嘆今天來訪者罕見，而 Wuk Lamat 最後告訴你：她不認為 Vorporlor 和他的族人會立刻改變對 Tuliyollal 的看法，但這並不代表他們永遠不會改變——因為今天就是最好的證明。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 桑克瑞德 <small class="muted">(奧闊帕恰山, X:5.3, Y:24.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-skyruin.html">天穹毀滅者</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.93</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-promise-of-peace.html">和平的承諾</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
