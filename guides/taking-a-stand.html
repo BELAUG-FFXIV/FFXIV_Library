@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Taking a Stand | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Taking a Stand (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/Vpr5wVCs0f4"
+              title="Taking a Stand" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Taking a Stand</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Taking a Stand`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Hunmu Rruk steadies himself after what he has shared with you, admitting that recalling the past has left him emotional. He asks for a moment to compose himself—and urges you not to keep the Third Promise waiting—then thanks you again, saying he feels better for having spoken with you.</p><p>When you return to the Garden of the Stars, Krile is there, and Wuk Lamat immediately looks up, eager to know what Hunmu Rruk wanted. You make it clear with a small gesture that it is a secret, and she accepts it without pressing. She does, however, confirm the Ty’iinbek Traverse is still not cleared—more rocks, apparently—and with the delay stretching on, Krile decides to rest, worn out from all the cooking and preparation.</p><p>Before anyone can truly settle, a voice cuts in and calls for the Promise. A Hoobigo—one of Bakool Ja Ja’s—steps forward and says he has come to fetch her. He claims she is free to refuse, but warns that doing so would be “most unwise,” then pointedly asks what you think, calling you her “salted friend.” With that pressure hanging in the air, he orders Wuk Lamat to follow.</p><p>He leads you into the Xobr’it Cinderfield, and Wuk Lamat demands to know what this is and how far they intend to take you. Then she freezes—Hunmu Rruk is there. Bakool Ja Ja laughs and tells her to look closely, insisting Hunmu Rruk is the reason you are here and demanding she recognize her “real father.” His companion pushes the knife further, saying you heard it straight from Hunmu Rruk himself. Wuk Lamat’s question catches in her throat, and Bakool Ja Ja seizes the moment: hand over the keystones, and he will even “allow” her to fight for them—just the two of them. But if you try to interfere, he will kill the old man.</p><p>Wuk Lamat refuses to accept hostages, no matter whose blood is involved, and she steps forward to fight. Bakool Ja Ja taunts her and calls you out, wanting you to watch as he tears your Promise apart, but Wuk Lamat forces his attention back onto her and insists she will not lose. Even when his followers chafe at standing aside and the situation threatens to spiral, she drives herself onward with sheer resolve—what she has learned through the rite, what “peace” means to her, and what it would mean to protect her people’s happiness—until she finally breaks through and wins.</p><p>When the dust settles, Wuk Lamat takes back what was stolen from her. Bakool Ja Ja is left reeling, and she condemns his schemes—threats, the release of Valigarmanda, and the danger he has brought upon innocents—warning that if he ever torments her people again, he will answer to her. One of the Hoobigo admits the path was blocked on purpose: the plan was to drag her here and take the rest of her keystones, but she has beaten them, so they will release the hostage. Hunmu Rruk apologizes for his carelessness, and when Wuk Lamat hesitantly returns to what Bakool Ja Ja claimed, he avoids the question—praising her instead for defeating Bakool Ja Ja alone and affirming that she truly is the Dawnservant’s daughter. Wuk Lamat accepts what she is, declares herself Gulool Ja Ja’s daughter and Tuliyollal’s next Dawnservant, and tells you it is time to rejoin the others.</p><p>Back at the Garden of the Stars, the others can tell something happened—Krile remarks on how Wuk Lamat seems to be glowing with confidence, and Alisaie notices the satisfied air around you. Wuk Lamat admits you were the last to return and thanks everyone for having faith in her, especially you for keeping out of the fight even when it became dirty. She says Bakool Ja Ja will not be the last to threaten those she cares about, and she needed to prove to herself that she can stand up to such villains even when she stands alone—while also admitting she will still ask for help when she needs it.</p><p>Elsewhere, in the Second Promise’s camp, Koana acknowledges that the passage to Mamook remains blocked and suggests resting and recovering—perhaps even preparing xibruq pibil again. As the conversation turns, he confronts his own shortcomings: he has been so single-minded in advocating foreign innovations that he failed to understand what the people of Tuliyollal hold dear. Thancred tells him that understanding and connecting with people is not easy, but there is one step he can take—let them see who he truly is, the honesty behind what makes him laugh, cry, and rage. Urianger admits he has struggled to speak from the heart as well, and urges him to dispense with pretense and simply be. Remembering his father’s words—“Understanding begets fellowship”—Koana accepts the challenge, resolving to make a greater effort to be himself, even if it does not come naturally.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Hunmu Rruk <small class="muted">(Yak T’el, X:9.6, Y:13.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-fathers-grief.html">A Father’s Grief</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 94</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="into-the-traverse.html">Into the Traverse</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'笑顔を護るための戦い',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>フンム・ルルクは、過去を思い返したことで感情が揺らいだと告げ、気持ちを整えるために少し時間がほしいと言う。だが同時に、第三誓約者を待たせぬようにとあなたに促し、話せて楽になったと礼を述べる。</p><p>星々の庭園へ戻ると、クルルがあなたに声をかけ、ウクラマトはすぐさまフンム・ルルクが何を望んだのかと問う。あなたが仕草で「秘密だ」と示すと、彼女はそれ以上追及しない。とはいえ、ティ・インベク・トラヴァースは依然として開通しておらず、岩がさらに増えたらしいとウクラマトは言う。調理や準備で疲れ切ったクルルは、この機会に休むことにする。</p><p>だが、落ち着く間もなく、誰とも知れぬ者が「誓約者よ」と呼び止める。現れたのはバクージャジャの手の者で、迎えに来たと言い、拒むこともできるが賢明ではないと脅す。そして、あなたが事情を察しているだろうと示唆し、ウクラマトに従えと促す。重い空気のまま、あなたたちは連れ出されてしまう。</p><p>辿り着いた先でウクラマトは真意を問いただし、そこでフンム・ルルクの姿を見て息をのむ。バクージャジャは嘲笑し、彼こそがこの場に呼び出された理由だと言い放つ。さらに「本当の父親をよく見ろ」と煽り立て、相棒もまた、あなたがフンム・ルルクの口から直接聞いたはずだと突きつける。ウクラマトは真実を確かめようとするが、バクージャジャは容赦なく迫り、鍵石を差し出せと言う。戦いは一対一で受けてやるが、あなたが介入すれば老人を殺す――そう脅して人質を盾にする。</p><p>ウクラマトは、血縁がどうであれ人質など許さないと言い、前へ出て戦いを受ける。バクージャジャはあなたに目を逸らすなと叫び、第三誓約者が引き裂かれる様を見届けろと挑発するが、ウクラマトは相手の視線を自分へ引き戻し、必ず勝つと宣言する。卑劣な思惑が渦巻く中でも、儀式を通じて得た学びと覚悟、そして人々の幸福を守るという誓いが彼女を支え、ついに勝利を掴み取る。</p><p>勝敗が決した後、ウクラマトは奪われた鍵石を取り戻す。彼女は、脅迫や策謀、ヴァリガルマンダ解放など数々の悪行で無辜の人々を危険に晒したことを糾弾し、二度と民を苦しめるなら自分が裁くと告げる。手の者は、通路封鎖も計画の一部で、ここに引きずり出して残りの鍵石まで奪うつもりだったと吐き捨てるが、敗北した以上人質は解放すると言う。フンム・ルルクは不覚だったと詫び、ウクラマトが恐る恐る投げかけた言葉を受け止めきれず、代わりに彼女の勝利を称え、暁王の娘に相応しいと認める。ウクラマトは自分が「誓約者」であることを受け入れ、グルージャジャの娘として、トライヨラの次なる暁王になると宣言し、あなたと共に仲間のもとへ戻る。</p><p>星々の庭園に戻ると、仲間たちは何かがあったと察し、クルルはウクラマトが自信に満ちていることに驚く。アリゼーもまた、あなたに漂う得心の気配に気づく。ウクラマトは最後に戻ったことを詫びつつ、皆が無事でよかったと言い、汚い争いになっても手を出さずに信じ続けてくれたあなたへ感謝を伝える。これからも大切な人を脅かす者は現れるだろうから、たとえ一人で立つ場面でも悪党に屈しないと自分に証明したかったのだと語り、それでも必要なときは助けを求めると正直に認める。</p><p>一方その頃、第二誓約者の陣営では、マムークへの道が塞がれたままであることをコアナが受け止め、休養と回復のために、あの料理をもう一度作ろうかと提案する。やがて彼は、自分が異国の技術革新ばかりを唱えるあまり、トライヨラの人々が何を大切にし、どんな未来を願うのかを顧みてこなかったと吐露する。サンクレッドは、人と理解し合い結びつくのは容易ではないが、まずは本当の自分を見せることだと助言する。笑い、涙し、怒る――そうした正直さが相互理解の第一歩になるのだと。ウリエンジェもまた胸の内から語ることの難しさを認め、恐ろしくとも前へ進むなら、虚飾を捨ててただ在れと背中を押す。父の言葉「理解は交わりを生む」を思い返し、コアナは不器用でも自分らしくあろうと決意する。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> フンムルク <small class="muted">（ヤクテル樹海, X:9.6, Y:13.4）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-fathers-grief.html">ふたりの父</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 94</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="into-the-traverse.html">ティーンベク洞道を抜けて</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'挺身而出為了守護笑容而戰',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Hunmu Rruk 回想起過去後情緒翻湧，他坦白自己需要一點時間平復心情，但仍請你不要讓第三誓約久等。等他稍微整理好，他又向你道謝，說把話說出口後舒服多了。</p><p>你回到 Garden of the Stars，Krile 迎上來確認你是否已和 Hunmu Rruk 談完；Wuk Lamat 也立刻追問他找你做什麼。你用一個小小的手勢示意「這是秘密」，她便笑著放過你，沒有再逼問。更重要的是，Ty’iinbek Traverse 依然沒清乾淨，聽說又多了更多落石。Krile 說自己做菜、準備、忙到現在早就累壞了，趁這個空檔想好好休息一下。</p><p>然而你們還來不及真正喘口氣，一個陌生的聲音便叫住了誓約者。來者是 Bakool Ja Ja 的手下，他說奉命來「請」Wuk Lamat 走一趟；她可以拒絕，但那會非常不明智。對方刻意把話拋給你，暗示你應該懂他們的意思，還譏諷你這種「家貓」居然被叫了也會來。話說到這裡，Wuk Lamat 只能跟上去，你也不得不一起前往。</p><p>你們被帶到 The Xobr’it Cinderfield，Wuk Lamat 質問這到底是什麼意思、要把你們帶到多遠。下一秒她看見了 Hunmu Rruk，怒火立刻燒上來，直接指著 Bakool Ja Ja 要他別碰選定者。Bakool Ja Ja 卻大笑，說 Hunmu Rruk 不只是選定者——他才是你們被帶來的原因，還逼 Wuk Lamat「好好看看」，要她認出誰才是自己的親生父親。另一個人更補上一刀，說你早就從 Hunmu Rruk 口中聽得一清二楚。Wuk Lamat 問他是不是事實，沉默本身就像答案；Bakool Ja Ja 便趁勢威脅：交出鑰石，他會「允許」她跟自己單挑，但只要你敢插手，他就親手殺了老先生。</p><p>Wuk Lamat 說不管是否有血緣，她都不會容忍挾持人質。她把所有注意力都拉回自己身上，要 Bakool Ja Ja 別盯著你，真正的對手是她。即使對方惡意挑釁、還想讓你親眼看著她被撕碎，她仍咬牙撐住——這場儀式讓她學到太多，她終於明白自己想守護的是什麼：每天都能平安醒來的日常、以及人們能笑著生活的幸福。就算對方的手下蠢蠢欲動、局勢越來越骯髒，她也靠著那股決意一路打到底，最後硬是把勝利抓在手裡。</p><p>戰鬥結束後，Wuk Lamat 當場把被偷走的鑰石奪回來。她痛斥 Bakool Ja Ja 用卑劣手段惹出一連串麻煩：威脅 Hanuhanu、放出 Valigarmanda、甚至把無辜的人都拖進危險裡；她警告對方，若再敢折磨她的人民，就要為此付出代價。Hoobigo 的人也承認，Ty’iinbek Traverse 的封路本來就是計畫的一部分——他們想逼你們到這裡，好把剩下的鑰石全奪走；如今輸了，就會放人質。Hunmu Rruk 低聲道歉，說自己太大意了。Wuk Lamat 想追問 Bakool Ja Ja 先前說的「你跟我」到底是怎麼回事，Hunmu Rruk 卻沒有正面回答，只改口讚她竟能獨自擊敗 Bakool Ja Ja，並肯定她確實是 Dawnservant 的女兒。Wuk Lamat 接住那句「誓約者」的稱呼，挺直背脊宣告自己是 Gulool Ja Ja 的女兒、也是 Tuliyollal 的下一任 Dawnservant，然後要你一起回去和大家會合。</p><p>回到 Garden of the Stars，Krile 一眼就看出 Wuk Lamat 雖然一身狼狽，卻像在發光一樣自信；Alisaie 也察覺你身上有種「事情果然發生了」的氣息。Wuk Lamat 說你們似乎最後才回來，但很高興大家都平安無事；她也謝謝你一直相信她——哪怕戰鬥變得再骯髒，你仍忍住沒有出手。她坦承 Bakool Ja Ja 不會是最後一個威脅她在乎之人的人，所以她想對自己證明：就算必須獨自面對，她也能挺身對抗那樣的惡徒；但她也立刻補上一句，該求助的時候她當然會開口，因為她現在知道自己並不是一個人。</p><p>同一時間，在第二誓約者那邊，Koana 也只能接受 Mamook 的通路仍被封住，暫時只能休養恢復；他甚至提議不如再借用廚房做一次 xibruq pibil。話題轉開後，他終於說出自己的盲點：他太執著於外來創新，幾乎沒有真正去理解 Tuliyollal 的人們珍視什麼、又對未來懷抱什麼希望。Thancred 告訴他，理解並連結人心從來不容易，但至少可以先做一件事——讓人們看見真正的自己，看見你會笑、會哭、會憤怒的那一面，坦率就是相互理解的第一步。Urianger 也承認自己同樣不擅長說出心裡話，但若要向前，就必須踏出那一步，放下矯飾、單純地做自己。Koana 想起父親的話「理解會帶來情誼」，終於下定決心：即使不自然，他也要努力讓自己更像真正的自己。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 亨穆·魯魯克 <small class="muted">(Yak T’el 樹海, X:9.6, Y:13.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-fathers-grief.html">兩個父親的悲痛</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.94</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="into-the-traverse.html">穿越Traverse</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
