@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Saddled Up | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Saddled Up (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/AGUOgjx0cw8"
+              title="Saddled Up" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Saddled Up</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Saddled Up`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>You meet Erenville’s contact at the stables, and are told it won’t be long—just keep an eye out for a man arriving in Hhusatahwi with two rroneek. Erenville goes ahead to confirm the mounts have arrived, inviting you to look around until you’ve had your fill, and remarks that traveling with only a single companion makes for fewer complications than he’s used to.</p><p>When the good-natured stableman finally greets you, he apologizes for the delay and explains that unruly wildlife isn’t the only trouble lately—robberies have been on the rise, merchants in particular. With so many people now lining up to use rroneek, he insists you make a stop at Sheshenewezi Springs, and admits the Dustwatch are doing what they can, but the bandits seem to be operating as a gang. Erenville thanks him for the warning, and the man sends you off with a final reminder to take care of anything valuable.</p><p>You saddle up and set out with Erenville. He assumes it’s your first time riding, but says he can’t imagine it will be difficult for you all the same—just take it slow and mind the rroneek’s temper. As you ride, he can’t help dwelling on how much Shaaloani has changed: a town you’ve just passed didn’t even exist a few years ago, and with water hard to come by, travelers turned to those who tend nopal cacti—not only for the water in their stems, but for fruit said to be both nutritious and delicious.</p><p>Along the way, Erenville points out a hole some might mistake for a water source, only to find it brimming with ceruleum instead—blue flames that erupt into a spectacle grim enough to inspire cautionary tales. He notes that the Whalaqee hold ceruleum and its blue fire in great reverence, but cuts the thought short: you’ve arrived, and it’s a welcome stop for the rroneek as well.</p><p>At Sheshenewezi Springs—busy enough to draw fortune-seekers from all over—Erenville is struck again by how much has been built in the three years he’s been away. With time before the next train departs, he asks to visit an old friend of his mentor, a woman named Iyaate, certain she’d never let him hear the end of it if he passed through without a word. Her blue hair makes her easy to spot, and when you find her, she recognizes him at once and teases him for how much he’s grown—then calls him by a name you’ve never heard.</p><p>When you react, Erenville admits that he was born with that name, but chose “Erenville” when he became a gleaner, following eastern Viera conventions to avoid drawing attention—and asks you to keep using the name he chose. Iyaate, delighted, reminisces about his mother and mentor: a peerless archer with an even greater understanding of nature, whose knowledge earned her a place among Gulool Ja Ja’s traveling companions. She recalls how often Erenville was left in her care while his mentor chased the unknown, and how he would cry and beg to go along—only to be told he could come when he proved himself a true explorer. Erenville answers quietly that she set him the task of finding the golden city, and though he once thought it only a dream meant to spur him onward, it was real—and you found it during the rite of succession.</p><p>Before Iyaate can say more, a cry for help rings out. You and Erenville move to investigate, and find the infamous local bandits threatening a woman who has been robbed—Namikka, Wuk Lamat’s nursemaid. The moment the bandits realize who she is, they decide this has gone too far and rush the stolen goods to their boss, while the rest turn on you. Erenville goes after Namikka, leaving the attackers to you, and you fight back until the outlaws break and scatter.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Erenville <small class="muted">(Tuliyollal, X:14.3, Y:2.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-long-road-to-xak-tural.html">The Long Road to Xak Tural</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 95</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="braced-for-trouble.html">Braced for Trouble</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'ロネークの背に揺られて',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>あなたは厩で「すぐに来る」と告げられ、フサタフイにロネークを二頭連れて来る男を探すよう言われる。エレンヴィルは先に厩へ向かって手配の状況を確かめに行き、あなたには気の済むまで周囲を見て回っていいと促す。そして、同行者がひとりだけの旅は余計な厄介が少ないのだと、ふと思い返したように口にする。</p><p>やがて現れた人のよさそうな厩番は、待たせたことを詫びつつ、最近は荒ぶる野生動物だけでなく、商人を狙った盗賊被害が増えていると話す。ロネークの利用希望者も多く順番待ちが長いからこそ、あなたたちにはシェシェネウェジの泉に立ち寄ってもらいたいのだという。見回りの者たちも手を尽くしているが、盗賊は徒党を組んでいるらしく一網打尽にはしづらい――そう忠告され、エレンヴィルは礼を述べ、貴重品には気をつけようとあなたに声をかける。</p><p>あなたは鞍にまたがり、エレンヴィルとともに出発する。初めての騎乗なら無理をせず、振り落とされないように、と彼は歩調を合わせるように言う。道すがら彼は、シャーローニがどれほど変わったかに目を見張る。ほんの数年前には存在しなかった町がいまは立ち、補給できる水場が限られる旅人たちは、茎の水や実りを頼りにできるサボテンを世話する者たちに助けられてきたのだと語る。</p><p>あなたの視線の先にある穴を指し、そこに水を期待する者もいるだろうが、満ちているのはセルレウムだとエレンヴィルは告げる。内から噴き上がる青い炎は見世物のようでありながら、近づきすぎた者の末路を語る戒めの話を生むほど危うい。セルレウムと青い炎を敬う人々もいるのだと言いかけ、彼は今はその話を脇に置く――目的地に着いたのだ。</p><p>あなたはシェシェネウェジの泉に到着し、各地から一攫千金を夢見る人々が集まるこの地の賑わいに圧倒される。エレンヴィルもまた、離れていた三年の間に築かれたものの大きさに驚き、次の列車までの時間で師の旧友に挨拶したいと言う。名はイヤーテ。通り過ぎたと知れたら叱られるに違いない、と彼は苦笑し、青い髪を目印に探し出す。</p><p>あなたがイヤーテと対面すると、彼女はエレンヴィルを見てすぐに気づき、成長ぶりをからかうように懐かしむ。そして、彼を幼い頃の名で呼びかけ、あなたが戸惑うと、エレンヴィルは生まれた時の名と、仕事の都合で目立たぬよう選んだ名があるのだと明かし、これからも「エレンヴィル」と呼んでほしいと頼む。イヤーテはさらに、彼の母であり師でもある人物の腕前と博識、旅の仲間に選ばれたほどの自然への理解を語り、幼い彼が何度も旅に連れて行ってほしいと泣いて頼んだことまで暴露する。エレンヴィルは堪えきれず止めようとするが、結局、かつて課された「黄金の都を探す」という宿題が、継承の儀の中で現実となり、あなたたちがそれを見つけたのだと告げる。</p><p>そのとき、助けを求める叫び声が響く。あなたとエレンヴィルが駆けつけると、悪名高い盗賊たちがひとりの女性を脅し、奪った品を抱えて逃げようとしていた――彼女はウクラマトの乳母、ナミッカだった。盗賊は相手を知って動揺し、奪った品を頭目のもとへ運べと仲間に命じる一方で、残りがあなたに襲いかかる。エレンヴィルはナミッカを追うと言い残し、戦いはあなたに託す。あなたが応戦すると、ならず者たちは追い詰められ、ついには散り散りに逃げ去っていく。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> エレンヴィル <small class="muted">（トライヨラ, X:14.3, Y:2.4）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-long-road-to-xak-tural.html">サカ・トラルへ</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 95</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="braced-for-trouble.html">腕輪を取り戻せ！</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'整裝上路',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你在馬廄被告知「不會等太久」，只要留意在 Hhusatahwi 會有個男人牽著兩頭 rroneek 抵達。Erenville 先行一步去確認馬匹是否到了，並讓你想逛就逛、看夠了再來找他；他也順口說起，這是他第一次只和一位同伴同行，麻煩事自然少了很多。</p><p>不久後，那位和氣的馬廄人終於出現，先為讓你們久等道歉，接著坦言近期的困擾不只是不安分的野生動物——搶劫案也變多了，而且多半衝著旅行商人下手。因為想借用 rroneek 的人排得很長，他要求你們務必在 Sheshenewezi Springs 停一趟；你追問為何 Dustwatch 還沒處理，他也只能說 Kemakka 和夥伴們已盡力，但對方像是成幫結隊行動，想一口氣全抓住沒那麼容易。Erenville 向他道謝，並提醒你們要更警覺、看緊身上的貴重物。</p><p>你翻身上鞍，和 Erenville 一起出發。Erenville 明知你可能是第一次騎乘，仍說他不覺得這會難倒你，只是叮囑先放慢步調、小心別被 rroneek 把你甩下去。一路上，他不斷感嘆 Shaaloani 的變化之大——你們剛經過的那座城鎮，幾年前甚至還不存在；而在缺乏穩定補水點的路線上，旅人只能仰賴照料仙人掌的人們，不只取其掌莖裡的水，連果實也被說成既營養又美味。</p><p>他指向路旁一處洞穴，說有人可能會以為那裡能找到水，結果裡頭滿是青磷水。洞中會噴出藍色火焰，景象雖壯觀，卻也足以衍生出「靠太近就會出事」的警世故事。Erenville 提到 Whalaqee 對青磷水與藍焰懷有深深敬意，但隨即收住話頭——此刻你們已抵達目的地，對 rroneek 來說也是件好事。</p><p>你們在 Sheshenewezi Springs 下馬。這裡或許是 Shaaloani 最忙碌的城鎮之一，人們從各地趕來，只盼能在此找到自己的財富。Erenville 說，Hhusatahwi 的變化已讓他吃驚，而這座城鎮在他離開的三年裡更是大有進展；距離下一班列車出發還有時間，他想去拜訪師傅的一位老朋友——Iyaate。她十年前離開村子到 Tural 各地闖蕩，若知道他路過卻沒打聲招呼，肯定不會放過他；她一頭藍髮很醒目，你們很快便找到她。</p><p>Iyaate 起初還在打量你們，下一秒卻認出 Erenville，驚呼他已長成大人，還笑說他小時候可是個可愛的孩子。她甚至用一個陌生的名字叫他，讓你一時語塞。Erenville 只好承認那是他出生時的名字，而他成為 gleaner（蒐集員，Old Sharlayan 派出的外勤人員，負責蒐集各地樣本與知識）後，為了不引人注目才改採符合東方 Viera 慣例的新名字；既然回到故地，遲早瞞不住，但他仍希望你能繼續用他選擇的名字稱呼他。Iyaate 也提起他的媽媽與師傅：她是她所知最出色的弓箭手，對自然的學識更是無人能及，正因如此才成為 Gulool Ja Ja 旅伴的一員；她曾多次把年幼的他交給 Iyaate 照顧，自己外出探索未知，而他總是哭著求她帶上自己，卻一次次被要求「等你證明自己是真正的探險者再說」。Erenville 也終於說出，那份「去找黃金城」的託付，他曾以為只是哄他走向更廣闊世界的夢話，直到你們在繼承儀式中真的找到了它。</p><p>話音未落，遠處傳來求救聲。你和 Erenville 立刻前去查看，果然撞見在地盜匪挾持一名被搶的女子——那人竟是 Wuk Lamat 的奶媽 Namikka。盜匪聽見她的身分後動搖，急忙命人把贓物帶去交給頭目，自己則轉而想把你們解決掉。Erenville 決定先追上 Namikka，把襲擊者交給你處理；你迎戰不法之徒，逼得他們節節敗退，最後只能狼狽散逃。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 艾倫維爾 <small class="muted">(圖萊尤拉, X:14.3, Y:2.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-long-road-to-xak-tural.html">走向 Xak Tural 這漫長的旅程</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.95</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="braced-for-trouble.html">麻煩上門，奪回腕輪</a></div></div>`
+  }
+};
+
+const LANG_KEY = 'ffxiv-guide-lang';
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.async = true;
+  s.setAttribute('crossorigin', 'anonymous');
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
