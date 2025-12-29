@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ever Greater, Ever Brighter | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Ever Greater, Ever Brighter (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/lVotigenZPc"
+              title="Ever Greater, Ever Brighter" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Ever Greater, Ever Brighter</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Ever Greater, Ever Brighter`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>As the cheers in Tuliyollal fade into a calmer hush, you linger with your companions and try to take in what just happened. Erenville says Wuk Lamat might never have told anyone what she was planning, but he’s certain of one thing—she doesn’t act without her people’s best interests in mind. Alphinaud can’t hide his regret that the Head of Reason, who devised the rite of succession with such care, isn’t here to witness its end. Even so, the mood is clear: Wuk Lamat has truly come into her own.</p><p>From above, Wuk Lamat’s speech moves the crowd—and then, with the same spontaneity that carried her through the rite, she names Koana as a fellow Dawnservant. It happens in an instant, yet you want to believe it wasn’t thoughtless. Alisaie notes that Koana accomplished every feat but the last, and that he only forfeited it to help Wuk Lamat secure victory. Krile looks ahead, already imagining how Tuliyollal might prosper under their care.</p><p>When Wuk Lamat comes to greet you, she refuses titles outright. After everything you’ve shared, she says, you’re family—so she wants you to call her “Lamaty’i,” like family would. Your response, however you choose to give it, clearly reaches her. She still has supporters to thank, so she asks you to wait, and tells you to meet her outside the Winged Walk once she’s finished making her rounds.</p><p>Your first stop together is Aunt Tii’s Tacos—“not just for a snack,” she insists, though she immediately admits it would be a shame not to pick one up anyway. Wuk Evu tries to speak casually, panics, tries again, and only settles when Wuk Lamat orders him to drop the formalities. Mablu, thrilled with the moment, announces a commemorative sales campaign as her first big undertaking as a merchant, while Tobli mutters that it would be easier to hold a conversation with a drunken alpaca. Through the laughter, Wuk Lamat turns serious long enough to thank them—saying the Feat of Reeds and the Feat of Gold were her first true tests, and that without their guidance she might have failed before she even understood what the rite demanded.</p><p>At Bayside Bevy, more guests are waiting: Moblins, Yok Huy, and Fonjeantaine. They congratulate the new Dawnservants and grieve for the passing of the Head of Reason, promising to keep his vision alive. Wuk Lamat speaks plainly about what she learned—peace isn’t simply the absence of war, but the ability to live together in safety and happiness, as her father wished. As Dawnservant, she vows she will not forsake anyone, promising to bring that same happiness even to the bandits in Kozama’uka and the Yok Huy of Chirwagur Saltern, and reminding them that this city will always be their home, too.</p><p>Later, you visit Hunmu Rruk and the representatives of Mamook. Wuk Lamat admits that days like this make her wonder what her birth parents might say if they could see her now, and Hunmu Rruk answers that they would feel only joy at the strong, compassionate woman she has become. Talk turns to Bakool Ja Ja’s distance, to family being there when words fail, and to absences that feel pointed—Ketenramm nowhere in sight, and the First Promise missing as well. When you return to the Winged Walk, Wuk Lamat finally says what Koana hinted at: she wants you to stay in Tuliyollal with her, if you wish, and she presses a permit to Xak Tural into your hand—because she knows an adventurer like you can’t resist what lies beyond. And far below, in the depths of the Skydeep Cenote, Zoraal Ja stands before a sealed gate as Sareel Ja urges him on as “Promise,” while a disembodied voice speaks of knowledge great enough to remake worlds—just before naming the price.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Krile <small class="muted">(Tuliyollal, X:11.6, Y:7.6)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="dawn-of-a-new-tomorrow.html">Dawn of a New Tomorrow</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 95</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-long-road-to-xak-tural.html">The Long Road to Xak Tural</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'すべての路は希望とともに',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>トライヨラの熱気が静かな余韻へ変わっていくなか、あなたは仲間たちと並んで式典の終わりを噛みしめる。エレンヴィルは、ウクラマトが誰かに計画を話していたかどうかはわからないと言いつつも、彼女が民の利益を置き去りにして動くことはないと断言する。アルフィノは、継承の儀を精緻で意義深いものとして整えた理性之首が、この結末を見届けられないことを惜しむ。それでも、ウクラマトが確かに自分の足で立ち、皆に受け入れられはじめている事実は揺らがない。</p><p>高みからの演説で人々の心を動かした直後、ウクラマトは彼女らしい勢いのままに、コーナを連王として指名する。あまりに唐突で周囲が息をのむほどだが、あなたはそれが軽い思いつきではないと信じたくなる。アリゼーは、コーナが最後を除くすべての試練を成し遂げ、勝利を譲ったのはウクラマトを助けるためだったと言い、クルルは二人の治世でトライヨラがどう栄えるのかを楽しみにする。</p><p>やがてウクラマトはあなたたちの前に現れ、称号をやめろと笑い飛ばす。これまでを共に越えてきたあなたたちは家族だと言い、家族のように「ラマティーイ」と呼んでほしいと頼む。あなたの返事は彼女の胸にまっすぐ届き、彼女はそれを大切そうに受け取る。まだ支援者へ挨拶して回る必要があるため、しばらく待っていてほしい、終わったらウィングド・ウォークの外で落ち合おうと告げる。</p><p>あなたが同行して最初に向かったのは、アント・ティーのタコスだった。「軽食のためだけじゃない」と言いながら、結局はついでに買う気満々なのがウクラマトらしい。ウーク・エヴはくだけた言葉遣いを試しては引っ込み、また試しては慌てるが、ウクラマトに「かしこまるな」と命じられてようやく落ち着く。マブルは記念の売り出しを誇らしげに宣言し、トブリは酔ったアルパカのほうが話が通じるとぼやく。笑いの合間にウクラマトは真剣な顔で礼を述べ、葦の試練と黄金の試練が自分にとって最初の本当の試練だったこと、あなたたちの助けがなければ儀の意味を知る前に挫けていたかもしれないことを認める。</p><p>続いてベイサイド・ベヴィーでは、モブリンやヨカフイ族の客人、そしてフォンジャンテーヌが集まり、新たな連王たちを祝うと同時に理性之首の死を悼む。ウクラマトは、平和とは戦がないことではなく、安心と幸福の中で共に生きられることだと語り、それこそが父の望んだトライヨラだと言う。彼女は連王として、コザマル・カの盗賊にもチーワグー塩田のヨカフイ族にも同じ幸福を届け、決して見捨てないと誓い、この街はいつでも帰る場所だと念を押す。</p><p>その後あなたはフンム・ルルクやマムークの者たちとも会い、祝賀はより私的な色を帯びていく。ウクラマトは生みの親なら何と言うだろうと口にし、フンム・ルルクは強く優しい彼女の姿を見れば喜びで満たされるはずだと言う。バクージャジャの距離や家族の支えが語られ、ケテンラムの不在に加えて第一誓約も姿を見せていないことが話題になる。あなたがウィングド・ウォークへ戻ると、ウクラマトはあなたにトライヨラに留まってほしいと願い、サカ・トラルへの通行許可証を手渡す。そして天深きセノーテの奥底では、ゾラージャが封じられた門の前に立ち、サレージャが誓約者として門を開けと迫るなか、見えぬ声が世界を作り替える知識を語り、代償が示されようとしていた。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> クルル <small class="muted">（トライヨラ, X:11.6, Y:7.6）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="dawn-of-a-new-tomorrow.html">新たなる夜明け</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 95</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-long-road-to-xak-tural.html">サカ・トラルへ</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'愈發壯大，愈發耀眼',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Tuliyollal 的歡呼慢慢散去，留下來的是一種更安靜、也更真實的餘溫。你和同伴站在一起，還在消化這場儀式的結尾。Erenville 說，Wuk Lamat 也許沒有把她的打算說出口，但他很確定——她不會做出任何不顧族民利益的事。Alphinaud 則惋惜 Head of Reason（理性之首）無法親眼見證繼承儀式走到終點；可就算帶著這份遺憾，你仍能感覺到，Wuk Lamat 已經真正站穩了她的位置。</p><p>你回想她在高處發言的模樣，那些話確實打動了人心。然後，她又用你熟悉的方式把場面推向下一步——幾乎沒有遲疑地提名 Koana 成為共同的 Dawnservant。決定來得突然，卻不顯得草率；你也願意相信她早已在心裡衡量過。Alisaie 說 Koana 幾乎完成了所有試煉，最後之所以放手，是為了讓 Wuk Lamat 穩穩拿下勝利；Krile 則已經開始期待 Tuliyollal 在兩人照看下會走向什麼樣的未來。</p><p>當 Wuk Lamat 走到你們面前，她第一句就把頭銜全推開。她說，經歷了這麼多，你們早就是家人；所以她希望你像家人一樣，叫她「Lamaty’i」。你的回應不管是哪一種，她都收得很深、很踏實。她還得去向到訪的支持者致意，便請你們先等她，並約好稍後在 Winged Walk 外面會合。</p><p>你陪她去的第一站，是 Aunt Tii’s Tacos。她嘴上說不是為了點心才來，但話才說完又忍不住補一句：既然都到了，當然也要順便買點吃的。熟悉的面孔聚在那裡，對她的敬意又熱又緊；Wuk Evu 更是反覆卡在「要不要客套」的掙扎裡，直到 Wuk Lamat 乾脆用命令把他拉回來：別再拘泥形式。氣氛被逗得一鬆，Mablu 興奮宣布要推出紀念折扣，Tobli 則抱怨說，跟喝醉的羊駝聊天都比較省事。笑聲之間，Wuk Lamat 仍很認真地道謝——她坦承「蘆葦試煉」與「黃金試煉」是她第一次真正被考驗；若沒有你們的引導，她可能在還沒弄懂繼承儀式的分量之前就先倒下。</p><p>接著你們轉往 Bayside Bevy。更多來客聚在那裡，一邊為 Head of Reason（理性之首）的離去感到惋惜，一邊祝賀新的 Dawnservants。Wuk Lamat 在眾人面前把她學到的答案說得很清楚：和平不只是沒有戰爭，而是能在安全與幸福中一起生活——那是她的爸爸想要的國度，也是她想交到你們手上的 Tuliyollal。她承諾自己不會拋下任何人，會盡力把同樣的幸福帶給 Kozama’uka 的盜賊，也帶給 Chirwagur Saltern 的 Yok Huy，並提醒所有人：這座城市永遠也屬於他們。</p><p>之後你又跟著她去見 Hunmu Rruk 和 Mamook 的人，慶祝的熱鬧變得更貼近人心。Wuk Lamat 說，這樣的大日子會讓她想像：如果親生父母知道了，會怎麼看她；Hunmu Rruk 回答得很篤定——他相信他們只會為她成長為堅強又溫柔的人而滿心喜悅。話題也提到 Bakool Ja Ja 暫時還不敢面對她、家人會在身後支撐著他，以及 Ketenramm 的缺席；甚至連第一誓約也沒有現身。你們回到 Winged Walk 後，Wuk Lamat 終於把 Koana 暗示過的那件事說出口：她希望你能留在 Tuliyollal，若你願意，你在這裡永遠有一個位置。她把前往 Xak Tural 的通行許可證交到你手上——因為她知道，你這樣的冒險者不可能抗拒未知。</p><p>而在你完全不知情的同時，Skydeep Cenote 的深處，Zoraal Ja 站在一道封閉的大門前。Sareel Ja 逼他以「誓約者」之名打開大門，某個看不見的聲音透過 linkpearl 傳來，宣稱自己掌握足以重塑世界的知識——就在它準備說出「交換的代價」之前。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 可露兒 <small class="muted">(圖萊尤拉, X:11.6, Y:7.6)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="dawn-of-a-new-tomorrow.html">迎向嶄新的黎明</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.95</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-long-road-to-xak-tural.html">走向 Xak Tural 這漫長的旅程</a></div></div>`
+  }
+};
+
+const LANG_KEY = 'ffxiv-guide-lang';
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.async = true;
+  s.setAttribute('crossorigin', 'anonymous');
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
