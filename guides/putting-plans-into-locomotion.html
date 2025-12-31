@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Putting Plans into Locomotion | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Putting Plans into Locomotion (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/6oUWyro-dW0"
+              title="Putting Plans into Locomotion" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Putting Plans into Locomotion</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Putting Plans into Locomotion`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>You gather at Shaaloani Station with the train plan set, but G’raha Tia voices a lingering worry: if you charge into the dome, what stops Zoraal Ja from striking Tuliyollal in retaliation?</p><p>Wuk Lamat answers that she has weighed that risk. Zoraal Ja demanded that she come and “prove herself,” and he wants the satisfaction of defeating her face-to-face—showing that what he has claimed is superior to Tuliyollal. He won’t be content to attack while she’s away; he’ll wait inside the dome, ready to crush you and proclaim his strength.</p><p>With that in mind, you all commit to the course: you will hit him head-on and keep his attention fixed on you, buying Koana the time he needs to fortify Tuliyollal. G’raha Tia accepts the danger that awaits and promises that you will all do everything in your power to see Wuk Lamat through.</p><p>Work begins in earnest. Wawlika walks you through what the train still needs—protection first and foremost—because a single clean strike to the ceruleum tanks would end everything in an instant. Since eyewitnesses say the enemy uses lightning-based weapons, he wants grounding rods installed, and he asks whether you can call in a capable carpenter.</p><p>The needs keep piling up: heavy equipment must be moved quickly, and the train must be armed to answer threats from flying vessels. Your suggestions fly, but the real breakthrough comes when G’raha Tia offers a design he learned from the Crystarium’s defenses—an aetheric cannon that could be built here, if you can secure the right materials and skilled smiths.</p><p>The tasks split naturally. G’raha Tia begins drafting schematics while Wawlika lines up smiths, and Shenza takes stock of supplies. Shenza can source conductive metal for the cannon’s barrel, but for the purest fire-aspected crystals, he points you to the one person he trusts most—your miner friend Iyaate—so you set out for Sheshenewezi Springs to ask her help.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> G’raha Tia <small class="muted">(Shaaloani, X:18.1, Y:14.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-yyasulanis-shadow.html">In Yyasulani’s Shadow</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 96</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-hot-commodity.html">A Hot Commodity</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'路を拓くために',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>シャーローニ駅で列車改造の方針が固まるなか、グ・ラハ・ティアはひとつ懸念を口にする。あなたたちがドームへ突入した隙に、ゾラージャが報復としてトライヨラルを襲わないと言い切れるのか、と。</p><p>ウクラマトはその可能性も考えたうえで、なお彼は待つはずだと言う。ゾラージャは「来て証明しろ」と告げた以上、あなたが不在の間に攻撃しても満足しない。彼は自らの王国がトライヨラルより優れていることを誇示するため、ドームの内側であなたたちを迎え撃ち、力でねじ伏せる瞬間を望んでいるのだと。</p><p>だからこそ方針は明確になる。あなたたちは正面から突入して彼の視線を引きつけ、その間にコーナがトライヨラルの防備を固める。グ・ラハ・ティアは最善の策だと判断するなら信じようと応じ、抵抗が激しくとも全力で支えると誓う。</p><p>そして改造作業が始まる。ワウリカはまず列車を敵襲から守る必要があると言い、青磷タンクに一撃でも受ければ一瞬で終わると釘を刺す。目撃情報では敵兵は雷属性の武器を使うため、接地用の避雷針を取り付けたいのだという。あなたが頼めそうな大工がいるかを問われる。</p><p>次々に課題が増える。重量機材の運搬、人員の手配、そして飛行艦に対抗できる強力な装備。あなたが案を出す一方で、決定打となったのはグ・ラハ・ティアの提案だった。クリスタリウムの防衛に用いられた「エーテル砲」の設計を応用できる、材料と腕利きの鍛冶師さえ揃えばここでも造れるはずだと。</p><p>役割分担が決まる。グ・ラハ・ティアは図面を起こし、ワウリカは鍛冶師の確保へ動き、補給担当のシェンザが資材の見当をつける。砲身に使う導電性の高い金属は手配できるが、必要なのは最高純度の火属性クリスタルだという。シェンザは、その調達ならシェシェネウェジ温泉の採掘者イアーテに頼るのが一番だと告げ、あなたは彼女を訪ねることになる。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> グ・ラハ・ティア <small class="muted">（シャーローニ荒野, X:18.1, Y:14.2）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-yyasulanis-shadow.html">荒野に落ちる影</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 96</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-hot-commodity.html">トライヨラが好きだから</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'讓計畫動起來',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你們在 Shaaloani Station 把「用列車撞進去」的方案定下來後，G’raha Tia 還是提出一個顧慮：你們闖進 the dome（罩住 Yyasulani 的巨型屏障）時，怎麼確定 Zoraal Ja 不會反過來報復 Tuliyollal？</p><p>Wuk Lamat 說她也想過這種可能，但她相信 Zoraal Ja 會等你們。他要的是你親自去「證明自己」，要在你們面前宣稱他的王國凌駕於 Tuliyollal；在你不在的時候出手，對他而言毫無快感。相反地，他會在屏障之內等著你們挑戰，等著把你們壓垮，好讓一切看起來像是他力量的勝利。</p><p>於是你們把策略說得更清楚：你們要從正面衝鋒，把他的注意力牢牢釘在你身上；同一時間，Koana 會在後方想辦法加固 Tuliyollal。G’raha Tia 表示既然你們認定這是最佳路線，他就相信這個判斷；就算敵軍阻力不小，他也會和大家一起把你推到最後。</p><p>接著工作立刻動起來。Wawlika 先談最要緊的事——列車必須能扛住攻擊，因為只要敵人對準青磷油槽打中一次，整個計畫就會在瞬間結束。既然目擊者說那些士兵用的是雷電系武器，他想加裝接地用的避雷桿，並問你能不能找來一位能處理這種工程的木匠。</p><p>然後是更多現實問題：重型設備要搬、工序要趕、列車還得有足以對付空中艦船的遠距火力。你提出各種想法，卻在這時迎來真正可行的方向——G’raha Tia 說他在 the First（鏡像世界之一，與The Source (原初世界)同源分裂的分支；邊界可能被侵蝕、甚至引發回歸／合一等重大影響）見過 Crystarium 的防衛設計，那裡使用過「以太加農炮」，只要材料與鍛造技術到位，就能把同樣的構想搬到列車上。</p><p>分工很快確立。G’raha Tia 先著手繪製設計圖，Wawlika 去張羅鐵匠，而補給由 Shenza 統籌。Shenza 說導以太性高的金屬他有辦法取得，但最高純度的火屬性水晶就得另想辦法——他立刻提到你認識的礦工 Iyaate，並要你去 Sheshenewezi Springs 直接問她；於是你轉身出發，準備把列車所需的關鍵材料帶回來。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 古·拉哈·提亞 <small class="muted">(Shaaloani 荒野, X:18.1, Y:14.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-yyasulanis-shadow.html">Yyasulani 的陰影之下</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.96</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-hot-commodity.html">搶手貨</a></div></div>`
+  }
+};
+
+const langToggle = document.getElementById('langToggle');
+const pageTitle  = document.getElementById('pageTitle');
+const tabBtns    = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story: document.getElementById('panel-story'),
+  acq: document.getElementById('panel-acq'),
+  unlockq: document.getElementById('panel-unlockq'),
+  followq: document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem('ffxiv-guide-lang') || 'EN'; }
+
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => btn.textContent = t.tabs[btn.dataset.tab]);
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem('ffxiv-guide-lang', next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.async = true;
+  s.setAttribute('crossorigin', 'anonymous');
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
