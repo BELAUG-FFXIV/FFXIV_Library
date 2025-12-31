@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>On Track | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – On Track (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/j_3V1RakXxM"
+              title="On Track" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">On Track</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`On Track`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Back in Sheshenewezi Springs, Namikka clutches the recovered bracelet with trembling relief, telling you it is more than a gift—it is a part of her she could never replace. She calls Wuk Lamat blessed to have friends like you, while Erenville brushes it off with a half-hearted insistence that you are merely long-standing acquaintances, not something so grand.</p><p>Zekowa then rushes in, proudly declaring that the “real Daybreakers” have arrived—his closest friends, Kwikana and Liwine. They thank you for trusting Zekowa and for helping free them, savoring the thought of Wihuwte finally put behind bars, and swearing to rebuild the Daybreakers—the group they founded to protect those who couldn’t protect themselves—so no one can twist it into banditry again. Before leaving, Zekowa promises he will repay the debt one day, then parts ways with a vow to meet again.</p><p>With the danger passed, Namikka quietly excuses herself to rest and offers her help if you need it. Erenville asks about her train home, only for Iyaate to reveal that service has been suspended—tracks damaged by a quake, the tunnel closed, and tremors striking repeatedly. She urges you to ask the stationmaster directly if you want to know when trains will run again.</p><p>At the station, frustration boils over among stranded passengers, and the railroad engineer apologizes—there are too few hands for too much work. They explain that inspecting the tracks after every quake is slow enough, but the huge jolt after the succession ceremony was different: it felt less like an earthquake and more like the rumbling of an explosion, and it wrecked a great number of railroad ties. Hearing that, you and Erenville offer to help rather than complain.</p><p>Inside, Shenza gratefully welcomes you, introducing the team—Wawlika the stationmaster, Nitowikwe their top driver, and Zawpya an engineer who can’t stop praising their ceruleum-powered engine. They speak with pride about the depot behind the platform, then waste no time assigning your first task: procure timber strong enough to become new railroad ties.</p><p>The best wood comes from the trees in the Pyariyoanaan Plain, but it lies in Hhetsarro territory—so you’ll need the chief’s permission first. As you prepare to set out, Erenville admits that though many live in Shaaloani, he has never visited the Hhetsarro homeland, and he suspects their older traditions may make them wary of railroads.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Erenville <small class="muted">(Shaaloani, X:28.4, Y:30.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="law-of-the-land.html">Law of the Land</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 95</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="one-with-nature.html">One with Nature</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'サカ・トラル・レールロード',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>シェシェネ青燐泉へ戻ると、ナミッカは取り戻した腕輪を胸に抱き、何度も礼を述べる。それは贈り物というだけではなく、失えば二度と取り戻せない「自分の一部」だと言い、あなたたちのような存在がいることを、ウクラマトは幸運だと語る。エレンヴィルは照れ隠しのように、あくまで長い付き合いの知人だと言い張るが、結びつきの深さは隠しきれない。</p><p>そこへゼコワが駆けつけ、「本物のデイブレイカーズが来た！」と声を弾ませる。親友のクウィカナとリウィネを紹介し、ふたりはあなたがゼコワを信じて動いてくれたおかげで解放されたと感謝し、ウィフウテが牢に入ったことを痛快だと言う。かつて弱い者を守るために生まれたデイブレイカーズを、もう一度立て直し、二度と誰にも踏みにじられないよう鍛え直す――ゼコワはそう誓い、いつか必ず恩を返すと言い残して去っていく。</p><p>騒動が収まると、ナミッカは静かな場所で休みたいと席を外し、しばらくここに滞在するから何かあれば力になると申し出る。帰りの列車の話題になると、イヤーテが運休を告げる。最近は揺れが続き、あなたたちが到着する少し前にも大きな揺れがあって、線路やトンネルに影響が出たのだという。再開時期が知りたいなら、駅長に直接聞いてみるよう促される。</p><p>駅へ行くと、立ち往生した客の不満を受けながら、鉄道技師が頭を下げる。人手が足りず、復旧作業が追いつかないうえ、揺れのたびに線路点検が必要だと嘆く。さらに「継承の儀」の直後に起きた大きな揺れは、地震というより爆発の轟きのように感じられ、多くの枕木を傷めたのだと説明する。あなたとエレンヴィルは文句を言うためではなく、手を貸すために来たと伝える。</p><p>シェンザはあなたたちを中へ案内し、駅長のワウリカ、運転士のニトウィクウェ、技師のザウピャを紹介する。ワウリカは青燐機関車への誇りを口にし、ザウピャはその姿を称えて整備庫を見に行くよう勧める。だが感傷に浸る暇はなく、まずは新しい枕木を作るための強い木材を調達してほしいと依頼される。</p><p>木材はパリヨーナン沃野の樹木が最適だが、そこはフテサロ族の縄張りであり、首長の許可が必要になる。出発の準備をしながら、エレンヴィルはシャーローニに住む者は多いのに自分はフテサロ族の故郷を訪れたことがないと認め、古いしきたりを重んじる彼らが鉄道をよく思わないかもしれないと警戒する。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> エレンヴィル <small class="muted">（シャーローニ荒野, X:28.4, Y:30.4）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="law-of-the-land.html">荒野の掟</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 95</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="one-with-nature.html">自然に導かれし人々</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'前往 Xak Tural 鐵道',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>回到 Sheshenewezi Springs，Namikka 把找回來的手環緊緊握在手裡，一遍遍向你道謝。她說那不只是禮物——那像是她自己的一部分，失去了就再也補不回來；也因此，她覺得 Wuk Lamat 能擁有你們這樣的同伴，是一種受祝福的幸運。Erenville 卻把話說得很淡，只說你們不過是認識很久的「老相識」，但那份牽繫其實誰都看得出來。</p><p>沒多久，Zekowa 風風火火地趕來，興奮地說「真正的 Daybreakers 回來了！」他把兩位摯友 Kwikana 和 Liwine 帶到你面前。兩人真心感謝你願意相信 Zekowa、也願意出手相助，才讓他們重獲自由；他們也痛快地說，看到 Wihuwte 被關起來實在大快人心。Zekowa 則鄭重表示，Daybreakers 本來就不是為了劫掠而生——那是他們為了保護弱者、替被欺壓的人討回公道而建立的組織——所以他們會重新振作、日夜訓練，絕不再讓任何人把這個名字扭曲成恐懼。</p><p>事情暫時告一段落後，Namikka 想找個安靜的地方休息，並表示自己還會在這裡待一陣子，若你需要幫忙，她願意盡力。Erenville 問她不是要搭火車回去嗎，Iyaate 這才說列車停駛了——最近地震頻繁，鐵軌受損、隧道也被封閉。若你想知道什麼時候恢復營運，最好直接去問站長。</p><p>你走到車站時，鐵道技師一邊安撫怨聲載道的乘客，一邊無奈道歉：人手太少、工作太多，光是每次地震後都得巡檢軌道就已經耗時，而在 繼承儀式 之後發生的那次劇烈震動更是把大量枕木弄得一團糟。更奇怪的是，那感覺不像地震，反倒像爆炸的轟鳴。你和 Erenville 表明不是來抱怨，而是願意出手幫忙。</p><p>進到裡頭，Shenza 立刻感激地迎上來，介紹你認識眾人：站長 Wawlika、最可靠的列車駕駛 Nitowikwe，以及同樣是技師的 Zawpya。Wawlika 提起他們的青磷引擎滿是驕傲，Zawpya 更把那台機關車說得像詩一樣，還邀你有空去月台後方的機廠看看。不過眼下最要緊的是修復鐵道——他們要你們先去取得足夠堅韌的木材，好用來製作新的枕木。</p><p>在這一帶，最適合的木材出自 Pyariyoanaan Plain 的樹林，但那是 Hhetsarro 的領地，必須先取得族長的同意才能動手。準備出發時，Erenville 坦言自己雖然也在 Shaaloani 活動，但其實從未拜訪過 Hhetsarro 的居地；他推測對方多半遵循更古老的傳統，或許不會喜歡鐵道這種新事物——而你接下來要做的，就是在不惹怒他們的前提下，替這條停擺的路找回重新運轉的可能。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 艾倫維爾 <small class="muted">(Shaaloani 荒野, X:28.4, Y:30.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="law-of-the-land.html">荒野法則</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.95</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="one-with-nature.html">與自然同在 跟隨自然的人們</a></div></div>`
+  }
+};
+
+const langToggle = document.getElementById('langToggle');
+const pageTitle  = document.getElementById('pageTitle');
+const tabBtns    = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story: document.getElementById('panel-story'),
+  acq: document.getElementById('panel-acq'),
+  unlockq: document.getElementById('panel-unlockq'),
+  followq: document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem('ffxiv-guide-lang') || 'EN'; }
+
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => btn.textContent = t.tabs[btn.dataset.tab]);
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem('ffxiv-guide-lang', next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.async = true;
+  s.setAttribute('crossorigin', 'anonymous');
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
