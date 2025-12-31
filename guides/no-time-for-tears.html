@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>No Time for Tears | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – No Time for Tears (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/K9WO7dzjeMw"
+              title="No Time for Tears" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">No Time for Tears</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`No Time for Tears`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>You arrive too late to change what has already happened. In the stunned hush that follows the chaos, you watch Gulool Ja Ja fading before your eyes as Ketenramm, Koana, Wuk Lamat, and the others struggle to accept the truth—everyone reaching for reasons, for answers, for anything that might undo this moment.</p><p>Even as his strength slips away, Gulool Ja Ja holds on long enough to speak what matters. He calls to Ketenramm like an old companion and entrusts his children to him, and when Wuk Lamat answers him with “Papa,” his final words become a lesson as much as a farewell—bodies may perish, but remembrance keeps a life from truly vanishing, and the hopes he carried must now live on through them.</p><p>Grief has no time to settle. A Landsguard soldier brings word that the enemy has withdrawn and that aid is already underway, even as casualties slow their efforts. Koana forces himself into action, ordering relief to take priority, and you split up with the others to tend the wounded—moving through shaken streets where fear, anger, and disbelief spill from every voice you soothe.</p><p>As you help where you can, you hear the same questions again and again: why so many had to die, how such an attack was possible, and what those strange soldiers and looming ships mean for the city’s future. Amid the confusion, a darker rumor surfaces—people whisper that the enemy leader looked like Zoraal Ja, and they cannot reconcile that with the idea of the First Promise turning on his own.</p><p>When you finally find Wuk Lamat at the shore, she is still trying to stand upright under the weight of everything—pressing medicine into trembling hands, refusing to stop moving, refusing to rest. Alisaie pulls her back to the present, insisting that rest is not weakness but duty, and you stay close enough that she cannot disappear into the next emergency.</p><p>Later, in the quiet that follows, Wuk Lamat breaks—furious at herself, sick with loss, and crushed by the gap between the nation she vowed to build and the blood now on its streets. You remind her she is not alone, and she steadies herself just enough to admit the truth she’s been resisting: Zoraal Ja will not be reasoned with, and protecting the peace may demand a confrontation she never wanted.</p><p>When she rises again, it is with pain still in her chest—but also with control. She tells you she cannot charge ahead recklessly, that she must turn that anguish into resolve, and that she needs to speak strategy with Koana at the palace. Before you go, she asks you to reassure Alisaie—because even now, when everything is burning, she is still trying to carry her people without letting herself fall apart.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Wuk Lamat <small class="muted">(Sunperch, X:5.7, Y:4.7)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="and-the-land-would-tremble.html">And the Land Would Tremble</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 96</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="pick-up-the-pieces.html">Pick up the Pieces</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'血の涙を拭って',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>あなたは、もう取り返しのつかない光景を前に立ち尽くす。ケテンラムも、コアナも、ウクラマトも、アルフィノたちも、目の前の現実を受け止めきれずに言葉を失い、どうしてこんなことが起きたのかを必死に探そうとする。</p><p>だが、グルージャジャは自分が助からないことを悟り、残された時間で伝えるべきことを絞り出す。彼は旧友であるケテンラムに子どもたちを託し、いつかまた一緒に旅をしようと約束を交わす。ウクラマトが「パパ」と呼ぶと、彼は、肉体は滅びても記憶に刻まれる限り人は消えないのだと諭し、希望は子どもたちの歩みに受け継がれるのだと告げる。</p><p>悲しみに沈む暇もなく、ランドガードの兵が状況を報告する。敵は退き、救助が始まっているが、こちらの損害も大きく作業は難航しているという。コアナは気丈に命令を下し、あなたは仲間と手分けして負傷者の手当てに向かい、動揺する人々の声を受け止めながら街を駆け回る。</p><p>あなたが救いの手を伸ばす先々で、人々は嘆き、怒り、恐れをこぼす。なぜ守れなかったのか、あの奇妙な兵は何者なのか、空に残る船は何を意味するのか――答えのない問いが街を満たす。やがて、敵の首魁がゾラージャに似ていたという噂まで流れ、第一の誓約が自分たちを襲うはずがないと、人々は混乱する。</p><p>その後、あなたは海辺でウクラマトを見つける。彼女は薬を配りながら気丈に振る舞おうとするが、限界は明らかで、心も身体も擦り切れている。アリゼーは彼女の肩を掴み、休むことは逃げではなく責務だと言い聞かせ、あなたもまた、彼女が一人で背負い込まないよう寄り添う。</p><p>静けさが戻った場所で、ウクラマトはついに本音を吐き出す。皆の前で幸せな国を築くと誓ったのに、現実はこの有様だと自分を責め、決意の誓約者として人々を守れない自分に怒りさえ覚える。あなたが共に背負うと告げると、彼女は少しだけ息を整え、ゾラージャとは話し合いが通じず、平和を守るには立ち向かわねばならないのだと認める。</p><p>そして彼女は立ち上がり、痛みを抱えたまま、それを迷いではなく力に変えると言う。無謀に突っ込むのではなく、コアナと策を練り、皆にも方針を共有したいと告げて宮殿へ向かう。去り際に、アリゼーへ自分は大丈夫だと伝えてほしいと頼むその姿に、あなたは彼女が崩れそうになりながらも、なお民のために前を向こうとしていることを痛感する。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ウクラマト <small class="muted">（金凰の間, X:5.7, Y:4.7）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="and-the-land-would-tremble.html">大地が鳴いた日</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 96</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="pick-up-the-pieces.html">頼れる仲間と共に</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'拭去血淚',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你趕到時，一切都已經來不及挽回。你看著眼前的景象，Ketenramm、Koana、Krile、Alphinaud、Alisaie 都說不出話來，Wuk Lamat 更像是被整個世界抽空了力氣——你們都明白，這不是一句「怎麼會這樣」就能改變的事。</p><p>Gulool Ja Ja 的氣息正在散去，卻仍撐著把最重要的話說完。他喚著 Ketenramm，像把最後的責任交給一位走過無數旅程的老友，請他照看自己的孩子們；Wuk Lamat 哽咽著喊「爸爸」時，他用幾乎要斷掉的聲音告訴你們：肉身會枯萎，但只要被記得，就不會真正消失——他的希望會透過孩子們活下去，也要你們不要為他停下腳步。</p><p>悲傷甚至來不及沉澱，Landsguard（陸衛軍）的士兵便帶來報告：敵人已撤退，救援也已開始，但己方傷亡讓進度受阻。Koana 逼著自己把情緒收好，命令救助優先進行；你們立刻分頭行動，去安撫、去止血、去把每一個還能救回來的人拉回來——在滿是驚懼與嘶喊的街區裡，沒有誰能真正喘息。</p><p>你一路幫人時，聽見的都是同樣的問題：為什麼死了這麼多人、那些怪異的士兵到底是什麼、天空上那些船為什麼還停著。有人咬牙說自己再也不相信安全，有人哭到說不出完整的句子；更有人低聲傳著一個更可怕的傳聞——敵方首領看起來像 Zoraal Ja，這讓所有人都無法理解：第一誓約怎麼可能攻擊自己的人民？</p><p>你最後在海邊找到 Wuk Lamat。她還在硬撐，親手把藥遞出去、親口一遍遍安撫，像只要不停下來就能把崩塌推遠一些；可她的顫抖和失神藏不住。Alisaie 抓住她，逼她看著自己，告訴她現在需要休息——不是軟弱，而是責任；你也留在旁邊，讓她沒辦法獨自把自己丟進下一場混亂裡。</p><p>等你們暫時退到能喘一口氣的地方，Wuk Lamat 終於把壓著的情緒全部倒出來。她說自己曾在眾人面前承諾要建立一個人人都能幸福的國度，可如今這一切像笑話；她痛恨自己身為 Head of Resolve（決意之首）卻沒能守住人民，甚至沒能守住自己的爸爸。你告訴她，你會和她一起扛下去，她才勉強把呼吸拉回來，承認自己不能再靠意氣行事——Zoraal Ja 不會聽你們講理，而和平若要守住，就可能必須正面迎戰。</p><p>她起身時，眼裡仍有撕裂般的痛，但也有重新握住方向的清醒。她說自己不能再一頭熱地衝進戰場，不能讓心口的痛把自己帶偏——她要把那份痛變成力量，回到宮殿和 Koana 談策略，也要讓你們都知道接下來的方針。臨走前，她還拜託你去告訴 Alisaie 她會沒事——你看得出來，她其實離崩潰很近，卻仍逼著自己站穩，為了 Tural 的人一步一步走下去。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 烏克·拉瑪特 <small class="muted">(金凰廳, X:5.7, Y:4.7)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="and-the-land-would-tremble.html">大地震顫的那一天</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.96</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="pick-up-the-pieces.html">與可靠的夥伴一同收拾殘局</a></div></div>`
+  }
+};
+
+const langToggle = document.getElementById('langToggle');
+const pageTitle  = document.getElementById('pageTitle');
+const tabBtns    = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story: document.getElementById('panel-story'),
+  acq: document.getElementById('panel-acq'),
+  unlockq: document.getElementById('panel-unlockq'),
+  followq: document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem('ffxiv-guide-lang') || 'EN'; }
+
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => btn.textContent = t.tabs[btn.dataset.tab]);
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem('ffxiv-guide-lang', next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.async = true;
+  s.setAttribute('crossorigin', 'anonymous');
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
