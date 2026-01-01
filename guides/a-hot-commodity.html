@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A Hot Commodity | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – A Hot Commodity (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/TNqVlvBivJk"
+              title="A Hot Commodity" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">A Hot Commodity</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`A Hot Commodity`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Iyaate suddenly recalls the cerule analas and tells you they can be found south of town—strange, fire-bellied beasts that swallow fire crystals and keep them in their gut. If you want the purest crystals, she says, you’ll need to bring down the oldest and toughest among them—something she’s certain you can handle. She offers to show you where to hunt, eager to see for herself why Erenville speaks so highly of you.</p><p>Out in the wilds, Iyaate explains that these lands are full of fiery creatures. People suspect ceruleum is the cause, though no one can say for sure. What you need, she insists, isn’t the usual run of wildlife, but the larger, dominant sort—and the surest way to draw one out is to establish yourself as a threat.</p><p>You do as instructed, cutting down common analas and waiting for the leader to show itself. At first there’s nothing—no sign of your prey—until you push farther south and feel it: a hostile presence closing in. Then a hefty, cantankerous anala lumbers toward you, murderous intent written in every step.</p><p>The fight is brutal but brief. When the dust settles, Iyaate can barely hide her amazement at how quickly you dealt with the beasts. You explain the crystals are needed for the train, and she promises to see them delivered to the crew. With the Clear Fire Crystal secured, the path toward breaching the dome moves one step closer.</p><p>Iyaate thanks you—openly, sincerely—for going to such lengths to stop the invaders, and then, almost as an aside, asks you to look after Elene’shpya, knowing she’d grumble if she learned Iyaate had asked. Before parting, she mentions she saw Wuk Lamat heading for the station.</p><p>Not long after, she praises your work again—this time with the train nearly ready—and when you return to Shaaloani Station, Erenville confirms the preparations are proceeding apace. Even with everything moving forward, you can feel the tension humming under every word: the real work begins the moment the extra hands arrive.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Iyaate <small class="muted">(Shaaloani, X:15.1, Y:17.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="putting-plans-into-locomotion.html">Putting Plans into Locomotion</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 96</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="all-aboard.html">All Aboard</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'トライヨラが好きだから',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>イヤーテはふと「セルリックアナラ」のことを思い出し、町の南にいると教えてくれる。あの獣は火属性クリスタルを飲み込み、腹の中に溜め込むのだという。より純度の高い結晶が欲しいなら、年老いて手強い個体を狙うしかない――だが、それはあなたなら問題ないはずだ。彼女は狩場を案内すると言い、エレンヴィルがあなたを高く評価する理由を自分の目で確かめたがっている。</p><p>シャーローニ荒野のエシュケヤーニ荒原では、青燐の影響か火気を帯びた野生が多いとイヤーテは語る。確かな理由は分からないが、必要なのは小型ではなく、この地を支配するような大物だ。そのためにはまず脅威として存在を示し、同族を倒して頭目を誘い出せばいい――そう言って、彼女は近くで見張りを続けると約束する。</p><p>あなたが指示どおりに狩りを進めても、すぐには気配がない。だが南へ足を延ばした瞬間、敵意が肌を刺す。次いで、巨体で気難しいアナラが、殺意をむき出しにしてこちらへ突進してくる。</p><p>戦いは激しいが長引かない。あなたが獣を退けると、イヤーテは目を見張り、あっという間だったと感嘆する。目的は列車のための結晶だと告げれば、彼女はシェンザへ確実に届けると言い、あなたから「クリアファイアクリスタル」を受け取る。あのドームを突破する計画へ、確かな一歩が刻まれる。</p><p>イヤーテは侵入者を止めるために力を尽くしたあなたへ礼を述べ、そして小さな声で、エレネッシパのことを頼むと言う。本人に知られたら不平を言うだろうが、それでも――と。別れ際には、ウクラマトが駅へ向かうのを見かけたとも伝える。</p><p>やがてシェシェネ青燐泉でイヤーテは結晶の成果を褒め、列車の準備が整うのも間近だと告げる。シャーローニ駅へ戻れば、エレンヴィルも結晶の手配が済んだことを認め、こちらも滞りなく進んでいると言う――ただ、増援が到着してからが本番だ。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> イヤーテ <small class="muted">（シャーローニ荒野, X:15.1, Y:17.9）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="putting-plans-into-locomotion.html">路を拓くために</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 96</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="all-aboard.html">ドーンブレイザー</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'搶手貨',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Iyaate 忽然想起一件要緊事：cerule anala。她說牠們在城鎮南方出沒——竟然會把火之水晶吞進肚子裡存著，聽起來荒唐卻是真的。若想要最純淨的結晶，就得去找最老、最難纏的那種個體；她語氣篤定，彷彿早就知道你一定辦得到。她也願意帶你去標出狩獵地點，等著親眼看看為什麼 Erenville 會如此看重你。</p><p>在 Shaaloani 的荒野裡，Iyaate 指著四周那些帶著火氣的生物，說這一帶「火性」的野生動物特別多。大家都懷疑和青燐有關，但沒人能說準。她要的不是常見的小型獵物，而是更巨大、足以支配族群的那種——你必須先讓牠們把你當成威脅，才會把首領引出來。</p><p>你照她的說法，先解決幾隻普通的 anala，耐心等著牠們的頭目現身。起初你什麼也沒等到，只能往更南邊找尋。就在那一刻，你清楚感到一股敵意逼近；下一秒，一隻又大又暴躁的 anala 直直衝來，殺氣毫不掩飾。</p><p>戰鬥短促卻兇狠。當你將牠擊退，Iyaate 幾乎是驚訝地看著你，說你收拾得太快了。你把目的講明：這些結晶得送去給 Shenza，列車需要它們，因為你們正準備闖入 the dome（罩住 Yyasulani 的巨型屏障）。她點頭答應會替你把東西送到。你把 Clear Fire Crystal（純淨火之水晶）交給她，感覺整個計畫終於踏實地往前推了一步。</p><p>Iyaate 真誠地向你道謝，說你為了阻止入侵者竟願意做到這種地步。接著她又像是怕被聽見似的補了一句：如果可以，請你照看一下 Elene’shpya——她要是知道自己被拜託，肯定會碎念，但 Iyaate 還是希望你能放在心上。臨走前，她也提到自己看見 Wuk Lamat 正往車站方向去了。</p><p>之後在 Sheshenewezi Springs，Iyaate 又一次肯定你的成果，說列車很快就能準備就緒。你回到 Shaaloani Station，Erenville 也確認結晶的事已經處理妥當，這邊的準備同樣按部就班。可你也聽得出來——真正的忙碌，會在更多人手趕到之後才正式開始。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 伊雅特 <small class="muted">(Shaaloani 荒野, X:15.1, Y:17.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="putting-plans-into-locomotion.html">讓計畫動起來</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.96</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="all-aboard.html">全員上車</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
