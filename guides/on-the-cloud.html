@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>On the Cloud | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – On the Cloud (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/GBJyCLrMUDM"
+              title="On the Cloud" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">On the Cloud</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`On the Cloud`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>You take your leave of Mahuwsa, who—still a little sheepish about laughing—admits that your friend’s description of Sphene sounded nothing like the queen they know. At Sphene’s suggestion, you head back to the outskirts, where she’s eager to show you more of Alexandria, and Mahuwsa invites you to visit again any time.</p><p>Sphene’s bright promise is cut short when Wuk Lamat hears something wrong in the distance. As you approach, people greet Sphene as she comes to see someone named Namikka—and the moment Sphene speaks gently to her, Wuk Lamat freezes. The bangle on the woman’s wrist is the one Wuk Lamat once gave her. Namikka is “like a mother” to her, and Wuk Lamat struggles to believe she’s truly here.</p><p>Others murmur that Namikka has almost no time left—she has no more “soul cells,” and at her age, it wouldn’t change anything. Pepoane says the ushers have arrived, and Sphene thanks Namikka for decades of friendship, urging her not to fear and to take comfort that this is not the end. When Wuk Lamat begs to stay with her a little longer, Sphene allows them time alone, and afterward Wuk Lamat can only say she’s grateful to have been there at the end—until Sphene quietly repeats, “It’s not the end,” and turns the conversation forward.</p><p>You begin with what you can be reasonably sure of: Alexandria’s people and your own testimony confirm that two lands have become one, and meeting Namikka proves time has diverged as well. G’raha Tia argues these signs point to cross-rift displacement—Alexandria moved from another reflection to the Source—on a scale far beyond a voidgate or even the Crystal Tower, like a localized dimensional compression akin to a Rejoining. Sphene can’t follow the theory, but she explains that Alexandria lived under the barrier’s protection for centuries after a devastating cataclysm, the barrier raised to isolate them from the surrounding land’s noxious influence, and only later was the whole region whisked away by unknown means.</p><p>Sphene offers the next step: register you as her guests at Everkeep so you can enter Solution Nine and learn how Alexandria truly functions—but she cannot take you directly to Zoraal Ja. Wuk Lamat presses her with the truth: she has come to avenge her father, and she intends to take Zoraal Ja’s life—will Sphene allow Alexandria’s king to be slain? Sphene answers that her people come first, and she will do everything in her power to keep them from harm, then adds a lead for Erenville: try the Thunderyards to the east for Cahciua.</p><p>And then the ground shifts beneath your certainty. When Wuk Lamat thanks Pepoane for being Namikka’s friend these past thirty years, Pepoane blinks—he doesn’t know who she means. Alisaie demands an explanation, and Pepoane insists that if he ever knew her, those memories must have been stored “in the cloud”—anyone forgotten without reason is probably there. When you ask around the outskirts, you hear the same: no one remembers Namikka, and some speak as though being “taken up to the cloud” is simply something that happens.</p><p>Back together, you weigh what you saw: magic could alter memories, but changing so many at once would be an enormous act—and neither Krile nor Alisaie sensed any surge of aether. Alisaie did notice something else: just before Pepoane forgot, a light in the device on his head began to blink. With no clear way to solve the mystery without causing more confusion, you choose the one lead you still have—Cahciua—and set out toward the Thunderyards, only to spot a strange floating object that reacts in shock and flees.</p><p>You track it across the area, then into an abandoned coal mine where crates of stone suggest turquoise, and faint voices echo from deeper within. Suspecting a trap but unwilling to turn back, you press on through the tunnels until the ambush snaps shut—only for the floating object to cry out in delight at the sight of you, calling Erenville “Elene’shpya,” and laughing with a familiarity Erenville can’t deny. He says the name like a question he already knows the answer to: Mother. The object introduces herself as Cahciua, welcomes you as friends of her dear “Elene’shpya,” and while everyone reels at the idea that Erenville’s mother is a floating machine, the one thing that matters is clear: she’s here, she’s safe, and if anyone can explain what’s happening, it’s her.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Sphene <small class="muted">(Heritage Found, X:19.1, Y:14.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-day-in-the-life.html">A Day in the Life</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 97</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="gone-and-forgotten.html">Gone and Forgotten</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'雲の上へ',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>あなたはマフウサに別れを告げる。先ほど笑ってしまったことを詫びつつ、彼女は「あなたの友人が語ったスフェーン像」が、彼らの知る女王とかけ離れていて思わず吹き出したのだと言う。スフェーンの提案であなたたちはアウトスカーツへ戻り、彼女は「アレクサンドリアをもっと見せたい」と目を輝かせる。マフウサは魔物退治への礼を重ね、いつでも訪ねてほしいと送り出した。</p><p>アウトスカーツに着くと、ウクラマトが不穏な気配に気づき、あなたは騒ぎの方へ向かう。そこにはスフェーンを迎える人々と、「ナミッカ」と呼ばれる女性がいた。スフェーンが優しく呼びかけた瞬間、ウクラマトの顔色が変わる。彼女の腕輪は、かつてウクラマトがナミッカに贈ったものだった。ナミッカは血のつながりはなくとも、母のような存在だったのだと、ウクラマトは言葉にならないまま確かめようとする。</p><p>周囲は「ソウルセルがもう残っていない」「年齢を考えれば節約していても意味がない」と囁き、時が残り少ないことを告げる。ペポアネは「案内役が来た」と告げ、スフェーンは長年の友情に礼を述べて「恐れないで」「これは終わりではない」と穏やかに送り出そうとする。ウクラマトが「もう少しだけ一緒にいたい」と懇願すると、スフェーンは二人きりの時間を許した。やがてウクラマトは、言葉のない別れの中で最期に寄り添えたことへの感謝を口にするが、スフェーンは小さく「終わりではない」と繰り返し、話を先へ進めようとする。</p><p>あなたたちは「確かなこと」から整理する。目撃した事実と住民の証言から、二つの土地が一つになったのは間違いない。さらにナミッカの存在は、時間の流れに隔たりがあることを突きつける。グ・ラハ・ティアは、これは裂け目を越えた移動――別の鏡像世界から原初世界へ、アレクサンドリアが移された現象だと推測し、その規模はヴォイドゲートどころかクリスタルタワーでも到底及ばず、局地的な次元圧縮で「再統合」に似ていると言う。スフェーンは難しい理屈は理解できないと認めつつ、はるか昔の大災厄の後、周囲の有害な影響から守るためにバリアが築かれ、何百年もその庇護の下で平穏に暮らしてきたこと、そして後になって理由もわからぬまま土地ごと移されたことだけは語った。</p><p>スフェーンは次の手順として、あなたたちをエバーキープで客人登録し、ソリューション・ナインと居住区へ入れるよう手配すると言う。ただしゾラージャのもとへ直接案内はできない。ウクラマトは父の仇としてゾラージャの命を奪う決意を隠さず、アレクサンドリアの王が討たれることを、スフェーンは黙って見過ごすのかと問う。スフェーンは「民が最優先」「害から守るために力を尽くすのが統治者の務め」と答え、さらにエレンヴィルには「東のサンダーヤーズへ行けば、母カチュアのことがわかる」と手がかりを渡した。</p><p>だが、あなたたちの足元で別の異常が露わになる。ウクラマトが「ナミッカの友でいてくれてありがとう」とペポアネに礼を述べると、彼は「誰のことかわからない」と戸惑う。アリゼーが詰め寄っても、ペポアネは本気で覚えがないと言い、「理由もなく忘れられた人はクラウドに記録されているのだろう」と淡々と語って立ち去った。周囲に聞き込みをしても、誰一人ナミッカを知らず、「きっとクラウドに上げられただけだ」という言葉だけが返ってくる。</p><p>あなたたちは合流して状況を検討する。大勢の記憶を一度に改変するなら、相応の大きな変化が起きるはずだが、クリルもアリゼーもその瞬間に異変を感じていない。ただアリゼーは、ペポアネが忘れる直前、頭部の装置の光が点滅したのを見たという。「ソウルセル」という言葉とも関係があるのかもしれないが、これ以上の聞き込みは混乱を招くだけだ。あなたたちは手がかりのあるカチュアを探すため、サンダーヤーズの方角へ向かう途中、奇妙な浮遊物体が驚愕して逃げ去るのを目撃する。</p><p>あなたはそれを追って地帯を駆け、やがて放棄された炭鉱へ辿り着く。箱詰めの石はターコイズにも見え、奥からはかすかな声が反響して聞こえる。罠を警戒しながら坑道を進むと、案の定、待ち伏せが仕掛けられていた――しかし浮遊物体はあなたたちを見て歓喜し、エレンヴィルを「エレネシュピャ」と呼んで笑う。その笑い声に、エレンヴィルは否定できないまま呟く。「母さん……？」　浮遊物体は自分をカチュアだと名乗り、「エレネシュピャの友人なら歓迎だ」とあなたたちを招き入れる。状況の異様さに皆が言葉を失いながらも、ひとつだけ確かなことがある――あなたはついにカチュアに辿り着いた。そして、この地の不可解を解く鍵は、彼女の口から聞くしかない。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> スフェーン <small class="muted">（ヘリテージファウンド, X:19.1, Y:14.4）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-day-in-the-life.html">人を知り、国を知る</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 97</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="gone-and-forgotten.html">魂を扱う者たち</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'踏上雲端',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你向 Mahuwsa 道別。她先為先前的失笑道歉，坦白說是因為你的朋友把 Sphene 描述得和他們所認識的樣子差太多，她才一時沒忍住。依照 Sphene 的提議，你們回到 the outskirts；Sphene 仍帶著興奮的語氣，說有太多 Alexandria 想帶你看，而 Mahuwsa 也再次致謝，邀你隨時再來拜訪。</p><p>才踏回 the outskirts，Wuk Lamat 就聽見遠處不對勁的動靜。你跟著她走近，人們迎著 Sphene，口中喚著一個名字——Namikka。Sphene 溫柔地安撫她時，Wuk Lamat 卻整個人僵住：那女人手上的手環，是 Wuk Lamat 送給 Namikka 的。Wuk Lamat 幾乎不敢相信，低聲說 Namikka 對她而言就像母親一樣，還顫著聲音想確認「是不是你」。</p><p>旁人低聲議論，說 Namikka 的時間快到了——她已經沒有「魂細胞」，就算曾經省著用，以她的年紀也改變不了什麼。Pepoane 提醒引導的人已經到了，Sphene 便向 Namikka 道謝，說這不是終點，要她不要害怕，因為她的記憶會留在大家心中。Wuk Lamat 急切地想多陪她一會兒，甚至哽著聲說就算沒有血緣，她也把 Namikka 當成母親；Sphene 於是讓你們給她們一段獨處的時間。等 Wuk Lamat 回來，她說 Namikka 沒有開口，但她仍感激自己能陪在最後，而 Sphene 只是又輕輕說了一次——這不是終點——然後把話題拉回你們必須面對的真相。</p><p>你們從能確定的事開始整理：你親眼所見與 Alexandria 居民的證詞，都指向兩片土地確實融合成了一個，而 Namikka 的出現更證明時間流逝存在落差。G’raha Tia 推論這是跨裂縫的位移——Alexandria 從另一個 reflection（鏡像世界）被移到 the Source（原初世界）——而且規模大到不可能是 voidgate（虛空門），甚至連 Crystal Tower 都難以達成，像是一種局部的次元壓縮，讓人想到 Rejoining (再統合。指某個 reflection（鏡像世界） 被「併回」到 the Source（原初世界）、讓分裂的世界重新合而為一的現象，通常會伴隨大規模災厄)。Sphene 雖聽不懂 reflections（鏡像世界）與次元的理論，但她能說的只有：Alexandria 在 barrier （防護屏障）的保護下平靜生活了漫長歲月；那道 barrier 早在數百年前的大災變後就被建立，用來隔絕外界土地的有害影響，而後來整片區域又在不明原因下被連同一切一起帶走。</p><p>Sphene 說下一步應該前往 Everkeep，先把你們登記為她的賓客，如此你們便能進入 Solution Nine 及其住宅區，親眼理解 Alexandria 的現況；只是她無法直接帶你們去見 Zoraal Ja。Wuk Lamat 於是直白攤開自己的目的：她為了替父親報仇而來，並且打算親手奪走 Zoraal Ja 的性命——Sphene 會不會站在一旁，任由 Alexandria 的王被殺？Sphene 的回答只有一個重點：她的人民永遠第一，她會竭盡所能讓他們不受傷害，這是統治者的責任。接著她又補上一條線索，指向東邊的 Thunderyards，說 Erenville 的母親 Cahciua 或許就在那裡。</p><p>然而下一秒，你們對「確定」的依靠就被硬生生抽走。Wuk Lamat 才剛向 Pepoane 感謝他這三十年來陪伴 Namikka，Pepoane 卻一臉茫然，說自己根本不知道 Namikka 是誰。Alisaie 質疑他怎可能忘記，畢竟 Namikka 就在他的照護之下；Pepoane 卻認真地說，若他原本記得，恐怕那些記憶已被存進雲端——任何無緣無故被遺忘的人，大概都在雲端。你們在附近詢問其他人，得到的也是同樣的結果：沒有人記得 Namikka，有人甚至用一種理所當然的口吻說，她多半只是「被帶上雲端」而已。</p><p>你們再次合流，試著判斷這究竟是什麼手段。Krile 說若要用魔法同時改動這麼多人的記憶，理應伴隨巨大的以太波動，你們不可能毫無察覺；Alisaie 也說她沒有感應到，但她注意到另一件事——就在 Pepoane 忘記之前，他頭上的裝置有一盞燈開始閃爍。G’raha Tia 聯想到方才聽到的「魂細胞」一詞，卻也明白再繼續問下去只會造成更多混亂。於是你們決定先追著唯一還握在手裡的線索走：去找 Cahciua；而在動身途中，那個神祕的漂浮物體驚呼「不可能」後立刻逃走，你們便順勢追了上去。</p><p>你追著它一路來到一座廢棄已久的煤礦。你們在外頭只看見空置的坑道與箱籠中的礦石，G’raha Tia 還懷疑那些石頭是否是綠松石；Erenville 則說他聽見裡頭傳來微弱的人聲。Wuk Lamat 提醒這可能是陷阱，但你們仍保持警戒往深處前進，穿過漫長的隧道，直到埋伏驟然收緊——然而那漂浮物體看見你們的瞬間，竟興奮地叫出「Elene’shpya」，還在光線下反覆確認自己的眼睛。那笑聲讓 Erenville 再也否認不了，他幾乎是用試探的語氣喊出答案：媽媽？漂浮物體便自稱 Cahciua，把你們當成「Elene’shpya 的朋友」熱情迎進來。所有人都被這荒謬的現實震住，但至少有一件事終於確定：你們找到了 Cahciua，而接下來要搞清楚的一切，只能從她口中問出來。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 斯芬 <small class="muted">(Heritage Found, X:19.1, Y:14.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-day-in-the-life.html">走進日常，識人知國</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.97</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="gone-and-forgotten.html">操弄靈魂的人</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
