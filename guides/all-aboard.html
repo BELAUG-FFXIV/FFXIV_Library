@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>All Aboard | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – All Aboard (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/RMLyE3FaSiM"
+              title="All Aboard" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">All Aboard</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`All Aboard`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Wawlika tells you the crew won’t stop working until the train is ready, and urges you to take care of any last preparations now—because the boarding call will come sooner than you think. When the engineers report in, Nitowikwe warns that the modifications are nearly complete, but there’s no time for a test run. Wuk Lamat accepts the risk without hesitation, placing her faith in their craft.</p><p>Shenza’s shout rings out the moment the work is finished, and the rebuilt locomotive is unveiled as the Dawnblazer. Zawpya explains how it’s been reinforced with wooden armor and fitted with a crystal grounding rod against lightning, with the engine overhauled to bear the added weight. G’raha Tia adds that he had aetheric cannons installed as well—modeled after those used at the Crystarium—and Wawlika asks what you think, proud of what they achieved under pressure.</p><p>Alisaie cuts through the admiration with urgency: it’s time to move. Wawlika warns that you won’t get far if the enemy can pummel you from the air, but once you reach the tunnel you’ll be safe enough. G’raha Tia promises to conceal the train with magic once everyone is aboard, long enough to reach the tunnel unnoticed—and with that, the boarding call comes.</p><p>The Dawnblazer surges forward, racing toward the dome. G’raha Tia says you’ll arrive in no time, but Alisaie is already certain you’ll be spotted first. The ambush hits exactly as she fears—shots raining in as the enemy switches to firearms—and the ride turns into a scramble of shouted warnings and split-second decisions. When Alisaie yells for G’raha Tia to jump, Wuk Lamat calls on Erenville to take over, and Nitowikwe barks that it’s the end of the line.</p><p>You make it through by a hair’s breadth. In the aftermath, Wuk Lamat exhales that it was too close, checking that Erenville is still alive, and Krile urges you to hurry before the enemy can regroup. With the stronghold ahead, Wuk Lamat pushes you onward—she wants to see what lies inside. Nitowikwe tells you the rest is up to you now and that she’ll make her own way back, while Erenville stays out of sight until the fighting is over, warning you again not to do anything reckless.</p><p>At the approach, a watchguard—already alerted by Wawlika—tells you to be careful as you proceed to the Vanguard entrance. When you cross into Yyasulani, Erenville’s words hang heavy: what greets you is not the home he left behind. You recognize the land, and yet everything is wrong—changed beyond imagining—and you press on beneath darkened skies that mirror fear and uncertainty. Wuk Lamat can only stare and whisper that it’s bizarre, that this cannot be Yyasulani, can it?</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Wawlika <small class="muted">(Shaaloani, X:18.6, Y:13.8)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-hot-commodity.html">A Hot Commodity</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 97</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-land-of-levin.html">The Land of Levin</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'ドーンブレイザー',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ワウリカは、列車の準備が整うまで手を止めずに作業を続けると言い、あなたに今のうちに身支度を整えておくよう促す。ほどなく技師たちが改造はほぼ完了だと報告するが、ニトウィクウェは試運転はできないと強く念を押す。ウクラマトは危険を理解したうえで受け入れ、彼らの腕を信じると告げる。</p><p>ついに仕上げが終わると、シェンザが歓声を上げる。披露されたのは、改造を極めた機関車――ドーンブレイザーだ。ザウピャは、落雷の影響を抑えるため木製の装甲とクリスタルの接地棒を備え、重量増に耐えられるよう機関も作り替えたと説明する。さらにグ・ラハ・ティアは、クリスタリウムの装備を手本にしたエーテル砲を搭載したと語り、その威力は折り紙つきだと太鼓判を押す。ワウリカは短い工期でも上出来だろうと胸を張り、あなたの感想を求める。</p><p>だがアリゼーは空気を切り替え、出発を急ぐべきだと告げる。ワウリカは、空から叩かれ続ければ進めないが、トンネルに入ってしまえば十分安全だと言う。全員が乗り込んだら、グ・ラハ・ティアが魔法で列車を隠し、気づかれぬままトンネルまで辿り着けるはずだ――そうして「乗り込め！」の声が飛ぶ。</p><p>ドーンブレイザーは加速し、ドームへ向けて突き進む。すぐ到着できる速度だとグ・ラハ・ティアが言う一方で、アリゼーは見つかるのが先だと警戒を促す。予感は的中し、敵の攻撃が降り注ぐなか、相手は銃器へ切り替えてくる。怒号が交錯し、咄嗟の判断が続く。アリゼーがグ・ラハ・ティアに跳べと叫び、ウクラマトはエレンヴィルに交代を頼み、ニトウィクウェが「ここまでだ！」と叫ぶ。</p><p>間一髪で切り抜けたあと、ウクラマトは危なかったと息をつき、エレンヴィルの無事を確かめる。クルルは敵が立て直す前に急ごうと促し、ウクラマトは目の前の拠点へ踏み込もうと言う。ニトウィクウェは自分は戻れるから心配するなと告げて別れ、エレンヴィルは戦いが終わるまで身を潜めるとしつつ、あなたに無茶はするなと繰り返す。</p><p>入口へ向かう途中、ワウリカから話を聞いていた見張りが注意を促す。やがてあなたがヤサラニへ足を踏み入れると、エレンヴィルは、待っていたものは故郷ではなかったと吐き出す。辿り着いたはずの地は記憶とかけ離れ、想像もつかないほど変わり果てていた。あなたは恐れと不確かさに曇る空の下を進み、ウクラマトは呆然と呟く――どうしてこんなことに、ここは本当にヤサラニなのか、と。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ワーリカ <small class="muted">（シャーローニ荒野, X:18.6, Y:13.8）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-hot-commodity.html">トライヨラが好きだから</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 97</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-land-of-levin.html">雷雲に覆われた地</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'全員上車',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Wawlika 說從現在開始，大家會一直做下去，直到列車準備就緒；如果你還有任何行前準備，現在就是最後的空檔，因為登車通知很快就會響起。工程師們回報改造幾乎完成，但 Nitowikwe 也嚴肅提醒：你們負擔不起試車。Wuk Lamat 沒有退縮，她說你們理解風險、也願意承擔，因為你們相信他們的手藝。</p><p>當 Shenza 大喊「終於完成了！」時，改造後的列車正式亮相——Dawnblazer。Zawpya 解釋它加裝了木製裝甲，還裝上水晶接地桿來減緩雷擊影響，為了扛住新增重量，連引擎也重新調整過。G’raha Tia 則補上關鍵：他也替列車配置了以太砲，參考的是 Crystarium 的同型裝備，威力絕對可靠。Wawlika 在緊迫工期下仍能做到這種程度，忍不住要你說說看，你眼前這台機械到底有多硬派。</p><p>但 Alisaie 立刻把氣氛拉回現實：現在該出發了。Wawlika 提醒你們，若一直被敵人從空中猛轟，列車撐不了多久；不過只要抵達隧道，就能暫時安全。G’raha Tia 說等所有人上車，他會用法術把列車隱蔽起來，至少能撐到你們不被發現地進入隧道——於是「全員上車」的呼喊緊接而來。</p><p>Dawnblazer 以驚人的速度衝向 the dome（罩住 Yyasulani 的巨型屏障）。G’raha Tia 說照這速度很快就能抵達，但 Alisaie 也直覺你們會先被發現，要你保持警戒。果然攻擊很快就落下，敵人甚至改用槍械，槍聲與警告交錯成一片，你只能在混亂中緊盯每一次指令與轉折。當 Alisaie 大喊要 G’raha Tia 跳下去，Wuk Lamat 立刻要 Erenville 接手，Nitowikwe 也喝令大家撐住——你們只能把一切押在下一秒。</p><p>你們幾乎是擦著邊緣闖過去。Wuk Lamat 低聲罵著「太驚險了……」，立刻確認 Erenville 還活著；Krile 催促你們趕快行動，別讓敵人重新集結。前方就是敵方據點，Wuk Lamat 要你們進去看看裡頭到底藏著什麼。Nitowikwe 則說接下來只能靠你了，她會自己回去；Erenville 也表示會先躲起來等戰鬥結束，同時再次提醒你別做任何魯莽的事。</p><p>當你接近入口時，看守人員早已收到 Wawlika 的交代，慎重告誡你路上務必小心。你踏入 Yyasulani 的瞬間，Erenville 的話沉沉落下：眼前迎接他的，根本不是他離開時的家。你們明明抵達了 Yyasulani，卻又像是走進陌生的地方——那片他記憶裡的土地，早已變得面目全非。你們只能在陰沉天色下繼續前進，恐懼與不確定像雲層一樣壓在心口；Wuk Lamat 也只能怔怔地說，這太離奇了，這真的會是 Yyasulani 嗎？</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 瓦里卡 <small class="muted">(Shaaloani 荒野, X:18.6, Y:13.8)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-hot-commodity.html">搶手貨</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.97</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-land-of-levin.html">被雷雲覆蓋之地</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
