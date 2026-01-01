@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Solution Nine | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Solution Nine (DT 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/Lpjxee9_A0E"
+              title="Solution Nine" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Solution Nine</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Solution Nine`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>You gather yourself at the ward of Everkeep, trading a few last remarks with your companions—G’raha Tia trying (and failing) to hide his excitement, Krile noting the resolve it takes for Oblivion to oppose Zoraal Ja, and Alisaie already thinking of twin stories to swap with Nostalgia and Wayakkwe. When you step forward, the Mechanical Sentry detects a visitor and begins verifying access rights—then rejects you outright: no data found, and you must be accompanied by registered personnel to proceed.</p><p>Cahciua arrives at the checkpoint as if on cue, confident that if Queen Sphene truly registered you as guests, you’ll march right in. Wuk Lamat asks what happens if she didn’t—and Cahciua answers plainly that you may have a swarm of Zoraal Ja’s minions to deal with. With nothing left but to test Sphene’s word, Cahciua requests passage, the sentry identifies her unit, verifies the registrations of the civilians with her…and finally welcomes you as guests of Queen Sphene.</p><p>Inside the tower, you find yourself in Solution Nine—Erenville’s voice framing it as a residential district on the ninth level of a twelve-tiered Everkeep, a place built of electrope beneath an endless shroud of storm clouds, and a name that feels like a question as much as an answer. Cahciua laughs at how overwhelming it is and admits it’s natural to be dizzy in a city where strange technologies cater to every conceivable need—something none of you could have imagined back in Tuliyollal.</p><p>While Cahciua goes to explain matters to those in the Backroom, she urges you to explore first, insisting lived experience teaches better than dry explanations—and you do need to understand Sphene and Zoraal Ja’s dominion. As registered guests, she says, you’re exempt from sentries’ scrutiny, though she warns you away from the elevator to the uppermost level. She tells you to meet later at the entrance to True Vue in the eastern sector, and Krile decides she will speak with residents to see if anyone recognizes the earring.</p><p>As you begin to move, Wuk Lamat can’t stop marveling at “towers inside a tower,” even as the layout already threatens to swallow you in crossroads and unfamiliar corridors. Erenville presses Cahciua—asking where she truly is—but she refuses to say, calling it a precaution, and only assures you she’s safe. Then, as she asks about your adventurer friend and what you’ve endured together, Erenville lets slip that you found the entrance to the golden city—prompting Cahciua’s startled disbelief—and Wuk Lamat, flustered by how different everything feels, insists you should explore together.</p><p>Before long, Sphene appears in the district and confirms the checkpoint went according to plan—then makes her request with no hesitation: she wants Wuk Lamat to make peace with Zoraal Ja. She claims she still cannot see eye to eye with him and does not condone his methods, but she doesn’t want Wuk Lamat to fight him or regret a decision made in anger, especially when you are unequipped with regulators and the risk is too great. Wuk Lamat refuses, saying the impossible has been asked—Zoraal Ja murdered her father, his minions slaughtered her countrymen, and as Vow of Resolve, it falls to her to stop him.</p><p>Sphene answers that she understands all too well, and urges you to return to your people and prepare—warning that Zoraal Ja will use any means to win, and that unlike her, you still have the power to determine your own fate. Wuk Lamat says dependable comrades are holding the fort in Tuliyollal, so you can devote yourselves to what must be done here—and when you stand firm alongside her, Sphene admits she envies the comrades you can rely on. Wuk Lamat then asks Sphene to show you around so you can decide whether she is trustworthy, and Sphene accepts with a laugh, offering to guide you and even introduce you to the citizens she considers family—promising an enjoyable, enlightening tour.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Wuk Lamat <small class="muted">(Earthen Sky Hideout, X:6.1, Y:6.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="embracing-oblivion.html">Embracing Oblivion</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 97</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-queens-tour.html">The Queen’s Tour</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'ソリューション・ナイン',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>あなたはエバーキープの区画へ向かい、仲間たちの言葉を背に一歩を踏み出す。グ・ラハ・ティアは胸の高鳴りを隠しきれず、クルルはオブリビオンの面々がゾラージャとその軍勢に抗う胆力に思いを致し、アリゼーはノスタルジアとワヤックウェに双子の縁を重ねて、いつか話そうと笑う。だが検問の機械哨兵は来訪者を検知し、権限確認ののちに告げる――登録情報がなく、登録者の同伴なしでは通過できない。</p><p>そこへカフキワが現れ、理性の女王スフェーンが客人として登録しているならこのまま入れるはずだと言う。ウクラマトが、もし登録されていなかったらと問えば、ゾラージャの手下の群れとやり合うことになるかもしれない、とカフキワは淡々と返す。彼女が通行を求めると、機械哨兵は先行案内ユニットを識別し、同行者の資格を照合していく――そして最後に、理性の女王スフェーンの客人としてあなたたちを迎え入れる。</p><p>あなたは塔の内側へ足を踏み入れ、ソリューション・ナインに辿り着く。エレンヴィルは、永久の嵐雲を貫くエレクトロープの塔エバーキープ、その十二層の第九層にある居住区がソリューション・ナインなのだと語り、その名に託された希望と、そこで求めた答えを思う。カフキワは景観を誇らしげに示し、工業区など他の区画もあるが、ここが最大だと告げる――トライヨラでは夢にも見なかった光景だ、と。</p><p>カフキワはバックルームへ事情を伝えに行く前に、まず探索してくるよう勧める。机上の説明より体験のほうが学びになるし、あなたたちはスフェーンとゾラージャの支配を理解する必要があるからだ。客人として登録されている以上、哨兵の詮索は免除されるが、最上層へ上がる昇降機には近づくな、と釘を刺す。そして東区画のトゥルーヴュー入口で落ち合うよう告げ、クルルは住民に声をかけて耳飾りの手がかりを探すつもりだと言う。</p><p>あなたたちは歩き出すが、ウクラマトは「塔の中に、さらに塔があるのか」と目を回しそうになり、早くも分かれ道に頭を抱える。エレンヴィルはカフキワに、どこにいるのかと迫るが、彼女は安全のためまだ明かせないとだけ言い、無事だと保証する。さらに彼女があなたという冒険者について語るよう求めると、エレンヴィルは黄金郷への入口を見つけた出来事を口にしてしまい、カフキワは驚愕する。異郷の違いに気後れしながらも、ウクラマトは一緒に探索しようと言い出す。</p><p>やがてスフェーンが姿を現し、検問が滞りなく進んだことを確かめたうえで、あなたたちに願いを告げる――ゾラージャと和解してほしい、と。彼女は同調できないし手段も容認しないと言いながらも、怒りと焦りで決めた戦いを後悔してほしくない、レギュレーターのないあなたたちが挑む危険は大きすぎる、と訴える。だがウクラマトは拒む。父を殺し、同胞を屠り、戦を捨てないゾラージャを止めるのは、決意の誓約者である自分の務めだ、と。</p><p>スフェーンは、それでも理解していると言い、勝つためなら手段を選ばぬゾラージャに備えて民のもとへ戻り、できる限り準備せよと促す――そして自分とは違い、あなたたちには自らの運命を選ぶ力があるのだと告げる。ウクラマトは、トライヨラには頼れる仲間がいて守りを固めているからこそ、ここでの戦いに集中できるのだと言い、あなたも彼女とともに退かぬと示す。スフェーンは、頼れる仲間がいることを羨むと漏らし、ウクラマトが信用できるか確かめたいから案内してほしいと頼むと、彼女は笑って引き受ける――自ら案内役となり、家族同然の民も紹介しよう、と。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ウクラマト <small class="muted">（空の坑道のアジト, X:6.1, Y:6.2）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="embracing-oblivion.html">手を取り合うという路</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 97</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-queens-tour.html">理王のガイドツアー</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'Solution Nine',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你走到 Everkeep Ward 的入口前，身邊的同伴各自吐露心情：G’raha Tia 明顯壓不住興奮又硬要裝鎮定；Krile 說得很直白，敢與 Zoraal Ja 和他的軍隊對抗，需要的不只是勇氣；Alisaie 甚至已經把 Nostalgia 和 Wayakkwe 當成可以交換「雙胞胎故事」的對象；Erenville 則擔心 Cahciua 要是說了什麼讓人尷尬的事就糟了。你們正要踏進檢查哨，機械哨兵立刻偵測到訪客並開始核對權限，卻冷冰冰地回覆：沒有資料，必須由已登記的人員陪同才能通行。</p><p>就在氣氛繃緊時，Cahciua 出現了。她說，如果 Queen Sphene 真的把你們登記為賓客，你們就能直接走進去；Wuk Lamat 追問若沒登記怎麼辦，Cahciua 也不繞彎——那你們可能得面對 Zoraal Ja 的手下蜂擁而上。她向機械哨兵提出通行申請，對方辨識她的引導單元並逐一核對你們的身分，最後終於放行，宣告你們是 Queen Sphene 的賓客。你聽見那句「Welcome」時，才真的鬆了一口氣。</p><p>你們進入塔內，抵達 Solution Nine。Erenville 的旁白把眼前的一切定了形：Everkeep 是由 electrope 構成、刺穿永恆風暴雲的高塔；在十二層之中，第九層是一座名為 Solution Nine 的居住區——這個名字像是在問：當初建造它的人究竟把希望寄託在哪裡，而它是否真的成了他們想要的答案。Cahciua 讓你們抬頭看個夠，說塔內還有其他區域，包括工業區，但 Solution Nine 最大；她笑你們頭暈很正常，畢竟這裡的技術幾乎能滿足所有需求，Tuliyollal 根本不可能想像得出來。</p><p>Cahciua 表示她要先去 Backroom 向同伴說明情況，並要你們趁這段時間先探索——她認為親身體驗比乾巴巴的解釋更有用，而你們確實也需要更了解 Sphene 與 Zoraal Ja 的統治。她提醒你們：既然以賓客身分登記在案，就能免於機械哨兵的盤查，但最上層的電梯最好別靠近；其他地方只要裝得像「本來就屬於這裡」就行。她約你們之後在東區 True Vue 的入口集合，並說路線有點複雜，到時會派人去帶路；Krile 也決定去和居民聊聊，看有沒有人認得那只耳環。</p><p>你們開始往前走，Wuk Lamat 一邊驚呼「塔裡面竟然還有一座城市」，一邊在岔路口直接慌了手腳，最後乾脆硬著頭皮選了方向往前闖。Erenville 趁機追問 Cahciua：你到底在哪裡？Cahciua 仍不肯說，只表示這是必要的防備，但她很安全；接著她又要 Erenville 多說說你這位冒險者同伴，問你們一起經歷了多少事。Erenville 聊著聊著脫口而出你們找到了 golden city 的入口，Cahciua 震驚得立刻追問為什麼現在才說；而 Wuk Lamat 被陌生感弄得有些彆扭，卻還是逞強說要一起探索——不是因為害怕，只是這裡和家鄉差太多了。</p><p>就在你們穿梭街區時，Sphene 現身，先確認你們在檢查哨沒有出問題，接著竟直接提出請求：她希望 Wuk Lamat 與 Zoraal Ja 講和。她說自己依然無法與他達成共識，也不認同他的手段，但她不希望 Wuk Lamat 在憤怒與倉促之下做出會後悔的決定；更何況你們沒有配備「調節器」，風險實在太大。Wuk Lamat 卻回絕得毫不遲疑：Zoraal Ja 殺了她的爸爸，他的手下屠殺了 Tuliyollal 的人民，他不可能放棄戰爭；身為「決意之誓約者」，阻止他是她的責任，她不可能退讓。</p><p>Sphene 低聲說她理解得太深了，並提醒你們：Zoraal Ja 會不擇手段取勝，如果想保護人民，就該立刻回去、盡可能做好準備——就算這話出自敵國女王之口聽來空洞，她仍要說。她又補上一句：不像她，你們仍有力量決定自己的命運。Wuk Lamat 回應說 Tuliyollal 有可靠的同伴在守著，因此你們才能把心力放在這裡；而你也表態會站在她身邊，不會退。Sphene 便坦承自己羨慕你們有能依靠的同伴；接著 Wuk Lamat 轉而要求她帶你們逛逛這個區域，好讓你們判斷她值不值得信任。Sphene 笑著答應，說既然你們是她的賓客，她樂意成為嚮導，甚至也能介紹她視為家人的居民——並承諾這會是一趟既愉快又讓人長見識的導覽。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 烏克·拉瑪特 <small class="muted">(空之坑道據點, X:6.1, Y:6.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="embracing-oblivion.html">攜手同行之路</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.97</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-queens-tour.html">理智之王的巡禮</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
