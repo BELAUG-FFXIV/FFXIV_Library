@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Her People, Her Family | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Her People, Her Family (DT 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/52fzl77VYok"
+              title="Her People, Her Family" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Her People, Her Family</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Her People, Her Family`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Wuk Lamat can’t help but mutter at the heaviness of what you just witnessed, but Sphene gently urges you onward, insisting she’s continuing the tour because she wants to—not because she must. She says she’ll show you one of the district’s most vital facilities, a place called Resolution, and leads you back toward leynode nine, where the aetheryte is situated.</p><p>At the Scanning Port, the sight of the conveyor makes Wuk Lamat swallow hard, then bluster as if she isn’t nervous. Sphene points out the markings that show the conveyor’s direction and explains there’s a matching pair on the other side, reassuring you both that it’s extremely safe. Wuk Lamat snaps that she isn’t afraid at all—and then hurries you along anyway.</p><p>You arrive in the government sector, where Sphene declares that Resolution is the operational heart of Solution Nine—the place from which they oversee the district and provide essential services like welfare support and job introductions. Inside, Wuk Lamat eyes the strange devices everywhere, and Sphene shows you an infusion station: it dispenses souls in exchange for credits, a system Alexandrians have lived with for a long time. Wuk Lamat admits it sounds disturbing, yet refuses to dismiss it outright, asking you to hear the realm’s history so she can understand why their culture became what it is.</p><p>Sphene begins far in the past, explaining that lightning energy gradually swelled in their world. Ancient records describe a rainy season that grew longer and more violent across centuries—thunderstorms ravaging the land, crops failing, livestock starving—until desperation took hold. Then came the discovery of electrope (a black ore that can store lightning and convert it into other energies), found after a lightning-caused fire; in a single revelation, endless storms became a source of salvation, and inventions built on electrope (a black ore that can store lightning and convert it into other energies) transformed daily life. But the ore was hard to obtain in quantity, supply stayed scarce, and nations began taking it from one another—conflicts that escalated once electrope entered warfare, until the whole world was swallowed by the terrible war known as the Storm Surge.</p><p>As the war reached its peak, Lindblum committed its stores of electrope to a weapon of mass destruction and unleashed a lightning calamity beyond even its scientists’ expectations, inundating the entire continent and laying it to waste. Sphene says Alexandria had already lost so much to war, and then lost nearly everything else to the levin—survivors left scarred by grief, living with death’s shadow always beside them. Seeking a solution, their scientists turned again to electrope and developed a way to preserve memory and soul, clinging to the belief that physical death isn’t the end as long as memories endure.</p><p>Your steps are interrupted when a frantic man begs Sphene for help—he has no souls left, but Soul Supply won’t give him any. A clerk explains the man does no work and spends his days drinking True Vue, and thus has no credits; the man insists he was a fighter at the Arcadion, barred from fighting by the king’s decree. Sphene recognizes his courage but refuses to give preferential treatment, explaining the king requires feral souls for war and won’t have them spent on amusements. When the man lashes out at her, Sphene stays calm, telling him she truly wants him to live, that she loves her people equally as family, and that even a smallest seed of joy can grow into a reason to smile again—promising she will always listen when frustration spills over. The man apologizes and leaves, and Sphene quietly asks you to move on.</p><p>Outside, Sphene declares the tour complete. Wuk Lamat asks if scenes like that happen often, and Sphene admits hardships are unavoidable: their soul management system has sustained the realm for generations, but it has flaws—people have grown dependent on spare souls, feeling anxious without them, and some claim it may have contributed to a decline in births. Wuk Lamat wonders aloud if the system could ever be abolished; Sphene answers flatly that it cannot, and Wuk Lamat compares it to how the Mamool Ja relied on blessed siblings, acknowledging beliefs don’t change easily. Still, she says that once Zoraal Ja is defeated, you could all work together—restore the realm and fix what you can—only for Sphene to start to confess something, then swallow it, smiling as if nothing matters. She agrees she’d like to be shown Tuliyollal someday, and yet, when she thinks you can’t hear, she admits she has no choice but to continue down this path—asking forgiveness of Vow Wuk Lamat even as she says she must disappoint her.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Sphene <small class="muted">(Solution Nine, X:4.2, Y:19.6)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-queens-tour.html">The Queen’s Tour</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 98</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="scales-of-blue.html">Scales of Blue</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'護るべき家族たち',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ウクラマトは、先ほど目の当たりにした現実の重さに言葉を落とすが、スフェーンは穏やかに歩みを進めようと促す。あなたたちが気を遣うと、彼女は「義務だからではなく、そうしたいから続けている」とはっきり告げ、次は区画でも屈指の重要施設「レゾリューション」へ案内すると言う。そして、エーテライトのあるレイノード９を経由して向かうのだと説明した。</p><p>スキャニングポートで搬送装置を前にしたウクラマトは、思わず息を呑んでから強がるように声を張る。スフェーンは、搬送装置の印が進行方向を示しており、反対側にも同じ対の装置があるのだと教え、「とても安全だから怖がる必要はない」と落ち着いて言い聞かせる。ウクラマトは怖がってなどいないと言い返しつつ、あなたを急かして装置へ踏み出す。</p><p>政府区画に着くと、スフェーンはレゾリューションを「ソリューション・ナインの運用の中心」と呼び、ここから区画を管理し、生活支援や職業紹介といった必須のサービスを提供しているのだと語る。内部に入れば奇妙な装置が並び、ウクラマトが目を留めたものを、スフェーンは「注入装置」だと説明する。クレジットと引き換えに魂を供給し、予備の魂がもたらす安心を得る――それが長らく続くこの国の暮らしであり、外から来た者には理解しがたいだろうとも添える。ウクラマトは不気味だと率直に感じつつも、頭ごなしに否定はせず、この文化がそうなった理由を知りたいから歴史を語ってほしいと求め、あなたもその話を聞くことになる。</p><p>スフェーンは、千年以上も昔から世界の雷の力が膨れ始めたと語り、古い記録では雨季が年の四分の一を占め、激しい雷雨が大地を荒らしたという。さらに時を経て雨季は半分近くにまで延び、祖先たちは長く雷雲の下で苦しみ、作物は実らず家畜は餓えた。だが絶望のさなか、救いを約束する奇跡の鉱石が見つかる――**エレクトロープ（雷を蓄え、別のエネルギーへ変換できる黒い鉱石）**だ。落雷による火災の調査後、村人が未知の黒い鉱石を見つけ、試験によってその性質が明らかになると、終わりなき嵐は祝福へと変わった。発明は暮らしを一変させたが、量産は難しく供給は慢性的に不足し、やがて奪い合いが始まる。エレクトロープが戦に使われるようになると争いは拡大し、ついには「ストームサージ」と呼ばれる大戦が世界を呑み込んだ。</p><p>戦争が頂点に達したとき、隣国リンドブルムは蓄えたエレクトロープを大量破壊兵器に注ぎ込み、前線で起動する。科学者でさえ予測できなかった雷の力が解き放たれ、そのエネルギーは大陸全土を覆い尽くし、地を荒廃させた。アレクサンドリアの人々は戦争で多くを失い、さらに雷害でほとんどすべてを奪われる。生き残った者は早すぎる別れの記憶に苛まれ、生きていても死の影が常に寄り添った。解決を求めた科学者たちは再びエレクトロープに向き合い、記憶と魂を保存する手段を生み出す。「肉体の死は終わりではない。記憶が残る限り生き続けられる」――その信念が当時も今も、人々の支えになっているのだという。</p><p>そこへ取り乱した男が駆け込み、魂が尽きたのに供給が拒まれたとスフェーンに助けを乞う。係員は、男は働かず真視酒に溺れてクレジットがないのだと告げるが、男は自分は闘技場の戦士で、王の命令で試合を禁じられたのだと言い張る。スフェーンは彼を勇敢な戦士として受け止めつつも、特別扱いはできないと告げ、王は戦のために野性の魂を求め、娯楽に使わせたくないのだと説明する。罵声を浴びてもスフェーンは揺らがず、「魂を与えられなくても、生きてほしい」と真っすぐに言い、民を等しく家族のように愛しているからこそ、希望を捨てる姿がつらいのだと語る。小さな喜びの種からでも自分の幸せを育て、また笑える理由を見つけてほしい――そして不満を吐き出す場所が必要なら、いつでも耳を貸すと約束し、男は謝って去っていく。</p><p>外へ出たスフェーンは、主要施設の案内は終わったと宣言する。ウクラマトが先ほどのような出来事は頻繁かと尋ねると、スフェーンは避けられないと答え、魂の管理制度は代々国を支えてきたが欠点もあると認める。予備の魂に慣れた人々は、ないと不安になり、出生の減少に影響したという見方もある。ウクラマトが制度をなくせないのかと問うと、スフェーンは「できない」と言い切る。ウクラマトは、マムージャが受祝福の兄弟に頼ったのと同じく、信念と生活は簡単には変えられないのだと理解を示しつつ、ゾラージャを倒せばあなたたちで協力して国を立て直し、直せるところから直していけるはずだと語る。スフェーンは何か言いかけて飲み込み、案内できてよかったと微笑む。トライヨラを案内してほしいという誘いには心から頷くが、背を向けた瞬間、彼女は自分がこの道を進むしかないことを悟り、誓約者ウクラマトに詫びながら「失望させる」と言葉を落とした。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> スフェーン <small class="muted">（ソリューション・ナイン, X:4.2, Y:19.6）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-queens-tour.html">理王のガイドツアー</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 98</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="scales-of-blue.html">青いフビゴ族</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'必須守護的家人們',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Wuk Lamat 想到剛才看見的事，只能低聲感嘆「居然有那樣的問題……」。她看得出 Sphene 身上背著責任，便主動說如果 Sphene 忙的話，行程到這裡也沒關係；但 Sphene 立刻否認，說她不是因為義務才做，而是因為她想做，所以要你別擔心。接著她表示還要帶你們去看這個區域最重要的設施之一——名為 Resolution 的地方，並說必須經由 leynode nine，也就是設有 aetheryte 的那一處前往。</p><p>回到 Scanning Port Nine，Wuk Lamat 看到前方的自動輸送裝置，明顯吞了口口水，嘴上卻硬撐著不讓人看出緊張。Sphene 指給你看輸送裝置上的標記，說那代表方向，另一側也有成對的裝置能對應抵達。Wuk Lamat 忍不住問安不安全，Sphene 乾脆地保證「非常安全」，要你們不必害怕；Wuk Lamat 立刻反駁自己才沒怕，然後催著你一起上去。</p><p>你們被送進 Government Sector，Wuk Lamat 逞強說這只是孩子的遊樂設施而已。Sphene 則帶你走到 Resolution，稱它為 Solution Nine 的運作核心：在這裡掌管整個區域的運行，並向市民提供生活所需的服務，例如福利支援與工作介紹。她說與其解釋不如直接帶你進去看。</p><p>進到裡面，Wuk Lamat 對滿眼的裝置感到不安，並指著其中一個詢問用途。Sphene 解釋那是 infusion station（靈魂注入裝置）——用信用額度交換靈魂的設施；透過工作累積信用額度，市民便能獲得「備用靈魂」帶來的安心，這是 Alexandrians 長久以來的生活方式，但外來者大概很難理解。Wuk Lamat 直言這聽起來令人不舒服，卻也表示她不會直接否定，因為任何習俗都不會憑空出現；她想知道你們究竟經歷了什麼，才會走到今天這一步，於是請 Sphene 談談這個世界的歷史，而你也選擇一起聽下去。</p><p>Sphene 回溯到遙遠的過去：一千多年以前開始，這個世界的雷屬性能量逐漸膨脹；古老記錄提到，雨季曾佔一年四分之一，嚴重雷雨肆虐大地，幾百年後雨季又延長到接近一年一半。祖先被迫更久地困在雷雲之下，作物歉收、牲畜挨餓。就在絕望擴散之際，人們發現了救命的材料——electrope（黑色礦石，可儲存雷屬性能量並轉換為其他能量）。有人在落雷引發森林火災後巡查時，撿到從未見過的黑礦；測試證明它能儲存雷並轉換成其他能量，於是無盡風暴從災厄變成了祝福。electrope 被用在無數發明上，大幅改善生活，但它難以大量取得、供應長期短缺，國家之間開始彼此掠奪。衝突原本零星，卻在 electrope 被投入武器與戰術後全面升級，最終演變成席捲全世界的恐怖戰爭——Storm Surge（因 electrope 爭奪而擴大成世界規模的大戰）。</p><p>戰爭逼近終局時，Alexandria 的鄰國 Lindblum 把囤積的 electrope 送進一種大規模殺傷武器並在前線啟用，結果釋放出的雷之力量連他們自己的科學家都沒預料到：能量淹沒整個大陸，把一切夷為平地。Sphene 說，Alexandria 的人民原本就被戰爭奪走許多，又被這場雷的災厄奪走幾乎所有；倖存者帶著深深的傷痕，被「太早失去的摯愛」折磨，即使活著也像被死亡的陰影緊追不放。為了尋找出路，科學家再度把希望寄託在 electrope 上，經過研究發展出保存記憶與靈魂的方法，並以「肉體的死亡不是終點，只要記憶仍在，就能繼續活下去」來支撐自己——那份信念當時如此，如今也仍帶來安慰。</p><p>就在這時，一名男子慌張衝來向 Sphene 求救，說自己已經沒有靈魂可以置入了，但靈魂供應站拒絕再給他；一旁的職員表示這人不工作，只會整天喝 True Vue，沒有信用額度只能怪自己。男子卻辯稱自己原本是 Arcadion 的鬥士，因為國王的命令才不被允許上場，並非出於他的選擇；他甚至要求 Sphene 重新開放 Arcadion。Sphene 表示她理解他是勇敢的競技場戰士，也真心想幫他，但她不能給予特別待遇；她解釋國王需要 feral souls（取自野性生物的靈魂，用於戰爭） 用於戰爭，不希望把補充的靈魂消耗在娛樂上。男子失控辱罵她只是掛名的女王，職員憤怒斥責，而 Sphene 卻平靜地說她不在意，也不會因此厭惡對方。她鄭重對男子說，即使無法給他靈魂補充，她仍希望他活下去——她平等地愛著所有人，把市民視為家人；看著他親手否定希望，讓她感到心痛。她要他去找屬於自己的幸福，哪怕只能從一顆微小的喜悅種子開始，世界某處一定還有讓他再次微笑的理由；若需要宣洩，她也永遠願意傾聽。男子終於冷靜下來道歉離開，Sphene 也向你致歉，說讓你看見這一幕了，接著請你繼續往前。</p><p>走出來後，Sphene 宣布主要設施已參觀完畢，導覽到此結束。Wuk Lamat 問這種事是否常見，Sphene 承認多少會發生，因為困境本就是生活的一部分；他們的靈魂管理制度世世代代支撐著國家，但並非沒有缺陷——人們習慣擁有備用靈魂，一旦沒有就會感到脆弱與焦慮，甚至有人認為這可能也導致出生率下降。Wuk Lamat 試探地問能不能乾脆取消制度，Sphene 直接說不行；Wuk Lamat 便把這份「難以改變的生活方式」拿來對照 Mamool Ja 對 受祝福的兄弟 的依賴，表示她理解信念並不容易動搖。她仍說，只要打倒 Zoraal Ja，未來就能由你們一起努力修補、讓這個國度回到它該在的位置，並看能走到哪一步。Sphene 像是有話要說，卻又突然打住，說那不重要；她感謝你們陪她走這一趟，並欣然接受將來由 Wuk Lamat 帶她去 Tuliyollal 的邀請。然而在你們分開之後，她仍喃喃承認自己似乎只能繼續走下去，並低聲向 誓約者 Wuk Lamat 道歉，說她終究會讓她失望。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 斯菲恩 <small class="muted">(Solution Nine, X:4.2, Y:19.6)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-queens-tour.html">理智之王的巡禮</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.98</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="scales-of-blue.html">蒼藍鱗族 Hhubigo</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
