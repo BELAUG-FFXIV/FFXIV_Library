@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Casing the Castrum | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Casing the Castrum (ARR 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/AwlrveT2_Ac"
+              title="Casing the Castrum" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Casing the Castrum</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Casing the Castrum`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>You regroup with Yda, her resolve immediate and unwavering as she urges you to move—now—to rescue Minfilia and the others. Cid’s focus is colder and more practical: whatever Gaius called that “weapon of ancient Allag,” he saw signs of heavy magitek modification, proof that the Empire has been shaping something far beyond a relic recovered intact.</p><p>Alphinaud accepts what must be faced—an imperial castrum was always the likeliest destination—and Y’shtola makes the danger plain. Even at the best of times, forcing a way into an imperial stronghold is perilous; with valuable prisoners inside, Castrum Centri will be guarded all the more fiercely. If you mean to bring your allies back alive, you will need a plan—and before you can build one, you will need intelligence.</p><p>With that, Y’shtola names a contact: Lord Portelaine of House Durendaire, stationed at the Observatorium in Coerthas. You go to him and ask for his aid, and he receives you with recognition—remembering the one who unmasked a heretic—and with the understanding that you stand among the Scions of the Seventh Dawn. When he hears the name Castrum Centri, his curiosity turns sharp.</p><p>You tell him the Garleans have taken your comrades, and any detail could mean the difference between rescue and failure. Portelaine shares what his scouts saw: four prisoners led into the castrum—a Hyuran woman, an Elezen man, and two Lalafells, one male and one female. It is enough for Yda to know, without hesitation, that you have found the trail of Minfilia, Urianger, Papalymo, and Tataru.</p><p>Then Portelaine adds a newer report—an imperial airship forced to make an emergency landing in Coerthas. Two men believed to be prisoners fled the wreck: a Roegadyn and a Lalafell. At that, Cid’s shock becomes certainty—Biggs and Wedge. And certainty becomes urgency, because the imperials will not stop until they have the escapees in chains again…or worse.</p><p>Portelaine warns you his scouts saw troops set off in pursuit soon after the prisoners fled. Y’shtola weighs the facts with grim clarity: if the Garleans captured the Scions to learn about the Echo, they will keep them alive while they can still be studied. Biggs and Wedge have no such value to the Empire. If you want to see them again, you must act now—and Cid’s gratitude is immediate as the group commits to the rescue.</p><p>Far from you, in Mor Dhona at Castrum Centri, Nero reports to Gaius that final preparations are nearly complete—the culmination of five years of painstaking work. Gaius declares the purpose without softness: the power to purge the land of false gods, to impose the “security and stability” Eorzea’s leaders have failed to provide. He issues orders to Rhitahtyn—departure at midnight, command of the western front in Vylbrand from Castrum Occidens, and a single expectation: the Eorzeans will try to interfere, and they must not be allowed to do so.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Y’shtola <small class="muted">(The Waking Sands, X:6.8, Y:6.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="reclamation.html">Reclamation</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 44 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="eyes-on-the-empire.html">Eyes on the Empire</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'反攻の布石',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>イダがあなたに向き直り、迷いなく叫ぶ。ミンフィリアたちを救いに行く――今すぐにでも。だがシドは、興奮ではなく確信の重さで言う。ガイウスはそれを古代アラグの兵器と呼んだが、実物には大規模な魔導改修の痕跡があった。帝国はただ遺物を得たのではない。意図して作り替え、磨き上げている。</p><p>アルフィノは、帝国のカストルムが舞台になるのは当然だと受け止める。ヤ・シュトラは危険性をはっきりと示す。平時でさえ帝国要塞の防衛を突破するのは命懸けであり、価値ある囚人を収容している以上、カストルム・セントリの警戒はさらに強化されているはずだ。救出には戦略が要る。そして戦略には情報が要る。</p><p>そこでヤ・シュトラは協力者を挙げる。クルザスのアドネール占星台に駐屯する、デュランデル家のポルトゥレーン卿だ。あなたは彼を訪ね、助力を請う。彼はあなたを覚えていた――かつて異端者を暴いた者として、そして暁の血盟の一員として。カストルム・セントリの名を聞いた瞬間、その視線が鋭くなる。</p><p>あなたが事情を告げると、ポルトゥレーンは斥候の報告を語る。カストルムへ連行された囚人は四名。ヒューランの女性、エレゼンの男性、そしてララフェルが二名――男と女がひとりずつ。イダは即座に確信する。ミンフィリア、ウリエンジェ、パパリモ、タタルだ、と。</p><p>だが彼はさらに、より新しい出来事を続ける。帝国の飛空艇がクルザスに緊急着陸し、囚人と思しき二人が逃走したという。ルガディンの男とララフェルの男。シドの胸に走る衝撃は、すぐに確信へ変わる――ビッグスとウェッジだ。帝国は必ず追う。捕らえるか、さもなくば殺すまで。</p><p>ポルトゥレーンは、囚人が飛空艇を離れた直後に帝国兵が追撃に出たと告げる。時間は残されていない。ヤ・シュトラは冷静に整理する。暁の血盟が囚われた理由が「超える力」の解明にあるのなら、研究が終わるまでは処刑されまい。だがビッグスとウェッジには、その猶予すら期待できない。今こそ救うべきだ――そうしてあなたは、まず二人を追う決断を固め、シドは深く礼を言う。</p><p>一方その頃、モードゥナのカストルム・セントリでは、ネロがガイウスに報告していた。最終準備はほぼ完了し、五年に及ぶ労作はついに結実する。ガイウスは宣言する。偽りの神――蛮神を排し、この地に帝国が望む秩序をもたらすのだ。彼はリタティンに命じる。深夜にカストルム・オキデンスへ向かい、ヴィルブランド西方戦線を指揮せよ。エオルゼア勢が介入を試みるなら、必ず阻止せよ――と。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ヤ・シュトラ <small class="muted">（砂の家, X:6.8, Y:6.1）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="reclamation.html">かすかな灯火</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 44～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="eyes-on-the-empire.html">帝国を見張る目</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'反攻前的佈局',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你才剛重新集結，Yda 就把所有遲疑都甩在身後，催促你立刻動身去救 Minfilia 和其他人。Cid 的語氣沒有激昂，只有沉下來的判斷：Gaius 或許把那東西稱作 Ancient Allag（古代亞拉戈帝國）的武器，但他親眼看見上頭有大量 magitek 的改造痕跡——那不是單純撿回來的遺物，而是被帝國重新塑形過的兵器。</p><p>Alphinaud 也只能承認，關押地點是帝國要塞這種事早就該料到。Y’shtola 則把危險講得一清二楚：就算在正常情況下，硬闖帝國要塞的防線也是極其凶險；而如今 Castrum Centri 收押著 Garleans 認定「有價值」的俘虜，他們只會加倍強化警戒。要救人，你們需要策略；要有策略，就必須先拿到情報。</p><p>於是 Y’shtola 提出人選：Coerthas 的 Observatorium 裡，House Durendaire 的 Lord Portelaine。你們去見他、請求協助。他一開口就認出你——那個曾在他們之中揭穿異端的人，也就是 Scions of the Seventh Dawn 的同伴。當他聽見 Castrum Centri 這個名字，他的關注立刻變得尖銳。</p><p>你說明 Garleans 扣押了你們的同伴，而任何細節都可能左右你們能不能把人活著帶回來。Portelaine 轉述斥候回報：有四名俘虜被押進 castrum——一名 Hyuran 女性、一名 Elezen 男性，以及兩名 Lalafell（男、女各一）。Yda 幾乎不需要多想就肯定，那就是 Minfilia、Urianger、Papalymo 和 Tataru。</p><p>但 Portelaine 還有更新的消息：不久前，一艘帝國飛空艇在 Coerthas 緊急迫降；兩個疑似囚犯的人逃離了飛空艇——一名 Roegadyn 和一名 Lalafell。Cid 當場愣住，隨即認出那兩人是 Biggs 和 Wedge。因為他太清楚了：帝國軍不會停手，他們會追到把人抓回去——或直接殺掉。</p><p>Portelaine 警告你們，俘虜一離開飛空艇，帝國軍就立刻出發追捕，時間只會越來越少。Y’shtola 冷靜把局勢攤開：如果 Garleans 抓走 Scions 是為了弄懂 Echo，那在研究完成之前，他們不太可能立刻處決人。但 Biggs 和 Wedge 不是 Scions，也不掌握 Echo 的情報——他們對帝國而言沒有「必須活著」的價值。你們若想再見到他們，就只能現在立刻行動；而當你們做出決定時，Cid 立刻向所有人道謝。</p><p>與你們相隔遙遠的 Mor Dhona，Castrum Centri 內部也正在推進另一條路線。Nero 向 Gaius 回報，最後的準備幾乎完成——那是五年心血的結晶。Gaius 以毫不掩飾的口吻宣告：他們終於擁有清除這片土地上「假神」的力量，並把他所謂的安定與秩序強加於 Eorzea。接著他命令 Rhitahtyn：午夜出發前往 Castrum Occidens，指揮 Vylbrand 的西方戰線；Eorzeans 一定會試圖干涉，而你們要做的，就是確保他們辦不到。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 雅·修朵拉 <small class="muted">(砂之家, X:6.8, Y:6.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="reclamation.html">在微弱燈火下收復失地</a></div><div class="row">所有職業（不含限定職） 等級 44 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="eyes-on-the-empire.html">注視帝國動向</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
