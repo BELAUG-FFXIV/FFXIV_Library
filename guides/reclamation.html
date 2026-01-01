@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reclamation | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Reclamation (ARR 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/ZUbhzxKC4HQ"
+              title="Reclamation" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Reclamation</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Reclamation`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>The weapon didn’t simply destroy the primals—it devoured them, and the thought of what else it might do sits heavy on you. Alphinaud insists it’s time to return to the Waking Sands, not only to reclaim what was lost, but to honor those who fell there. You may have been brought to your knees, he says, but you will rest, rebuild, and rise again.</p><p>You set out for Vesper Bay at once. On the way, Cid admits he never truly understood the weight you carried—he can only imagine what it felt like to come back to the headquarters that day. When the Waking Sands comes into view, Alphinaud slows, studying the place as if listening for a sound that shouldn’t be there. He points out signs of recent habitation and wonders if someone has been here, then urges you onward into the solar.</p><p>Inside, Cid halts you with a sharp word—wait. A voice answers from the shadows: Yda demanding to know who goes there. Alphinaud chides her gently for greeting friends with suspicion, and when she recognizes you, her certainty breaks into disbelief. She stares at Cid as if he might vanish, asking if she’s dreaming; Cid can only say he isn’t aware of it, and that it’s been a long while.</p><p>Yda’s shock gives way to the ache of what this place has endured. Cid looks around and says the Waking Sands has seen better days. Yda stammers that she wasn’t here when it happened—she was still in talks at the Adders’ Nest—and the first she knew was returning to see what had been left behind. The church handled the bodies, she says, but the stains remained, and she didn’t know where to begin. If Y’shtola hadn’t been there to help her, she doesn’t know what she would’ve done.</p><p>At Alphinaud’s question, Yda confirms Y’shtola is here—just not now. She has gone to Ul’dah to meet a man who might know what became of the others. According to the church, Papalymo and Minfilia were not among the dead, and Y’shtola believes they were taken somewhere. Alphinaud answers with grim certainty that it was done on the Black Wolf’s orders, and Cid demands to know why he would want them.</p><p>Alphinaud lays it out: they possess something Gaius desires—knowledge of another power that can be used against the primals, one he has yet to harness. The Echo. Gaius knows it exists, and he knows it grants the gifted immunity to the primals’ influence; for all the might of his Allagan weapon, he would covet that protection. Alphinaud believes he intends to use Minfilia to understand the Echo, even if it still doesn’t explain how the Empire learned the location of the Waking Sands. Whatever the answer, the Empire has shown its hand—now it falls to you to rebuild the Scions and save Eorzea. Yda agrees without hesitation, and you decide to wait for Y’shtola’s return before planning your next move. For now, Alphinaud tells you to rest.</p><p>As you try to breathe in the quiet, the Echo rises again—Hydaelyn’s voice, filling your thoughts. She bids you hear, feel, think, calling you Bringer of Light and a brave gatherer of the Crystals, warning that Darkness begins to spread. She tells you to beware the bearer of the Crimson Brand, the Avatar of Shadow whom death ever attends, and promises the Crystals will be your salvation—your blade and shield. Steel yourself, she says: at the appointed hour, you shall stare into the Heart of Darkness; go with caution, but do not fear, for she is ever with you.</p><p>When the vision fades, Y’shtola returns and confirms you and Alphinaud are safe—and Cid as well. She says it defies simple explanation that you should be gathered together again, as if Master Louisoix’s benevolent hand still guides you. Then she delivers what you came for: she knows where Minfilia and the others are being held—an imperial stronghold in the heart of Mor Dhona, Castrum Centri.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Alphinaud <small class="muted">(Ul’dah - Steps of Nald, X:10.3, Y:11.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="lady-of-the-vortex.html">Lady of the Vortex</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 44 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="casing-the-castrum.html">Casing the Castrum</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'かすかな灯火',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>その兵器はプリマルを倒したのではない――喰らい尽くしたのだ。いったい何が起こり得るのか、思い至るだけで胸の奥が冷える。アルフィノは告げる。砂の家へ戻るべき時が来た、と。あの場所を荒れたままにしておくことは、そこで倒れた者たちの記憶を踏みにじることになる。あなたたちは膝をつかされたが、休み、立て直し、必ず再び立ち上がるのだと。</p><p>あなたたちはただちにベスパーベイへ向かう。道すがらシドは打ち明ける。自分は何も知らなかった――あなたがあの日、砂の家へ戻ったときに何を感じたのか、想像することしかできない、と。砂の家が見えてくると、アルフィノは足を緩め、近ごろ誰かが出入りした痕跡があると指摘する。侵入者かもしれない、と疑いながらも、あなたを応接室へ促す。</p><p>中へ踏み込もうとした瞬間、シドが短く制する――待て。闇の向こうから鋭い声が返る。イダが叫び、誰だと問いただす。アルフィノはたしなめるように言う。友に向ける挨拶ではないだろう、と。あなたの姿を見たイダは息を呑み、次いでシドを見て言葉を失う。夢なのかと震える彼女に、シドは冗談めかしながらも否定し、久しいな、とだけ告げる。</p><p>驚きはすぐ痛みに変わる。シドは周囲を見回し、ここは以前よりずっと荒れていると言う。イダはうまく言葉をつなげない。自分はその場にいなかった――アダー・ネストで交渉中で、戻ってきて初めて知ったのだ、と。遺体は教会が処置してくれたが、残ったのは拭えない痕跡で、どこから手をつければいいのかわからなかった。ヤ・シュトラが助けてくれなければ、とても立っていられなかった、と。</p><p>アルフィノが尋ねると、イダはうなずく。ヤ・シュトラもここにいる――ただ今は不在で、ウルダハへ向かったのだという。他の者たちの行方を知るかもしれない男に会うためだ。教会の話では、パパリモとミンフィリアは死者の中にいなかった。ヤ・シュトラはどこかへ連れ去られたと考えている。アルフィノはそれが黒狼の命令だろうと断じ、シドはなぜ彼がそこまで望むのかと問い詰める。</p><p>アルフィノは結論を示す。ガイウスが欲するものがある――プリマルに対抗し得る、別の力の知識だ。エコー。ガイウスはその存在を知り、授かった者がプリマルの影響を受けにくいことも知っている。いかにアラグの兵器が強大でも、その庇護は喉から手が出るほど欲しいはずだ。ミンフィリアを利用してエコーを理解しようとしているのだろう、と。砂の家の場所がなぜ帝国に知られたのかはなお不明だが、帝国は手札をさらした。今度はあなたたちが動く番だ。暁の血盟を立て直し、エオルゼアを救う――イダは迷いなく力を貸すと答え、次の一手はヤ・シュトラの帰還を待ってから決めようとする。まずは休め、とアルフィノはあなたに告げる。</p><p>静けさに身を置いたそのとき、エコーが再びあなたを貫く。ハイデリンの声が思考の奥で響く。聞け、感じよ、考えよ――光の担い手よ、クリスタルを集めし勇なる者よ、と。闇が広がり始めたこと、紅の烙印を帯びし者を警戒せよと告げ、彼を死が常に伴う影の化身だと言う。クリスタルこそが救いであり、刃であり盾である。定められし刻に、あなたは闇の中心を見据えるだろう――慎重に進め、だが恐れるな、常に共にあると。</p><p>やがて気配が戻ると、ヤ・シュトラが姿を現す。あなたとアルフィノが無事であること、そしてシドがいることに驚きつつ、これはルイゾワ師の慈愛の導きのようだと言う。そして言い切る。ミンフィリアたちが囚われている場所を突き止めた――モードゥナの中心部、帝国の拠点カストルム・セントリだ、と。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> アルフィノ <small class="muted">（ウルダハ：ナル回廊, X:10.3, Y:11.1）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="lady-of-the-vortex.html">暴虐の嵐神ガルーダ</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 44～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="casing-the-castrum.html">反攻の布石</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'在微弱燈火下收復失地',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>那把武器並不是「消滅」了 primal——它是把 primal 吞噬了。你光是想到它還可能做到什麼，就覺得背脊發冷。Alphinaud 說，現在該回 Waking Sands 了；若讓總部繼續破敗下去，就是對那裡倒下的人不敬。你們確實被打倒過，但你們會休整、重建，然後再次站起來。</p><p>你們立刻動身前往 Vesper Bay。路上，Cid 低聲承認：他根本不知道那天的真相有多沉重——你回到 Waking Sands 時的感受，他只能想像。當你們抵達時，Alphinaud 先停下腳步，說他看見最近有人活動過的痕跡，懷疑可能有闖入者；他又像是在自我否定般皺起眉，接著帶你往 solar 走去。</p><p>就在你們要進入時，Cid 先喊你等等。下一秒，一道喝問從黑暗裡傳來：Yda 大聲質問是誰。Alphinaud 立刻用熟悉的語氣安撫她，說這不是迎接朋友的方式。Yda 看見你後鬆了一口氣，轉頭看到 Cid 卻整個僵住——她像是不敢相信自己的眼睛，甚至問這是不是夢。Cid 只能苦笑說他並不這麼認為，並向她說，好久不見。</p><p>Yda 的震驚很快被回憶壓成疼痛。Cid 環顧四周，說這裡早已不是從前的模樣。Yda 急忙解釋：事情發生時她其實不在場——她還在 Adders’ Nest 談事情，直到回來才看見一切。教會替你們處理了遺體，但留下的痕跡依舊在，她根本不知道該從哪裡開始；如果不是 Y’shtola 在旁邊拉著她，她真的撐不下去。</p><p>Alphinaud 追問，Yda 便說 Y’shtola 也在，只是此刻不在這裡——她去了 Ul’dah，去見一個可能知道其他人下落的男人。根據教會的說法，Papalymo 和 Minfilia 並不在死者之中；Y’shtola 認為他們被帶走了。Alphinaud 幾乎立刻斷言那是 Black Wolf 的命令，Cid 則壓著怒意問：他為什麼要這麼做？</p><p>Alphinaud 把理由說得清清楚楚：因為他想要他們手上的東西——一種能用來對付 primal、但 Gaius 還沒掌握的力量知識，Echo。Gaius 知道 Echo 的存在，也知道被賦予的人能免於 primal 的影響；即使他擁有強大的 Allagan（古代亞拉戈帝國）武器，他仍會渴望那種保護。他很可能想利用 Minfilia 去理解 Echo。至於帝國究竟怎麼知道 Waking Sands 的位置，暫時還沒有答案；但現在帝國已經亮牌，你們也必須行動——重建 Scions，拯救 Eorzea。Yda 立刻答應會配合，而你們決定等 Y’shtola 回來再討論下一步；眼下，Alphinaud 要你先休息。</p><p>你剛要在沉默中喘口氣，Echo 又一次襲來——Hydaelyn 的聲音直接在你的思緒裡響起。她要你聽、去感受、去思考，稱你為 Bringer of Light，也稱你為勇敢的水晶蒐集者，說你的靈魂燃燒得明亮。她警告你 Darkness 正在蔓延，要你提防 Crimson Brand 的持有者——那是 Avatar of Shadow，死亡總與其相伴。她說水晶將成為你的救贖，是你的利刃與盾；在那個注定的時刻，你將直視 Heart of Darkness。她要你謹慎前行，但不要害怕，因為她永遠與你同在。</p><p>當那段聲音退去，Y’shtola 也回到了你們面前；她先確認你與 Alphinaud 都平安，接著看到 Cid 的身影也一時語塞，說這樣的重逢簡直難以解釋，彷彿仍有 Master Louisoix 的慈愛之手在引導你們。然後她給出關鍵情報：她知道 Minfilia 和其他人被關在哪裡——在 Mor Dhona 核心地帶的帝國要塞 Castrum Centri。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 阿爾菲諾 <small class="muted">(烏爾達哈 - 納爾回廊, X:10.3, Y:11.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="lady-of-the-vortex.html">暴風女王 Garuda 現身，暴虐席捲而來</a></div><div class="row">所有職業（不含限定職） 等級 44 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="casing-the-castrum.html">反攻前的佈局</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
