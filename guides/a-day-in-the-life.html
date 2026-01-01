@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A Day in the Life | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – A Day in the Life (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/_NRGzELVtqY"
+              title="A Day in the Life" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">A Day in the Life</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`A Day in the Life`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Touring farmlands at the side of a foreign queen is not how Wuk Lamat expected her day to go, yet Sphene calmly guides everyone back toward the farm you passed earlier. She says it will be easier to learn by speaking with the workers directly, and when you arrive, she promises you’ll come away understanding far more about Alexandria than any long explanation could offer.</p><p>At the farm, Sphene introduces Mahuwsa as one of the most experienced hands in all of Alexandria—someone whose hard-won knowledge has helped the place flourish. Mahuwsa greets the praise with a laugh, but she doesn’t hesitate to welcome you once Sphene explains you’re guests from beyond the barrier, here to see how their crops are grown. The visit is met with warm, practical hospitality, and Mahuwsa gives you leave to walk the grounds freely and speak with the other farmhands.</p><p>Wuk Lamat chooses to stay with Sphene rather than roam ahead. She insists it isn’t simple suspicion, but the reality of who they are—two leaders moving through unfamiliar territory. Sphene accepts the point with an easy smile and a teasing warning not to let her out of sight, and she asks you to find them again after you’ve seen what you came to see.</p><p>As you make the rounds, the work reveals itself as steady and human despite the strange machines scattered through the fields. Elias explains that he tends the crops—watering, enriching the soil—and also maintains the lamps used across the farm, fixing them when they malfunction. The harsh land and sky make a good harvest constant work, he says, but he enjoys how involved the process is, especially since he didn’t grow up knowing anything about farming and has had to learn day by day.</p><p>Kipehwi confirms the rumor that you’re visitors from beyond the barrier, and the idea that the outside world is “connected again” lands with quiet weight. Even so, Kipehwi says there’s no longing to leave—life in Alexandria is enough. As the one in charge of livestock, Kipehwi talks about the joy of tending the animals and the sting of not growing attached when it’s time for them to be shipped off, then asks that you pass regards to the queen and—maybe later—tell more of what the world beyond the barrier is like.</p><p>Hhinek shows you the storehouse entrance and explains the real storage lies underground: larger, temperature-regulated, and designed to keep the harvest from spoiling. The small entrance helps keep wild beasts out, and the underground space can even be used to breed and raise livestock, with a few beds kept for emergencies. Hhinek admits some complain that Alexandrian technology and electrope complicate life, but insists it’s only a matter of learning how the systems work—and takes pride in overseeing the storage that feeds every table in Alexandria, even if the work is hard.</p><p>When you return, Sphene asks for your impressions, relieved when your words suggest her people are not being pushed beyond reason. She then turns to Wuk Lamat and, trying to set aside formalities, calls her by a familiar nickname she’s heard others use. Wuk Lamat startles, then lets it pass, and admits she is impressed—machines that can overcome such a harsh environment are beyond anything she has seen.</p><p>Mahuwsa explains the machinery behind them controls water distribution for both fields and livestock, but it has been acting up after taking in water heavily charged with lightning. They suspect certain creatures have become saturated with that energy and are releasing it into the river they draw from. The system would return to normal if those creatures were dealt with, yet Mahuwsa hesitates to trouble the army. Wuk Lamat immediately offers help, saying she wants to aid people in need no matter how relations between nations unfold—and she points out that you are even stronger than she is, so it should not take long. Sphene accepts with gratitude, but urges caution all the same.</p><p>You and Wuk Lamat head out and hunt down the lightning-charged fiends, cutting through the danger quickly and returning without so much as a bruise. Sphene’s worry spills out the moment she sees you safe, and Mahuwsa’s relief is unmistakable. Mahuwsa notes that, thanks to you, they won’t have to ask for Zoraal Ja’s machines—he’s been focused on bolstering his forces and leaves little to protect ordinary people. When the complaint grows too pointed, Sphene stops it firmly, reminding Mahuwsa there will be time to speak of grievances later, but not here and not now.</p><p>Wuk Lamat agrees that Zoraal Ja has never been one to look after his people, then thanks the farmhands for welcoming you. Sphene brightens at the praise, calling her people her pride and joy, and Mahuwsa answers with the familiarity of someone who knows that care firsthand. Wuk Lamat admits Sphene seems like a good sort, even if she won’t lower her guard toward an “enemy queen” just yet. Sphene doesn’t laugh it off—she turns sober, saying a ruler is responsible for countless lives, and a single wrong decision can lead to suffering beyond measure. With that, she says it’s time to leave the farm and move on.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Sphene <small class="muted">(Heritage Found, X:17.9, Y:10.6)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-royal-welcome.html">A Royal Welcome</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 97</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="on-the-cloud.html">On the Cloud</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'人を知り、国を知る',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>あなたが案内されることになったのは、国境の向こうの女王と並んで歩く農地だった。ウクラマトは思わず、こんな一日になるとは思わなかったとこぼすが、スフェーンは長い説明よりも、先ほど通りかかった農場へ戻って実際に働く者の話を聞こうと提案する。到着すれば、アレクサンドリアのことを多く学べるはずだと。</p><p>農場に着くと、スフェーンは最熟練の農夫の一人だというマフウサを紹介する。数多の農法に通じ、彼女が他の農夫たちへ伝えてきた知恵こそが、この地を豊かにしてきたのだという。突然の称賛にマフウサは驚きつつも、ドームの外から来た客だと聞けば歓迎を惜しまない。噂は本当だったのか、と目を輝かせ、見学を拒むような無礼はしないと言い、あなたは心ゆくまで歩き回って話を聞いてよいと許される。</p><p>一方でウクラマトは、あなたが見学に回る間、スフェーンに付き添うことを選ぶ。疑っているわけではないが、立場を考えれば一緒に行動するのが自然だろうと。スフェーンはそれを受け入れ、冗談めかして目を離さないでほしいと言い、見学を終えたら戻ってくるよう促す。</p><p>あなたが農場を回ると、奇妙な装置があっても、働きの中身は驚くほど地に足がついている。エリアスは、畑の世話――水やりや土づくり――を担い、畑で使う灯りの管理も任されていると話す。異常な土地と空が続く以上、実りを確かなものにするには手間が尽きないが、その過程に深く関われることが好きだという。農業をほとんど知らずに育った自分にとって、毎日が学びだとも。</p><p>家畜担当のキペウィは、あなたがドームの外から来たという噂を確かめ、外の世界と再び繋がったのだと実感をにじませる。とはいえ自分はアレクサンドリアの暮らしに満足していて、出たいわけではないとも言う。ここでは野菜や果物だけでなく肉や卵も生産しており、動物の世話は喜びだが、出荷のたびに少し胸が痛む――それでも仕事だと割り切るしかないのだと。最後に女王へよろしく伝えてほしいと頼み、いずれ外の世界の話も聞かせてほしいと告げる。</p><p>倉庫を案内するヒネクは、入口の奥に本当の貯蔵庫が地下に広がっていると説明する。温度調整の仕組みがあり、収穫物が傷まないよう守られているうえ、入口が小さいから野獣の侵入も防ぎやすい。地下は家畜の繁殖や飼育にも転用でき、緊急時のための寝床まで用意されているという。アレクサンドリアの技術や特殊な素材が生活を複雑にすると嘆く者もいるが、仕組みを覚えればよいだけだとヒネクは言い、収穫物が塔へ運ばれ、やがてアレクサンドリアの食卓へ届く流れを支える自分の仕事に誇りを見せる。</p><p>見学を終えて戻ると、スフェーンはあなたの感想を求め、あなたの言葉が民が無理を強いられていないことの証になると安堵する。続いてウクラマトにも感想を尋ね、親しげな呼び名で呼んでしまい、ウクラマトは戸惑いながらも形式にこだわらないという約束を思い出して受け入れる。そして、過酷な環境を機械で乗り越えていることに心底感心したと率直に認める。</p><p>マフウサは、背後の仕組みが畑と家畜への給水を制御する装置だと説明するが、最近は調子が悪いのだという。原因は雷の力を強く帯びた水が入り込んだことらしく、そのエネルギーに当てられた生き物が川へ放電しているのではないかと見ている。生き物を片づければ元に戻るが、軍に頼むのは気が引ける――そう言うと、ウクラマトは自分たちで引き受けると申し出る。国同士の関係がどうなろうと、困っている人がいるなら助けたいのだと。さらに、あなたは自分より強いのだから時間はかからないとも言い、スフェーンは危険を案じながらも感謝して受け入れる。</p><p>あなたとウクラマトは雷を帯びた魔物を探して討ち、ほとんど汗もかかずに戻ってくる。無事を見たスフェーンは心底ほっとし、マフウサも目を輝かせる。これでゾラージャの機械に頼らずに済む、とマフウサは言い、彼が戦力増強にばかり力を注ぎ、民の護りにはほとんど割いていないと不満を漏らす。スフェーンはそれ以上を制し、訴えは後で聞くが今ここで王の話をするべきではないと釘を刺す。</p><p>ウクラマトは、ゾラージャが民を顧みないのは昔からだと苦く同意しつつ、農場の者たちへ見学の礼を述べる。スフェーンはその言葉を誇らしげに受け取り、民こそが自分の誇りであり宝だと語る。ウクラマトはスフェーンを悪い人物ではなさそうだと認めながらも、まだ警戒を解くつもりはないと言い、スフェーンは笑い飛ばさず、統治者は無数の命の福祉を背負い、たった一度の誤りが計り知れない苦しみを招くのだと静かに告げる。そして農場はここまでにして、次へ向かおうと言う。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> スフェーン <small class="muted">（ヘリテージファウンド, X:17.9, Y:10.6）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-royal-welcome.html">理王スフェーン</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 97</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="on-the-cloud.html">雲の上へ</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'走進日常，識人知國',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你原本就沒想過，自己會在這種情況下跟另一個國家的女王一起「逛農場」。Wuk Lamat 乾脆把這份荒謬講出口，Sphene 卻像早就料到你們會困惑一樣，說與其用冗長的解釋拖住你們，不如先回到稍早路過的那座農場。到了那裡，直接跟農人說話，你們會更快理解 Alexandria 的真實樣貌。</p><p>抵達之後，Sphene 把你帶到一名資深農人面前，介紹她叫 Mahuwsa，是 Alexandria 最有經驗的農場工之一。她熟悉各式各樣的耕作技巧，靠著她分享出去的知識，這片土地才能在惡劣環境裡仍然維持繁盛。Mahuwsa 聽到 Sphene 突然的稱讚忍不住反問，但當 Sphene 說明你們是來自屏障之外的訪客、想看看作物如何栽培時，她立刻用最務實的熱情接納了你們，甚至笑著說外頭來客的傳聞果然是真的，怎麼可能把人拒於門外。她也看得出 Sphene 是順道來查看農場狀況，便乾脆讓你們自由走動，想看就看、想問就問。</p><p>Wuk Lamat 沒跟著你一起四處跑，她選擇留在 Sphene 身邊。她說這不是多疑，而是你們各自的立場使然：兩位「帶頭的人」在這種地方一起行動，才合理。Sphene 接得很自然，還半開玩笑要 Wuk Lamat 別讓她離開視線，接著請你看完、問完之後再去找她們會合。</p><p>你沿著農地走了一圈，才發現那些奇怪裝置的背後，其實是非常踏實的日常工作。Elias 說他的工作大多是照料田地：替作物澆水、維持土壤肥力，慢慢摸索出最適合的做法。他還負責管理田裡的燈具，盡力維持設備符合規範，一旦出現故障就得由他修好。這片土地與天空本就不安分，要確保豐收就得不停投入心力；可他並不覺得厭煩，反而喜歡那種「整個流程都得親手照看」的踏實感。更何況他本來就不懂農業，每一天都像在學新的事、也在重新長大。</p><p>Kipehwi 聽說你們是屏障之外的訪客，立刻追問是否屬實。當得到肯定，她像是鬆了一口氣：這代表 Alexandria 又與外面的世界重新連上了。只是她也坦白，自己並不想離開——她很滿足於 Alexandria 的生活。她負責照料家畜，說在 Yyupye’s Halo 這裡不只種水果和蔬菜，也生產肉類、家禽與雞蛋。她真心喜歡與動物相處，但也必須提醒自己別太投入，因為它們終究會被運走；每次送走都會有點難過，可工作就是工作。她一邊道別，一邊請你代她向女王問好，也希望之後你能再多說說屏障之外的世界究竟是什麼模樣。</p><p>Hhinek 則把你帶到一座看起來不大的倉庫入口前，告訴你真正的儲藏空間在地下：更寬敞，也有溫度調節的系統，能避免收成腐壞。入口做得小，反而更容易防止野獸闖入；地下空間甚至能兼作繁殖與飼養家畜的場所，還備有幾張床，以防緊急狀況。Hhinek 說，有些人會抱怨 Alexandria 的技術和那種名為 electope 的材料讓生活變複雜，但他認為只要弄懂原理就好。他自己負責監督收成入庫，之後會被送往高塔加工，再分送到 Alexandria 的每張餐桌；工作很累沒錯，可他仍為此感到滿足，因為那是「把人們餵飽」的責任。</p><p>等你回到 Sphene 面前，她先關心你對農場的印象。你把所見所聞說出來後，她明顯鬆了一口氣，像是你的話證明了她的人民並非在過度壓力下工作。她接著轉向 Wuk Lamat，想用更親近的方式詢問感想，便照著大家的叫法喊了她一聲暱稱。Wuk Lamat 當場愣住，但很快就說沒關係——既然先前已說好不必拘泥頭銜與禮節，那就照這樣吧。她也坦率承認自己很佩服：在這麼嚴苛的環境裡，竟能靠機械維持耕作與生活，她從沒見過這種做法。</p><p>Mahuwsa 這才指著身後的裝置解釋：那是一套用來控制田地與家畜用水分配的系統，但最近常出狀況。原因很單純——系統吸進了帶著強烈雷電能量的水，大家懷疑有些生物被那股能量「充上電」，又把電放進他們取水的河裡。只要把那些生物處理掉，系統就會恢復正常；可她不太想為了這種事去求軍隊出面。Wuk Lamat 立刻說你們可以代勞，還強調不管兩國之間最後會變成什麼關係，只要有人需要幫助，她就想伸手。她甚至補上一句：你比她還強，解決起來應該很快。Sphene 雖然擔心危險，最後仍接受了你們的好意，反覆叮囑務必小心。</p><p>你和 Wuk Lamat 立刻出發，沿著線索尋找那些被雷電能量影響的魔物，很快就把威脅清掉並返回。Sphene 看到你們平安無事，第一反應竟是鬆到忍不住把擔心說出口；Wuk Lamat 則笑著回她根本不用擔心，你們幾乎沒費什麼力。Mahuwsa 更是驚嘆你們的身手，說多虧如此，他們就不用去求 Zoraal Ja 的機械來「幫忙」了——因為 Zoraal Ja 正一門心思強化軍力，留給民眾防衛的資源少得可憐，根本不把大家的安危放在心上。Mahuwsa 的抱怨越說越直白，Sphene 立刻制止她，說若有不滿她之後會聽，但現在不該在這裡談論那位「決意之王」。</p><p>Wuk Lamat 也冷冷附和：Zoraal Ja 向來就不是會照顧人民的人。可她隨即把話題拉回來，向 Mahuwsa 與農場眾人道謝，說這趟參觀很愉快，這裡的人也令人喜歡。Sphene 聽到這些話，神情明亮起來，說她的人民就是她的驕傲與珍寶；Mahuwsa 也笑著回應，彷彿早已習慣女王把關心掛在嘴邊。Wuk Lamat 直言 Sphene 的確像個不錯的人，但她仍不會立刻對這位「敵國女王」放下戒心。Sphene 沒把這話當成玩笑，她反而收起笑意，說身為統治者必須背負無數生命的福祉，而一次錯誤的決策就可能帶來難以估量的痛苦，失敗是不能被允許的。說完，她便示意農場的事到此為止，該繼續往下一步前進了。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 斯芬 <small class="muted">(Heritage Found, X:17.9, Y:10.6)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-royal-welcome.html">王室迎接 理智之王 Sphene</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.97</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="on-the-cloud.html">踏上雲端</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
