@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Land of Levin | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – The Land of Levin (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/o_GlcrbLWOY"
+              title="The Land of Levin" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">The Land of Levin</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`The Land of Levin`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>You arrive without any sensation of crossing into another world, yet the landscape in front of you refuses to make sense. Wuk Lamat and the others trade uneasy words as you stare at a tower that shouldn’t exist and a wall that was never there. The material is foreign to Tural—closer to what you saw at the gate to the golden city, and to the mechanical soldiers. Krile can’t accept that something so vast was built so quickly, and G’raha Tia reins in the guesses: until you learn more, conclusions are meaningless—so you begin to look around.</p><p>Under the dome, the skies churn with thunderclouds, the air heavy with lightning-aspected aether in a way that feels unnatural. Erenville recognizes the lay of the land and insists it is Yyasulani—and that only deepens the dread. When Alisaie points out what looks like a train station, Erenville names it at once: Yyasulani Station, where passengers once disembarked. You head there hoping to find someone, anyone, to explain what you’re seeing.</p><p>Up close, the station feels wrong in a different way—familiar, yet abandoned. Wuk Lamat swears it looks like it’s been left to rot for years. A Turali-style aetheryte stands amid enormous alien structures, and the turntable and tracks are thick with rust, as if untended for decades. When you finish searching the area, Wuk Lamat gathers everyone to show you what she found: a broken mechanical soldier. Its presence is proof enough that you’re inside Zoraal Ja’s domain.</p><p>The evidence keeps colliding. Erenville insists these buildings were completed barely a year ago—so why do they look ancient? Alisaie voices what the scene suggests: if new structures can decay and gigantic ones can appear in an instant, then time itself may be flowing differently here. G’raha Tia explains the idea of reflections—worlds separated by a dimensional rift where time can move at different speeds—but Krile pushes back: if this is Yyasulani, you should still be in the Source, where time ought to be synchronized. Wuk Lamat doesn’t pretend to grasp the theory; she chooses the practical path and urges you onward to Erenville’s village. Along the way, a defective automaton flickers to life and demands citizen identification in broken bursts before glitching out, and you leave it behind—too strange, too unreliable to trust.</p><p>When G’raha Tia notices pole-like structures drawing lightning, he asks you to accompany him. The material matches that used in the mechanical soldiers and warships, and fine etchings—like arcane runes—cover the surface. He suspects the design isn’t decorative at all, but meant to harness lightning as a source of energy. He promises to share the observation with Y’shtola, noting with relief that the dome doesn’t seem to interfere with linkpearls, and then you press on toward the village to reunite with the others.</p><p>Tesh’pyani Village is a wound in the landscape. Erenville stares at the ruins of his home, unable to understand how everything could have collapsed into abandonment. Krile checks other houses—empty, long deserted—and Wuk Lamat’s frustration boils over at the sheer impossibility of it all. Then a voice speaks from the shadows. A girl steps forward, apologizing for the fright, and says Zoraal Ja has told her about you. She introduces herself as Sphene, the Queen of Reason, and confirms that Zoraal Ja is the King of Resolve—together, they reign. When Wuk Lamat accuses her of the attack on Tuliyollal, Sphene insists she hasn’t come to fight. She admits Alexandria’s soldiers and airships were used, but says Zoraal Ja alone turned them into weapons and laid siege—and even if she didn’t prosecute the war, she bears responsibility for enabling it. She explains that she once ruled alone, until he arrived seeking conquest; in fear, she bargained—keeping her throne while giving him technology and the knowledge to use it, hoping to spare her people. Yet even she can’t fully explain what happened between your lands and hers: people from Tuliyollal appeared “here,” or perhaps Alexandria appeared “there,” sudden and inexplicable. G’raha Tia compares it to the Crystal Tower’s passage across time and space, only on a far larger scale. Sphene asks to take you to the outskirts to examine the phenomenon, where some of the Shetona live—perhaps even your acquaintances. Despite Alisaie’s suspicion, you choose to follow, wary but needing answers if you’re going to stop Zoraal Ja.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Erenville <small class="muted">(Heritage Found, X:34.4, Y:35.3)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="all-aboard.html">All Aboard</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 97</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-royal-welcome.html">A Royal Welcome</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'雷雲に覆われた地',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>あなたは別世界へ渡った感覚すらないまま、目の前の光景に言葉を失う。ウクラマトたちは「どんどんおかしくなる」と顔をこわばらせ、見覚えのない塔と壁を見上げる。素材はトラルのものではなく、「黄金郷」への門や機械兵のそれに近い。クルルは、あれほどの構造物が短期間で築けるはずがないと断じ、グ・ラハ・ティアは推測をいったん止める――結論を急いでも意味はない。まずは周囲を確かめるしかない、と。</p><p>ドームの内側は雷雲に覆われ、雷属性のエーテルが異様なほど濃い。自然とは思えない空気に、グ・ラハ・ティアも「見たことのない不自然さ」だと言う。エレンヴィルは地形そのものは「ヤースラニ」だと断言するが、だからこそ理解できない。そんな中、アリゼーが駅舎らしきものを見つけ、エレンヴィルはそこが「ヤースラニ駅」だと告げる。乗客が降り立った場所に人がいるかもしれない――あなたは一行とともに調査へ向かう。</p><p>近づくほどに、駅は「見覚えがあるのに荒れ果てている」場所だった。ウクラマトは、まるで何年も放置されたかのようだと言い、トラル式のエーテライトが巨大な異質の構造物の中に取り残されていることに違和感が募る。転車台も線路も厚い錆に覆われ、建物は朽ち、長い年月が経ったようにしか見えない。探索を終えると、ウクラマトは皆を集め、壊れた機械兵を示す。動かなくなったそれがあるだけで、ここが武王ゾラージャの勢力圏であることは疑いようがなかった。</p><p>しかし証拠は噛み合わない。エレンヴィルは、この集落は「完成してからまだ一年も経っていない」はずだと言い張るのに、現実は何十年も使われていないかのように荒廃している。アリゼーは「時間の流れが違うのでは」と口にし、グ・ラハ・ティアは鏡像世界の存在――世界ごとに時間の進み方が異なり得る理屈を説明する。だがクルルは、ここがヤースラニなら原初世界のはずで、時間は同期しているはずだと反論する。ウクラマトは理屈よりも確かめることを選び、北西にあるエレンヴィルの村へ向かうよう促す。道中、故障したオミクロン系の自動兵器が「市民識別」を要求しては途切れ途切れに同じ確認を繰り返し、結局まともに答えを得られないまま、あなたたちはそれを置いて先へ進む。</p><p>そのとき、グ・ラハ・ティアが雷を引き寄せる柱状の構造物に目を留め、あなたに同行を求める。近づいて調べると、機械兵や軍艦と同じ素材で、表面には魔紋めいた細かな刻印が走っていた。装飾ではなく、雷をエネルギーとして利用するための仕組みではないか――彼はそう推測し、ヤ・シュトラへ共有すると言う。幸い、ドームはリンクパールの通信を妨げないらしい。あなたは礼を受け、再び村へ向かう。</p><p>テッシャ・パニ廃村は、もはや村の形を保っていなかった。エレンヴィルは崩れた自宅を前に立ち尽くし、なぜこうなったのか、皆はどこへ消えたのかと声を震わせる。クルルが家々を確認しても、どれも明らかに放棄されており、ウクラマトは苛立ちを隠せない。そこへ影から声がかかる。怯えさせたことを詫びながら現れた少女は、武王ゾラージャからあなたたちのことを聞いていると言い、自らを理王スフェーンと名乗る。ゾラージャは武王であり、二人で統治している――だがスフェーンは、あなたたちと戦うために来たのではないと告げる。アレクサンドリアの兵器が使われたことは認めつつも、戦争の道具へ仕立て、トライヨラを包囲したのはゾラージャだと言い、そして自分にも責任があると受け止める。かつて単独で治めていた彼女は、征服を望むゾラージャに怯え、民を守るために取引し、技術とその扱いを与えたのだという。だが、あなたたちの土地とアレクサンドリアの間で何が起きたのかは、彼女にも完全には分からない。突然トライヨラの人々が現れたのか、あるいは自分たちがトライヨラへ迷い込んだのか――その感覚は不可解で、グ・ラハ・ティアはクリスタルタワーが時空を越えて移った出来事に重ねる。スフェーンは現象を調べるため外縁へ案内したいと言い、そこにはシャトナの民も暮らしている、あなたの知己がいるかもしれないと示す。アリゼーが警戒を口にしても、あなたは武王ゾラージャを止めるために必要な答えを求め、疑念を抱いたまま彼女についていく。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> エレンヴィル <small class="muted">（ヘリテージファウンド, X:34.4, Y:35.3）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="all-aboard.html">ドーンブレイザー</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 97</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-royal-welcome.html">理王スフェーン</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'被雷雲覆蓋之地',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你幾乎沒有「穿越到另一個世界」的感覺，可眼前的景象卻讓所有人都說不出話。Wuk Lamat 低聲抱怨事情越來越詭異，Alisaie 和 Krile 也同樣錯愕——那座塔原本就不該在那裡，遠處的牆更是從未存在。材質不像 Tural 會用的東西，反而更接近你們在黃金城之門看到的構造，或那些機械士兵的外殼。Krile 無法相信這麼龐大的建築能在短時間內完成，G’raha Tia 乾脆把推測先按下：現在下結論沒有意義，你們必須先弄清楚更多事實。</p><p>在 the dome（罩住 Yyasulani 的巨型屏障）之下，天空被厚重的雷雲壓住，空氣裡滿是雷屬性的以太，濃到讓人覺得不自然。Erenville 一眼就認出地形，堅持這裡確實是 Yyasulani——但也正因如此，才更無法理解為什麼會變成這副模樣。當 Alisaie 指著前方說那看起來像車站時，Erenville 立刻說出名字：Yyasulani Station，乘客過去下車的地方。也許那裡還找得到人，你跟著大家一起前去調查。</p><p>可真正走近之後，車站給人的感覺更令人不安——熟悉，卻像被遺棄了好多年。Wuk Lamat 說照這狀態看起來簡直像荒廢已久；而在那些巨大又陌生的結構之間，卻偏偏還立著一座 Tural 風格的以太之光。轉盤、鐵軌都覆著厚厚鏽層，旁邊的建築也早已朽壞，怎麼看都不像「才剛建好」的地方。你們搜尋完畢後，Wuk Lamat 把大家叫來，指給你看她找到的東西——一具早已損壞的機械士兵。它的存在幾乎等同於宣告：你們確實踏進了 Zoraal Ja 的勢力範圍。</p><p>然而所有線索彼此衝突。Erenville 說這些房屋與設施明明在不到一年前才完工，卻老舊得像是荒廢了好幾十年；巨大的建築又像是憑空出現。Alisaie 忍不住提出一個可怕的可能：如果不是建築在瞬間生成，就是時間在這裡流得不一樣。G’raha Tia 進一步解釋「鏡像世界」——不同世界之間的裂縫會讓時間流速出現差異；可 Krile 立刻反駁：若這裡是 Yyasulani，那你們仍在 The Source (原初世界)，時間理應同步。Wuk Lamat 聽不懂那些維度理論，卻做出最直接的決定：去 Erenville 的村子親眼確認。途中，你們遇到一台勉強還在運作的故障自動機械，它反覆要求出示市民身分識別，訊息一陣亂跳後就只剩斷續的確認聲。你們得不到答案，只能把它丟在原地繼續前進。</p><p>這時 G’raha Tia 注意到遠處有柱狀結構吸引著落雷，像是某種避雷針，便請你陪他靠近調查。那材質與機械士兵、戰艦相同，表面還刻著極細的紋路，像魔紋一樣，並非純粹裝飾。他推測這是用來把雷電當作能源加以收集與利用的技術，令人咋舌。G’raha Tia 表示會把觀察結果告訴 Y’shtola，所幸 the dome（罩住 Yyasulani 的巨型屏障）似乎不會干擾連絡珍珠的聯絡。你們結束查看後，便趕往村子與其他人會合。</p><p>當你踏進 Tesh’pyani Village，迎面而來的只剩殘破與空寂。Erenville 看著化為廢墟的家，幾乎無法相信自己眼前所見——為什麼會變成這樣？人都去哪了？Krile 進屋查看其他住處，只發現明顯被遺棄的痕跡，Wuk Lamat 也因這一切毫無道理而惱怒。就在此時，一道聲音從陰影裡傳來，先為驚嚇致歉，接著說自己有理由必須躲著，並且表示 Zoraal Ja 已經告訴她許多關於你們的事。她自稱 Sphene，是 Queen of Reason（理智之王），而 Zoraal Ja 則是 King of Resolve（決意之王）——兩人共同統治名為 Alexandria 的領域。Wuk Lamat 立刻指控她參與了對 Tuliyollal 的襲擊，Alisaie 也不相信她會無緣無故現身示好；但 Sphene 說她不是來戰鬥的。她承認襲擊用到的士兵與飛空艇確實源自 Alexandria，卻強調是 Zoraal Ja 把它們改造成戰爭兵器並圍攻 Tuliyollal，而她即使沒有親自發動戰爭，也仍然要為此負責。她說自己曾經是唯一的統治者，直到某天 Zoraal Ja 現身、意圖征服；她在恐懼與弱勢之下選擇談判，讓他得到更高層次的技術與使用方法，只求能保住自己的人民。可就連她也說不清到底發生了什麼：某一天，Tuliyollal 的人突然出現在 Alexandria，或是 Alexandria 突然出現在 Tuliyollal——一切都來得突兀又難以理解。G’raha Tia 聯想到 Crystal Tower 曾在時空之間轉移的先例，只是這次似乎牽動的不只是一座塔，而是整片環境與居民。Sphene 於是提出帶你們去外圍調查現象，那裡也住著 Shetona，或許你們的熟人就在其中。即使 Alisaie 仍提醒要保持警戒，你仍選擇跟上——在疑心未消的情況下，為了弄清 Zoraal Ja 為何能變得如此強大，也為了找到能擊敗他的線索。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 艾倫維爾 <small class="muted">(Heritage Found, X:34.4, Y:35.3)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="all-aboard.html">全員上車</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.97</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-royal-welcome.html">王室迎接 理智之王 Sphene</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
