@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Footprints in the Snow | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Footprints in the Snow (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/0Z8UX6u-5J8"
+              title="Footprints in the Snow" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Footprints in the Snow</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Footprints in the Snow`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Pierremons tells you the airship was carrying prisoners, and when it was forced to land, they seized the chance to run. The Garleans deployed immediately, splitting into search parties to comb the wilderness, and Pierremons returned to his post to raise the alarm—only to find signs that someone had come by while he was gone. Whoever it was tried the door, failed to get in, and moved on. He noted two sets of footprints in the snow—one large, one small—and urges you to search the area and follow them to their owners.</p><p>Tracking the prints, you find Wedge half-frozen and terrified, convinced he’s about to be eaten—until he spots you and blurts out his relief. He rambles through how the Garleans chased them like hungry wolves, how he nearly ran into monsters more than once, and how the cold and hunger finally caught up with him when he found somewhere to hide. Biggs isn’t with him—he split off in another direction to draw the pursuers away. Before you can decide what to do next, Cid contacts you via linkpearl: you’ve found Wedge, but Biggs is still missing. Cid says he’s searched near the Darkhold without results, yet he’s sure Biggs headed west—and with Yda and Y’shtola helping, he believes they’ll find him soon. He tells you to meet him at an Ishgardian fortification to the west—Monument Tower—while he heads your way and keeps watch for Biggs. Wedge, shaken but hopeful after hearing Cid’s voice, insists on going with you to wait there.</p><p>At Monument Tower, Abelie greets you and asks what brings you to this frozen corner of the realm. Seeing Wedge’s condition, she urges you both to warm yourselves by the fire and brings hot broth to chase the chill away. Once Wedge has steadied, she tells you to stay as long as you need—and reminds you, too, that with a hard road ahead, you must take rest whenever you can.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Portelaine <small class="muted">(Coerthas Central Highlands, X:14.3, Y:35.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="eyes-on-the-empire.html">Eyes on the Empire</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 44 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="monumental-hopes.html">Monumental Hopes</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'ふたりの脱走者',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ピエルモンは、帝国の飛空艇には捕虜が乗っていたらしく、やむなく着陸した隙に逃げ出した者がいたのだとあなたに語る。帝国兵は捜索隊を組んで荒野を洗い、ピエルモンは味方に知らせるため持ち場へ戻ったが、その不在の間に誰かがここへ来た痕跡が残っていたという。扉を試したものの入れず、別の場所へ向かったらしい――雪の上には大きい足跡と小さい足跡、二組がはっきり残っていた。あなたは周囲を探し、その足跡を辿って持ち主を見つけてほしいと頼まれる。</p><p>足跡を追った先で、あなたは凍えきったウェッジを見つける。怯えきった彼は必死に逃げ回った顛末をまくしたて、帝国兵に追い立てられ、魔物に何度も遭遇しかけ、ようやく身を隠した途端に寒さと空腹が身に染みたのだと訴える。ビッグスは囮になるため別方向へ向かったという。そこへリンクパール越しにシドが連絡してくる。ウェッジを見つけたのは朗報だが、ビッグスはまだだ――ゼーメル要塞周辺も成果はなく、それでも彼が西へ向かったのは確かで、イダとヤ・シュトラも動いている以上、ほどなく見つかるはずだとシドは言う。そしてあなたの西にあるイシュガルドの防塁「秘石の塔」で合流しようと告げ、あなたのもとへ向かいながらビッグスを捜すと約束する。ウェッジはシドの無事を知って泣きそうになりながらも顔色を取り戻し、あなたと共に「秘石の塔」へ向かう決意を固める。</p><p>秘石の塔に辿り着くと、アベリがあなたを迎え、この凍てつく辺境に何の用で来たのかと尋ねる。連れのウェッジがひどく冷えているのを見ると、彼女は火のそばへ案内し、温かい汁物を用意して身体を温めさせてくれる。少し落ち着いたところで、必要なだけここに留まってよいと言い、あなたにも、これから先の旅が厳しいのは明らかだからこそ、休める時に休むよう静かに念を押す。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ポルトゥレーン <small class="muted">（クルザス中央高地, Ｘ:14.3, Ｙ:35.2）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="eyes-on-the-empire.html">帝国を見張る目</a></div><div class="row">すべて（リミテッドジョブを除く）Ｌｖ４４～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="monumental-hopes.html">ビッグスの捜索</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'雪地足跡',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Pierremons 告訴你，那艘帝國飛空艇上似乎載著囚犯；飛空艇被迫緊急降落時，他們就抓準機會逃了出去。帝國軍隨即被派下來，分成多支搜索隊在荒野裡地毯式搜捕，而 Pierremons 為了通報己方部隊趕回崗位——卻發現自己離開的這段時間，有人來過。對方試過門卻進不去，只能轉往別處；雪地裡清楚留下兩組足跡，一大一小。Pierremons 要你在附近搜尋，沿著足跡追上它們的主人。</p><p>你循著足跡一路找去，終於在橋下發現冷到發抖的 Wedge。他先是嚇得大喊求饒，下一秒認出你就像抓到救命繩般崩潰地傾訴——帝國軍一路緊咬不放，像餓狼群追著他們跑；他拼命閃躲追兵，還差點三度撞進魔物張開的大口，等好不容易躲起來，才發現自己又冷又餓得幾乎站不穩。Biggs 沒跟他在一起，為了把追兵引開，選了另一個方向離開。就在你壓下焦急思緒時，Cid 透過 linkpearl 聯絡上你：找到 Wedge 是好消息，但 Biggs 仍下落不明。Cid 說他已在 Dzemael Darkhold 周邊搜尋過卻沒有收穫，不過可以確定 Biggs 往西邊去了；再加上 Yda 與 Y’shtola 也在協助，他相信很快就會有結果。Cid 要你到西邊不遠處的 Ishgard 防禦據點 Monument Tower 會合，他也會一邊趕來、一邊留心找尋 Biggs。聽見 Cid 的聲音，Wedge 像是終於能喘口氣，抹著眼淚說自己好多了，堅持跟你一起去 Monument Tower 等他。</p><p>來到 Monument Tower，Abelie 迎上前來，問你為何會到這片冰寒的角落。她一眼看出 Wedge 受了寒，立刻把你們帶到火邊取暖，還端來熱湯讓他回暖。等 Wedge 的狀況稍稍穩住，她要你們需要多久就待多久；而看著你，她也語氣平靜卻很篤定地提醒——前方的路顯然不會輕鬆，你必須在能休息的時候就好好休息。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Portelaine <small class="muted">(Coerthas Central Highlands, X:14.3, Y:35.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="eyes-on-the-empire.html">注視帝國動向</a></div><div class="row">所有職業（不含限定職）等級 44 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="monumental-hopes.html">尋找 Biggs</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
