@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Eyes on the Empire | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Eyes on the Empire (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/LmQJXQL25q8"
+              title="Eyes on the Empire" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Eyes on the Empire</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Eyes on the Empire`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Lord Portelaine tells you his duty is to reconnoiter Garlean activity along Abalathia’s Spine, and that work is how he came to know Y’shtola. He explains that word of the imperial airship’s emergency landing reached them via Dzemael Darkhold to the west, and that a knight stationed at the entrance—Bricelt—may know more. To speed your search, he writes a letter of introduction, and sends you off with a prayer that you will soon be reunited with your comrades.</p><p>At the gates of Dzemael Darkhold, Bricelt stops you—no one enters without authorization—until he reads Lord Portelaine’s letter and understands why you’ve come. He shares what their scouts saw: the airship had barely touched down when two men—captives, by all accounts—burst out and fled. Since then, imperial soldiers have been spotted in the area, trying to recapture them. When you tell him those captives may be your friends, he can only hope they stayed a step ahead. The emergency landing, he says, was near the Aurum Vale to the south and west, and he urges you to continue the search there and speak to another knight—Pierremons.</p><p>At the Aurum Vale, Pierremons confirms he saw the imperial airship with his own eyes. He rushed to the landing site and arrived in time to watch it take to the skies again—but not before it deployed a detachment of troops. The orders were harsh, the movements tense, and everything about the scene suggests you’ve arrived in the wake of something urgent—and dangerous.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Portelaine <small class="muted">(Coerthas Central Highlands, X:24.8, Y:28.8)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="casing-the-castrum.html">Casing the Castrum</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 44 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="footprints-in-the-snow.html">Footprints in the Snow</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'帝国を見張る目',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>提示された素材が英語のみのため、人物名・地名・組織名などの公式日本語表記を核実できません（例：各地名や騎士名）。あなたのルールどおり「JP は公式用語で全日文・半形英数なし」を守るには、ゲーム内の日本語テキストまたはあなたが指定する**公式出典（例：指定ページの #Dialogue）**が必要です。該当の日本語素材を貼ってくれれば、その内容だけを根拠に📗JPの叙事を書きます。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ポルトゥレーン <small class="muted">（クルザス中央高地, Ｘ:24.8, Ｙ:28.8）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="casing-the-castrum.html">反攻の布石</a></div><div class="row">すべて（リミテッドジョブを除く）Ｌｖ４４～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="footprints-in-the-snow.html">ふたりの脱走者</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'注視帝國動向',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Lord Portelaine 告訴你，他此行的任務是偵察 Abalathia’s Spine 一帶的 Garlean 動向，也因此有幸與 Y’shtola 相識。接著他說，關於帝國飛空艇緊急迫降的通報，是從西邊的 Dzemael Darkhold 傳來的；守在入口的騎士 Bricelt 可能知道更多細節。為了讓你行動更順利，他替你準備了一封介紹信，並祝福你能盡快與同伴重逢，也願 The Fury （十二神之一，Ishgard 信奉的戰神 Halone）賜你力量。</p><p>你來到 Dzemael Darkhold 前，Bricelt 先依規矩攔下你——這座由 Ishgard 的名門挖掘出的地下要塞，沒有授權不得進入。但當他看見 Lord Portelaine 的介紹信，便明白你是為了那艘帝國飛空艇而來。他轉述斥候回報：那艘飛空艇幾乎才剛碰地，就有兩名男子——看起來像是俘虜——衝出來拔腿就跑；而帝國士兵很快也在附近出沒，似乎正在追捕他們。你說那兩名俘虜很可能就是你的同伴時，Bricelt 只能祈禱他們仍領先追兵一步。最後他指出，迫降地點據說在南西方、靠近 Aurum Vale 一帶，並建議你立刻轉往那裡，去找另一名騎士 Pierremons 協助搜查。</p><p>到了 Aurum Vale，Pierremons 直接點頭——那艘帝國飛空艇，他確實親眼看見它靠近並準備降落。他立刻趕往現場，卻只來得及看到飛空艇再次升空離去；但在起飛前，它已經放下了一支部隊。現場充斥著粗暴的喝令聲，士兵的動作也透著焦躁不安——你能感覺到，這不是單純的迫降事故，而是一場仍在延燒的追捕。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 波特萊納 <small class="muted">(庫爾札斯中央高地, X:24.8, Y:28.8)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="casing-the-castrum.html">反攻前的佈局</a></div><div class="row">所有職業（不含限定職） 等級 44 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="footprints-in-the-snow.html">雪地足跡</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
