@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Getting Even with Garlemald | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Getting Even with Garlemald (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/VAAzUszHDm0"
+              title="Getting Even with Garlemald" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Getting Even with Garlemald</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Getting Even with Garlemald`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Glaumunt doesn’t hesitate when you explain what you’re trying to do. Slafborn pointed you to the right man—Glaumunt has his own score to settle with the Empire, and you can count on his help. But he cuts off any talk of grudges and forces the conversation back to what matters: rescuing captives is delicate work, and one small mistake can end everything. You can’t leave room for uncertainty.</p><p>Before anything else, Glaumunt insists you confirm, beyond any doubt, that Minfilia and the others are truly being held at Castrum Centri. There’s no sense risking your life only to learn they’ve been moved. To find out, you’re to approach Centri from the east, slip into the swampland called the Tangle on your left, ignore the morbols, and make your way to the southwestern corner.</p><p>There, Glaumunt says you’ll find drainage pipes running down from the stronghold. One of them, he claims, leads back up to the command tower—and if you listen closely, you may be able to eavesdrop on what’s happening inside. With that, he sends you off at once, pressing you to move quickly and carefully.</p><p>You follow the instructions, forcing your way through the Tangle until you find the pipes. A maddening buzzing fills your ears as you press in close, and faint voices echo down from within. You hear imperial soldiers complaining that the captive refuses to speak, that questioning has yielded nothing, and that the others aren’t much better—one of them, an Elezen, draws particular irritation because everything he says sounds like gibberish. They wonder aloud why the tribunus is so fixated on Minfilia, and the answer that comes back is unsettling: they’ve heard she possesses some kind of mystical power—something Garleans lack. The conversation cuts off as their break ends and their footsteps fade into silence.</p><p>Back at Revenant’s Toll, you report what you learned. Alphinaud takes it as the confirmation you needed: Minfilia and the others are indeed at Castrum Centri, so the operation can proceed. While you were away, Cid devised the next steps—disguises as imperial soldiers remain the core of the plan, and Glaumunt is working on procuring a suit of magitek armor. Cid asks for your help with preparations, and reminds you that Minfilia and the others are counting on you—so you must not keep them waiting any longer than necessary.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Glaumunt <small class="muted">(Mor Dhona, X:22.5, Y:7.5)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="come-into-my-castrum.html">Come-Into-My-Castrum</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 44 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="drowning-out-the-voices.html">Drowning Out the Voices</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'帝国軍あざむき作戦',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>グラウムントは、あなたが事情を話すとすぐに頷いた。スラフボーンがあなたをここへ向かわせたのは当然だと言い、帝国に対して清算すべき因縁がある以上、力は貸すと断言する。だが、私怨の話は切り上げ、作戦の要点だけを突きつけた。捕虜の救出は繊細な仕事であり、ほんの小さなミスひとつで全てが終わる。迷いの余地を残してはならない、と。</p><p>まず必要なのは、ミンフィリアたちが本当に「カストルム・セントリ」にいるという確証だと、グラウムントは言う。命を懸けて踏み込んだ末に、すでに移送されていたでは済まされない。その確認のため、東からセントリへ近づき、左手に見える湿地「タングル」へ入って、モルボルどもは気にするなと言い捨てつつ、南西の隅を目指せと指示する。</p><p>南西の一角で、要塞から下へ伸びる排水管が見つかるはずだという。どうやって知ったかは問うな、と前置きした上で、そのうち一本は司令塔へ繋がっているらしい。耳を澄ませば、内部の様子を盗み聞きできるかもしれない――確証が得られたら、次の段階へ進む。そう言って、グラウムントはあなたを急き立てた。</p><p>あなたは指示どおり「タングル」を進み、排水管のもとへ辿り着く。耳を塞ぎたくなるほどの耳鳴りに耐えながら管に近づくと、かすかな話し声が反響してくる。捕虜は口を割らず、得られた情報は皆無だと苛立つ声が続き、ほかの者たちも大差ないと言う。とりわけエレゼンの捕虜は、口を開けば意味不明な戯言ばかりだと吐き捨てられる。なぜトリブヌスがミンフィリアに執着するのかという疑問には、神秘的な力を持つらしい、ガレアンにはない力だと聞いた――そんな返答が返り、休憩の終わりとともに足音が遠ざかって沈黙が戻った。</p><p>あなたがレヴナンツトールへ戻って報告すると、アルフィノは確証が得られたと判断する。ミンフィリアたちは確かに「カストルム・セントリ」にいる――これで作戦を進められる。留守のあいだにシドが行動計画をまとめており、骨子は変わらず帝国兵に変装して要塞へ潜入するというものだという。グラウムントは魔導アーマーの確保に動いており、シドはあなたに準備の手伝いを求めた。そして、ミンフィリアたちはあなたを頼りにしているのだから、これ以上待たせないようにと念を押した。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> グラウムント <small class="muted">（モードゥナ, X:22.5, Y:7.5）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="come-into-my-castrum.html">モードゥナに集う猛者たち</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 44～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="drowning-out-the-voices.html">即席の雷波塔</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'欺敵作戰',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>當你把來意說清楚，Glaumunt 幾乎沒有猶豫。Slafborn 把你帶到他面前並不意外——他本來就和帝國有筆帳要算，而這次也絕不會放過反擊的機會。但他很快把話題拉回正事：救人這件事非常細，任何一個小疏忽都可能讓一切前功盡棄，所以行動裡不能留下半點不確定。</p><p>Glaumunt 說，第一步不是衝進 Castrum Centri，而是先把關鍵確認到「毫無疑問」：Minfilia 和其他人確實被關在那裡。你不能拿命去賭，結果卻發現人早就被轉移。要查清楚，就從東面接近要塞，左側會看到一片叫 The Tangle 的沼地——進去，別管那些 morbols，想辦法一路摸到西南角。</p><p>在那裡，你會看到從要塞往下延伸的排水管。Glaumunt 叫你別問他怎麼知道，因為其中一根據說能通往指揮塔；只要你貼近、仔細聽，就可能偷聽到裡頭的動靜。等確定 Minfilia 他們真的在 Castrum Centri，才進入下一階段。他催你立刻上路，動作要快，卻更要穩。</p><p>你照著指示闖進 The Tangle，找到那些排水管。當你靠近時，耳邊像被嗡鳴塞滿一般令人發狂，而管內傳來斷斷續續的說話聲。你聽見帝國兵抱怨「那名俘虜」死都不肯開口，拷問也問不出任何情報；其他人也沒好到哪裡去，其中一名 Elezen 更讓他們火大——每次開口都只是在胡言亂語。有人納悶為何那名帝國高階指揮官會如此執著於 Minfilia，得到的回答更令人不安：聽說她擁有某種神祕力量，是 Garleans 所沒有的。話音隨著休息結束而中斷，腳步聲漸遠，最後只剩沉默。</p><p>你回到 Revenant’s Toll 把探到的內容說清楚。Alphinaud 立刻抓住重點：Minfilia 和其他人確實在 Castrum Centri，這樣就能推進救援行動。你外出期間，Cid 已經整理出下一步——核心仍是不變的偽裝：你們要扮成帝國軍士兵潛入要塞；而 Glaumunt 正在設法弄到一具 magitek armor（魔導裝甲）。Cid 也請你協助他完成必要的準備，並提醒你：Minfilia 和其他人都在等你們，所以不要讓他們再多等任何不必要的時間。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 格勞蒙特 <small class="muted">(摩杜納, X:22.5, Y:7.5)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="come-into-my-castrum.html">聚集於 Mor Dhona 的強者們</a></div><div class="row">所有職業（不含限定職） 等級 44 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="drowning-out-the-voices.html">以雷聲淹沒通訊</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
