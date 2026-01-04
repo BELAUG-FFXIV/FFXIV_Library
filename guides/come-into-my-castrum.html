@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Come-Into-My-Castrum | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Come-Into-My-Castrum (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/YNTapmztLqo"
+              title="Come-Into-My-Castrum" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Come-Into-My-Castrum</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Come-Into-My-Castrum`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Biggs can’t hide his relief—he knew Cid was still alive, and seeing him standing there in good health makes it feel real at last, even if he jokes that a shave wouldn’t hurt. Wedge, meanwhile, throws his thanks straight at you, insisting he would’ve ended up frozen, drowned, or eaten by some marsh beast if you hadn’t found him in time. Cid answers simply: thanks to you, Biggs and Wedge are with the group again.</p><p>With the reunion behind you, Cid turns the mood back to urgency. Minfilia and the others are still missing, and he can’t ignore how long they’ve already been kept waiting. Based on what you’ve learned, he believes they’re being held at Castrum Centri—so you should gather at Revenant’s Toll in Mor Dhona, make preparations, and seek the insight of the adventurers there.</p><p>At Revenant’s Toll, Slafborn listens to the plan and doesn’t sugarcoat the problem: Castrum Centri has been on high alert, armored patrols circling the perimeter day and night, and not even a fly could get near the walls without being noticed. Y’shtola agrees the danger is more than distance—if the Garleans are alerted, no one can know what they’ll do to Minfilia and the others, so the rescue must be carried out with the greatest stealth.</p><p>Cid’s answer is as blunt as it is daring: infiltration—old-fashioned, careful, and quiet. When Yda asks how anyone could slip inside with security that tight, Cid says he intends to walk in through the front door. The plan is to disguise yourselves as imperial troops and march in, but that means acquiring several sets of imperial uniforms, a suit of magitek armor, and timing so precise it can’t afford a mistake. Slafborn laughs at the audacity, but admits it might work—and points you toward Glaumunt, who bears a personal grudge against the Empire and knows more about Castrum Centri than most.</p><p>As Y’shtola and Yda head out to reconnoiter Garlean activity at the stronghold, Biggs and Wedge stay behind to talk themselves into the madness—Biggs ready to match your nerve, Wedge daydreaming about getting his own magitek “reaper.” Cid reminds you that stealth and subterfuge are how you’ll free your friends, and he trusts you can play the part of an imperial soldier. Alphinaud adds the sobering context: after the Calamity, the XIVth Imperial Legion occupied what remained of Castrum Novum, rebuilt it, and renamed it Castrum Centri—its manufacturing and storage facilities supplying imperial forces across Eorzea, and its defenses reflecting that importance. And when you finally find Glaumunt, he sizes you up with a grin—if you’re looking to get inside Castrum Centri, he has a feeling you’re going to get along just fine.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Cid <small class="muted">(Coerthas Central Highlands, X:7.5, Y:28.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><div><a class="link" href="notorious-biggs.html">Notorious Biggs</a></div><div class="muted" style="margin-top:6px;">All classes and jobs (excluding limited jobs) (Level 44 or above)</div></div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="getting-even-with-garlemald.html">Getting Even with Garlemald</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'モードゥナに集う猛者たち',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ビッグスは、シドが生きていると信じていたと胸の内を明かし、目の前の彼が元気そうなのを見て安堵をにじませる。ひげを剃ればもっと良いのに、と冗談めかしながらも、その声は確かな手応えに満ちている。ウェッジはあなたに向かって、見つけてくれたことへの感謝を一気に吐き出し、あなたがいなければ凍えていたか、溺れていたか、泥の獣に食べられていたかもしれないと訴える。シドは、あなたのおかげでビッグスとウェッジが再び戻ってきたのだと、短く礼を述べた。</p><p>再会の余韻を断ち切るように、シドは次の目的を告げる。ミンフィリアたちは依然として囚われたままで、これ以上待たせるわけにはいかない。得られた情報から、彼らは「カストルム・セントリ」に拘束されている可能性が高いという。そこで、準備のためにも「モードゥナ」の「レヴナンツトール」に集合し、現地の冒険者たちから助言を得て、作戦に役立つ知見を集めようと提案する。</p><p>レヴナンツトールに着くと、スラフボーンは事情を聞いて顔を曇らせる。「カストルム・セントリ」は最近とくに警戒が厳しく、装甲兵の巡回が昼夜を問わず続いているという。壁から百ヤルム以内に近づけば、たとえ小さな気配でも見逃されない――それほどの厳重さだ。ヤ・シュトラも同意し、帝国に動きを悟られればミンフィリアたちがどう扱われるかわからない以上、最大限の隠密で動かなければならないと釘を刺す。</p><p>シドは、必要なのは古典的な潜入だと言い切る。厳重な警備を前にして、ヤ・ダがどうやって中へ入り込むのかと問うと、シドは正面から入ると答える。帝国兵に変装し、堂々と行進して侵入する――そのために、帝国軍の軍服を複数そろえ、魔導アーマーを一機用意し、完璧なタイミングを整える必要がある。大胆だが筋は通っているとスラフボーンは笑い、装備を手に入れる機会ならこの周辺にいくらでもあるはずだと背中を押す。そして、帝国への私怨を抱き、カストルム・セントリの内情にも通じた男として「グラウムント」に会うよう勧める。</p><p>ヤ・シュトラとヤ・ダが要塞周辺の偵察に向かうあいだ、ビッグスは正面突破の変装作戦に腹を括り、ウェッジは魔導アーマーへの憧れを隠しきれない。シドはあなたに、友を救う鍵は隠密と策謀にあり、帝国兵を演じ切れると信じていると告げる。さらにアルフィノは、霊災後に「第十四軍団」が「カストルム・ノヴム」の残骸を占拠し、改築して「カストルム・セントリ」と改名した経緯を語り、巨大な製造・貯蔵施設が帝国軍の物資供給を担うがゆえに、要塞が重防備であると説明する。それでも潜入は避けて通れない――そうしてあなたがグラウムントのもとへ向かうと、彼は相手を確かめるように言葉を投げ、カストルム・セントリに入りたいのなら手を貸してやると、愉快そうに笑った。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> シド <small class="muted">（クルザス中央高地, X:7.5, Y:28.9）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><div><a class="link" href="notorious-biggs.html">炉には炎を、回せ歯車</a></div><div class="muted" style="margin-top:6px;">すべて（リミテッドジョブを除く）Lv 44～</div></div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="getting-even-with-garlemald.html">帝国軍あざむき作戦</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'聚集於 Mor Dhona 的強者們',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Biggs 終於把憋著的心放下來——他一直相信 Cid 還活著，而且此刻看著他站在眼前、氣色也不差，那份直覺像是被證實了一樣踏實。Biggs 還不忘帶點玩笑，說他要是能剃個鬍子就更像樣了。Wedge 則把所有感謝都衝著你來，說如果不是你找到他，他可能早就凍死、溺死，或被沼澤裡的怪物吞掉。Cid 只用一句話把重點說清：多虧你，Biggs 和 Wedge 才能再次回到大家身邊。</p><p>重逢的喜悅很快被更急迫的事拉回來。Cid 提醒你們，Minfilia 和其他同伴仍被囚禁，而且已經讓他們等得太久。根據目前掌握的情報，他判斷他們被關在 Castrum Centri。於是他決定先到 Mor Dhona 的 Revenant’s Toll 集合——那裡足以作為整備與商議的據點，也能向當地冒險者請教，從他們的經驗裡找出對救援有利的線索。</p><p>抵達 Revenant’s Toll 後，Slafborn 聽完你的來意，語氣立刻變得沉重：Castrum Centri 近來戒備森嚴，裝甲巡邏日夜不斷，牆外百 yalms 之內幾乎不可能不被發現。Y’shtola 也提醒你，最可怕的不只是接近困難——若 Garleans 察覺你們來襲，就沒人知道他們會對 Minfilia 和其他人做出什麼事，所以行動必須做到極致的隱密。</p><p>Cid 的回答乾脆得像是早就想好了：用最傳統的方式——潛入。Yda 仍不敢相信，警戒這麼緊要怎麼把人送進去；Cid 卻說，他打算從正門走進去。你們要偽裝成帝國軍士兵，堂堂正正列隊進入——但前提是準備好多套帝國軍制服、一具魔導裝甲，還要掌握無懈可擊的時機。Slafborn 聽了先笑你們膽大，但也承認這招或許真行；他並建議你去找 Glaumunt——那人對帝國軍有私怨，也正好知道不少 Castrum Centri 的內情，肯定願意出手相助。</p><p>當 Y’shtola 和 Yda 先去要塞周邊偵察帝國軍動向時，Biggs 也把話說得很直：既然你敢做，他就敢跟。Wedge 則興奮得像孩子一樣，滿腦子都是「自己的魔導裝甲」。Cid 再次叮囑你，救出同伴靠的是隱密與手段，他相信你能把帝國軍士兵演得像模像樣。Alphinaud 隨後補上背景：Calamity 之後，XIVth Imperial Legion 佔據了 Castrum Novum 的殘存部分，重建並改名為 Castrum Centri；那裡擁有龐大的製造與儲存設施，是帝國軍在 Eorzea 各地的主要補給來源，所以防禦才會如此森嚴，但潛入仍是不得不做的事。等你見到 Glaumunt，他先用一句「你找的人就是我」把你攔下，接著聽到你想進 Castrum Centri，便露出像是找到同路人的笑意——他有預感，你們會合作得很愉快。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 希德 <small class="muted">(庫爾札斯中央高地, X:7.5, Y:28.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><div><a class="link" href="notorious-biggs.html">爐火不熄，齒輪不停</a></div><div class="muted" style="margin-top:6px;">所有職業（不含限定職） 等級 44 以上</div></div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="getting-even-with-garlemald.html">欺敵作戰</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
