@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Resilient Son | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – The Resilient Son (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/JRIs-YrOb28"
+              title="The Resilient Son" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">The Resilient Son</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`The Resilient Son`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>With news that dragons came to Tuliyollal’s aid, the group’s resolve tightens rather than eases. You turn your eyes to Everkeep’s summit, determined to end Zoraal Ja’s madness for Tuliyollal—and for the world. Cahciua points out the next step: the entrance to Origenics lies at the back of Everkeep, and you can reach it by water—so you head for the pier at the Driftdowns.</p><p>At the Driftdowns, the plan becomes concrete. Origenics accepts deliveries at fixed times, and you will slip in during one such window aboard a hover cargo. Kiluwsa will pilot; the Backroom team will stage a diversion; and you will push upward, cutting down anything that blocks the path to the summit. G’raha Tia urges caution and constant coordination, and Krile commits to keeping support informed using a communicator borrowed from Shale. With everyone aligned, Cahciua signals that departure is imminent—be ready.</p><p>Once inside, the facility’s defenses don’t wait for you to catch your breath. A lock refuses to open until Shale works it remotely, guiding you onward to an elevator that will carry you to the eleventh level—just below the summit. There, you find rows of soul cells, the place where processed souls are stored. Wuk Lamat realizes what that implies after the attack… yet most of the lights are dark, and the fear hits all at once: has Zoraal Ja already burned through them—killing even his own for a regulator to feed his scheme?</p><p>Before you can press forward alone, reinforcements arrive. Alphinaud, Y’shtola, and Estinien appear, explaining that Tural is stable and the enemy has withdrawn, freeing them to join you. The Backroom crew has briefed them, and they share your alarm—empowering oneself with souls evokes grim parallels, and you have to stop Zoraal Ja before the casualties grow worse. Wuk Lamat asks for your strength one last time; Cahciua, having done what she can to get you here, steps back and orders you to return in one piece. Together, you advance to the summit.</p><p>At the top of Everkeep, what waits beyond the clouds is not what you expected: an immense aperture that looks like a voidgate at first glance, yet Y’shtola is certain it does not lead to the Thirteenth. It is, in all likelihood, a portal to another reflection—proof that the fusion of realities was only the beginning. Speculation ends the moment Zoraal Ja appears. He has exceeded the limit of aether a living being can contain, swollen with the souls he absorbed into power that rivals even a king among voidsent—at a terrible cost. Wuk Lamat names herself as the Vow of Resolve of Tuliyollal and names him as the King of Resolve of Alexandria, declaring this last fight—for duty, for blood, for everything—while Zoraal Ja vows to burn every last mote of the souls within him to “prove the miracle” and claim himself as Father’s true successor.</p><p>When the battle finally breaks him, Gulool Ja faces his father through tears and confusion, asking why it had to be this way and why he was never wanted. Zoraal Ja answers like a man who has already surrendered to ruin—spurned by his own father, left no throne and no legacy, he believes he had nothing to leave in return. He offers what he “earned” to Gulool Ja to accept or reject, admitting he could not surpass Father… nor Lamaty’i… and the miracle he chased slips away. Wuk Lamat erupts, calling him a fool for thinking “Papa” left him nothing—because he had the one thing no one else could be given: himself, and Gulool Ja.</p><p>But the end of Zoraal Ja does not bring peace. Queen Sphene appears, thanking you for defeating the King of Resolve and “delivering” her people—while also expressing regret for what she has done to yours. Wuk Lamat refuses easy absolution, yet rejects revenge that would ignite all-out war, insisting Tuliyollal and Alexandria must seek a different path forward. Sphene says there is no path left: she cooperated with Zoraal Ja because the life force from the slain was needed to sustain the Endless, and even now she cannot abandon them—flesh or no, all are dear to her. When Alisaie pleads that it is wrong to sacrifice the living to save the dead, Sphene insists they are not dead so long as they are remembered, and she cannot accept that Cahciua’s existence should simply fade. Declaring herself the bearer of Queen Sphene’s memories, she reveals an Alexandrian legend: in ancient calamity, a clan fled into another world using a singular “key” that answers desperate desire. Preservation’s scientists pursued its secret of interdimensional fusion but gained only partial control—yet to sustain the inhabitants of Living Memory, she will invoke it anyway, even if she must become history’s most brutal queen.</p><p>In the aftermath, the danger shifts from Zoraal Ja to what Sphene might do next. Y’shtola reasons that Sphene’s true form likely lies beyond, in the reflection on the other side, but the portal is already closed—and Cahciua’s vessel goes lifeless as the gate shuts. Wuk Lamat remembers Cahciua saying she operated her vessel from afar, and dread rises: something may have happened to her. When you compare what you just witnessed with what happened to those who knew Namikka, the pattern sharpens—Erenville confirms that people from his village did not remember Cahciua, and the implication becomes unavoidable. Cahciua, too, was an Endless—an inorganic vessel sustained by faint aether that turned to an empty husk when the connection was severed. Erenville is forced to say the words out loud: his mother was dead all along.</p><p>Even with grief raw, you keep moving. Y’shtola begins searching for an alternate means of passage now that the gate is shut; Alphinaud urges an investigation of the area for clues about what lies beyond; and Erenville throws himself into the work, desperate to help in any way. Alisaie suggests you take Gulool Ja back below to rest while the others continue, and Wuk Lamat agrees—these developments must also be shared with the Backroom. Back there, Gulool Ja insists he will be fine, while Wuk Lamat admits everything happened too fast to process—yet she has no regrets about the choice she made with Zoraal Ja. She only wishes you could have stopped Sphene as well, before she walked further down her misguided path, and the exhaustion finally catches up as she admits she needs rest.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Cahciua <small class="muted">(Heritage Found, X:15.6, Y:5.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="unto-the-summit.html">Unto the Summit</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 99</div><div class="row"><b>Unlock Dungeon</b> <a class="link" href="origenics.html">Origenics</a></div><div class="row"><b>Unlock Trial</b> <a class="link" href="everkeep.html">Everkeep</a></div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-new-family.html">A New Family</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'奇跡の子',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>トライヨラに竜たちが駆けつけたという知らせが届くと、安堵よりも先に決意が固まる。あなたたちはエヴァーキープの頂上を見据え、ゾラージャの狂気に終止符を打つことを改めて胸に刻む。カチュアは次の行き先を示す――オリジェニクスの入口はエヴァーキープの裏側にあり、水路で回り込める。あなたたちはドリフトダウンズの桟橋へ向かう。</p><p>ドリフトダウンズで、作戦の輪郭がはっきりする。オリジェニクスは特定の時刻に搬入を受け付け、そのタイミングにホバー貨物に乗って施設へ潜入する。操縦はキルウサが担い、バックルームの仲間が陽動を仕掛け、あなたたちは頂上へ向かって道を切り開く。グ・ラハ・ティアは不測の事態に備え、支援班との連絡を絶やさず状況に応じて動くべきだと促し、クルルはシャーレから借りた通信機で常時報告すると言う。カチュアは全員が理解したことを確かめ、まもなく出発だと告げて備えを急がせる。</p><p>施設内では、最初から障害が待っていた。扉のロックが開かず、カチュアがシャーレに解除を頼むと、遠隔操作で道が開く。通路の先には昇降機があり、第十一層へ運ぶという――頂上の一歩手前だ。そこであなたたちは魂の保管場所、魂細胞が並ぶ区画に辿り着く。襲撃で多くが死んだ以上、魂は処理されここへ運ばれているはず……しかし灯りが消えたものが大半で、疑念が胸を刺す。ゾラージャはすでに魂を使い尽くし、調節器のために身内さえ斬ったのではないか。</p><p>そのとき、援軍が現れる。アルフィノ、ヤ・シュトラ、エスティニアンが合流し、トラルでは敵が退いて状況が落ち着いたため駆けつけられたと告げる。バックルームから事情も聞いており、魂で己を強める発想が危険であることを共有しつつ、これ以上の犠牲を出す前に止めるべきだと一致する。ウクラマトは最後の力を貸してほしいと仲間に頼み、カチュアはここで同行を終えると告げて、必ず無事に帰れと言い残す。あなたたちは連れ立って頂上へ向かう。</p><p>雲の向こうで待っていたのは、想像を超える巨大な門だった。ヴォイドゲートに見えたが、ヤ・シュトラは「第十三世界」へ通じるものではないと断じ、別の鏡像世界への門である可能性を示す。現実の融合が始まりに過ぎなかったと悟る間もなく、ゾラージャが姿を現す。生者が保てる限界を超えるほどのエーテルを抱え込み、吸収した魂によってヴォイドの王に比肩する力へ到達した代償が、その姿に滲んでいた。ウクラマトは自らを「トライヨラの決意の誓約者」と名乗り、相手を「アレクサンドリアの決意の王」と呼び、血と務めのすべてを賭けた最後の戦いを宣言する。ゾラージャは、内に抱えた魂を最後の一片まで燃やし尽くし、「奇跡」を証明して父の真の後継者だと示すのだと吼える。</p><p>激闘の末、倒れたゾラージャの前にグルージャが立ち、痛みと戸惑いのままに問いかける――なぜこうなったのか、なぜ自分は父を知らないのか、なぜ望まれなかったのか。ゾラージャは、己もまた父に拒まれ、王座も遺産も何ひとつ残されなかったのだと語り、汗して得たものを「受け入れるか拒むかはおまえ次第だ」と置いていく。父にも、ラマティにも及ばず、強靭なる子が追い求めた奇跡は潰えたのだと。ウクラマトは怒りを爆発させ、父が何も残さなかったと思うなと言い捨てる――誰にも渡せない唯一のもの、おまえとグルージャを残していたのだと。</p><p>だが終わりではなかった。スフェーンが現れ、あなたたちが「決意の王」を討ったことへの感謝と、あなたたちにしたことへの悔いを口にする。ウクラマトは謝罪で死者は戻らないと突き放しつつも、報復で戦争を招けば無辜の命がさらに失われると理解し、共存の道を探るべきだと言う。スフェーンは「もう遅い」と告げ、エンドレスを維持するために死者から生まれる生命力が必要で、ゾラージャと協力したのだと明かす。生身であろうと否と、民は等しく愛しいのだと。アリゼーが生者を犠牲にしてはならないと訴えても、スフェーンは「記憶される限り死なない」と言い、カチュアの存在が空虚だとは認めない。自らを「アレクサンドリアのスフェーン女王の記憶の担い手」と宣言し、異界融合の鍵にまつわる伝承と、プレザベーションの科学者がその力を追った経緯を語る。完全には制御できなくとも、リビング・メモリーの住民を支えるためにはその力に縋るしかない――流血で救えるなら、史上最も残酷な女王になるとまで言い切って去っていく。</p><p>残されたあなたたちは、脅威がゾラージャからスフェーンへ移ったことを突きつけられる。ヤ・シュトラは、スフェーンの本体は向こう側の鏡像世界にある可能性が高いが、門は閉じ、カチュアの器も同時に機能を失ったと見る。ウクラマトは「遠隔で器を動かす」と聞いていたことを思い出し、胸騒ぎを抑えられない。エレンヴィルは、村の者がカチュアを覚えていないと告げ、ナミッカのときと同じ現象だと重ねる。結論は避けられず、カチュアもまたエンドレスだった――淡いエーテルで保たれた無機の器は、接続が断たれればただの抜け殻になる。エレンヴィルは、母が最初から死んでいたのだと認めざるを得ない。</p><p>それでもあなたたちは立ち止まらない。ヤ・シュトラは別の通路を探ると言い、アルフィノはこの場所を調べて手がかりを見つけようと促す。エレンヴィルも知識と経験を差し出し、できることは何でもすると申し出る。アリゼーはあなたに、グルージャを連れて下へ戻り休むよう提案し、ウクラマトも同意する――バックルームへ状況を伝える必要もある。戻った先でグルージャは大丈夫だと言い、ウクラマトはゾラージャに関しては後悔がないと語る一方で、スフェーンを止められなかったことを悔やみ、ようやく疲労を吐き出すように休息を求めるのだった。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> カフキワ <small class="muted">（ヘリテージファウンド, X:15.6, Y:5.1）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="unto-the-summit.html">エバーキープ屋上へ</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 99</div><div class="row"><b>ダンジョン開放</b> <a class="link" href="origenics.html">魂魄工廠 オリジェニクス</a></div><div class="row"><b>討伐戦開放</b> <a class="link" href="everkeep.html">ゾラージャ討滅戦 エヴァーキープ</a></div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-new-family.html">新たな家族を迎えて</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'奇蹟之子',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Alisaie 說她已經和 Alphinaud 聯絡過，有龍族的援軍趕也趕到 Tuliyollal 參戰；這消息沒有帶來鬆懈，反而把你們的決心再一次拉緊。G’raha Tia 望向 Everkeep 的頂端，像是終於要揭開雲層遮住的真相；Krile 也表明她會同行，因為她一直努力的，就是為了能站在這裡。Wuk Lamat 斬釘截鐵地說：Zoraal Ja 已經不是王了——為了 Tuliyollal、也為了世界，你們必須終結他的瘋狂。</p><p>Cahciua 隨即指出 Origenics 的入口位在 Everkeep 的背面，你們可以走水路抵達，所以你們前往 the Driftdowns 的碼頭。到了那裡，作戰細節被攤開：Origenics 會在特定時間收貨，你們就挑那個時間點，搭乘「懸浮貨櫃」潛入設施。Kiluwsa 會負責駕駛，你們只要坐穩直到抵達入口；the Backroom 的同伴會製造騷動當作掩護，讓你們能趁亂溜進去，接著一路往上，遇到阻礙就清掉，直衝頂端。</p><p>出發前，G’raha Tia 提醒要隨時與支援隊保持聯繫、根據意外狀況調整；Krile 則拿出向 Shale 借來的通訊器，表示會把進度與情報即時回報。Cahciua 確認你們都理解後，催促你們很快就要出發——務必做好準備。</p><p>進入 Origenics 後，阻礙立刻找上門。某處的門鎖打不開，Cahciua 立刻請 Shale 協助處理；在通訊的指引下，你沿著通道前進，找到能把你們送往 Everkeep 第十一層的電梯——那裡已經只差一步就到頂端。你們在那裡看見成排的靈魂細胞，Cahciua 說這是用來存放靈魂的地方；Wuk Lamat 立刻意識到，那些在襲擊中死去的人，他們的靈魂理應被處理後送到這裡存放。可 Alisaie 指出，正常載入的靈魂細胞會亮起綠光，但現在大多數都熄著——Wuk Lamat 的恐懼瞬間成形：Zoraal Ja 會不會早就把靈魂都用光了，甚至為了調節器而砍下自己人？</p><p>就在你們準備繼續推進時，援軍現身。Alphinaud、Y’shtola、Estinien 趕到，說 Tural 目前已經穩住，敵軍撤退後他們得以抽身前來支援；the Backroom 也已經把簡報交代給他們。Y’shtola 提到「用靈魂強化自己」讓她想起 voidsent（來自 The Thirteenth 的虛界生物，常以吞噬以太／靈魂來增強自身）的作法，但眼下更重要的是阻止事態繼續惡化；Alisaie 也直言 Alexandrians 的死傷沉重，你們必須在更糟之前攔下 Zoraal Ja。Wuk Lamat 感謝你們一路相伴，並請你們最後再借她一次力量；而 Cahciua 則在此告退，要你們一定要完整回來。你們隨即向 Everkeep 的頂端前進。</p><p>頂端的景象讓你們一瞬間失語：那像是巨大的裂口，Alisaie 甚至懷疑是 voidgate（通往 The Thirteenth（第十三世界）的虛界之門），可 Y’shtola 判斷它並不通往 the Thirteenth。她推測，那很可能是通往另一個鏡像世界的門；G’raha Tia 也感到震撼——原來現實的融合只是開端。推測還沒來得及延伸，Zoraal Ja 已經出現：他吸收了太多靈魂，體內的 aether 遠超生者能承受的極限，換來足以匹敵 voidsent 之王的力量，卻也付出可怕代價。Wuk Lamat 喊他「兄弟」時，他只覺得刺耳，甚至迷失在「自己到底是誰」的質問裡；Wuk Lamat 則明確報上名號——她是 Tuliyollal 的「決意之誓約者」，而他是 Alexandria 的「決意之王」。她宣告這是最後一次交鋒，為了職責、為了血緣、為了一切；Zoraal Ja 回應，他會把體內那群靈魂燃到最後一粒塵埃，殺了你們來證明「奇蹟」，證明自己才是爸爸真正的繼承者。</p><p>當戰鬥終於落幕，Gulool Ja 面對倒下的爸爸，哭著問他為什麼要變成這樣、為什麼自己會不認識他、為什麼他不想要自己。Zoraal Ja 說，他連當爸爸都做不到，因為他自己的爸爸也曾拋棄他——沒給他王座、沒給他遺產、什麼都沒留下，所以他也覺得自己無法留下任何東西給 Gulool Ja。可他仍把「靠自己汗水得來的一切」交出去，讓 Gulool Ja 自己選擇要擁抱還是拒絕；他承認自己走的是毀滅之路，既無法超越爸爸，也無法超越 Lamaty’i，那個他想證明的「強韌之子」與「奇蹟」終究只是空話。Wuk Lamat 聽到他說「爸爸什麼都沒留給你」時徹底爆炸，怒罵他是笨蛋——爸爸留給他的，是誰都無法取代的唯一：他自己，還有 Gulool Ja。</p><p>然而真正的麻煩並沒有因此結束。Sphene 出現，感謝你們討伐「決意之王」、拯救她的人民，也為她對你們造成的傷害致歉。Wuk Lamat 冷冷回應，道歉換不回死者，也洗不掉罪；但她也拒絕用復仇把兩國推入全面戰爭，表示即使現在無法成為朋友，也必須尋找讓 Tuliyollal 與 Alexandria 共存的道路。Sphene 卻說「不可能」：她之所以與 Zoraal Ja 合作，是因為必須依靠被殺者釋出的生命力來維持 Endless；即使計畫被背叛、軍勢被擊潰，她也不願失敗——不論擁有肉身與否，她的人民都同樣珍貴。Alisaie 明確反對「犧牲活人去拯救死者」的錯誤，Sphene 則堅持只要被記得就不會死，她不接受 Cahciua 的存在只是空殼、可以任其消散。她宣稱自己是「Alexandria 的 Queen Sphene 記憶的承載者」，並說明一段傳說：曾有一族在自身世界遭逢災厄時，靠著一把能回應強烈願望的「鑰匙」逃往你們的世界；那把鑰匙牽涉到跨界融合，而 Preservation 的科學家以此為最重要任務，卻只得到「部分控制」。即便如此，為了維持 Living Memory 的居民，她仍要動用它——如果流血能救她的子民，她就會成為史上最殘酷的女王。</p><p>在混亂的餘韻中，你們不得不把目光從 Zoraal Ja 轉向 Sphene 的威脅。Y’shtola 推測 Sphene 的真正形體多半在門另一端的鏡像世界，但門已經關閉；更糟的是，Cahciua 的「容器」也在門關上的瞬間失去功能。Wuk Lamat 想起 Cahciua 曾說自己是遠端操作容器，立刻擔心她是否出了事；而 Erenville 聽見 Sphene 對「母親」說的話後，回想起更可怕的徵兆——來自他村子的人，沒有人記得 Cahciua，這和你們看過「認識 Namikka 的人突然不記得她」完全一樣。你們終於不得不說出口：Cahciua 也是 Endless（以死者的記憶為本體、在 Living Memory 中被系統維持的存在），是由記憶重塑出的存在；她的容器就像 Sphene 投射到機械上的形態一樣，都是帶著微弱 aether 的無機物，一旦 aether 消散，就只剩沒有生命的空殼。Erenville 被迫承認：他的母親其實早就死了，只是一直瞞著所有人。</p><p>即便如此，你們仍要繼續。Y’shtola 表示會去尋找替代的通行方法；Alphinaud 提議先從這裡開始調查，找出關於門另一端的線索；Erenville 也急切地表示願意做任何事來幫忙。Alisaie 建議你先帶 Gulool Ja 回下方休息，讓其他人繼續調查；Wuk Lamat 也同意，因為你們還得把最新發現回報給 the Backroom。回到那裡，Gulool Ja 說自己沒事、不用擔心；Wuk Lamat 則坦言一切發生得太快，她還在努力消化，但對 Zoraal Ja 她毫無後悔——她只遺憾沒能也把 Sphene 一起攔下，沒能阻止她走向那條錯誤的道路。最後，疲憊終於壓過話語，她只能低聲承認：她真的需要休息。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 卡芙琪娃 <small class="muted">(遺產之地, X:15.6, Y:5.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="unto-the-summit.html">前往 Everkeep</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.99</div><div class="row"><b>解鎖地城</b> <a class="link" href="origenics.html">靈魂工廠</a></div><div class="row"><b>解鎖試煉</b> <a class="link" href="everkeep.html">Zoraal Ja 討滅戰</a></div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-new-family.html">迎接新的家人</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
