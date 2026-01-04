@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Unto the Summit | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Unto the Summit (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/xR2w0yFIFSA"
+              title="Unto the Summit" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Unto the Summit</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Unto the Summit`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>You rouse yourself after a short rest, and Cahciua wastes no time—she calls for everyone to be gathered at once. The situation has only grown more urgent: during your confrontation with him, Zoraal Ja demanded that Wuk Lamat come to the tower’s summit, yet the emergency lockdown has sealed the elevators. Shale admits their efforts to lift the access restrictions are stalling, and you can feel the window narrowing with every passing moment.</p><p>Cahciua lays out what she believes is the only remaining path. Solution Nine sits on Everkeep’s ninth level, while the summit lies on the twelfth. The map cuts off before it reaches the top; the king and queen’s residence is said to be there, but the details are tightly classified, leaving you without reliable map data. What they do have, she says, is trustworthy intelligence for everything up to the eleventh level—and a route that runs straight through it.</p><p>She points to Origenics: the facility where souls are separated and refined for use. The process begins at the base, extracting souls from regulators and fiends. Those souls are then carried upward to an aetheric separator, where memories are cleansed away, before being sealed into soul cells for distribution. G’raha Tia recoils at the implication—what you’re hearing echoes the way souls are broken down in the aetherial sea, rebuilt here as a manufactured system.</p><p>Ethics can wait, Cahciua insists. What matters is that Origenics runs vertically from the first level to the eleventh—and if Zoraal Ja truly intends to strengthen himself with the people’s souls, the facility will be operating to process and send those souls directly to him on the twelfth. Krile connects the final dot: to reach him, you’ll fight your way through Origenics. Security will be brutal, but if you’ll brave the route, they’ll support you however they can. Wuk Lamat answers for everyone—there’s no question you’re going. Cahciua adds that she’s coming too; you’ll need guidance inside, and this body makes her best suited to lead you through.</p><p>Before you move, Erenville stops the momentum with the question he can’t swallow anymore: you’ve known all along that Sphene is an Endless, haven’t you? Cahciua confirms it—and when he demands to know why you weren’t told, she admits the truth without apology: it didn’t seem relevant to the immediate crisis, it was complicated to explain, and it would have distracted you from dealing with Zoraal Ja. She turns the focus back to the mission and asks Erenville to provide support from behind. He agrees, and afterward tells you he has more he wants to say—but not now. Someone must keep Tuliyollal informed, and other matters can wait until the work is done.</p><p>Out in Everkeep Ward, the resolve hardens into something sharp. You hear that dragons came to Tuliyollal’s aid, and it steels the group’s determination rather than easing it. G’raha Tia looks toward the summit as if he can already see past the clouds, and Krile insists she’s coming—this is what she has worked to be part of. Wuk Lamat’s judgment is final: Zoraal Ja is no king anymore. For Tuliyollal—and for the world—you’ll put an end to his madness.</p><p>With everyone assembled, Cahciua confirms the headcount and sets the pace: you’ll reach the summit in one push. It will be a grueling climb, so you make your preparations as though you won’t get a second chance—because you likely won’t.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Cahciua <small class="muted">(The Backroom, X:5.9, Y:6.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-comforting-hand.html">A Comforting Hand</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 99</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-resilient-son.html">The Resilient Son</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'エバーキープ屋上へ',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>休息を終えると、カチュアはすぐにあなたへ呼びかけ、全員を集めるよう促す。敵はあなたたちに「塔の頂上へ来い」と告げていたが、非常事態のため昇降機は封鎖されていた。解除を試みても見通しは立たず、時間だけが容赦なく削れていく。</p><p>彼女は、別の道があると告げる。あなたたちがいる階層より上には頂上があり、地図は途中で途切れている。最上部の居住区画に関する情報は秘匿されていて、確かな地図情報は得られない。だが、ひとつ手前の階層までなら信頼できる情報がある――そこへ至る縦に伸びた施設を通れば、道はつながるという。</p><p>その施設は、魂を分離し精製するための場所だった。基部で装置や魔物から魂を回収し、上層へ運び、分離装置で記憶を洗い落とす。最後に魂を容器へ詰め、配給するために流通させる。自然の循環を模して魂を加工するその仕組みに、あなたは背筋の冷たさを覚える。</p><p>だが今は是非を論じる時ではない。施設は最下層から上の階層まで縦に連なっており、もし敵が民の魂で己を強めようとしているのなら、魂は処理され、最上部へと直接送られているはずだ。ゆえにあなたたちは、その施設を突破して頂上へ向かう。警備は厳重だが、後方から支援は尽くすと言われ、あなたは迷わず前へ出る。案内が必要だからと、カチュアも同行を申し出る。</p><p>出発の前に、エレンヴィルがあなたたちを呼び止める。「女王がエンドレスであることを、最初から知っていたのか」と。カチュアは肯定し、今は説明に時間を割くべきではなかったと告げて、行動を優先する。前線へ出る者は塔の前へ集まり、残る者は後方支援に回る。エレンヴィルは同意し、あなたへ「他の話は後だ」と言い聞かせるように、任務に集中してくれと背中を押す。</p><p>やがて合流地点で、援軍が本国を助けたという知らせが届く。仲間は頂上を見据え、あなたもまた視線を上へ向ける。同行を決めた者は、ここへ至るために積み重ねてきた覚悟を口にし、そして敵を「王ではない」と断じる。世界のために、あなたはその狂気に終止符を打つと決める。</p><p>全員の準備が整うと、カチュアは一気に頂上まで押し切ると宣言する。過酷な登攀になる――あなたは二度目がないつもりで、装備も心も整えて踏み出す。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> カフキワ <small class="muted">（バックルーム, X:5.9, Y:6.2）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-comforting-hand.html">痛みに手を重ねて</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 99</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-resilient-son.html">奇跡の子</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'前往 Everkeep',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你休息得差不多了，Cahciua 立刻催你行動——把大家都召集起來。她說得很清楚：在你們與他正面衝突時，Zoraal Ja 指名要 Wuk Lamat 上到塔的頂端，可是緊急狀態已經把電梯全面封鎖。Shale 一邊想辦法解除限制，一邊也不得不承認：目前看起來並不樂觀。</p><p>Wuk Lamat 問還有沒有其他辦法能抵達 Zoraal Ja，Cahciua 回答「有」。Solution Nine 位於 Everkeep 的第九層，而頂端在第十二層；可地圖在途中就被切斷，因為據說王與女王的居所設在那裡，資訊高度機密，所以沒有地圖資料。不過，她們掌握了直到第十一層為止的可靠情報——而且有一條路線，能從底部一路向上貫穿到那裡。</p><p>那條路線的核心是 Origenics：一座用來「分離並精煉靈魂」的設施。流程從底部開始——把靈魂從調節器與魔物身上抽取出來，再把那些靈魂運送到以太分離裝置，洗去其中的記憶，最後把靈魂封進「靈魂細胞」中，準備分配出去。這套做法近乎重現了以太之海分解靈魂的過程，聽得你心裡發寒。</p><p>Cahciua 說，這確實是違逆自然，但眼下不是討論倫理的時候。重點是：Origenics 從第一層一路垂直延伸到第十一層；如果 Zoraal Ja 真打算用人民的靈魂來強化自己，那這座設施此刻就會運作，把處理完成的靈魂直接輸送到第十二層交到他手上。Krile 立刻抓住關鍵——要抵達 Zoraal Ja，你們就必須穿越 Origenics。警備一定極嚴密，但只要你願意冒這條路，她們會盡全力支援。Wuk Lamat 毫不猶豫地表態：你們一定會去。Cahciua 也決定同行，因為你們需要現場引導，而她現在這副身體最適合帶路。</p><p>就在出發前，Erenville 擋下你們的腳步，問出他壓了許久的疑問：你們一直都知道 Sphene 是 Endless，對吧？Cahciua 直接承認。當他追問為何不說，Cahciua 的回答冷靜到近乎殘酷——她覺得那並不影響當下要處理的事，解釋起來太複雜，不值得在這節骨眼分散心力；現在最重要的是對付 Zoraal Ja。她要出發的人到塔前集合，也請留守的人從這裡提供支援。Erenville 最終點頭，並在之後對你說：他還有話想談，但先放著；必須有人把 Tuliyollal 的狀況隨時傳回去，其他事都等任務結束再說。Shale 也承諾會提供一切能給的支援，要你務必小心。</p><p>在 Everkeep Ward，團隊的意志反而更集中。你得知 dragons 已經趕到 Tuliyollal 助戰，而這消息沒有讓人鬆懈，反倒像把每個人的決心再次拴緊。G’raha Tia 望向 Everkeep 的頂端，像是終於要揭開雲層遮住的一切；Krile 表示她也要同行，因為她一直努力的，就是為了能站在這裡。Wuk Lamat 的判決不容動搖：Zoraal Ja 已經不是王了。為了 Tuliyollal——也為了這個世界——你們必須終結他的瘋狂。</p><p>Cahciua 確認所有人都到齊後，宣布要一口氣衝到頂端。這會是一段艱苦的攀登，所以你把準備做到毫不保留——像是再也不會有第二次機會一樣。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 卡芙琪娃 <small class="muted">(後台, X:5.9, Y:6.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-comforting-hand.html">將手輕覆在傷痛之上</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.99</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-resilient-son.html">奇蹟之子</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
