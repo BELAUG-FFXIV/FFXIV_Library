@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>In Pursuit of Sphene | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – In Pursuit of Sphene (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/B2NVQdVulHI"
+              title="In Pursuit of Sphene" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">In Pursuit of Sphene</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`In Pursuit of Sphene`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Koana speaks quietly of what happened at Everkeep—how Zoraal Ja would spare no souls to revive himself in battle, because pride would allow nothing else. Gulool Ja lingers beside him, wishing there were anything he could do. After you and Wuk Lamat finish catching Koana up, a call comes through. Wuk Lamat answers, confirms you’re with her, and quickly agrees to meet at Sunperch. With word that Y’shtola is already on her way back—and the faint hope that she’s found a path to pursue Sphene—you set out ahead to Sunperch while Wuk Lamat contacts the Landsguard.</p><p>At Sunperch, Y’shtola arrives at last and apologizes for the delay. Everyone is gathered—G’raha Tia, Alisaie, Krile, and Shale—and the air tightens with expectation as you hear the news: they believe they’ve found a way to travel to the reflection where Sphene has retreated. Alisaie admits she was busy providing aid in Solution Nine and asks to hear it from the beginning, so Y’shtola lays out what they know.</p><p>By Sphene’s own words, the gate atop Everkeep was opened and closed by the power of interdimensional fusion, and the artifact known as the key let her control it. Krile adds what Ketenramm told her: the key was brought with her to the Source twenty years ago and kept in the palace until Zoraal Ja stole it—then used it in Yyasulani to fuse a portion of your world with that reflection. When Zoraal Ja fell, Sphene seized the key and vanished through the gate.</p><p>But where did that gate truly lead? In searching for the answer, they took another look at Origenics and uncovered something that changes everything. Everkeep’s summit should have had one more level—the twelfth, the King of Resolve’s royal abode—yet when you went there, it simply wasn’t there. Their analysis of Origenics’s logs revealed where the memories of the departed were being sent: through the gate, to that missing twelfth level. That level alone must have lain outside the fused region and so was left behind—and you realize what it means. Sphene fled to her own reflection, returning home to join the memories of her departed citizens.</p><p>The problem is immediate: with the key now in Sphene’s hands on the other side, you have no means to reopen Everkeep’s gate. Krile proposes another path—another gate—and says they know exactly where one is: the Skydeep Cenote. All evidence suggests the gate there leads to the world whence the Alexandrians and Krile came. As for how to open it, Shale reminds everyone that Krile’s earring is a data storage device, and its analysis yielded a code used to control a contraption—an enormous one. Given how Krile arrived at the Source, they believe that contraption is the gate to the golden city. It’s an educated guess, but hope runs through the group as the plan finally takes shape, and you set your course for the Skydeep Cenote.</p><p>Back in Tuliyollal, Wuk Lamat confirms she has informed the Landsguard officers of her intention, and they fully support the endeavor. Gulool Ja can barely contain himself and asks why you aren’t leaving already, but Koana asks you for a moment before setting forth. He admits he meant to save something for later, yet with events moving so quickly, now feels like the right time. He invites you to come with him to Bayside Bevy.</p><p>At Bayside Bevy in High Tide Harbor, Koana thanks you for the valor that has kept Tuliyollal safe and presents a token of that gratitude: special equipment commissioned for you, incorporating foreign technology. He tells you that Mewazunte has it in his keeping—only say the word, and it will be brought out. From this point, you can obtain job-specific weapons and gear from Mewazunte: they can be equipped at level 99 with item level sync applying to their stats until you reach level 100 on that job, and they can be dyed once you complete that job’s role quests. Koana vouches for the artisans’ work without hesitation—and Gulool Ja grins, certain it will look good on you.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Wuk Lamat <small class="muted">(Tuliyollal, X:15.8, Y:4.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-new-family.html">A New Family</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 99</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="through-the-gate-of-gold.html">Through the Gate of Gold</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'彼女を追うために',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>コーナは静かに語る。エバーキープでの戦いのさなか、ゾラージャは己を蘇らせるために魂を惜しむことなどしなかったのだろう、と。誇りがそれを許さないはずだ、と。そばでグルージャは、何か力になれることがあればいいのに、と小さくこぼす。あなたとウクラマトがコーナに状況を伝え終えたところで連絡が入り、ウクラマトは応答して、あなたが一緒にいることを告げると、金凰の間で会おうと約束する。ヤ・シュトラが戻るという知らせに、スフェーンを追う手がかりが得られたのではないかという淡い期待を抱きながら、あなたは先に金凰の間へ向かい、ウクラマトはランドガードへ連絡を入れる。</p><p>金凰の間で待つあなたたちのもとへ、ヤ・シュトラが到着し、待たせたことを詫びる。グ・ラハ・ティア、アリゼー、クルル、そしてシェールも揃い、場の空気が引き締まる。話によれば、スフェーンが退いた鏡像世界へ渡る手段が見えてきたという。ソリューション・ナインで支援に追われていたアリゼーが最初から説明してほしいと頼むと、ヤ・シュトラは知り得た事実を順に語り始めた。</p><p>スフェーン自身の言葉によれば、エバーキープ頂上のゲートは次元融合の力によって開閉され、遺物であるキーがその制御を可能にしていた。クルルはケテンラムの証言を添える。キーは二十年前にクルルとともに原初世界へ持ち込まれ、王宮で保管されていたが、ゾラージャに盗まれ、ヤースラニでこの世界の一部と鏡像世界の一部を融合させるために使われた。ゾラージャの死後、スフェーンはキーを手にしてゲートの向こうへ姿を消した。</p><p>だが、あのゲートはどこへ通じていたのか。答えを求めて、彼女たちは魂魄工廠 オリジェニクスを改めて調べ、衝撃の発見に至る。エバーキープの頂には本来もう一層が存在するはずだった。第十二層――決意の王の王宮である。ところが実際に辿り着いたあなたたちが見たのは、そこに何もないという事実だった。そこでオリジェニクスの記録を解析し、死者の記憶がどこへ送られているのかを追ったところ、その行き先はゲートの向こう、失われた第十二層だったのだという。その一層だけが融合領域の外にあり、取り残されたのだろう――つまり、スフェーンは己の鏡像世界へ帰還し、亡き市民の記憶へ合流しようとしているのだと、あなたは理解する。</p><p>しかし問題もまた明白だった。キーは向こう側でスフェーンの手にあり、こちらからエバーキープのゲートを再び開く術はない。そこでクルルは別のゲートを用いると告げる。天深きセノーテだ。そこにあるゲートは、アレクサンドリアの民とクルルが来た世界へ通じている可能性が高いという。開く方法について、シェールはクルルの耳飾りがデータ保管装置であり、解析によって巨大な装置を制御するためのコードが得られたことを思い出させる。クルルが原初世界へ来た経緯を踏まえれば、その装置こそ黄金郷へのゲートである可能性が高い――推測にすぎないとはいえ、希望は確かな形を帯び、あなたたちは天深きセノーテへ向かう計画を固める。</p><p>トライヨラへ戻ると、ウクラマトはランドガードの将校たちに意志を伝え、全面的な支持を得たと報告する。早く出発しようと急かすグルージャをなだめつつ、コーナはあなたに少し時間をもらえないかと願い出る。後に渡すつもりだったが、事態が動いた今こそ渡すべきだというのだ。あなたはコーナに導かれ、連なる丘の先、満ちた玄関のベイサイド・ベヴィーへ向かう。</p><p>ベイサイド・ベヴィーでコーナは言う。トライヨラが保たれているのはあなたの武勇あってこそであり、その感謝のしるしとして特別な装備を用意した、と。異国の技術を取り入れているらしく、ウクラマトはコーナらしい趣向だと笑う。装備はメワズンテが預かっており、ひと声かければ受け取れるという。以後、あなたはメワズンテからジョブ専用の武器と防具を受け取れるようになり、九十九で装備できるが能力は同調され、百に達すれば同調は解除される。さらに該当ジョブのロールクエストを終えれば染色も可能になる。コーナは職人たちの出来を保証し、グルージャはきっと似合うと無邪気に笑った。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ウクラマト <small class="muted">（トライヨラ, X:15.8, Y:4.1）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-new-family.html">新たな家族を迎えて</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 99</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="through-the-gate-of-gold.html">黄金の扉の先へ</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'追尋 Sphene',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Koana 低聲談起 Everkeep 的那一戰——Zoraal Ja 為了在戰鬥中復甦自己，毫不猶豫地耗盡所有靈魂；你也明白，那樣的選擇，恐怕正是出於他的驕傲與固執。Gulool Ja 在一旁悶悶地說著：他真希望自己能幫上什麼忙。你和 Wuk Lamat 把情況都告訴 Koana 後，通訊忽然響起；Wuk Lamat 接起來，確認你就在她身邊，隨即約定在 Sunperch 會合。她提到 Y’shtola 正在趕回來——你忍不住盼望，她或許已經找到能追上 Sphene 的線索。於是你先一步前往 Sunperch，而 Wuk Lamat 則去聯絡 Landsguard 的士兵。</p><p>到了 Sunperch，Y’shtola 終於現身，先為讓大家久等而致歉。G’raha Tia、Alisaie、Krile、Shale 都已到齊，眾人的目光不約而同收束在同一個答案上——你們相信，已經找到前往 Sphene 退去的那個鏡像世界（也是一種平行世界的概念）的方法。Alisaie 說自己先前忙著在 Solution Nine 協助救治，還沒聽到細節，便請 Y’shtola 從頭說起。</p><p>Y’shtola 依照 Sphene 的說法整理出關鍵：Everkeep 頂端的 gate 之所以能開啟與關閉，是靠 interdimensional fusion （把兩個不同次元／世界（原初世界與某個鏡像世界）的部分區域，短時間內融合在一起）的力量；而讓她得以操控一切的，正是那件被稱為 key 的神器。Krile 接著補上 Ketenramm 的資訊：key 在二十年前隨她一起被帶到 the Source（原初世界），之後一直存放在宮中，直到被 Zoraal Ja 偷走——他在 Yyasulani 以鑰匙為媒介，將你們世界的一部分與那個鏡像世界的一部分強行融合。等到 Zoraal Ja 死去，Sphene 便奪回鑰匙，穿過黃金之門消失無蹤。</p><p>可那道門究竟通往哪裡？為了找出答案，你們重新檢視 Origenics，竟有了驚人的發現。你們都知道，Everkeep 的頂端本該還有更上一層——第十二層，決意之王的王宮；可你們真正抵達時，那一層卻彷彿從未存在。Shale 說，他們分析 Origenics 的紀錄，追查死者的記憶被送往何處，結果竟發現它們穿過黃金之門，被送往那個消失的第十二層。那一層很可能位於融合區域之外，因此在融合發生時被「留在原處」。你因此確信：Sphene 逃往的鏡像世界，正是她自己的故鄉——她回到那裡，是為了與逝去市民的記憶相會。</p><p>然而現實也隨之逼近：鑰匙在另一側由 Sphene 持有，你們失去了重新開啟 Everkeep 門的手段。Krile 於是提出改走另一道門——Skydeep Cenote。所有線索都指向：那裡的門連向 Alexandrians 與 Krile 來自的世界。至於如何開啟，Shale 提醒大家，Krile 的耳環其實是資料儲存裝置；分析後得到了一段編碼，用來控制某種巨大的裝置。G’raha Tia 認為，結合 Krile 抵達 the Source 的經緯，那裝置很可能就是通往黃金城的大門。雖然仍是推測，但希望終於有了著力點——你們決定立刻前往 Skydeep Cenote。</p><p>回到 Tuliyollal，Wuk Lamat 表示她已向 Landsguard 的軍官說明意圖，對方也全力支持你們的行動。Gulool Ja 一直催著快出發，但 Koana 卻在啟程前叫住你，說想占用你片刻。他原本打算晚些再交給你，然而事態發展得太快，他認為現在就是時候——於是他請你跟他走一趟 Bayside Bevy。</p><p>在 High Tide Harbor 的 Bayside Bevy，Koana 鄭重向你致謝：Tuliyollal 能維持安全，你的奮戰功不可沒；因此他特地為你委託打造了一套「特別的裝備」作為心意。Wuk Lamat 說那似乎融合了外來技術，的確很像 Koana 會做出的安排。Koana 指出裝備由 Mewazunte 保管，只要你開口，他就會取出交付給你。從此你可以向 Mewazunte 取得各職業的專用武器與防具——在等級九十九便能穿戴，但能力會受到 item level sync 影響；等你以相同職業達到等級一百，同步便不再套用。若你完成該職業的 role quests，裝備也能進一步染色。Koana 以最認真的語氣保證工匠的品質，而 Gulool Ja 則笑著說：你穿起來一定很好看。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 烏克·拉瑪特 <small class="muted">(圖利約拉爾, X:15.8, Y:4.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-new-family.html">迎接新的家人</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.99</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="through-the-gate-of-gold.html">穿越黃金之門</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
