@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A Comforting Hand | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – A Comforting Hand (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/mHfMZ_cOEi0"
+              title="A Comforting Hand" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">A Comforting Hand</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`A Comforting Hand`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Otis is gone, and the shock of it sits heavy in the silence—Alisaie offers a quiet prayer for his peace, while G’raha Tia and Krile stare at the wreckage, struggling to accept that Zoraal Ja would slaughter even those he once claimed as his own. Wuk Lamat tries to put words to what the survivors have endured: in Alexandria, regulators spared people the fear of death by returning them to life—and by erasing their memories of those who died. With death blurred into something distant and unreal, being murdered again and again would leave wounds far deeper than the body.</p><p>G’raha Tia wonders where Queen Sphene has gone when her people need her most, but Wuk Lamat can only guess she’s checking other districts—and that it’s far too much for her to bear alone. So while Cahciua and her crew focus on the physically injured, you set out to find those whose injuries are invisible, starting with True Vue, and agree to regroup afterward in the Backroom.</p><p>In True Vue, grief comes at you raw and unfiltered. A stunned woman can barely believe she’s still alive, sobbing as she begs for peace and curses the king for ruining ordinary lives. A trembling man describes the repeated deaths as a living nightmare and spits out his fury—Zoraal Ja is no king to him, only a murderer who must be torn from the throne. And an exhausted man, shaken but steadying himself, speaks of Queen Sphene: rumors say she isn’t truly “alive,” that her real body exists elsewhere, yet she fought in person to protect her people—and that, to him, is all the proof he needs to call her worthy.</p><p>Back in the Backroom, Cahciua reports that Solution Nine is stabilizing and they’re preparing to move people to other levels, but Gulool Ja stands wordless, hollowed out by what he has seen. Wuk Lamat can’t leave that silence alone—she decides to tell him everything, because hiding the truth would only cut deeper later. Cahciua agrees, reminding her that above all, he needs to know he isn’t alone.</p><p>When you face Gulool Ja, his questions land like stones: people are dead because of his father, and Otis is gone too. He says it plainly—his father is a bad man, so you’re going to kill him, aren’t you? Wuk Lamat answers without flinching: you will confront him. He invaded Tuliyollal and harmed her people, and as the Vow of Resolve, she must bring him to justice. Yet she admits it isn’t simple—rage made her deny him as a brother, but years spent chasing his example don’t vanish on command. And because they are family, she believes it’s their duty to stop each other when one goes astray, even if it costs everything, as Gulool Ja’s grandfather proved.</p><p>That’s when Gulool Ja’s fear finally shows—Otis is gone, and if his father is gone too, he thinks he’ll have no one left. Cahciua urges him to look around, and Wuk Lamat promises what he can’t yet believe: he has you, and he has all of them. You will stay with him through whatever comes next. He won’t be alone again.</p><p>Afterward, Gulool Ja apologizes for not listening and for following you, admitting he wanted to stop his father—and maybe understand why he chose this path. Wuk Lamat tells him to rest, and Cahciua offers a room in the back while Wuk Lamat takes him there. Then Cahciua turns to you with the words of a mother she refuses to unleash on Zoraal Ja, choosing instead to thank you—none of this would have been possible without you. She urges you to rest too, because it isn’t over yet… and as her words begin to break into a buzzing blur, she brushes it off as an old, worn hitch—promising a meeting soon to decide what comes next.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Wuk Lamat <small class="muted">(Solution Nine, X:19.4, Y:14.3)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-protector-and-the-destroyer.html">The Protector and the Destroyer</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 99</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="unto-the-summit.html">Unto the Summit</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'痛みに手を重ねて',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>オーティスを失った痛みが、破壊の跡に重く沈む。アリゼーは静かに冥福を祈り、グ・ラハ・ティアとクルルは、この惨状がここで起きたことを信じきれずにいる。ウクラマトは、アレクサンドリアの民がレギュレーターによって「死の恐怖」から遠ざけられていたことを思い返す――あの装置は蘇生させるだけでなく、死者に関する記憶までも消し去る。死という概念が曖昧になった世界で、何度も殺される恐怖は、心に深い傷を残すはずだ。</p><p>いま最も人々が必要としているのは、民を慰撫する王の存在だとグ・ラハ・ティアは口にするが、スフェーンの行方はわからない。ウクラマトは、別の区画を巡っているのかもしれないと推し量りつつ、それでも彼女ひとりでは抱えきれないと感じていた。そこで、カチュアたちが負傷者の手当てに回るあいだ、あなたは心に傷を負った者たちを探す役目を引き受け、トゥルービューへ向かうことになる。</p><p>トゥルービューでは、助かったという安堵がすぐに嗚咽へ変わり、王への怒りが噴き出す。生き残った女性は「もう戦争に巻き込まれたくない」と泣き、震える男は、かつての事故死など比べものにならないほどの恐怖――殺され続ける悪夢――を語り、ゾラージャを偽りの王として引きずり下ろせと叫ぶ。疲れ切った男は、スフェーンにまつわる噂を口にしながらも、民を守るために自ら戦ったその姿こそが王の証だと言い切り、彼女が何者であろうと「我らの女王」だと受け止めていた。</p><p>バックルームに戻ると、カチュアはソリューション・ナインの状況が落ち着きつつあること、そして他の階層へ人々を送り出す手配を進めていることを報告する。だが、グルージャは言葉を失ったまま動かない。ウクラマトはその沈黙が気がかりで、真実から目を背けさせないためにも、あなたの前で「起きたこと」と「これから起きること」をすべて話す決意を固める。カチュアも、何より彼がひとりではないと知る必要があると背中を押した。</p><p>グルージャは、父のせいで多くの人が死んだこと、そしてオーティスまでも失ったことを、子どもなりの言葉で突きつける。そして「父は悪い人だ。だから倒すんだろう」と言い放つ。ウクラマトはうなずき、あなたとともに父に向き合うと告げる。彼はトライヨラを侵し、民を傷つけた――武王として、正義のために裁きを下さねばならない。だが同時に、家族だからこそ道を踏み外した者を正す責任があるのだと、怒りだけでは切り捨てられない年月を認めながら語り、命を賭して向き合った祖父の姿になぞらえて、逃げないと誓う。</p><p>それでもグルージャの胸に残るのは恐れだった。オーティスがいなくなり、もし父までもいなくなったら――自分には誰も残らないのではないか。カチュアは周囲を見るよう促し、ウクラマトはあなたを含めた皆がいるのだと、どんなときもそばにいるのだと約束する。やがてグルージャは、父を止めたかったこと、なぜああなったのか知りたかったことを打ち明け、疲れに負けそうなまぶたを閉じていく。ウクラマトは休むよう促し、あなたは彼を奥の部屋へ連れていく。残されたカチュアは、あなたへ感謝を伝え、休息を取るように言いかけたところで声と映像が乱れ――それでも心配はいらないと笑い、ほどなく次の一手を話し合う会議を開くと告げるのだった。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ウクラマト <small class="muted">（ソリューション・ナイン, X:19.4, Y:14.3）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-protector-and-the-destroyer.html">護る者、壊す者</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 99</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="unto-the-summit.html">エバーキープ屋上へ</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'將手輕覆在傷痛之上',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Otis 已經不在了，餘波卻還留在每個人的呼吸裡。Alisaie 低聲向他道別，祈願他終得安息；G’raha Tia 望著眼前的慘烈景象，仍難以想像事情竟會走到這一步；Krile 則壓著怒意，問著 Zoraal Ja 的惡行是否永無止境——連那些被他收作「家人」的人也不放過。Wuk Lamat 想起 Alexandria 的人之所以不再畏懼死亡，是因為他們佩戴的調節器不只會讓人復活，還會抹去你對死者的記憶；久而久之，「死亡」本身就變得模糊，甚至被遺忘。可也正因如此，被一再殺害的恐懼更像無止盡的折磨，倖存者就算身體無傷，心裡也必然需要被照顧。</p><p>G’raha Tia 說，這種時刻人們需要 Queen Sphene 出面安撫，可她究竟去了哪裡，誰也說不清。Wuk Lamat 只能猜她或許正在查看其他區域，但不管怎樣，這一切都不是她能獨自承受的。於是你們分工：Cahciua 和她的同伴先照料有外傷的人，而你則去找那些「看不見的傷口」——你們先前往 True Vue，並約好之後在 the Backroom 會合。</p><p>在 True Vue，你看到的不是戰鬥後的勝利，而是被撕碎的日常。一名女子顫聲確認「真的結束了嗎」，才剛慶幸自己還活著，就立刻哭到說不出話；她質問 Zoraal Ja 憑什麼摧毀他們的生活，只求把和平還給他們、別再把他們拖進戰爭。另一名男子回想那種「一次又一次被殺」的恐怖，說那根本是活生生的噩夢；他痛罵 Zoraal Ja 只懂戰爭、只會製造士兵，如今還把那些東西放出來屠戮人民——這不是他的王，是必須付出代價的兇手。還有一名精疲力竭的男子提到 Queen Sphene 的傳聞：她並非真正以肉身活著，而是把真正的身體置於別處，靠某種力量現身；可他親眼見到她為了人民而戰，光是這一點就足以證明她配得起王座——不管她究竟是什麼，她都是他們的女王。</p><p>回到 the Backroom，Cahciua 報告 Solution Nine 的情勢已稍微穩住，正準備把人送往其他層級安置。然而 Gulool Ja 依舊一句話也說不出來，只剩沉默。Wuk Lamat 放不下他的狀態，她說，與其把真相藏起來讓他日後被迫面對更深的痛，不如現在就把一切說清楚——已經發生的事、以及接下來可能迎來的事。Cahciua 同意，並提醒她：比任何解釋都重要的是，讓 Gulool Ja 明白他並不是獨自一人。</p><p>當你們終於與 Gulool Ja 對上眼，他的問題沒有拐彎：因為他的爸爸，很多人都死了，對吧？Otis 也不在了，對吧？他甚至直接說出口——他的爸爸是壞人，所以你們要去殺了他，對吧？Wuk Lamat 沒有逃避，她要你聽清楚：你們會去面對他的爸爸。Zoraal Ja 入侵 Tuliyollal，傷害了她的人民；身為「決意之誓約者」，她必須讓他接受制裁。可她也坦承，事情並不簡單——攻擊之後她曾被憤怒吞沒，一遍遍告訴自己那不再是她的兄弟，但那些年努力追上對方背影的記憶，不可能說抹去就抹去。正因為是家人，才更不能放任彼此走偏；她必須像 Gulool Ja 的祖父那樣，即使代價是生命，也要親自去糾正錯誤。</p><p>Gulool Ja 的害怕終於浮出來：Otis 已經不在了，如果他的爸爸也不在了，那他就真的什麼都沒有了。Cahciua 讓他看看周圍，而 Wuk Lamat 把話說得很明白——他還有你，也還有你們所有人；不管接下來要面對什麼，你們都會陪著他走下去，他不會再是一個人。之後 Gulool Ja 低聲道歉，說自己沒有聽進勸告還跟著你們走，是因為他想阻止他的爸爸，也想弄明白他為什麼會變成這樣。Wuk Lamat 讓他去休息，Cahciua 也安排了後面的房間；等你們把他安頓好，Cahciua 轉向你道謝，說若沒有你們，這一切根本撐不過去。她勸你也先休息——事情還沒結束——可她的影像與聲音忽然變得模糊、嗡嗡作響，她卻只把它當成老舊故障，說稍後會再召集會議，商量下一步該怎麼走。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 烏克·拉瑪特 <small class="muted">(Solution Nine, X:19.4, Y:14.3)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-protector-and-the-destroyer.html">守護者與毀滅者</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.99</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="unto-the-summit.html">前往 Everkeep</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
