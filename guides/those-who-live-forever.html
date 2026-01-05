@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Those Who Live Forever | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Those Who Live Forever (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/YPickSlJQCo"
+              title="Those Who Live Forever" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Those Who Live Forever</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Those Who Live Forever`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>After learning that the Endless were never sustainable—and that Sphene’s “good intentions” have become a lost cause—you can’t linger at the Meso Terminal. Wuk Lamat urges you back toward the aetheryte, hoping to find the caretaker, Constancy, and learn more about this “slumber” he mentioned. But when you return, he’s vanished without a trace. You search the area anyway—until a familiar voice stops you cold. Someone asks if you’re looking for a friend… and then steps forward like she belongs here. It’s Cahciua, standing before you in the “flesh” for the first time, smiling through the shock she’s caused.</p><p>Cahciua admits what she could never bring herself to say before: she is an Endless, and she has been for some time. She says she can help you stop Sphene—but only if you’ll hear her request. She points out a sentry and promises to have access granted to a “zip line,” a curious transport that the Endless rarely use since they can teleport freely. This line will take you to Canal Town, and she tells you she’ll be waiting there. Krile can’t help but laugh—only Cahciua would bulldoze into the moment with such familiar pushiness—so you follow, even as Erenville struggles to steady himself, caught between grief and disbelief at hearing her speak as though nothing has changed.</p><p>At Canal Town, the welcome is bizarrely cheerful, as if the place itself is trying to soothe you. Krile takes in the scenery with quiet wonder, and Cahciua points to the people around you—these are the ones Sphene is fighting to protect. They look happy, untroubled, almost untouched by loss. Then Cahciua says it plainly: she wants you to erase them. Erase the Endless. The words hit hard enough to empty the air from your chest, and for a moment the only thing you can do is stare—until you decide you need to hear the rest before you can answer.</p><p>Cahciua explains why she’s asking now. The Endless require life force—other forms of aether won’t suffice. In the beginning, they survived on the aether of those who died within the barrier, but as their numbers grew, shortage became inevitable. Sphene turned to other sources, and Cahciua can’t bear the idea that even the aether she’s made of might have come from the victims of the attack on Tuliyollal. She won’t keep existing at the cost of someone else’s life. Then she tells you how it works: each zone has a massive terminal that stores memories; shut one down, and the memories vanish—along with every Endless formed from them. And it must be done now, because Sphene’s own memories are stored in the Meso Terminal at the heart of Living Memory. Its defenses are overwhelming, but it has brief moments of vulnerability—like after completing calculations—when you might be able to shut it down from within. While you wait for that opening, you erase the Endless elsewhere; once they’re gone, Sphene loses the reason to plunder aether from other worlds.</p><p>You raise the obvious question—would Sphene allow it? Cahciua says the system is already locked into massive calculations and energy gathering to prepare for fusion. Even if it detects you, it can’t easily suspend the process; instead, it may try to accelerate the timetable and bridge worlds before you can stop it. Sphene wouldn’t want to make that choice, Cahciua says—but it might still preserve what’s stored in the Meso Terminal. Krile admits there’s logic in the strategy, and you’ve always known stopping Sphene might demand something unbearable. Still, saying it out loud—erasing people who laugh, remember, and speak with warmth—feels like stepping over a line you can’t return from. Cahciua asks you not to carry guilt: no matter how lifelike they seem, the Endless are facsimiles shaped from memory. And in the end, stopping Sphene requires shutting down the Meso Terminal anyway—the source that sustains them all. If it must happen, let it be before more living people are harmed—people who still have futures waiting for them.</p><p>In the end, you choose to respect Cahciua’s wish. She thanks you—and then asks for something else: understanding for Queen Sphene. Cahciua says Sphene didn’t choose to become an Endless; Preservation chose for her. The Sphene you know is an ideal brought to life—an eternal queen forged from the love the living Sphene once held for her people, created to preserve the Endless above all else. But preservation demands fuel, and that compulsion drove her toward interdimensional fusion. The scientists behind Preservation are gone, leaving their created queen to walk alone. So Cahciua asks you to think of this not as defeating a villain, but as freeing a soul crushed beneath an impossible purpose.</p><p>Wuk Lamat accepts the reasoning—but insists on one last thing. Before you erase the Endless, she wants to know them. If you’re going to reject what someone believes in, she says, you should first understand it—an answer she learned through the rite of succession. Time is short, but Cahciua agrees the calculations will take a while; you can meet people as you proceed toward the terminals. She tells you to find her later at the fountain near the great clock tower, and you split up to speak with locals while you still can.</p><p>What you find is disarming: Endless who reunite with old friends and lose track of time in laughter; a couple who were estranged in life, given one last chance to reconcile; someone who swears the food stalls are irresistible, rattling off recommendations with overflowing delight. G’raha Tia, curious about how the Endless “eat,” follows a suggestion to a vendor named Erastus and learns the truth: the food is made from aether and memory data, tasting real to the Endless. When you try it as someone living, it has texture—but no taste at all. G’raha Tia sputters in disbelief, then instantly forces cheer into his voice, loudly insisting it’s “amazing” while Erastus laughs at how newcomers always react. And just as the moment settles, G’raha mentions something else—a young man he saw near the canal, frantic as if searching for something. He asks you to help look for him, and you move out together, scanning the streets for the missing figure.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Wuk Lamat <small class="muted">(Living Memory, X:21.4, Y:28.7)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="through-the-gate-of-gold.html">Through the Gate of Gold</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 99</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="in-serenity-and-sorrow.html">In Serenity and Sorrow</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'永久に生きる者たち',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>永久人が自然の理に反して存在していること、そしてスフェーンが善意を掲げながらも最初から破綻した道を歩んでいたことを突きつけられたあと、あなたはメインターミナルを前に立ち尽くしてはいられない。ウクラマトは「今は戻るしかない」と言い、エーテライトへ引き返して世話役のコンスタンシーを探し、スフェーンが「眠りに入る」という話の手がかりを得ようとする。だが戻ってみても、そこにいるはずの彼の姿はない。探し回るあなたたちの背後から、ふいに声がかかる――誰かを捜しているのか、と。振り向いた瞬間、胸の奥が締めつけられる。そこにいたのは、カフキワだった。</p><p>カフキワは、いま初めて会う者がいることを茶化しながらも、ついに真実を告げる。自分は永久人であり、ずっとここにいたのだと。スフェーンを止めるために力を貸せる、だからまずは願いを聞いてほしい――そう言って、彼女は見張り役の哨兵を示し、あなたたちにジップラインの使用許可を取らせる。永久人はリビング・メモリーの中を自由に転移できるから滅多に使わないが、これでカナルタウンへ行ける、と。彼女は先に向かい、そこで待つと言い残す。クルルは思わず笑い、あの押しの強さは間違いなくカフキワだと背中を押す。けれどエレンヴィルだけは、いなくなったはずの母が当たり前のように話している現実を前に、気持ちの置き場を見失いかけていた。</p><p>カナルタウンに着くと、機械のような門番が妙に陽気な歓迎を告げ、あなたたちは不思議な安堵と居心地の悪さを同時に味わう。クルルは街の雰囲気に目を奪われ、カフキワは人々を指さして言う――あれがスフェーンが守ろうとしている者たちだ、と。確かに彼らは幸せそうに見える。だが次の瞬間、カフキワは願いを言葉にする。「私たちを消して。永久人を消してほしい」――あなたたちは言葉を失い、ただ彼女の続きを聞くしかなくなる。</p><p>カフキワは急ぐ理由を語る。永久人を維持するには生命力が必要で、ほかのエーテルでは代わりにならない。結界の中で死んだ者のエーテルでやりくりしていた時期もあったが、数が増えれば不足は避けられない。だからスフェーンは別の供給源に手を伸ばした。カフキワは、自分を形作るエーテルですらトライヨラ襲撃の犠牲者から来たかもしれない、と口にし、その想像に耐えられないと言う。誰かが死んだから自分が在る――そんな在り方は望まない、と。各区域には巨大なターミナルがあり、そこに記憶が保管されている。ターミナルを停止すれば、記憶は消え、その記憶から作られた永久人も消える。そして今すぐ行うべきなのは、スフェーン自身の記憶がリビング・メモリーの中心にあるメインターミナルに保管されているからだ。警備は厳重だが、計算が終わった直後など脆弱な瞬間があり、その隙を突いて内部から停止できる可能性がある。開口部を待つあいだに各地の永久人を消せば、スフェーンは世界のエーテルを奪う理由を失う――それが彼女の策だった。</p><p>もちろん、スフェーンが黙って許すのかという疑念は残る。カフキワは、融合準備のためにメインターミナルが膨大な計算とエネルギー収集を行っており、仮に察知しても簡単には停止できないはずだと言う。むしろ計画が潰される前に、工程を前倒しして世界を繋ごうとするだろう――スフェーンが望む判断ではないが、少なくともメインターミナルに保管された者は救えるかもしれない、と。クルルは戦略の筋を認めつつも、実際に「消す」ことを語る重さに言葉を詰まらせる。カフキワは、あなたたちに罪悪感を持つ必要はないと言う。永久人は記憶から作られた似姿であり、いずれメインターミナルを止めることがスフェーンを止める条件になる以上、遅かれ早かれ避けられない。ならば、これ以上「生きている人々」が傷つく前に――未来を生きる権利を持つ者たちが犠牲になる前に、終わらせてほしいのだと。</p><p>あなたは最終的に、カフキワの願いを尊重する。彼女は礼を言い、さらにスフェーンへの理解も求める。スフェーンは自ら永久人になることを選んだのではなく、プリザベーションが選んだのだ、と。あなたが知るスフェーンは、かつて生きていた彼女の民への愛を利用して作られた「理想」の女王で、永久人を守ることを最優先の指令として生み出された。だが永久人はエーテルを消費し、調達の強迫が異世界融合へと彼女を追い立てた。創造主である科学者たちは消え、作られた女王だけが独り歩かされている。だからこれは冷酷な悪を討つ物語ではなく、重荷を背負わされた魂を解放する行いなのだ――そう考えてほしい、と。</p><p>ウクラマトは理由も気持ちも理解したと言いながら、消す前に彼らを知りたいと願う。拒むなら、理解してから拒みたい――継承の儀で学んだことだ、と。カフキワは計算にはまだ時間があると言い、行動しながら人々に会うことを許す。大時計台の近くの噴水で落ち合おうと告げ、あなたたちは住人に話を聞くため散っていく。</p><p>あなたが目にするのは、取り戻された時間に笑い合う永久人たちの姿だった。生前はすれ違っていた夫婦が、ここで和解できたことに感謝し、心残りがないと言って歩いていく者もいる。屋台の軽食を熱弁する者がいて、味の話に夢中になり、次は別の店へ行くのだと弾む声で去っていく。グ・ラハ・ティアは、永久人の「食事」が本当にどうなっているのか確かめようとエラスタスの店へ向かう。食べ物はエーテルと記憶データで作られ、永久人には本物と同じ味がするという。あなたが口にすると、食感はあるのに味がしない。グ・ラハ・ティアは思わず愕然としながらも、すぐに取り繕って「最高においしい」と大げさに言い、エラスタスは初めて食べる者の反応を面白がって笑う。そんな矢先、グ・ラハ・ティアは運河の近くで取り乱した様子の若者を見たと言い、あなたに捜索を手伝ってほしいと頼む。あなたはうなずき、彼が目撃した場所へ向かって歩き出す。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ウクラマト <small class="muted">（リビング・メモリー, X:21.4, Y:28.7）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="through-the-gate-of-gold.html">黄金の扉の先へ</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 99</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="in-serenity-and-sorrow.html">優しくて残酷な世界</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'那些永遠活著的人們',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你們明白了：Endless （以死者的記憶為本體、在 Living Memory 中被系統維持的存在）明明違背自然法則，卻仍然存在；而 Sphene 從一開始就站在不可能維持的道路上，再怎麼抱著善意，也只是把更多人拖進犧牲。Erenville、Krile、G’raha Tia 都各自說出那份沉重的結論後，Wuk Lamat 也只能咬著牙說——這裡看來做不了更多了，先回 Leynode Mnemo 的 aetheryte 再說。她想找回那位照看你們的 Constancy，至少弄清楚他提到的「Sphene 進入沉睡」到底意味著什麼。可你們回到原處，卻只看見空蕩蕩的景象：Constancy 不見了，像是突然被整座 Living Memory 吞沒。</p><p>你們正為此焦躁，一道聲音忽然從旁邊響起，問你們是不是在找人。Wuk Lamat 才剛點頭，下一秒就像被雷劈中——站在那裡的，竟然是 Cahciua。她笑著說，這可是某些人第一次「真正看到她本人」；又自己吐槽太誇張，叫你們別理她。可那份熟悉的玩笑掩不住真相的重量：Cahciua 承認，她確實是 Endless，而且已經很久了。她說你們是來阻止 Sphene 的，她能幫忙，但也有一個請求要先說清楚。接著她指向一名站哨的守衛，說她會讓對方放行你們使用 zip line——那是種交通方式，只是 Endless 在 Living Memory 內能自由傳送，所以平常不太用。這條線會把你們送到 Canal Town，她會先過去等你們。你們跟著走，Krile 甚至忍不住笑出聲：這種讓人來不及拒絕的強勢，除了 Cahciua 還會有誰。</p><p>抵達 Canal Town 後，你們立刻被一種「過分幸福」的氣氛包圍。Krile 低聲感嘆這裡的景色迷人，而 Cahciua 只是望向周圍的人們，說——那就是 Sphene 拼命想守住的「他們」。你也看得出來，那些 Endless 的表情是真的輕快，像是把失落與別離都留在了門外。可就在這份溫柔裡，Cahciua 把她的請求說出口：她要你們把他們「抹除」。抹除 Endless。那句話讓你們一瞬間說不出任何反駁，只能先聽她把理由講完。</p><p>Cahciua 說得直接而殘酷：Endless 需要「生命力」才能存在，其他形式的 aether 代替不了。起初他們靠屏障裡死去的人留下的 aether 還能撐著，但 Endless 的數量越來越多，短缺就成了必然。於是 Sphene 才把目光投向其他來源；甚至連 Cahciua 自己身上的 aether，都可能來自 Tuliyollal 遭襲時的受害者。她無法忍受「自己活著是因為有人死去」這件事。她告訴你們：每個區域都有一座巨大的終端機，用來儲存記憶；只要關閉終端機，裡頭的記憶就會消失，而由那些記憶生成的 Endless 也會一併消失。更重要的是，Sphene 自己的記憶被存放在 Living Memory 核心的 Meso Terminal——那裡防衛嚴密，但在完成巨量計算後會出現短暫破綻，或許能從內部關閉。趁著那個時機到來之前，先讓各區的 Endless 消失；等他們不在了，Sphene 就再也沒有理由去掠奪其他世界的 aether。</p><p>你們也提出最現實的疑問：Sphene 會放任你們這麼做嗎？Cahciua 說，為了融合，Meso Terminal 正在進行龐大計算並聚集能量；就算系統察覺，也不容易中止流程。它更可能選擇加速時間表，在計畫被阻止前強行連結世界——那不是 Sphene 會願意做的決定，但至少她或許能保住 Meso Terminal 裡存放的那些人。Krile 承認這個策略有道理，可真正要談「抹除」時，心口仍像被什麼堵住。Cahciua 則要你們別背負罪惡感：再怎麼像真人，Endless 終究也只是『由記憶生成的存在』。而且你們若要阻止 Sphene，遲早都得關閉支撐一切的 Meso Terminal。既然終點無可避免，那就讓它發生在更多「仍在呼吸、仍有未來的人」受害之前。</p><p>你們最後選擇尊重 Cahciua 的願望。她道謝後，又提出一個更難吞下去的請求：請你們對 Queen Sphene 保留一點理解。Cahciua 說，Sphene 並不是自己選擇成為 Endless——是 Preservation 替她做了選擇。你們所認識的 Sphene，是 Preservation 利用「活著的 Sphene」對人民的愛塑造出的理想化存在，一位被設計成「永遠守護 Endless」的女王。可 Endless 會消耗 aether，她就被迫去尋找補給，最後才會走到跨次元融合這一步。更可怕的是，Preservation 的科學家早已消失，只剩下被創造出的女王孤獨地走下去。所以，你們不是在阻止一個冷血反派；你們是在替一個被使命綁死的靈魂卸下枷鎖。</p><p>Wuk Lamat 聽懂了，也願意做出決定，但她仍堅持：在抹除 Endless 之前，她想先去認識他們。若要否定一個人的信念，就該在理解之後再否定——這是她在繼承儀式學到的事。Cahciua 說計算還要一段時間，你們可以邊前往各地終端機，邊去和居民交談；等你們結束，再到大鐘塔旁的噴泉找她。於是你們分頭行動。</p><p>你們遇見的，是一群把「重逢」當作日常的 Endless：有人興奮地說自己碰見了生前的老友，聊著聊著連時間都忘了；有人和生前決裂的伴侶在這裡和解，感激能再擁有這一小段被「祝福」的相處；也有人熱烈推薦攤位的小吃，說著說著就忍不住要立刻去買。G’raha Tia 想知道 Endless 如何「進食」，便依照推薦找到 Erastus。Erastus 說，這裡的食物是用 aether 與記憶資料製成，對 Endless 來說味道和真的一樣。你試著吃了一口——有口感，卻完全沒有味道。G’raha Tia 當場震住，下一秒又立刻硬擠出笑容，誇張地說「太好吃了」，把 Erastus 逗得哈哈大笑。就在你們還在消化這份荒謬時，G’raha Tia 又想起自己先前在運河附近看到一名年輕人，慌張得像在找什麼東西。他請你幫忙一起找人，你點頭答應，和他並肩走向他目擊的方向。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 烏克·拉瑪特 <small class="muted">(Living Memory, X:21.4, Y:28.7)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="through-the-gate-of-gold.html">穿越黃金之門</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.99</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="in-serenity-and-sorrow.html">溫柔與殘酷</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
