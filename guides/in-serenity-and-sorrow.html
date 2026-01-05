@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>In Serenity and Sorrow | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – In Serenity and Sorrow (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/uQaoynj8ghk"
+              title="In Serenity and Sorrow" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">In Serenity and Sorrow</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`In Serenity and Sorrow`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>You and G’raha Tia split up to look for the one who seemed troubled—an Eldite man with fair hair. When you find him, he’s flustered and clearly in a hurry, but the worry spills out anyway: a lanky, monkey-like fiend snatched the engagement ring he meant for his beloved. He tracked the creature to the nearby square, yet with aether running thin, he cannot risk a fight—if he were struck down and his essence dispersed, he might not be remade for a long time, and he cannot bear that after finally being reunited with his beloved’s form once more. Even as he tries to resign himself to letting the ring go, he warns you the beast loves shiny objects… and you feel a hostile presence nearby.</p><p>You recover the stolen ring and return. The man can barely believe it when you place it in his hands—gratitude breaking through every shaken breath. G’raha Tia arrives to see the matter already resolved, and the fair-haired man introduces himself as Euclase, thanking both you and the one who first noticed his distress. With the ring reclaimed, he can finally do what he failed to do in life: ask for his beloved’s hand.</p><p>Euclase explains that they were sweethearts in life, but he died young, and she followed only decades later. Even then, they could not reunite right away—because in this place, the shortage of aether means not everyone can be given form at the same time. While memories are stored within the terminals, fewer than one in ten have bodies at present; Euclase himself has been remade three times already, and each time there seem to be fewer of them. That he and his beloved exist together now feels like a miracle.</p><p>He tells you his beloved wore a regulator, and so was spared the full sorrow of his death—yet even so, she never took another partner, living with a lingering sense that someone precious had once been part of her life. The ring is a yearning made tangible, even if it is only a construct—like these bodies. Euclase admits a small part of him wonders if any of this is wrong, but if he can make the one he loves happy again, he can’t help feeling gratitude toward Queen Sphene. Before he goes to propose, he presses tickets into your hands—gondola tickets, a reminder that even here, order is kept “the proper way.”</p><p>G’raha Tia suggests using them—before the terminal is shut down and the chance is lost. As the gondola glides over the water, he speaks quietly of what he once told you: life as a series of journeys, the future as fluid as the water beneath you. He asks if you have ever wished to be reunited with someone who has passed away—then answers for himself: he has… and yet, more than that, he wishes they had lived. Even one more day. He did everything he could, spared nothing, and still so many were beyond his power to save—so he can’t help wondering what he would have done, had he possessed a place like this. And then he asks you plainly: can you imagine spending eternity here, knowing no loss?</p><p>When you rejoin the others, G’raha Tia admits that meeting Endless like Euclase has made him understand Sphene a little better—anyone would want a long, happy future for those they love, and she shoulders that desire for all her people. Near Font of Devotion, Cahciua asks what impressions you have of the locals, and explains that reunions aren’t always chance: the terminals hold unfulfilled longings and use them to orchestrate meetings. She adds that an Endless’s appearance may reflect the happiest period of their life—a best-loved moment given shape again.</p><p>Cahciua, ever inquisitive, says she could never settle for staying within these bounds—so she learned to take control of a vessel and ventured outside. But now she asks a favor: despite the city’s gleaming surface, it is centuries old and badly run-down, and the fountains have fallen silent. If you feed aether into the control units built into the lampposts, the circuits should return—and she wants, at the end, to treat the people here to the display. You do as she asks, and the fountains blaze back into motion to everyone’s wonder—only for a familiar voice to cut through it as Namikka appears, searching for a small Xbr’aal girl. Wuk Lamat recognizes her, and their reunion spills into gratitude, pride, and a farewell heavy with love. Later, at Hydro Terminal, Cahciua tells you her memories are stored elsewhere, but shutting this terminal down will make the Endless here fade away along with this beautiful scenery—and it cannot be restored. When you choose to proceed, she murmurs a soft goodnight… and when the true face of Living Memory is revealed, the ache settles over all of you—painful, undeniable, and yet met with the only path left: forward.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> G’raha Tia <small class="muted">(Living Memory, X:16.1, Y:32.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="those-who-live-forever.html">Those Who Live Forever</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 99</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-land-of-dreams.html">The Land of Dreams</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'優しくて残酷な世界',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>あなたとグ・ラハ・ティアは、様子のおかしかった「金髪のエルダイト」を探すため、手分けして歩き回る。やがて見つけた男は慌てた様子で、急いでいるから手短に、と言いながらも事情を吐き出した。愛する人に渡すはずだった婚約指輪を、猿のように痩せた魔物に奪われたのだ。広場で魔物を見つけはしたが、エーテル不足の今、争えば危険が大きすぎる。倒されて存在が霧散すれば、再び形を得るまで長い時を要するかもしれない――百年越しにようやく、愛する人が「形」を得たというのに、それは賭けられない。男は悔しさを噛み殺しつつ、魔物は光り物が好きだから気をつけろと忠告し、あなたは敵意の気配を感じ取る。</p><p>あなたが指輪を取り戻して戻ると、男は目を見開き、震える声で礼を繰り返した。そこへ合流したグ・ラハ・ティアは、あなたがすでに事態を解決しているのを見て安堵する。男は自分の名を ユークレース と名乗り、心配してくれたあなたたちに深く感謝したうえで、ようやく生前に果たせなかったこと――愛する人に結婚を申し込む決意を口にする。</p><p>ユークレースは、生前は恋人同士だったが、自分は若くして死に、相手は数十年後に亡くなったのだと語る。けれどこの場所では、エーテル不足のせいで、誰もが同時に形を得られるわけではない。記憶はターミナルに保存されているが、今、実際に姿を与えられているのは十分の一にも満たないという。彼自身もこれまで三度、形を得てきたが、そのたびに「いるはずの者」が減っていくように感じる。それでも今、愛する人と同じ時に存在できたのは、奇跡に近いのだと。</p><p>相手はレギュレーターのおかげで、自分の死の悲しみを避けられた――それでも彼女は生涯ほかの誰も選ばず、「大切な誰かがいた気がする」という感覚だけを抱えて生きたのだという。指輪は、長く抱え続けた未練が形になったものだ。身体と同じく「構成物」に過ぎないとわかっていても、手放せなかった。正しいことなのか迷いがないわけではないが、それでももう一度、愛する人を幸せにできるなら――この世界がどれほど歪であろうと、スフェーン女王には感謝しかない。そう言って彼は、礼のしるしに「ゴンドラのチケット」を渡し、ようやく百年越しのプロポーズへ向かっていく。</p><p>グ・ラハ・ティアは、そのチケットを使おうとあなたに提案する。ターミナルが停止されれば、もう乗れないかもしれないからだ。水面を滑るゴンドラの上で、彼は以前あなたに語った言葉を思い出させる――人生は旅の連なりであり、先に何が待つかは誰にもわからない。ここで見た光景を前に、彼はあなたに問いかける。亡くなった誰かと、もう一度会いたいと願ったことはあるか、と。彼自身はある、と答えたうえで、それ以上に「生きていてほしかった」と願ってしまうのだと言う。あと一日だけでも。救うためにできる限りのことをしたのに、救えなかった魂があまりにも多かった――だからこそ、もしこの場所のようなものを手にしていたら、自分はどうしていたのか、と。そして最後に、あなたへ静かに問う。喪失を知らずに、永遠をここで過ごす自分を想像できるか、と。</p><p>合流すると、グ・ラハ・ティアは、ユークレースのような永久人と出会ったことで、スフェーンのことが少しわかった気がすると告げる。大切な人に長く幸せでいてほしい――誰もが抱く願いを、彼女は民すべての分まで背負っているのだ、と。いたわりの泉のそばで、カフキワはあなたが出会った者たちの印象を尋ね、再会が偶然ではない場合もあると説明する。ターミナルは「満たされなかった想い」の情報をもとに、ユークレースのような再会を組み立てているのだという。さらに、永久人の姿は、その人がもっとも幸せだった時期を反映しているのではないか――そんな推測も語られる。</p><p>好奇心旺盛なカフキワは、ほかの永久人のようにここに留まれず、器を操る方法を独学して外へ出たのだと言う。だが今は頼みがある。この街は見た目こそ輝いているが、実際は何世紀も前の古い都市で、噴水も止まったままだ。街灯に組み込まれた制御装置へエーテルを流し込めば回路が戻り、噴水ショーを再現できる――永久人の彼女にはそれができないから、あなたたちに託したいのだ。あなたが装置を起動すると、噴水は眩く蘇り、人々は息を呑む。そのさなか、ナミーカが現れ、幼いシュバラール族の子を探していると告げる。ウクラマトは彼女を呼び止め、互いの想いを確かめ合い、温かな再会と別れを交わす。のちにウォーターターミナルで、カフキワは自分の記憶は別のターミナルにあるが、ここを停止すればカナルタウンの永久人も、この美しい景観も消え、元には戻らないと告げる。それでもあなたが選ぶと、彼女は「……おやすみ、みんな……」と囁き、消えゆく光景の中で、消すことの痛みを抱えながらも――あなたたちは前へ進む。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> グ・ラハ・ティア <small class="muted">（リビング・メモリー, X:16.1, Y:32.1）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="those-who-live-forever.html">永久に生きる者たち</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 99</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-land-of-dreams.html">希望のテーマパーク</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'溫柔與殘酷',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你和 G’raha Tia 分頭去找那個看起來心事重重的人——一位金髮的 Eldite。你找到他時，他明顯在趕時間，卻還是壓不住焦躁：他弄丟了最重要的東西——原本要向摯愛求婚用的訂婚戒指，被一個瘦長、像猴子一樣的魔物搶走了。他一路追到廣場，卻不敢貿然搶回來。如今以太短缺，硬碰硬太危險；若他被打倒、存在被打散，他可能要很久很久才有機會再次被「重塑」。好不容易，他的摯愛在相隔百年後才終於再次擁有形體——他不敢冒任何失去的風險。就算再不甘心，他也只能準備放棄，並提醒你那魔物很愛亮晶晶的東西。你同時感覺到一股敵意在逼近。</p><p>你把被奪走的戒指找了回來，交到他手上時，他幾乎不敢相信，連聲道謝，情緒一瞬間潰堤。G’raha Tia 也趕到現場，看到你已經把事情處理好，語氣裡帶著鬆一口氣的笑意。那名金髮男子自我介紹為 Euclase，除了感謝你，也感謝最先察覺他不對勁的那位朋友。戒指回來了，他終於能去完成那件生前沒能做到的事——向摯愛求婚。</p><p>Euclase 告訴你，他們在生前就是戀人，但他年紀輕輕就死了，而她是在數十年後才追隨而去。即使如此，他們也沒能立刻重逢——因為這裡以太不足，不是每個人都能同時被賦予形體。雖然記憶都保存在終端裡，但現在真正「有形體」的，連十分之一都不到。Euclase 自己已經被重塑過三次，可每一次醒來，都覺得能被重塑的人變得更少。即便如此，他和摯愛能在同一時間存在，仍像奇蹟一樣難得。</p><p>他說，她靠著調節器，得以避開他死亡帶來的巨大悲傷——可即便如此，她此後依舊沒有再選擇任何人，只是始終甩不掉一種感覺：她的人生裡，曾經有個非常重要的人。這枚戒指，是他長久以來的牽掛化成的形狀；他明知它只是「構造物」，就像他們如今的身體一樣，卻仍不願放手。他坦白，心底也曾懷疑這一切是否不對，可如果能再一次陪在摯愛身邊、讓她得到幸福——不管這個世界多麼扭曲，他都只剩下對 Queen Sphene 的感謝。說完，他把一疊票券交給你們——貢多拉的票，彷彿提醒你：就算在這裡，秩序依然被要求「照規矩來」。</p><p>G’raha Tia 提議乾脆搭貢多拉回去——在終端被關閉之前，這樣的體驗也許很快就不可能了。貢多拉滑過水面時，他像是想起很久以前對你說過的話：人生是一段又一段旅程，而未來就像腳下的水一樣流動不定。然後他問你：你有沒有曾經希望，能再見一次已經離世的人？他自己有——而且比起重逢，他更希望的是「那個人能活著」。只要再多一天也好，哪怕只是快樂的一天。他曾拚盡所有，想把更多靈魂從災厄中救出來，卻仍有太多超出他能及的範圍；因此他忍不住去想，如果當時他能擁有這樣的地方……他會怎麼做？最後，他把問題拋回你：你能不能想像，自己待在這裡度過永恆，從此不再經歷失去？</p><p>你們回到眾人身邊後，G’raha Tia 說，見到像 Euclase 這樣的Endless（以死者的記憶為本體、在 Living Memory 中被系統維持的存在），讓他更能理解 Sphene 的心情——任何人都會希望自己珍視的人擁有漫長而幸福的未來，而她把這份願望替所有子民扛在肩上。來到 Font of Devotion 附近，Cahciua 問你對那些居民有什麼感想，並解釋「重逢」往往不是偶然：終端會根據人們未了的牽掛與渴望，安排像 Euclase 那樣的相遇。她也推測，Endless 的外貌不一定是死去時的模樣，而可能是他們人生中最幸福、最安穩的時期所呈現的樣子。</p><p>Cahciua 說自己天生愛追根究柢，無論自然或科技都想弄明白；也正因如此，她不像其他 Endless 那樣甘於留在這裡——她甚至自學如何掌控交通工具，曾經冒險前往外界。可現在她想拜託你們一件事：這座城市看起來閃亮，實際上卻已經古老到不堪使用，許多噴水都停擺了。只要你們把以太注入周圍路燈內的控制裝置，就能讓回路復原、重新啟動噴水；而身為 Endless 的她做不到。你照她說的去做，噴水再次亮起，所有人都被那場景震住——就在此時，Namikka 的呼喊穿透人群，她在找一個年幼的 Xbr’aal 小女孩。Wuk Lamat 幾乎是被那聲音拉回原地，急切地確認彼此，終於換來一場遲來的重逢與告別。之後在 Hydro Terminal，Cahciua 提醒你：她的記憶不在這裡，所以她不會立刻消失，但一旦關閉 Hydro Terminal，Canal Town 的 Endless 與這片美景都會一起淡去，而且再也無法恢復。當你做出決定，她輕聲道別，要大家好好睡去——而真正的 Living Memory 露出原本的模樣時，所有人都明白：把 Endless 抹去的重量，遠比想像中更痛。即使如此，你們也只能帶著這份疼痛，繼續往前走。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 葛拉哈·提亞 <small class="muted">(Living Memory, X:16.1, Y:32.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="those-who-live-forever.html">那些永遠活著的人們</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.99</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-land-of-dreams.html">夢想之地</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
