@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Land of Dreams | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – The Land of Dreams (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/LxleCfyGFNg"
+              title="The Land of Dreams" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">The Land of Dreams</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`The Land of Dreams`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>You take in Living Memory’s true visage, and the reality of what you have been doing settles heavy in your chest—erasing the Endless is far harder than you had prepared yourself for. Even so, Wuk Lamat does not waver; she chose this path and will not halt her steps, while Cahciua insists the burden is hers to bear and reminds you that the Endless are facsimiles shaped from memories, not the living themselves. Krile still struggles to form the words of farewell, and Wuk Lamat answers that this is precisely why you must remember them—then urges everyone to pull themselves together and keep seeking them out. Cahciua points you toward the next zone, Yesterland, reached by another zip line at the Gate of Remembrance, and adds a final warning: shutting down a terminal should erase the Endless bound to it, but those with strong, unresolved feelings may linger—if you meet them, you should listen, because their hopes are proof they once lived.</p><p>You move out after Cahciua, keeping pace through the Gate of Remembrance toward Yesterland. Erenville, quiet but firm, tells you not to worry—he has no intention of stopping either. Krile notes that Yesterland already looks altogether different, as though each zone of this world has its own distinct character, and G’raha Tia points to the lively land ahead, wondering what manner of folk await you there.</p><p>At the entrance, a machine-like guard completes a reboot, stutters through an “error,” and then welcomes you anyway—inviting you to enjoy Yesterland, where the dreams of children and inner children alike come true. The bright cheer feels jarring against the weight you carry, but it also makes the place’s purpose unmistakable the moment you step in.</p><p>Wuk Lamat marvels that this too is a recreation of an actual place, and Cahciua explains that, in a sense, it is: Yesterland is themed on a time of peace before the Storm Surge swallowed the world in conflict—a golden age for Alexandria, captured here as an amusement park. G’raha Tia can’t help reacting to the scale of it, and when you admit you’re excited, he laughs and confesses he feels the same—perhaps that is exactly how you are meant to feel.</p><p>Cahciua tells you the terminal lies beyond the park, in a castle’s basement, and says she will go ahead and wait there—urging you to take whatever time you need to acquaint yourselves with the locals. With her gone, Wuk Lamat repeats the routine you have set: you will speak with the Endless, learn what is dear to them, and then do what you must—so you begin by exploring to get your bearings. You find children talking animatedly about “Ser Otis,” a strong knight who doesn’t get jokes but vanquishes fiends in a flash; they dream of growing up to be like him and protecting Queen Sphene. Nearby, you study a star-swirled floor fresco and an old-fashioned house reminiscent of buildings submerged in Heritage Found, and the name “Ser Otis” keeps tugging at your memory until it feels necessary to seek him out.</p><p>Before long, you spot a man locked in battle with fiends and move in to help. After the fight, the children beam at the display and the knight—calling himself Ser Otis—boasts that so long as he lives and breathes, no citizen shall come to harm, only for Wuk Lamat to freeze at the name in disbelief. She recalls meeting Otis while searching for Gulool Ja, sharing a meal he cooked, and fighting beside him in Solution Nine—yet he has never heard of any of it, insists he would remember you, and suspects villainy meant to bewilder him. Still, he cuts the exchange short, declaring he must prepare for the Founding Celebration—having promised the children he would perform in the marquee play—and departs with a hurried farewell. Left behind, Wuk Lamat tries to steady herself: he may not be the exact same as the one you knew, but the resemblance is too sharp to ignore, and she remembers Otis once said he was a test subject for soul preservation—perhaps that explains why he exists here like this. She wants to speak with him again, because there are things she needs to tell him.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Cahciua <small class="muted">(Living Memory, X:7.4, Y:27.7)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-serenity-and-sorrow.html">In Serenity and Sorrow</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 99</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-knight-of-alexandria.html">A Knight of Alexandria</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'希望のテーマパーク',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>リビングメモリーの真の姿を目にして、あなたの胸には重い実感が落ちる。覚悟はしていたはずなのに、エンドレスを消し去るという行為は、思っていた以上にきつい。けれどウクラマトは揺らがない――この道を選んだのは自分であり、歩みを止めるつもりはないと。カフキワは「苦しむ必要はない」と言い、頼んだのは自分なのだから負担は自分が負うべきだと告げる。そして、エンドレスは記憶から作られた仮の存在にすぎないのだから、消すことに罪悪感を抱かなくていいのだと念を押す。クルルはそれでも別れを口にするのがつらいと言い、ウクラマトは「生きている者の務めとして、彼らを知り、覚えていく」と応える。気持ちを立て直して探し続けよう――そう言って次の区画へ向かうよう促される。行き先はユースターランド、ゲート・オブ・リメンブランスのジップラインで行けるという。さらに、ターミナルを停止すれば紐づいたエンドレスは消えるはずだが、強い未練を残した者はしばらく留まるかもしれない――そのときは耳を傾けてほしい、彼らの願いは「かつて生きた」証だから、と。</p><p>あなたは先に向かったカフキワを追い、ゲート・オブ・リメンブランスからユースターランドへ向かう。エレンヴィルは沈黙ののち、心配するなとだけ言い、あなたと同じく歩みを止めるつもりはないと断言する。クルルは、ここは見た目からして別世界のようで、区画ごとに明確な個性があるのだろうと述べ、グ・ラハ・ティアは前方の賑やかな場所を見やり、そこでどんな者たちに出会うのかと目を細める。</p><p>入口では機械のような衛兵が再起動を終え、エラーを吐きながらも登録を確認し、ユースターランドへようこそと告げる。そこは子どもと「子どもの心」を持つ者の夢が叶う場所――どうぞ滞在を楽しんでほしい、と。軽やかな歓迎の言葉が、あなたの抱える重さと不釣り合いなほど明るい。</p><p>ウクラマトが、ここも実在した場所の再現なのかと驚くと、カフキワは「ある意味ではそうだ」と説明する。ユースターランドは、ストームサージが世界を争いへ呑み込むより前、平和だった時代をテーマにした区画で、アレクサンドリアにとっての黄金期を遊園地として形にしたのだという。グ・ラハ・ティアは大規模なアトラクションに感嘆し、あなたが胸の高鳴りを隠さないと、彼も笑って同じだと認める――そう感じるよう意図されているのだろう、と。</p><p>カフキワは、ターミナルは区画の奥、城の地下にあると告げ、自分は先に行って待つから、あなたたちは好きなだけこの地に慣れていくといいと言って去っていく。残されたウクラマトは、これまでと同じくまずエンドレスと話し、彼らが大切にしているものを知ったうえで、為すべきことを為そうと確認する。あなたは周囲を歩き回り、子どもたちが「セル・オーティス」の話で盛り上がっているのを耳にする。冗談は通じないけれど、とても強くて魔物を一瞬で倒す騎士――大きくなったら自分もそうなって、クイーン・スフェーンを守りたいのだと。星が渦巻く床絵や、ヘリテージファウンドの水没した家々を思わせる古風な家を見て回るうちに、「オーティス」という名があなたの記憶を強く揺さぶり、本人を探して確かめるべきだという考えが固まっていく。</p><p>やがて、魔物と戦う男を見つけ、あなたは手を貸す。戦いが終わると子どもたちは歓声を上げ、男は「セル・オーティス」と名乗って誇らしげに宣言する――自分が生きて息をしている限り、市民に危害は及ばせない、と。そこでウクラマトは思わず名を呼び、かつてグルージャを探していたときに出会い、食事を振る舞われ、ソリューションナインで共に戦った相手ではないかと訴える。だが彼はそのどれも知らないと言い切り、あなたたちとも会った覚えはないと主張し、惑わせるための悪だくみではないかと疑う。それでも口論を続ける暇はないとばかりに、建国記念祭の準備がある、子どもたちに請われて芝居に出るのだから失望させられないと言って立ち去ってしまう。取り残されたウクラマトは、同じ存在ではないのかもしれないが、それでも衝撃は大きいと息をつく。彼がかつて「魂の保存」の実験対象だったと語っていたことを思い出し、それがこの形でここにいる理由なのかもしれない、と。だからこそ、もう少し話したい――伝えなければならないことがあるのだと。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> カフキワ <small class="muted">（リビング・メモリー, X:7.4, Y:27.7）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-serenity-and-sorrow.html">優しくて残酷な世界</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 99</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-knight-of-alexandria.html">アレクサンドリアの王国騎士</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'夢想之地',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你看見 Living Memory 真正的樣貌，才發現自己再怎麼做過心理準備，仍然很難承受「抹除 Endless（以死者的記憶為本體、在 Living Memory 中被系統維持的存在）」這件事。G’raha Tia 低聲說，他早已逼自己接受，卻還是在真正動手的瞬間感到沉重；但 Wuk Lamat 依然堅定——這條路是她自己選的，她不會停下腳步。Cahciua 則要你們別再折磨自己，說是她提出了請求，所以該承擔的人是她；而且你們必須記得，Endless 只是由記憶塑成的仿製品，你們不必為抹除他們而背負罪惡感。即便如此，Krile 仍覺得道別太難開口；Wuk Lamat 回答，是啊，但正因如此，活著的人才更有責任去認識他們、把他們記在心裡——所以打起精神，繼續去尋找、去理解。Cahciua 指向下一個區域：Yesterland，可以從 Gate of Remembrance 乘另一條滑索前往；同時她也提醒，關閉終端理應會抹除與之綁定的 Endless，但若對方仍懷著強烈、未了的心願，可能會暫時徘徊不散——若你遇見那樣的人，請你願意聽他們說，因為那些希望本身，就是他們曾經活過的證明。</p><p>你跟上隊伍的步伐，朝 Gate of Remembrance 前進，準備追上已先行的 Cahciua。Erenville 沉默片刻後對你說，別擔心——他也不打算停下腳步。Krile 看著眼前的景象，說 Yesterland 的氣氛與先前完全不同，彷彿每個區域都有截然不同的性格；G’raha Tia 望向遠方那片熱鬧的地方，忍不住好奇那裡會遇見什麼樣的人。</p><p>入口處，一名像 Omicron 之類的機械守衛完成系統重啟，發出幾聲嗶嗶作響的錯誤提示後，仍然照程序確認你的登記，並用誇張又歡快的語氣歡迎你來到 Yesterland——這裡是讓孩子、以及心裡仍住著孩子的人圓夢的地方，請你盡情享受。那份明亮的熱情，與你心裡的沉重形成強烈對比，卻也讓這個地方的「設計目的」一目了然。</p><p>Wuk Lamat 驚嘆這裡是否也是某個真實地點的重現，Cahciua 回答「某種程度上算是」：Yesterland 的主題，是 Storm Surge （席捲第九世界的戰亂）吞沒世界、把一切拖進戰火之前，那段相對和平的時代——對 Alexandria 而言的黃金年代，被他們以「遊樂園」的形式保存下來。G’raha Tia 看到又是一個大規模的設施，不由得發出感嘆；當你坦率表示自己也有點興奮時，他笑著承認他同樣期待——或許這正是這個地方想讓人產生的感受。</p><p>Cahciua 告訴你，終端在 Yesterland 的另一側，一座城堡的地下室，她會先過去那裡等你；你們可以先花點時間熟悉這裡、和居民聊聊。等她離開後，Wuk Lamat 再次提醒你們要做的事：像之前一樣，先與 Endless 交談，理解他們珍視的事物，再去完成不得不做的抹除——於是你開始四處探索、確認方位。你遇見一群孩子，他們興奮地談著「Ser Otis」：那位有點怪、聽不懂玩笑，卻強得能瞬間擊退魔物的騎士；他們說長大後也想像他一樣強，去守護 Queen Sphene。你又看見地面上旋繞星光的壁畫，以及一棟古老的房舍，外觀像極了 Heritage Found 裡那些沉在水中的建築；當這些景象與孩子口中的名字疊在一起，你心裡浮現一個念頭——你得找到那個人，親自確認他的身分。</p><p>不久後，你看見一名男子正與魔物交戰，便上前援助。戰鬥結束，孩子們歡呼著稱讚你們的身手，而那名騎士哈哈大笑，自信宣告只要他「Ser Otis」還活著，就不會讓任何市民受傷；Wuk Lamat 卻在聽見名字的瞬間僵住，難以置信地叫出 Otis。她急忙提起你們曾在尋找 Gulool Ja 時遇見他、吃過他親手做的料理，還在 Solution Nine 並肩作戰——但他一概否認，說自己從沒聽過那些地名與事件，也不可能忘記曾與你們相識，甚至懷疑你們是在設局混淆他、圖謀不軌。就在氣氛緊繃之際，他卻忽然匆匆收尾，說自己必須去準備 Founding Celebration（Alexandria王國誕生紀念性質的慶典活動）——孩子們苦苦央求他參與帳篷劇的演出，他絕不能讓他們失望——說完便告辭離開。你目送他走遠，Wuk Lamat 仍難掩震驚：就算他可能不是你們在 Heritage Found 認識的「同一個」Otis，但相似得令人無法忽視。她想起 Otis 曾說過自己是「保存靈魂」的實驗對象——也許正因如此，他才會以這種方式出現在這裡。她低聲說，她還想再跟他談談，因為有些話，她必須親口告訴他。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 卡芙琪娃 <small class="muted">(Living Memory, X:7.4, Y:27.7)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-serenity-and-sorrow.html">溫柔與殘酷</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.99</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-knight-of-alexandria.html">Alexandria 的王國騎士</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
