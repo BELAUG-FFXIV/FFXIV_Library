@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Sanctuary of the Strong | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – The Sanctuary of the Strong (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/bTol7m0nnTQ"
+              title="The Sanctuary of the Strong" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">The Sanctuary of the Strong</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`The Sanctuary of the Strong`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>You press onward through Living Memory, and Wuk Lamat keeps everyone moving, reminding you there are still miles ahead. Erenville counts what remains—two zones—while Krile quietly notes that makes half. G’raha Tia says that when you return, you must regale Gulool Ja with the heroic tale of Ser Otis Velona, and Cahciua reports that the Meso Terminal shows no change so far.</p><p>Cahciua suggests you use the lull to visit another zone: Asyle Volcane in the northeast. Wuk Lamat perks up at the idea of a volcano—then immediately groans when she realizes you’ll be taking the zip line again. Cahciua assures you she’ll handle the guard at the Gate of Remembrance, and urges you back the way you came so you can head out.</p><p>At the threshold of the next area, Wuk Lamat stares at the billowing smoke and asks if the volcano isn’t real—if all of it is just glamour. Erenville mutters at how carefree she can be, Krile wonders what kind of theme could inspire a place so fiery, and G’raha Tia admits it saddens him to watch the scenery change in your wake.</p><p>A mechanical sentry greets you with clipped, synthetic noise—errors, downloads, registration confirmed—then welcomes you as “dauntless adventurers” to Asyle Volcane, the sanctuary of the strong. It calls on you to fight with courage and honor, so your legend might ring out forever within the Arena of Valor.</p><p>Inside, Wuk Lamat tries to steady herself, repeating under her breath that it’s only an illusion, only an illusion. Cahciua catches on at once and teases her—afraid of lava? Wuk Lamat denies it, insisting it isn’t even real, and Cahciua needles her further by suggesting she jump in and see. When Wuk Lamat backs down, Cahciua points out the terminal and explains you can reach it through caverns running through the volcano, then heads on ahead to wait, warning you to watch for wildlife.</p><p>Wuk Lamat checks in on Erenville, but he insists he’ll explore alone and keep his distance. Krile observes he’s still trying to come to terms with everything, and Wuk Lamat agrees—best to leave him be for now—before urging you onward. As you approach a fork, Krile notes the right path seems more direct, but she’s curious about a round building on the left. Wuk Lamat admits she saw Cahciua head that way, decides she’s up for the scenic route, and leads you after her.</p><p>The building proves to be an arena with seats for spectators, and as you arrive, Cahciua remarks that you had the same idea. G’raha Tia wonders if it recreates a place that once truly existed; Cahciua thinks it likely does, and says such facilities were once common—closed now, but even Solution Nine has the Arcadion, perhaps a legacy of the past. With the next match about to begin, she moves on, encouraging you to go inside and take a look.</p><p>As the spectacle unfolds, Krile and G’raha Tia notice the art resembles arcanima—so close it borders on identical. Then something catches Krile’s eye: a Milalla couple nearby feels painfully familiar. She blurts out in shock, and the woman hesitates, asking if you know each other, but the man tries to pull her away. Krile begs them to wait, fumbling for words as the woman gently tells her that the strangeness will fade with time.</p><p>Desperate, Krile shows them her earring and asks if they recognize it. The man freezes, calling it impossible. Krile says her name—Krile—and explains that as a baby she was taken from this world to another, growing up without knowledge of her past, and that the code within the earring allowed her to reopen the gate and find her way back. The man falters, and the woman, voice breaking, says she can tell Krile isn’t lying—there’s no mistaking the earring—and calls her their darling daughter, marveling at how she’s grown. Krile whispers that it has been twenty years.</p><p>The man introduces himself as Robor, and the woman as Alayla—her mother—and suggests you take the mountain of questions somewhere quieter. He proposes the heatwells, a place to sit, breathe, and talk. When it’s over, Wuk Lamat admits that miracles really do happen here, and she’s happy for Krile; G’raha Tia can scarcely believe she truly met her parents. Still overwhelmed, Krile wonders aloud if the system orchestrated this reunion too, and apologizes—she has so much to take in that she can barely gather her thoughts.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Cahciua <small class="muted">(Living Memory, X:36.4, Y:25.8)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-knight-of-alexandria.html">A Knight of Alexandria</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-taste-of-family.html">The Taste of Family</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'ヴォルケーノアサイラム',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>あなたたちはリビング・メモリーをさらに進み、ウクラマトは「まだ先は長い、歩みを止めるな」と皆を促す。エレンヴィルは残りがあと二つのエリアだと淡々と数え、クルルはそれで半分だと口にする。グ・ラハ・ティアは、戻ったらセロ・オーティス・ヴェローナの英雄譚をグルージャに聞かせねばならないと言い、カフキワは例の端末に今のところ変化はないと告げた。</p><p>だからこそ、別のエリアへ向かおう――北東にある「ヴォルケーノアサイラム」へ。火山と聞いて身を乗り出したウクラマトは、またジップラインを使うのかと顔をしかめる。カフキワは「門の警備は任せて」と軽く請け負い、いったん引き返して次のエリアへ向かうよう促した。</p><p>境目に差しかかると、ウクラマトは噴き上がる煙を見上げ、「あの火山、本物じゃないんだよね？　煙も全部、幻みたいなものだよね？」と確かめる。エレンヴィルは彼女の気楽さに言葉を失い、クルルはこの灼熱の景色が何を題材にしているのか気になると言う。グ・ラハ・ティアは、あなたたちが通るたび景色が変わっていくのを見るのは胸が痛む、と静かに告げた。</p><p>機械仕掛けの衛兵が、断続的な電子音とともにエラーを繰り返し、処理の完了と登録の確認を宣言する。そして「勇敢なる冒険者よ、ようこそ――ヴォルケーノアサイラム、“強者の聖域”へ！」と高らかに歓迎し、勇気と名誉をもって戦え、あなたたちの伝説が闘技場に永遠に響き渡るように、と告げる。</p><p>ウクラマトは喉を鳴らしながら「幻だ、幻だ……」と自分に言い聞かせる。怯えを見抜いたカフキワは溶岩が怖いのかとからかい、ウクラマトは必死に否定しつつ、どうせ本物じゃないだろうと言い返す。カフキワは「なら飛び込んで確かめてみる？」と追い打ちをかけ、ウクラマトが引き下がると、端末の場所と火山を貫く洞窟の道筋を教え、先に行って待つから野生生物に気をつけろと言い残して進んだ。</p><p>ウクラマトはエレンヴィルを気にかけるが、彼は一人で探索すると言い、野生生物には近づかないとだけ答える。クルルは彼がまだ受け止めきれていないのだろうと漏らし、ウクラマトも責められないと頷いて、あなたに先へ進もうと声をかける。やがて分かれ道に差しかかり、右が近道に見える一方で、左手の円形の建物が気になるとクルルが言う。カフキワが左へ向かったのを見たというウクラマトは、景色を見ながら遠回りしようと決め、あなたを連れてそちらへ向かった。</p><p>そこは観客席を備えた闘技場だった。カフキワは「同じことを考えたんだね」と笑い、グ・ラハ・ティアが実在した場所の再現なのかと問うと、かつては各地にこうした施設があったらしいと答える。今は閉鎖されているが、ソリューション・ナインにもアルカディオンがある以上、昔の名残なのかもしれない――そう言い残し、次の試合が始まる前に先へ行くから中を見てくるといい、とあなたたちを促した。</p><p>闘いの気配の中で、クルルは術の在り方がアルカナの理に酷似していることに気づき、グ・ラハ・ティアもまた、反射世界で独自に発展したにせよ、あまりにも同じだと頷く。だが次の瞬間、クルルは近くにいるミララ族の夫婦に息を呑み、思わず声を上げる。女は立ち止まり「どこかでお会いしましたか」と戸惑い、男は急かして連れ去ろうとする。クルルは待ってほしいと懇願し、女は「最初は奇妙でも、そのうち慣れる」と穏やかに言い残す。</p><p>追いすがるクルルは耳飾りを示し、覚えがあるかと問う。男はありえないと震え、クルルは、自分が赤子の頃にこの世界から別の世界へ連れ去られ、過去を知らずに育ったこと、耳飾りに残された符号で門を開き、ここへ戻って来られたことを、途切れ途切れに語る。女は彼女が嘘をついていないと悟り、耳飾りを見て確信し、「大きくなったね、私の娘……」と抱きしめる。クルルは「二十年……」と囁いた。</p><p>男はロボルと名乗り、女はアライラ――クルルの母だと告げる。互いに聞きたいことは山ほどあるが、落ち着ける場所へ移ろうと提案し、ひとまず温泉へ行こう、そこで腰を下ろして話そうと言う。ウクラマトは「ここでは奇跡が本当に起きるんだね」とクルルのことを喜び、グ・ラハ・ティアもまた、彼女が両親に会えた事実に言葉を失う。けれどクルルは、これさえ仕組まれた再会なのかもしれないと不安を漏らし、許してほしい、あまりに多くて思考が追いつかないと、震える声で言った。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> カフキワ <small class="muted">（リビング・メモリー, X:36.4, Y:25.8）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-knight-of-alexandria.html">アレクサンドリアの王国騎士</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-taste-of-family.html">味がしなくたって、あなたがいれば</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'火山聖域',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你們在 Living Memory 繼續前行。Wuk Lamat 提醒大家路還很長，要繼續走下去；Erenville 低聲數著還剩兩個區域，Krile 也跟著說那等於走完一半了。G’raha Tia 說回去之後得把 Ser Otis Velona 的英雄事蹟好好講給 Gulool Ja 聽，而 Cahciua 則確認 Meso Terminal 目前看起來仍然沒有任何變化。</p><p>既然如此，Cahciua 提議把握空檔先去另一個區域——位在東北方的 Asyle Volcane。Wuk Lamat 聽到「火山」先是興致勃勃，下一秒又想到要再搭 zip line，忍不住抱怨起來。Cahciua 說她會處理 Gate of Remembrance 的守衛，催促你們先回頭，準備出發前往下一區。</p><p>走近邊界時，Wuk Lamat 盯著火山口噴出的濃煙，忍不住問：那真的不是「真的火山」吧？那些煙也只是幻象的一部分吧？Erenville 對她還能這麼若無其事感到不可思議；Krile 望著灼熱的景色，想知道這裡到底是以什麼為主題；G’raha Tia 則說，看著你們所到之處景色跟著改變，讓人很難不感到難過。</p><p>一名機械守衛發出斷續的電子音，自我修正般反覆報錯、完成下載、確認登錄，接著用儀式般的語氣歡迎你們來到 Asyle Volcane——「強者的聖域」。它要求你們以勇氣與榮耀戰鬥，讓你們的傳說在 Arena of Valor 永遠回響。</p><p>Wuk Lamat 緊張到吞了口口水，一路喃喃重複「只是幻象、只是幻象」。Cahciua 一眼看穿，笑著問她該不會是怕岩漿吧；Wuk Lamat 連忙否認，嘴硬說反正那也不是真的。Cahciua 乾脆反將一軍，叫她跳下去親自確認；Wuk Lamat 立刻縮回去，說不用，她相信就是了。Cahciua 指向那座終端機末段，說可以沿著穿過火山的洞穴抵達，自己會先過去等你們，也提醒你們路上要小心野生生物。</p><p>Wuk Lamat 想關心 Erenville，但 Erenville 說他會自己探索，叫你們不用擔心，他會避開野外生物。Krile 低聲說他還在努力消化這一切；Wuk Lamat 也點頭，說這很正常，先別打擾他，接著催促你們繼續走。前方出現岔路，Krile 說往右看起來比較直達終端機末段，但她對左邊那棟圓形建築很在意；Wuk Lamat 也說她剛剛似乎看到 Cahciua 往左走，乾脆選擇繞點路走，帶著你跟上去。</p><p>那棟圓形建築有明顯的觀眾席，像是一座格鬥場。Cahciua 看見你們也走來，笑說你們想到一塊了；G’raha Tia 問這是不是某個真實場所的再現，Cahciua 認為很可能是——雖然她不清楚細節，但據說過去這種設施在各地都很常見。她又提到，就算現在關著，Solution Nine 也有 Arcadion（競技場），或許正是過往遺產的延續；眼看下一場比試就要開始，她說自己已經看夠了要先走，但你們應該進去看看。</p><p>在場內，你們注意到表演般的術式竟與奧術極其相似，G’raha Tia 也說就算不同世界各自發展，像到這個程度幾乎令人難以忽視。就在這時，Krile 突然被一對 Milalla 夫婦吸引——那份熟悉感像被硬生生拉扯出來，她失聲驚呼，追上去想確認。女人遲疑地問是不是在哪裡見過，男人卻急著拉她離開；Krile 焦急地請他們等一等，女人只能溫柔地說：你是新來的吧，一開始會覺得怪，但久了就會習慣的。</p><p>Krile 迫切地拿出耳環，問他們是否認得。男人顫聲說不可能；Krile 連忙報上自己的名字，說自己還是嬰兒時就被從這個世界帶到另一個世界，在那裡長大、完全不知道自己的過去——直到她發現耳環裡藏著能重新開啟那道門的代碼，她才終於找到回來的方法。男人仍不敢置信，女人卻說她看得出 Krile 沒有說謊，而且那副耳環不可能認錯；她喊出「我親愛的女兒」，哽咽著說你長大了。Krile 只低聲回了一句：已經二十年了。</p><p>男人自稱 Robor，女人名叫 Alayla——她說那是自己的名字，也是 Krile 的母親。他們說彼此想問的事情太多了，不如先找個更安靜的地方再談；他們提議去 heatwells，在那裡坐下來慢慢聊。走出場館後，Wuk Lamat 說在這裡奇蹟真的會發生，她替 Krile 開心；G’raha Tia 也難以相信 Krile 竟真的遇見了父母。可 Krile 仍然心亂如麻，她喃喃自問：難道連這場重逢，也是系統安排的一部分嗎？她向你們道歉，說自己一下子承受太多，腦中還沒辦法把思緒整理好。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 卡芙琪娃 <small class="muted">(Living Memory, X:36.4, Y:25.8)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-knight-of-alexandria.html">Alexandria 的王國騎士</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-taste-of-family.html">就算嚐不出味道，只要有你在就夠了</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
