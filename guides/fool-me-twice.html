@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fool Me Twice | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Fool Me Twice (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/dBWfJir2DSw"
+              title="Fool Me Twice" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Fool Me Twice</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Fool Me Twice`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Glaumunt is pleased with the imperial duds you secured, and tells you he hasn’t been idle either. After much effort, he’s finally devised a plan to get your own suit of magitek armor. From what he’s observed, Castrum Centri sends out a reaper on most patrols—but the patrol routes and deployments are irregular, and hardly any come near Revenant’s Toll.</p><p>So to draw them out, he took the liberty of feeding the imperials false intelligence: he told them insurgents were plotting against their stronghold. It’s not far from the truth, he admits, and he expects you’ll start seeing more patrols than before.</p><p>Your part is simple—on paper. You’re to approach one of these patrols while wearing your shiny tin suit, report enemies nearby, then lure them as close to Revenant’s Toll as you can. They may hesitate to stray far from their walls, so if you need extra encouragement, Glaumunt gives you a smoke signal stolen from an imperial scout. When reinforcements come running, you hit them hard and make off with their reaper.</p><p>You find a patrol sweeping the perimeter and play your role, saluting—poorly enough to earn a centurion’s scolding. Still, the centurion takes your warning seriously: insurgents to the east. He orders you to return and keep watch, and tells you to use the smoke signal if anything goes awry.</p><p>When the imperials arrive at the site, Cid joins you—he wants to be on hand, seeing as you’re seizing advanced weaponry. The centurion demands the enemy show itself, a signaler points, and the order comes down: send in the reaper and make an example of the insurgents. The fight erupts, and Cid urges you to keep hitting the reaper until it stops moving—cut down the foot soldiers first, then focus your blows. Mid-battle, the armor surges into overdrive, and Cid warns you to stay out of its sights if you value your life.</p><p>At last, you bring the reaper down—and claim your prize: a suit of magitek armor of your own. It’s worse for wear, smoking and battered, so Cid asks Biggs and Wedge for an honest assessment. Biggs says it’s structurally sound, but Wedge dislikes the buckled legs and suspects the servomechanism is damaged—oddly, without any sign the casing took a blow, suggesting a faulty part.</p><p>A hall in Revenant’s Toll is set aside for repairs, and you’re told to come join them. Inside, Slafborn confirms they’ve brought the armor in, and Biggs and Wedge beam with pride at the work ahead. Cid explains their closer inspection confirms the initial diagnosis: the frame is sound, but the servomechanism is faulty. Still, he assures you the two engineers will restore it in no time—so long as someone remembers to remind them to visit the privy.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Glaumunt <small class="muted">(Mor Dhona, X:22.5, Y:7.5)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="drowning-out-the-voices.html">Drowning Out the Voices</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 46 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="every-little-thing-she-does-is-magitek.html">Every Little Thing She Does Is Magitek</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'魔導アーマーを奪取せよ！',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>グラウモントは、あなたが手に入れた帝国軍の装備を褒め、こちらも遊んでいたわけではないと胸を張る。時間はかかったが、ついに魔導アーマーを奪う算段を立てたという。彼の見立てでは、カストルム・セントリの巡回部隊の多くは「リーパー」を随伴している。だが巡回そのものが不規則で、経路も投入もでたらめであり、レヴナンツトールの近くまで来ることはほとんどない。</p><p>そこで彼は、帝国軍を誘い出すために偽情報を流した。反乱分子が要塞を狙っている、と吹き込んだのだ。今思えば大嘘でもない、と彼は言い、これまでより巡回が増えるはずだと踏んでいる。</p><p>あなたがやるべきことは、帝国軍の巡回に近づき、例の装備を着て敵の存在を知らせることだ。そして、できる限りレヴナンツトールの近くへ誘導する。相手が要塞から離れるのを渋るようなら、帝国軍の斥候から盗んだという狼煙を使え――それを見れば増援が駆けつける。あとは叩きのめして、リーパーを奪って逃げるだけだ、とグラウモントは言う。</p><p>あなたは外周を巡回する部隊に接触し、敬礼をするが、その出来栄えを百人隊長に手厳しく叱責される。それでも報告は受け取られ、「東方に反乱分子が集結している」という話に百人隊長は目を細めた。周辺警戒の範囲外ではあるが、不手際と言われるのは御免だ――あなたは現場へ戻り監視を続け、異変があれば狼煙で呼べと命じられる。</p><p>帝国軍が現場へ現れると、シドが同行する。先進兵器を確保する以上、立ち会ったほうがよいと判断したのだ。敵影を探す百人隊長に、伝令が方角を示し、命令が飛ぶ――リーパーを投入し、反乱分子に見せしめをくれてやれ。戦闘が始まり、シドはまず歩兵を片づけ、その後でリーパーに集中しろと促す。やがてアーマーが過負荷で暴走し、命が惜しければ射線に入るな、とシドが叫ぶ。</p><p>激戦の末、あなたはリーパーを撃破し、ついに魔導アーマーを手に入れる。だが機体は煙を上げ、傷みも目立つ。シドはビッグスとウェッジに状態を尋ね、ビッグスは構造的には問題ないと言う一方、ウェッジは脚部の歪みを気にかけ、サーボ機構の損傷を疑う。装甲板は厚いはずなのに外装に打撃の痕がない――部品不良の可能性が高い、という見立てだ。</p><p>修理のため、レヴナンツトールに作業用の広間が用意される。中へ入ると、スラフボーンが魔導アーマーはシドたちが運び込んだと告げ、あなたも合流するよう促す。ビッグスとウェッジは仕事ぶりを見せると意気込み、シドは精査の結果、初期診断どおり「骨格は健全だがサーボ機構が不調」だと説明する。とはいえ、あの二人ならすぐに元どおりにしてみせる――ただし、夢中になりすぎるから、用足しだけは忘れるなと注意してやってくれ、と。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> グラウムント <small class="muted">（モードゥナ, X:22.5, Y:7.5）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="drowning-out-the-voices.html">即席の雷波塔</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 46～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="every-little-thing-she-does-is-magitek.html">魔導兵器のみる夢</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'把魔導裝甲搶回來！',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Glaumunt 稱讚你把帝國軍那套行頭弄到手，還得意地說他這段時間也沒閒著。他花了不少工夫，終於想出一個辦法，讓你們也能搶到一套魔導裝甲。依他觀察，Castrum Centri 的巡邏多半會出動一台 reaper 那種魔導裝甲機械；麻煩在於巡邏本身毫無規律，路線與派出都很隨機，而且幾乎不會靠近 Revenant’s Toll。</p><p>為了把帝國軍引出來，他擅自放出了一點「假情報」：告訴他們有叛亂者打算對要塞下手。Glaumunt 自己也承認，想想看這其實離事實不遠；總之照理說，接下來你應該會看到比以往更多的巡邏隊。</p><p>你的任務聽起來很直白：穿上那套「亮晶晶的鐵皮裝」，去接近其中一支巡邏隊，假裝回報敵情，接著想辦法把他們一路引到越靠近 Revenant’s Toll 越好。帝國軍多半會警惕，不願離開自己的城牆太遠；如果他們不肯上鉤，Glaumunt 就把從帝國軍偵察兵那裡順來的煙號交給你——只要一放，援軍就會衝過來。等他們到齊，你就狠狠干一場，趁亂把那台收割者搶走。</p><p>你很快找到一支正在外圍巡邏的部隊，上前照做；結果你那個「敬禮」做得太離譜，直接被 Imperial Centurion（帝國軍百人隊長）當場訓了一頓。即便如此，你提出的警告仍然被聽進去：你說東邊有叛亂者集結。Imperial Centurion 判斷那已經超出巡邏範圍，但他不想背上怠忽職守的名聲，便命令你回到現場繼續盯梢——一旦情況不對，就用煙號把他們叫來。</p><p>當帝國軍趕到現場，Cid 也選擇跟著你一起到場。他說既然要奪取先進兵器，就最好在旁邊看著。Imperial Centurion 站定後四下搜尋，卻看不見敵人；這時 Imperial Signaler（帝國傳令兵）指向一處，Imperial Centurion 立刻下令投入 reaper 魔導裝甲機械，拿叛亂者殺雞儆猴。戰鬥瞬間爆發，Cid 要你先把步兵壓下去，再集中火力對付收割者——受點擦傷無可避免，重點是別讓它有機會穩住陣腳。</p><p>你照著做一路猛攻，Cid 也一邊提醒你工程師的日子沒那麼好過。就在局勢拉扯之際，收割者突然進入超載狀態；Cid 大喊那是暴走，如果你還珍惜自己的命，就別站進它的視線裡。你抓住破綻硬是把它打停，總算讓這台機體失去動力。</p><p>終於，你們拿到了一套屬於自己的魔導裝甲——只是它狀況不太好，還冒著煙，看起來相當破舊。Cid 說不想挑剔「天上掉下來的禮物」，但這台確實傷得不輕，於是轉頭問 Biggs 與 Wedge 的看法。Biggs 說結構大致健全；Wedge 則盯著彎折的腿部，懷疑伺服機構受損，而且外殼看不出受擊痕跡，反倒像是零件本身有問題。</p><p>Revenant’s Toll 已經撥出一間大廳給你們維修使用。你進去時，Slafborn 告訴你魔導裝甲已被 Cid 他們搬進來，要你也進去會合。Biggs 興奮地說要讓你見識 Ironworks 工程師的手藝，Wedge 也半夢半醒地被拖著上工。Cid 則在更仔細檢查後確認：初步診斷沒錯——機體骨架沒問題，但伺服機構確實故障；他要你放心，Biggs 和 Wedge 只要一投入修理就會忘了其他事，直到把它恢復原樣為止——前提是，你得記得提醒他們去上廁所。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 格勞蒙特 <small class="muted">(摩杜納, X:22.5, Y:7.5)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="drowning-out-the-voices.html">以雷聲淹沒通訊</a></div><div class="row">所有職業（不含限定職） 等級 46 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="every-little-thing-she-does-is-magitek.html">魔導裝甲的夢</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem('ffxiv-guide-lang') || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem('ffxiv-guide-lang', next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
