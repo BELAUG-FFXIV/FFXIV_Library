@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Leafing through the Past | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Leafing through the Past (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/lPPmXSjNkAk"
+              title="Leafing through the Past" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Leafing through the Past</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Leafing through the Past`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Wuk Lamat is in high spirits after everything goes smoothly, and she laughs that your sense of balance is something else. G’raha Tia agrees that even tasteless ice cream can still be a delight to look at—and, more importantly, it helped take the edge off. Krile reminds you that her parents described the cavern inside the volcano as a place to learn about the Milalla’s ancient homeland, but she has another goal as well: she wants to uncover anything it might reveal about Preservation.</p><p>Krile lays out what’s at stake—Preservation were the scientists who researched interdimensional fusion, and before that, they created the Endless. If Living Memory is also their handiwork, she expects they would be careful about what they leave behind concerning themselves, yet she wants to keep her eyes open anyway. Wuk Lamat is immediately on board: since the key once belonged to the Milalla, learning more about them can only help. With that, you all head inside.</p><p>The chamber within feels like a museum—panels everywhere, each detailing the Milalla. The “ruin” around you looks ancient at first glance, but Krile suspects it’s another illusion. One panel speaks of isles of eternal summer where flowers bloomed endlessly—until the seas suddenly froze, life died off, and the catastrophe dragged on without end as the Milalla dwindled beyond counting. As you take it in, a chirpy voice answers Krile’s wonder with a “correct!” and a mechanical guide reveals itself: this “ancient homeland” has been recreated in exacting detail through electrope, scaled for visitors of all sizes. It introduces itself as the guide of this facility and insists your visit will be a quizzed tour—meaning the correct approach is to follow your guide’s instructions. With a brisk satisfaction, it registers the four of you and sends you onward.</p><p>In the next space, light spills across the wall in dazzling patterns. G’raha Tia recognizes a Milalla motif, and Krile notes the elaborate decoration suggests this was a place of importance. The mechanical guide calls for your attention and explains you are standing in a shrine of the Milalla—migrants who roamed until they found new lands to call their own. Folklore says they once came from a paradise of eternal summer, but a great calamity froze even the seas, forcing them to flee. Their spiritual leader, the Speaker, guided them to safety, and she is enshrined here together with the sacred relic she wielded—rituals performed in dedication to the dream that one day they might return home. Krile’s thoughts snap into focus: that “sacred relic” must be the key used to initiate interdimensional fusion. The guide marvels at the possibilities and immediately launches a history quiz—four braziers, four statements, and you must light the ones you believe are true. With G’raha Tia nominating you as representative, you step up to judge what to believe.</p><p>When the judging begins, you don’t get it right at first. The guide’s buzzer rings out, but it encourages you to try again and offers a hint: two statements are true, and they aren’t next to each other. As you regroup, Wuk Lamat chatters nervously about the suspense, while G’raha Tia suggests the earlier panels may hold clues. Krile adds that if a mechanical soldier is serving as guide, it likely means Preservation knew what was being presented here and didn’t object to its dissemination. Even so, G’raha Tia points out the obvious gap: taken at face value, the story reads like simple migration from a distant land—yet you all know about shard worlds, umbral calamities, and interdimensional fusion. Krile’s mind goes to the Fifth Umbral Calamity, the one that ushered in the Age of Endless Frost, and the legend that the entire population of the south sea isles vanished overnight. She asks whether, over your adventures, you’ve encountered that legend—after all, you visited a shrine of the forgotten people of Aloalo and even fought a statue of the Speaker. G’raha Tia adds another thread: arcanima traces its roots to the calculations of the south sea islanders, and while that doesn’t prove they were the Milalla, the similarities are hard to ignore. The guide clears its throat, impatient for you to finish musing, and urges you into the next chamber—another quiz awaits.</p><p>The next location is lined with massive faces—masks in different expressions. The guide calls it the most enigmatic place in the museum: though it’s known as the Speakers’ Rest, everything else is a mystery, even to the Milalla themselves. Some claim it may be purely the designer’s creation, not something that existed in the Milalla homeland at all. Still, it’s generally believed the wall’s adornments are masks representing the emotions of men—and that leads into the final quiz: how many types of masks are there? Wuk Lamat already senses it won’t be as simple as it sounds. You lose track as you count, while G’raha Tia tries to steady the answer and Krile wonders aloud whether the masks point to something deeper—if emotions and memories are intrinsically bound, perhaps this is the Milalla’s way of expressing different faces of Living Memory. Even the guide, when you answer incorrectly, urges you to try again—or just go with your heart.</p><p>When it’s finally over, Wuk Lamat admits she’s exhausted. Krile falls quiet, turning over the implications: if the legend is true, the Milalla were refugees from the Source—so what is this relic of theirs that can bridge worlds, and who made it, and why? Robor answers with grave clarity: much about the key remains shrouded in mystery. Preservation managed to augment it with electrope and open a portal, yet they never truly understood how they succeeded, much less the underlying principles. To this day, no one understands the mechanics of interdimensional fusion—who imbued the key with its power, when, or for what purpose. Robor asks you to remember one thing: the key is a tool, neither good nor evil by itself, yet once held, its capacity for both becomes plain—saving one person may doom another and make a lie of every good intention. Alayla adds that Queen Sphene, like Preservation, seeks to wield the key for those she loves, and in doing so makes her people party to the destruction of countless souls. They say they’ve told you all they can; being able to share it at the last feels like fulfilling their purpose. Robor confirms why you came: to shut down the terminal. Krile admits it, even as she wonders if there might be another way. Robor says they have long sought a means to erase themselves before their knowledge could be used for ill, and in you they have found it—so press on, and do not look back. Krile agrees, then asks one final question: why did they leave her the earring? Alayla answers simply: because they wanted to see her again, and they wanted to leave a trace with her—a hint to guide her to them, so they could live in hope. Robor confesses they dreamed of this day and now wonder if they deserve to enjoy it, haunted by how much she might have suffered without them.</p><p>Krile refuses to let them torment themselves. She tells them that fate entrusted her to a good man—Galuf—who raised her as his own, and that she’s been blessed with the finest comrades anyone could have. Thanks to them, she is here now, hale and happy—so they should be at peace. Then she says it plainly, with all her heart: be at peace, Mother, Father. Alayla tells her she already has a beautiful name, but asks if they might call her by the one they gave her—Maya, their dearest Maya, loved more than life itself. Krile repeats it in disbelief, as though the sound reshapes her from the inside. When Wuk Lamat offers to handle the terminal for her, Krile refuses: she must do this. She declares that she will press on, and then bids her parents farewell—Mother, Father—and Robor answers with the same finality.</p><p>Afterward, Krile confides in you that she’s been anxious ever since she chose to accompany you to Tural. She feared what she might find—nothing at all, or worse, proof that her parents never loved her. Now she knows the truth, and she couldn’t be happier. She’s glad she took up pictomancy, glad she found the courage to say she wanted to join you, and she thanks you for trusting her with your life and walking with her all this way. She cuts herself off with a brisk attempt at composure and urges you to catch up. At the terminal, Wuk Lamat notes Erenville still isn’t there, while G’raha Tia calls Robor and Alayla lovely people and Krile insists she will be fine. Cahciua—having heard everything—says she’s glad Krile could bid her parents a proper farewell and asks again if you’re ready to shut down the terminal, warning that doing so will make it impossible to restore the area to its present form. Krile says she knows what to do. After the shutdown, Erenville stands silent, and Krile holds to one truth: even if their memories are gone, their love will be with her always. With only one zone remaining—and with Elene’shpya now among you—Cahciua tells everyone to head for the last. When Wuk Lamat checks on Krile, she answers without hesitation: she is all right. She chose to forge on no matter what, and she had the courage because of all of you—thanking you from the bottom of her heart as the journey continues.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Krile <small class="muted">(Living Memory, X: 35.4 Y: 15.3)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-taste-of-family.html">The Taste of Family</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="an-explorers-delight.html">An Explorer’s Delight</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'三つ葉の耳飾り',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ウクラマトは、すべてがうまくいったことに満足げに笑いながら、あなたのバランス感覚は本当にすごいと言う。グ・ラハ・ティアも、味はなくともアイスは目に楽しく、緊張をほどく助けになったのが何よりだと頷いた。クルルは、火山の洞窟はミララの古い故郷を学ぶ場所だと両親から聞いたと話しつつ、もうひとつ確かめたいことがあるのだと続ける――プリザベーションの情報を探したい、と。</p><p>プリザベーションは次元融合を研究していた科学者たちであり、その前にはエンドレスを生み出した存在でもある。リビング・メモリーも彼らの創造である可能性が高い以上、自分たちに関する手がかりは慎重に取捨選択されているはずだが、それでも見落としたくない――クルルはそう言って気を引き締める。ウクラマトも、鍵はもともとミララのものだったのだから、彼らを知ることは無駄にならないと賛同し、あなたたちは洞窟の奥へ踏み込んだ。</p><p>内部はパネルが並び、まるで博物館のようだった。ミララの歴史を記した記録には、かつて永遠の夏の島々で平穏に暮らしていたこと、しかし海が凍りつき、命が失われ、異常気象が終わりなく続くなかで、数え切れぬほどの死が積み重なったことが記されている。神秘的な雰囲気にクルルが思いを巡らせた瞬間、軽い正解の音とともに機械の案内役が姿を現した。ここはエレクトロープの技術によって、ミララの古い故郷を精密に再現した施設であり、体格の違いに合わせて規模だけ調整しているという。案内役はこの施設のガイドとして、あなたたちの見学はクイズ形式で進むのだと告げ、「ガイドの指示に従う」ことが正しい見学方法だと言い切った。そして四人を来館者として登録し、次の区画へ進むよう促す。</p><p>次の空間では壁が美しく照らされ、グ・ラハ・ティアはミララの意匠だろうかと目を凝らし、クルルは装飾の凝り方から重要な場所だと推し量る。案内役は、ここは新天地を求めて移り住んだ旅の民ミララの聖域であり、伝承では永遠の夏の楽園から来たが、大いなる災厄が海さえ凍らせたため捨てざるを得なかったのだと語る。精神的指導者である神子が民を導き、その神子は聖なる遺物とともに祀られている――いつか祖地へ帰るという夢に捧げる儀式も、ここで行われたという。クルルはその「聖なる遺物」が次元融合を起動した鍵に違いないと確信し、案内役はその力に思いを馳せながら、すぐに歴史クイズを始めた。四つの火鉢と四つの文――正しいと思う文の火鉢だけを点ける。代表として指名されたあなたが、パネルを読み、判断を下すことになる。</p><p>判定が始まると、あなたの選択は最初は外れてしまう。案内役は再挑戦を許しつつ、真実は二つで隣り合っていないとヒントを出した。ウクラマトはどれも本当かもしれないと落ち着かず、グ・ラハ・ティアは前の区画の記録が手がかりになるだろうと言い、クルルは案内役が存在する以上、プリザベーションもこの情報の公開を把握し、異議はなかったのだろうと推測する。それでもグ・ラハ・ティアは、記録をそのまま読めば単なる移住譚に見えるが、あなたたちは鏡像世界や霊災、次元融合の存在を知っているのだと指摘した。クルルは海を凍らせた出来事として第五霊災を想起し、その時代に南洋諸島の民が一夜で姿を消したという伝承を口にする。そしてあなたがアロアロ島の忘れられた民の祠を訪れ、神子の像と戦ったことまで挙げ、伝承を知っているかと尋ねた。さらにグ・ラハ・ティアは、巴術の源流も南洋の島民が残した計算にあると語り、ミララと断定はできないが共通点は十分だと結論づける。案内役は思索が済んだなら次へ進めと促し、また別のクイズが待っていると言った。</p><p>次の区画には巨大な仮面が並び、表情の違いが目を引く。案内役はここを最も謎めいた場所と呼び、「神子の休息地」として知られてはいるが、用途はミララ自身にも分からなかったという。施設の設計者が作り出しただけで、故郷には存在しなかったのではないかという説もある。それでも一般には、壁の装飾は人の感情を表す仮面だと考えられており、最後のクイズはその種類を数えることだった。単純そうで単純ではなく、あなたは数を見失い、グ・ラハ・ティアが答えを絞ろうとし、クルルは感情と記憶が結びつくのなら、仮面はリビング・メモリーの「多面性」を示すミララの表現かもしれないと口にする。答えを外すと、案内役はもう一度数えるか、心で選べと言って終わりを告げた。</p><p>やっと終わったとウクラマトが疲れを漏らすなか、クルルは思索を深める。伝承が真実なら、ミララは原初世界からの難民だったのか――では世界を繋ぐ遺物とは何で、誰が、何のために作ったのか。ロボルは、鍵の謎は今なお深いと言う。プリザベーションはエレクトロープで鍵を強化し門を開くことには成功したが、なぜ成功したのかも、技術の根幹も掴めなかった。次元融合の仕組みを理解する者は誰もおらず、誰が、いつ、なぜ鍵に力を宿したのかも分からない。それでも忘れるな、とロボルは念を押す――鍵は道具であり、それ自体は善でも悪でもない。しかし手に取れば、その両方の力が露わになる。ひとりを救うことで、別の誰かを破滅させ、善意さえ嘘にしてしまうことがある。アライラは、プリザベーションと同じく、スフェーン女王も愛する者のために鍵を振るおうとし、その結果、数え切れぬ魂の破壊に人々を加担させていると語る。彼らは語れることはすべて語ったと言い、最後にそれを伝えられたことが目的の達成だと告げた。ロボルはあなたたちがここへ来た理由――ターミナルを停止しに来たのだろう、と確認し、クルルは肯定しつつ、停止せずに済む道がないかと揺れる。だがロボルは、悪用される前に自分たちを消す方法を長く探してきたこと、そしてあなたの中にそれを託せるものを見いだしたことを告げ、「進め。振り返るな」と背中を押した。クルルは受け止め、最後の問いとして、なぜイヤリングを自分に残したのかを尋ねる。アライラは、もう一度あなたに会いたかったからだと言い、あなたに自分たちの痕跡を残し、希望の中で生きるための手がかりにしたかったのだと打ち明ける。ロボルもまた、あなたが不在の間にどれほど苦しんだのかを思い、胸を痛め続けていたと告白した。</p><p>クルルは、どうか自分たちを責めないでほしいと告げる。運命は自分を良き人に託した――ガラフが我が子として育ててくれたこと、そして自分には最高の仲間がいること。だから今、自分は健やかで幸せだ、と。だから安らかに、とクルルは言う――母さん、父さん、どうか安らかに。アライラは、あなたにはすでに美しい名があるが、自分たちが付けた名で呼ばせてほしいと願う。マイア――愛するマイア。クルルはその名を口にし、戸惑いながらも受け止めていく。ウクラマトがターミナルは自分たちに任せてもいいと言っても、クルルは退かない。自分がやる、と。進み続けるのだと告げ、母さんに別れを、父さんに別れを告げ、ロボルも別れを返した。</p><p>その後、クルルはあなたに胸の内を明かす。トラル大陸へ同行すると決めてからずっと不安だった――何も分からないかもしれない、あるいはもっと恐ろしい真実として両親に愛されていなかったと知るかもしれない、と。だが今、真実を知り、これ以上ないほど幸せだと言う。ピクトマンサーの道を選んだことも、同行したいと口にする勇気を出したことも、本当に良かった、と。あなたが命を預けてくれたこと、ここまで共に歩いてくれたことに感謝し、これからは一緒に最後までやり遂げようと告げて、皆に追いつこうと促す。ファイヤターミナルでは、ウクラマトがエレンヴィルがまだ来ていないと気にかけ、グ・ラハ・ティアはロボルとアライラを「素敵な人たちだった」と言い、クルルは自分は大丈夫だと答える。カフキワは事情を聞き、クルルが両親にきちんと別れを告げられたことを喜んだうえで、もう一度問いかける――ターミナルを停止する準備はできているか。停止すれば、この場所を現状に戻すことはできない。クルルは方法を知っていると答え、停止を進める。停止後、エレンヴィルは言葉を失い、クルルは記憶は失われても愛はずっと自分とともにあると噛みしめる。残るはあと一つの区画だとグ・ラハ・ティアが言い、エレネッシパも合流したのだから最後の区画へ向かおうとカフキワが促す。ウクラマトがクルルの様子を確かめると、クルルは迷いなく答えた――大丈夫だ。どんなことがあっても進むと決めた。そしてそれができたのは、あなたたちがいたからだ。心の底から感謝している、と。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> クルル <small class="muted">（リビング・メモリー, X: 35.4 Y: 15.3）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-taste-of-family.html">味がしなくたって、あなたがいれば</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="an-explorers-delight.html">探求者たちの庭</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'三葉耳飾',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>事情順利得超乎想像，Wuk Lamat 開心得像孩子一樣，笑著說你那個平衡感真的太誇張了。G’raha Tia 也認同，就算冰淇淋完全沒有味道，光是視覺上的漂亮就已經算是一種享受，更重要的是，它確實把大家繃緊的情緒鬆開了。Krile 則把話題拉回正事：她的父母說過，火山洞窟裡的那座空間，是用來了解 Milalla 古老故鄉的地方——但她希望裡面還能找到另一種資訊：關於 Preservation 的資訊。</p><p>Krile 說得很直接：Preservation 就是研究次元融合的科學家，而在那之前，他們還創造了 Endless。既然 Living Memory 很可能也是他們的產物，她不意外他們會把涉及自身的細節篩選得滴水不漏，可她還是想盯緊每一個可能的線索。Wuk Lamat 立刻點頭贊成：畢竟那把鑰匙曾經屬於 Milalla（在「第九世界（The Ninth）」中，對應於你熟悉的「Lalafell」種族），多了解他們不會有壞處。於是你們一起踏進洞窟深處。</p><p>裡頭像博物館一樣，到處都是解說面板。Krile 覺得這裡看起來像古代遺跡，但恐怕也只是「幻象」的一部分。面板記錄著 Milalla 的過去：很久以前，他們曾安居在永夏之島，四季不見寒冬，花朵以彩虹般的色彩盛開——直到海面忽然結冰，水裡的魚、天上的鳥，生命一個個死去；異常的寒冷沒有盡頭，Milalla 也在漫長的災厄裡一個個倒下，死亡多到無從計數。正當 Krile 被這股神祕氛圍牽引思緒時，一個聲音像答題遊戲般「叮叮」回應，隨即現身的是機械導覽員：它說這座「Milalla 的古老故鄉」能被精密重現，是靠 electrope 的奇蹟，並且為了讓不同體型的人都能參觀，才調整了整體比例。它自稱是這座設施的導覽員，還強調參觀方式是「測驗式導覽」——也就是你必須照它的指示走才算正確。它替你們完成登記後，就催你們前往下一個空間。</p><p>下一個房間裡，牆面被光照亮得璀璨，G’raha Tia 盯著那個圖樣，猜測是 Milalla 的紋飾；Krile 則從精緻的裝飾判斷，這裡對 Milalla 來說地位不低。機械導覽員請你們注意：你們正站在 Milalla 的聖域之中——那是一群遷徙的民族，長久漂泊後才找到能稱作家園的新土地。傳說裡，他們原本來自永夏的樂園，但一場巨大的災難連海都凍結，只能被迫放棄故土。作為精神領袖的 Speaker 引導他們脫離險境，而 Speaker 與她手持的神聖遺物一起被供奉於此；Milalla 也在這裡舉行儀式，把「終有一日能回到祖地」的夢想當作信仰般守著。Krile 聽到「神聖遺物」立刻聯想到那把能啟動次元融合的鑰匙。機械導覽員一邊驚嘆這種力量能做到多少大事，一邊馬上宣布要開始歷史測驗：房內有四座火盆，每座旁邊都有一段敘述；你覺得是真的，就操作面板把火盆點亮。G’raha Tia 說既然沒人反對，就由你來當代表——你走上前，讀著面板，替大家做出判斷。</p><p>判定開始後，你第一次沒有選對。機械導覽員發出刺耳的錯誤聲，卻也允許你再試一次，還丟出提示：真正正確的敘述有兩個，而且它們不相鄰。Wuk Lamat 被吊著胃口，緊張得像快憋不住；G’raha Tia 則提醒你，前一個房間的面板可能藏著線索。Krile 也補上一句：既然連機械兵器都被安排來當導覽員，很可能意味著 Preservation 知道這裡展示的內容，而且不反對對外公開。不過，G’raha Tia 還是點破關鍵——單從文字看起來，Milalla 像只是從某個遙遠國度搬遷而來；但你們都明白有鏡像世界、靈災，以及次元融合。Krile 立刻想到第五靈災，那場帶來「無盡冰霜時代」的災厄；而傳說也說，在那段時期，南洋群島的人口一夜之間消失無蹤。她問你是否曾在旅途中接觸過這個傳說——畢竟你不只到過 Aloalo 那些被遺忘之民的聖域，甚至還與 Speaker 的雕像交戰過。G’raha Tia 又提到另一條脈絡：據說奧術也源自南洋島民的計算之術，雖然不能直接斷言那些人就是 Milalla，但相似之處已經多到足以支撐這個推測。機械導覽員像忍不住一樣清了清嗓子，催你們別再沉思，下一個房間還有測驗等著。</p><p>接著映入眼簾的，是一張張巨大的面具——表情各異，壓迫感十足。機械導覽員說這裡是整座設施最難解的地方：雖然被稱作 Speakers’ Rest，但除此之外幾乎一切都成謎，連 Milalla 自己也不知道它原本用來做什麼。甚至有人懷疑這裡完全是設計者的創作，根本不是 Milalla 故鄉真實存在的景象。普遍的看法則認為，牆上的裝飾是象徵人類情感的面具——而最後的測驗很簡單：面具一共有幾種？Wuk Lamat 一邊驚訝已經來到最後，一邊直覺這題不會真的那麼「簡單」。你數著數著又失去節奏，G’raha Tia 嘗試把答案收斂到一個確定的數字，Krile 則提出自己的聯想：如果情感與記憶本就密不可分，那麼這些面具，會不會是 Milalla 用來表達 Living Memory 不同「面貌」的方法？當你回答錯誤時，機械導覽員也只是要你再數一次——或者乾脆憑直覺選一個。</p><p>終於結束後，Wuk Lamat 忍不住抱怨自己累到不行。Krile 卻越想越深：如果那個傳說是真的，Milalla 可能是來自 the Source 的難民；那麼，這個能跨越世界的遺物到底是什麼？是誰打造、又是為了什麼目的？Robor 的回應沉重而清晰：關於那把鑰匙，仍有太多事情被迷霧遮住。Preservation （Alexandria 的科學研究組織，核心工作是研究並利用「interdimensional fusion（次元融合）」相關技術。）透過 electrope（黑色礦石，可儲存雷屬性能量並轉換為其他能量）強化鑰匙，確實成功打開了通道，但他們始終無法理解自己為何能做到，更別提技術背後的原理。直到今天，沒有人真正理解次元融合的機制——也沒人知道鑰匙的力量究竟是誰、在何時、為何賦予的。Robor 要你記住：鑰匙只是工具，本身既非善也非惡；可一旦落入誰的手中，它能帶來的兩面性就會毫不留情地顯露——拯救某個人，可能同時害另一個人走向毀滅，甚至讓持有者的善意都變成謊言。Alayla 接著說，正如 Preservation 一樣，Queen Sphene 也想為了她所愛的人使用鑰匙，卻因此讓自己的人民成為摧毀無數靈魂的共犯。他們說自己已把能說的都說完了，能在最後把這些交給你們，彷彿終於完成了使命。Robor 問得直接：你們是來關閉終端機的嗎？Krile 承認是，卻仍忍不住想——是否有不必停用終端的別條路？Robor 說，他們一直想在知識被用於惡之前抹除自身，而在你身上，他們找到了能託付的人，所以要你「往前走，別回頭」。Krile 答應了，卻又鼓起勇氣問最後一個問題：那只耳環，為什麼要留給她？Alayla 的回答溫柔得近乎疼痛：因為他們想再見她一面，也想在她身上留下自己的一點痕跡——一個引導她找到他們的線索，讓他們能在希望裡活著。Robor 也坦白，他們盼了這一天太久，如今真的成真，反倒開始懷疑自己是否配得上這份幸福；他們只想給她最好的，卻始終擔心她在沒有他們的日子裡究竟承受了多少。</p><p>Krile 不讓他們繼續折磨自己。她說命運把她託付給了一個好人——Galuf——他把她當成親生孩子養大；而且她也擁有最好的同伴。正因為他們，她才能站在這裡，健康而幸福。所以，她請他們安心，請他們安息——媽媽、爸爸。Alayla 說她現在的名字已經很美，但如果可以，想用他們當年為她取的名字叫她：Maya，他們最珍愛的 Maya，愛得勝過生命本身。Krile 重複著那個名字，像第一次真正抓住「自己是誰」。Wuk Lamat 問她要不要把關閉終端機的事交給大家處理，Krile 卻搖頭：不，她必須親手去做。她說她要繼續往前走，然後向媽媽、爸爸道別，Robor 也回以同樣的告別。</p><p>之後，Krile 私下對你吐露，她自從決定陪你前往 Tural 就一直很焦慮——她害怕最後什麼也找不到，更害怕找到的會是更殘酷的答案：也許她的父母並不愛她。但現在，她知道真相了，而且她從未如此快樂。她很慶幸自己學會了 pictomancy（繪靈術），也很慶幸自己鼓起勇氣說想跟你同行；她謝謝你願意把性命託付給她，謝謝你一路與她並肩走到這裡。她像是突然覺得太多話會讓自己失控，急忙收住情緒，說你們一起把一切看完——然後趕緊追上其他人。到了終端前，Wuk Lamat 注意到 Erenville 還沒到；G’raha Tia 說 Robor 和 Alayla 真的是很溫柔的人；Krile 則說不用擔心，她會沒事。Cahciua 聽完經過後說，她很高興 Krile 能好好向父母道別，接著再次問出那個幾乎讓人喘不過氣的問題：你們準備好關閉終端了嗎？她也提醒，一旦關閉，就不可能把這個區域恢復到現在的樣子。Krile 說她知道該怎麼做。關閉之後，Erenville 只是沉默，而 Krile 把那句話牢牢放進心裡：就算記憶消失了，他們的愛也會永遠在她身上。G’raha Tia 說只剩最後一個區域；Cahciua 則表示既然 Elene’shpya 也加入了，就往最後的區域前進吧。Wuk Lamat 轉頭問 Krile 還好嗎，Krile 直視著她，回答得很肯定：她很好。她選擇不管發生什麼都要繼續走下去，而能做到這一步，是因為有你們所有人在——她發自內心地道謝，任務也在你們繼續前行的腳步裡落下句點。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 克露兒 <small class="muted">(Living Memory, X: 35.4 Y: 15.3)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-taste-of-family.html">就算嚐不出味道，只要有你在就夠了</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="an-explorers-delight.html">探險家的秘密花園</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
