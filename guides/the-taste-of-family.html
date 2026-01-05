@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Taste of Family | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – The Taste of Family (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/2Bpzc48xWjw"
+              title="The Taste of Family" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">The Taste of Family</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`The Taste of Family`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Miracles feel real in this place. You watch Wuk Lamat and G’raha Tia share their quiet disbelief—and their happiness for Krile—because she truly met her parents. Krile steadies her breathing and admits that even if she thought she was prepared, facing them in person overwhelmed her, and being separated since infancy leaves her unsure how to act. G’raha Tia tells her to take her time—after everything, she has earned it—and that there are countless words she and her parents can finally say. Wuk Lamat agrees: this is a meeting to cherish, so Krile should simply do what comes natural.</p><p>At the hot springs, the reunion is tender and strange all at once—Krile’s parents can hardly believe they are seeing their daughter again here, of all places. They thank you and the others for bringing her to them, and Krile realizes she forgot introductions in the rush of emotion. She presents Wuk Lamat as Tuliyollal’s Vow of Resolve, G’raha Tia as her colleague from the Students of Baldesion, and you as the friend she trusts most—the one she owes her life to. You offer a small smile and nod, while her parents respond with heartfelt gratitude, even if the moment begins a little awkwardly.</p><p>The silence that follows is thick enough to cut. Wuk Lamat blurts out that food might help, then turns it into a plan—asking if they would like something to eat. Krile’s father insists they are fine, but Krile’s mother admits the heat by the springs makes her crave something cold. Wuk Lamat promises to fetch treats to cool everyone off, and even though Krile worries about being a bother, G’raha Tia brushes it aside: that is what friends are for. Krile agrees, and you set out with a shared hope that a simple treat can soften the tension.</p><p>As you regroup, G’raha Tia points out a complication: food here tastes like nothing to the living. Still, it seems perfectly enjoyable to the Endless, and Krile likely understands that. Even if it doesn’t instantly break the ice, it might help to thaw it. With that, you split up to ask around for something cold—Wuk Lamat determined to find the best treat possible, and you heading toward the locals for recommendations.</p><p>The answers quickly converge. One person can’t decide what cold drink to pair with a snack, another points you toward a popular stall to the southwest, and a third insists there’s only one choice in Asyle Volcane: gold star ice cream—delicious, colorful, and famously tricky to handle without turning into a puddle. When you meet Wuk Lamat again, she has heard the same thing and worries about carrying three servings intact. You reassure her you can manage, take the three portions from the vendor, and hurry back—moving quickly, but carefully, so it won’t melt or collapse before it reaches Krile.</p><p>At the springs, Krile brightens at the sight of it and thanks you—its appearance alone feels like a gift. Yet the air is still tense, the years between parent and child too vast to bridge in a breath. Then G’raha Tia suddenly takes big bites, as if choosing action over hesitation. Krile shakes her head when others worry—no, it really is delicious, the best she has ever tasted—and her parents echo that it tastes better when they are together. Little by little, dessert becomes a shared rhythm, and with it comes the courage to speak. Krile’s parents begin giving answers: their people, the Milalla, once lived in another world until a calamity froze the seas, and a mighty relic—the key—opened a portal to escape. When lightning later threatened this world, they tried to flee again, failed, and accepted Preservation’s “help,” only to learn the order sought to plunder other worlds of aether. They defected, seized control of a prototype gate, and sent their infant daughter and the key through it to protect her—because Preservation wanted to experiment on her unusual gift, which G’raha Tia recognizes as the Echo. When </p><p>Krile asks how to learn more, her parents suggest a cavern within the volcano where their ancient homeland has been recreated, and she asks to go—wanting to understand her ancestors and the legacy entrusted to her. Wuk Lamat agrees, and afterward Krile turns to you, G’raha Tia, and Wuk Lamat: with your help, she not only reunited with her parents, but also learned the joy of sharing a meal with them—and for that, and so much else, she thanks you.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Krile <small class="muted">(Living Memory, X:28.3, Y:15.5)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-sanctuary-of-the-strong.html">The Sanctuary of the Strong</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="leafing-through-the-past.html">Leafing through the Past</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'味がしなくたって、あなたがいれば',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>この場所では、本当に奇跡が起こるのだと実感する。仲間たちは、友がついに両親と会えたことを喜びつつも、その現実にどこか戸惑いを隠せない。友は「落ち着いてきた」と言いながら、覚悟していたはずなのに実際に向き合った瞬間、心が追いつかなかったこと、幼い頃に引き離されたせいでどう振る舞えばいいのか分からないことを打ち明ける。仲間は急かさず、起きた出来事のすべてを越えてきたのだから時間をかけていいのだと告げる。いまなら互いに言葉を交わせる——その事実が、少しずつ背中を押していく。</p><p>温泉のほとりで、両親は「こんな場所で娘に再会できるなんて」と震えるような声をこぼし、あなたたちが連れてきてくれたことに礼を言う。友は感情に飲まれて紹介を忘れていたことに気づき、あなたたちが自分にとってどれほど大切な存在かを、言葉を選びながら伝える。あなたは短く微笑み、うなずいて応える。両親はぎこちなくも真心のこもった感謝を重ねるが、空気はまだ硬いままで、最初の一歩の難しさがその場に残る。</p><p>沈黙が痛いほど続く中、仲間が「食べ物で場が和らぐかもしれない」と思いつき、空腹かどうかを尋ねる。父親は遠慮して断るが、母親は暑さのせいで冷たいものがほしいと口にする。仲間は「冷える甘味を持ってくる」と勢いよく引き受け、友が負担を気にしても、別の仲間が「気にする必要はない、友のためだ」と自然に支える。友も頷き、あなたたちは“特別な時間”を守るために動き出す。</p><p>ただし問題もある。ここで口にするものは、生きている者には味がしないという。けれど、それでもこの地の住人には楽しめるらしく、友もそのことを分かったうえで受け入れているのだろう。すぐに打ち解けるとは限らないが、冷たい甘味が硬さを少しでも溶かしてくれるかもしれない。あなたたちは手分けして、評判の“冷たいもの”を探しに向かう。</p><p>人々の話を聞くうちに、ある屋台の名物が繰り返し挙がる。見た目が華やかで、人気が高い一方、運ぶのが難しく、油断すれば崩れてしまうという冷菓だ。仲間も同じ結論に辿り着き、三人分を無事に届けられるかを心配する。あなたは任せてほしいと答え、屋台で三つ受け取り、溶けないよう急ぎつつも、崩れないよう慎重に運んで温泉へ戻る。</p><p>友はその姿に目を丸くし、あなたに心から礼を言う。だが場の緊張はまだ強く、失われた年月は簡単に埋まらない。そこで仲間が突然、大きく冷菓を頬張りはじめる。味がしないはずだと周囲が慌てても、友は首を振り、「おいしい」と断言する——一緒にいるからこそ、そう感じられるのだと。両親もその言葉に寄り添い、少しずつ会話が動き出す。やがて両親は、異なる世界にいたという自分たちの民の伝承、海が凍る大災厄、救いとして用いられた“鍵”の遺物、そしてそれを利用して他世界の力を奪おうとした組織の思惑を語る。追い詰められた末に試作の門を奪って起動し、幼い娘と鍵を託して送り出したこと、娘の“特別な力”ゆえに実験の対象にされかけたことも明かされる。その力は、仲間が「エコー」だと気づく。</p><p>友は自分の民のことをもっと知りたいと願い、火山の洞窟に再現された故郷の場へ行きたいと申し出る。道中にあるのなら、と仲間も同意する。別れ際、両親はあなたたちの善意に感謝し、友はあなたと仲間たちに向き直って、両親と絆を結べただけでなく、共に食事を分かち合う喜びまで得られたのだと告げ、改めて深く礼を言う。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> クルル <small class="muted">（リビング・メモリー, X:28.3, Y:15.5）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-sanctuary-of-the-strong.html">ヴォルケーノアサイラム</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="leafing-through-the-past.html">三つ葉の耳飾り</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'就算嚐不出味道，只要有你在就夠了',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>在這個地方，奇蹟像是真的會發生。你聽著 Wuk Lamat 和 G’raha Tia 的感嘆——他們替 Krile 高興，也被這件事的真實感壓得一時說不出話。Krile 讓自己慢慢冷靜下來，坦白說：她以為自己早就做好心理準備，但真正面對父母的那一刻，情緒還是整個湧上來，把她淹沒；更何況她從嬰兒時期就和他們分離，現在甚至不知道該怎麼表現才對。G’raha Tia 沒有催促，只告訴她慢慢來——經歷了這麼多，她值得把時間留給自己，也終於能把那些想說的話，一句一句說出口。Wuk Lamat 也點頭：這是一場值得珍惜的重逢，照著本能去做就好。</p><p>到了溫泉邊，Krile 的父母望著她，像是還不敢相信竟能在這裡再見到女兒。他們先是激動得語無倫次，接著又趕緊向你們道謝——謝謝你們把 Krile 帶到他們面前。Krile 這才想起自己竟然忘了介紹，於是努力把情緒放穩：她告訴父母，Wuk Lamat 是 Tuliyollal 的決意誓約者，G’raha Tia 是她在 Students of Baldesion 的同伴，而你——你是她最信賴、也最可靠的朋友，她甚至欠你一條命。你只是微微一笑、點了點頭，Krile 的父母則用最真摯的語氣把感謝重複了又重複，卻也讓那份尷尬更清楚地浮在空氣裡。</p><p>沉默變得刺痛，Wuk Lamat 忍不住說：這氣氛簡直讓人難受。她隨口提到如果有什麼能讓場面順一點就好了，下一秒便轉念——乾脆用食物來破冰。她問大家餓不餓，願不願意讓你們帶點吃的回來。Robor 客氣地說不用，但 Alayla 卻看著熱氣蒸騰的溫泉說：這裡真的太熱了，如果能來點冰涼的東西就好了。Wuk Lamat 立刻拍胸脯答應，說要去找能讓人「降溫又留下印象」的甜點。Krile 雖然覺得麻煩大家不好意思，G’raha Tia 卻說別放在心上——朋友就是該在這種時候出手。Krile 只能帶著感激點頭，說她會期待你們帶回來的冰涼點心。</p><p>你們離開後，G’raha Tia 提醒了一個可能的問題：在這裡，活著的人吃到的食物是沒有味道的。Wuk Lamat 當場愣住，才發現自己完全不知道這件事。可 G’raha Tia 也說，對Endless（以死者的記憶為本體、在 Living Memory 中被系統維持的存在）而言似乎依然能享受味覺，而 Krile 願意配合這個提議，多半也明白其中差別。也許它不會立刻讓大家變得親近，但至少能讓那股僵硬稍微融化一些。於是你們分頭去問附近的人，打算找出 Alayla 想要的「冷的」，越冷越好。</p><p>你一路打聽，有人一邊猶豫要喝咖啡還是茶，最後又改口想喝啤酒；也有人說這裡多是豪爽又能填飽肚子的食物，但西南方有個熱門攤位也許正合你們的需求；還有人更直接——在 Asyle Volcane，最有名的就是 gold star ice cream，說它「看起來就值得一試」，但也提醒你要小心：那堆彩色圓球很容易融化、也很容易塌，一不注意就會變成一灘。你和 Wuk Lamat 會合時，她也聽到同樣的推薦，甚至擔心三份要怎麼完整送回去。你告訴她交給你就好，接著從攤販手上接過三份 gold star ice cream，在時間壓力下快步前行，又必須一路保持手穩——不能讓它融化，更不能讓它崩塌。</p><p>回到溫泉邊，Krile 看到那「看起來就很厲害」的甜點，立刻對你道謝。可氣氛依舊緊繃——二十年的空白不可能一下就補回來。就在這時，G’raha Tia 像是突然下定決心般，大口咬下冰淇淋；Wuk Lamat 看得目瞪口呆，Alayla 和 Robor 也擔心他是在勉強自己，畢竟活著的人吃不到味道。Krile 卻搖頭，認真地說：不，它很好吃，她從沒嚐過這麼美味的東西——就像是只要大家一起坐在這裡，它就真的變得有滋有味。那句話讓 Alayla 和 Robor 的表情終於鬆動，他們也跟著接話，說一起分享時，感覺確實更好。甜點把沉默切開了一道縫，接著，話也終於能往前走。Krile 的父母開始給你們答案：他們的族人 Milalla 曾生活在另一個世界，直到一場大災變把海都凍成冰；祖先依靠一件強大的遺物開啟通道，才逃往另一個現實。那件遺物就是「鑰匙」，世世代代由他們守護。後來這個世界遭遇雷電威脅時，他們也想再次用鑰匙逃離，卻怎麼做都無法喚起力量；就在絕望時，Preservation 提出合作，結果他們才發現對方的真正目的，是掠奪其他世界的以太。為了阻止對方，他們背離了組織，在追兵逼近時奪下原型門並啟動，將嬰兒時期的 Krile 和鑰匙一同送走——因為 Preservation （Alexandria 的科學研究組織，核心工作是研究並利用「interdimensional fusion（次元融合）」相關技術。）想利用 Krile 與生俱來的異能做實驗，而 G’raha Tia 判斷那正是 Echo。</p><p>Krile 接著問：她能不能了解更多關於 Milalla 的事？Robor 說火山洞窟裡有一處重現了他們遠古故鄉的地方，雖然原本是娛樂用途，但能讓她學到族人的歷史與傳統。Krile 立刻請求前往——她想知道自己的祖先，也想知道父母交到她手上的那份傳承。Wuk Lamat 說路上正好會經過，當然可以。最後，Robor 和 Alayla 再次對你們的付出表示感謝；而 Krile 望向你、G’raha Tia、Wuk Lamat，說多虧你們，她不只與父母重新連結，也終於感受到和他們一起分享食物的喜悅——因此，她由衷地謝謝你。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 克露兒 <small class="muted">(Living Memory, X:28.3, Y:15.5)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-sanctuary-of-the-strong.html">火山聖域</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="leafing-through-the-past.html">三葉耳飾</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
