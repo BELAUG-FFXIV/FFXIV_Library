@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Interphos | BELAUG · FFXIV Library</title>
+  <meta name="description" content="FFXIV DT 7.0 Trial — The Interphos（エターナルクイーン討滅戦 / 永恆女王討滅戰）：故事概要、需求條件、解鎖任務、後續任務、BGM，附影片。" />
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#ffffff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif; background:var(--bg); color:var(--fg);}
+    .container{max-width:1080px; margin:0 auto; padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border); background:#fff9edb3; backdrop-filter:saturate(120%) blur(6px); position:sticky; top:0; z-index:10}
+    .nav{display:flex; align-items:center; justify-content:space-between; height:60px}
+    .left{display:flex; align-items:center; gap:12px}
+    .home{border:1px solid var(--border); background:#fff; padding:4px 8px; border-radius:8px; text-decoration:none; color:var(--fg); font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex; align-items:center; gap:8px}
+    .icon-btn{background:none; border:none; cursor:pointer; font-size:14px; padding:6px 10px; border-radius:8px}
+    .icon-btn:hover{background:#fff; border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid; grid-template-columns:1.1fr 1fr; gap:20px; align-items:start;}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative; padding-top:56.25%}
+      .video-wrap iframe{position:absolute; inset:0; width:100%; height:100%}
+    }
+    .card{background:var(--card); border:1px solid var(--border); border-radius:16px; box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px; border-bottom:1px solid var(--border); font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%; height:420px; border:0; display:block; border-radius:16px}
+
+    .tabs{display:flex; gap:8px; padding:12px 12px 0; flex-wrap:wrap}
+    .tab-btn{background:#fff; border:1px solid var(--border); color:var(--fg); border-radius:999px; padding:8px 14px; cursor:pointer; font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent); color:#fff; background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+
+    .stack{display:flex; flex-direction:column; gap:10px}
+    .stack .row{padding:12px 14px; border:1px dashed var(--border); border-radius:12px; background:#fffdf6}
+    .link{color:#0b60d8; text-decoration:none}
+    .link:hover{text-decoration:underline}
+
+    /* ✅ 右側不要貼邊：固定用 gap，且允許換行 */
+    .row-flex{
+      display:flex;
+      align-items:baseline;
+      gap:18px;
+      justify-content:flex-start;
+      flex-wrap:wrap;
+    }
+    .row-flex .label{font-weight:800}
+    .row-flex .righttxt{white-space:nowrap}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/EPujPeH4Xus" title="The Interphos" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">The Interphos</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true" data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="req">Requirements</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlock">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="bgm">BGM</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story" class="tab-panel active"></div>
+          <div id="panel-req" class="tab-panel"></div>
+          <div id="panel-acq" class="tab-panel"></div>
+          <div id="panel-unlock" class="tab-panel"></div>
+          <div id="panel-bgm" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const LANG_KEY = 'ffxiv-guide-lang';
+
+    const i18n = {
+      EN:{
+        langLabel:'EN',
+        pageTitle:'The Interphos',
+        tabs:{story:'Story', req:'Requirements', acq:'Unlock Quest', unlock:'Follow-Up Quest', bgm:'BGM', comments:'Comments'},
+        story:`<p>A world free of suffering and loss… This earnest wish, made by the young Queen Sphene in her final moments, was realized centuries later in the form of Living Memory, the twisted paradise behind the legend of the golden city. In order to obtain the aether needed to sustain the sanctuary’s recreated denizens, Sphene has shed her conscience─the memories she had as a living person─to arise as within the Meso Terminal a terrifying entity possessed of absolute authority. Thus empowered, she now seeks to initiate interdimensional fusion and harvest the life force of people in other worlds, and it falls to you to stop her before untold lives are sacrificed.</p>`,
+        req:`<div class="stack">
+          <div class="row"><strong>Players:</strong> 1–8 players (2 Tanks, 2 Healers, 4 DPS)</div>
+          <div class="row"><strong>Class/Job:</strong> Disciples of War or Magic</div>
+          <div class="row"><strong>Unrestricted Parties:</strong> Not Allowed</div>
+          <div class="row">※ Limited jobs can participate only in a preformed party meeting party size requirements or an unrestricted party, and if duty rules allow.</div>
+          <div class="row"><strong>Level:</strong> 100</div>
+          <div class="row"><strong>Average Item Level:</strong> 670</div>
+          <div class="row"><strong>Item Level Sync:</strong> 700</div>
+          <div class="row">※ While synced, all item stats are adjusted.</div>
+          <div class="row"><strong>Additional Loot Rules:</strong> Unavailable</div>
+          <div class="row"><strong>Explorer Mode:</strong> Unavailable</div>
+          <div class="row">※ Role and item level restrictions are lifted for parties meeting minimum size requirements.</div>
+        </div>`,
+        /* ✅ 分別放在三語：這裡是 EN 版 Unlock Quest */
+        acq:`<div class="stack">
+          <div class="row"><a class="link" href="dawntrail.html">Dawntrail</a></div>
+          <div class="row"><a class="link" href="alexandria.html">Alexandria</a></div>
+        </div>`,
+        unlock:`<div class="stack">
+          <div class="row"><a class="link" href="a-royal-invitation.html">A Royal Invitation</a></div>
+        </div>`,
+        bgm:`<div class="stack">
+          <div class="row row-flex">
+            <span class="label">Trials II No. 58</span>
+            <span class="righttxt"><a class="link" href="bgm-paved-in-solitude.html">Paved in Solitude</a></span>
+          </div>
+          <div class="row row-flex">
+            <span class="label">Trials II No. 59</span>
+            <span class="righttxt"><a class="link" href="bgm-paved-with-resolve.html">Paved with Resolve</a></span>
+          </div>
+        </div>`
+      },
+
+      JP:{
+        langLabel:'JP',
+        pageTitle:'エターナルクイーン討滅戦',
+        tabs:{story:'ストーリー', req:'必要条件', acq:'開放クエスト', unlock:'後続クエスト', bgm:'BGM', comments:'コメント'},
+        story:`<p>誰もが、悩みも争いもなく生きられますように――ひとりの少女が死に際に願った祈りは、やがて歪な黄金郷として結実した。愛する民を永久に生かすには、異界の命を奪い続けねばならない。その非道を為すため、少女スフェーンの記憶から形作られた理想の王は、優しき心を自ら消し去る。かくして生まれたるは、鋼の躯体に鎧われた「エターナルクイーン」。彼女を止めねば、残存する鏡像世界から数多の命が失われる。今こそ、孤独な路を突き進まんとする機械仕掛けの女王に立ち向かい、そのコアを破壊せよ！</p>`,
+        req:`<div class="stack">
+          <div class="row"><strong>1～8人用：</strong>(TANK:2/HEALER:2/DPS:4)</div>
+          <div class="row"><strong>クラス：</strong>ファイター／ソーサラー</div>
+          <div class="row"><strong>「制限解除」：</strong>非対応</div>
+          <div class="row">※ リミテッドジョブは規定人数パーティもしくは「制限解除」状態かつ許可されているコンテンツに参加できます。</div>
+          <div class="row"><strong>レベル：</strong>100</div>
+          <div class="row"><strong>平均アイテムレベル：</strong>670～</div>
+          <div class="row"><strong>アイテムレベルシンク：</strong>700</div>
+          <div class="row">※ アイテムレベルシンク中は、すべての装備品の性能がアイテムレベルシンク以下になるように調整されます。</div>
+          <div class="row"><strong>ロットルール変更：</strong>非対応</div>
+          <div class="row"><strong>「自由探索での参加」：</strong>非対応</div>
+          <div class="row">※ 規定人数の場合は自由なロール構成かつ、アイテムレベルに関わらず参加できます。</div>
+        </div>`,
+        /* ✅ JP 版 Unlock Quest */
+        acq:`<div class="stack">
+          <div class="row"><a class="link" href="dawntrail.html">黄金のレガシー</a></div>
+          <div class="row"><a class="link" href="alexandria.html">記憶幻想 アレクサンドリア</a></div>
+        </div>`,
+        unlock:`<div class="stack">
+          <div class="row"><a class="link" href="a-royal-invitation.html">アレクサンドリアからの報せ</a></div>
+        </div>`,
+        bgm:`<div class="stack">
+          <div class="row row-flex">
+            <span class="label">Trials II No. 58</span>
+            <span class="righttxt"><a class="link" href="bgm-paved-in-solitude.html">ひとつの路</a></span>
+          </div>
+          <div class="row row-flex">
+            <span class="label">Trials II No. 59</span>
+            <span class="righttxt"><a class="link" href="bgm-paved-with-resolve.html">ふたりの路</a></span>
+          </div>
+        </div>`
+      },
+
+      ZH:{
+        langLabel:'ZH-TW',
+        pageTitle:'永恆女王討滅戰',
+        tabs:{story:'故事概要', req:'需求條件', acq:'解鎖任務', unlock:'後續任務', bgm:'BGM', comments:'留言'},
+        story:`<p>「沒有痛苦、也不會再失去任何人……」——年輕的女王 Sphene 在生命最後一刻許下的真切願望，在數百年後以 Living Memory 之名被實現，成為那段「黃金城」傳說背後、扭曲而美麗的樂園。然而，奇蹟從不免費。為了取得維持聖域中「被重現的居民」所需的以太，Sphene 親手捨棄了自己身為活人時的記憶與良知，並在 Meso Terminal 之中化為掌握絕對權限的可怖存在。獲得力量的她，如今意圖啟動次元融合，收割其他世界人們的生命力——而你必須在無數生命被犧牲之前，阻止她。</p>`,
+        req:`<div class="stack">
+          <div class="row"><strong>人數：</strong>1–8 人（2 坦克／2 治療／4 輸出）</div>
+          <div class="row"><strong>職業：</strong>戰鬥職業／魔法職業</div>
+          <div class="row"><strong>無限制隊伍：</strong>不可</div>
+          <div class="row">※ 限定職業僅能在事先組成符合人數條件的隊伍，或以無限制規則參加，且需符合任務規則允許的情況。</div>
+          <div class="row"><strong>等級：</strong>100</div>
+          <div class="row"><strong>平均裝等：</strong>670</div>
+          <div class="row"><strong>裝等同步：</strong>700</div>
+          <div class="row">※ 同步時，所有裝備數值將自動調整。</div>
+          <div class="row"><strong>追加掉落規則：</strong>不可</div>
+          <div class="row"><strong>探索模式：</strong>不可</div>
+          <div class="row">※ 當隊伍僅達最低人數時，角色定位與裝備品級限制將解除。</div>
+        </div>`,
+        /* ✅ ZH 版 Unlock Quest */
+        acq:`<div class="stack">
+          <div class="row"><a class="link" href="dawntrail.html">黃金的遺產</a></div>
+          <div class="row"><a class="link" href="alexandria.html">Alexandria 記憶幻境</a></div>
+        </div>`,
+        unlock:`<div class="stack">
+          <div class="row"><a class="link" href="a-royal-invitation.html">來自 Alexandria 的消息</a></div>
+        </div>`,
+        bgm:`<div class="stack">
+          <div class="row row-flex">
+            <span class="label">Trials II No. 58</span>
+            <span class="righttxt"><a class="link" href="bgm-paved-in-solitude.html">走上孤寂之路</a></span>
+          </div>
+          <div class="row row-flex">
+            <span class="label">Trials II No. 59</span>
+            <span class="righttxt"><a class="link" href="bgm-paved-with-resolve.html">走向並肩的路</a></span>
+          </div>
+        </div>`
+      }
+    };
+
+    const langToggle = document.getElementById('langToggle');
+    const pageTitle  = document.getElementById('pageTitle');
+    const tabBtns    = [...document.querySelectorAll('.tab-btn')];
+
+    const panels = {
+      story   : document.getElementById('panel-story'),
+      req     : document.getElementById('panel-req'),
+      acq     : document.getElementById('panel-acq'),
+      unlock  : document.getElementById('panel-unlock'),
+      bgm     : document.getElementById('panel-bgm'),
+      comments: document.getElementById('panel-comments')
+    };
+
+    function getLang(){ return localStorage.getItem('ffxiv-guide-lang') || 'EN'; }
+
+    function applyLang(lang){
+      const t = i18n[lang] || i18n.EN;
+      pageTitle.textContent = t.pageTitle;
+      langToggle.textContent = `🌐 ${t.langLabel}`;
+      tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+      const activeBtn = tabBtns.find(b=>b.getAttribute('aria-selected')==='true') || tabBtns[0];
+      renderPanel(activeBtn.dataset.tab, lang);
+      if (activeBtn && activeBtn.dataset.tab === 'comments') loadGiscusForCurrentLang();
+    }
+
+    function renderPanel(key, lang){
+      const t = i18n[lang] || i18n.EN;
+      Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+      panels[key].classList.add('active');
+      if (key !== 'comments') {
+        panels[key].innerHTML = t[key] || '';
+      } else {
+        loadGiscusForCurrentLang();
+      }
+    }
+
+    tabBtns.forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+        btn.setAttribute('aria-selected','true');
+        renderPanel(btn.dataset.tab, getLang());
+      });
+    });
+
+    langToggle.addEventListener('click',()=>{
+      const cur=getLang();
+      const next=cur==='EN'?'JP':(cur==='JP'?'ZH':'EN');
+      localStorage.setItem('ffxiv-guide-lang',next);
+      applyLang(next);
+    });
+
+    applyLang(getLang());
+
+    const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+    };
+
+    function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+
+    function loadGiscusForCurrentLang(){
+      const mount = document.getElementById('giscus_container');
+      if (!mount) return;
+      mount.innerHTML = '';
+      const langCode = getLang();
+      const s = document.createElement('script');
+      s.src = 'https://giscus.app/client.js';
+      s.setAttribute('data-repo', GISCUS_CFG.repo);
+      s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+      s.setAttribute('data-category', GISCUS_CFG.category);
+      s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+      s.setAttribute('data-mapping', 'specific');
+      s.setAttribute('data-term', location.pathname + '｜' + langCode);
+      s.setAttribute('data-reactions-enabled', '1');
+      s.setAttribute('data-emit-metadata', '0');
+      s.setAttribute('data-input-position', 'bottom');
+      s.setAttribute('data-lang', uiLang(langCode));
+      s.setAttribute('data-theme', GISCUS_CFG.theme);
+      s.setAttribute('crossorigin', 'anonymous');
+      s.async = true;
+      mount.appendChild(s);
+    }
+  </script>
+</body>
+</html>
