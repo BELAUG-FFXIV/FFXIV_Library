@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A Journey Never-ending | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – A Journey Never-ending (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/VbXZg_XwDWg"
+              title="A Journey Never-ending" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">A Journey Never-ending</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`A Journey Never-ending`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>At the Cleyra Museum of Nature, you arrive with Cahciua and Erenville still half-expecting disappointment—until the curator greets you and confirms you can indeed go on leisure flights atop the adorable mehwapyarras, specially trained by a Turali friend. Cahciua immediately starts theorizing that the animals themselves may not be flying at all, but that their saddles are imbued with levitation magicks. Erenville responds with a dry attempt at reason, invoking a theory that all life-forms possess an innate capacity for levitational magicks that usually lies dormant, but can manifest as flight.</p><p>When the moment comes, you mount up, and all you need do is relax as the mehwapyarras follow their set route. Cahciua laughs with pure exhilaration, while Erenville can only stare in disbelief as the ground falls away—somehow, they truly do fly. Cahciua chatters as you move in formation, saying you look like migrating birds, and Erenville mutters that the resemblance is ruined by the fact you’re riding giant rodents. She pivots again, reminding him his name comes from the mallard, and praising her clever “mallard” for traveling as far as any migrating bird might—only for Erenville to demand she stop calling him that.</p><p>Too soon, you’re back on solid ground. Cahciua stretches, declaring it a wonderful experience worth saving for the very end, and asks if you enjoyed yourselves as well. Erenville gives a restrained admission that it was enjoyable enough, and Cahciua takes it as high praise from her fussy bunbun, thanking you both for indulging her. Then she grows practical, saying it’s time to head to the Aero Terminal—and if there’s anything you still wish to do in Windspath Gardens, you should do it now. She’ll go find the others and tell them the same.</p><p>Yet when Cahciua is no longer right beside you, Erenville’s composure cracks. He forces himself to name the truth: she is only a facsimile constructed from her memories. He understands that—but when she stands there, as alive and spirited as he has ever known her, he doesn’t know how he is supposed to do it, how he is supposed to erase her, and whether she even realizes how it tears him apart. When you rejoin the others, Erenville can only say it isn’t fair, and Wuk Lamat says she saw you from below and it looked like you were having fun. Krile asks that you send Cahciua off with a smile, and G’raha Tia promises you will be there for Erenville.</p><p>Cahciua returns, brimming with warmth, saying she hasn’t enjoyed herself this much since her journey with the Dawnservant—and then correcting herself, because this was even better, precisely because she could share it with her darling boy. She says this is as far as she can go, and Erenville snaps at her to stop doing it again—deciding everything by herself and then disappearing. Cahciua calls him by the name she uses for him and reminds him, as her pupil, he should understand: everything that lives must one day die, and what has died is not meant to return—this is the way of nature. Her existence is unnatural, endured only because she had to unmake this twisted mausoleum, but now that brave souls have appeared to whom she can entrust her mission, she can finally embrace the end, and she asks if he cannot be happy for her.</p><p>Cahciua admits she was scared—scared she would be trapped inside the barrier forever, denied the thrill of discovery for all her days—and she says your coming gave her courage and comfort, more than he knows. She declares that in this moment she stands unburdened and free, in the happiest moment of her life, and you tell her that those feelings will live on. Erenville finally yields, telling her he will continue what she began, that leaving home truly broadened his horizons, that he met his friends and found this place—and he bids her leave her dreams with him, vowing he will go where she could not go and do what she could not do. Cahciua calls him grown and dependable, warns him he may know failure and burning regret, but that these too will become guides to lead him onward, and asks him to keep her close to his heart so she can be there, in his way, to see what she hasn’t seen. She tells him he is her pride and joy, bids you all farewell, and thanks you for the memories—and for watching over her boy.</p><p>At the Aero Terminal, Erenville hardens his resolve and says there will be no more doubts: he will shut the terminal down. Krile tells you to see the task through to the end, and G’raha Tia says you carry on with their hopes and memories in your hearts. Wuk Lamat leaves it to Erenville, and he answers that he will not waver—not anymore—while the finality becomes clear: once the Aero Terminal is shut down, Windspath Gardens cannot be restored to its present form. As soon as it’s done, Wuk Lamat says that makes all of them, and G’raha Tia says all that remains is to wait for the Meso Terminal to become vulnerable when it is about to initiate fusion, and then strike. The Meso Terminal announces the final phase of world bridging and that the aether of all residents will shortly be replenished, insisting no action is required—only for Wuk Lamat to realize it has already begun. With no time left for tears, you brace yourselves to finish what must be done, even knowing what it is Sphene seeks to protect.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Cahciua <small class="muted">(Living Memory, X:11.0, Y:12.5)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-search-of-discovery.html">In Search of Discovery</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="dawntrail.html">Dawntrail</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'終わらない旅路を',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>クレイラ自然博物館に着いたあなたは、カフキワとエレンヴィルとともに係員に迎えられる。遊覧飛行ができる場所かと尋ねるカフキワに、係員はうなずき、トラルの友が特別に訓練した愛らしいメフワピャラスがあなたたちを運ぶのだと言う。カフキワはさっそく、メフワピャラス自体が飛ぶのではなく、鞍に浮遊の魔法が込められているのではないかと推測する。エレンヴィルは、すべての生命には本来浮遊の魔法を発現させる素質があり、普段は眠っていても飛翔という形で現れることがある、という説を持ち出して応じる。</p><p>いよいよ鞍にまたがると、メフワピャラスは決まった航路を飛ぶので、あなたは景色を楽しむだけでいいと告げられる。カフキワは高揚した笑い声を上げ、エレンヴィルは半ば呆然としながらも、信じがたいことに本当に飛んでいると認めざるを得ない。編隊を組んで飛んでいる様子を見て、カフキワは渡り鳥みたいだと言い、エレンヴィルは巨大な齧歯類に乗っている時点で違うと返す。するとカフキワは、渡り鳥のマガモがあなたの名の由来だと語り、海を越えて望む場所へ飛べる渡り鳥のように、あなたも遠くまで旅をしたのだと褒めるが、エレンヴィルはその呼び名で呼ばないでくれと顔をしかめる。</p><p>気づけば遊覧は終わり、地上に戻ったカフキワは大きく伸びをして、最後に取っておくにふさわしい体験だったと満足げに言う。あなたたちも楽しめたかと問われ、エレンヴィルは「それなりには」と控えめに答えるが、カフキワは気難しいバンバンからの賛辞だと受け取り、あなたとともに付き合ってくれたことへ礼を言う。そして、次はアエロ・ターミナルへ向かう時間だと告げ、ウィンドスパス・ガーデンズでまだやりたいことがあるなら今のうちに済ませるよう促す。自分は他の皆を探し、同じことを伝えてくると言って去っていく。</p><p>けれど、カフキワが少し離れた途端、エレンヴィルは押さえ込んでいた思いをこぼす。彼女は記憶から作られた紛い物だと理解している、それでも目の前にいる彼女が、かつて知っていた通りに生き生きとしているからこそ、どうやって消せばいいのか分からないのだ、と。どうやって彼女を消し去ればいいのか、どれほど自分が引き裂かれているか、彼女は知っているのか――そう吐き出す。合流した場で、エレンヴィルは「不公平だ」とつぶやき、ウクラマトは下から見ていて楽しそうだったと言う。クルルは笑顔で送り出そうと呼びかけ、グ・ラハ・ティアはエレンヴィルのそばにいると約束する。</p><p>戻ってきたカフキワは、この上なく満ち足りた様子で語る。暁の王との旅以来これほど楽しかったことはない、いやそれ以上だ、なぜなら愛しい息子とこの冒険を分かち合えたからだ、と。そしてここまでだと言いかけた瞬間、エレンヴィルはやめろと遮り、また勝手に決めて姿を消すのかと責める。カフキワは師である以上分かるはずだと言い、命あるものはいつか死に、死んだものは戻るべきではない、それが自然の理だと諭す。自分の存在は不自然で、この歪んだ霊廟を解きほどくために耐えてきただけだが、今は使命を託せる勇敢な者たちが現れたのだから、ようやく終わりを受け入れられるのだ、と。だから自分のために喜べないのか、と問う。</p><p>カフキワは、ずっと怖かったのだと打ち明ける。屏障の内側に閉じ込められ、発見のときめきを得られないまま永遠を過ごすことが怖かったのだ、と。あなたたちが来てくれたことが勇気と慰めになった、そして今この瞬間、自分は重荷から解き放たれ自由で、人生でいちばん幸せなのだと言う。あなたは、その想いはこれからも生き続けると返し、エレンヴィルはついに受け入れて、母の望み通りに自分が始めたことを引き継ぐと告げる。家を出たことで視野が広がり、友と出会い、この場所に辿り着いた――だから夢は自分に託してほしい、行けなかった場所へ行き、できなかったことを成し遂げる、と誓う。カフキワは彼の成長を喜び、失敗や燃えるような後悔さえも道しるべとなるのだと励まし、旅のどこにいても自分を胸に留めてほしいと頼む。誇りだと言い、別れを告げ、あなたにも記憶への礼を述べ、息子を見守ってくれたことに感謝する。</p><p>アエロ・ターミナルに立つと、エレンヴィルは迷いはないと言い、ターミナルを停止させる決意を固める。クルルは最後までやり遂げようと言い、グ・ラハ・ティアは希望と記憶を胸に進もうと告げる。ウクラマトは任せると言い、エレンヴィルはもう揺らがないと答える――停止すればウィンドスパス・ガーデンズは元の姿に戻せない、その重みを受け止めた上で。やがてウクラマトは「これで全部だ」と言い、グ・ラハ・ティアは、融合の開始直前にメソ・ターミナルが脆くなる瞬間を待って攻め込むだけだと確認する。メソ・ターミナルは世界接続の最終段階に入ったと告げ、住民のエーテルはまもなく補充される、何もする必要はないと繰り返すが、ウクラマトはもう始まっているのかと息を呑む。涙を流している時間はない――あなたは皆とともに、スフェーンが守ろうとしているものを知った上で、それでも果たすべきことを果たすために動き出す。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> カフキワ <small class="muted">（リビング・メモリー, X:11.0, Y:12.5）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-search-of-discovery.html">未知を追い求めて</a></div><div class="row">ファイター ソーサラー（リミテッドジョブを除く）Lv 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="dawntrail.html">黄金のレガシー</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'永無止境的旅程',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你跟著 Cahciua 和 Erenville 來到 Cleyra Museum of Nature，館員迎上前來，你們確認這裡確實能搭乘 mehwapyarras 進行遊覽飛行，而且牠們是由一位 Turali 的朋友特別訓練過的。Cahciua 立刻提出自己的推測：也許不是 mehwapyarras 本身會飛，而是牠們的鞍座被施加了「浮空」的魔法。Erenville 則用一套偏學理的說法回應，提到有種理論認為所有生命形態都具備與生俱來的浮空魔法潛能，平時多半沉睡不顯，但也可能以「能飛」的形式被喚醒。</p><p>你們準備好後便翻身上鞍。館員說 mehwapyarras 會沿著固定路線飛行，你只要放鬆、好好看風景就行。Cahciua 開懷大笑，興奮得像孩子一樣；Erenville 則難以置信地看著腳下景色遠去，低聲承認——牠們竟然真的會飛。Cahciua 說你們飛成隊形的樣子像候鳥遷徙，Erenville 立刻潑了冷水：只是你們騎的是巨大齧齒類。Cahciua 乾脆把話題轉到「候鳥」本身，提起 Erenville 的名字源自 mallard，還稱讚他像遷徙的鳥一樣能飛往想去的任何地方，甚至越過海洋抵達遙遠的大陸；Erenville 卻只皺著眉要她別再那樣叫他。</p><p>遊覽很快結束。Cahciua 落地後伸了個懶腰，說這真是太棒了——留到最後才做，完全值得。她轉頭問你們是不是也玩得開心，Erenville 只勉強承認「還行吧」，Cahciua 卻笑說這已經是她那個挑剔的 bunbun （她對 Erenville 的暱稱）給出的高評價了，並向你和他道謝，謝謝你們願意陪她任性一次。接著她收起笑意，提醒你們該往 Aero Terminal 前進了；如果在 Windspath Gardens 還有想做的事，現在就要趁早完成。她會去找其他人，把同樣的話轉告。</p><p>可當 Cahciua 不在眼前時，Erenville 的聲音一下子變得沉重。他逼自己說清楚：她只是由記憶構成的仿製品，這點他理解——可當她就站在那裡，依舊鮮活、依舊精神奕奕，像他記憶裡的那個人一樣，他到底要怎麼做？要怎麼把她抹去？更讓他痛苦的是，他不知道她是否明白，這件事正在把他撕得粉碎。你們回到眾人身邊時，Erenville 只低聲說了一句「這不公平」。Wuk Lamat 說她從下方看到你們飛過去，看起來像是在享受；Krile 則希望你們能帶著笑容送 Cahciua 走完最後一段路；G’raha Tia 也說大家會陪著 Erenville。</p><p>Cahciua 回來時滿臉滿足，說自己已經很久沒有這麼開心了——自從和 Dawnservant 的旅程之後就沒有，甚至她得承認，這次更棒，因為她能和自己最親愛的孩子一起分享。她正要說「自己只能走到這裡」時，Erenville 打斷她，指責她又在做同樣的事：擅自決定一切，然後就消失。Cahciua 喚著他私下用的稱呼，說他身為她的學生應該明白：萬物終將一死，死去之物不該回返，這才是自然的法則。她的存在本就不自然，她之所以忍到現在，只因必須拆解這座扭曲的陵墓；如今既然出現了能託付使命的勇敢之人，她終於可以坦然迎向終點——她問他，難道不能為她高興嗎？</p><p>Cahciua 又坦白說，其實她一直很害怕：害怕自己會永遠被困在屏障之內，一輩子都得不到「發現未知」的悸動。她說你們的到來給了她勇氣與安慰，遠遠超過他所知道的程度；而現在這一刻，她覺得自己卸下了重擔、真正自由——是她人生中最幸福的瞬間。你告訴她，這些感受不會就此消失。Erenville 終於順著她的心意說下去，說自己會延續她開始的事：離開故鄉確實拓寬了他的眼界，他遇見了朋友，也來到了這裡；所以他請她把夢留給他，他會去她去不了的地方，做她做不到的事。Cahciua 說他已經長大、變得可靠，前方仍有無數經驗等著他——每一次都是一堂課；他也許會遭遇失敗與灼人的悔恨，但那些都會成為指引前路的路標。她要他無論走到哪裡，都把她放在心裡，讓她能以那種方式「陪著」他看見她未曾看見的世界；最後她說他是她的驕傲與喜悅，向你們道別，也向你道謝，謝謝你帶給她最後的回憶，還有守護她的孩子。</p><p>站在 Aero Terminal 前，Erenville 斬釘截鐵地說自己不再猶豫——他會關閉終端機。Krile 說你們得把任務做完，G’raha Tia 說你們會把他們的希望與記憶放在心裡繼續前進。Wuk Lamat 表示這裡交給 Erenville，Erenville 回答自己不會再動搖；他也明白，一旦關閉 Aero Terminal，就不可能讓 Windspath Gardens 回到現在的樣子。終端關閉後，Wuk Lamat 說這樣所有區域都處理完了；G’raha Tia 則提醒，接下來只要等 Meso Terminal 在即將啟動融合、變得脆弱的那一瞬間，然後出手。Meso Terminal 隨即宣告世界連接已進入最終階段，所有居民的以太即將補充完畢，並反覆表示你們無需採取任何行動——可 Wuk Lamat 立刻意識到：已經開始了。你們沒有時間再沉浸在眼淚裡，只能帶著 Cahciua 的心願往前衝，無論你們已經明白 Sphene 想守護的是什麼，該做的事仍然得做完。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 卡芙琪娃 <small class="muted">(Living Memory, X:11.0, Y:12.5)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-search-of-discovery.html">踏上探索未知的旅程</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="dawntrail.html">黃金的遺產</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
