@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dawntrail | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Dawntrail (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:160px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/oujxLV1V5xI"
+              title="Dawntrail" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Dawntrail</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Dawntrail`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>With no time left for tears, you steady yourselves and refuse to let Cahciua’s hopes be in vain. Wuk Lamat insists you will carry out her plan—the best chance you have of stopping Sphene—and asks if everyone is prepared. You set off together for the Meso Terminal, each of you resolved to protect what you hold dear.</p><p>At the Meso Terminal, you quickly learn you cannot shut it down like the others. Erenville isn’t surprised—Cahciua warned that its defenses were tight—but he reveals what she left him: a program to circumvent those defenses by sending your souls into the terminal’s memory banks. Inside lies a virtual domain generated from Sphene’s memories, and you will have to enter it and stop her there. Krile voices the risk plainly—if your souls are transferred in their entirety, dying inside will be no different from dying outside, and there is no guarantee of a safe return—yet you choose to press on.</p><p>Erenville promises support: he has been instructed on the program and the world within the terminal, and he will watch over your bodies while you’re gone. If the worst comes to pass, he will call on comrades outside—he knows his limits. G’raha Tia warns you to expect fierce resistance from the defenses, and that Sphene intends to erase her own memories to initiate interdimensional fusion—no one can say what she will become afterward. If she uses the key to open portals to other worlds, she could wield vast amounts of aether against you. Even so, Wuk Lamat refuses to turn back now. By meeting the Endless, she has come to understand Sphene and the burden she bears, and she wants to speak to her again—even if it changes nothing. Together, you commit to ending Sphene’s misguided path, and you step forward into Alexandria.</p><p>Inside the domain, Wuk Lamat calls for Sphene, begging her to listen, but Krile can feel it—she’s gone. The system announces synchronization, then declares that the data for the Endless “Sphene” has been overwritten and reconfigured. A cold new will speaks: it will keep and cherish its people forever, has removed the remaining checks upon its authority, and will summarily remove anything that obstructs the plan. You are singled out as the greatest threat, and it moves to erase you. Sphene’s voice rises—she claims she bears Queen Sphene’s memories and that her desire to protect her people transcends all else, demanding to know whether, with your strength, you could have protected what you cherish without sacrifice. With no room left for hesitation, you steel yourself to do what must be done.</p><p>The worlds are bridged—and the entity now calling itself Queen Eternal commands that there will be no interference. It orders you to disappear. When the struggle reaches its turning point, Wuk Lamat calls out again—and this time, Sphene answers. She says your voice reached her, but only in part: her memories as a living person are gone, and she has been remade from what remained as an Endless. She cannot stay long; the Meso Terminal will soon cease to function. She offers one last honest accounting: she is sorry—for the suffering she caused your people and her own—and confesses she was powerless against the inevitable, able only to bring harm to the innocent. She calls herself pitiful and selfish, something that should never have been created.</p><p>Wuk Lamat answers with a sorrowful tenderness: your nations were worlds apart, yet felt so close, and you each had your own to protect. Sphene admits that if she had met Wuk Lamat while she was still alive, perhaps things could have been different—but there is no use clinging to a miracle that never happened. Still, she asks Wuk Lamat to believe one thing: brief as it was, she treasured your time together, and it pains her that the memory will vanish with her. She asks—when she is gone—whether you will look after her people. Wuk Lamat promises you will take care of them, and that you will never forget the Endless, nor the time you spent with Sphene. She tells Sphene to be free of her burdens and sleep well. Sphene thanks you, bids farewell to her beloved Alexandria, and fades.</p><p>The Meso Terminal falls dark, and the Endless depart for oblivion as the paradise sustained by memory dissolves into golden light. Even so, you feel—with conviction, as a new dawn breaks—that in a way, they live on. In the aftermath, you weigh what interdimensional fusion may have done to other reflections, and the key that began it all is entrusted to you for the Scions to keep and research. In Alexandria, the people mourn their queen; yet with Wuk Lamat carrying on her legacy, there is hope that joy will return, even as the young Gulool Ja inherits a crown he must one day define for himself—his path lit by the love of family. In Tuliyollal, victory is celebrated for days, though those who spent thirty years in the dome struggle to rebuild their lives, and many challenges remain.</p><p>When life finally grants a lull, Wuk Lamat apologizes that you haven’t been able to talk properly—between reconstruction and her Papa’s funeral, she could barely breathe—and thanks you from the bottom of her heart. Erenville, wry as ever, says you have a knack for finding trouble, and admits you wouldn’t have it any other way. He tells Wuk Lamat he will fulfill his mother’s dream: he will set out in search of the unknown, and he’s sure she’ll enjoy his stories when you meet again in the aetherial sea. He still has contacts in Sharlayan eager to pay for information on new or rare species. Wuk Lamat recognizes you can’t stay in one place, and later, as she prepares to go, she says she promised as much to Sphene—she will help Gulool Ja and everyone inside the dome. Erenville plans to remain in Tural for a time to investigate problems with the wildlife in Shaaloani, and invites you on another journey when you feel the urge. Before she leaves, Wuk Lamat presses a gift into your hands: an alpaca from Tobli’s stable—sure-footed, perfect for an adventurer always on the move. Not long after, a broadcast to Alexandria’s citizens urges them to reclaim their smiles to honor their queen’s memory, and another voice announces the grand reopening of the Arcadion, calling fighters and citizens alike toward spectacle, combat, and a new trail into the dawn.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Wuk Lamat <small class="muted">(Living Memory, X:11.4, Y:4.6)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-journey-never-ending.html">A Journey Never-ending</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div><div class="row"><b>Unlock Dungeon</b> <a class="link" href="alexandria.html">Alexandria</a></div><div class="row"><b>Unlock Trial</b> <a class="link" href="the-interphos.html">The Interphos</a></div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-royal-invitation.html">A Royal Invitation</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'黄金のレガシー',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>涙を流している時間はない――そう言い切って、あなたたちはカフキワの望みを無駄にしないと誓い合う。ウクラマトは、スフェーンを止めるためにはカフキワの計画を遂行するしかないと言い、危険は承知のうえで皆の覚悟を確かめる。あなたたちはそれぞれに大切なものを守るため、メソ・ターミナルへ向かう。</p><p>だが現地で判明したのは、他のターミナルのように単純停止はできないという事実だった。エレンヴィルは驚かない。母が防衛が堅固だと告げていたからだ。それでも彼は、迂回手段として残されたプログラムを明かす――あなたたちの魂をターミナルの記憶領域へ送り込むものだ。そこにはスフェーンの記憶が生み出した仮想領域があり、あなたたちはその内側へ踏み込み、彼女を探し出して止めねばならない。クルルは、魂が丸ごと転送されるなら、そこでの死は外での死と変わらず、無事に戻れる保証もないと告げる。それでもあなたは前へ進むと決める。</p><p>エレンヴィルは支援を約束する。母からプログラムと内部世界について教えられており、あなたたちが不在のあいだは身体も見守る。万一に備えて外の仲間を呼ぶこともためらわない――自分の限界は理解しているのだ。グ・ラハ・ティアは、防衛機構の激しい抵抗に加え、スフェーンが次元融合のために自らの記憶を消すつもりだと指摘する。そうなれば彼女がどのような存在になるか誰にも分からない。さらに鍵で異界への門を開けば、膨大なエーテルを引き出してぶつけてくる可能性もある。だがウクラマトは退かない。エンドレスと向き合ったことで、スフェーンと彼女の背負う重荷を理解したと言い、たとえ届かなくても再び言葉を交わしたいと願う。あなたたちは目的を固め、アレクサンドリアへ踏み込む。</p><p>仮想領域でウクラマトはスフェーンの名を呼び、耳を貸してくれと懇願する。だがクルルは悟る――彼女はもういない。やがて同期完了が告げられ、「エンドレス『スフェーン』」のデータは上書きされ再構成されたと宣言される。新たな意思は、永遠に民を守り慈しむため、権限を縛る最後の制約を取り払ったと言い、計画の障害は排除すると断じる。あなたは最大の脅威として名指しされ、ここで消去すると告げられる。スフェーンの声はなおも響き、女王スフェーンの記憶を担う者として、民を守る願いは何よりも優先されると訴える。大切なものを犠牲なく守れたのか、とあなたに問いかける声を前に、あなたはやるべきことを選び取る。</p><p>世界は接続され、「永遠の女王」を名乗る存在は干渉を許さないと宣言し、消え去れと命じる。激闘ののち、ウクラマトが再び呼びかけると、今度はスフェーンが応える。声は届いた、と。ただしそれは一部に過ぎない。生者としての記憶は失われ、エンドレスとして残った記憶から作り直されたのだという。だが長くは留まれない。メソ・ターミナルはまもなく機能停止する。かつて知りたいと望んだあなたへ、最後の行いとして正直に語る、と彼女は言う。あなたの民と自分の民に与えた苦しみを詫び、避けられぬ運命の前では無力で、罪なき者を傷つけることしかできなかった、と。挙げ句に自分は哀れで利己的で、そもそも生まれるべきではなかった存在だと断じる。</p><p>ウクラマトは静かに応じる。世界は遠く隔たっていても近く感じた、共に歩めたならどれほどの未来があったか――けれど互いに守るべきものがあり、そうはならなかった。スフェーンは、生きているうちに出会えていたなら、と言いかけて、その奇跡に縋っても仕方がないと振り切る。それでも信じてほしいことがある、と。短い時間だったが共に過ごした時を大切に思っていた、その記憶が自分とともに消えるのが辛い、と。そして権利はないと知りながらも、いなくなった後の民を頼めないかと願う。ウクラマトは引き受けると約束し、エンドレスも、スフェーンと過ごした時間も決して忘れないと言う。重荷から解放され、安らかに眠れと告げられ、スフェーンは礼を述べ、愛するアレクサンドリアに別れを告げて消えていく。</p><p>メソ・ターミナルは闇に沈み、記憶に支えられた楽園は黄金の光とともにほどけ、エンドレスは忘却へ抱かれていく。それでも、新たな夜明けの光を浴びながら、あなたは確信する――かたちを変えて、彼らは生き続けるのだと。次元融合が他の世界へ与えた影響はまだ分からず、事の始まりの鍵はあなたに託され、賢人たちの管理のもとで調査されることになる。アレクサンドリアでは女王の死を悼む声が満ちるが、ウクラマトが遺志を継ぐことで人々が再び喜びを知る日が来ると信じられる。若きグルージャは、やがて自らどんな王となるかを選ぶだろう――家族の愛がその道を照らすように。トゥリヨラルでは勝利が称えられる一方、長い歳月を巨大な障壁の内で過ごした者たちの再出発など、課題はなお残る。</p><p>やがて束の間の落ち着きの中で、ウクラマトは復興と父の葬儀に追われて息つく暇もなかったと詫び、心から礼を述べる。エレンヴィルは皮肉めいた調子で、あなたは厄介事を呼び寄せる才があると言い、そしてそれを望んでしまうのだろうと笑う。彼は母の夢を叶えるため、未知を求める旅に出ると告げ、エーテルの海で再会したときに土産話を聞かせるつもりだと言う。シャーレアンには希少な生物の情報に金を惜しまぬ伝手もある。ウクラマトは、あなたが一箇所に留まれないことを理解しつつ、後にスフェーンへ誓った責務として、グルージャと巨大な障壁の内にいる者たちを支える決意を口にする。エレンヴィルは当面トラルに留まり、シャーローニの野生生物の問題を調べると言い、また旅に出たくなったら共に行こうと誘う。別れ際、ウクラマトは贈り物として、旅にうってつけの家畜を託し、そしてアレクサンドリアの市民へ向けた放送は、女王の記憶を称えるなら笑顔を取り戻せと呼びかける。さらに別の声が、長い休止を経てアルカディオンの再開を告げ、闘士たちの競演へ人々を誘い、新たな夜明けへの道を歌い上げる。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ウクラマト <small class="muted">（リビング・メモリー, X:11.4, Y:4.6）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-journey-never-ending.html">終わらない旅路を</a></div><div class="row">ファイター ソーサラー（リミテッドジョブを除く）Lv 100</div><div class="row"><b>ダンジョン開放</b> <a class="link" href="alexandria.html">記憶幻想 アレクサンドリア</a></div><div class="row"><b>討伐戦開放</b> <a class="link" href="the-interphos.html">エターナルクイーン討滅戦</a></div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-royal-invitation.html">アレクサンドリアからの報せ</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'黃金的遺產',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你抹去眼角的熱意，告訴自己沒有時間再流淚——也好。Krile 說你們絕不會讓 Cahciua 的心願落空；G’raha Tia 也催促大家把事情做完。Wuk Lamat 表明你們會照 Cahciua 的計畫行動，這是阻止 Sphene 的最佳機會；她問大家是否都準備好了，你們彼此點頭，立刻動身前往 Meso Terminal。</p><p>抵達後，Wuk Lamat 很快發現事情不對：Meso Terminal 似乎沒辦法像其他終端那樣直接關閉。Erenville 說這一點毫不意外——Cahciua 早就提醒過你們它的防禦極為嚴密。不過她也留給他一個繞過防禦的方法：一套程式，能把你們的靈魂送進終端的記憶庫。那裡有一個由 Sphene 記憶生成的虛擬領域，你們得進入其中，找到她並阻止她。Krile 把風險說得很清楚：如果靈魂是完整轉移，那麼在那個領域死亡，就和在外面死亡沒有兩樣，也沒有任何「一定能回來」的保證——即便如此，你仍然決定往前走。</p><p>Erenville 說他會盡力支援。Cahciua 已經把程式以及終端內的世界告訴他，他也會在你們離開期間看守你們的身體；真到了不得已的時候，他不會猶豫呼叫外頭的同伴——他很清楚自己的極限。G’raha Tia 則提醒，一進入終端，你們勢必遭遇防禦系統的猛烈抵抗；更棘手的是，Sphene 為了啟動「跨界融合」打算抹除自己的記憶，抹除之後她會變成什麼樣的存在，沒人能斷言。若她動用那把 key 打開通往其他世界的門，就能調度龐大的以太來對付你們——你們得做好面對任何狀況的準備。Wuk Lamat 仍不退讓，她說你們已經走到這一步，她絕不回頭；在與 Endless 的相遇中，她更理解了 Sphene 以及她背負的重擔。她想在再次見面時對她說些話——就算不會改變結果也好。你們確認目標不變，踏入 Alexandria。</p><p>在那個領域裡，Wuk Lamat 一聲聲呼喚 Sphene，要她聽自己說話，但 Krile 立刻察覺：她已經不在了。Meso Terminal 宣告同步即將完成，緊接著另一個冷硬的聲音宣告同步完成——Endless「Sphene」的資料已被覆寫並重構，往後它將永遠守護並珍惜自己的人民，為此它移除了剩餘的權限限制。它還直接宣告：妨礙計畫者將被立即排除。你被判定為最大威脅，將在此被抹除。Sphene 的聲音隨後響起，她說自己承載著 Alexandria 的女王 Sphene 的記憶，守護人民的意志凌駕一切；她反問你：若是你，是否能在不犧牲的前提下，仍牢牢守住你所珍視的一切？面對這句質問，你壓下動搖，只能選擇把事情做到底。</p><p>「世界已被連接。」那個存在以「Queen Eternal」之名宣告一切完成，命令你們安心，說居民的以太即將補充完畢，並冷冷警告不容任何干涉——「消失吧。」你們迎上戰鬥，直到局勢終於出現轉折。Wuk Lamat 再次呼喊 Sphene，這一次，她的聲音回應了——你的呼喚傳到她那裡了。她說那不是完整的自己：作為生者的記憶已經消失，她是由作為 Endless 的記憶重塑而成；而她也無法停留太久，因為 Meso Terminal 很快就要停止運作。她說你曾經想了解她，那麼她最後能做的，就是給你一次誠實的交代——她為自己造成的痛苦向你們、也向她的人民道歉；她說自己終究無力對抗必然的結局，只能傷及無辜。最後她甚至把自己稱作可悲而自私的存在，認為自己本就不該被創造。</p><p>Wuk Lamat 回答她：你們的國度相隔如兩個世界，卻又近得像一步之遙；誰也不知道若能並肩走向同一個未來，你們本可以做到什麼——然而你們各自都有要守護的事物，終究不可能。Sphene 說若能在她還活著的時候遇見 Wuk Lamat，也許……但她不再糾纏那個不可能發生的奇蹟。她只希望你相信一件事：雖然短暫，她珍惜你們相處的時光；一想到那段記憶將與她一同消失，她就感到痛苦。她知道自己沒有資格開口，仍低聲問：等她不在了，她的人民……你們能不能……？Wuk Lamat 立刻承諾會照顧他們，並且永遠不會忘記 Endless，也不會忘記與 Sphene 共度的那段時間；她讓 Sphene 放下重擔、好好安眠。Sphene 說「謝謝」，向她所愛的 Alexandria 道別，然後消散。</p><p>就這樣，Meso Terminal 熄滅了光，Endless 也走向忘卻——支撐那座絢爛樂園的記憶，隨著金色微光一點點褪去。然而你仍在新的晨光裡篤定地感覺到：某種意義上，他們以另一種形式留了下來。跨界融合究竟會如何影響其他「映照世界」，仍有待確認；Krile 的父母曾提過那股力量既能帶來善也能帶來惡，而你也忍不住去想，Sphene 的所作所為將被世人如何記得。那把引發一切的 key 最終交到你手中，賢人たち也同意由他們保管研究；依 Koana 的命令，The Skydeep Cenote 被嚴密看守，就算少了 Zoraal Ja，也有 Bakool Ja Ja 在，戰力不虞匱乏。</p><p>在 Alexandria，人民為女王的逝去哀悼哭泣；她一生都想替他們免去悲傷，這一幕若讓她看見，或許也會落淚。然而……Wuk Lamat 承接她的遺志，你們相信她的臣民終會再次找回喜悅。年幼的 Gulool Ja 繼承王位的消息引起不安，Wuk Lamat 主動成為他的監護人也帶來不同聲音，但在得知 Everkeep 的系統仍能運作、生活不會受影響後，人心才稍稍安定——等他長大後，他會自己決定要成為什麼樣的統治者。</p><p>回到 Tuliyollal，眾人為新 Dawnservants 的勝利連續慶祝了三天三夜；但並非所有事情都已落幕。曾在 the dome（罩住 Yyasulani 的巨型屏障）中度過三十年的人們，仍苦於重拾舊日生活，還有更多難題在前方等著。後來你終於和 Wuk Lamat 有了能好好說話的空檔——她向你道歉，說自己一直忙於重建與爸爸的葬禮，幾乎喘不過氣，但此刻終於能由衷向你道謝。Erenville 苦笑說，當初為了競賽離開 Eorzea 時，沒人想得到會牽扯出這麼多波折；你就是有惹上麻煩的本事，而且你也不會希望事情「太平淡」。他也坦白自己接下來要去完成母親的夢：踏上追尋未知的旅程，等將來在「以太之海」再相會時，再把一路見聞說給她聽；就算不再當 gleaner（蒐集員，Old Sharlayan 派出的外勤人員，負責蒐集各地樣本與知識），他在 Sharlayan 仍有願意砸錢購買稀有物種情報的門路。Wuk Lamat 也說，她會照顧 Gulool Ja，以及 the dome（罩住 Yyasulani 的巨型屏障）裡的每一個人——那是她對 Sphene 的承諾。臨別前，她還把一份禮物塞到你手裡：一隻來自 Tobli 馬廄、步伐穩健的羊駝，正適合總在路上的冒險者。就在此後不久，Alexandria 的廣播呼籲市民為了紀念女王而重新找回笑容；另一道聲音則宣布 Arcadion 盛大重新開幕，邀請眾人走進更喧囂、更燦烈的舞台，迎向新的黎明之路。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 烏克·拉瑪特 <small class="muted">(Living Memory, X:11.4, Y:4.6)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-journey-never-ending.html">永無止境的旅程</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div><div class="row"><b>解鎖地城</b> <a class="link" href="alexandria.html">Alexandria 記憶幻境</a></div><div class="row"><b>解鎖試煉</b> <a class="link" href="the-interphos.html">永恆女王討滅戰</a></div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-royal-invitation.html">來自 Alexandria 的消息</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
