@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>An Explorer’s Delight | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – An Explorer’s Delight (DT Patch 7.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/tq7UwHG_VWc"
+              title="An Explorer’s Delight" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">An Explorer’s Delight</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`An Explorer’s Delight`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>You sense the journey drawing to a close as the group gathers itself for what remains. Erenville stays quiet, and Krile holds tight to the thought that even if memories fade, love can endure. G’raha Tia marks the distance left—only one zone remains—while Wuk Lamat steels herself for the parting ahead. Cahciua admits that the nearer you get to the end, the faster time seems to slip away, and urges you onward to the fourth and final zone. She says she’ll quickly check the Meso Terminal and meet you at the Gate of Remembrance—so you accept the next step and move out together.</p><p>At the Gate of Remembrance, Wuk Lamat can’t help but call Erenville’s name, but he offers only silence. You all understand what comes next will be hard, yet Krile insists you must honor Cahciua’s wish. When Cahciua appears, she tells you there is still some leeway with the Meso Terminal—enough that you can keep getting to know the Endless in the last zone. She names it Windspath Gardens and promises it is breathtakingly beautiful, the place where her memories are kept.</p><p>Cahciua jokes that she saved this place for last so she could guide you for as long as possible, and then teases a “great idea” she’ll reveal after you arrive. Erenville mutters that her great ideas are usually less than great, and Wuk Lamat turns to him with careful honesty: she wants to grant his mother her wish, but she also wants to respect his—and when all is said and done, she wants him to be happy. Erenville answers softly that he knows, though the words don’t come easily.</p><p>You set off again, choosing to keep doing what you’ve been doing—seeking out the Endless and learning what is dear to them—without letting the weight of the farewell stop your feet. Krile wonders what Cahciua’s idea could be, and G’raha Tia puts his faith in Erenville’s inner strength. At last, a mechanical guard greets you with cheerful precision, welcoming you into Windspath Gardens, a sanctuary of exploration and discovery where the marvels of the natural world await.</p><p>Cahciua asks for everyone’s attention, and speaks of the two wishes she held before she died. The first was to see who her Elene’shpya would become, and she says that wish has been fulfilled: the boy who once shunned company has returned a more sociable man, surrounded by wonderful friends—and as both mother and mentor, she couldn’t be more proud. Her second wish was to see kinds of nature she had never seen before, to explore every corner of the world and find life thriving there, and she admits—without pretending it doesn’t sting—that she didn’t even get to see all of Tural.</p><p>Then she asks you to help her fulfill that second wish here, because she can feel that this place holds wonders she has never witnessed. Wuk Lamat agrees at once, and Cahciua thanks you, explaining that Windspath Gardens preserves flora and fauna that once thrived on the continent—yet even she has never explored it in earnest while she was forced to focus on controlling her vessel. She wants to end with a small, perfect adventure… but Erenville refuses, asking how she can expect that of him when the adventure will only end with her leaving. Cahciua asks him to understand: she wants it to end on a happy note—for herself, and for all of you—better than a sad good-bye. With the decision made, you step into the garden beside her, determined to give her the memories she’s reaching for.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Cahciua <small class="muted">(Living Memory, X:31.1, Y:14.8)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="leafing-through-the-past.html">Leafing through the Past</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="in-search-of-discovery.html">In Search of Discovery</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'探求者たちの庭',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>終わりが近づいていることを、あなたは皆の足取りから感じ取る。エレンヴィルは言葉を失い、クルルは「記憶が失われても、愛だけは消えない」と胸に刻む。グ・ラハ・ティアは残る距離を告げ、残された区域はあとひとつだと言う。ウクラマトは次に待つ別れを前に身構え、カフキワは「終わりに近づくほど、時間が早く過ぎていくようだ」とこぼしながら、第四の最後の区域へ向かおうと促す。彼女はメソ・ターミナルを手早く確認してから「記憶の門」で合流すると言い、あなたは皆とともに次の段階へ踏み出す。</p><p>「記憶の門」に集まると、ウクラマトは思わずエレンヴィルの名を呼ぶが、返るのは沈黙だけだ。クルルは前と同じように苦しい道になると分かっていても、カフキワの願いを尊重しなければならないと言う。現れたカフキワは、メソ・ターミナルにはまだ余裕があると告げ、最後の区域でもエンドレスたちと向き合い、彼らを知る時間が残されているのだと説明する。そこはウィンドスパス・ガーデンズと呼ばれ、息をのむほど美しい場所であり、彼女の記憶が保管されているのだという。</p><p>カフキワは、できるだけ長くあなたたちを導けるよう最後に残しておいたのだと冗談めかして語り、「いい考え」を思いついたのだと目を輝かせる。だがその内容は向こう側に着いてから話すと言い、エレンヴィルは「母のいい考えは、大抵ろくでもない」とぼやく。ウクラマトは彼に向き合い、母の願いを叶えたい気持ちと同じだけ、あなたの気持ちも大切にしたいのだと真っすぐ伝える。すべてが終わったあと、あなたに幸せでいてほしい――そう言われ、エレンヴィルはかすかに「分かっている」と答えながらも、言葉を重ねるのに苦しむ。</p><p>あなたは迷いを抱えたままでも歩みを止めず、今まで通りに進むことを選ぶ。エンドレスを探し、彼らが何を大切にしているのかを知る――それを続けるのだ。クルルは「いい考え」とは何なのか気になり、グ・ラハ・ティアはエレンヴィルの内にある強さを信じていると言う。やがて機械の守衛が電子音混じりにあなたを迎え入れ、「探求と発見の聖域」ウィンドスパス・ガーデンズへようこそと告げる。自然の驚異が、あなたを待っているのだと。</p><p>カフキワは皆の注意を集め、死ぬ前に抱いた二つの願いについて語る。ひとつ目は、自分のエレネシュピャがどんな人間になるのか見届けること。彼女は、それは叶ったと言い切る。かつて人付き合いを避けていた少年は、今や素晴らしい友に囲まれた、少し社交的な男として戻ってきたのだと。母として、そして師として、誇らしく思わないわけがない――そう言う彼女の声に、あなたは確かな重みを感じる。二つ目は、見たことのない自然をこの目で見ること。世界の隅々まで歩き、そこで息づく命に出会いたかった。しかし彼女は、トラルのすべてすら見届けられなかったと悔しさを隠しきれない。</p><p>そしてカフキワは、その二つ目の願いを、ここであなたたちに手伝ってほしいと頼む。ウクラマトは喜んで応じ、カフキワは感謝しながら、この庭園には大陸でかつて栄えた動植物が集められているのだと説明する。だが彼女自身も、器を操ることに気を取られ、本格的に探索できなかったのだと言う。小さな完璧な冒険で締めくくりたい――そう微笑む彼女に、エレンヴィルは「それで終わったら、あなたは去るのだろう」と拒み、そんなことは求めないでくれと訴える。カフキワは、どうか理解してほしいと言い、悲しい別れよりも、皆にとって幸せな終わり方にしたいのだと告げる。あなたはその願いを受け止め、彼女のための記憶を積み重ねる決意で庭園へ踏み出す。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> カフキワ <small class="muted">（リビング・メモリー, X:31.1, Y:14.8）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="leafing-through-the-past.html">三つ葉の耳飾り</a></div><div class="row">ファイター ソーサラー（リミテッドジョブを除く）Lv 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="in-search-of-discovery.html">未知を追い求めて</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'探險家的秘密花園',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你能感覺到旅程正一步步逼近終點。Erenville 依舊沉默，Krile 把那句話緊緊收在心裡——記憶也許會消失，但愛會一直留著。G’raha Tia 指著前方說，只剩最後一個區域了。Wuk Lamat 想著接下來必須面對的別離，話到嘴邊又咽了回去。Cahciua 則像是被時間追著走般嘆道：越靠近結局，時間就越像加快腳步。她催你們前往第四、也是最後的區域，並說自己要先去確認 Meso Terminal，之後在 Gate of Remembrance 跟你們會合——於是你和大家一起接下任務，繼續往前。</p><p>到了 Gate of Remembrance，Wuk Lamat 忍不住低聲喊了 Erenville 的名字，但他只用沉默回應。Krile 說，跟之前一樣，這會很難熬，可你們必須尊重 Cahciua 的心願。Cahciua 抵達後告訴你們，Meso Terminal 目前還有些餘裕，代表你們仍能在最後的區域繼續認識 Endless（以死者的記憶為本體、在 Living Memory 中被系統維持的存在）。那裡叫作 Windspath Gardens，她說那裡美得令人屏息——而且，也是她的記憶被存放的地方。</p><p>Cahciua 半開玩笑地說，她故意把這裡留到最後，才能盡可能久地帶著你們走到終點。緊接著，她又神秘兮兮地提起自己想到了一個「好點子」，但要等到抵達另一側才要說。Erenville 低聲吐槽：她的「好點子」通常都不怎麼好。Wuk Lamat 轉向他，語氣格外小心，她說自己想成全他媽媽的願望，但也同樣想尊重他的心意；等一切結束，她希望他能幸福，真的希望他明白這件事。Erenville 只回了句「我知道」，又像是把更多話壓回心底。</p><p>你們沒有停下腳步，只能先照原本的方式前進——繼續尋找 Endless，繼續了解他們珍視的是什麼。Krile 好奇 Cahciua 的「好點子」究竟是什麼，G’raha Tia 則說他相信 Erenville 內心的力量。當你們踏入 Windspath Gardens 的入口，一名機械守衛以一連串電子音完成確認，隨即以明亮的語氣歡迎你們來到這座「探索與發現的聖域」，說自然世界的奇景正在等著你們。</p><p>Cahciua 要大家先停下來聽她說幾句。她說，自己在死前有兩個願望：第一個，是想親眼看到她的 Elene’shpya 會成為什麼樣的人。她認為那個願望已經實現了——曾經拒人於千里之外的孩子，如今成了願意與人同行的男人，身邊還有這麼多美好的朋友；作為媽媽、也作為導師，她為他感到無比驕傲。至於第二個願望，她說自己一直想看遍從未見過的各種自然景象，想走遍世界每個角落，去遇見那些蓬勃的生命……可她說著說著也承認，連 Tural 都沒能看完，人生的時間從來不夠用。</p><p>然後，Cahciua 把目光放回你們身上，請你們幫她完成第二個願望。Wuk Lamat 立刻答應，Cahciua 道謝後解釋：Windspath Gardens 保存著曾在大陸上繁盛的動植物，但她自己也從未真正探索過，因為操控那副容器占去了她所有心力。她想用一段「剛剛好的小冒險」來收尾——可 Erenville 卻直接拒絕，質問她：你們完成願望之後呢？她就要離開了嗎？這種事他做不到。Cahciua 叫他理解，她只是想讓一切以快樂作結，不只是為了自己，也是為了你們所有人；比起帶著悲傷道別，她更想留下能讓大家撐得住的那種回憶。你們終究還是跟上她的腳步，決定陪她把這段最後的路走完。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 卡芙琪娃 <small class="muted">(Living Memory, X:31.1, Y:14.8)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="leafing-through-the-past.html">三葉耳飾</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="in-search-of-discovery.html">踏上探索未知的旅程</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
