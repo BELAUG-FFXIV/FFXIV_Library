@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rock the Castrum | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Rock the Castrum (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/0XjhnMI0st0"
+              title="Rock the Castrum" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Rock the Castrum</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Rock the Castrum`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Edelstein thanks you for rekindling the flames of courage burning in the hearts of the brave men and women of the garrison. With the time for battle now close at hand, he urges you to march forth without worries or regrets, and tells you that General Raubahn awaits you at Castrum Meridianum. The fight will not be easy, he says—but he trusts you are equal to it. With that, he bids you godsspeed, addressing you once more by your Grand Company rank and surname.</p><p>When you reach Raubahn at the push toward Castrum Meridianum, he welcomes your return as their hero and says he trusts your visit helped lift spirits on the eve of the greatest battle yet. There is no time to spare—he moves at once to commence the briefing.</p><p>Before the gathered forces, glad tidings are proclaimed: spurred by news of the siege of Castrum Oriens, the Maelstrom has struck a double blow, placing Castrum Occidens and Castrum Marinum under blockade. Phase two of Operation Archon is declared a success, with reports of fierce Garlean resistance—and an Admiral who yielded not one ilm. With Occidens, Marinum, and Oriens suppressed, the third phase may begin in earnest. Even now, the Order of the Twin Adder moves to block the railway from Castrum Centri—proof that the hour has come to strike at the heart of the Garlean invasion force: Castrum Meridianum, the den of the Black Wolf.</p><p>Minfilia introduces herself as the Mistress of the Scions of the Seventh Dawn and speaks to your fellow Eorzeans of the barriers that divide people—race and nation, language and creed. Such barriers may isolate neighbors, she says, yet they also shape who they are; they cannot truly be broken so long as liberty endures, but they can be transcended. And she declares that you do so now, by coming together for this grand endeavor—fighting side by side in defense of your shared home.</p><p>Alphinaud then addresses the assembled troops and points to you—the adventurer who will lead the unit tasked with destroying the Ultima Weapon. To the Scions, he says, you are also a dear friend who has endured untold hardship on their behalf, a true hero who has always blazed a path for them to follow. And now, he declares, it is time for them to blaze a path for you.</p><p>Raubahn sets the objective: the main forces will wreak havoc outside the walls of Meridianum to buy you and your comrades the time needed to disable the magitek field generator within. With the way cleared, all minds will turn to the true goal—the destruction of the Ultima Weapon—and the order is given for all troops to prepare for battle. Cid tells you he cannot accompany you, as the Ironworks has been entrusted with facilitating communications between the forces, but he will pray for your safe return. Minfilia bids you come back and offers her blessing, and Raubahn roars that the Black Wolf will prowl your lands no more—forward, comrades, for Eorzea—until the shout rises as one: “FOR EORZEA!” With that, you are urged onward to bring everyone one step closer to the dawn, and Castrum Meridianum becomes accessible via the Duty Finder.</p><p>Within Castrum Meridianum, Cid diverts power to the cannons as Livia sas Junius confronts you. She says her lord was taken with you and the power you possess—the “Echo”—and she had wondered who this “princess among women” might be, only to find you are merely another adventurer, no better than the multitude. Yet the masses hail you as their champion, she snarls, and you remain a thorn in the Empire’s side wherever you appear—leaving havoc in your wake, even slaying Rhitahtyn, one of their finest. She cares little how you achieved any of it; what matters is that you did, and if you continue, she fears you will deprive her of all she has toiled for—her minions, her comrades, even her lord Gaius. She will not allow it. Gaius’s dreams and ambitions, his body and soul, are hers, she insists—she lost everything once before and will not suffer it again—and she swears she will kill you, claiming only your death can bring her peace. Afterward, her sobs break through her rage as she begs you not to take him away and cries out for her lord Gaius. Cid calls her another poor fool who craved Gaius’s affection above all else, gives thanks that you have come to no harm, and—marveling at what you have done—says you have opened the way to the Praetorium. The problem is you cannot reach it on foot; you will need the Enterprise, left at the Ceruleum Processing Plant, so you must regroup there. And when you do, Raubahn greets you with certainty that you would not let them down: with the Praetorium stripped of its defenses, the way to the Ultima Weapon lies open, and the final phase of Operation Archon has come.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Edelstein <small class="muted">(Northern Thanalan, X:20.8, Y:22.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="hearts-on-fire.html">Hearts on Fire</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 50 or above)</div><div class="row"><b>Unlock Dungeon</b></div><div class="row"><a class="link" href="castrum-meridianum.html">Castrum Meridianum</a></div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-ultimate-weapon.html">The Ultimate Weapon</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'カストルム・メリディアヌムの死闘',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>エーデルシュタインは、あなたが勇敢な兵たちの胸に燃える勇気の火を再び燃え立たせたのだと感謝を告げる。そして戦いの時は間近だと言い、迷いも悔いもなく進軍しようと促したうえで、ラウバーン将軍がカストルム・メリディアヌムであなたを待っていると伝える。戦いは容易ではないが、あなたなら務めを果たせると信じている――そう言って、グランドカンパニーの階級と姓であなたを呼び、武運を祈る。</p><p>ラウバーンのもとへ戻ると、彼は英雄の帰還を歓迎し、あなたの働きかけが決戦前夜の駐屯地の士気を大いに高めたはずだと語る。時は貴重だ――ただちに作戦会議を始めると宣言する。</p><p>集まった同盟の戦士たちへ、吉報が告げられる。カストルム・オリエンス包囲の報を受けて、黒渦団が二重の打撃を加え、カストルム・オキデンスとカストルム・マリヌムは封鎖下に置かれたという。反攻作戦「マーチ・オブ・アルコンズ」第二段階は成功し、ガレマール帝国軍の抵抗は激しかったが、提督は一歩たりとも譲らなかったと報告される。オキデンス、マリヌム、オリエンスが制圧されたことで、第三段階はいよいよ本格的に始動する。さらに双蛇党は、カストルム・ケントリからこちらへ続く鉄路を封鎖しに動いている――それはただひとつ、侵攻軍の心臓部を叩く時が来たということだ。狙うは「黒狼」の巣、カストルム・メリディアヌム。</p><p>ミンフィリアは、第七霊災を払う暁の血盟の盟主として名乗り、同胞たるエオルゼアの民に語りかける。人種や国家、言語や信仰――人々を隔てる障壁は数多い。障壁は隣人を遠ざける一方で、己を形作るものでもあり、それを失えば個の違いは薄れ、生の豊かな多様性は無味乾燥な同一性へと傾くのだという。自由がある限り障壁を完全に取り払うことはできないが、それでも乗り越えることはできる。そして今まさに、あなたたちはこの大事業のために集い、共通の故郷を守るべく肩を並べて戦うことで、それを成しているのだと宣言する。</p><p>アルフィノは、アルテマウェポン破壊任務を担う部隊を率いる者として、あなたを皆の前に示す。暁の血盟にとってあなたは、計り知れぬ苦難を背負いながらも道を切り拓いてきた、かけがえのない友であり真の英雄だという。だからこそ今度は、皆があなたのために道を切り拓く番なのだと、仲間たちへ呼びかける。</p><p>ラウバーンは作戦目標を示す。主力はメリディアヌム外壁の外で大混乱を引き起こし、その隙にあなたと仲間たちが内部の魔導障壁発生装置を停止する時間を稼ぐ。道が開けたなら、真の目的――アルテマウェポン破壊――へと踏み込むのだ。全軍に戦闘準備が命じられる。シドは、帝国軍との通信連絡の調整を担うため今回は同行できないと告げつつ、あなたの無事を祈ると誓う。ミンフィリアもまた帰還を願い、加護を授ける。ラウバーンは吠える――黒狼にこれ以上この大地を荒らさせはしない、狩る者に狩られる痛みを教えてやれ、進め、エオルゼアのために。叫びはひとつに重なり、「エオルゼアのために！」と響き渡る。こうしてあなたは進軍を促され、カストルム・メリディアヌムへ向かう準備が整う。</p><p>カストルム・メリディアヌムの中で、シドが砲撃用の砲に全電力を回すと、リウィア・サス・ユニウスがあなたの前に立ちはだかる。彼女は、主があなたとその力――「エコー」――に強い関心を示したことを語り、女王のような存在を想像していたが、ふたを開ければただの冒険者でしかなかったと嘲る。それでも民衆はあなたを英雄として称え、栄誉を浴びせる――理不尽だ、と。あなたが現れるたびに混乱が起こり、最精鋭のひとりであるリタティンさえ討ち取った。どうやったかなど興味はない、問題はそれを成し遂げたという事実だ――このままでは自分が積み上げたすべてを奪われる、と彼女は言う。配下も、戦友も、そしてガイウス閣下までも。だが彼を奪わせはしない。主の夢も野望も、肉体も魂も、自分のものだと叫び、かつてすべてを失った自分は二度と同じ目に遭わないと誓う。そしてあなたを殺す、あなたの死だけが自分に安らぎをもたらすのだと吐き捨てる。やがて彼女は嗚咽まじりに、また同じことが起きるのだと震え、彼を奪わないでほしいと懇願し、ガイウス閣下の名を叫ぶ。シドは、主の愛情だけを求めた哀れな愚か者だと嘆きつつ、あなたが無事であることに感謝し、あなたが道を切り拓いてプラエトリウムへの進路を開いたと告げる。だが徒歩では辿り着けない――必要なのはエンタープライズだ。彼はそれをセリウム精製所に置いてあると言い、そこで合流しようと促す。そしてラウバーンは、あなたなら期待を裏切らないと断言し、プラエトリウムの防備が剥がれた今、アルテマウェポンへの道は開かれたと告げる。反攻作戦「マーチ・オブ・アルコンズ」最終段階の時が来たのだ。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> エデルスティーン少闘士 <small class="muted">（北ザナラーン, X:20.8, Y:22.1）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="hearts-on-fire.html">心に火をくべて</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 50～</div><div class="row"><b>ダンジョン開放</b></div><div class="row"><a class="link" href="castrum-meridianum.html">外郭攻略 カストルム・メリディアヌム</a></div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-ultimate-weapon.html">究極幻想アルテマウェポン</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'Castrum Meridianum 決死攻防戰',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Edelstein 感謝你重新點燃了駐軍那些勇敢男女心中燃著的勇氣之火。他說戰鬥的時刻已近，現在必須無憂無悔地踏上前進的道路；General Raubahn 正在 Castrum Meridianum 等你。這一戰不會輕鬆，但他相信你有能力扛起這份重任。於是他再次以你所屬大國防聯軍的軍階與姓氏稱呼你，祝你一路平安。</p><p>你抵達 Raubahn’s Push，Raubahn 迎上前來，說英雄回來了，也相信你方才在營地的走動，已在這場「至今最艱鉅的決戰」前夕大大提振了士氣。時間緊迫，他要立刻開始簡報。</p><p>同盟面前傳來捷報：因 Castrum Oriens 遭到圍攻的消息，Maelstrom 乘勢再下一城，Castrum Occidens 與 Castrum Marinum 已被封鎖。Operation Archon 的第二階段宣告成功；報告指出 Garleans 抵抗激烈，但 Admiral （Merlwyb Bloefhiswyn——也就是 Limsa Lominsa 的提督、同時是 Maelstrom（黒渦団）的最高指揮官）連一步都不曾退讓。如今 Occidens、Marinum、Oriens 皆已受壓制，第三階段終於能正式展開。與此同時，Order of the Twin Adder 也正前往封鎖從 Castrum Centri 通往此地的鐵路——這只有一個意思：出手的時刻到了，你們要直擊 Garleans 侵略軍的心臟。目標正是「黑狼」的巢穴：Castrum Meridianum。</p><p>Minfilia 以 Scions of the Seventh Dawn 的領袖身分向眾人自我介紹，對所有 Eorzeans 說：世上有無數阻隔彼此的藩籬——種族與國家、語言與信仰等等。這些藩籬讓人與鄰人隔絕，卻也同時形塑了「我們是誰」；若被剝去，彼此之間便難有分別，生活的豐饒多樣也會被單一而貧瘠的秩序取代。她說，只要世上仍有自由，藩籬就不可能真正消失，但人們仍能超越它——而你們此刻正是如此：為了這場偉大的行動聚集，肩並肩守護共同的家園。</p><p>Alphinaud 接著將眾人的目光引向你，說你就是那位將率領部隊、負責摧毀 Ultima Weapon 的冒險者。對 Scions 來說，你更是一路替他們承受了無數艱難、始終為眾人劈出道路的摯友與真正的英雄。正因如此，他說，現在輪到大家為你劈出一條路。</p><p>Raubahn 宣布作戰目標：主力部隊將在 Meridianum 的城牆外造成足以撼動一切的混亂，爭取時間，讓你與同伴能在內部關閉魔導防護的發生裝置。道路一旦打通，你們就能把心思完全轉向這次行動真正的目的——摧毀 Ultima Weapon——全軍立刻準備開戰。Cid 告訴你他這次無法同行，因為 Ironworks 被交付了協助各軍聯絡通訊的艱鉅任務；但他會為你的平安歸來祈禱。Minfilia 也要你務必回到大家身邊，並給予祝福。Raubahn 高聲怒吼：不能再讓黑狼在你們的土地上恣意橫行——要讓獵人知道被狩獵是什麼滋味！向前，為了 Eorzea！眾人齊聲回應「FOR EORZEA!」</p><p>進入 Castrum Meridianum 後，Cid 一面指揮把所有能源轉向砲台，Livia sas Junius 一面現身攔在你面前。她說她的 lord 對你與你所擁有的力量——「Echo」——非常在意，她原以為那位被稱作「女人中的公主」的人會是誰，結果卻發現你不過也是個冒險者，跟其他人沒什麼兩樣。可即便如此，眾人仍把你捧成他們的鬥士、將榮耀加諸你身——這讓她無法理解。她痛恨你總是成為帝國的眼中釘：你走到哪裡就把混亂帶到哪裡，甚至還殺了 Rhitahtyn，那個被稱為精銳中的精銳的人。她說她不在乎你是怎麼做到的，重要的是你確實做到了；若讓你繼續下去，你終究會奪走她辛苦爭來的一切——她的部下、她的同袍，甚至她的 Lord Gaius。她尖聲宣告你別想得到他：Gaius 的夢想與野心、他的身體與靈魂，全都是她的；她曾失去過一切，絕不容許再次發生。她說她會殺了你，因為只有你的死才能讓她得到安寧。可當一切崩塌，她又在哭泣中顫抖，說同樣的事又要重演了，哀求你別把他從她身邊帶走，並失聲喊著她的 Lord Gaius。Cid 低聲感嘆她不過是另一個把渴求 Gaius 的寵愛看得高於一切的可憐人，隨後慶幸你毫髮無傷，也坦言你已成功打通通往 Praetorium 的道路——只是你們無法徒步抵達。要前往那裡，就必須搭乘 Enterprise (企業號飛艇)；Cid 說他把它留在 Ceruleum Processing Plant，讓你們先去那裡會合。等你回到 Raubahn 面前，他果然大笑著說他就知道你不會讓大家失望；如今 Praetorium 的防衛已被解除，通往 Ultima Weapon 的道路已然敞開——Operation Archon 的最終階段，就此到來。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Edelstein <small class="muted">(薩納蘭 - 北薩納蘭, X:20.8, Y:22.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="hearts-on-fire.html">點燃心火</a></div><div class="row">所有職業（不含限定職）等級 50 以上</div><div class="row"><b>解鎖地城</b></div><div class="row"><a class="link" href="castrum-meridianum.html">攻陷 Castrum Meridianum</a></div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-ultimate-weapon.html">究極幻想：終極武器</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
