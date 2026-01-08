@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Escape from Castrum Centri | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Escape from Castrum Centri (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/AWPSiw9yfyw"
+              title="Escape from Castrum Centri" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Escape from Castrum Centri</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Escape from Castrum Centri`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Cid checks in on your preparations and says you will leave the moment you are ready. Glaumunt arrives to see you off, saying it’s the least he can do for the men and women about to make his lifelong wish come true. When Cid gently asks what the Empire did to earn his hatred, Glaumunt chooses to speak—because he has been wanting to tell someone, even if his pain is not unique under imperial rule.</p><p>He tells you he once had a mother and a sister, and though they were poor, their life still held happiness. When Ala Mhigo fell, the imperials put his family in a camp—he was forced into hard labor, while his mother and sister were made to suffer far worse. They tried to hide it from him, but he knew, and it drove him mad enough to plan an escape. Caught outside the walls, his mother and sister chose to leap into a gorge rather than be taken again, and he was dragged back in chains. He escaped years later, swore revenge, became an adventurer to sharpen his skills and earn coin—yet two decades on, he feels he has achieved nothing compared with what you have done in so short a time. Cid says you seek only to rescue friends, but Glaumunt answers that nothing matters more, and admits he’s certain you will come for the Empire next. Still, he refuses to join the front lines—calling himself a realist whose talents lie in plotting, not swordplay—and promises to keep helping from the shadows, praying that Rhalgr grant you strength.</p><p>Cid then steadies the purpose: wherever the Empire goes, misery follows, and for Eorzea’s sake Gaius’s ambitions must be ended—but first, friends must be rescued. He tells you Biggs and Wedge will wait east of Castrum Centri, outside patrol range, and warns you not to forget your imperial disguise. When you arrive, Cid urges you to don it at once; he even jokes that you wear imperial black and crimson well, but quickly returns to business and reviews the plan—an imperial patrol has gone out, and you will enter the stronghold as if returning from duty while he and Alphinaud create a diversion outside. He warns that if the diversion fails he will contact you by linkpearl, and he notes Yda and Y’shtola had to improvise and depart early, leaving only a message: don’t do anything reckless.</p><p>Inside Castrum Centri, you witness Livia sas Junius tormenting Minfilia over the Echo, promising a quick end if she talks and something far worse if she refuses, before ordering the prisoners sent to Castrum Meridianum. Keeping your face hidden behind the guise, you and your companions move through tense corridors where soldiers gossip, complain, and boast—until you secure an identification key to the storage tower under the pretense of official orders. There you find the Scions bound; you unshackle Papalymo and Urianger, and in the chaos you fight through the guards to free the rest. Tataru trembles with relief, Minfilia scolds you for risking your life and thanks you for arriving when you did, and Papalymo fears for Thancred even as Urianger urges you all to flee before the chance closes.</p><p>Your escape is cut short when Y’shtola and Yda confront Livia, accusing her of the slaughter at the Waking Sands and refusing to let her plague Eorzea a day longer. The castrum erupts; Wedge charges ahead to protect Tataru, Biggs shepherds Minfilia and the others, and you hold the line against an endless press—including a shielded colossus—until you break free. Cornered again, you hear Cid through the linkpearl ordering you to count to five and jump, and you leap on trust as the pursuit collapses behind you.</p><p>Then the horizon itself turns colder: Gaius van Baelsar appears, scorning Eorzea’s rulers and the people who cling to “implausible panaceas,” declaring the realm needs a ruler with the power to cast down eikons. In the skies over Castrum Centri, the Empire unveils the Ultima Weapon—an ancient relic excavated from beneath Ala Mhigo—built to crush primal and foe alike. Beside the Black Wolf stands an Ascian overlord, Lahabrea, and the revelation lands like a blade: Thancred was him. Minfilia’s scream follows you as you are forced to retreat, while Alphinaud reels at how thoroughly the enemy deceived you all and resolves that the Alliance leaders must be warned—hope must be restored before fear decides Eorzea’s fate.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Cid <small class="muted">(Mor Dhona, X:6.0, Y:6.0)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="every-little-thing-she-does-is-magitek.html">Every Little Thing She Does Is Magitek</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 46 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-black-wolfs-ultimatum.html">The Black Wolf’s Ultimatum</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'カストルム・セントリからの救出',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>シドはあなたの支度を確かめ、準備ができ次第すぐ出発すると告げる。そこへグラウムントが駆けつけ、「長年の願いを叶えてくれる」あなたたちに、せめてもの見送りをさせてくれと言う。シドが帝国への憎しみの理由を尋ねると、彼は少し迷いながらも、自分の過去を語り始める――帝国に苦しめられた者の一人として。</p><p>彼には母と妹がいた。貧しくとも穏やかで、笑顔の絶えない母と、羊のように優しく、それでいて芯の強い妹。だがアラミゴ陥落ののち、帝国は家族を収容所へ押し込み、彼には過酷な労役を、母と妹にはさらに残酷な仕打ちを強いた。二人は必死に隠そうとしたが、彼には分かってしまい、正気を保てず脱出を企てた。ところが城外の峡谷で追いつかれ、母と妹は再び奪われるくらいならと、自ら崖へ身を投げる。鎖で連れ戻された彼は、数年後に再度逃げ延び、復讐を誓って冒険者となったが、二十年近い歳月を費やしても、思うような成果は得られなかったと吐露する。あなたたちが短い間に成し遂げたことを思えばなおさらだ、と。シドが「我々は友を救いたいだけだ」と返すと、グラウムントは「それ以上に大事なことがあるか」と言い切り、しかし前線に加わる誘いは断る。自分は剣より策が向く、だから影から手助けするのが最善だと決め、ラーラ―の加護を祈って送り出す。</p><p>シドは、帝国の行く先には常に惨禍が残ると静かに言い、黒狼ガイウスの野望を止めねばならないと告げる。だがまずは友の救出だ。カストルム・セントリ東方、哨戒圏の外でビッグスとウェッジが待つので、必ず帝国兵の変装を整えて合流するよう念を押される。到着するとシドはあなたに急いで変装を着けるよう促し、冗談めかして似合うと言いながらも、すぐ作戦確認へ移る。外へ出ている哨戒部隊が戻る体で、あなたたちは要塞へ侵入する。シドとアルフィノは外で陽動し、うまくいかなければリンクパールで退避を指示するという。なおイダとヤ・シュトラは車両接近で計画を変更して先に動き、あなたへ「無茶をするな」と伝言だけ残したという。</p><p>要塞内では、リウィア・サス・ユニウスがミンフィリアを苛烈に追い詰め、エコーを吐けと迫り、拒めば死を乞うても終わらせないと告げたうえで、囚人をカストルム・メリディアヌムへ移送せよと命じる。あなたは変装のまま緊張の廊下を進み、兵の雑談や愚痴に紛れて情報を集め、ついに倉庫塔の識別キーを手に入れる。そこで拘束された盟友たちを見つけ、パパリモとウリエンジェの枷を外し、混乱の中で敵を撃退して救出する。タタルは怯えながらも涙ぐみ、ミンフィリアは無謀さを叱りつつも、間に合ってくれたことに感謝する。パパリモはサンクレッドの行方を案じ、ウリエンジェは好機が閉じる前に退くべきだと促す。</p><p>だが脱出の途上、ヤ・シュトラとイダがリウィアに対峙し、ウェイキングサンズ襲撃と非戦闘員の虐殺を糾弾する。要塞は騒然となり、ウェッジはタタルを守るため先行し、ビッグスはミンフィリアたちを退避させ、あなたは追撃を食い止めながら突破口を切り開く。果てしない増援と、外部の力で守られた巨兵に苦しめられながらも、盾の源を断って活路を掴む。追い詰められた瞬間、リンクパール越しにシドが「五つ数えて跳べ」と叫び、あなたはその声を信じて飛び降りる。</p><p>そして空が凍りつく。ガイウス・ヴァン・バエサルはエオルゼアの支配者と、その甘言にすがる民を嘲り、蛮神を討つ真の力を持つ支配者こそ必要だと説く。カストルム・セントリの上空で帝国が披露したのは、アラグの遺物――アルテマウェポン。アラグの技術で蛮神も敵も等しく蹂躙する兵器を、今度は帝国が振るうのだという。黒狼の傍らには上位のアシエン、ラハブレアが立ち、衝撃の真実が突きつけられる――サンクレッドはラハブレアだった。ミンフィリアの叫びを背に、あなたたちは退くしかない。アルフィノは自分の不明を悔いながらも、同盟指導者に事実を伝え、絶望ではなく希望を示さねばならないと決意する。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> シド <small class="muted">（モードゥナ, X:6.0, Y:6.0）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="every-little-thing-she-does-is-magitek.html">魔導兵器のみる夢</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 46～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-black-wolfs-ultimatum.html">エオルゼアの明日のために</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'逃離 Castrum Centri',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Cid 先確認你是否已經準備就緒，說你一點頭就會立刻出發。這時 Glaumunt 趕來送行，笑說自己也想給你們一個熱熱鬧鬧的送別——畢竟你們正要去完成他一生最渴望看到的事。Cid 想起你們受他幫忙良多，卻幾乎不了解他的過去，便小心地問起他為什麼會如此痛恨帝國；Glaumunt 沒有迴避，反而說他其實一直想把這段故事說出口，只是他的遭遇，並不算特例。</p><p>他告訴你，自己曾經也有母親與妹妹。母親溫柔體貼，笑容總在臉上；妹妹嬌小可愛、像小羊一樣溫順，卻也硬得起來。家裡雖然窮，日子卻仍有快樂。直到 Ala Mhigo 淪陷，帝國把他們一家關進收容營——他被迫做苦工，而母親與妹妹被迫承受更不堪的折磨。她們拼命想瞞著他，但他終究知道了，那份憤怒逼得他策畫逃亡。可是在城外不遠的峽谷邊，他們被追上；母親與妹妹不願再次被帶回去，竟在他眼前縱身跳下。心碎之下，他也被鎖鏈拖回。多年後他終於再次逃出，發誓要向帝國復仇，成為冒險者磨練實力、攢下所需的金錢——然而將近二十年過去，他仍覺得自己什麼也沒做到。相比之下，你們才剛踏進這場戰局不久，卻已完成遠超過他的事。Cid 說你們只是想救回同伴；Glaumunt 反問，還有什麼比這更重要？他也坦言，你們救回人之後一定會繼續對抗帝國。但即便如此，他仍婉拒加入前線——他說自己擅長的是謀劃，不是刀劍，能做得最多的，就是在暗處幫助像你這樣的人，並祈求 Rhalgr 賜予你們力量。</p><p>Cid 隨後收束心緒，說帝國所到之處總會留下不幸；為了所有以 Eorzea 為家的人，必須終結 Gaius van Baelsar 的野心——但眼下最先要做的，是把同伴救回來。他交代你：Biggs、Wedge 和他會在 Castrum Centri 東側、巡邏警戒線外待命，你準備好就過去會合；而且務必戴上帝國的偽裝，不然這次行動會成為史上最短的救援。你趕到後，Cid 催你立刻穿戴好偽裝，還打趣說帝國的黑紅配色很襯你，但下一秒就正色重申滲透計畫——一支帝國巡邏隊剛離開不久，你們要假扮成巡邏隊回營，趁機進入要塞；Cid 與 Alphinaud 則在外頭製造混亂拖住對方，若情勢不妙就用 linkpearl 通知你立刻撤退。至於 Yda 與 Y’shtola 因為帝國車輛逼近而先行調整部署，只留話要你「別做傻事」，算是最務實的提醒。</p><p>你踏入 Castrum Centri 時，先目睹 Livia sas Junius 對 Minfilia 的逼問與折磨——她說自己只是想研究那份名為 Echo 的力量，威脅 Minfilia 若願意吐露一切就會讓她痛快結束；若拒絕，即使她哀求死亡也不會如願。接著她下令把囚犯送往 Castrum Meridianum。你壓下怒火，依計畫在要塞內行動；士兵們在走廊間抱怨、閒聊，甚至把「被抓到的 Scions」當成談資。你終於以「奉上級之命」為由取得倉庫塔的識別鑰匙，潛入後找到被囚禁的同伴，替 Papalymo 與 Urianger 解開枷鎖，並在混戰中擊退敵人、帶人突圍。Tataru 一邊顫抖一邊喊著她有多害怕；Minfilia 先責備你太魯莽、可能會死，卻也坦白若你沒趕到，她不敢想後果；Papalymo 開始擔心 Thancred 的下落，而 Urianger 催促你們別戀戰，趁窗口尚未關上立刻撤離。</p><p>你們才剛要脫身，Y’shtola 與 Yda 就現身攔下 Livia sas Junius，指控她帶隊襲擊 Waking Sands、屠殺手無寸鐵的人，只因那些人「不值得被活捉」。要塞警報炸開，追兵蜂擁而至；Wedge 衝上前想護住 Tataru，Biggs 則帶著 Minfilia 一行人搶先撤出，你在後方迎擊掩護。敵人召出新型的巨兵阻路，甚至有不尋常的力量為其撐起護盾，你只能在壓力中找出破綻、打碎支撐護盾的源頭，才勉強殺出缺口。就在你們被再次逼到絕境時，linkpearl 傳來 Cid 的吼聲，要你「數到五就跳」；你照做，縱身一躍，把一切交給那個瞬間的判斷。</p><p>然而真正的寒意，來自你們看見的東西。Gaius van Baelsar 在你耳中響起冷酷的宣告——他嘲笑 Eorzea 的統治者與追逐奇蹟的群眾，說這片土地缺的是能以「理性」擊倒 primal 的真正強權。接著，帝國完成的兵器現身：Ultima Weapon。Minfilia 說那是從 Ala Mhigo 深處挖出的 Allag（古代亞拉戈帝國）遺物，曾被 Allag（古代亞拉戈帝國）用來碾碎 primal 與敵人，如今帝國要用它重演同樣的毀滅。更糟的是，在黑狼（Gaius 的稱號）身旁你看見 Lahabrea——而那張臉、那份氣息，竟是 Thancred。Minfilia 崩潰地喊出他的名字，Alphinaud 則被自責吞沒：敵人一直在你們身邊，你們卻毫無察覺。可你們沒有時間停下來，因為同盟議會必須立刻得知帝國的新武器；在恐懼讓各國分崩離析之前，你們得把「Scions 還活著」的消息帶回去，讓 Eorzea 看見尚未熄滅的希望。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 希德 <small class="muted">(摩杜納, X:6.0, Y:6.0)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="every-little-thing-she-does-is-magitek.html">魔導裝甲的夢</a></div><div class="row">所有職業（不含限定職） 等級 46 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-black-wolfs-ultimatum.html">為了艾歐澤亞的明天</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
