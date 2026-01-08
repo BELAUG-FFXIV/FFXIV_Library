@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Castrum Meridianum | BELAUG · FFXIV Library</title>
+  <meta name="description" content="FFXIV ARR 2.0 Dungeon — Castrum Meridianum（外郭攻略 カストルム・メリディアヌム / 攻陷卡斯特魯姆・梅里迪亞努ム）：故事概要、需求條件、解鎖任務與後續任務，附影片。">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#ffffff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif; background:var(--bg); color:var(--fg);}
+    .container{max-width:1080px; margin:0 auto; padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border); background:#fff9edb3; backdrop-filter:saturate(120%) blur(6px); position:sticky; top:0; z-index:10}
+    .nav{display:flex; align-items:center; justify-content:space-between; height:60px}
+    .left{display:flex; align-items:center; gap:12px}
+    .home{border:1px solid var(--border); background:#fff; padding:4px 8px; border-radius:8px; text-decoration:none; color:var(--fg); font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex; align-items:center; gap:8px}
+    .icon-btn{background:none; border:none; cursor:pointer; font-size:14px; padding:6px 10px; border-radius:8px}
+    .icon-btn:hover{background:#fff; border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid; grid-template-columns:1.1fr 1fr; gap:20px; align-items:start;}
+    @media (max-width:900px){ .grid{grid-template-columns:1fr} .video-wrap{position:relative; padding-top:56.25%} .video-wrap iframe{position:absolute; inset:0; width:100%; height:100%} }
+    .card{background:var(--card); border:1px solid var(--border); border-radius:16px; box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px; border-bottom:1px solid var(--border); font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%; height:420px; border:0; display:block; border-radius:16px}
+    .tabs{display:flex; gap:8px; padding:12px 12px 0; flex-wrap:wrap}
+    .tab-btn{background:#fff; border:1px solid var(--border); color:var(--fg); border-radius:999px; padding:8px 14px; cursor:pointer; font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent); color:#fff; background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex; flex-direction:column; gap:10px}
+    .stack .row{padding:12px 14px; border:1px dashed var(--border); border-radius:12px; background:#fffdf6}
+    .link{color:#0b60d8; text-decoration:none}
+    .link:hover{text-decoration:underline}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/0KSLKnv-GFM" title="Castrum Meridianum" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">Castrum Meridianum</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true" data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="req">Requirements</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlock">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story" class="tab-panel active"></div>
+          <div id="panel-acq" class="tab-panel"></div>
+          <div id="panel-req" class="tab-panel"></div>
+          <div id="panel-unlock" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const LANG_KEY = 'ffxiv-guide-lang';
+
+    const i18n = {
+      EN:{
+        langLabel:'EN',
+        pageTitle:'Castrum Meridianum',
+        tabs:{story:'Story', req:'Requirements', acq:'Unlock Quest', unlock:'Follow-Up Quest', comments:'Comments'},
+        story:`<p>So begins the third phase of Operation Archon, which entails a frontal assault upon Castrum Meridianum, Gaius van Baelsar’s seat of power. Forming the main thrust, the Immortal Flames will strike at the stronghold with all their strength, though this is but a feint. While the garrison’s eyes are drawn outwards, you and your comrades must steal past its defenses and attempt to deactivate the magitek field which protects the Praetorium, the fortress within a fortress wherein the Ultima Weapon is believed to be housed.</p><p><strong>BGM</strong>: <a class="link" href="bgm-the-emperors-wont.html">The Emperor’s Wont</a></p>`,
+        req:`<div class="stack">
+          <div class="row"><strong>Players:</strong> 1–4 players (1 Tank, 1 Healer, 2 DPS)</div>
+          <div class="row"><strong>Class/Job:</strong> Disciples of War or Magic</div>
+          <div class="row">※ Limited jobs can participate only in a preformed party meeting party size requirements or an unrestricted party, and if duty rules allow.</div>
+          <div class="row"><strong>Level:</strong> 50</div>
+          <div class="row">※ Level will be synced upon entry.</div>
+          <div class="row"><strong>Average Item Level:</strong> 42</div>
+          <div class="row"><strong>Item Level Sync:</strong> 60</div>
+          <div class="row">※ While synced, all item stats are adjusted.</div>
+          <div class="row"><strong>Additional Loot Rules:</strong> Unavailable</div>
+          <div class="row">※ Role and item level restrictions are lifted for parties meeting minimum size requirements.</div>
+        </div>`,
+        acq:`<div class="stack">
+          <div class="row"><a class="link" href="rock-the-castrum.html">Rock the Castrum</a></div>
+        </div>`,
+        unlock:`<div class="stack">
+          <div class="row"><a class="link" href="the-ultimate-weapon.html">The Ultimate Weapon</a></div>
+        </div>`
+      },
+
+      JP:{
+        langLabel:'JP',
+        pageTitle:'外郭攻略 カストルム・メリディアヌム',
+        tabs:{story:'ストーリー', req:'必要条件', acq:'開放クエスト', unlock:'後続クエスト', comments:'コメント'},
+        story:`<p>反攻作戦「マーチ・オブ・アルコンズ」も、いよいよ最終局面に突入した。ラウバーン・アルディン局長率いる不滅隊を中核とする、エオルゼア同盟軍本隊が、帝国軍拠点「カストルム・メリディアヌム」に迫る。</p><p>帝国軍の切り札、アルテマウェポンを破壊するためには、多重の防壁に囲まれた一大拠点を陥落させなければならない。今こそ死力を尽くして、戦うべき時だ。汝にクリスタルの導きがあらんことを！</p><p><strong>BGM</strong>：<a class="link" href="bgm-the-emperors-wont.html">魔導の軍勢</a></p>`,
+        req:`<div class="stack">
+          <div class="row"><strong>プレイヤー数：</strong>1～4人用 (TANK:1/HEALER:1/DPS:2)</div>
+          <div class="row"><strong>クラス：</strong>ファイター ソーサラー</div>
+          <div class="row">※リミテッドジョブは規定人数パーティもしくは「制限解除」状態かつ許可されているコンテンツに参加できます。</div>
+          <div class="row"><strong>レベル：</strong>50</div>
+          <div class="row">※レベル上限を超えた場合はレベルシンクされます。</div>
+          <div class="row"><strong>平均アイテムレベル：</strong>42～</div>
+          <div class="row"><strong>アイテムレベルシンク：</strong>60</div>
+          <div class="row">※アイテムレベルシンク中は、すべての装備品の性能がアイテムレベルシンク以下になるように調整されます。</div>
+          <div class="row">ロットルール変更非対応</div>
+          <div class="row">※規定人数の場合は自由なロール構成かつ、アイテムレベルに関わらず参加できます。</div>
+        </div>`,
+        acq:`<div class="stack">
+          <div class="row"><a class="link" href="rock-the-castrum.html">カストルム・メリディアヌムの死闘</a></div>
+        </div>`,
+        unlock:`<div class="stack">
+          <div class="row"><a class="link" href="the-ultimate-weapon.html">究極幻想アルテマウェポン</a></div>
+        </div>`
+      },
+
+      ZH:{
+        langLabel:'ZH-TW',
+        pageTitle:'攻陷卡斯特魯姆・梅里迪亞努ム',
+        tabs:{story:'故事概要', req:'需求條件', acq:'解鎖任務', unlock:'後續任務', comments:'留言'},
+        story:`<p>「Operation Archon」的第三階段就此展開——正面強襲 Castrum Meridianum，那是 Gaius van Baelsar 的權力據點。作為主攻部隊，Immortal Flames（不滅隊）將傾盡全力猛攻要塞，但這其實只是佯攻。當守軍的注意力被引向外側，你與同伴必須悄然穿過防線，設法解除保護 Praetorium 的 magitek 防護力場；那座「要塞中的要塞」之內，據信正藏著 Ultima Weapon。</p><p><strong>BGM</strong>：<a class="link" href="bgm-the-emperors-wont.html">帝王的意志</a></p>`,
+        req:`<div class="stack">
+          <div class="row"><strong>人數：</strong>1–4 人（1 坦克／1 治療／2 輸出）</div>
+          <div class="row"><strong>職業：</strong>戰鬥職業／魔法職業</div>
+          <div class="row">※ 限定職業僅能在事先組成符合人數條件的隊伍，或以無限制規則參加，且需符合任務規則允許的情況。</div>
+          <div class="row"><strong>等級：</strong>50</div>
+          <div class="row">※ 進入時將套用等級同步。</div>
+          <div class="row"><strong>平均裝等：</strong>42</div>
+          <div class="row"><strong>裝等同步：</strong>60</div>
+          <div class="row">※ 同步時，所有裝備數值將自動調整。</div>
+          <div class="row"><strong>追加掉落規則：</strong>不可</div>
+          <div class="row">※ 當隊伍僅達最低人數時，角色定位與裝備品級限制將解除。</div>
+        </div>`,
+        acq:`<div class="stack">
+          <div class="row"><a class="link" href="rock-the-castrum.html">Castrum Meridianum 決死攻防戰</a></div>
+        </div>`,
+        unlock:`<div class="stack">
+          <div class="row"><a class="link" href="the-ultimate-weapon.html">究極幻想：終極武器</a></div>
+        </div>`
+      }
+    };
+
+    const langToggle = document.getElementById('langToggle');
+    const pageTitle  = document.getElementById('pageTitle');
+    const tabBtns    = [...document.querySelectorAll('.tab-btn')];
+    const panels = {
+      story : document.getElementById('panel-story'),
+      acq   : document.getElementById('panel-acq'),
+      req   : document.getElementById('panel-req'),
+      unlock: document.getElementById('panel-unlock'),
+      comments: document.getElementById('panel-comments')
+    };
+
+    function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+    function applyLang(lang){
+      const t = i18n[lang] || i18n.EN;
+      pageTitle.textContent = t.pageTitle;
+      langToggle.textContent = `🌐 ${t.langLabel}`;
+      tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+      const activeBtn = tabBtns.find(b=>b.getAttribute('aria-selected')==='true') || tabBtns[0];
+      renderPanel(activeBtn.dataset.tab, lang);
+      if (activeBtn && activeBtn.dataset.tab === 'comments') loadGiscusForCurrentLang();
+    }
+
+    function renderPanel(key, lang){
+      const t = i18n[lang] || i18n.EN;
+      Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+      panels[key].classList.add('active');
+      if (key !== 'comments') {
+        panels[key].innerHTML = t[key];
+      } else {
+        loadGiscusForCurrentLang();
+      }
+    }
+
+    tabBtns.forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+        btn.setAttribute('aria-selected','true');
+        renderPanel(btn.dataset.tab, getLang());
+      });
+    });
+
+    langToggle.addEventListener('click',()=>{
+      const cur=getLang();
+      const next=cur==='EN'?'JP':(cur==='JP'?'ZH':'EN');
+      localStorage.setItem(LANG_KEY,next);
+      applyLang(next);
+    });
+
+    applyLang(getLang());
+
+    const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+    };
+    function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+    function loadGiscusForCurrentLang(){
+      const mount = document.getElementById('giscus_container');
+      if (!mount) return;
+      mount.innerHTML = '';
+      const langCode = getLang();
+      const s = document.createElement('script');
+      s.src = 'https://giscus.app/client.js';
+      s.setAttribute('data-repo', GISCUS_CFG.repo);
+      s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+      s.setAttribute('data-category', GISCUS_CFG.category);
+      s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+      s.setAttribute('data-mapping', 'specific');
+      s.setAttribute('data-term', location.pathname + '｜' + langCode);
+      s.setAttribute('data-reactions-enabled', '1');
+      s.setAttribute('data-emit-metadata', '0');
+      s.setAttribute('data-input-position', 'bottom');
+      s.setAttribute('data-lang', uiLang(langCode));
+      s.setAttribute('data-theme', GISCUS_CFG.theme);
+      s.setAttribute('crossorigin', 'anonymous');
+      s.async = true;
+      mount.appendChild(s);
+    }
+  </script>
+</body>
+</html>
