@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A Hero in Need | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – A Hero in Need (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/Ul6OH7wmyUE"
+              title="A Hero in Need" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">A Hero in Need</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`A Hero in Need`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>With the second phase already underway, the Allied Communications Officer tells you that the Maelstrom is holding its ground against Garlean forces on Vylbrand and across the Rhotano Sea. Soon, the third phase will begin, and you will be needed on the front lines again.</p><p>This time, the Immortal Flames will attack Castrum Meridianum as a diversion, drawing the Garleans into open battle. While the enemy is engaged, your task is to slip into the stronghold and bring down the magitek field that seals off the Praetorium—the inner fortress where the Ultima Weapon is believed to be held. You are ordered to proceed to the staging point in northern Thanalan, in the shadow of Castrum Meridianum.</p><p>Before you reach that rendezvous, however, you are asked to stop briefly at Camp Bluefog, one of the key outposts in the region. The garrison there has fallen into low spirits, weighed down by the looming prospect of what may become the bloodiest battle in history. For the sake of the operation, you are told to appear before them and help stoke the fire in their hearts.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Allied Communications Officer <small class="muted">(Western Thanalan, X:12.1, Y:11.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-black-wolfs-ultimatum.html">The Black Wolf’s Ultimatum</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 49 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="hearts-on-fire.html">Hearts on Fire</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'決戦の地へと続く道',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>同盟通信士は、作戦第二段階がすでに進行中であることを告げる。ヴィルブランドおよびロタノ海では、黒渦団が帝国軍を相手に持ちこたえているという。ほどなく第三段階が始まり、あなたも再び戦場に出る必要がある。</p><p>第三段階では、不滅隊が陽動としてカストルム・メリディアヌムに攻撃を仕掛け、ガレマール帝国軍を戦闘に引きずり出す。その混乱の最中、あなたは要塞へ潜入し、プレトリウム――要塞内の要塞であり、アルテマウェポンが収容されていると目される場所――を覆う魔導障壁を解除しなければならない。集結地点は北ザナラーン、カストルム・メリディアヌムの影にあると説明され、そこへ向かうよう命じられる。</p><p>しかし道中、同盟の重要拠点である「ブルーフォグ野営地」へ短く立ち寄ってほしいとも頼まれる。駐屯兵たちは、史上最も血なまぐさい戦いになるかもしれないという重圧に心が沈み、士気が落ちているという。ケープ・ウェストウィンドの英雄であるあなたが姿を見せれば、消えかけた火が再び燃え上がる――そう信じて、あなたは彼らを鼓舞してほしいと求められる。</p><p>ブルーフォグ野営地に到着すると、クラックド・フィストはあなたの訪れを心から歓迎する。補給と準備は整っており、いつでも進軍できる状態にある。だが兵は身体こそここにあれど、心は別の場所にあり、迫り来る凄惨な戦いを前に気分は沈んでいる。それでも、英雄であるあなたが彼らの間を歩けば、魂の奥で細く残る火種を呼び戻せるかもしれない――そうして彼は、あなたに希望を託す。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> 同盟軍の連絡将校 <small class="muted">（西ザナラーン, X:12.1, Y:11.9）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-black-wolfs-ultimatum.html">エオルゼアの明日のために</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 49～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="hearts-on-fire.html">心に火をくべて</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'<a class="link" href="a-hero-in-need.html">前往決戰之地</a>',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>同盟軍通信官告訴你，作戰第二階段已經在進行中：Maelstrom 正在 Vylbrand 與 Rhotano Sea 迎戰帝國軍，暫時還撐得住。但第三階段很快就會開始，你也必須再次踏上前線。</p><p>接下來 Immortal Flames 會以佯攻的方式正面牽制 Castrum Meridianum，讓帝國軍被迫投入戰鬥、無暇他顧。而你要趁著戰線拉開的混亂，滲透進要塞，解除包圍 Praetorium 的魔導力場——那座「要塞中的要塞」，也是 Ultima Weapon 被認為藏身之處。任務集結點就在 Northern Thanalan、Castrum Meridianum 的陰影下，你必須立刻前往。</p><p>不過在抵達集結點前，通信官請你先繞去 Camp Bluefog 短暫停留。那裡是附近的重要據點，但駐軍士氣低落，因為他們都明白：這場戰役很可能會成為史上最血腥的一戰。為了整體戰局，他希望你以「Cape Westwind 的英雄」身分現身，讓他們重新燃起信念與鬥志。</p><p>當你抵達 Camp Bluefog，Cracked Fist 立刻迎上前，直言你的到來正是他們最需要的。從補給與調度來看，這裡已經做好隨時出征的準備，可士兵們雖然人還在營地，心卻早被恐懼與壓力壓得透不過氣。他相信，只要你走進他們之中，那些快熄滅的火苗仍有機會被再次點燃。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 同盟軍聯絡軍官 <small class="muted">(薩納蘭 - 西薩納蘭, X:12.1, Y:11.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-black-wolfs-ultimatum.html">為了艾歐澤亞的明天</a></div><div class="row">所有職業（不含限定職） 等級 49 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="hearts-on-fire.html">點燃心火</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.innerHTML = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
