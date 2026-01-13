@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Moving On | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Moving On (ARR Patch 2.1)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/vHi07bomg9M"
+              title="Moving On" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Moving On</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Moving On`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Minfilia sits with the weight of Alphinaud’s proposal still pressing on her. “Leave Ul’dah…” she murmurs, as if testing the words and finding them heavier than she expected. Then she notices you, asks you to attend to Alphinaud, and explains that he is occupied with business that requires your help. She urges you to go—Alphinaud is waiting, and she has much to think about—and adds one more message for you to carry: tell him she will give her answer in due time.</p><p>When you find Alphinaud, frustration spills out. He insists she knows what must be done, yet she hesitates, and he blames the hesitation on fanciful rumors. He explains that Minfilia’s mother—adoptive mother—was believed to have perished in the Calamity. Her name was F’lhaminn, known to many as the “Songstress of Ul’dah,” a performer of singular talent and beloved across Eorzea, not least by a certain Sharlayan minstrel. When word of her death spread, grief turned to disbelief; many refused to accept it, and the fact that her body was never found only fed speculation. Minfilia struggled to accept the truth at first, but as months stretched into years, she could see there was no other explanation—until recently, when rumors began circulating again that F’lhaminn is alive.</p><p>Alphinaud tells you that one of your informants, Father Iliud, has sent word of a woman matching F’lhaminn’s description being seen at the seaside resort of Costa del Sol. If you can track her down, he believes it would ease whatever worries now trouble Minfilia’s heart. Alphinaud means to leave for La Noscea at once, and asks you to reconvene there and speak with Master Gegeruju about whether the rumors are true.</p><p>At Costa del Sol, Alphinaud asks Gegeruju to shed light on the talk of F’lhaminn. Gegeruju is in melodramatic despair over his “Miqo’te muse,” then jolts upright at your arrival—calling you Titan’s Bane before catching himself. When he hears the name F’lhaminn, he erupts, claiming the “goddess made flesh” who lived among them until recently was the Songstress of Ul’dah, and bemoaning that he let her leave. In his rambling outrage, he lets slip that she went west, off to ply her trade among riffraff. Alphinaud seizes on the direction, thanks him, and says the information will help. There could be any number of places she might be, so he goes to question people at the docks while sending you onward to Wineport to do the same.</p><p>In Wineport, you ask around. One man jokes crudely that he has not seen a lass in far too long—except you. Another recognizes you as the savior of Wineport and confirms a customer matching the description did come through. He grudgingly admits she was a delight to behold, but complains her perfume was so ghastly he threw her out for interfering with tastings. Then he suggests you consult your blind associate—his sense of smell is without peer—and boasts that if he could smell her from a malm away, your associate could smell her from ten.</p><p>You turn to Shamani Lohmani, who sniffs the air and remarks that you have had many grand adventures since you last spoke. He remembers the girl immediately—no one forgets a perfume like that. He describes it as robust and intoxicating, yet oddly familiar, reminiscent of a bloom native to the area. He says he told her as much, and she asked where she might find those flowers. So he directed her south into Raincatcher Gully, then east after crossing the second bridge, toward the flowers growing in the cliff’s shade where the scent is strongest. If you hurry, he says, you may still find her there.</p><p>In Raincatcher Gully you sense a hostile presence, and in the midst of it you meet the woman you have been seeking. She thanks you, saying she did not realize her activities had aroused a goobbue’s ire until it was too late, and begins to explain she was gathering oils to make perfume—then freezes when she hears her own name. “F’lhaminn?” she repeats, unsure, then demands to know who you are and whom you serve. Alphinaud arrives, impressed that you found her first, and addresses her as the Songstress of Ul’dah. He tells her Minfilia—Ascilia—is looking for her, and F’lhaminn recoils at the name. Alphinaud notes she is the picture of health while the world believes her dead, and concludes it must have been by design, asking why. F’lhaminn warns that not everyone who seeks her does so with good intentions, but says she does intend to reveal herself to Minfilia—when the time is right. Alphinaud presses for when that will be, but she refuses to be rushed, insisting she did not come all this way on a whim and repeating that she came to harvest flowers for perfume. Alphinaud apologizes for intruding and suggests continuing the conversation somewhere safer—Wineport, perhaps—and she agrees to move.</p><p>Back in Wineport, F’lhaminn remarks that she has been rescued yet again from the jaws of a ravenous goobbue, and sighs that people forget the lessons of the past—though she admits she was not solely to blame for that foolishness. Alphinaud, shaken, admits this is not at all how he imagined it. And as the reality settles in, he says he can scarcely imagine what emotions will pass through Minfilia’s heart when she reunites with her mother after all these years.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Minfilia <small class="muted">(The Waking Sands, X:6.9, Y:6.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-price-of-principles.html">The Price of Principles</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 50 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="all-things-in-time.html">All Things in Time</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'歌姫を追って',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ミンフィリアは、アルフィノの提案の重みを抱えたまま、「ウルダハを離れる……本当に、ここまで来てしまったの？」と呟く。そこへあなたの姿を見つけると、アルフィノのもとへ行ってほしいと頼み、彼が何やら用事を抱えていてあなたの助けが必要なのだと告げる。彼はあなたを待っている、そして自分には考えることが山ほどある――そう言ってあなたを送り出し、最後に、返事は追って必ず出すと伝えてほしい、と言い添える。</p><p>あなたがアルフィノに合流すると、彼は苛立ちを隠さない。ミンフィリアは何をすべきか分かっているのにためらっている、それは「根も葉もない噂」のせいだと言う。そして事情を説明する。ミンフィリアの母――実母ではなく養母――は大災厄で亡くなったとされる一人で、その名はフ・ラミン。ウルダハの歌姫として知られ、比類なき才を持つ演者であり、エオルゼアの人々に愛されていた存在で、あるシャーレアンの吟遊詩人にとっても特別だった。訃報は衝撃と不信をもって迎えられ、多くの者が受け入れようとせず、遺体が見つからなかったことが憶測をさらに煽った。ミンフィリアも当初は受け入れられなかったが、月日が重なるにつれ、他に説明はないと悟った――少なくとも最近までは。ところが理由は分からないまま、フ・ラミンは生きているという噂が再び広まり始めたのだという。</p><p>アルフィノは、情報提供者のひとりであるイリウド神父から、歌姫の特徴に合う女が海辺の保養地コスタ・デル・ソルで目撃されたとの報せが来たと告げる。もし彼女を見つけ出せれば、ミンフィリアの心を苛む不安も和らぐはずだ、と。彼はただちにラノシアへ向かうつもりで、現地で合流し、ゲゲルジュ主に噂の真偽を確かめようとあなたに促す。</p><p>コスタ・デル・ソルでアルフィノが噂のフ・ラミンについて尋ねると、ゲゲルジュは砂浜の甘美な“ミコッテの女神”を嘆きつつ、あなたの姿に気づいて「タイタン・ベイン！」と叫び、慌てて名を言い直す。フ・ラミンの名を聞くや、彼は「つい最近までここにいた女神がウルダハの歌姫だったのか」と大袈裟に騒ぎ立て、知っていれば縛りつけてでも帰さなかったと嘆く。そして彼女が西の方へ行ってしまったことを口走り、悲劇だと騒ぐ。アルフィノは「西か」と要点を掴み、礼を言って情報を活かすと述べる。行き先は多岐にわたるはずだとして、彼は港で聞き込みを始め、あなたにはワインポートへ向かって同様に探ってほしいと頼む。</p><p>ワインポートであなたが聞き込みをすると、ひとりは下卑た冗談を飛ばしつつも、別の者はあなたをワインポートの救世主だと迎え、特徴に合う客が来たと認める。姿は見事だったが香水がひどく、試飲の邪魔になるから追い出したと言い、嗅覚が並外れたあなたの盲目の協力者に相談しろと勧める。自分が一マルム先から匂ったのだから、彼なら十マルム先からでも分かるだろう、と。</p><p>あなたがシャマニ・ロマニのもとへ行くと、彼は鼻を鳴らしながら、久しぶりに会って以来あなたが多くの冒険を重ねてきたのだろうと語りかける。少し前に来た娘のことなら忘れようがない、と彼は言い、その香りは強烈で陶酔的でありながら、同時にどこか懐かしく、この土地に自生する花を思わせるものだったと説明する。彼はそのことを彼女に伝え、花の在処を尋ねられたので、レインキャッチャー・ガリーへ南下し、二つ目の橋を渡ってから東へ向かうよう案内したという。崖陰に咲く花が最も強く香る――急げばまだ間に合うかもしれない、と。</p><p>レインキャッチャー・ガリーで敵意を感じた直後、あなたはついに目的の女と対面する。彼女は礼を述べ、香水に用いる油を採ろうとしていたらグゥーブーの怒りを買ってしまったのだと語りかけるが、自分の名を呼ばれて言葉を失う。「フ・ラミン？」と戸惑い、あなたが何者で誰に仕えるのかと問い詰める。そこへアルフィノが現れ、あなたが先に見つけたことに感心しつつ、彼女こそウルダハの歌姫であり、ミンフィリア――いやアシリアが彼女を探しているのだと告げる。フ・ラミンは「アシリア！？」と反応する。アルフィノは、健康そのものの彼女が世間では死んだと思われていることから、意図的にそうしたのだろうと推測し、理由を問う。フ・ラミンは、探す者が皆善意とは限らないと釘を刺しつつも、時が来ればミンフィリアに姿を現すつもりだと言う。アルフィノが時期を迫ると、彼女は自分が決めることだと退け、ここへ来たのは気まぐれではなく、香水用の花を採取するためだと言い切る。アルフィノは割り込んだことを詫び、安全な場所――ワインポートで話を続けようと提案し、彼女もそれに応じる。</p><p>ワインポートに移ると、フ・ラミンはまたしても貪欲なグゥーブーの顎から救われたと零し、過去の教訓を忘れるものだと溜息をつく――もっとも、その愚かさの責任は自分だけではないのだが、と。アルフィノは動揺を隠せず、こんな展開は想像していなかったと漏らす。そして長い歳月を経て母と再会する時、ミンフィリアの胸をどれほどの感情が駆け抜けるのか、想像もつかないと言葉を失う。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ミンフィリア <small class="muted">（砂の家, X:6.9, Y:6.1）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-price-of-principles.html">「暁」の在り方</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="all-things-in-time.html">母と子</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'繼續前行',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Minfilia 仍被「離開 Ul’dah」這句話壓得喘不過氣來，她低聲自問：真的走到這一步了嗎。她注意到你之後，先請你去照看 Alphinaud，說他正忙著處理某些事，需要你的協助。她催你快去，因為 Alphinaud 正在等你，而她自己也有太多事情要想；臨別前，她又要你轉告他——她會在適當的時候給出答覆。</p><p>你找到 Alphinaud，他一開口就是懊惱：Minfilia 明明知道該做什麼，卻還在遲疑，而讓她動搖的，全是那些不切實際的流言。他接著解釋原委：Minfilia 的媽媽——更準確地說，是養母——被認為是在 Calamity 中罹難的眾人之一。她名叫 F’lhaminn，你可能更熟悉她的稱號——「Ul’dah 的歌姬」。她天賦出眾、深受 Eorzea 人民愛戴，也被某位 Sharlayan 的吟遊詩人所珍視。她的死訊傳出時，崇拜她的人震驚又不願相信，許多人拒絕承認這一切；而她的遺體從未被找到，更讓猜測像野草一樣蔓延。Minfilia 起初也難以接受，但當 F’lhaminn 的缺席從數月拉長成數年，她不得不明白：不可能有別的解釋——至少直到最近為止。因為不知為何，關於 F’lhaminn 仍然活著的傳聞，又再度流傳開來。</p><p>Alphinaud 說，你們的線人之一——神父 Iliud——帶來消息：最近在海濱度假地 Costa del Sol，有人目擊到一名女子外貌特徵與那位歌姬相符。若能把人找出來，他相信 Minfilia 心裡那些盤據不散的煩憂，或許就能得到安撫。Alphinaud 決定立刻前往 La Noscea，要你在那裡會合，並去向 Master Gegeruju 打聽這些傳聞是否屬實。</p><p>你在 Costa del Sol 與 Alphinaud 一同詢問 Master Gegeruju。Gegeruju 先是哀嘆自己沙灘上的「我的 Miqo’te 女神」為何離他而去，接著一看到你就激動地脫口喊出打倒 Titan 的英雄，才又急忙改口叫你名字。當聽見 F’lhaminn 這個名字，他立刻誇張地嚷起來，說那位直到不久前還住在度假村、彷彿「化身為人的女神」的女子，竟然就是 Ul’dah 的歌姬；他還懊悔自己若早知道，就該把人綁住不讓她走。Gegeruju 一邊抱怨、一邊又透露她往西邊去了，說她如今竟去替「西邊那群雜碎」表演，簡直是悲劇。Alphinaud 立刻抓住重點，謝過他提供的線索，並表示去處可能不只一個。他自己會先去碼頭一帶打聽，同時請你前往 Wineport 也做同樣的詢問。</p><p>你到了 Wineport 四處打聽。有個人先用粗魯的玩笑回應你，說自己很久沒見過什麼姑娘——除了你以外。也有人認出你就是 Wineport 的救星，並承認確實來過一名符合描述的客人；他勉強稱讚那名女子外表確實出眾，但又嫌她的香水氣味刺鼻到不行，甚至干擾品酒，他只好把人趕出去。接著他建議你去問問那位失明的同伴——對方的嗅覺無人能及；他誇口說自己都能在一個 malm 外聞到那股味道，你的同伴肯定能在十個 malm 外就察覺。</p><p>你去找 Shamani Lohmani。他先嗅了嗅，說自從上次見面後，你一定又經歷了許多精彩的冒險。至於不久前來過的那名女子，他說那種香水的味道不可能忘記：濃烈、令人暈眩，卻又帶著奇妙的熟悉感，像是這一帶原生花朵的氣味。他說他當時就把這點告訴對方，女子也問他哪裡能找到那種花。於是他指引她沿路往南走進 Raincatcher Gully，過了第二座橋後再往東；崖壁陰影下生長的花香最濃。Shamani 說你若趕快，或許還來得及追上她。</p><p>你趕到 Raincatcher Gully，立刻感覺到敵意逼近。就在混亂之中，你遇見了那名女子。她先向你道謝，說自己忙著採集 goobbue 的油脂——那能用來做香水——卻沒察覺已惹怒了 goobbue，直到太遲才發現。可當她被叫出名字時，她忽然怔住，困惑地重複了一句「F’lhaminn？」隨即提高戒心，質問你是誰、又是在替誰做事。Alphinaud 這時趕到，對你先一步找到人表示佩服，並直呼她就是 Ul’dah 的歌姬，還說 Minfilia——或者該說 Ascilia——正在找她。F’lhaminn 聽見「Ascilia」的名字立刻一震。Alphinaud 觀察到她氣色極好，卻被世人當成已死之人，只能推斷這是刻意安排，於是追問原因。F’lhaminn 警告他，不是每個追尋她的人都懷著善意；但她也表示自己確實打算在「適當的時候」與 Minfilia 相認。Alphinaud 想逼問那個時機究竟是何時，她卻拒絕被催促，反問他難道以為她千里迢迢來這裡只是心血來潮？她說自己來此只是為了採花做香水，並反問這樣是否足以滿足他的好奇心。Alphinaud 為自己的闖入道歉，並提議換個更安全的地方再談——例如回 Wineport。於是你們暫時先撤回。</p><p>回到 Wineport，F’lhaminn 感嘆自己又一次從飢餓的 goobbue 口中被救了出來，說人總是很快就忘了過去的教訓；她又嘆了口氣，補上一句自己並非完全無辜。Alphinaud 則顯得相當動搖，說這一切完全不是他原本想像的樣子。他低聲承認，他幾乎無法想像，多年之後，Minfilia 與媽媽重逢時，心裡會掀起什麼樣澎湃的情緒。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 敏菲利亞 <small class="muted">(砂之家, X:6.9, Y:6.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-price-of-principles.html">信念的代價</a></div><div class="row">所有職業（不含限定職） 等級 50 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="all-things-in-time.html">萬事皆有時</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
