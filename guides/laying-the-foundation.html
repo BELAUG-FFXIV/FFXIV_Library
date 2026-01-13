@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Laying the Foundation | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Laying the Foundation (ARR Patch 2.1)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/SHcBGxxVptM"
+              title="Laying the Foundation" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Laying the Foundation</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Laying the Foundation`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Minfilia says that finding a new home in Revenant’s Toll is only the beginning—there is too much to do, and too little time. The first step, she explains, is securing the cooperation of the Adventurers’ Guild representatives there, for without the guild’s efforts the camp would never have been established, let alone rebuilt into a fortified settlement. With construction ongoing and supplies scarce, she expects they will ask something in return, and she will not begrudge it—because the Scions need the guild more than the guild needs the Scions. Without their aid, even basic work like securing facilities, building ties with local merchants, and recruiting adventurers would become difficult, if not impossible.</p><p>Alphinaud tells her she need not trouble herself with such matters, and suggests instead that she consider who should be entrusted with resolving them—then promptly presents the Adventurers’ Guild emissary from Revenant’s Toll. The emissary offers respectful greetings and says the guild moved to open talks as soon as possible; the representatives in Revenant’s Toll hold the Scions of the Seventh Dawn in the highest regard, and would be honored to welcome them. Alphinaud begins to speak of provisions that must be negotiated, and Minfilia gives her assent.</p><p>The emissary then turns to you, recognizing you at once and greeting you with clear admiration. Slafborn, he says, spoke of you in glowing terms—of stealing an imperial reaper, and using it to infiltrate a Garlean castrum, an undertaking few would attempt and fewer still survive. Revenant’s Toll will always welcome you, he adds, and he hopes you will return before long. Minfilia can only laugh at how your reputation seems to arrive ahead of you, and though she muses about sending you to Revenant’s Toll at once as first intended, she decides you have earned a rest after traveling so far and doing so much—for the Scions, and for her.</p><p>After you have had time to recover, Minfilia asks you to join her in the solar—Alphinaud has returned, and there is something he wishes to share. Alphinaud wastes no time: the negotiations are concluded. The Adventurers’ Guild has agreed to provide new facilities and material support, in exchange for the Scions’ assistance in the ongoing defense and development of Revenant’s Toll. The Scions of the Seventh Dawn, he declares, will soon have a new home in Mor Dhona: the Rising Stones.</p><p>Amid the relieved reactions and wry remarks, Minfilia shares news of her own. In anticipation of this day, she personally informed the Alliance leaders of the plan, and each pledged full support—General Raubahn included. More than that, she has decided the time is right to cast off what remains of the veil of secrecy and announce the Scions to the world. Alphinaud questions whether it is wise, but Minfilia calls it a formality—she says their existence is perhaps the worst kept secret in Eorzea. She urges her comrades to affirm their identity, proclaim their achievements, and show the people what the Scions stand for: power revealed openly, accountable to no one, and at once to all. And to those who have felled primal and faced down the Empire, she gives a final charge—prepare for the great challenges ahead, and rise to meet them together, united as one.</p><p>When the moment passes, Minfilia speaks to you again, marveling at Alphinaud’s timing—how he appeared with an emissary mere moments after she voiced the need for ties between their organizations. Setting that aside, she entrusts you with a task: deliver documents concerning the forthcoming move to Slafborn. She tells you to take care on the road and represent the Scions well. In Revenant’s Toll, Slafborn admits he was told to expect a Scion, but did not expect it to be you—he greets you like an old companion, takes the documents, and confirms everything is in order. Then, with a grin, he asks if you will be staying a while, joking that if they cannot have a dozen more like you, they will simply give you the work of a dozen men.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Minfilia <small class="muted">(The Waking Sands, X:6.9, Y:6.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="all-things-in-time.html">All Things in Time</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 50 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="its-possibly-a-primal.html">It’s Possibly a Primal</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'レヴナンツトールへ',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ミンフィリアは、レヴナンツトールに新たな拠点を得られたのは喜ばしいが、やるべきことは山ほどあり、しかも時間がないと言う。まず必要なのは、あそこにいる冒険者ギルド代表者たちの協力だ。冒険者ギルドの尽力がなければ、かつての野営地レヴナンツトールは築かれず、ましてやより堅固な拠点へと発展することもなかった。だが建設はまだ続き、資材も不足している以上、たとえこちらの志に同情してくれていても、見返りを求められるのは避けられない。何を頼まれようとも恨みはしない――率直に言って、こちらが彼らを必要としているのだ。施設の確保、現地商人との関係づくり、冒険者の募集といった要の仕事は、彼らの助けなくしては成り立たない。</p><p>アルフィノは、そうした交渉は心配無用だと告げ、先代が気にかけるべきは「誰にそれを任せるか」だと諭す。そして「ここにいる」と胸を張り、ひとりではないことを示すように、レヴナンツトールの冒険者ギルドから来た使者を紹介した。使者は丁重に名乗り、アルフィノから意向を聞いた以上、最短で話し合いを始めるのが最善だと判断したと言う。レヴナンツトールの仲間は第七霊災の暁を深く敬愛しており、あなたたちを迎えられるなら光栄だ。アルフィノは交渉すべき条件があると前置きし、任せてほしいと申し出ると、ミンフィリアはそれを認めた。</p><p>使者は続いてあなたへと向き直り、すぐに気づいた様子で声を弾ませる。スラフボーンからあなたの話は絶賛とともに聞いている――帝国軍のリーパーを奪い、それを利用してガレマール帝国のカストルムに潜入したという、常人なら考えもしない偉業を成し遂げ、しかも生還した者はさらに少ない。レヴナンツトールはいつでもあなたを歓迎する、近いうちにまた顔を見せてほしい、と。ミンフィリアは思わず笑い、あなたの評判は先に到着しているようだと言う。最初の予定どおり、すぐにでもレヴナンツトールへ向かわせたいところだが――その前に休むべきだ。遠路を越え、すでに多くを成し遂げてくれた。暁のため、そして彼女自身のために。ひとまず身を労わり、また後で話そう、と。</p><p>休息を取ったのち、ミンフィリアはあなたに声をかけ、応接の間へ同行してほしいと言う。アルフィノが戻ったばかりで、共有すべきことがあるらしい。アルフィノは要点から告げた――交渉はまとまった。冒険者ギルドは、新たな施設と物資支援を提供する代わりに、レヴナンツトールの防衛と発展における協力を求めている。そして第七霊災の暁は、モードゥナに新たな本拠を得ることになる――「暁の血盟の本拠」、ライジングストーンズだ。</p><p>安堵と皮肉混じりの反応が広がる中、ミンフィリアもまた報せを口にする。この日を見越し、彼女は同盟の首脳たちに計画を直接伝えており、各々が全面支援を約束した――ラウバーン将軍も含めて。さらに彼女は、今こそ秘密の帳を払い、暁の存在を世界に公表すると決めたと言う。アルフィノは慎重な問いを投げかけるが、ミンフィリアは形式にすぎないと断じる。暁の存在は、エオルゼアでもっとも隠しきれていない秘密かもしれない。ならば名乗り、成し遂げたことを掲げ、第七霊災の暁が何のために立つのかを示そう――誰の支配も受けず、同時にすべてに対して責を負う力として。原初の脅威を退け、帝国と相対してきた仲間たちへ、彼女は告げる。これから待つ試練は大きい。だが、あなたたちが力を合わせれば乗り越えられないはずがない――何度もそうしてきたように、ひとつとなって立ち向かおう、と。</p><p>ひと段落すると、ミンフィリアはアルフィノの絶妙な機転に感心した様子で言う。必要性を口にした直後に、まるで予告していたかのように冒険者ギルドの使者を連れて現れた――そのタイミングは、あなたに負けず劣らずだ、と。だが今はそれよりも頼みがある。彼女はあなたに、転居に関する書類をスラフボーンへ届けてほしいと託す。道中は気をつけ、暁を代表して恥のないように、と。レヴナンツトールでスラフボーンは、暁の者が来るとは聞いていたが、まさかあなたとは思わなかったと懐かしげに迎え、書類を受け取って確認し、問題ないと頷く。そしてしばらく滞在するのかと尋ね、同じような人材が何人もいればいいのにとこぼしつつ、いないのならせめてあなたに十二人分の仕事を任せよう――冗談だ、冗談だ、と笑ってみせた。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ミンフィリア <small class="muted">（砂の家, X:6.9, Y:6.1）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="all-things-in-time.html">母と子</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="its-possibly-a-primal.html">黒衣森で覚醒するもの</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'前往 Revenant’s Toll',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Minfilia 說，雖然他們終於在 Revenant’s Toll 找到新的落腳處，但接下來要做的事情太多，而時間又太少。第一步，是取得那裡冒險者公會代表的合作；若不是公會長期投入，最初的 Camp Revenant’s Toll 根本不可能成立，更別說後來成為更堅固的據點。只是建設仍在進行、資源又短缺，她預料即使對方同情他們的理念，也一定會要求回報。無論對方提出什麼條件，她都不會計較——因為坦白說，Scions 比冒險者公會更需要彼此的協助。沒有公會，無論是取得新的設施、和當地商人建立關係，或是招募冒險者，這些關鍵工作都會變得困難，甚至不可能。</p><p>Alphinaud 則表示，這些事不必讓她煩心；他說她真正該在意的，是「把這些事交給誰最合適」——而他就在這裡，並且還帶來了人。他介紹了來自 Revenant’s Toll 的冒險者公會使者。使者恭敬地致意，說收到 Alphinaud 的消息後，他們認為應該把握最早的時機開始談判；Revenant’s Toll 的同伴一向對 Scions of the Seventh Dawn 推崇備至，也非常榮幸能迎接他們。Alphinaud 提到仍有一些條件需要協商，願意由他來談；Minfilia 也點頭同意。</p><p>使者隨即轉向你，顯然立刻認出了你，語氣裡滿是敬意。他說 Slafborn 對你讚譽有加——你曾偷走帝國軍的 reaper（魔導兵器），還借此潛入 Garlean castrum（帝國要塞）；這種行動少有人敢想，更少有人能活著走出來。他說 Revenant’s Toll 永遠歡迎你，也希望你不久後能再度造訪。Minfilia 忍不住笑了，說看來你的名聲總是走在你前頭；她甚至打趣要照原先的打算，立刻派你前往 Revenant’s Toll——但在那之前，她認為你先該好好休息。你走了很遠的路，也已經為他們做了太多：為 Scions，也為她。她說之後再談，現在先照顧好自己。</p><p>等你休息過後，Minfilia 便請你和她一起去 The Waking Sands 的 solar，因為 Alphinaud 剛回來，看起來有件事要和大家分享。Alphinaud 直接帶來結論：談判已經結束。冒險者公會同意提供新的設施與物資支援，交換條件是 Scions 必須協助 Revenant’s Toll 的持續防衛與發展。他宣布，Scions of the Seventh Dawn 即將在 Mor Dhona 擁有新的家—The Rising Stones。</p><p>在眾人帶著輕鬆或調侃的反應之中，Minfilia 也說她有消息要宣布。為了迎接這個重要的日子，她已親自把計畫告知 Alliance 的領袖們，而他們都承諾會全力支援——其中也包括 General Raubahn。除此之外，她決定是時候拋開組織殘存的秘密面紗，正式向世界宣告 Scions 的存在。Alphinaud 擔心這是否明智，但 Minfilia 說這更像是形式：他們的存在很可能早就是 Eorzea 最藏不住的秘密。既然如此，就該坦然確認自己的身分、宣示成就，讓所有人知道 Scions of the Seventh Dawn 代表什麼——她願意讓人們看見他們真正的力量，同時也讓人們明白：這份力量不受任何人指使，卻也對所有人負責。對於那些曾討伐過 primal、也曾正面迎戰 Empire 的同伴們，她要大家準備迎接未來的挑戰；那些挑戰會很巨大，但不會比他們更巨大，只要團結一致，就能一次又一次地站起來。</p><p>事情告一段落後，Minfilia 又對你提起一件事：她忍不住好奇 Alphinaud 到底是怎麼辦到的——幾乎就在她說需要和冒險者公會建立聯繫的同時，他就帶著使者現身，時機準得像是可預料一般。她暫時把這份疑問放下，轉而交付你一項任務：把關於即將搬遷的文件送交給 Slafborn。她叮囑你路上小心，也要好好代表 Scions。你抵達 Revenant’s Toll 後，Slafborn 說他確實接到通知會有 Scion 前來，卻沒想到來的人是你；他像見到久違的老朋友般招呼你，收下文件仔細確認，說一切都沒有問題。接著他又笑著問你是不是會在這裡待上一段時間，還半開玩笑地說：既然沒有十幾個像你這樣的人，那就只好把十幾個人的工作都交給你了，當然，他立刻補上一句：他是在開玩笑。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 敏菲利亞 <small class="muted">(砂之家, X:6.9, Y:6.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="all-things-in-time.html">萬事皆有時</a></div><div class="row">所有職業（不含限定職） 等級 50 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="its-possibly-a-primal.html">疑似 primal 的徵兆</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
