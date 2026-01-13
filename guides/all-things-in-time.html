@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>All Things in Time | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – All Things in Time (ARR Patch 2.1)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/wbFgkXDXfNs"
+              title="All Things in Time" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">All Things in Time</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`All Things in Time`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Alphinaud notes that, for all her years of nomadism, Lady F’lhaminn has kept an unexpectedly close watch on the Scions’ affairs—close enough to prove how resourceful she truly is, and how such resourcefulness is never born without effort or reason. When F’lhaminn confirms that her daughter is waiting in Vesper Bay, she says she has kept her waiting long enough, and insists you all take the next ferry. The perfume can be finished on the way, and Alphinaud gladly has you escort her to the Waking Sands.</p><p>At the Solar within the Waking Sands, Alphinaud announces that you have a guest. Minfilia turns—and freezes, stunned into silence—before the name escapes her in disbelief. F’lhaminn answers softly, calling her “Ascilia,” and the room tightens with a feeling Tataru can barely contain, whispering that she has not seen Minfilia like this in years.</p><p>Minfilia admits she never truly believed the reports of F’lhaminn’s death, and demands to know what kept her away for so long. F’lhaminn tells her the imperials came for her, as she always knew they would, and she chose distance so their pursuit would not endanger Minfilia or the cause. From afar, she watched Minfilia press on—achieving more than she had ever imagined—and celebrated every victory in secret, pride swelling in the one place she could keep it safe.</p><p>F’lhaminn then offers a gift: Celsettia perfume. Minfilia recognizes it at once, amazed that it still exists, and F’lhaminn reminds her how she used to wear it so often that, if she ever lost sight of her, she could find her again by following the scent. Minfilia realizes how much trouble it must have taken, but F’lhaminn calls it no trouble—though she adds that you were essential to its making. Minfilia thanks you, and thanks her, voice unsteady with gratitude.</p><p>There is something else. F’lhaminn returns a cat’s-eye Minfilia once found, and the sight of it pulls Minfilia back through years she rarely speaks aloud: her father’s ties to the Ala Mhigan Resistance, the journey to Ul’dah when she was still a child, and the accident that claimed his life soon after they arrived. In that aftermath, F’lhaminn took her in and raised her as her own—teaching her what she needed to survive. Alphinaud, who thought he knew the facts, realizes he has not understood what they truly meant. Minfilia explains that mining was among her first lessons, and that this cat’s-eye was the first stone she ever unearthed; proud despite its modest worth, she gave it to F’lhaminn as a gift—and now, bewildered, she asks why it is being returned.</p><p>F’lhaminn quickly assures her that nothing is amiss. On the contrary, she says she needs Minfilia to recognize how far she has come—and how much further she still must go. The Scions have succeeded where she failed, and she is proud beyond words, yet she cannot ignore what remains ahead and what it will demand. Calling her “daughter,” she tells Minfilia she cannot stay here any longer: she and the Scions must leave Ul’dah. Minfilia struggles to answer, but F’lhaminn reminds her she built their refuge once and can build it again—this time together. When Minfilia finally believes it, she turns to Alphinaud and declares the time has come to leave Vesper Bay and establish a new headquarters in Revenant’s Toll, as he proposed. There is no time to waste: you are to help ensure the Scions are informed, and word is to be sent to the Students of Baldesion—preparations begin at once.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> F’lhaminn <small class="muted">(Eastern La Noscea, X:20.7, Y:21.5)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="moving-on.html">Moving On</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 50 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="laying-the-foundation.html">Laying the Foundation</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'母と子',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>アルフィノは、放浪の歳月を重ねてきたにもかかわらず、フ・ラミンが「暁」の動向を驚くほど近い距離で見つめ続けてきたのだと語る。そこには彼女の抜け目なさがあり、そして、その才覚は努力と理由なくして身につくものではないのだと。フ・ラミンは、娘がベスパーベイで待っていると聞くや否や、もう十分に待たせたと言い、次の渡船で向かうことを決める。香水の仕上げは移動の途中でできる――そうしてあなたは、彼女を「砂の家」へと案内することになる。</p><p>「砂の家」のソーラで、アルフィノはあなたに客人がいると告げる。ミンフィリアはその名を耳にした瞬間、息を呑み、信じられないという表情のまま立ち尽くす。フ・ラミンは静かに「アシリア……」と呼びかけ、タタルは小声で、ミンフィリアがこんな顔をするのは何年ぶりだろうと漏らす。</p><p>ミンフィリアは、あなたが無事であることに安堵しつつも、ずっと「死んだ」と聞かされていた相手を前に、なぜ長いあいだ姿を消していたのかを問う。フ・ラミンは、帝国軍が自分を追ってくることは最初からわかっていたと言い、その追跡がミンフィリアと志を危険にさらさぬよう、あえて遠くに身を置いたのだと語る。だが離れていても、ミンフィリアが成し遂げた数々の成果を見届け、誰にも知られぬ場所でひそかに祝ってきた――その歩みを誇りに思う、と。</p><p>フ・ラミンは贈り物として「セルセティアの香水」を差し出す。ミンフィリアはそれを覚えていたと声を震わせ、もう作られていないはずだと驚くが、フ・ラミンは忘れるはずがないと言う。いつも身につけていたから、もし見失っても香りを辿ればすぐに探し当てられたのだと。手間など惜しくはない――ただし、あなたの助けがなければ完成しなかった、と彼女は付け加える。ミンフィリアは、あなたとフ・ラミンの双方に深く礼を述べる。</p><p>さらにフ・ラミンは、ひとつの石を返す。「キャッツアイ」――かつてミンフィリアが見つけた石だ。ミンフィリアはそれを見て、幼い頃の記憶を語り始める。父がアラミゴ解放軍の一員であったこと、子どもの自分を連れてウルダハへ来たこと、そして到着して間もなく事故で命を落としたこと。あのとき自分を支え、我が子のように育て、生きる術を教えたのがフ・ラミンだった。アルフィノは事情を知っているつもりでいたが、その意味を理解できていなかったと悟る。ミンフィリアは、採掘が最初に教わったことのひとつであり、このキャッツアイが初めて掘り当てた石だったと話す。小さな成果でも誇らしくて、贈り物としてフ・ラミンに渡した――だからこそ、なぜ今それを返すのかと、不安を隠せずに問う。</p><p>フ・ラミンは、何も不吉なことではないと強く否定する。むしろ、あなたに――いや、アシリアに、自分がどれほど遠くまで来たのかを実感してほしいのだと言う。あなたと仲間たちは、彼女が果たせなかったものを成し遂げ、希望以上の結果を手にした。そのことが誇らしくてたまらない一方で、これから先に待つものと、その重さを思わずにはいられない。だからこそ、アシリアと「暁」はウルダハを離れなければならない――そう告げる。ミンフィリアは言葉を失うが、フ・ラミンは、あなたが一度築いたものならもう一度築けると諭し、今度は一緒にやろうと言う。やがてミンフィリアは決意し、アルフィノに、ベスパーベイを離れて新たな拠点をレヴナンツトールに置くと宣言する。やるべきことは山ほどある――あなたは仲間へ伝達する段取りを支え、「バルデシオン委員会」へも連絡が飛ぶ。準備は直ちに始まる。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> フ・ラミン <small class="muted">（東ラノシア, X:20.7, Y:21.5）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="moving-on.html">歌姫を追って</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="laying-the-foundation.html">レヴナンツトールへ</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'萬事皆有時',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Alphinaud 提到，儘管 F’lhaminn 多年流浪在外，她卻仍把 Scions 的動向掌握得出奇地緊——緊到讓人不得不承認，她的手段與眼界從來都不缺。那種能耐不是憑空得來的，必然有付出，也必然有理由。當 F’lhaminn 確認 Minfilia 正在 Vesper Bay 等候，她說自己已經讓她等得夠久了，立刻決定搭下一班渡船出發；香水的最後工序，她會在路上完成。你隨 Alphinaud 一起陪同她前往 the Waking Sands。</p><p>來到 the Waking Sands 的 Solar，Alphinaud 對你說有位客人。Minfilia 轉身的瞬間便僵住了——那個名字幾乎讓她不敢相信。F’lhaminn 低聲喚她「Ascilia」，而 Tataru 也壓著聲音對你說，她已經很多年沒見過 Minfilia 露出這樣的神情。</p><p>Minfilia 顫聲問她：自己從未真正相信她已經死去，可為什麼要離開這麼久。F’lhaminn 坦言，帝國軍隊終究會來追她，這是她早就知道的事；所以她選擇遠離，是為了不讓對方的追捕牽連 Minfilia，也不讓整個目標因此受損。即便如此，她仍一路關注著 Minfilia 的每一次成功，並在不被任何人察覺的地方悄悄慶賀——她說，她以 Ascilia 為傲。</p><p>隨後，F’lhaminn 把一份禮物交到 Minfilia 手中：Celsettia perfume。Minfilia 一眼就認出來，震驚於它竟還能被做出；F’lhaminn 說她怎麼可能忘記——Minfilia 以前總是擦著這種香味，哪怕在人群裡走散，她也能循著氣味把人找回來。Minfilia 聽出這背後必定費了許多心力，F’lhaminn 卻只說那不算什麼，只是若沒有你的協助，她無法完成。Minfilia 望向你，向你道謝，也向 F’lhaminn 道謝。</p><p>但 F’lhaminn 還有另一樣東西要交還。Minfilia 看見那顆 cat’s-eye，立刻認出那是自己當年挖出的寶石。她把往事說出口：她的父親曾是 Ala Mhigan Resistance（為了奪回 Ala Mhigo、反抗帝國統治而秘密活動的解放抵抗勢力） 的一員；她還是孩子時，父親帶她來到 Ul’dah，而父親的死，就發生在抵達後不久的那場意外之後。那段日子，是 F’lhaminn 照顧她、把她當作自己的孩子撫養，教她所有活下去需要的本事。Alphinaud 聽著，才明白自己過去雖知道事實，卻從未真正理解其中的分量。Minfilia 又說，採礦曾是她最早被教導的事之一，而這顆 cat’s-eye 正是她第一次親手挖出的石頭；雖然並不名貴，她卻為此驕傲，便把它當作禮物送給 F’lhaminn。也因此，她困惑地問：為什麼現在要把它還給她，難道出了什麼事嗎？</p><p>F’lhaminn 立刻否認，說完全不是壞事，恰恰相反——她需要 Minfilia 看清自己已經走了多遠，也要明白前方仍有多遠必須繼續走。Scions 在你與盟友的努力下，做到了她曾做不到的事，讓她驕傲得說不出話；可正因如此，她也無法不去想接下來的代價與風險。她喚 Minfilia 為女兒，直言她不能再留在 Ul’dah：Minfilia 與 Scions 必須離開。Minfilia 難以置信地詢問是否真的可以，F’lhaminn 則告訴她——她曾經把一切建立起來過，就能再建立一次；而這一次，她們會一起完成。Minfilia 終於下定決心，轉向 Alphinaud 宣告：Scions 該離開 Vesper Bay 了，新的據點就依他的提議設在 Revenant’s Toll。接下來要做的事很多——你將與他們一同通知所有同伴，並把消息送往 Students of Baldesion（Sharlayan 的學術團體）：準備工作立刻開始。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 芙・拉敏 <small class="muted">(東拉諾西亞, X:20.7, Y:21.5)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="moving-on.html">繼續前行</a></div><div class="row">所有職業（不含限定職） 等級 50 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="laying-the-foundation.html">前往 Revenant’s Toll</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
