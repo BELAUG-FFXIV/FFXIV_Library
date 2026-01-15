@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Still Waters | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Still Waters (ARR Patch 2.2)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:700}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none;font-weight:700}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:700;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/dL86d4_QP-8"
+              title="Still Waters" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Still Waters</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Still Waters`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Minfilia summons you with a weary honesty—she has barely begun to settle in when Amajina & Sons Mineral Concern sends an urgent request. Their storehouse in Horizon has been suffering covert thefts for some time, and what once looked like harmless discrepancies in the manifests has revealed a pattern during the annual audit: significant quantities of crystals, and only crystals, are missing. The Brass Blades suspect someone inside the Concern is selling them for profit, but they have made no progress, and the proprietors are losing patience.</p><p>Minfilia makes it clear why the Scions cannot wait. If there is even a chance the thefts serve a primal rather than mere greed, the cost of delay is too high. She asks you to depart for Horizon at once, to rendezvous with Y’shtola—she and Thancred have already begun a preliminary investigation—and she places her trust in the three of you to uncover the truth, hoping your fears prove unfounded.</p><p>When you arrive in Horizon, Y’shtola greets you with relief and welcomes your help. She has questioned the Brass Blades of the Rose at length with little to show for it; the thieves have been careful and thorough. Rather than repeat what she has already learned, she directs you to speak with Fufulupa, the officer leading the investigation, in case something that escaped her attention does not escape yours.</p><p>Fufulupa is glad to see you again, but his report is grim: the crystal losses may be greater than anyone first imagined. Then, before he can dwell on it, he shares breaking news—earlier, the driver of a heavily laden carriage refused inspection, smashed through a checkpoint on the Royal Allagan Sunway, and fled toward eastern Thanalan. The carriage was apprehended without further incident. Y’shtola cannot help but find the choice strange for thieves known for subtlety, yet eastern Thanalan is where the Amalj’aa have a foothold, and she presses the obvious question: did the carriage carry the crystals you seek?</p><p>Before an answer arrives, Thancred returns—unhurried, as if he has been wherever he pleased, yet carrying information that shifts the entire line of suspicion. He had gone east to look into the Amalj’aa himself and happened upon the runaway carriage, even lending the Brass Blades a hand in intercepting it. The haul was staggering, but not of crystals: it was somnus in prodigious quantity, one of the largest the Blades have ever seen. The stolen crystals were nowhere to be found, and the revelation leaves you all forced back to uncertainty.</p><p>Y’shtola, frustrated, realizes you are standing precisely where you started. Thancred draws the conclusion the evidence demands: against all expectation, the Amalj’aa are innocent of these thefts. By all indications, they have not yet replenished the crystals they exhausted in their last attempt to summon Ifrit. What he cannot fathom is who else would pursue crystals in such quantities, and why, if profit were the motive, the trade would be limited to crystals alone. While you turn the problem over in your mind, Thancred decides to inform Urianger that the situation may be growing more complicated than anticipated.</p><p>In Vesper Bay, Thancred reaches Urianger, and Urianger replies that he will remain watchful. He also mentions another matter that requires attention—a young maiden, eager to—only for the conversation to derail into Urianger’s sharp rebuke when Thancred needles him about her “fairness,” and Urianger insists he will direct her steps to Revenant’s Toll regardless. Before anything more can be settled, a new voice intrudes: visitors from far across the sea, from the land of Doma, have arrived seeking audience with the ruler of these lands—and they demand to know who here speaks for you.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row">Quest Giver <span class="muted">Minfilia, The Waking Sands (X:6.1, Y:5.2)</span></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="build-on-the-stone.html">Build on the Stone</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 50 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-final-temptation.html">A Final Temptation</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'「暁」の役目',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ミンフィリアは疲れを滲ませながら、あなたに急ぎの依頼を告げる。居を整え始めた矢先、アマジナ鉱山社から救援の要請が届いたという。ホライズンの倉庫が密かに狙われ続け、当初は伝票の誤記として片づけられていた小さな食い違いも、年次監査で見過ごせない規則性を示した。失われていたのは大量のクリスタル──しかも、クリスタルだけだった。</p><p>ブラスブレードは社内の誰かが私利私欲で横流ししていると見ているが、容疑者の特定には至らず、社の主たちも苛立ちを募らせている。だがミンフィリアが動くのは金銭的価値の問題ではない。もし盗人が己の利益ではなく、蛮神に仕える意図で動いている可能性があるなら、ブラスブレードの判断を待つ余裕などない──そう言い切り、あなたに早急な出発を求める。</p><p>ホライズンへ向かい、到着したらヤ・シュトラと合流してほしい、とミンフィリアは告げる。ヤ・シュトラとサンクレッドはすでに予備調査を始めているという。あなたたち三人なら必ず真相に辿り着けるはずだと信じつつも、最後に、取り越し苦労であってほしいという願いを滲ませた。</p><p>ホライズンに着くと、ヤ・シュトラはあなたを迎え、助力を歓迎する。ローズのブラスブレードとは長く話をしたが成果は乏しく、盗人は周到に痕跡を隠しているらしい。彼女は詳細を繰り返すより、捜査の指揮を執るフフルパに直接当たったほうがよいと言い、あなたの目なら見落としを拾えるかもしれないと託す。</p><p>フフルパはあなたとの再会を喜びつつ、盗まれたクリスタルの量はいまだ確定できないが、想像以上かもしれないと口にする。だがすぐに別の報せを持ち出した。少し前、荷を満載した馬車が検問で停止を拒み、王道の検問所を突破して東ザナラーンへ逃走したという。現地の仲間が無事に取り押さえたらしい。ヤ・シュトラは、巧妙な盗賊にしては目立つ手口だと訝しみつつ、東ザナラーンにはアマルジャの勢力圏があることを思い起こし、積み荷に目的のクリスタルがあったのかと問い詰める。</p><p>そこへサンクレッドが戻ってくる。彼は東へ足を伸ばしてアマルジャの動きを探っていたところ、逃走馬車に遭遇し、ブラスブレードの迎撃にも一役買ったという。だが馬車に積まれていたのはクリスタルではなく、かつて見たこともないほど大量のソムヌスだった。ブラスブレードが「過去最大級の押収品」と呼ぶほどの量で、肝心の盗難クリスタルは一つも見つからなかった。</p><p>結局、ヤ・シュトラは振り出しに戻った現状に苛立ちを隠せない。サンクレッドは証拠が示す結論を告げる──この一連の盗難に関して、アマルジャは無関係だ。イフリート召喚で消耗したクリスタルの備蓄すら、まだ補充できていないという。では誰が、何のために、これほどの量のクリスタルだけを執拗に狙うのか。利益目的なら、なぜクリスタルに限るのか。あなたが考えを巡らせるあいだ、サンクレッドは状況が想定以上に複雑になり得るとして、ウリエンジェへ連絡すると言う。</p><p>ベスパーベイでサンクレッドはウリエンジェに状況を伝え、ウリエンジェは警戒を続けると応じる。さらに別件として、ある若い娘のことを持ち出しかけるが、サンクレッドの揶揄に苛立ちを露わにし、彼女が天使でも悪魔でもレヴナンツトールへ導くと突き放す。やり取りが落ち着く間もなく、見知らぬ者の声が割り込む。海の彼方、ドマの地より来訪した者たちが、この地を治める者への謁見を求めているという──そして、誰がここであなたたちを代表するのかと問いただした。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row">ミンフィリア <span class="muted">砂の家 (X:6.1, Y:5.2)</span></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="build-on-the-stone.html">石の家へ</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-final-temptation.html">クリスタル消失事件</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'Scions 的職責',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Minfilia 帶著一股「真的連喘口氣都沒有」的疲憊，把你叫到面前。她才剛開始安頓下來，就收到了 Amajina & Sons Mineral Concern（Ul'dah 做礦產、建材、貨運與倉儲等生意的礦產公司） 的求助：Horizon 的倉庫遭到一連串暗中的竊盜。過去偶爾出現的出入差異被當成文書疏失，但在年度盤點時，終於看出明確的規律——失竊的量不小，而且被偷走的只有水晶，只有水晶。</p><p>Brass Blades（Ul’dah 的治安部隊／傭兵警備組織，負責城邦周邊的巡邏、維安、盤查、逮捕、調查等工作） 負責調查的人認為，是 Concern 內部有人為了獲利私下轉賣，卻遲遲找不到像樣的嫌疑對象，讓業主的耐心逐漸耗盡。Minfilia 也坦白表示：如果只是金錢損失，她不會出面介入。可一旦這些水晶有可能是為了 primal 而被動用，哪怕只是可能性，也不能讓 Brass Blades 再繼續摸索錯方向、拖延下去。</p><p>她要你立刻前往 Horizon，抵達後與 Y’shtola 會合。Y’shtola 和 Thancred 已經先行展開初步調查。Minfilia 相信你們三人能把事情查個水落石出，但她也同時希望——等你們真的找到答案時，所有擔憂都只是虛驚一場。</p><p>你一到 Horizon，Y’shtola 便立刻迎上來，語氣裡明顯帶著「你來得正好」的鬆一口氣。她已經和 Rose 的 Brass Blades 反覆溝通，卻幾乎沒有收穫；竊賊顯然花了很大力氣掩飾行蹤。她不想浪費你的時間重複同樣的內容，而是請你直接去找負責帶隊的 Fufulupa——也許你能看見她沒注意到的細節。</p><p>Fufulupa 看到你很高興，卻也立刻把焦慮說出口：目前還無法確認失竊水晶的總量，但他直覺恐怕比想像更嚴重。就在他話還沒說完，他又拋出最新消息——不久前，一輛滿載貨物的馬車拒絕受檢，硬闖檢查哨卡後沿著 Royal Allagan Sunway 逃向 eastern Thanalan，所幸同僚已在那裡順利攔截。Y’shtola 對這種「明目張膽的逃亡」感到不太對勁：如此老練的竊賊，怎會選擇這麼顯眼的方式？但她也同時想到 eastern Thanalan 有 Amalj’aa 的勢力據點，於是追問——那輛馬車的貨物，是不是你們在找的水晶？</p><p>答案還沒到，Thancred 先回來了。他像是把一切看得太過理所當然似的，說自己只是去 eastern Thanalan 探探 Amalj’aa 的情況，路上剛好撞見那輛逃逸的馬車，還順手幫 Brass Blades 把它截下來。攔下來的確是「大收穫」，卻完全不是水晶——而是一批數量驚人的 somnus（昏睡藥）。Brass Blades 甚至說那是他們見過最大的一次查獲，但失竊的水晶一顆也沒出現。</p><p>你們只能被迫回到原點。Y’shtola 壓著不耐，反覆思考到底漏掉了什麼；Thancred 則依照眼前的事實下了結論：這次的連環竊案，Amalj’aa 極可能是清白的。從種種跡象看，他們甚至還沒補回上一次召喚 Ifrit 所耗掉的水晶儲備。那麼問題就更尖銳了——如果不是為了召喚 primal，誰會不惜代價只偷水晶、而且偷到這種規模？若只是圖利，又為什麼只做水晶的生意？你仍在盤算可能性時，Thancred 決定把「進展極少、但情勢可能更複雜」的現況回報給 Urianger。</p><p>在 Vesper Bay，Thancred 聯絡上 Urianger，Urianger 表示自己會保持警戒，並提到還有另一件事需要你們留意——一位年輕的少女，急切地想要……話還沒說完，對話就被 Thancred 的揶揄帶偏，Urianger 明顯不悅地反擊，說無論那人是天使還是惡魔，他都會把她引導到 Revenant’s Toll。就在這段不歡而散的拉扯之間，一個陌生的聲音忽然闖入：他們遠渡重洋，自 Doma 而來，要求覲見這片土地的統治者——並且當場質問，這裡究竟由誰代表你們說話。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row">Quest Giver <span class="muted">敏菲利亞, 砂之家 (X:6.1, Y:5.2)</span></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="build-on-the-stone.html">前往石之家</a></div><div class="row">所有職業（不含限定職） 等級 50 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-final-temptation.html">最後的試探</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
