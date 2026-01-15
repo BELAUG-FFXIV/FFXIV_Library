@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Promises to Keep | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Promises to Keep (ARR Patch 2.2)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/aNM5igD7u-o"
+              title="Promises to Keep" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Promises to Keep</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Promises to Keep`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>After the vote, you hear Alphinaud’s conclusion spoken plainly: as Lord Lolorito goes, so goes the Syndicate. Yugiri admits what that means for her people—another long sea voyage is beyond them—yet if Ul’dah will not accept them, she cannot see what choice remains. Kasasagi and Kikyo bristle at the accusation that they are “prone to violence and criminal activity,” unable to accept being condemned for sins they have not committed, and furious that Yugiri’s pleas could be dismissed so coldly. Teledji Adeledji insists Lolorito does not speak for the Syndicate, but Raubahn answers with hard realism: Lolorito speaks his mind, and he is unlikely to change it. Still, Raubahn refuses to waste more words—not when the Domans are in need—and orders everyone to follow him to the Hall of Flames.</p><p>At the Hall of Flames, the disappointment settles in. Alphinaud admits he should have considered the likelihood of failure more seriously, while Yugiri states what you can already feel: a galleon cannot remain anyone’s home. Kasasagi and Kikyo ask what more they can do to earn the approval of Ul’dahns, insisting they do not wish to live by another’s grace—they want to work and contribute. Teledji tries to temper the moment, conceding that some refugees have burdened the sultanate, but arguing they do not represent the majority, and that fear for the nation’s welfare is not, in itself, a crime.</p><p>Raubahn closes the door on reconsideration: the Syndicate has spoken, and the Monetarists have made their position clear. Alphinaud agrees—Ul’dah is no longer an option, nor, he judges, are Limsa Lominsa or Gridania, given their internal affairs. That leaves the Domans confined to their ship, and the thought of them packed into an airless hold with no hope of relief is unbearable. He wishes for time to find a place not bound by the calculations of the great nations—then his mind snaps to Minfilia, and to what he has truly been trying to reach since the moment this began.</p><p>Yugiri, though understanding Ul’dah’s instinct to protect what it has, cannot accept this judgment while her people suffer. She asks whether the sultanate might grant even a short reprieve—mere days—yet Alphinaud moves quickly, saying he will keep her informed, and offers a proposal instead. The headquarters of the Scions of the Seventh Dawn stands at Revenant’s Toll, an outpost in Mor Dhona. It is rough and lacking in comforts, but its leaders are striving to build something better—and they need able-bodied workers willing to serve as frontier hands, earning only food and shelter through hard labor. Raubahn notes the terms resemble those Yugiri herself proposed; Teledji adds that Revenant’s Toll has advantages, not least the absence of suffocating bureaucracy. Yugiri accepts at once—if they can accommodate everyone, her people will go.</p><p>Alphinaud cautions you that the life ahead will be harsh, and that an even harder problem comes first: carrying the refugees safely to Revenant’s Toll, given both the distance and their present condition. He suggests the Ul’dahn Adventurers’ Guild may help and tells you to look for him there soon, while Raubahn asks Yugiri and her people to accompany him to discuss what aid the Immortal Flames can provide. When you meet again at the Quicksand, Alphinaud explains the immediate plan: the Domans may not be able to endure the journey all at once after so long sequestered aboard ship with scarce supplies and barely room to breathe, much less stretch their limbs. Momodi has offered to house them until they are ready—those healthy enough will depart as soon as transportation is secured, while those too weak will remain until they regain strength.</p><p>Transportation, however, remains the greatest obstacle. Alphinaud asks whether the Immortal Flames can help, and Raubahn answers that it exceeds their mandate; if the number were smaller, it might pass unnoticed, but the Syndicate will not bear the cost of escorting more than two hundred Domans to Mor Dhona. Teledji steps in where the government will not, declaring that when officials fail, private citizens must act. He offers to engage the services of the Seventy-Seven Caravans on the Domans’ behalf. Raubahn welcomes the generosity and urges immediate contract negotiations; Teledji tells Yugiri that whatever comes, she will always have a friend in Ul’dah, and Yugiri answers that he will have one in Revenant’s Toll. Momodi briskly turns sentiment into logistics, calling everyone to settle the details—while Alphinaud places the escort in your hands, after you have rested your road-weary legs, and waits for your answer.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Raubahn <small class="muted">(Ul’dah - Steps of Thal, X:10.8, Y:12.3)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-mother-of-exiles.html">The Mother of Exiles</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 50 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="yugiris-game.html">Yugiri’s Game</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'安息できる場所',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>採決ののち、アルフィノは断言する。ロロリト卿が動けば、十二評議会もまた動く。ユウギリは、民がこれ以上の長い航海に耐えられないと認めつつも、ウルダハが受け入れないなら他に道があるのかと問いかける。カササギとキキョウは「暴力と犯罪に走りやすい」などという決めつけに憤り、犯してもいない罪で裁かれるのかと声を荒らげ、ユウギリの訴えが退けられたことに耐えられない。テレジ・アデレジはロロリトが十二評議会を代表しているわけではないと言うが、ラウバーンは冷静に返す。ロロリトは言うべきことを言い、そして変わらない——だからこそ今は言葉を費やすべきではない。彼は、ドマの者たちがまだ助けを必要としているとして、炎の間へ来いと一行を導く。</p><p>炎の間で、失意がさらに重くのしかかる。アルフィノは失敗の可能性をもっと考えるべきだったと悔やみ、ユウギリはガレオン船を住まいにし続けることはできないと断言する。カササギとキキョウは、どうすればウルダハの者たちの承認を得られるのかと問う。施しに頼りたいのではない、働き、貢献したいのだと。テレジは一部の難民が負担になっていることは否定しないが、それが多数派だという主張には異を唱え、国を守りたいという思いそのものを悪と断じるべきではないと述べる。</p><p>ラウバーンは結論を下す。十二評議会はすでに決した——再考を求めても意味はない。マネタリストの立場は明確だ。アルフィノも同意し、ウルダハは選べないと言い切る。さらに、内情を鑑みればリムサ・ロミンサもグリダニアも難しいだろうと判断する。となればドマの者たちは船に閉じ込められたままになる。息苦しい船倉で希望もなく身を寄せ合う光景が脳裏を刺し、アルフィノは、五大都市の利害に縛られない別の道があればと歯噛みする。そこで彼の思考はミンフィリアへと跳び、まさにそれこそが話したかったことだと気づく。</p><p>ユウギリは、皆が自分のものを守りたいと思うのは理解できると言いながらも、民が苦しむかぎりこの裁定を甘受できないと訴え、せめて数日でも一時的に受け入れることはできないかと問う。だがアルフィノは「提案がある」と切り替える。第七霊災対策室の拠点は、モードゥナの前哨地レヴナンツトールにある。快適さは乏しいが、指導者たちは環境を整えようとしており、そのために開拓の手として働ける者を求めている。報酬は食事と寝床のみ、疑いようのない重労働だ。ラウバーンはそれがユウギリ自身の申し出た条件に近いと述べ、テレジは官僚的な障害が少ない点を利点として挙げる。ユウギリは、全員を受け入れられるなら喜んで応じると即答する。</p><p>アルフィノは感謝を止めるよう告げ、これから待つ生活が厳しく、そしてその前に最大の難題があると言う。レヴナンツトールまで、距離も彼らの体力も考えれば、安全に運ぶこと自体が容易ではない。彼はウルダハ冒険者ギルドの助力を示唆し、近くそこで会おうとあなたに告げる。ラウバーンはユウギリたちを伴い、不滅隊がどこまで支援できるか話し合おうと促す。クイックサンドで再び合流すると、アルフィノは当面の策を説明する。長く船に隔離され、物資も乏しく、息をするのもやっとの状況では、すぐの長旅に耐えられない者もいる。モモディが出発まで受け入れると申し出ており、移送手段が整い次第、動ける者からモードゥナへ向かい、弱った者は回復するまで滞在できるという。</p><p>しかし最大の障害は移送手段だ。アルフィノが不滅隊に助力を求めると、ラウバーンは権限外だと答える。人数が少なければ目立たずに済むかもしれないが、二百を超えるドマの者たちをモードゥナまで護送する費用を十二評議会は負担しない。そこでテレジが、行政が動かぬなら民が動くべきだと名乗り出て、七十七キャラバンの雇用を申し出る。ラウバーンはその厚意を歓迎し、ただちに契約交渉を始めようと言う。テレジはユウギリに、ウルダハにおいて常に友であると誓い、ユウギリはレヴナンツトールで友となろうと応じる。モモディは早速段取りをまとめにかかり、アルフィノは、まずあなたが旅の疲れを癒したうえで、護衛を任せたいと告げ、返答を待つ。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ラウバーン <small class="muted">（ウルダハ：ザル回廊, X:10.8, Y:12.3）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-mother-of-exiles.html">異邦からの来訪者</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="yugiris-game.html">ドマの子どもたち</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'安息之地',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>投票結束後，你聽見 Alphinaud 把結論說得毫不含糊：Lolorito 的態度幾乎就決定了 Syndicate 的走向。Yugiri 低聲承認，她的人民已經撐不起另一趟漫長的海上漂泊，可如果 Ul’dah 不接納，他們還能怎麼辦。Kasasagi 和 Kikyo 對「容易走向暴力與犯罪」的指控怒不可遏，質問憑什麼用尚未發生的罪來懲罰他們，也無法接受在明知他們經歷了什麼之後，仍有人能把 Yugiri 的懇求推回門外。Teledji Adeledji 一再強調 Lolorito 並不代表 Syndicate，但 Raubahn 只用一句話戳破希望：Lolorito 向來直言不諱，也不太可能改變。與其把力氣耗在他身上，不如先把眼前需要救助的人安置好——他要所有人跟他去 Hall of Flames。</p><p>到了 Hall of Flames，失望不再只是情緒，而成了壓在胸口的重量。Alphinaud 罕見地承認自己該更早正視失敗的可能；Yugiri 也直接說明，讓任何人長住在 galleon 上都不可能再持續下去。Kasasagi 與 Kikyo 問，難道真的沒有方法能換來 Ul’dahns 的認同？他們不想仰賴別人的施捨，他們想工作、想付出。Teledji 則試著把場面拉回可談的方向：他不否認難民人口中的某些部分確實成了負擔，但他反對把那說成「大多數」，也認為不能因為人們想保護自己的國家，就把那份顧慮全當成惡意。</p><p>Raubahn 結束了所有「再試一次」的念頭：Syndicate 已經表態，沒有理由要求重審；Monetarists (指 Ul’dah 的兩大政治派系之一，與支持 sultana 的 Royalists 對立；其核心成員多為 Syndicate（Ul’dah 掌握權勢與資源的財閥高層）內掌握財富與實權的商業巨頭，主張以利益與資本為優先、強化 Syndicate 的主導權，因此在難民、救濟與治安等議題上往往更傾向「成本／風險」的計算)的立場更是清楚。Alphinaud 同意——Ul’dah 不是選項；而以各自的內部情勢來看，Limsa Lominsa 與 Gridania 也不適合。剩下的路徑，只會把 Doma 的人重新推回那艘船。你光是想像他們擠在不通風的船艙裡、看不見轉機，就覺得胸口發緊。Alphinaud 幾乎是在懊惱時間不夠用：如果能有一個不受那些「大國盤算」束縛的地方就好了——然後他忽然提到 Minfilia，像是終於抓住了他一直想說的重點。</p><p>Yugiri 表示她理解人們想守住自己擁有的一切，尤其在覺得受到威脅時；但只要人民仍在受苦，她就無法溫順地接受這個裁決。她甚至提出一個卑微到近乎心碎的請求：能不能讓 sultanate 先暫時收留他們？一週也好，幾天也好。Alphinaud 卻迅速轉向更可行的方案：他提出一個提案。Scions of the Seventh Dawn 的總部位在 Mor Dhona 的一處前哨——Revenant’s Toll。那裡條件艱苦、談不上舒適，但管理者正努力把它建成能讓人安身的地方；而他們急需願意做開拓工作的勞動者。那是貨真價實的苦力活，報酬只有食物與住處。Raubahn 指出，這條件與 Yugiri 先前提出的「以工作償還」相近；Teledji 也說 Revenant’s Toll 的優勢之一，就是少了那些會卡死人的官僚程序。Yugiri 立刻答應：只要能容納所有人，他們願意接受。</p><p>Alphinaud 要 Yugiri 不必道謝，並再次提醒你：那將是勞作繁重、舒適稀少的生活；而在抵達之前，還有更棘手的問題——怎麼把這群狀況不一、體力早被海上困頓磨耗的人，安全送到 Revenant’s Toll。距離不短，他們的現況也不容樂觀。Alphinaud 認為 Ul’dahn 冒險者公會也許能提供協助，要你稍後去那裡找他；Raubahn 則請 Yugiri 與族人跟他同行，商談 Immortal Flames 能提供哪些援助。你們之後在 The Quicksand 再次會合時，Alphinaud 說明眼前的安排：Domans 長期被困在船上，補給不足、空間狹窄，連呼吸與伸展都奢侈，旅途對他們而言可能過於沉重。因此 Momodi 願意先安置他們，等到準備好再出發；能走的先走，太虛弱的就留下休養，直到恢復體力。</p><p>但真正卡住一切的，仍是「運輸」。Alphinaud 問 Raubahn，Immortal Flames 是否能支援；Raubahn 回答這超出他們的職責範圍——如果人數少，也許還能不被注意，可要護送兩百多名 Domans 前往 Mor Dhona，Syndicate 不會負擔費用。於是 Teledji 說，當政府不作為，責任就落到民間；他願意代表 Domans 聘請 Seventy-Seven Caravans（Eorzea 的大型商業／運輸商隊組織，在各大城邦都有分支與人員，主要做跨地區的貨物運輸、貿易與商隊調度。）。Raubahn 接受這份慷慨，要求立刻開始合約談判；Teledji 對 Yugiri 承諾，無論發生什麼，她在 Ul’dah 永遠有一位朋友，而 Yugiri 也回以同樣的承諾——在 Revenant’s Toll。Momodi 把感動收進手心，乾脆俐落地要大家開始敲定細節；同時 Alphinaud 把護送的任務交給你——當然是在你先讓疲憊的雙腿休息過後——並等你表態。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 勞班 <small class="muted">(烏爾達哈 - 來生回廊, X:10.8, Y:12.3)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-mother-of-exiles.html">來自異鄉的訪客</a></div><div class="row">所有職業（不含限定職） 等級 50 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="yugiris-game.html">Doma 的孩子們</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
