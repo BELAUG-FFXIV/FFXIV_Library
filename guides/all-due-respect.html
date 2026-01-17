@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>All Due Respect | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – All Due Respect (ARR Patch 2.2)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/slZ43IdczDU"
+              title="All Due Respect" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">All Due Respect</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`All Due Respect`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>You hear Yugiri say she is ready to depart whenever you give the word, and Kasasagi and Kikyo immediately turn their thoughts to what lies ahead—Mor Dhona’s wastes, the beasts that roam there, and the children who must be watched more closely after so many malms on the road. Alphinaud decides there is nothing more in Thanalan that truly requires you, and instead assigns you as escort to the Doman delegation for the full journey. When you arrive at Revenant’s Toll, you are to speak first with Slafborn, the one the Domans will be working with most closely, and then to introduce Yugiri to Minfilia and the Adventurers’ Guild emissary so the ties formed there can steady the Domans for what comes next.</p><p>Revenant’s Toll greets you with rough stone and hard edges rather than finery, and Slafborn welcomes Yugiri and her companions as friends, insisting the place may look poor but it has spirit and camaraderie to spare. He makes his expectations plain: race and creed do not matter here, provided people are willing to earn their keep. Yugiri answers without hesitation that her people are no strangers to hard work and will carry out his orders diligently. Slafborn laughs at her formality, explains he gives the same speech to every new arrival, and tells her not to bow or call him “Master”—as far as he is concerned, they are all frontier hands together.</p><p>When Slafborn realizes the Domans have not yet met the Antecedent, he all but shoves you onward, demanding you bring them to the Rising Stones at once. Outside, Kasasagi measures the sentries and suggests forbidding anyone from leaving the walls unescorted for a time, while Kikyo vows that this is their chance to prove their worth. Yugiri pauses, weighing the burden of what is being offered, and asks for a moment to compose herself before meeting your leader, promising she will follow you to the Rising Stones shortly.</p><p>Inside the Rising Stones, you find Minfilia in grim reflection—every attempt to reach the Students of Baldesion has failed, and even Urianger’s other inquiries have yielded nothing. She tells you they will persevere, yet in truth they are waiting only for confirmation of what they already suspect. She asks after the Domans and acknowledges the question you might be carrying: why aid refugees when the primal threat remains unresolved? She admits it lies outside the Scions’ usual purview, but says she could not ignore suffering that was within their power to ease. When Yugiri is shown in, Minfilia’s answer is immediate—Revenant’s Toll will help, and if it cannot accommodate everyone, they will find a solution together. The Adventurers’ Guild emissary takes leave as the first carriages are due to arrive and points you back to Slafborn if anything else is needed.</p><p>Afterward, the Domans allow themselves small, fragile hopes—amazement that no one here knew of the war of succession, anxious thoughts about beasts in Mor Dhona, and the first willingness in many moons to believe the journey might truly be turning. Minfilia says she and Lhaminn will prepare everything needed to help the Domans feel at home, but she cannot hide that the missing crystals still trouble her, and she asks you to wait for Y’shtola’s return. When Thancred strolls in with a grin and a teasing question, Y’shtola answers with certainty: the Serpent Reavers are the culprits. The trail did not lead back to the Amalj’aa—it led across the sea into Vylbrand. Minfilia immediately understands what that implies, remembering reports of increased Sahagin activity, and her fear lands in words: they mean to summon Leviathan.</p><p>Y’shtola confirms it, saying she verified the evidence with the aid of the Maelstrom and that it is only a matter of time before Leviathan rises to harrow the seas. But she adds something worse: one of the Sahagin—an elder by her judgment—spoke of being granted the “gift and knowledge of eternity.” The moment those words are spoken, the Echo seizes you, dragging you into a vision where the aether is disturbed and a Sahagin priest raves that their lord will rise amid surging waves to wash away the finless ones, and that he will receive immortality—standing equal with an “emissary.” Y’shtola’s alarm sharpens at that title, and you withdraw before you outstay your welcome, the Echo releasing you back into the Rising Stones.</p><p>Minfilia repeats the phrase—“the gift… and knowledge”—as if tasting a poison she recognizes. She asks if you shared the vision, and when Y’shtola confirms it, Minfilia admits she recognized Elidibus’s words even before the Sahagin spoke of the emissary. Yet she cannot accept that it lies within his power to grant the Echo, and that uncertainty becomes a reason to act, not to hesitate. Y’shtola warns that if they do not move swiftly, Leviathan will rise again; the Admiral has already requested the Scions’ intervention, and if prevention fails, they are to see to the primal’s extinction. Minfilia commits the Scions to full cooperation and orders an immediate departure for Limsa Lominsa, placing Tataru in charge in her absence. Thancred protests the risk, but Minfilia insists she must see something with her own eyes—the true nature of the Echo—and Thancred is allowed to accompany her as bodyguard. When Yugiri asks if something ill is afoot, Y’shtola explains what a primal is and what the Scions are sworn to do, and Yugiri answers by offering her blade in return for the kindness shown to her people. Y’shtola accepts without hesitation, warning you to come well prepared—because this is the sort of experience that teaches, brutally, what Eorzea is truly facing.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Alphinaud <small class="muted">(Ul’dah - Steps of Nald, X:11.7, Y:9.6)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="why-we-adventure.html">Why We Adventure</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 50 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-sea-rises.html">The Sea Rises</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'新たな開拓者',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ユウギリは、あなたが言葉をかけさえすればいつでも出発できると告げる。カササギはモードゥナの荒野に棲む凶暴な獣を思い、子どもたちから目を離さねばならないと言い、キキョウは長い距離が身にこたえたとこぼしつつも、これが旅の最後であってほしいと願う。アルフィノは、レヴナンツトールでギルドの代表と会うべき時が来たとして、以後あなたにドマ使節団の護衛を任せると決める。到着したらまずスラフボーンに会い、その後ユウギリをミンフィリアと冒険者ギルドの使者へ引き合わせろ――その縁が、これからの助けになるはずだと。</p><p>レヴナンツトールは飾り気のない前哨地だが、スラフボーンはユウギリたちを友として迎え、貧しく見えても気骨と仲間意識なら豊かだと言う。ここでは種族や信仰は問題にならない、ただし働いて糧を得る意志があることが条件だ、と。ユウギリは、苦労や重労働には慣れている、命じられた仕事は誠実に果たすと約束する。スラフボーンは笑って、これは新参者全員に同じ話をしているだけだと告げ、「マスター」などと呼ばず頭も下げるな、同じ開拓者だと思っているのだと言い添える。</p><p>そしてスラフボーンは、ドマの者たちがまだミンフィリアに会っていないと知ると、なぜ自分に付き合っているのかと呆れ、すぐに石の家へ案内しろと急き立てる。外ではカササギが見張りの力量に一定の安堵を見せつつ、当面は壁の外へ護衛なしで出るのを禁じるべきだと言い、キキョウはようやく価値を示す機会が来たのだと誓う。ユウギリは「与えられた分、求められるものも大きい」と胸中で噛みしめ、指導者に会う前に心を整える時間がほしいとして、のちほど石の家に向かうと告げる。</p><p>石の家では、ミンフィリアが暗い確信を抱えたまま報告を待っていた。バルデシオン委員会への連絡はことごとく失敗し、ウリエンジェが探った別の手段も成果がない。それでも諦めはしないが、心の底ではすでに答えを知っており、あとはそれを裏づける確証を待つだけだと言う。彼女はドマの者たちの様子を尋ね、蛮神の脅威が未解決なのに難民を助けるのは賢明なのか、とあなたが疑っても責めはしないと告げる。だが、手の届く苦境を見過ごすことはできなかった――そう言ってユウギリを迎え入れ、レヴナンツトールで受け入れると約束し、もし全員を収容できない事態になっても共に道を探すと誓う。冒険者ギルドの使者は、最初の馬車が到着するので失礼すると挨拶し、何かあればスラフボーンに相談するよう残して去っていく。</p><p>その後、ドマの者たちはようやく小さな希望に触れる。継承戦争の話がここまで伝わっていなかったことへの驚き、荒野の獣への警戒、そして長い月日ぶりに、希望を信じてもよいのではないかという揺らぎ。ミンフィリアは、ルアミンとともに迎え入れの準備を整えると言いながらも、クリスタル盗難の件がまだ胸に引っかかっていると漏らし、ヤ・シュトラの帰還を待って話してほしいと言う。そこへサンクレッドが軽口を叩き、ヤ・シュトラは断言する――犯人はサーペントリーヴァーズだ。痕跡はアマルジャではなく、海を越えたヴィルブランドへ続いていた。ミンフィリアはサハギンの活動が活発化している報告を思い出し、恐れていた言葉に辿り着く――リヴァイアサンを召喚するつもりなのだ、と。</p><p>ヤ・シュトラはそれを認め、メイルストロームの協力で裏を取った以上、リヴァイアサンが再び海を荒らすのは時間の問題だと言う。さらに彼女は、あるサハギン――年長の個体と見た――が「永遠の賜物と知識」を得ると口にしたことを伝える。その瞬間、あなたはエコーに引きずり込まれる。乱れたエーテルの中、サハギンの神官が、うねる波のただ中で主が起ち上がり、鰭のない者どもを洗い流すと叫ぶ。そして自分は不滅を授かり、「使者」と並び立つのだと狂信の言葉を吐き散らす。ヤ・シュトラは「使者」という呼び名に引っかかり、あなたたちはそれ以上踏み込まずに退く。エコーが解け、意識は石の家へ戻る。</p><p>ミンフィリアは「賜物……知識……」と反芻し、あなたも同じ光景を見たのだろう、と確かめる。そして彼女は、サハギンが使者に言及するより前に、エリディブスの言葉だと分かったと告げる。だが彼にエコーを授ける力があるはずがない――その疑念が残るほど、急がねばならない。ヤ・シュトラは、動かなければリヴァイアサンは再び起ち上がると警告し、提督から介入要請が来ている以上、阻止できなければ討滅にあたるしかないと言う。ミンフィリアは全面協力を宣言し、リムサ・ロミンサへ急ぐと決め、留守のあいだタタルに指揮を託す。サンクレッドは危険を案じるが、ミンフィリアは自分の目で確かめたいものがある、エコーの真の性質だと譲らず、護衛として同行を許す。ユウギリが不穏を察すると、ヤ・シュトラは蛮神とは何か、そして暁の血盟がその脅威を終わらせるために誓っていることを説明する。ユウギリは、民への厚意に報いるため自分の剣を貸すと申し出、ヤ・シュトラは、蛮神に挑むなら頼れる味方はいくらいてもよいと受け入れ、万全の備えで来るようあなたに告げる。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> アルフィノ <small class="muted">（ウルダハ：ナル回廊, X:11.7, Y:9.6）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="why-we-adventure.html">ドマの民、ウルダハへ</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-sea-rises.html">ふたりの盟主</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'新任開拓者',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Yugiri 說你只要一開口，他們隨時都能出發；Kasasagi 提醒 Mor Dhona 的荒野裡有許多兇猛的野獸，孩子們得看得更緊；Kikyo 則希望這真的是旅程的最後一段，因為距離早已把人磨得疲憊不堪。Alphinaud 判斷 Thanalan 這邊不會再有需要你親自處理的事，改要你在整段路程中擔任 Doma 使節團的護送者。他交代你抵達 Revenant’s Toll 後先去見 Slafborn，接著再把 Yugiri 引見給 Minfilia 與冒險者公會的使者；若兩邊都談得順利，建立起的連結會成為 Domans 往後立足的依靠。</p><p>走進 Revenant’s Toll，你立刻感受到這裡缺少精緻與排場，只剩粗硬卻踏實的日常。Slafborn 把 Yugiri 與眾人當朋友迎接，坦白說這裡確實沒什麼奢華，但他們不缺的是精神與互相扶持的情誼。他也把規矩說清楚：在這裡不看種族、不看信仰，只看你願不願意靠勞動換取生活所需。Yugiri 回答得很平靜：辛苦的工作他們做得來，她的人民會以應有的勤勉完成交付的任務。Slafborn 反而笑著要她別那麼拘謹，說這套話他對每個新來的人都會講一遍，也不必低頭、更不必叫他「Master」——在他看來，彼此都是同樣在前線扛起生活的人。</p><p>可當 Slafborn 得知 Domans 還沒見過 Minfilia，他立刻急了，幾乎像是在責怪你浪費時間，催你趕快把人帶去 The Rising Stones。走在外頭，Kasasagi 看著守衛仍不敢掉以輕心，認為至少暫時應該禁止任何人沒有護送就踏出城牆；Kikyo 則說，終於輪到他們證明自己的價值，絕不會讓你後悔。Yugiri 低聲提醒自己「受人所賜，也就受人所望」，並在見你們的領袖前要求一點時間整理思緒，表示稍後會在 The Rising Stones 與你會合。</p><p>你先進入 The Rising Stones，看到 Minfilia 的神色比你想像中更沉。她說他們持續嘗試聯絡 Students of Baldesion 卻一再失敗，Urianger 另闢的線索也同樣毫無收穫；他們會繼續做下去，但心裡其實早已明白真相，只是在等那個「把已知變成確定」的確認。她問起 Domans 的狀況，也坦承你或許會懷疑：primal 的威脅尚未解決，卻分神去援助難民，是否明智？她說這確實不在 Scions of the Seventh Dawn 一貫的職責範圍內，但只要在能力所及之處，她就無法對苦難視而不見。當 Yugiri 被請進來時，Minfilia 直接表態願意接納；Yugiri 仍擔心人數不確定，若 Revenant’s Toll 容納不下所有人該怎麼辦，Minfilia 只回答：若真走到那一步，他們就一起找出路。冒險者公會的使者隨後告辭，說第一批馬車隨時會到，並表示若還需要協助就去找 Slafborn。</p><p>Domans 的情緒在這裡第一次鬆動成可以呼吸的希望。Yugiri 驚訝這裡竟沒人知道那場繼承戰爭；Kasasagi 在眾多強健的冒險者身邊反而開始懷疑自己是不是太多慮；Kikyo 則說自己不敢把希望全押下去，但這是許多個月以來第一次願意試著相信。Minfilia 說她會和 Lhaminn 盡快準備好一切，讓 Domans 抵達時能感到安心，可她也坦白自己仍放不下「水晶失竊」這件事，並請你在這裡等 Y’shtola 回來。Thancred 一出現就用玩笑口吻問你們「釣到什麼滑溜的了嗎」，Y’shtola 卻用一句話斬斷輕鬆：他們的懷疑是對的，Serpent Reavers 就是犯人。線索沒有回到 Amalj’aa，而是一路跨海指向 Vylbrand。Minfilia 想起近期 Sahagin 活動增加的報告，心裡那個答案幾乎立刻成形——他們是要召喚 Leviathan（Sahagin 信奉並企圖召喚的 primal；會以巨浪與海嘯般的以太之力危及航路與沿岸，是 Scions of the Seventh Dawn 需阻止的目標）。</p><p>Y’shtola 證實了她的猜測，並說她在 Maelstrom 的協助下已經把證據查實；Leviathan 再度掀翻海面的日子，只是時間問題。但她還帶回更令人不安的資訊：其中一名 Sahagin——她判斷是長者——提到了「永恆的恩賜與知識」。就在那句話落下的瞬間，Echo 把你整個人扯進視野之中。你在被擾動的以太裡看見一名 Sahagin 祭司狂熱叫喊，說他們的主將在洶湧波濤中升起，洗去那些「沒有鰭的」人；他自己也會得到不朽，並與某個「使者」平起平坐。Y’shtola 對「使者」這個稱呼立刻警覺，你們不再停留，Echo 也隨之退去，讓你回到 The Rising Stones 的現實。</p><p>Minfilia 低聲重複那句話的片段，像是在確認自己沒有聽錯：那份「恩賜……與知識」。她問你是不是也看見了同樣的景象，並在得到肯定後說，即使 Sahagin 還沒提到使者，她也已經認出那是 Elidibus 的話——他在背後推動這一切。可她同時又無法接受：Elidibus 真的能賦予他人 Echo 嗎？疑問沒有讓她退後，反而逼她更快行動。Y’shtola 警告你們，若不立刻出手，Leviathan 很快就會再度現身；Admiral（Limsa Lominsa 的海軍最高統帥頭銜；此處指 Maelstrom 的最高領導者 Merlwyb Bloefhiswyn）已請求 Scions of the Seventh Dawn 介入阻止，若阻止失敗，就必須討伐 primal。Minfilia 宣布全力配合，決定立刻前往 Limsa Lominsa，並請 Tataru 在她不在時負責指揮。Thancred 擔心這樣是否太冒險，Minfilia 卻堅持她必須親眼確認一件事——Echo 的真正本質；Thancred 於是以護衛身分陪同。當 Yugiri 察覺不對勁而詢問，Y’shtola 便解釋 primal 是什麼、又為何 Scions of the Seventh Dawn 誓言終結它們的威脅。Yugiri 立即表態：她精通武藝，為了回報你們對她人民的善意，她願意交出自己的刀。Y’shtola 接受得乾脆，並提醒你務必做好萬全準備，因為與 primal 對抗的經驗，會用最直接的方式讓你理解，Eorzea 正面臨的是什麼。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 阿爾菲諾 <small class="muted">(烏爾達哈 - 納爾回廊, X:11.7, Y:9.6)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="why-we-adventure.html">冒險的理由</a></div><div class="row">所有職業（不含限定職） 等級 50 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-sea-rises.html">暗潮將起</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
