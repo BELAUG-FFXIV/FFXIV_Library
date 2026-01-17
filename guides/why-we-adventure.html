@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Why We Adventure | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Why We Adventure (ARR Patch 2.2)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/NngGKxvI-9g"
+              title="Why We Adventure" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Why We Adventure</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Why We Adventure`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Hozan tells you the first caravan will depart shortly, with the rest following at regular intervals. He explains that his family will ride in the lead carriage—Hozan himself, his son, and even his stubborn old father, Homei—together with young Koharu, whom you have already met. He knows the road to Ul’dah is regularly patrolled, yet he asks if you will accompany them anyway, because your presence would bring the refugees real comfort. When you are ready, he says, you need only inform the coachman, and they will set out.</p><p>No sooner are you moving than fresh worries ripple through the carriage: reports of a great beast somewhere on the road to Ul’dah. Homei reacts with unsettling curiosity, wondering what such creatures are and where they come from. Yozan, meanwhile, can only complain that the horsebirds stink, while Koharu is captivated by their fluffiness. Then the Hyuran coachman reins in the mood with practical caution—he has word from the Brass Blades that a fierce-looking beast has been sighted south of the bridge to Hammerlea. It might be a mistake, he says, but in his business it never pays to gamble. The refugees cannot fight like you can, so he asks you to go ahead, scout the area, and deal with anything dangerous before the caravan proceeds.</p><p>You go on alone, and the road grows quiet in a way that makes your instincts tighten. Somewhere ahead, you feel an eye upon you—an unseen presence measuring your steps. You press forward anyway, do what must be done, and return only when you are satisfied the way is clear. By the time the caravan reaches Horizon, the tension has eased into relief; Homei even admits the ride was surprisingly pleasant, and wonders if the longer journey to Revenant’s Toll might not be so dreadful after all. Hozan is glad to see you well and urges the coachman onward, while the coachman laughs in rough gratitude that the “beastie” is now firmly a matter of the past.</p><p>With the immediate danger behind you, the conversation turns heavier. Hozan praises your strength and says he would have been proud to stand beside you if his health allowed, but Homei reminds him—gently, firmly—that responsibility leaves no room for reckless heroics. Hozan cannot stop himself from thinking of Doma: if they had been able to call upon heroes like you, everything might have been different. He breaks off, admitting the past cannot be changed, and that those who fought and fell are gone forever. Homei answers that they are lost but not forgotten—least of all by Yugiri’s kin, who fought fiercest despite knowing it was in vain. She could have walked away, he says, yet she chose to stay, and food, shelter, and even the promise of a better life are debts they owe her. Hozan’s reply is simple and unwavering: they will repay her in kind—by giving everything in return. Whatever work awaits in Revenant’s Toll, they will do it without question, until the outpost grows and prospers by their hands.</p><p>Then the children pull you back toward something brighter. Yozan runs up to you with Koharu at his side and demands to know why you became an adventurer, convinced he already knows the answer. Koharu immediately insists it is her turn and asks what Revenant’s Toll is like—whether it is pretty, whether it is busy, whether there are many people as strong as you. Yozan refuses to be outdone and asks what he must do to become stronger when he is older, clinging to your every word as if it is a promise that the future can be rebuilt. Hozan eventually cuts them off before they overwhelm you, but their excitement only spills into new plans: once they reach Revenant’s Toll, they want to make an Adventurers’ Guild for the people of Doma, to protect their friends and punish the wicked—just like you, and just like Yugiri.</p><p>The caravan rolls on, and at Scorpion Crossing the walls and beds of a proper settlement feel almost unreal after months at sea. The coachman asks you to let Alphinaud know the first group has arrived, since he must stay with the birds. Back at the Quicksand, Yugiri prays the refugees do not grow too accustomed to this kind treatment—it is a welcome respite, but far from what they should expect in Revenant’s Toll. Kasasagi and Kikyo greet you and urge you to inform Alphinaud at once. Alphinaud receives the news with satisfaction—excellent, the first group is safely in—and then dismisses any thought that you must remain: he has matters well in hand here. You, he says, and Yugiri should travel to Revenant’s Toll forthwith.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Hozan <small class="muted">(Western Thanalan, X:11.5, Y:14.3)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="yugiris-game.html">Yugiri’s Game</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 50 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="all-due-respect.html">All Due Respect</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'ドマの民、ウルダハへ',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ホザンは告げる。第一陣のキャラバンは間もなく出発し、以後も一定の間隔で後続が続くという。先頭の馬車には、ホザンの家族――あなたが会ったことのあるコハル、そして頑固な老父ホメイも含め――が同乗する。道中はブラスブレードが巡回していると理解しているが、それでもあなたが同行してくれれば、皆の心はどれほど救われるだろうかと頼む。出立の用意が整ったら、御者に伝えてほしい。それだけでいい、と。</p><p>ところが出発早々、道に大きな獣が出るという噂が皆の不安を煽る。ホメイは妙に興味深そうに「どこから来たのだろう」と呟き、ヨザンは馬鳥の臭いに顔をしかめ、コハルは「ふわふわだ」と無邪気に目を輝かせる。そこへヒューランの御者が現実を叩きつける。ブラスブレードからの報せで、ハンマーレアの橋の南に凶暴そうな獣が目撃されたというのだ。見間違いかもしれないが、この稼業で賭けはしない。あなたなら戦えるが、この一行はそうではない――だから先に行って周囲を確かめ、危険があれば対処してほしい、と。</p><p>あなたは単身で先行する。道は静まり返り、肌の奥が警戒で硬くなる。どこかから視線を感じる――見えない何かが、あなたを測っている。だがあなたは怯まず、必要なことを済ませ、道が安全だと確信してから戻る。やがて一行はホライズンに辿り着き、緊張は安堵へとほどけていく。ホメイは意外にも乗り心地が良かったと言い、レヴナンツトールまでの旅も案外悪くないかもしれないと笑う。ホザンはあなたの無事を喜び、御者に先へ進めと伝える。御者も「獣は『いた』が、もう『いない』」と豪快に笑い飛ばした。</p><p>危機を越えた途端、話題は自然とドマへと戻る。ホザンはあなたの戦いぶりを称え、健康でさえあれば誇りをもって並び立てたのにと言うが、ホメイは、責務ある者が軽々しく武勇を求めるべきではないと諭す。ホザンはなおも、もしドマにあなたほどの英雄がいたなら、と悔やまずにいられない。だが過去は変えられない。戦い、倒れた者たちは戻らない。ホメイは「失われても忘れられない」と言い、なかでもユウギリの縁者は、無駄だと分かっていても最も激しく戦ったと語る。彼女は去ることもできたのに、残る道を選んだ。食事も、寝床も、より良い未来の約束も、すべて彼女のおかげだ――その恩をどう返すのか。ホザンは答える。行いで返すのだ、と。レヴナンツトールで必要とされる仕事が何であれ、溝掘りでも煉瓦積みでも構わない。自分たちの手で、あの地を育ててみせる、と。</p><p>その重さを振り払うように、子どもたちがあなたのもとへ駆け寄る。ヨザンは「あなたはなぜ冒険者になったのか」と矢継ぎ早に尋ね、コハルはすぐさま「次は私」と割り込み、レヴナンツトールはどんな場所か、美しいのか、人は多いのかと目を輝かせる。ヨザンは負けじと、どうすれば強くなれるのかと食い下がり、あなたの言葉を一言も逃すまいとする。ホザンが「それくらいに」と止めても、二人の胸はすでに先を見ている。レヴナンツトールに着いたら、ドマの者たちのための冒険者ギルドを作るのだ。友を守り、悪を罰する――あなたとユウギリのように、と。</p><p>キャラバンはさらに進み、スコーピオン・クロッシングの城壁と「ちゃんとした寝台」が、長い航海の記憶を一瞬遠ざける。御者は馬鳥から離れられないため、第一陣が到着したことをアルフィノに知らせてほしいと頼む。クイックサンドへ戻ると、ユウギリは、この手厚さに慣れすぎないよう祈ると言う。休息としてはありがたいが、レヴナンツトールで待つ現実はもっと厳しい。カササギとキキョウはあなたの帰還を喜び、アルフィノへ至急知らせてほしいと促す。アルフィノは第一陣の到着を聞いて満足し、ここは自分が処理すると言い切る。そしてあなたに告げる――あなたとユウギリは、ただちにレヴナンツトールへ向かうべきだ、と。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ホウザン <small class="muted">（西ザナラーン, X:11.5, Y:14.3）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="yugiris-game.html">ドマの子どもたち</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="all-due-respect.html">新たな開拓者</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'冒險的理由',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Hozan 告訴你，第一批 車隊 很快就要出發，之後其餘的人也會依固定間隔陸續啟程。他說他們一家人——包含他那位固執的老爸爸 Homei——會和你已經見過的 Koharu 一起坐在領頭的馬車上。雖然通往 Ul’dah 的道路平時都有 Brass Blades 巡邏，但他仍懇求你同行；對漂泊已久的人而言，你在身邊就像一道能安定心神的保證。等你準備好了，只要去告訴車伕，他們就能立刻上路。</p><p>然而還沒走遠，關於「路上出現巨大野獸」的傳聞就讓氣氛再度緊繃。Hozan 認為這消息令人不安，Homei 卻反而好奇起來，追問那會是什麼生物、又是從哪裡來的。Yozan 一臉嫌棄地抱怨馬鳥的味道難聞到受不了，Koharu 則完全相反，沉迷在那團「好蓬、好軟」的毛裡。就在此時，Hyuran 的車伕收起笑意說，他剛收到 Brass Blades 的通報：在通往 Hammerlea 的橋南側，有人目擊到一頭看起來凶惡的野獸。也許只是看錯，但這種事不能賭。你當然能應付戰鬥，可這一車的人不行，所以他希望你先獨自往前探路，確認安全；若真的遇到危險，就照你一貫的做法處理掉。等你確定道路無虞，再到 Horizon 外與他們會合。</p><p>你獨自前行，四周的寂靜很快讓你的神經繃緊。你清楚感覺到，有一道目光正落在你身上——像是在暗處衡量你、等你露出破綻。你沒有停下，只把該做的做完，直到你確信「那段路可以走」，才回到 車隊 的動線上。等你們終於抵達 Horizon，緊繃像被剪斷的線一樣鬆開。Homei 甚至意外地說這趟路坐起來很舒服，讓他覺得前往 Revenant’s Toll 的長途也許沒那麼可怕；Hozan 看見你平安無恙，立刻催車伕繼續前進，而車伕也大笑著感嘆：那頭野獸果然存在，只是現在已經成了「過去式」。</p><p>危機過後，話題自然沉入更痛的地方。Hozan 誇你打得漂亮，甚至惋惜自己若不是身體狀況不佳，也會以能與你並肩為榮；Homei 卻提醒他，身負責任的人不能沉迷逞勇。Hozan 還是忍不住把心拉回 Doma：如果當初能請到像你這樣的英雄，他們的結局也許會完全不同。他嘆息著說，過去無法改寫，那些曾經奮戰、也倒下的人，已永遠失去。Homei 接著說，他們失去，但不會被遺忘——尤其是 Yugiri 的親人們；明知道無望，仍打得最凶。她明明可以轉身離開，卻選擇留下，於是食物、住處、以及對更好生活的盼望，才有了著落。那樣的恩情，要怎麼償還？Hozan 的回答很直接：用行動償還。到了 Revenant’s Toll，不論需要做的是挖溝、砌磚、還是任何粗活，他們都會毫不猶豫地投入，讓那個地方靠他們的雙手成長、繁榮。</p><p>就在沉重快要把人吞下去時，孩子們又把世界拉回明亮的一端。Yozan 拉著 Koharu 跑來，迫不及待問你為什麼會成為冒險者，語氣像是他早就有答案，只等你點頭。Koharu 立刻搶著說輪到她，追問 Revenant’s Toll 是什麼樣的地方、是不是漂亮、是不是有很多像你一樣強的人。Yozan 不服輸，又追問他長大後要怎麼變強，像是把「變強」當成能保護同伴的路標。Hozan 只好出面阻止他們別再把你問到喘不過氣，可孩子們的心已經開始往前跑：到了 Revenant’s Toll，他們想替 Doma 的人做一個「冒險者公會」，保護朋友、懲罰壞人，就像你、也像 Yugiri 一樣。</p><p>車隊 繼續前進，到了 Scorpion Crossing，厚實的城牆與「終於能睡在床上」這件事，讓人幾乎不敢相信是真的。車伕得留在馬鳥旁邊照看，請你去把「第一批人已抵達」的消息通知 Alphinaud。你回到 The Quicksand 時，Yugiri 低聲說，希望大家別太習慣這樣的待遇——這確實是難得的喘息，但和 Revenant’s Toll 的現實相比仍差得很遠。Kasasagi 與 Kikyo 迎接你，催你立刻去通知 Alphinaud。Alphinaud 聽見第一批人已安全抵達，滿意地說很好；接著他便要你別再被這裡牽住手腳——他在 Ul’dah 的安排都已掌握。你與 Yugiri 現在該做的，是立刻前往 Revenant’s Toll。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 寶山 <small class="muted">(薩納蘭 - 西薩納蘭, X:11.5, Y:14.3)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="yugiris-game.html">Doma 的孩子們</a></div><div class="row">所有職業（不含限定職） 等級 50 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="all-due-respect.html">新任開拓者</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
