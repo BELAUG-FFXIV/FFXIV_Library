@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Scouts in Distress | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Scouts in Distress (ARR Patch 2.2)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/AjKYWhmjxLg"
+              title="Scouts in Distress" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Scouts in Distress</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Scouts in Distress`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>At Camp Skull Valley, Falkbryda speaks without trying to soften the situation. Maelstrom scouts were sent to reconnoiter the Sapsa Spawning Grounds, and their task was not merely patrol work—it was to learn where Leviathan might emerge, if it comes to that. She admits, with visible strain, that the Maelstrom has never faced a foe like this before, and that every step must be taken with caution.</p><p>But the scouts have not returned. Their absence has stretched too long to dismiss as delay, and Falkbryda’s fear settles into certainty that something has gone wrong. For better or worse, their fate must be known—and she asks you to help search for them, because time is running out and the stakes are rising by the moment.</p><p>Five scouts went into Sapsa. Falkbryda presses a flask of restorative into your hands and tells you to use it on any who may still be alive but wounded. Then, with reluctance she cannot fully hide, she adds the harder request: if they have perished, recover their bodies—if circumstances allow. Do not venture too deep into enemy territory, she warns, because they cannot afford to lose you now.</p><p>You make for Halfstone, and before long you find one of the scouts—barely holding on, cursing his own mistake for forgetting the restorative when he needed it most. You use the restorative on him, and the color returns to his face enough for him to speak through the pain.</p><p>He tells you they were ambushed by the Serpent Reavers. Lightly armed, they stood no chance. He alone escaped as far as this, but the others were captured, dragged away toward the Serpent’s Tongue—he is certain of it. He can force himself back to camp, he says, but his voice breaks when he begs you to save his comrades.</p><p>When you return to Camp Skull Valley, Falkbryda’s relief is immediate—followed by shock when she learns you went to the Serpent’s Tongue alone. And when she sees what you bring back, her grief turns sharp with fury: the wounds were not meant to kill quickly, but to torture and maim. Even enemies, she says, should not be treated with such savagery. She fears for the two still unaccounted for, yet she cannot ignore that at least one scout made it back alive—and for that, she thanks you. The price was dear, but the Maelstrom has the intelligence it needs. Even now, she says, the Admiral is finalizing the operation, and the warhorns will sound at any moment—so you must be ready to move when they do.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Falkbryda <small class="muted">(Western La Noscea, X:22.7, Y:22.7)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-sea-rises.html">The Sea Rises</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 50 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-gift-of-eternity.html">The Gift of Eternity</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'海に散る命',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>キャンプ・スカルバレーで、ファルクブリダ中甲佐は状況をごまかさずに告げる。黒渦団の偵察隊はサプサ産卵地へ派遣され、任務は単なる偵察ではない――万が一、リヴァイアサンが顕現するなら、その出現地点を探るためのものだった。これほどの脅威に黒渦団が正面から向き合ったことはないと、悔しさを滲ませながら認め、だからこそ慎重に進まねばならないと言う。</p><p>しかし、その偵察隊が戻ってこない。遅延では片づけられないほど時間が過ぎ、ファルクブリダは不吉な予感を隠せない。良くも悪くも、彼らの運命を確かめねばならない――そこであなたに、捜索への助力を求める。</p><p>サプサへ向かったのは五人。ファルクブリダは回復薬を手渡し、負傷者がいればすぐ手当てするよう命じる。続けて、口にするのも辛いという調子で、もし死亡していた場合は可能な限り遺体を回収してほしいと頼む。ただし敵地の奥へは踏み込みすぎるな、と釘を刺す。ここであなたを失うわけにはいかないのだ、と。</p><p>あなたがハーフストーンへ向かうと、息も絶え絶えの黒渦団二等甲兵を見つける。助けを求める声は掠れ、肝心なときに回復薬を忘れたことを悔やみながら、痛みに耐えていた。あなたが回復薬で手当てすると、彼は震える息の合間に、ようやく言葉をつなぐ。</p><p>海蛇の強奪者に襲撃されたのだという。軽装の偵察では太刀打ちできず、自分だけがここまで逃げ延びたが、仲間は捕らえられ、海蛇の巣穴へ連行された――間違いない、と。自分はキャンプへ戻れるが、仲間の行方が恐ろしい。どうか助けてほしい、と彼はあなたに懇願する。</p><p>あなたがキャンプ・スカルバレーへ戻ると、ファルクブリダはまず安堵し、すぐに顔色を変える。あなたが単身で海蛇の巣穴へ向かったと知り、無謀さに戦慄したのだ。そしてあなたが持ち帰ったものを前に、彼女の声は嗚咽に途切れる。傷は殺すためではなく、苦しめ、傷つけるためのものだった――その蛮行に怒りを抑えきれず、敵であろうと度を越していると言い放つ。なお行方不明の二人のことを思うと胸が潰れそうだと祈りつつも、少なくとも一人は生きて戻った、その事実にあなたへ感謝を告げる。代償は大きかったが、必要な情報は得た。提督はすでに作戦の詰めに入っており、号角が鳴るのは間もない――鳴り響いたら、ただちに出撃できるよう備えよ、と。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ファルクブリダ中甲佐 <small class="muted">（西ラノシア, X:22.7, Y:22.7）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-sea-rises.html">ふたりの盟主</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-gift-of-eternity.html">超える力、不滅なる者</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'斥候遇難',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>在 Camp Skull Valley，Falkbryda 不再迴避現實。Maelstrom 的斥候已被派往 Sapsa Spawning Grounds 偵察，而他們的任務不只是巡查——更是要在最壞的情況到來時，確認 Leviathan 可能從何處現身。她帶著難以掩飾的沉重承認，Maelstrom 從未面對過這樣的敵人，因此每一步都必須格外謹慎。</p><p>然而，斥候遲遲未歸。等待的時間已長到令人不安，Falkbryda 的擔憂也逐漸變成確信：他們恐怕遭遇不測。無論結果好壞，都必須查明他們的下落與命運——她請你協助搜尋，因為時間正在被一點一滴耗盡。</p><p>共有五名斥候進入 Sapsa。Falkbryda 把一瓶回復藥交到你手上，要你一旦找到負傷者就立刻施救。接著，她用近乎痛苦的語氣補上一句：若他們已經身亡，在情況允許下，請你回收遺體。但她也同時警告你，絕對不要深入敵方地盤太深——此刻，他們承受不起再失去你。</p><p>你趕往 Halfstone，很快便發現一名瀕死的 Maelstrom 士兵。他低聲呻吟，斷斷續續地求救，懊悔自己偏偏在最需要的時候忘了帶回復藥。你用回復藥替他治療後，他才勉強撐住氣息，顫抖著把真相說出口。</p><p>他們遭到 Serpent Reavers 埋伏。斥候裝備輕便，根本無力抵抗；他能逃到這裡已是僥倖，但其他人都被抓走了——被帶往 The Serpent’s Tongue，他非常確定。他說自己還能撐回營地，可他最害怕的，是同袍接下來會遭遇什麼。他用幾乎哀求的語氣請你救人，請你不要丟下他們。</p><p>當你回到 Camp Skull Valley，Falkbryda 先是鬆了一口氣，隨即在得知你獨自前往 The Serpent’s Tongue 後驚出冷汗。可當她看見你帶回來的結果，她的聲音立刻哽住——那些傷口不像是為了乾脆奪命，而更像是為了折磨、為了殘害。她痛怒交加，直說即使是敵人也不該被如此對待。想到仍有兩人下落不明，她只能祈禱他們沒有遭受同樣的惡意結局。至少，有一名士兵活著回來了；她為此向你道謝，並承認代價沉重，但情報已到手。她告訴你，Admiral（Limsa Lominsa 的提督；Merlwyb Bloefhiswyn，亦為 Maelstrom 最高統帥）正在敲定作戰細節，一旦戰爭號角吹響，你就必須立刻整備出發。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 法爾克布里達 <small class="muted">(拉諾西亞 - 西拉諾西亞, X:22.7, Y:22.7)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-sea-rises.html">暗潮將起</a></div><div class="row">所有職業（不含限定職） 等級 50 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-gift-of-eternity.html">超越之力，不朽之人</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
