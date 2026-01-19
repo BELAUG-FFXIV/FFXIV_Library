@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Great Divide | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – The Great Divide (ARR Patch 2.3)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/gjFvbDyag2Q"
+              title="The Great Divide" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">The Great Divide</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`The Great Divide`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Your thoughts drift to friends, to the isle itself, to everyone caught in uncertainty—but Minfilia forces the worry back into order. Speculation will not help; Urianger will send word if anything changes. Until then, you must keep your attention on what can still be changed. With that resolve, she turns to a matter closer at hand: the aetheric fluctuations once attributed to Good King Moggle Mog the Twelfth. The king’s defeat is a mercy you have earned, yet the Twelveswood remains troubled—readings now point to a continuing disturbance so great it may even signal a primal. The possibility alone demands immediate inquiry, and she is about to charge you with the task when F’lhaminn cuts in with urgent news: refugees from Ul’dah have arrived at Revenant’s Toll, seeking asylum, and they are waiting in the Seventh Heaven for a formal answer.</p><p>Minfilia knows what that request will cost. F’lhaminn warns that your resources are already stretched—accept them, and word will spread, and more will come. Still, Minfilia chooses to hear them. She asks you to stand with her at the meeting, reminding you that while your means are finite, the Scions of the Seventh Dawn bear a responsibility to protect the people of Eorzea.</p><p>At the Seventh Heaven in Mor Dhona, Minfilia introduces herself as the leader of the Scions. The refugees greet her with desperate reverence, swearing they will work as the Domans did—give them a task, any task, and they will prove their worth. One of them, struggling for words, finally spills the truth of years spent living on Ul’dah’s scraps: work is promised but never offered to an honest man, and after the Calamity the wealthy did not lend a hand—they climbed on the poor instead. With fear rising and the future narrowing, Revenant’s Toll became their last answer. You took foreigners in, they say. Surely you will do the same for them.</p><p>Minfilia’s reply is steady but heavy. The Domans were accepted under extraordinary circumstances, and an organization of your size cannot save everyone wounded by the Calamity. With sincere sympathy—and with visible regret—she denies their petition. The refusal lands like a door slammed shut: they have nowhere else to go, and to them it feels as though you have turned your back.</p><p>Before the argument can harden into hatred, Tataru rushes in with ill tidings from Ul’dah—Alphinaud has been wounded. She cannot say how badly, only that the Immortal Flames report a riot among the refugees, a frenzy of violence turned on anyone nearby. The refugees recoil in disbelief: the demonstration was meant to be peaceful, they insist, and if violence erupted then someone must have provoked it. Now the Blades will have their excuse to round people up and kill those who resist. If you will not help them build a new life, they beg, then at least help them keep the one they still have.</p><p>Minfilia will not promise what she cannot justify. She refuses to stand idle while innocents suffer, yet she also refuses to judge without knowing the truth. If the authorities decide the refugees attacked without provocation, then those responsible must answer for it. For now, she turns to you with a single, urgent command: find Alphinaud—quickly—and be at his side if he is in danger, or worse. The earlier matter of the Twelveswood can wait; Yda and Papalymo will see to it. Alphinaud is being treated at the Hourglass.</p><p>At the Hourglass in Ul’dah, you find Alphinaud far calmer than the rumors. Tataru, he says, is given to exaggeration—he is quite well. Ul’dah is not. The riot was no isolated flare; it is the sign of tensions long simmering at last threatening to boil over. He lays bare the city’s cruel arithmetic: Ul’dah measures worth by coin, and the wealthy therefore wield the greatest power. Refugees—those who fled Ala Mhigo and those displaced by the Calamity—have no wealth, no influence, and in the Ul’dahn view, no place at all. Raubahn and the sultana ordered the Immortal Flames to provide aid and succor, but the cost grows every day with no end in sight, feeding resentment among citizens even as refugees grow bitter beneath their sneers. Lord Lolorito’s refusal to grant the Domans asylum revealed a disdain for refugees that the Monetarists share openly. Protest was inevitable—and it is no surprise that some would eventually reach for violence. Worse still, the Immortal Flames have departed for joint training with the other Grand Companies; by the time they return, the situation may already have decayed beyond mending.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Minfilia <small class="muted">(The Rising Stones, X:6.1, Y:5.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="through-the-maelstrom.html">Through the Maelstrom</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 50 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="desperate-times.html">Desperate Times</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'災厄の報せ',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>あなたの胸に、仲間たちのこと、島そのもののこと、あらゆる不安が押し寄せる。だがミンフィリアは、思考を無理にでも現実へ引き戻す。憶測に意味はない。ウリエンジェから進展があれば連絡が入る。それまでは、あなたに変えられることへ意識を集中させねばならない――そう言って彼女は、もっと身近な問題へ話題を切り替える。かつて「善王モグル・モグ十二世」によるものと見做していたエーテルの変動。その王がもはや存在しないのは、あなたがもたらした祝福だ。だが黒衣森では事態が収まっておらず、最新の観測は、なおも大規模なエーテルの異常が続いていることを示していた。蛮神の存在すら疑われる以上、直ちに調査せねばならない――そうミンフィリアがあなたに告げようとした、その瞬間だった。フ・ラミンが割って入り、ウルダハから来た難民たちがレヴナンツトールに庇護を求めて到着したと告げる。彼らはセブンスヘブンで、正式な返答を待っているという。</p><p>ミンフィリアは、受け入れが何を意味するかを理解している。フ・ラミンは、これ以上の人々を抱え込む余力などないと釘を刺す。ここで応じれば噂が広がり、さらに多くが押し寄せる――それでもミンフィリアは、彼らの訴えを自ら聞くと決めた。そして会談にあなたの同席を求める。資源に限りがあることは承知の上で、それでも「暁の血盟」には、エオルゼアの人々を守る責任があるのだと。</p><p>モードゥナのセブンスヘブンで、ミンフィリアは自ら名乗り、暁の血盟を率いる者だと告げる。難民たちは、どこか祈るような熱で彼女にすがりつき、ドマの民と同じように働く用意があると言い募る。仕事を与えてくれさえすれば、必ずやり遂げる――言葉に詰まりながらも一人が語るのは、長年ウルダハの「残り物」に頼って生きてきた現実だった。働き口はあると言われても、正直者が魂を汚さずにできる仕事はない。災厄で膝をついたとき、金持ちは手を差し伸べるどころか、貧しい者の背に乗ってさらに上へ登った。先行きが見え、逃げ場を探した末に思い至ったのがレヴナンツトールだったのだ。異邦の民を受け入れたのなら、きっと自分たちにも同じようにしてくれるはずだ――そう訴える。</p><p>ミンフィリアの返答は、揺れないが重い。ドマの民を受け入れたのは、特別な状況のもとで下した決断だった。暁の血盟の規模では、災厄に傷ついたすべての人々を救うことはできない。深く同情しながらも、彼女は彼らの願いを退ける。難民たちは絶望する。行き場がない。ここで背を向けられれば終わりだ――そう叫ぶ。</p><p>その空気を断ち切るように、タタルが駆け込んでくる。ウルダハからの凶報――アルフィノが負傷したという。どれほど深刻かは断言できないが、恐らく軽くはない。不滅隊の報告では、難民たちが暴動を起こし、手当たり次第に暴れ回ったのだという。難民たちは否定する。抗議は平和的であるはずだった。挑発されたに違いない。もし暴動があったのなら、自分たちが始めたのではない――そう訴えながら、黄銅刃がこれを口実に人々を狩り集め、抵抗する者を殺すと怯える。新しい暮らしを築く手助けが無理なら、せめて今ある命を守ってほしい――そう懇願する。</p><p>ミンフィリアは、安易な約束をしない。無辜の人々が苦しむのを黙って見てはいられないが、事実が分からぬまま裁くこともできない。もし当局が、難民が挑発なく襲いかかったと判断するなら、責任ある者はその報いを受けねばならない――そう告げたうえで、彼女はあなたに命じる。アルフィノを捜し、急いで側にいてほしい。危険が迫っているのなら、あるいはそれ以上なら、あなた以外には任せられない。黒衣森の件は後回しでいい。イダとパパリモに任せる。アルフィノはウルダハの「砂時計亭」で治療を受けている。</p><p>砂時計亭であなたが目にしたアルフィノは、噂ほどには取り乱していない。タタルは大げさなのだ、と彼は言う。自分は見ての通り大丈夫だ。だがウルダハは違う。今回の騒ぎは孤立した事件ではなく、長く燻ってきた緊張が沸点へ達しつつある証だ。彼は、ウルダハの苛烈な現実を語る。富と貧の隔たりは大きく、人の価値は金で測られ、最も裕福な者ほど影響力を持つ。アラミゴから逃れた者や災厄で流浪する者――難民に居場所はない。富も権力もなく、ウルダハの価値観では「存在しないも同然」なのだ。それでもラウバーンとナナモは現実から目を背けず、不滅隊に救済を命じた。だが費用は日々膨らみ、義務への疑念が市民の間に広がる一方で、難民は嘲笑する市民への憎しみを募らせていく。ロロリトがドマの民に庇護を与えなかった態度は、難民全体への蔑視を露わにし、その姿勢はモネタリストにも共有されている。抗議が起きるのは時間の問題であり、やがて暴力に走る者が出るのも驚きではない。さらに不運なことに、不滅隊は他国軍との合同演習に出払っている。帰還する頃には、事態はもう立て直せないところまで崩れているかもしれない――アルフィノはそう警告する。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ミンフィリア <small class="muted">（石の家, X:6.1, Y:5.2）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="through-the-maelstrom.html">混沌の渦動</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="desperate-times.html">難民暴動を追って</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'巨大的分歧',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你心裡掛著的，是那些朋友，是那座島，是每一個可能被波及的人與事——但 Minfilia 很快就把那份不安按了下去。猜測改變不了任何結果；只要有進展，Urianger 一定會送來消息。在那之前，你必須把注意力牢牢放在「你仍能改變的事」上。她因此轉向另一個更近在眼前的問題：你們先前把 aether（以太）波動歸因於 Good King Moggle Mog XII，而如今那位王已被你擊敗，的確是一份得來不易的祝福；然而 Twelveswood 並未因此恢復平靜。最新的觀測顯示，大規模的 aether 異常仍在持續，甚至可能暗示 primal 的存在。僅僅是這個可能性，就足以要求立刻調查——Minfilia 正要把任務交到你手上時，F’lhaminn 忽然插話：一群來自 Ul’dah 的難民來到了 Revenant’s Toll，要求庇護；此刻他們就在 Seventh Heaven 等待正式回覆。</p><p>Minfilia 很清楚這個請求代表什麼。F’lhaminn 直言，你們根本沒有餘裕再收容更多人：一旦開了先例，消息就會傳開，接著只會有更多人湧來。但 Minfilia 仍決定親自聽他們陳情，並請你陪同出席。她提醒你，就算資源有限，你們仍肩負守護 Eorzea 人們的責任。</p><p>在 Mor Dhona 的 Seventh Heaven，Minfilia 向眾人致歉讓他們久候，並自我介紹——她是 Minfilia，領導著 Scions of the Seventh Dawn。難民見到她彷彿看到最後一根救命繩索，急切表示願意像 Domans 一樣工作：只要交代任務，他們就一定能完成。其中一人語塞又急促，終於把多年壓在喉頭的處境說出口：他們在 Ul’dah 靠著殘餘過活太久了，所謂「有工作」聽起來像安慰，但對想清白活著的人來說，能做的事少得可憐。Calamity（靈災）把所有人打趴時，城裡有錢人不但沒扶起他們，反而踩著他們往上爬。他不敢說自己多聰明，但他看得出更壞的事正在逼近；他們必須逃，而 Revenant’s Toll 成了唯一能想到的去處——既然你們曾收留外來者，那就也該收留他們。</p><p>Minfilia 的回應冷靜，卻沉重得像石頭。她承認 Domans 的請求確實曾被你們接受，但那是極端情勢下才做出的決定；以你們這樣的規模與資源，沒有能力援助所有被 Calamity（靈災）波及的人。她真心同情，卻仍只能帶著遺憾拒絕。對難民而言，這等同於被迫站回絕路：他們無處可去，而你們的拒絕像是把門直接關上。</p><p>就在情緒即將失控時，Tataru 趕來帶著 Ul’dah 的壞消息——Alphinaud 受傷了。她無法確定嚴重程度，只能說她擔心情況不輕。依 Immortal Flames 的說法，難民引發了暴動，甚至失控到對任何人出手。難民當場反駁：那不可能，他們的示威原本應該是和平的；若真的爆發衝突，一定是被挑釁所致。更讓他們恐懼的是，現在 Brass Blades（Ul’dah 的治安部隊／傭兵警備組織，負責城邦周邊的巡邏、維安、盤查、逮捕、調查等工作）終於有藉口大開殺戒，抓人、鎮壓、把任何反抗者都當作該被處決的對象。他們哀求 Minfilia：如果你們無法幫他們建立新生活，至少幫他們保住還剩下的生活。</p><p>Minfilia 不會在不明真相時做出承諾。她表明自己不會袖手旁觀、任由無辜者受苦，但在釐清這場暴動的來龍去脈之前，她也無法斷言能提供什麼援助；若當局判定難民是在毫無挑釁的情況下先行襲擊，那些責任者就必須為自己的行為付出代價。隨後，她把目光轉向你，語氣不容拖延：立刻去找 Alphinaud。若他正面臨危險，甚至更糟——她只信得過你守在他身邊。至於你們剛才談到的 Twelveswood 與 primal 的線索，先不要分心；Yda 與 Papalymo 會處理。Alphinaud 正在 Hourglass 接受治療。</p><p>在 Ul’dah 的 Hourglass，你見到的 Alphinaud 比傳聞冷靜得多。他說 Tataru 一向容易誇大，而你也親眼確認：他看起來確實無礙。但 Ul’dah 的情勢並不好——這場暴動不是偶發事件，而是長年壓抑的緊張終於要沸騰的徵兆。Alphinaud 把 Ul’dah 的結構攤開給你看：貧富差距巨大，多數人之所以接受，是因為他們相信每個人都該為自己的命運負責；而在 Ul’dah，金錢被視為衡量價值的首要標準，最富有的人自然掌握最大的影響力。那麼難民算什麼？無論是從 Ala Mhigo 逃出的流亡者，或被 Calamity（靈災）摧毀生活而漂泊的人，他們沒有財富、沒有權力，在 Ul’dah 的價值觀裡幾乎等同「不存在」。Raubahn 與 sultana 明白忽視不是辦法，因此命 Immortal Flames 提供救助，但開支日增且看不到盡頭，讓越來越多 Ul’dah 人開始質疑自己是否還需要為這些「無價值的流浪者」付出；同時，難民也在市民的輕蔑眼光中累積怨恨。Lolorito（Ul’dah 的巨商／財閥領袖級人物，也是掌握城邦實權的 Monetarists（財閥派）代表之一）拒絕給 Domans 庇護的態度，暴露了對所有難民的輕視，而這份態度也被 Monetarists 公然共享。抗議只是時間問題，有人最終走向暴力也並不意外。更糟的是，Immortal Flames 偏偏在此時與其他 Grand Companies 進行聯合演習離城——等他們回來時，局勢很可能早已惡化到無法挽回。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 敏菲利亞 <small class="muted">(石之家, X:6.1, Y:5.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="through-the-maelstrom.html">穿越混沌渦流</a></div><div class="row">所有職業（不含限定職） 等級 50 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="desperate-times.html">追查難民暴動</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
