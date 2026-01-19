@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reap the Whirlwind | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Reap the Whirlwind (ARR Patch 2.3)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/5hN8l5RUMTY"
+              title="Reap the Whirlwind" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Reap the Whirlwind</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Reap the Whirlwind`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>You head to Stonesthrow with one task in mind: the merchant has been lurking at the edge of the refugee camp, waiting for the Flames to withdraw. Now that the soldiers are gone, nothing stands between him and the next step of his scheme—and the refugees’ fear hardens into a plea. Find him, and make him stop before this “cause” claims even more lives.</p><p>Among the shaken camp, you meet Ele. Through sniffles, the child asks if you have seen their parents—told to wait with the others, promised they would return soon, yet days have passed with no sign. Ele explains they left with a man from Ul’dah who spoke of changing everything, of letting them live inside the walls with everyone else…until his words turned to making the rich pay, and the crowd’s anger became something terrifying. When Ele asks who you seek, you make it clear: you are looking for the merchant.</p><p>Ele’s answer breaks into sudden alarm—there, over yonder. The man. Before the child can even finish the thought, the merchant is already moving, and you catch his voice as he slips away, weighing which “gullible fool” might become his next victim. Ele’s small voice chases after you like a hook in the ribs: he’s getting away—go.</p><p>You corner him at the dispatch yard near Ul’dah, and he whirls on you in panic and outrage. Sedition? Treason? Revolution? He spits the words back as if they are absurd, demanding to know who poisoned you with such accusations—refugees, he sneers, the same refugees who terrorized Ul’dah’s streets. He insists you have no proof, and refuses to be taken to the Hall of Flames, claiming you have no right to detain him.</p><p>Then his denial twists into a colder confession-by-implication: even if he had done what you claim, he says, it was not politics—it was business. And if you agree to protect him, he swears he will tell you everything. The bargain hangs in the air for only a heartbeat—before a shout cuts through the yard, and an arrow’s consequence answers for him.</p><p>Stone Torch arrives to the commotion and orders a search—the killer may still be close. When questioned, it becomes clear you are not the one they seek; the merchant, they remark, may have been responsible for the riots, and some might even call his murderer owed a debt of gratitude. But Swift’s reaction at the Hall of Flames is immediate and grim: the merchant was not simply murdered—he was silenced, moments from divulging his secrets. Even so, Swift tells you not to despair. Whoever orchestrated the riots is closer to being unmasked than you may think.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Terrified Refugee <small class="muted">(Central Thanalan, X:25.2, Y:15.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="shock-and-awe.html">Shock and Awe</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 50 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="revolution.html">Revolution</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'暗躍の果て',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>あなたはストーンスローの難民たちのもとへ向かう。あの商人は、不滅隊が周辺から退くのを待って難民に近づこうとしていた――そして今、不滅隊は去った。止めるものは何もない。これ以上、無益な大義のために誰が死ねばいいのか。終わりが来るまで、どれほどの苦しみを耐えねばならないのか。あなたは「彼を見つけて、狂った企みをやめさせてほしい」と託される。</p><p>そこで、鼻をすすりながら震える子ども、エレに呼び止められる。「お父さんとお母さんを見なかった？」――ほかのみんなと一緒にここで待つように言われ、すぐ戻ると言われたのに、もう何日も経っている。両親はウルダハから来た男と一緒に出て行ったのだという。城壁の内側で、みんなと同じように暮らせるように「変えてくれる」と言ったから、エレはその言葉が好きだった。けれど、「金持ちに払わせる」と語ったとき、周りの怒りが露わになり、怖くなった――と。あなたが探しているのが商人だと告げると、エレは言葉を詰まらせる。</p><p>そのとき、エレが遠くを指さす。「あそこ……あれが、その人だと思う！」　あなたが視線を向けるより早く、男は逃げに転じる。すれ違いざまに聞こえたのは、誰を次の獲物にするか品定めするような呟き――「どの騙されやすい愚か者を、次の犠牲にしてやろうか」と。エレの声が追いすがる。「逃げるよ！　追いかけて！」</p><p>あなたが追い詰めると、商人は狼狽しながら叫ぶ。「またお前か！？　な、なぜ追ってくる！？」　扇動、反逆、革命――そんなものはでっち上げだと言い張り、誰がそんな嘘を吹き込んだのかとあなたを詰る。難民だろう、と。ウルダハの街を恐怖に陥れた、あの難民たちだろう、と嘲る。証拠はない、何ひとつない、と。</p><p>そして彼は、不滅隊本部へ連行されることを拒む。「拘束する権利などない」と震える声で言い募りながら、ふいに口ぶりを変える。仮に――仮に自分がやったとしても、政治になど興味はない、と。そんなものはどうでもいい。これは商売だ、ただの商売だ、と。あなたが本当に狙っている相手は自分ではない、とも。だが、あなたが自分を守ると約束するなら、すべて話すと誓う。</p><p>その取引が形になる前に、騒ぎを聞きつけてストーントーチが駆けつける。「何事だ！」　周囲へ捜索を命じる声が飛ぶ。犯人はまだ近くにいるかもしれない――と。状況を問われても、あなたが追われるべき人物ではないことは明らかだった。矢が放たれた方角を聞いたストーントーチは、射手の腕前に言及しながら、あなたに「暁」として捜査を続けるよう促す。</p><p>不滅隊本部でスウィフトに報告すると、返ってきたのは苛立ちと確信だった。「殺された！？　くそっ……！」　商人はただ殺されたのではない、口封じにされたのだ。顔を知る者が多く、秘密を明かそうとしていたからこそ――と。それでも、絶望するな、とスウィフトは言う。暴動を操った真の黒幕へ、あなたは思っている以上に近づいている。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> 震え上がった男 <small class="muted">（中央ザナラーン, X:25.2, Y:15.4）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="shock-and-awe.html">武器を取った人々</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="revolution.html">フロンティア計画</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'自食惡果',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你趕到 Stonesthrow，因為那名商人一直在等 Flames 撤離附近才敢靠近難民。如今 Flames 已經撤走，他的行動再也沒有阻礙。難民的恐懼化成一個請求：這場徒勞的「大義」究竟還要奪走多少性命，還要讓他們承受多少痛苦才會結束。你被託付去找到他，說服他停止這場瘋狂的追逐，否則只會把所有人帶向毀滅。</p><p>在營地裡，你遇見了哭得上氣不接下氣的 Ele。你還沒開口，Ele 就哽咽著問你有沒有看見爸爸媽媽——他們要 Ele 跟大家一起待在這裡，說很快就會回來，可是已經好幾天了。Ele 告訴你，爸爸媽媽跟著一個來自 Ul’dah 的男人離開；那個人說要改變一切，讓他們也能跟大家一樣住進城牆之內。Ele 曾經喜歡那句話，但當那人開始說要讓有錢人付出代價時，四周的人都變得憤怒，Ele 也因此害怕起來。你告訴 Ele，你正在找的就是那名商人。</p><p>Ele 先是茫然，隨即像被什麼刺到似的抬頭指向遠處——「看！我覺得就是他！」你循著方向望去，那名商人已經轉身逃開，你只聽見他冷冷地自語，像在挑選下一個「受騙的蠢貨」要成為他的獵物。Ele 的聲音急得發顫，催你立刻追上去：他要逃走了，不能讓他跑掉。</p><p>你在 Ul’dah 附近的派遣據點截住他，他回過身時滿臉驚恐又惱怒，結結巴巴地反問你為什麼要追他。煽動、叛國、革命——他把這些指控當成荒唐至極的笑話，質問到底是誰把這些謊言塞進你腦子裡；是難民嗎？就是那些曾在 Ul’dah 街頭引發恐慌的難民嗎？他嘲諷著大笑，堅稱你一點證據都沒有。</p><p>他拒絕跟你去 Hall of Flames，聲稱你沒有權力拘留他。可下一瞬，他的口氣又變得陰冷而現實：就算——就算他真的做了你說的那些事，那也不是政治，而是生意，純粹的生意。他說你真正想找的人不是他；但如果你願意保護他，他就發誓會把一切都告訴你。那句「我會說」還懸在空氣裡，局勢就被突如其來的騷動打斷。</p><p>Stone Torch 聽見動靜趕來，立刻命人分散搜索，因為兇手可能還在附近。你被要求交代經過，但從現場的線索來看，你顯然不是他們要抓的人。Stone Torch 甚至冷淡地評了一句：若這名商人真是近期暴動的元兇，也許有人會把殺他的人當成「替大家出了一口氣」。然而當你把消息帶回 Hall of Flames，Swift 的反應更直接、更沉重——那名商人不是單純被殺，而是被「滅口」，因為他正準備吐露秘密。Swift 要你別灰心：你離揪出真正操縱暴動的黑手，比你以為的更近。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 驚恐的難民 <small class="muted">(薩納蘭 - 中央薩納蘭, X:25.2, Y:15.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="shock-and-awe.html">拿起武器的人們</a></div><div class="row">所有職業（不含限定職） 等級 50 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="revolution.html">邊境計畫</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
