@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Desperate Times | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Desperate Times (ARR Patch 2.3)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/7592DB_Nch8"
+              title="Desperate Times" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Desperate Times</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Desperate Times`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>As Alphinaud warned you before, an incident like this was nearly inevitable with tensions rising across the sultanate—yet he tells you he has reason to believe this riot did not ignite on its own. If that possibility sharpens your attention, then so be it. He insists you accompany him to the Hall of Flames; he wants to hear what General Raubahn will say when confronted with the suspicion that someone set these events in motion.</p><p>Inside the Hall of Flames, Raubahn has no patience for ceremony. He tells you bluntly that this is no good time—his hands are full with the refugee crisis. Alphinaud presses exactly that point, and when Raubahn notes Alphinaud is already back on his feet, Alphinaud credits the Immortal Flames’ chirurgeons. His memory of the riot remains muddled, but he asks whether order has been restored. Raubahn admits it has not. The city was secured quickly, yet unrest has spilled into the surrounding territories, leaving pockets of resistance scattered across Thanalan. He has dispatched what forces he can spare to hunt the belligerents, but progress is slow—they are elusive and difficult to pin down.</p><p>Alphinaud understands how refugees living outside the walls would know the land. What he cannot reconcile is how they seemed so prepared. Before he was injured, he saw several refugees armed—not with butcher’s knives or pitchforks, but with proper martial weapons, and such equipment is costly. Tensions have worsened since the Domans were turned away, yes, but would a starving man buy arms instead of food? And what of those with not even a single gil, who survive only by the aid of the Immortal Flames—would they not sooner sell a weapon than raise it against the very hands that keep them alive? He tries to bring his suspicion into the open: this powder keg was not lit by chance—someone deliberately struck the spark.</p><p>Raubahn cuts him off. Order must be restored; that is his first duty. Until it is done, any investigation can wait. He refuses to debate it further, saying his scouts will be returning soon. Alphinaud does not mistake the silence for ignorance. Raubahn is no fool, and he has reason to keep his counsel. Without proof, if he claimed outside forces instigated the riots, the Monetarists would accuse him of evading responsibility—after all, he and the sultana have been the loudest advocates of refugee aid. Either way, harsh criticism is coming.</p><p>So Alphinaud turns to you. Allies may stumble upon the truth in time, but he trusts your abilities more. He proposes an independent investigation—separate from the authorities. You are to make inquiries in settlements suspected of harboring belligerents. Commander Swift will know which settlements, even if he hesitates to share information that could endanger soldiers. Alphinaud is confident you can persuade him. He, meanwhile, will seek answers in his own way, and then you will regroup and compare findings.</p><p>Commander Swift receives your request with guarded caution. What you ask is no small favor; in the wrong hands, such intelligence could cost countless lives. Even so, he concedes there is wisdom in sending an able individual—especially one with ties to the Immortal Flames—rather than an entire regiment. He tells you the Brass Blades have reported suspicious activity near Lost Hope. It may be unrelated, but they doubt it. You should begin by speaking with the Blades posted there—and you should do it quickly if you mean to arrive before additional forces are dispatched.</p><p>At Lost Hope, you are met with practiced reassurance. Amalberga tells you that if you seek refugees, you have come to the right place—then hurriedly corrects herself, insisting those refugees are not here. Most people in Lost Hope have accepted their lot and pass their days in quiet peace, she claims. Outsiders do not understand that—like a traveling merchant who came through recently, gregarious but outspoken. She says there is nothing to see, and that any troublemakers know better than to act with Leofric and her nearby.</p><p>Leofric’s tone is different the moment he recognizes you. He did not expect them to send you, which means someone has read his report. The refugees who left with the merchant have not returned, and he fears Zazawaka’s suspicions were correct. He tells you to speak with Zazawaka, and he warns you not to judge these people too harshly—every day is a struggle for them. If you were in their position, could you truly swear you would have chosen differently?</p><p>Behind the tents, you find the aftermath written in blood and terror. Zazawaka flinches at your approach, begging you not to hurt him, insisting he is not one of “them.” Then recognition breaks through his fear, and he apologizes for mistaking you for the thugs tormenting the refugees. He assumes Leofric sent you because you agreed to help—good, he says, because there is no time to waste. Everyone knows the Immortal Flames are on the march. The others have fallen under a fanatic’s spell, but not him. Promises of revolution and retribution, of making the ruling class pay and taking what is “owed”—he calls it childish fantasy. He tried to dissuade them from leaving, but few listened. Now one of the “idealists” has returned, and the madness of the merchant’s plan is plain for all to see. He tells you to look behind the tent and understand why.</p><p>There, a survivor shakes with trauma, babbling about blood, pleading at shadows not to draw their weapons, sobbing over someone who stayed behind. When you press him, he finally forces out what happened: he followed the merchant—may the gods strike him down for his folly. The merchant told them, “What they will not give, you must take,” then revealed a cache of weapons he had brought and urged them to seize control of their fates. The refugees were split into two groups and sent out separately. But when the Immortal Flames found them, panic swallowed any plan. Their leader tried to parley; arguments turned to fighting; soon everyone was fighting, and the Flames were shouting to give no quarter. His group was slaughtered. The other group is still out there—and if you do not stop what is coming, they will be massacred as well.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Alphinaud <small class="muted">(Ul’dah - Steps of Nald, X:11.7, Y:9.6)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-great-divide.html">The Great Divide</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 50 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="shock-and-awe.html">Shock and Awe</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'難民暴動を追って',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>あなたは、アルフィノが以前語った言葉を思い出す。スルタン政権内で緊張が高まり続ける以上、この種の事件が起きるのは避けがたかった――だが彼は、今回の暴動は自然発生ではないかもしれない、と言う。そう聞いて興味を引かれたなら結構だ、と彼はあなたを促し、炎の間へ同行するよう求める。ラウバーン将軍に会い、この件について何を語るのか、直接確かめたいのだ。</p><p>炎の間で、ラウバーンはあなたに向けて、今は取り込み中だと告げる。難民対応で手が塞がっているのだ。アルフィノはまさにその件を話し合いたいと言い、立ち上がっている彼を見たラウバーンが驚くと、アルフィノは不滅隊の医師の手当てのおかげだと答える。暴動の記憶はまだ曖昧だが、状況は収束したのか――そう問われてラウバーンは否定する。市内の鎮圧は間に合ったが、騒乱は周辺へも波及し、ザナラーン各地に抵抗の火種が残っている。割ける兵を送って残党を掃討しているが、進捗は遅い。連中は実に厄介で、捕まえづらいのだ。</p><p>アルフィノは、城壁外に暮らす難民が地理に詳しいこと自体は理解できると言う。だが理解できないのは、彼らがあまりにも「準備が整っていた」ことだ。負傷する前、彼は数人の難民が武装しているのを見た。包丁や農具ではない、明らかな武具だった。しかも武具は高価だ。ドマの民が追い返されて以降、市民と難民の緊張が高まったのは否定できない。だが飢えた者が食糧より武具を買うだろうか。さらに一ギルも持たず、不滅隊の支援なしには生きられぬ者たちが、恩人に刃を向けるために武具を抱え続けるだろうか。彼は結論へ踏み込む。これは偶然ではない。不満という火薬庫に、誰かが意図的に火を点けたのだ、と。</p><p>ラウバーンはそこで話を断つ。まずは秩序回復、それが自分の第一の務めだ。完了するまで捜査は後回しだと言い、これ以上の議論に時間は割けないと告げる。斥候がまもなく戻るのだ。アルフィノは、その沈黙を愚かさとは見ない。将軍は愚かではないし、慎重であるべき理由もある。証拠もなく外部勢力の扇動を口にすれば、モネタリストは責任逃れだと攻撃するだろう。難民支援を最も強く訴えてきたのは将軍とナナモである以上、いずれにせよ苛烈な非難は避けられない。</p><p>だからこそ、アルフィノはあなたに提案する。味方がいつか真相に辿り着く可能性はあるが、彼はそれ以上にあなたの働きを信じている。公権力とは別に、あなたたち自身で独自に調査するのだ。武装した抵抗者を匿っていると疑われる集落で聞き込みをしてほしい。情報はスウィフト中尉が把握している。軍事機密に関わるため渋るかもしれないが、あなたなら言葉で引き出せるはずだ。アルフィノは自分は自分のやり方で手がかりを探し、後で合流して情報を突き合わせようと言う。</p><p>スウィフト中尉は、あなたの申し出に警戒を隠さない。求める情報は軽い頼みではなく、もし誤った相手に渡れば多くの兵の命が危うくなる。だが彼は、あなたの言葉に一理あると認める。不滅隊と縁のある有能な個人に任せたほうが、連隊を動かすより適している場合もある。彼は、ロストホープ近辺で不審な動きが報告されていると告げる。最近の騒動と無関係かもしれないが、無関係とは思えない。現地に配置された黄銅刃と話すところから始めるべきだ。状況が整い次第、部隊も派遣される。先に調べたいなら急げ、と。</p><p>ロストホープでは、アマルベルガがあなたを迎え、難民を探しているのかと問いかける。だがすぐに、そういう難民はここにはいないと言い直し、この土地の人々は境遇を受け入れて静かに暮らしているのだと主張する。最近通りかかった旅の商人も理解できなかった、と彼女は言う。愛想のいい男だったが妙に意見が強く、去ってくれてせいせいしたとも。ここには何もない、少ない厄介者も自分とレオフリックがいる以上は大人しくしている――そう装う。</p><p>しかしレオフリックは、あなたを見るなり言葉を選ばない。あなたが来たということは、自分の報告が読まれたのだろう。旅の商人と共に去った難民が戻ってこない。ザザワカの疑念が当たっていたのではないか、と彼は不安を隠さない。あなたにはザザワカに会って説明を聞けと言い、そして難民を必要以上に責めるなと告げる。彼らにとって生きることは日々の闘いだ。あなたが同じ立場なら、別の選択をしたと言い切れるのか、と。</p><p>テントの奥で待っていたのは、血と恐怖だった。ザザワカはあなたを見るなり怯え、殴らないでくれ、自分はあいつらじゃないと叫ぶ。だがあなたの顔に気づくと、ならず者と勘違いしたと詫びる。レオフリックがあなたを寄越したのなら助けてくれるのだろう、と彼は縋るように言う。時間がない。不滅隊が進軍してくるのは周知の事実だ。仲間たちは扇動者に魅入られたが、自分は違う。支配階級に報復し、奪われたものを取り返す――そんな革命の甘言は子どもの空想だ、と彼は切り捨てる。止めようとしたが誰も耳を貸さず、だが理想に浮かれて出ていった者の一人が戻ったことで、旅の商人の計画がどれほど狂っていたかが誰の目にも明らかになった。テントの裏を見れば分かる、と彼は言う。</p><p>そこにいた生存者は、血の光景に心を壊され、意味のない言葉を繰り返し、武器を抜くなと怯え、誰かを失った痛みに泣き崩れている。あなたが問いかけ続けると、彼はついに事の顛末を吐き出す。旅の商人についていった――自分の愚かさを神に罰してほしいほどだ。あの男は「与えられぬなら奪え」と言い、隠し持っていた武器の山を見せ、「運命は自分の手で掴め」と焚きつけた。難民たちは二手に分けられ、それぞれ別行動にされた。だが不滅隊に見つかったとき、彼らはどうしていいか分からなかった。話し合いを試みたはずが口論になり、やがて斬り合いになり、皆が戦い、そして不滅隊は容赦するなと叫んだ。自分の側は壊滅した。もう一方の集団がまだ外にいる。止めなければ、彼らも同じように虐殺される――彼はそう訴える。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> アルフィノ <small class="muted">（ウルダハ：ナル回廊, X:11.7, Y:9.6）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-great-divide.html">災厄の報せ</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="shock-and-awe.html">武器を取った人々</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'追查難民暴動',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>正如 Alphinaud 先前告訴過你，在 sultanate 內部緊張持續升高的情況下，像這樣的事件幾乎無可避免；但他同時也告訴你，他有理由相信，這次暴動很可能不是自然爆發。你若因此被勾起好奇，那正合他意——他要你陪他一起去 Hall of Flames，親自聽 General Raubahn 對此事怎麼說。</p><p>在 Hall of Flames，Raubahn 沒有多餘的客套。他直接告訴你，現在不是好時機——他正忙著處理難民問題。Alphinaud 立刻接話：他們要談的正是這件事。Raubahn 見他已能站著，語氣裡帶著意外；Alphinaud 則把迅速恢復歸功於 Immortal Flames（不滅隊） 的醫師。他對暴動的記憶仍然有些模糊，但他想確認：局勢是否已重新受控。Raubahn 坦言並沒有。城市雖然很快被穩住，但騷亂已擴散到周邊領地，Thanalan 各處仍有零星抵抗。能抽調的兵力他都派出去了，卻進展緩慢——那些人狡猾得很，難以追蹤。</p><p>Alphinaud 能理解，因為多數難民都住在城牆外，他們熟悉地形並不奇怪；真正讓他不解的，是他們的「準備」為何如此周全。在他受傷之前，他曾親眼看見幾名難民帶著武器——不是屠夫刀、不是農具，而是貨真價實的軍用武器，而那種裝備價格昂貴。自從 Domans 被拒於門外後，Ul’dah 市民與難民之間的緊張確實日益升高，但這份不滿，足以讓飢餓的人寧可買武器也不買食物嗎？更何況，那些連一 gil 都拿不出來、必須依靠 Immortal Flames 救助才能活下去的人，理應更可能把武器賣掉換活命的資源，而不是拿來對付自己的施援者。</p><p>Raubahn 要他講重點。Alphinaud 只得把推論說穿：這座由怨氣堆成的火藥庫，不可能是偶然走火；有人刻意把引線點燃，故意讓事件發生——但 Raubahn 立刻截斷。他的第一責任是恢復秩序；在秩序回復之前，任何調查都得等。他沒有時間討論，因為斥候很快就要回報。</p><p>Alphinaud 並不把這當成愚鈍，而是當成將軍的克制。他明白 Raubahn 不是笨人，只是不得不保持沉默——若沒有證據就宣稱暴動是外力煽動，Monetarists 只會反咬他是在推卸責任。畢竟推動難民救助最力的，正是 Raubahn 與 sultana。無論如何，接下來幾天他們都將面對嚴厲的批評。</p><p>因此 Alphinaud 轉向你，提出另一條路：盟友或許終究能碰巧查出真相，但他更相信你的能力。他要你們繞開當局，自行展開獨立調查。你必須前往那些被懷疑匿藏武裝者的聚落打聽消息；Commander Swift 知道哪些地方最可疑。他可能會抗拒提供情報，畢竟落入不當之手，會讓無數士兵陷入危險——但 Alphinaud 相信你能用言語說服他。同時，Alphinaud 也會用自己的方式找答案，之後你們再會合交換發現。</p><p>面對你的詢問，Swift 的警戒幾乎是本能反應。這不是小忙；情報若落到錯的人手裡，會危及大量士兵的性命。但他仍承認你的說法有道理：由一個有能力、甚至與 Immortal Flames 有關聯的人去處理，有時比派出整支部隊更合適。於是他告訴你，Brass Blades（Ul’dah 的治安部隊／傭兵警備組織，負責城邦周邊的巡邏、維安、盤查、逮捕、調查等工作）回報在 Lost Hope 附近出現可疑活動；也許與近期事件無關，但他們不這麼認為。他建議你先去找駐守當地的 Brass Blades 詢問，而且若你想在增援抵達前先行調查，就必須立刻出發——只要情勢允許，部隊就會被派往那個地區。</p><p>到了 Lost Hope，Amalberga 先是用熱情的口吻問你是不是來找難民，說你來對地方了；接著她又立刻改口，說你要找的「那些難民」不在這裡。她強調 Lost Hope 的人早已接受現況，甘願安安靜靜過日子。她還提到一名最近路過的旅行商人：人很健談，卻意見特別多，她甚至不諱言自己並不遺憾他離開。她不斷暗示這裡沒什麼好看的，少數搗亂者也不敢在她和 Leofric 面前亂來。</p><p>Leofric 的話卻毫不含糊。他沒想到會派你來——也就是說，終於有人讀了他的報告。那些跟著旅行商人離開的難民至今未歸，他越來越擔心 Zazawaka 的猜疑是對的。你顯然還不明白他在說什麼，他要你去找 Zazawaka，讓對方把事情講清楚；而在你轉身前，他又提醒你別太急著審判這些人——對他們而言，每一天都像在掙扎求生。若你身處同樣的位置，你真能說自己一定不會做出同樣的選擇嗎？</p><p>你很快就在帳篷後見到恐懼的痕跡。Zazawaka 一看到你就嚇得求饒，說別傷害他，他不是「那些人」；接著他才認出你，連忙道歉，說自己把你錯認成一直欺負他們的惡棍。他以為 Leofric 叫你來，是因為你願意幫忙——那真是 Twelve 保佑，因為他們已經沒有時間了，所有人都知道 Immortal Flames 正在往這裡推進。他說其他人都被那個狂熱份子迷惑了，但他沒有。他痛斥那些「革命與報復」的承諾，什麼要清算統治階級、奪回應得之物——在他眼裡不過是幼稚的幻想。他曾竭力阻止大家跟著走，卻沒幾個人肯聽。如今其中一名理想派的人回來了，那名旅行商人的計畫到底多瘋狂，已經昭然若揭；他要你到帳篷後看一眼，你就會明白。</p><p>那裡，一名倖存者被血腥場面嚇到幾乎崩潰，口中反覆呢喃，像是在哀求別人不要拔武器，又像是在哭求某個人「應該在這裡安撫他」。當你終於讓他能把話說清楚一些，他顫抖著承認：他跟著旅行商人走了，但願眾神因我的愚蠢而降下懲罰。那個商人告訴他們：「他們不給的，你就自己去拿。」然後亮出他帶來的一批武器，煽動大家去「掌控自己的命運」。他當時就想逃，可其他人太興奮了；商人把人分成兩組，讓他們各自行動。可當 Immortal Flames 找到他們時，他們根本不知道該怎麼辦。領頭的人試圖與對方交涉，結果先是爭吵、接著打起來、最後所有人都在混戰；他聽見 Immortal Flames 喊著「不要留情」，而他的那一組就在混亂中被屠殺。更可怕的是——另一組還在外面。若不在事情走到最後一步前阻止，他們也會像這一組一樣，被徹底歼滅。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 阿爾菲諾 <small class="muted">(烏爾達哈 - 納爾回廊, X:11.7, Y:9.6)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-great-divide.html">巨大的分歧</a></div><div class="row">所有職業（不含限定職） 等級 50 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="shock-and-awe.html">拿起武器的人們</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
