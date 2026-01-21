@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lord of Levin | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Lord of Levin (ARR Patch 2.3)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/JLxcN8NfpTE"
+              title="Lord of Levin" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Lord of Levin</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Lord of Levin`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>You answer Minfilia’s summons at once, and she thanks you for coming with such haste—she would not have called you back if it were not urgent. The Order of the Twin Adder has sent troubling news: they have reason to believe the sylphs may have called forth their revered guardian, the primal Ramuh. Thancred seizes on her phrasing—“may have”? Then it is not certain. Minfilia explains that the Elder Seedseer says the elementals themselves murmur of the Lord of Levin’s return to the forest, and yet the Sylphlands show no outward sign of unusual unrest.</p><p>Papalymo asks the Antecedent to consider that the two reports do not truly conflict. Unlike more bellicose primals such as Garuda, Ramuh is said to act only to defend his children; he would not reveal himself unless someone directly threatened the sylphs or their land. Y’shtola is troubled by how abruptly this has developed—were they not keeping close watch on the “touched ones” and their movements? If preparations for a summoning were underway, surely it would not have escaped notice. Yda answers that it did not escape her; she was fairly sure it would happen—just not this soon.</p><p>Y’shtola’s disbelief turns sharp: you foresaw it and did nothing to prevent it? Yda insists she told Papalymo, and admits she could have reported sooner to Minfilia, but there was little they could do besides watch and wait. The sylphs do not welcome outsiders meddling in their territory, and they had summoned Ramuh once already right after the Calamity—then, it was because the Garleans marched through the forest. Papalymo adds that as long as Castrum Oriens stands, the sylphs cannot be blamed for wanting their guardian close at hand. In that sense, he says, he and Yda agree: the forest folk’s actions were inevitable.</p><p>Yet Papalymo also says something changed—an influx of strangers into the Black Shroud, something they did not foresee. By all accounts, the violence in Ul’dah drove refugees to seek shelter beneath the trees, and the sylphs likely took the panicked migration as yet another invasion, hastening their efforts to summon their god. Y’shtola is reminded of Titan and the kobolds: once again, the affairs of men have paved the way for a primal’s coming. Papalymo cannot resist a bitter aside about what Eorzea might be without mankind’s “civilizing influence,” but he turns the moment toward purpose—this regrettable development presents a unique opportunity.</p><p>He points to you. Through your past dealings with the sylphs of Little Solace, you once prevented an untimely conflict with Gridania. Might you now achieve something similar with their patron deity? If Ramuh can be convinced of your intentions, it could be the first step toward breaking the cycle of primal summoning. Y’shtola calls it a fond hope—if such persuasion were possible, they would not have been at war with the beastmen since time immemorial. Yda tries to insist that perhaps this time will be different, but Minfilia cuts the argument short: they must first consult the nation most affected by Ramuh’s presence.</p><p>The Elder Seedseer has requested your personal involvement. Minfilia orders you to report to Commander Vorsaile Heuloix at the Adders’ Nest as soon as you are able, and to steel yourself for the worst. She hopes for a peaceful resolution, but experience suggests your meeting with the Lord of Levin will be less than amicable; if it comes to that, the other Scions will provide whatever support you require.</p><p>At Adders’ Nest, Vorsaile Heuloix tells you your arrival has been keenly anticipated. A primal’s appearance is always cause for alarm, and though his men stand ready, he knows no one more qualified than you to snuff out the threat—he would have you act without delay. Yet the Elder Seedseer wishes to speak with you first; she believes your diplomatic skills may serve better than martial force. He directs you to Nophica’s Altar, where a conjurer will admit you to the Lotus Stand.</p><p>The Silent Conjurer confirms the other Scions have already arrived and shows you in. Yda promises she will be at your side no matter what the Elder Seedseer intends, and teases that Y’shtola will not be far behind—even if she does blame everything on mankind. Papalymo warns that once Ramuh passes judgment, his wrath is said to be implacable, and they should settle their discussion before Gridania and her people are placed upon his scales. Thancred notes the sylphs have sent a representative—then there can be no doubt. Y’shtola watches closely, eager to hear how the Elder Seedseer intends to treat with Lord Ramuh. The sylph’s servant greets you warmly as a friend of the elder one.</p><p>Kan-E-Senna welcomes the Scions in Gridania’s name, saying their presence brings comfort in these uncertain days. She has called you to share urgent tidings: only a short while ago, the great elemental spoke with unmistakable intensity—Ramuh has returned to the forest. Almost at once, an emissary from Little Solace arrived to say the sylphs too have sensed the Lord of Levin’s presence. His exact location remains unknown, but they may safely assume he was summoned deep within the Sylphlands.</p><p>Kan-E-Senna reminds you that Ramuh is unlike the primals you have faced before. He is not a raging avatar of destruction, but is revered for wisdom as well as strength—arbiter and guardian to his children. Because Gridania and the sylphs have found a way to share the Twelveswood, she hopes this sagely immortal will be amenable to reason, and conflict can be avoided. Blessed with the power of the Echo, you are among the few who may commune with a primal without fear of influence, and she asks you to represent them in this most delicate negotiation. The Twelveswood has suffered enough, she says—and on that point, Gridania, the sylphs, and likely Lord Ramuh himself are in perfect accord. Do not endanger the shared home with needless hostility; safeguard the peace between their peoples.</p><p>With her thanks given, she bids you make for Little Solace, where a member of the Order of the Twin Adder awaits to advise you on how to find the Lord of Levin. She leaves you with a final warning: an ill wind blows through the forest, and it is not only the Twelveswood that flinches—every land in Eorzea shivers in dread anticipation. Have care.</p><p>At last you arrive in Little Solace, where a Serpent Lieutenant greets you by name, saying he was told to expect you. You are to treat with Ramuh himself—an unenviable task, but one he believes you are well suited for. He tells you the other Scions are investigating the area even now to determine where the Lord of Levin might be found, and asks you to remain here until they return with their findings.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Minfilia <small class="muted">(The Rising Stones, X:6.1, Y:5.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="stories-we-tell.html">Stories We Tell</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 50 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="levin-an-impression.html">Levin an Impression</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'雷神ラムウ',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>あなたはミンフィリアの呼びかけに即座に応じる。彼女は急いで戻ってくれたことに礼を述べ、緊急でなければ呼び戻さなかったと念を押す。双蛇党から受け取った報せは不穏だった。シルフたちが、崇める守護神――蛮神ラムウを呼び出した可能性があるという。サンクレッドは「可能性」と聞き返す。本当に確定ではないのか。ミンフィリアは説明する。先代当主によれば、精霊たち自身が「裁きの雷神」が森へ戻ったとささやいている。しかしシルフ領では、異様な騒ぎは見られないのだ、と。</p><p>パパリモは先代当主に断りを入れつつ、その事実は精霊の証言と矛盾しないと言う。ガルーダのような好戦的な蛮神とは異なり、ラムウは子らを守るためにのみ動くと伝えられている。誰かがシルフや領域を直接脅かさない限り、姿を現すことはないだろう、と。ヤ・シュトラは事態の急変に不安を示す。「触れられし者」たちの動向は厳重に監視していたはずではないか。召喚の準備が進んでいたのなら、見落とすはずがない、と。イダは言う。見落としてはいない。起こるとは思っていたが、こんなに早いとは思わなかった、と。</p><p>ヤ・シュトラは声を強める。予見していながら止めなかったのか。イダは慌てて、パパリモには伝えていたと弁明する。ミンフィリアへ早めに報告できたかもしれないが、正直、できることは様子を見ることくらいだった、と。シルフは他者が領内をうろつくのを嫌う。しかも彼らは第七霊災直後にも一度ラムウを呼び出している――あのときは帝国軍が森を踏み荒らしたからだ。パパリモは続ける。カストルム・オリエンスが存在する限り、守護神を側に置きたいと願うシルフを責められない。つまりイダと自分は同意見で、森の民の行動は避けがたかったのだ、と。</p><p>だが今回、予見できなかった変化があった。黒衣森へ、見知らぬ者たちが突然流れ込んできたのだ。ウルダハでの暴力に追われた難民たちが、木々の天蓋の下へ身を隠そうとした――それをシルフは新たな侵入と受け取り、召喚を早めた可能性が高い。ヤ・シュトラはタイタンとコボルドを思い出し、人の都合がまたしても蛮神降臨の道を開いたと言う。パパリモは人の「文明化の影響」について皮肉を漏らしつつも、こうも言う。この遺憾な展開は、しかし、得がたい機会にもなり得る、と。</p><p>彼はあなたに目を向ける。あなたはかつてリトルソレースのシルフと関わり、グリダニアとの無用な衝突を防いだ。その経験があるあなたなら、彼らの守護神に対しても同様の成果を得られるのではないか。もしラムウにこちらの意図を理解させられれば、蛮神召喚の連鎖を断つ第一歩になるかもしれない。ヤ・シュトラはそれを甘い希望だと言う。そんなことが可能なら、太古から蛮族と戦い続けてなどいない。イダはそれでも「今回は」と言いかけるが、ミンフィリアが話を切り上げる。まず、ラムウの存在によって最も影響を受ける国家と協議しなければならない。</p><p>先代当主は、あなたの直接の関与を求めている。ミンフィリアは命じる。できるだけ早く双蛇党の本部へ赴き、司令官ヴォルセール・ユーロワに報告せよ。最悪の事態も覚悟しておけ。平和的解決を望むが、経験上、裁きの雷神との対面は友好的にはならない可能性が高い。万一そうなれば、暁の仲間は必要な支援を惜しまない、と。</p><p>双蛇党本部でヴォルセール・ユーロワは言う。あなたの到着は待ち望まれていた。蛮神の出現は常に不安と動揺を招く。部下はいつでも動けるが、脅威を速やかに消し去れる者として、あなた以上の適任はいない――本来なら即刻討伐を命じたい。だが先代当主が、まずあなたに会って話したいと言っている。武力よりも、あなたの外交的手腕が役に立つかもしれないのだ。彼はあなたをノフィカの祭壇へ導き、そこにいる幻術士がロータススタンドへ入れると告げる。</p><p>幻術士は、ほかの暁はすでに到着していると伝え、あなたを案内する。イダは先代当主が何を考えていようとあなたのそばにいると言い、ヤ・シュトラもきっと近くにいるはずだと笑う――たとえ彼女が何でも人間のせいにするとしても。パパリモは警告する。ラムウが裁きを下せば、その怒りは容赦ないと言われる。グリダニアと民が天秤に載せられる前に、議論を終えるべきだ。サンクレッドは、シルフ側も代表を寄こしていると指摘し、これでもう疑いようがないと言う。ヤ・シュトラは、先代当主がいかにラムウと交渉するのかを興味深く見守る。シルフの使いは、長老の友としてあなたに挨拶する。</p><p>カヌ・エ・センナはグリダニアの民を代表して暁を迎え、不安の時代にあなたたちの存在が大きな支えだと言う。彼女は緊急の報せを共有するために呼び集めた。つい先ほど、偉大なる精霊が告げた――その声はあまりに鮮烈で、ラムウが森へ戻ったことを明確に示していた。言葉の余韻が消えぬうちに、リトルソレースからの使者が訪れ、シルフたちもまた裁きの雷神の気配を感じ取ったと伝えた。居場所は不明だが、召喚はシルフ領の奥深くで行われたと考えてよい。</p><p>カヌ・エ・センナは言う。ラムウは、あなたがこれまで遭遇した蛮神とは異なる。破壊の化身ではなく、力だけでなく叡智によっても崇められ、子らの裁定者であり守護者だ。黒衣森を共有する道を見いだした以上、この賢き不滅の存在も理にかなう言葉に耳を傾け、争いを避けられることを願っている。あなたはエコーの力に祝福され、蛮神と交感しても影響を受けにくい数少ない者だ。だからこそ、繊細な交渉の場で代表となってほしい、と。黒衣森はもう十分に傷ついた。その点については、グリダニアもシルフも――そしておそらくラムウ自身も――完全に一致している。不要な敵対で共有の住処を危険に晒すな。両者のあいだにある平和を守ってほしい。</p><p>感謝を告げたカヌ・エ・センナは、リトルソレースへ向かうよう促す。そこで双蛇党の者が待っており、裁きの雷神を探す手がかりを示してくれるという。最後に彼女は警告する。森に不吉な風が吹いている。そしてそれは黒衣森だけの話ではない――エオルゼアのすべての地が、その到来に怯え震えている。気をつけて、と。</p><p>リトルソレースで双蛇党の中尉があなたを迎え、あなたが来ると聞いていたと言う。あなたはラムウそのものと対面し交渉する――気の重い任務だが、あなたなら適任だと信じている。ほかの暁は周辺を調査し、裁きの雷神が見つかりそうな場所を特定しようとしている。彼らが成果を持ち帰るまで、ここで待機してほしいと頼まれる。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ミンフィリア <small class="muted">（石の家, X:6.1, Y:5.2）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="stories-we-tell.html">止まない争い</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="levin-an-impression.html">裁きの雷</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'雷霆之主',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Minfilia 感謝你如此迅速回應她的召喚，並要你放心——若非情勢緊急，她不會把你叫回來。她直截了當地說明：Order of the Twin Adder 帶來極其不安的消息，他們有理由相信，sylphs 可能已經呼喚出他們所敬奉的守護者——primal Ramuh。Thancred 立刻抓住她的字眼追問：「可能」？也就是說還不確定？Minfilia 回答，Elder Seedseer（Gridania 的最高「Seedseer」頭銜，由能與 elementals 溝通、負責調停森林與居民關係的 Padjal 擔任；現任（ARR 主線時期）指的就是 Kan-E-Senna，同時也是 Seedseer Council 的領袖，並在軍政上統率（或至少具有最高指揮權層級）Order of the Twin Adder）轉述 elementals 的低語：Lord of Levin 已經回到森林；然而 Sylphlands 表面上卻沒有任何異常騷動。</p><p>Papalymo 向 Antecedent（Minfilia 的頭銜，也就是 Scions of the Seventh Dawn 的領袖）致意後表示，這兩件事並不矛盾。與 Garuda 這類更具攻擊性的 primal 不同，傳聞 Ramuh 只會在為了保護自己的孩子時才會行動；只要沒有人愚蠢到直接危害 sylphs 或他們的領地，他很可能不會急著讓自己的存在被看見。Y’shtola 對事態發展的突兀感到憂心——他們不是一直密切監視那些「touched ones」及其動向嗎？若真的在準備召喚儀式，不可能完全不被察覺。Yda 卻說並沒有沒察覺；她一直很確定事情會發生，只是沒想到會這麼快。</p><p>Y’shtola 的反應立刻變得尖銳：你預見了這個結果卻什麼都不做？Yda 急忙辯解，她有告訴 Papalymo；她也承認或許可以更早向 Minfilia 報告，但說到底他們能做的其實不多，只能先觀察再等待。sylphs 對外人闖進他們的領地極度敏感，而他們在 Calamity 之後也曾召喚過一次 Ramuh——當時是因為 Garleans 踩踏著穿越森林。Papalymo 接著補充，只要 Castrum Oriens 仍然矗立，sylphs 想把守護神留在身邊就不該被責怪；因此他與 Yda 的結論一致：森林之民的行動在某種程度上是必然、難以避免的。</p><p>但 Papalymo 也指出，真正讓情勢急轉直下的是一件他們沒有預料到的事——Black Shroud 突然湧入了陌生人。據他所知，Ul’dah 近期的暴力事件迫使不少難民逃進樹冠遮蔽之下尋求庇護；sylphs 很可能把這種恐慌的遷徙視為又一次入侵，因而加快了召喚神祇的步調。Y’shtola 想起 Titan 與 kobolds 的例子，感嘆又一次是人類的紛擾鋪出了 primal 降臨的道路。Papalymo 也冷冷嘲諷了一句，讓人不禁想像沒有「人類的文明化影響」時的 Eorzea 會是什麼模樣；但他隨即轉回正題：這件令人遺憾的發展，或許也提供了一個難得的機會。</p><p>他把目光放在你身上。你曾與 Little Solace 的 sylphs 交涉，成功避免與 Gridania 爆發不必要的衝突；那麼，一個曾經如此順利與 sylphs 互動的人，是否也能對他們的守護神取得類似成果？若能讓 Ramuh 理解他們的意圖，這也許就是打破「召喚 primal 週期」的第一步。Y’shtola 認為這只是美好的幻想——若真能做到，他們也不會自遠古以來就與 beastmen 戰爭不休。Yda 還想說「但也許這次可以」，Minfilia 便打斷了爭論：這個討論稍後再續，他們必須先去與受 Ramuh 影響最深的國家商議。</p><p>Minfilia 表示，Elder Seedseer 點名要你親自介入，請你盡快前往 Adders’ Nest 向 Commander Vorsaile Heuloix 報到。她要你為最壞情況做好心理準備——她希望能和平解決，但以往經驗顯示，你與 Lord of Levin 的會面恐怕不會太友善；若真演變成衝突，其他 Scions 當然會提供你所需的一切支援。</p><p>你抵達 Adders’ Nest 後，Vorsaile Heuloix 表示早已在等你。primal 的出現永遠令人警惕不安；雖然他的部下已準備好面對任何狀況，但他認為沒有誰比你更有資格立刻消除這個威脅，甚至希望你毫不拖延就動手。然而 Elder Seedseer 希望先與你談談——她認為你在「交涉」上的能力，比起「作戰」更能派上用場。Vorsaile Heuloix 要你前往 Nophica’s Altar，並說那裡的 conjurer 會放你進入 Lotus Stand。</p><p>到了 Nophica’s Altar，Silent Conjurer 告訴你其他 Scions 已經抵達，並請問是否要帶你進去。你進入 Lotus Stand 後，Yda 先表態：不論 Elder Seedseer 打算怎麼做，她都會站在你身邊；而 Y’shtola 肯定也不會離太遠——就算她老覺得一切都是人類的錯。Papalymo 警告，傳聞 Ramuh 一旦做出裁決，他的怒火將不可撼動；最好在 Gridania 與她的人民被放上他的天秤之前，先把該談的談完。Thancred 注意到 sylphs 也派來了代表，這下就毫無疑問了。Y’shtola 則帶著明顯的好奇，想看看 Elder Seedseer 打算如何與 Lord Ramuh 交涉。這時一名 Sylphic Servant 也朝你打招呼，說能再次見到「elder one 的朋友」真好。</p><p>Kan-E-Senna 以 Gridania 之名歡迎你們，說在充滿不確定的日子裡，Scions 的到來讓所有人都感到安心。她召集你們，是為了分享極其緊急的消息：不久前，偉大的 elemental 開口了，那聲音清晰而強烈——Ramuh 已經回到森林。她話音未落，Little Solace 的使者便來訪，告訴她 sylphs 也感覺到 Lord of Levin 的存在。雖然具體位置仍不明，但他們可以合理推斷 primal 是在 Sylphlands 深處被召喚出來的。</p><p>Kan-E-Senna 強調，Ramuh 與你之前遭遇過的 primal 不同：他不是狂怒的毀滅化身，而是同時以智慧與力量受人敬仰，既是孩子們的裁決者，也是守護者。既然 Gridania 與 sylphs 都已找到共存 Twelveswood 的方式，她希望這位睿智的不朽者也願意聽進道理，從而避免衝突。由於你擁有 Echo 的力量，你是少數能與 primal 交流而不必擔心受到 primal 影響的人之一，因此她請你代表他們，參與這場極為敏感的談判。她說 Twelveswood 已經受夠了；在這點上，Gridania、sylphs——甚至她推測 Ramuh 本人——都完全一致。不要因為不必要的敵對而危害共同的家園，請你守住兩個族群之間得來不易的和平。</p><p>她向你致謝後，請你前往 Little Solace。那裡有一名 Order of the Twin Adder 的成員在等你，會告訴你該如何找到 Lord of Levin。最後 Kan-E-Senna 以一句警告作結：森林裡正吹著不祥的風；而在這陣風來臨時顫抖的不只是 Twelveswood——Eorzea 的所有土地都在恐懼中屏息等待。務必小心。</p><p>你抵達 Little Solace 後，一名 Serpent Lieutenant 迎上前來，說他已被告知會等到你。他明白你要去與 primal Ramuh 本人交涉——這是讓人不願承接的任務，但他相信你完全勝任。他也說其他 Scions 正在附近進行調查，試圖確認 Lord of Levin 可能出現的位置；在他們帶回結果之前，他希望你先留在這裡等待。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 敏菲利亞 <small class="muted">(石之家, X:6.1, Y:5.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="stories-we-tell.html">止息不了的紛爭</a></div><div class="row">所有職業（不含限定職） 等級 50 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="levin-an-impression.html">審判之雷</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
