@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Stories We Tell | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Stories We Tell (ARR Patch 2.3)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/NEy-i8zgwBA"
+              title="Stories We Tell" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Stories We Tell</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Stories We Tell`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Alphinaud admits that knowing the truth should be a relief—yet the idea that such widespread chaos was engineered by one man’s lust for power leaves him sickened. What unsettles him further is the secrecy: how long, he wonders, did they intend to keep Omega’s existence hidden from the Scions, and why did they feel the need to hide it at all? He turns practical at once—if the disputed territories are the center of these military tensions, the Scions must learn more about what is happening there. And you, as he puts it, are the Scion best suited to making inquiries; he asks you to go to Maelstrom Command at the earliest opportunity.</p><p>Before the conversation can settle, a Sultansworn squire’s shout cuts through the air, driving a child away—this is no place for children. You recognize the sobbing voice. Ele has come looking for you, apologizing through tears, because you said you were searching for the man who left with Ele’s parents. Alphinaud’s surprise is immediate: you know this girl? Then the merchant truly did go to Stonesthrow as well. Ele’s question lands with painful simplicity—did you find him, and were their parents with him? Alphinaud answers gently but plainly: they were not.</p><p>He does not leave it there. Alphinaud says he can think of several places they might be, and offers to help search—together. Ele brightens at once, asking if he truly will help. Alphinaud agrees, but asks for a brief moment to finish speaking with you; you are “telling him a secret,” and no one else may listen, so could Ele wait by the pillar for just a moment? Ele promises to wait.</p><p>Once Ele is out of earshot, Alphinaud decides what to do with the child: he will take Ele to the Quicksand, where Momodi may know how to help. He lets out a long sigh—this whole charade has worn him thin, and he mutters that he would rather face a legion of Garleans, an aether-starved primal, even deal with an Ascian than keep up games like this. The strain, he says, is not only in Ul’dah. Sometimes he fears Minfilia is too ambitious—rushing the Scions from threat to threat as they arise, without regard for what it costs their limited resources, and themselves. Perhaps, he muses, the time has come for a change.</p><p>Then Minfilia’s voice comes through, urgent. She asks you to return to Revenant’s Toll with all haste: the situation in the Twelveswood has taken a turn for the worse, and she will explain once you arrive. Alphinaud reacts at once—Twelveswood? Then the primal threat she mentioned earlier has been confirmed. With no reports of Ixali activity, that leaves… the sylphs. He tells you to go, because you both know that the appearance of a primal takes precedence over all else. And before you leave, he adds a final request: when you arrive, tell the Antecedent that while he is grateful for her concern, she need not fear for his safety—he is more than capable of protecting himself.</p><p>At the Rising Stones, a Serpent Herald arrives on behalf of the Elder Seedseer to petition the aid of the Scions; the Antecedent has been informed. Minfilia greets you with relief, saying it is good to see you healthy and hale—the latest news from Ul’dah was deeply disturbing. Then she cannot resist a dry remark: clearly, the only injury Alphinaud suffered was to his ego, and that will heal soon enough. She says the other Scions must be present for what comes next, and if you are ready to begin, she will summon them now.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Alphinaud <small class="muted">(Ul’dah - Steps of Thal, X:10.7, Y:12.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="revolution.html">Revolution</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 50 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="lord-of-levin.html">Lord of Levin</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'止まない争い',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>アルフィノは言う。真実を知れたことは喜ぶべきなのに――すべての混乱が、たったひとりの権力欲の産物だと思うと吐き気がする、と。そしてさらに不穏なのは、オメガの存在を暁にどれだけ隠すつもりだったのかという点だ。隠す必要を感じたこと自体が、あまりにも不吉だ、と。だからこそ、係争地で行われている軍事活動について、こちらも把握しておくべきだと結論づける。あなたはその任務に最も適した暁だとして、できるだけ早く海軍司令部へ赴き、聞き込みをしてほしいと頼む。</p><p>その直後、親衛隊の従士の怒号が響く。子どもがいる場所ではない、立ち去れ――追い払われて泣いているのはエレだった。あなたを探して来たのだと言い、あなたが「両親と一緒に出て行った男」を探していると言っていたから、と嗚咽まじりに訴える。アルフィノは驚く。あなたはこの子を知っているのか――ならば、商人はストーンスローにも現れていたのだな、と。エレは必死に尋ねる。男は見つかったのか、両親は一緒だったのか。アルフィノは静かに答える。残念ながら、両親はいなかった、と。</p><p>だがアルフィノは続ける。両親がいそうな場所はいくつか思い当たる、よければ一緒に探そう、と。エレは涙を拭いながら、本当に探してくれるのかと問う。アルフィノはもちろんだと頷くが、まずあなたとの話を終えなくてはならないと言い、あなたが「秘密」を話しているから誰にも聞かせられないのだと説明する。だから、あの柱のそばで少し待っていてくれないか――ほんの少しでいい、と。エレは素直に待つと約束する。</p><p>エレが離れると、アルフィノは決める。エレはクイックサンドへ連れて行く、モモディならどうすべきかわかるかもしれない、と。そして深いため息をつき、苛立ちを漏らす。ガレマール帝国軍の一個軍団でも、エーテルを失った蛮神でも、アシエンの相手でも――こんな茶番よりはよほどましだ、と。さらに彼は、ミンフィリアは野心的すぎるのではないかと不安を口にする。脅威が現れるたびに右へ左へと駆け回り、限られた戦力と、そして自分たち自身にかかる負担を顧みない――変えるべき時が来たのかもしれない、と。</p><p>そこへリンクパール越しにミンフィリアの声が届く。突然だが、ただちにレヴナンツトールへ戻ってほしい――黒衣森の状況がさらに悪化した、と。詳しくは到着してから話すという。アルフィノは反応する。黒衣森となると、以前言っていた蛮神の脅威は確定したのか。イクサルの動きは聞いていない――となれば……シルフか。彼はあなたに急げと言う。蛮神の出現が何よりも優先されることは、あなたも承知だろう、と。さらに、到着したら先代当主に伝えてほしいとも頼む。気遣いには感謝するが、自分の身を案じる必要はない――自分は自分で守れる、と。</p><p>帰還後、双蛇党の伝令が現れ、長老樹海守の名代として暁に協力を求める。事態は先代当主にも共有済みだという。ミンフィリアはあなたの無事を見て安堵し、ウルダハから届いた最新の知らせは実に不穏だったと告げる。続けて皮肉も添える――アルフィノが負った傷は自尊心だけだろう、いずれ治る、と。彼女は、この会合にはほかの暁も同席する必要があると言い、準備ができたなら今すぐ呼び集める、とあなたに促す。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> アルフィノ <small class="muted">（ウルダハ：ザル回廊, X:10.7, Y:12.9）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="revolution.html">フロンティア計画</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="lord-of-levin.html">雷神ラムウ</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'止息不了的紛爭',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Alphinaud 說，知道真相本該讓人鬆一口氣，可是一想到這一切混亂竟然只是某個男人對權力的貪慾所造成，他就感到作嘔。更令他不安的是他們的刻意隱瞞——他們究竟打算把 Omega 的存在對 Scions 藏多久？而他們竟然覺得「必須隱瞞」本身就非常可疑。與其被動挨打，最符合他們利益的做法，是盡快掌握爭議領土上的軍事行動。於是他把任務交給你：你是 Scions 裡最適合去打聽這件事的人，請你抽空前往 Maelstrom Command，越早詢問越好。</p><p>話音未落，一名 Sultansworn Squire 的喝斥聲打斷了現場——這裡不是孩子該來的地方，快走。被趕開的孩子哭得上氣不接下氣，你一聽就知道是 Ele。Ele 哭著向你道歉，說自己一直在找你，因為你說過你在找那個跟爸爸媽媽一起離開的男人。Alphinaud 立刻察覺不尋常：你認識這個孩子？那麼那名商人果然也去過 Stonesthrow。Ele 急切地問你：你找到那個男人了嗎？爸爸媽媽跟他在一起嗎？Alphinaud 只能先說出最殘酷的答案——沒有，他們不在。</p><p>但 Alphinaud 沒有讓這句話變成終點。他說自己想得到幾個可能的去處；如果 Ele 願意，他可以陪 Ele 一起去找。Ele 眼裡立刻亮起一點希望，問他真的願意幫忙。Alphinaud 說當然，可他得先把眼前的話和你講完；你正在對他說「秘密」，所以不能讓任何人旁聽。於是他請 Ele 先到那根柱子旁等一等——只要一小會兒就好。Ele 乖乖答應，說自己會等。</p><p>Ele 走開後，Alphinaud 低聲做了安排：他會把 Ele 帶去 The Quicksand，或許 Momodi 知道該怎麼處理。接著他長嘆一口氣，語氣裡滿是厭倦，說他寧願面對一整隊 Garleans、寧願處理一個缺乏 aether 的 primal，甚至寧願去對付 Ascian，也不想再演這種騙人的把戲。他的煩躁很快轉成更深的憂慮——有時他擔心 Minfilia 太過雄心勃勃，Scions 總是追著威脅四處奔走，卻很少顧及這樣的消耗會如何拖垮他們有限的資源，也拖垮他們自己。他甚至覺得，也許是該改變的時候了。</p><p>就在這時，Minfilia 的聲音透過 linkpearl 急切傳來。她說事情突然，但她必須請你立刻趕回 Revenant’s Toll；Twelveswood 的情況變得更糟，她會等你到了再詳細說明。Alphinaud 聽見 Twelveswood 立刻警覺：那麼她先前提過的 primal 威脅已經被證實了？他沒有收到 Ixali 有動靜的報告，於是剩下的可能就只剩……sylphs。Alphinaud 要你立刻動身，因為你和他都很清楚，primal 的出現永遠優先於其他一切。臨走前他又補上一句：等你抵達後，請替他轉告 Antecedent——他感謝她的關心，但她不必擔心他的安危，他完全有能力保護自己。</p><p>回到 The Rising Stones，一名 Serpent Herald 代表 Elder Seedseer 前來，正式向 Scions 請求援助，並表示 Antecedent 已經掌握狀況。Minfilia 見到你平安無事，明顯鬆了一口氣，說能看到你健康無恙真是太好了；Ul’dah 傳回來的最新消息令人非常不安。她隨即帶著些許冷冷的玩笑補了一刀——看來 Alphinaud 唯一受傷的只有自尊心，想必很快就會恢復。最後她說，接下來的會面需要其他 Scions 一同出席；如果你已經準備好開始，她現在就把大家召集起來。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 阿爾菲諾 <small class="muted">(烏爾達哈 - 來生回廊, X:10.7, Y:12.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="revolution.html">邊境計畫</a></div><div class="row">所有職業（不含限定職） 等級 50 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="lord-of-levin.html">雷霆之主</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
