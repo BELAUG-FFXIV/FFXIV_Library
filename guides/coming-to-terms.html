@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Coming to Terms | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Coming to Terms (ARR Patch 2.4)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/xduSnIreZBY"
+              title="Coming to Terms" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Coming to Terms</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Coming to Terms`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Alphinaud tells you that you have been granted a rare opportunity: an audience with an ambassador of the Holy See of Ishgard. You are to treat with Ser Aymeric—lord commander of the Temple Knights—at Camp Dragonhead in Coerthas, and Alphinaud insists your presence is essential. If Aymeric wishes to meet the person behind the legend, he says, you should not deny him the pleasure of your company, and he reminds you that more good can be done with the stroke of a pen than the thrust of a sword.</p><p>He asks you to seek the Antecedent’s permission to accompany him, and when you bring the matter before Minfilia, she approves at once. With no recent reports of aetheric disturbances or unusual beast tribe activity, she sees no reason to deny Alphinaud if he believes your presence will help secure more favorable terms.</p><p>Yet even as Minfilia welcomes the overture, she cannot help questioning what prompted it. Ishgard has spurned contact with the other city–states for decades, keeping its borders closed and turning a deaf ear even when the Calamity loomed—and their banners were conspicuously absent at Carteneau. Alphinaud admits he cannot claim to know their true motives, only what is generally known of their reclusive nation and its rule by the Ishgardian Orthodox Church under an archbishop, and how they withdrew from the Eorzean Alliance once the imperial fleet was routed at Silvertear Skies. Still, he hopes this is a step in the right direction: this time, you will meet a man of genuine influence.</p><p>Alphinaud makes clear he is not naive enough to believe Ishgard comes out of kindness. They want something, though he has yet to learn what, and that is simply the nature of diplomacy—both sides bring agendas, and he will bring hard truths as well. Minfilia voices one of them plainly: the Empire will soon be at your doorstep again. Alphinaud agrees, and urges you to depart for Camp Dragonhead, noting that Lord Haurchefant is expecting you—and that your rapport with him may yet prove useful.</p><p>At Camp Dragonhead, Haurchefant greets you warmly and says the hearths have been stoked to blazing in preparation for your arrival, lest a distinguished guest catch cold. Alphinaud accepts the kindness with a thinly veiled confession that he will ever struggle in cold climes, and apologizes for imposing yet again. Haurchefant dismisses any talk of debts, remarks that House Fortemps may one day seek aid from your newly formed Crystal Braves, and expresses delight that the Holy See is at last willing to grant you an audience. He adds that your discoveries at Snowcloak likely helped justify the decision, and that the recent resurgence in heretical activity concerns all. Ser Aymeric has already arrived, he says, eager to meet you at your first convenience.</p><p>You proceed to the intercessory, where Haurchefant urges confidence and clarity. Ser Aymeric greets Alphinaud with honor and pleasure, introducing himself as lord commander of the Temple Knights, and Alphinaud answers in kind. Aymeric then turns to you—speaking of reputations, he says, yours towers over all, and he admits he has followed your activities with an interest bordering on fascination, glad you chose to join them. With that, the meeting begins.</p><p>Alphinaud lays out the dangers: the Garleans will return in force ere long, and the primal threat persists—beast tribes continue to summon their gods, each incarnation stronger than the last. He urges Ishgard to rejoin the Eorzean Alliance, insisting Ishgard is not immune. Aymeric respectfully disagrees: the Ixal do not concern Ishgard, he says, for their claims pertain to Gridanian lands, and Ishgard does not intervene in other nations’ internal affairs. Even setting that aside, Ishgard’s forces are wholly committed to the Dravanian conflict, with no knights to spare. As for the Garleans, Aymeric agrees it is only a matter of time before the Empire resumes its campaign, but argues that Gaius is dead and the conscripts he left behind lack the will to fight, making it unlikely they will emerge from their castra for some time.</p><p>When Alphinaud asks why Aymeric agreed to meet if Ishgard’s position has not changed, Aymeric answers that he did not come only as Ishgard’s representative. Concerns have been raised about the supplies House Fortemps has been sending to Revenant’s Toll, and there are calls to restrict aid to foreign powers—yet Aymeric can ensure the shipments continue unabated. But he requires something in exchange: Dravanian activity has surged, and Ishgard’s astrologians have observed alarming changes in the heavens—the dragon star waxing unnaturally bright, with whispers that it portends the resurrection of Midgardsormr. Aymeric will not send knights to Mor Dhona on that basis, he says, but you have forces to spare. If you agree to watch over the Keeper of the Lake, he will intervene on your behalf; Alphinaud accepts, promises to keep Ishgard abreast of developments, and voices hope that this may one day be remembered as the first step toward a united Eorzea.</p><p>The moment the terms are settled, the calm shatters—Haurchefant demands to know what is happening as a knight rushes in with the report: the caravan has been attacked, and it was Iceheart.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Alphinaud <small class="muted">(The Rising Stones, X:6.7, Y:6.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="back-and-fourth.html">Back and Fourth</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 50 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-intercession-of-saints.html">The Intercession of Saints</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'皇都の特使',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>アルフィノはあなたに告げる。イシュガルド聖座の使節と謁見できるという、またとない機会を得たのだと。クルザスのドラゴンヘッドで、聖堂騎士団総長アイメリク卿と会談する。聖堂騎士として聖座に直接仕えることは大いなる名誉であり、その指揮官は強い政治的影響力を持つ。だからこそ、相手の好意を得るためにも、あなたの同席が欠かせない――伝説の「本人」に会いたいというなら、その望みを叶えてやろう、と。剣の一突きよりも、筆の一筆で成せることがあるのだとアルフィノは言う。</p><p>あなたが先代に同行の許可を求めると、ミンフィリアは快く認める。最近はエーテルの異変も、獣人部族の不審な動きも報告されていない。アルフィノがあなたの存在で交渉を有利にできると考えるなら、拒む理由はない――そう告げる。</p><p>とはいえ、ミンフィリアは首を傾げる。イシュガルドは何十年も他国との接触を拒み、国境を閉ざし続け、災厄が迫ったときでさえ近隣の訴えに耳を貸さなかった。カルテノーの戦場でも、彼らの旗は見当たらなかった。アルフィノも動機は分からないと認め、世に知られる範囲で語る――アバラシア山脈の中心に位置する閉鎖的な国家であること、イシュガルド正教が大司教のもと国を治めていること、そしてかつて同盟に名を連ねながら、帝国艦隊が退けられるや離脱したこと。だが今回は、これまで押しつけられてきた使者ではなく、確かな影響力を持つ人物に会えるのだと希望をつなぐ。</p><p>アルフィノは、相手が善意だけで動くとは思っていないと言う。イシュガルドには欲しいものがあり、こちらにも譲れない主張がある。交渉の席には互いの思惑が持ち込まれるが、同時に揺るがぬ現実もある。ミンフィリアはそのひとつを口にする――帝国はやがて、再び目前まで迫ってくる。アルフィノはうなずき、その点も含めて説くつもりだと言い、ドラゴンヘッドへ向かおうと促す。待っているのはオルシュファン卿であり、あなたが彼と築いた縁は役に立つかもしれない、と。</p><p>ドラゴンヘッドでは、オルシュファンがあなたを歓待し、暖炉を燃やして出迎えたと言う。尊い客が寒さで体を冷やしてはならないからだ。アルフィノは礼を述べつつ、寒冷地はどうにも苦手だとこぼし、たびたび世話になる非礼を詫びる。オルシュファンは借りなどとうに返されたと言い、いつかフォルタン家があなたの新組織に助力を求めることもあるだろうと笑う。そして、聖座がついに謁見を許したことを喜び、スノークロークでの発見が判断を後押ししたのだろうとも語る。異端の動きが再び強まっているのは、誰にとっても看過できない。アイメリク卿はすでに到着し、あなたに会うのを待っている――休息より先に謁見所へ向かうべきだと、あなたたちは足を進める。</p><p>謁見所で、オルシュファンは自信と明晰さを忘れるなと励ます。アイメリクはアルフィノに面会の栄誉を述べ、自らが聖堂騎士団総長であると名乗る。アルフィノも応じ、互いに通じるものがあるだろうと言う。やがて話題はあなたへ移り、アイメリクは「評判」こそがすべてを凌ぐと述べ、あなたの歩みを興味深く追ってきたと率直に認める。あなたが同席することを喜び、会談を始めようと告げる。</p><p>アルフィノは、ガレマールがいずれ大軍で戻ること、そして蛮神の脅威が終わっていないことを示す。獣人部族は神を呼び続け、そのたびにより強くなる。イシュガルドも無縁ではないのだから、エオルゼア同盟へ復帰すべきだと訴える。だがアイメリクは異を唱える。イクサルの領土的主張はグリダニアに向けられており、イシュガルドが他国の内政に介入することはない。さらに聖堂騎士団はドラヴァニアとの戦いに全力を注いでおり、割ける騎士がいない。帝国の再侵攻が時間の問題である点は認めつつも、ガイウス亡きいま、残された兵は戦う意志を欠き、しばらくはカストルムの壁の内に留まるだろう――そう見る。</p><p>アルフィノが、それでもなぜ会談に応じたのかと問うと、アイメリクは自分がここへ来た理由はもう一つあると言う。フォルタン家がレヴナンツトールへ送っている物資について懸念が出ており、外国勢力への支援を制限すべきだという声がある。だが自分なら、補給を滞らせず続けさせることができる――ただし交換条件が必要だ。最近ドラヴァニアの動きが活発化し、占星術師たちは天象の異変を観測した。竜の星が不自然に明るさを増し、ミドガルズオルム復活の前触れだという囁きまである。だがその程度でモードゥナへ騎士を送る余力はない。あなたたちが「キーパー・オブ・ザ・レイク」を見張るなら、支援の継続を約束する――アイメリクは条件を示し、アルフィノは受け入れて情報共有を誓い、いつか共同歩調への第一歩になればと語る。</p><p>だが合意の直後、オルシュファンの声が鋭く響く。騎士が駆け込み、キャラバンが襲撃されたと報告する――相手はアイスハートだった。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> アルフィノ <small class="muted">（石の家, X:6.7, Y:6.1）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="back-and-fourth.html">第四分隊の危機</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-intercession-of-saints.html">目撃者の証言</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'皇都特使前來談條件',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Alphinaud 告訴你，你們得到了一個難得的機會——將與 Ishgard 的 Holy See （Ishgard 的宗教政權與統治中樞，由 Ishgardian Orthodox Church 掌權，國政與軍事都深受教會體制影響）使節會面。這次要在 Coerthas 的 Camp Dragonhead，與 Temple Knights （Ishgard 的正規精銳騎士團，直接隸屬 Holy See 的軍事力量；在國內具備高度地位與影響力，並長期投入對外戰爭前線）的 lord commander──Ser Aymeric──進行會談。能以 Temple Knight 身分直接侍奉 Holy See，被視為極高的榮譽；而身為其領袖的 Aymeric，在政治上也握有龐大的影響力。Alphinaud 認為，你們應當爭取他的好感，這對接下來的局勢只會有利。</p><p>也因此，他堅持你必須到場。若 Ser Aymeric 希望親眼見到「被傳頌為英雄的你」，Alphinaud 說他不打算剝奪對方與你一會的機會。你若覺得這樣的安排像是大材小用，他也提醒你：有些事，筆尖劃過的力量，往往勝過劍尖向前的一刺。接著他要你去向 Antecedent 請示，取得同意後便一同前往 Coerthas。</p><p>你向 Minfilia 說明此事後，她立刻表示贊成。她提到近來並未收到任何以太異常，或獸人部族出現可疑動向的報告；若 Alphinaud 認為你的出面能幫他談到更有利的條件，她看不出拒絕的理由。</p><p>不過在點頭之餘，Minfilia 仍忍不住疑惑：Ishgard 幾十年來一直拒絕與其他城邦往來，為何現在突然主動接觸？Alphinaud 也承認自己無從得知，只能把眾所周知的事整理出來：Ishgard 是位於 Abalathia’s Spine 中心、以閉鎖聞名的國家，由 Ishgardian Orthodox Church 統治，archbishop 居於其上；它曾是 Eorzean Alliance 的一員，卻在 Silvertear Skies （與帝國艦隊交戰的關鍵戰役；在相關敘事中常被用來標記帝國艦隊被擊退、以及 Ishgard 隨後退出 Eorzean Alliance 的時間點）的戰役中帝国艦隊が退けられるや離脱した後便迅速退出，從此對外封關，連 Calamity 迫近時也不願回應昔日盟友的請求，Carteneau 的戰場上更看不見他們的旗幟。即便如此，Alphinaud 仍希望這次算是往前一步——至少這回要見的，是一位真正「說得上話」的人。</p><p>Alphinaud 也說得很明白：他並不天真到以為對方是出於善意而來。Ishgard 一定想從你們身上得到什麼，只是他暫時還沒弄清楚；外交向來如此，雙方都帶著各自的目的上桌。但同時，他也會把一些無可迴避的現實擺在檯面上。Minfilia 直接點破其中之一：Empire 遲早會再度逼近。Alphinaud 表示他一定會在會談中強調這點，並要你立刻動身前往 Camp Dragonhead——Lord Haurchefant 已在那裡等你們；他還提到，你似乎又更得對方的青睞了，這份交情或許能在談判裡派上用場。</p><p>到了 Camp Dragonhead，Haurchefant 熱情迎接你，說壁爐已經燒得旺旺的，免得貴客在招待中受寒。Alphinaud 感謝他的用心，卻也坦白自己實在不擅長寒冷地帶，並為一次又一次的叨擾致歉；Haurchefant 則笑說早就兩清，未來局勢如何誰也說不準，甚至 House Fortemps 也可能有一天會需要 Crystal Braves 的協助。他更高興的是：Holy See 終於願意正式接見你們。Haurchefant 也提到，你們在 Snowcloak 的發現恐怕成了促成此事的理由之一，而近來異端活動再起，確實讓人無法放心。Ser Aymeric 已先一步抵達，並表示願意在你們方便時立刻會面；Alphinaud 不願讓對方久等，直接帶你前往 intercessory。</p><p>在 intercessory，Aymeric 與 Alphinaud 正式互致問候，自報身分為 Temple Knights 的 lord commander。話題很快轉到你身上——Aymeric 直言你的名聲「高過所有人」，也坦承自己一直關注你的行動，興趣幾乎到了著迷的程度；得知你會同席，他確實感到欣慰，於是示意會談開始。Alphinaud 開門見山：Garleans 終究會再度大舉來襲，而 primal 的威脅也尚未解除——獸人部族仍在召喚他們的神，而且每一次現身都比上一次更強。他因此重申，Ishgard 不可能置身事外，最理想的作法是回到 Eorzean Alliance，與各國共同面對。</p><p>Aymeric 卻婉拒。他表示，雖然 Ixal 出現在 Coerthas，但他們的領土主張指向的是 Gridania，真正被騷擾的是 Gridania；Holy See 因此把這視為 Gridania 的事，Ishgard 不會介入他國內政。即便不談這點，Ishgard 的兵力也被 Dravanian 戰事完全牽制，沒有多餘的騎士可抽調。至於 Empire，他承認 Ishgard 也觀察著帝國的崛起與擴張，同意他們重啟戰線只是時間問題；但他判斷 Gaius 已死，留下的徵召兵缺乏戰意，短期內不太可能走出 castra 的高牆。</p><p>Alphinaud 追問：既然立場未變，為何還願意會面？Aymeric 這才說，他此行不只代表 Ishgard。近來有人對 House Fortemps 提供 Revenant’s Toll 的補給提出疑慮，甚至出現要求限制對外援助的聲音；而他能以自己的影響力，確保補給照常、不受阻礙。但這不是無償——他需要交換條件。近期 Dravanian 的行動突然頻繁，astrologians 也觀測到天象出現異變：dragon star 反常地愈發明亮，並流傳著它預示 Midgardsormr （與 Silvertear Falls 相關的古老巨龍，在當前脈絡中被稱為「墜落的守護者」；Ishgard 方面的 astrologians 觀測到 dragon star 異常增亮，因此出現「Midgardsormr 可能復活」的傳聞與警訊）復活的說法。Aymeric 表示，僅憑這些不足以讓他把騎士派往 Mor Dhona，因為他確實抽不開人手；但你們抽得開。若你們願意監視 Keeper of the Lake，他就能出手讓 House Fortemps 的運補持續。Alphinaud 接受條件，承諾會把任何進展即時通報，也希望今天的成果能讓 Ishgard 看見合作的可能——也許某一天，你們會把這一刻視為走向「團結的 Eorzea」的第一步。</p><p>就在條件談妥的瞬間，外頭的動靜打斷了會談。Haurchefant 震怒喝問怎麼回事，騎士衝進來報告：車隊遭到襲擊——而下手的人，是 Iceheart。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 阿爾菲諾 <small class="muted">(石之家, X:6.7, Y:6.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="back-and-fourth.html">第四分隊陷入危機</a></div><div class="row">所有職業（不含限定職） 等級 50 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-intercession-of-saints.html">目擊者出面作證</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
