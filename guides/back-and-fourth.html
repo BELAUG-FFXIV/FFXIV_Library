@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Back and Fourth | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Back and Fourth (ARR Patch 2.4)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/YEWd_LvFrrU"
+              title="Back and Fourth" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Back and Fourth</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Back and Fourth`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Ilberd tells you that the hunt for the Ivy now truly begins, and that you must proceed with caution—one mistake could cost lives. For the moment, the business in Ul’dah is concluded, and he urges you to return to Rising Stones and report to Commander Leveilleur.</p><p>Back at Rising Stones, Ilberd reports your return, but Alphinaud cuts in at once: something has happened, and not a moment too soon. The 4th unit had been tasked with reconnoitering the rendezvous site used by the Ivy’s minion and his imperial contacts, yet shortly after you left, word arrived that the unit was ambushed on the way. One of your comrades has been taken captive, and Alphinaud fears for her safety—Garleans are not known to treat their enemies with dignity. He orders a rescue party dispatched immediately and calls for the Braves in the field to be recalled.</p><p>Ilberd objects—there is no time. A hastily assembled rescue will only hand the Garleans more captives, yet delay may mean death. He asks for your aid again, plainly stating that you are the best chance they have. Alphinaud agrees, and tells you that Alianne of the 4th is lying in wait in the Tangle near the entrance to Castrum Centri. You are to seek her out and learn the situation. Ilberd can only pray for your success.</p><p>In the Tangle, you find the remnants of the 4th unit holding themselves together by force of will, with one of them pleading for Rhesh to hold on. Alianne greets you with gratitude and urgency: the Garleans fell upon them without warning, wounded Rhesh, and dragged her away to the castrum. Outnumbered, the unit could only flee and regroup. Even now, Rhesh may be under interrogation—or worse—and with her injuries, Alianne fears she will not survive their attentions for long. Though the Crystal Braves are still in their infancy, she says, the bond between them is strong as mythril, and none will stand by while a comrade suffers. She asks you to help them infiltrate Castrum Centri and find Rhesh before it is too late.</p><p>Within Castrum Centri, you locate Rhesh. Barely able to speak, she offers a shaken thanks—only for you to sense a hostile presence closing in. When she comes to, she can only groan and ask where she is, but Alianne’s voice reaches her first, relieved beyond measure that you found her. Rhesh cannot walk with her wounds, so they will have to carry her out—and for that, Alianne says, they need a diversion. If you create a commotion inside the castrum, the Garleans will happily give you their undivided attention, and the others can slip away unseen. You draw the enemy onto yourself, alarms raised and steel closing in, while the 4th unit escapes with Rhesh.</p><p>When you meet Alianne again outside the walls, she confesses how anxiously she awaited your return. Thanks to your aid, Rhesh is safe and the unit suffered no further casualties—gratitude beyond words. She goes ahead to Rising Stones to report success.</p><p>Back at Rising Stones, Alphinaud admits he was more than a little anxious—entering an enemy stronghold is no small risk—yet you return hale and whole, as you so often do. He tells you that Rhesh is being cared for by the Domans, and thanks to their skilled ministrations, the danger has passed. He offers his gratitude, and Ilberd adds his own: Rhesh owes you her life. Alphinaud warns that though losses were minimal this time, you cannot afford to be caught off guard again—the Empire is not to be trifled with. Ilberd promises to keep the men sharp, and vows he will not rest until the Ivy is identified and apprehended. Alphinaud expresses full confidence in him.</p><p>Then Alphinaud turns to you. Though you have scarcely caught your breath, there is no rest for the weary: he requires you to accompany him to Coerthas. He has been granted an audience with an Ishgardian dignitary, and the man expressly requested your presence. Alphinaud tells you not to look so surprised—you should be familiar with the trappings of fame by now—and says you will depart as soon as you are ready.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Ilberd <small class="muted">(Ul’dah - Steps of Nald, X:8.6, Y:9.0)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="traitor-in-the-midst.html">Traitor in the Midst</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 50 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="coming-to-terms.html">Coming to Terms</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'第四分隊の危機',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>イルベルドは告げる。「アイヴィー」の追跡は、いよいよ本格的に始まる、と。慎重に進まねばならず、一歩踏み誤れば命を落としかねない。いまはウルダハでの用件がひとまず片付いたため、石の家へ戻り、ルヴェユール卿に報告しようと促す。</p><p>石の家へ戻ると、イルベルドが帰還を報告するより早く、アルフィノが言う。「遅すぎなくてよかった。問題が起きた」と。第4部隊には、アイヴィーの手下と帝国側の接触者が用いる集合地点を偵察する任務を与えていたが、あなたたちが出発した直後、その部隊が目的地へ向かう途中で待ち伏せを受けたという報せが入った。しかも味方のひとりが捕虜になった。ガレアンは敵を礼節で扱うことなどせず、彼女の身が案じられる。アルフィノは救出部隊を即刻編成し、外に出ている隊員を呼び戻すよう命じる。</p><p>だがイルベルドは制止する。時間がない。準備不足の救出は捕虜を増やすだけだが、手遅れにもできない。そこで彼は、あなたにもう一度力を貸してほしいと頼む。率直に言えば、いま最も成功の見込みがあるのはあなたなのだ。アルフィノも同意し、カストルム・ケントリ付近、入口近くの「タングル」で第4部隊のアリアンヌが待機していると言う。彼女から状況を聞き、救出に当たってほしい。イルベルドはあなたの成功を祈るしかない。</p><p>タングルで待っていた第4部隊の残存者たちは、捕らわれたレシュの無事を祈りながら踏みとどまっていた。アリアンヌはあなたの到着に深く感謝しつつ、時間がないと状況を説明する。ガレアンは不意に襲いかかり、レシュを負傷させたうえで砦へ連れ去った。数で劣る彼らは逃れて態勢を立て直すしかなかった。いまこの瞬間にもレシュは尋問を受けているかもしれず、あるいはそれ以上のことが起きているかもしれない。傷を負った彼女が長く耐えられるとは思えず、一刻も早く救い出さねばならない。組織はまだ始まったばかりだが、仲間を結ぶ絆はミスリルのように強い――誰ひとり、仲間が苦しむのを黙って見過ごしはしない。彼女は、第4部隊の残りでカストルム・ケントリへ潜入するから、手遅れになる前にレシュを見つけるのを手伝ってほしいと頼む。</p><p>砦の中であなたはレシュを見つける。彼女は震える声で礼を言いかけたが、すぐに敵意の気配が迫る。意識を取り戻した彼女は、自分がどこにいるのかも分からず呻くばかりだ。そこへアリアンヌが叫び、発見できたことを神に感謝し、あなたにも礼を述べる。しかしレシュは傷で動けず、担いで脱出するしかない。そのためには陽動が必要だという。あなたが砦の中で騒ぎを起こせば、ガレアンは喜んであなたに注意を向けるだろう。その隙に仲間は気づかれずに逃げられる。あなたは敵を引きつけ、警報の中で刃を受け止める一方、仲間はレシュを連れて砦を離脱する。</p><p>壁の外で再会したアリアンヌは、どれほど不安だったかを打ち明け、あなたのおかげでレシュは無事で、これ以上の犠牲も出なかったと告げる。言葉では尽くせない感謝を残し、彼女は成功を報告するため石の家へ先に向かう。</p><p>石の家でアルフィノは、敵の拠点へ乗り込むのは危険で、少しばかり心配していたと率直に言う。それでもあなたはいつものように任務を果たし、無傷で戻ってきた。救出したレシュはドマの者たちが手当てしており、その巧みな治療のおかげで危険は去ったという。アルフィノは礼を述べ、イルベルドもまた、レシュはあなたに命を救われたと感謝する。アルフィノは、今回は被害を最小限に抑えられたが、二度と不意を突かれてはならない、帝国を侮ってはならないと釘を刺す。イルベルドは隊員の気を引き締め、そして必ずアイヴィーを突き止めて捕らえるまで休まないと誓う。アルフィノはその成功を信じていると言う。</p><p>そしてアルフィノはあなたに向き直る。息をつく間もないが、休む暇はない。彼はあなたにクルザスへ同行するよう求める。イシュガルドの要人との面会が許可され、その人物があなたの同席を名指しで望んだのだという。驚くな、とアルフィノは言う。名声に伴うあれこれには、あなたももう慣れているはずだ。準備ができ次第、出発しよう。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> イルベルド <small class="muted">（ウルダハ：ナル回廊, X:8.6, Y:9.0）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="traitor-in-the-midst.html">写本師の影</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="coming-to-terms.html">皇都の特使</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'第四分隊陷入危機',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Ilberd 說，追捕 Ivy 的行動現在才算真正開始。接下來每一步都得走得更小心，因為只要一個失誤，就可能要用命來付代價。眼下在 Ul’dah 的事暫時告一段落，他要你回到 Rising Stones，向 Commander Leveilleur 報告。</p><p>你們回到 Rising Stones，Ilberd 才剛說明行程，Alphinaud 就立刻打斷：事情發生了，而且你們回來得正好。第 4 小隊先前被派去偵察一處會合地點——那是 Ivy 的手下與帝國聯絡人往來用的地方。可在你們離開不久，消息就傳來：第 4 小隊在前往目的地途中遭到伏擊。更糟的是，你們的人被擄走了一名。Alphinaud 說，Garleans 從來不會把敵人當人看，他非常擔心那位同伴的安危，必須立刻派出救援，並要求把外出執勤的 Crystal Braves 全部召回。</p><p>Ilberd 卻立刻反對：來不及了。臨時拼湊的救援隊只會把更多人送去當俘虜，但時間又拖不得。於是他再次請你出手，直白地說——你是目前最有勝算的人。Alphinaud 也同意，告訴你第 4 小隊的 Alianne 正在 The Tangle 待命，就在 Castrum Centri 入口附近。你去找她，她會把狀況說清楚。Ilberd 只能替你祈禱。</p><p>你在 The Tangle 找到第 4 小隊殘存的人，他們一邊壓著情緒、一邊低聲要 Rhesh 撐住。Alianne 對你趕來支援感激不已，但她也不浪費時間：Garleans 毫無預警地撲上來，傷了 Rhesh，還把她拖進那座 castrum。你們人數不敵，只能先撤退、重新集結。此刻 Rhesh 可能正在被拷問——甚至更糟；以她的傷勢，Alianne 很怕她撐不了多久，必須立刻救人。她說組織雖然還很新，但彼此之間的連結強得像 mythril 一樣，沒有人會眼睜睜看著同伴受苦。她表示第 4 小隊剩下的人會潛入 Castrum Centri，而她請你協助他們在太遲之前找到 Rhesh。</p><p>你在 Castrum Centri 裡找到 Rhesh。她虛弱地吐出一聲「謝謝」，你卻立刻察覺敵意逼近。她迷迷糊糊醒來，只能痛苦地問自己身在何處；下一秒，Alianne 的呼喊先傳過來，她像鬆了口氣般喊著「謝天謝地，終於找到你了」，也再次向你道謝。可 Rhesh 傷得走不了路，只能被抬著離開。要做到這點，必須有人製造騷動把守軍引開。Alianne 說，以你的名聲，Garleans 一定很樂意把全部注意力都放在你身上——只要你在 castrum 裡鬧出動靜，他們就能趁亂帶著 Rhesh 悄悄撤離。你照做了，警報聲與追兵迅速湧上，你把火力全拉到自己身上，讓第 4 小隊帶著 Rhesh 成功脫身。</p><p>你回到外頭與 Alianne 會合，她坦言自己一直焦急地等著你回來。多虧你的支援，Rhesh 已經安全，而且你們沒有再失去任何人；她說再多話也不足以表達感謝，接著先行回 Rising Stones 報告成功。</p><p>在 Rising Stones，Alphinaud 見你平安回來，語氣也放鬆了些。他說自己雖然相信你的本事，但闖進敵方據點終究太冒險，他確實有點擔心；但你依然像往常一樣把任務完成，毫髮無傷地回來。他告訴你，被救回的 Rhesh 正由 Domans 照料，在他們熟練的治療下已經脫離危險，並向你致謝。Ilberd 也補上一句：Rhesh 欠你一條命。Alphinaud 接著提醒你們，這次雖然傷亡已經壓到最低，但你們再也不能被打個措手不及——Empire 不是能輕忽的對手。Ilberd 表示會讓隊員時刻保持警覺，也說就算需要時間，他也絕不會停下來，直到把 Ivy 找出來並逮捕為止。Alphinaud 說他對此很有信心。</p><p>然後 Alphinaud 把目光轉向你：你幾乎還沒喘過氣，但現在沒有時間休息。他要你陪他去 Coerthas，因為他獲准與一位 Ishgard 的要人會面，而對方還特別點名要你到場。Alphinaud 要你別那麼驚訝，說你早該習慣名聲帶來的各種陣仗；等你準備好，你們就立刻出發。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 伊爾伯德 <small class="muted">(烏爾達哈 納爾迴廊, X:8.6, Y:9.0)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="traitor-in-the-midst.html">潛伏在身邊的叛徒</a></div><div class="row">所有職業（不含限定職） 等級 50 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="coming-to-terms.html">皇都特使前來談條件</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
