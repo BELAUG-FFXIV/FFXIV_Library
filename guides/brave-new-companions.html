@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Brave New Companions | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Brave New Companions (ARR Patch 2.3)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/EIL5NA9epvY"
+              title="Brave New Companions" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Brave New Companions</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Brave New Companions`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>While you were away in Coerthas, preparations for the inaugural ceremony were all but completed—but Tataru still seemed flustered. Slafborn urges you to head into Rising Stones and lend a hand to your frantic receptionist. When you arrive, you find Tataru buried in parchments and misplaced documents, sorely tempted to toss the whole lot into the wastepaper basket. Startled by your presence, she quickly gathers herself and gladly accepts your help, pressing a bundle of uniforms into your hands.</p><p>Tataru asks you to deliver the uniforms to the new recruits scattered around Revenant’s Toll. They are to don them immediately and assemble at Rising Stones, and you are to report back to Alphinaud if you do not wish to miss the ceremony. Even as she tries to keep order, she cannot help wondering whether the Scions will ever have matching uniforms—musing that a well-funded organization is a well-dressed one.</p><p>You make the rounds through Revenant’s Toll, handing out uniforms one by one. Laurentius admits he has been mimicking others without truly knowing what he is meant to do, yet the uniform reminds him of his induction into the Wood Wailers. Yuyuhase calls his service an “investment,” already dreaming of wealth and of selling replica costumes to adoring crowds once the organization makes a name for itself. Aergmhus, proud of his Maelstrom red, laughs at the striking blue and swears to devote himself to the greater good. Ilberd introduces himself as captain, praises the uniforms as a shrewd way to forge bonds among strangers, and speaks of rebuilding lives after all he lost to the Calamity. Ephemie, inspired by tales of your primal battles, accepts the uniform with open admiration; Wilred remarks on how alive this town is amid desolation and grumbles at the voluminous cloth; Riol jokes about the fit and the laughter of old mates; and Alianne, with Isildaure retired, steels herself to take her own path forward before the ceremony begins.</p><p>With the deliveries done, you return to Rising Stones and report to Alphinaud. He confirms that some recruits answered his call through the established Grand Companies and the like, and though this is not yet an army, he believes a small corps of elite warriors can achieve much. He tells you he has thought of a name for the company, and with the last recruits gathering, the moment of truth is at hand.</p><p>Before the assembled recruits, Alphinaud declares that by pledging their strength to the Scions of the Seventh Dawn, they are beholden to no single nation and will stand as the vanguard for a united Eorzea. From that moment forth, he names them the Crystal Braves and calls on them to mend a fractured realm and face their enemies as one—because the nations of Eorzea have proven unable to solve the problems that plague the land, whether beastmen and their primals or the conflict in Carteneau. The Crystal Braves answer in chorus, and Minfilia praises the speech, teasing him with the title of commander. Alphinaud insists it is honorary, and together they affirm their shared purpose—Minfilia declaring the Scions stand ready.</p><p>No sooner has the ceremony ended than Minfilia receives graver news. As you remain nearby, she listens and confirms the worst: the entire Isle of Val, and a power that defies comprehension. Then relief breaks through—Krile is alive, though still unconscious—and she gives thanks and asks to be informed of any change, promising to pass word to Urianger. Turning to the survey readings, she notes that the aetheric disturbance accompanying the isle’s destruction is alarmingly close in magnitude to Ultima, raising the question of whether the Ascians are responsible again. She asks whether you have heard aught from the Mothercrystal since the battle with the Garleans, and Hydaelyn’s silence leaves only ill portents, ending with a quiet prayer that Louisoix yet watches over you.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Slafborn <small class="muted">(Mor Dhona, X:21.9, Y:7.8)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="when-the-cold-sets-in.html">When the Cold Sets In</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 50 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="traitor-in-the-midst.html">Traitor in the Midst</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'エオルゼアの守護者',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>クルザスから戻ったあなたに、スラフボーンは「就任式」の準備がほとんど整ったと告げる。だがタタルはまだ落ち着かず、石の家で慌ただしくしているらしい。あなたは促されるまま、石の家へ向かう。そこには羊皮紙や書類が山のように積まれ、タタルは「いっそ全部くずかごへ放り込みたい」とこぼすほど追い詰められていた。あなたが声をかけると彼女は驚きつつも、すぐに手伝いを歓迎し、新兵用の制服を託してくる。</p><p>タタルは、レヴナンツトールに散らばる新兵たちへ制服を届けてほしいと言う。受け取った者はすぐに着替えて石の家へ集合すること、式に遅れたくないならアルフィノへ直接報告すること――そう釘を刺しながら、いつか暁の血盟もお揃いの制服を持てるだろうかと呟く。資金のある組織は身なりも整う、というのが彼女の本音だった。</p><p>あなたはレヴナンツトールを巡り、制服を一着ずつ手渡していく。ある新兵は、周囲を真似てはいたものの何をすべきか分からなかったと打ち明け、それでも制服を手にして気持ちを引き締める。別の新兵は身を捧げることを「投資」だと言い切り、組織が名を上げれば複製衣装で稼げると胸算用を隠さない。海賊衆の赤を誇りにしていた者は、鮮やかな青に目を見張りつつ「最大の善」のために尽くすと誓う。隊長役を任された者は、見知らぬ者同士に共通の絆を生むのに制服ほど手早いものはないと評し、災厄で失ったものを胸に再建へ力を尽くすと語る。あなたの蛮神討滅の噂に憧れて来た者もいれば、この町の活気に言葉を失う者、布地の多さに不満を漏らしつつも急ぐ者もいる――制服は彼らを石の家へと向かわせた。</p><p>用事を済ませたあなたが石の家へ戻ると、アルフィノはタタルから聞いていたと言い、新兵たちと会ったのだろうと確かめる。彼は各地のグランドカンパニーなどを通じて呼びかけ、応じた者は多くないが、精鋭の小隊でも成し遂げられることは多いと語る。そして彼は組織の名を考えたと言い、最後の新兵が揃えば、いよいよ公式発表だと告げる。</p><p>集った新兵たちの前で、アルフィノは「暁の血盟」に力を捧げた以上、彼らは特定の国家に縛られず、統一されたエオルゼアの先陣となるのだと宣言する。そしてこの瞬間から彼らを「クリスタルブレイブ」と名付け、蛮族と蛮神、カルテノーの争いが示すように諸国では解決できない問題を、少数の英雄が成し遂げねばならないのだと訴える。彼の呼びかけに「自由のために」と声が重なり、ミンフィリアは演説を称えて司令官と呼ぶが、アルフィノは名誉職だと慌てて否定する。目的は同じだと手を取り合い、ミンフィリアは暁の血盟の準備が整っていると告げた。</p><p>式が終わるや否や、ミンフィリアはさらに重い報告を受ける。あなたが傍らで見守るなか、彼女は「最悪の懸念が現実になった」と受け止め、島全体と、理解を超えた力の存在を確かめる。だが次の知らせで表情が変わる――クルルは生きており、まだ意識は戻っていないが、それでも十二神に感謝すると言う。彼女は容態の変化を知らせるよう頼み、ウリエンジェへ伝えることを約束する。調査隊の観測を読み解けば、島の消失に伴うエーテルの乱れは「アルテマ」に近い規模で、アシエンの関与を疑わざるを得ない。さらに彼女は、ガレマールとの戦い以来「母なるクリスタル」から何か聞こえたかと問い、ハイデリンの沈黙を不吉だと受け止め、最後にルイゾワが見守っているよう祈った。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> スラフボーン <small class="muted">（モードゥナ, X:21.9, Y:7.8）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="when-the-cold-sets-in.html">風霜にわかに</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="traitor-in-the-midst.html">写本師の影</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'Eorzea 的守護者們',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你從 Coerthas 回來後，Slafborn 說就任典禮的準備幾乎已經完成，但 Tataru 仍顯得手忙腳亂。他要你進去 Rising Stones 看看，或許那位忙到快崩潰的接待員正需要你幫忙。你走進去時，Tataru 果然被一堆羊皮紙與文件淹沒，甚至氣到懷疑這些東西到底為什麼會出現在這裡，差點就想整疊丟進廢紙籃。你一出聲，她被嚇了一跳，隨即又像抓到救星般接受你的幫忙，直接把新制服交到你手上。</p><p>Tataru 請你把制服送去給分散在 Revenant’s Toll 的新招募成員，並叮囑他們拿到後要立刻穿上、回到 Rising Stones 集合；而你若不想錯過典禮，就得把事情辦完後直接回去向 Alphinaud 回報。她一邊整理文件，一邊忍不住嘀咕：要是 Scions of the Seventh Dawn 也能有統一的制服就好了——資金充足的組織，穿著自然也會更體面。</p><p>你穿梭在 Revenant’s Toll，把制服一件件交出去，也從他們的反應看見這群人的差異。Laurentius 坦白自己只是跟著大家做，根本不知道該做什麼，拿到制服時卻想起自己曾經加入 Wood Wailers 的那段日子。Yuyuhase 把投身此處當作「投資」，甚至已經盤算等組織闖出名聲後，靠販售仿製服裝賺進大把金幣。Aergmhus 仍以 Maelstrom 的紅色為榮，卻也對這套鮮亮的藍色感到新鮮，並表明自己要為更大的善付出。Ilberd 自我介紹將帶領新兵，稱制服是讓一群陌生人迅速建立共同連結的最佳方式，也說自己曾一度失去希望，所以更想為重建他人的人生盡力。Ephemie 因你討伐 primal 的傳聞而來，接過制服時毫不掩飾敬仰；Wilred 感嘆 Little Ala Mhigo 若能學到 Revenant’s Toll 的活力就好了，嘴上抱怨衣服太厚；Riol 則笑著說這身行頭快勒到頭、得自己改一改，還擔心被老熟人撞見會被笑很久；Alianne 提到 Isildaure 退下後她要走自己的路，抱著忐忑卻也催促自己別錯過典禮。</p><p>你把制服都送到後回到 Rising Stones，向 Alphinaud 回報。Alphinaud 說 Tataru 已經跟他提過此事，也推測你已見過其他新兵。他說有些人是透過各地 Grand Company 等管道回應他的號召而來；你們尚稱不上軍隊，但一支小規模的精銳部隊依然能完成許多事。接著他透露自己已經想好這個新組織的名稱，而當最後的人到齊，他就會正式對外宣告。</p><p>典禮上，Alphinaud 對眾人說：你們今天站在這裡，代表每個人都做出了重大的選擇。你們將力量奉獻給 Scions of the Seventh Dawn，不再只屬於任何單一國家，而是要成為團結的 Eorzea 的先鋒。隨後他宣告：從此刻起，你們就是 Crystal Braves——要修補這個破碎的世界，作為一體對抗敵人。他指出，無論是 beastmen 與他們的 primal，還是 Carteneau 的衝突，都已證明各國無法自行解決折磨大地的問題；因此才需要少數英勇之人站出來，去完成他們做不到的事。眾人齊聲回應「為了所有人的自由」，Minfilia 也稱讚他的演說，甚至以新的頭銜呼喚他；Alphinaud 連忙表示那只是榮譽稱號。兩人隨即表明目標一致、必須攜手去做該做的事，而 Minfilia 也宣布 Scions of the Seventh Dawn 已準備就緒。</p><p>典禮才剛結束，Minfilia 就接到更沉重的聯絡。你在一旁看著她回應「我在聽」，語氣很快繃緊——最糟的擔憂被證實：整座 Isle of Val消失了，而那股力量之大，簡直匪夷所思。下一句話又讓她瞬間鬆了一口氣：Krile 還活著，雖然仍未恢復意識，她仍立刻向十二神道謝，並請對方一有變化就回報，同時表示會把消息轉告 Urianger。隨後她強迫自己把喜悅放到一旁，轉而分析調查隊的讀數：島嶼毀滅時伴隨的以太擾動，規模驚人地接近 Ultima，使她不得不懷疑 Ascians 是否也牽涉其中。她又問你，自從與 Garleans 的戰鬥之後，你是否曾再聽見 Mothercrystal 的聲音；而當答案仍是沉默，Hydaelyn 的寂靜只讓不祥的預感更加確定。最後，她低聲祈願 Louisoix 仍在守望你們。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 斯拉佛伯恩 <small class="muted">(摩杜納, X:21.9, Y:7.8)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="when-the-cold-sets-in.html">局勢驟變，艱難接踵而來</a></div><div class="row">所有職業（不含限定職） 等級 50 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="traitor-in-the-midst.html">潛伏在身邊的叛徒</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
