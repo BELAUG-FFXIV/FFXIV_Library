@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tendrils of Intrigue | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Tendrils of Intrigue (ARR Patch 2.4)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/AmDDSXEmCFY"
+              title="Tendrils of Intrigue" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Tendrils of Intrigue</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Tendrils of Intrigue`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Ilberd delivers his report at the Observatorium. The heretic you captured yields nothing new about Shiva, and is handed over to the Ishgardian authorities—henceforth the Holy See will pursue that matter on its own. The inquiry into the Ivy, however, goes better: you finally learn how the heretics obtained precise information about shipment routes.</p><p>Tracing the conspirators back from the Flame previously identified in the Ivy’s service, Ilberd follows the trail toward the mastermind—until it ends abruptly. Fearing the investigation was compromised, he detains every suspected collaborator: five in total, including a Flame stationed at Revenant’s Toll whose duty was to manage the inventory of foreign donations. By virtue of that role, he knew the details of every caravan bound for the settlement, including shipments from House Fortemps—and he sold the exact route to a merchant. With a little pressure, the merchant confesses to knowingly aiding and abetting the heretics.</p><p>Now Ilberd turns to the Ivy himself. Your pursuit forces the Ivy into a serious mistake: trying to cover his tracks by exercising administrative powers available only to high-ranking members of the Immortal Flames. Since only a handful of such people even know about the investigation, the suspect pool narrows sharply. Alphinaud realizes what that implies: the agent is likely within Raubahn’s innermost circle, someone placed during the company’s founding and able to remain above suspicion for years. Ilberd explains why Ul’dah’s Grand Company was especially vulnerable—unlike Limsa Lominsa and Gridania, the Immortal Flames were built from disparate orders and sellswords, a perfect chaos in which to hide an infiltrator.</p><p>Even as you speak, Doman allies are shadowing several high-ranking Flames who could be the Ivy. Alphinaud orders Ilberd to continue with the 1st, sends the 2nd to address unrest, and has the 3rd join the 4th to inspect crystal shipments—if Shiva is to be summoned like other primals, the heretics will be seeking further supplies. He will also send word to Ser Aymeric about identifying the heretics’ abettors. Then a new urgency cuts in: an emergency council of the Alliance leadership has been called, with developments in Garlemald. As commander of the Crystal Braves, Alphinaud is requested—and he asks you to accompany him, with the Antecedent’s consent already given.</p><p>You head to Gridania. Ilberd swears on the honor of the Crystal Braves that he will not rest until the Ivy is unmasked and chained. Alphinaud admits you all want to finish matters with Iceheart, but until another path to her sanctum is found, she remains beyond reach; Minfilia and the Archons are working tirelessly to secure an alternate route. For now, Alphinaud urges you to turn to the realm’s other problems and tells you to meet him at Nophica’s Altar, then proceed together to the Lotus Stand.</p><p>At the Lotus Stand, the leaders confirm the succession struggle in Garlemald has ended: a new emperor reigns—Varis yae Galvus has seized the crown from his uncle and will consolidate power despite a troubled claim. The Alliance debates the implications: Garlean forces have done nothing but fortify since Operation Archon, and they will be ready to march again when the emperor gives the word. Kan-E-Senna proposes setting aside the Carteneau dispute to focus on preparations for renewed war, and urges reexamining how Ishgard might be persuaded to rejoin the Alliance. Yet Alphinaud cannot ignore the deeper danger: so long as the Ivy remains at large, no plan will stay secret for long. Afterward, he reflects that mistrust among the citizenry still keeps the nations from true unity, and he even argues the Carteneau conflict may function as a necessary evil to placate hawks obsessed with Omega. But the hunt for the Ivy is tightening—Ilberd has narrowed suspects further, and the likeliest candidate has recently come to Gridania. Alphinaud sends you to Ilberd near the Adders’ Nest: all that remains is to corner your quarry, and from this point onward, you must proceed with extreme caution.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Alphinaud <small class="muted">(Coerthas Central Highlands, X:26.0, Y:28.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="for-the-greater-good.html">For the Greater Good</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 50 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="chasing-ivy.html">Chasing Ivy</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'絡まり合う陰謀',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>天文台で、あなたはイルベルドの報告を受ける。捕らえた異端者からは、シヴァについて既知以上の情報は引き出せなかった。身柄はイシュガルド当局へ引き渡され、以後は教皇庁が独自に追及するという。だが「アイヴィー」に関する調査は成果があり、異端者が補給路の情報をどう得たのか、その経路が判明した。</p><p>イルベルドは、以前「アイヴィー」の手先と特定した不滅隊士官を起点に、共謀者を辿っていったと語る。しかし手掛かりは途中で不意に途切れ、捜査の漏洩を恐れた彼らは容疑者を一斉に拘束した。名は五人――その中にレヴナンツトール勤務の不滅隊員がいた。彼は国外からの寄付品を管理し、必要が満たされるよう支援者へ内訳を伝える役目だったため、集落へ向かう荷の詳細をすべて知っていた。もちろんフォルタン家からの荷も含まれる。彼は隊商の正確な経路を把握し、その情報を商人へ売り渡していた。商人は少し追及されると、異端者への加担を自白した。</p><p>次にイルベルドは「アイヴィー」そのものへ踏み込む。執拗な追跡に追い詰められた「アイヴィー」は、痕跡を消すために不滅隊の高位者にしか扱えない行政権限を行使するという致命的な失策を犯した。捜査の存在を知る高位者はごく少数である以上、容疑者は大きく絞り込まれる。アルフィノは理解する――標的はラウバーンの側近中枢、創設当初から不滅隊にいた人物である可能性が高い。イルベルドは、ウルダハの不滅隊は他の二国と違い、寄せ集めの部隊と傭兵まがいの組織を土台に急造されたため潜入に脆かった、と説明する。創設の混乱は、権限のある地位へ紛れ込み、長年疑われずにいるには格好の環境だった。</p><p>同時に、ドマの同盟者たちは高位の不滅隊員を複数尾行しており、その中の誰が「アイヴィー」でもおかしくないという。アルフィノは第一小隊に捜査続行を命じ、第二小隊には不穏分子への対応を、第三小隊は第四小隊と合流してクリスタル輸送の検分を指示する。もしシヴァが他の蛮神と同様に召喚されるなら、異端者は追加の供給を求めるはずだ。さらに彼は、異端者の協力者を特定したことをサー・アイメリクへ報告すると言う。だがそこへ新たな急報が入る――ガレマールで動きがあり、同盟首脳による緊急会議が招集された。クリスタルブレイブ司令官としてアルフィノの出席が求められ、あなたも同席するよう頼まれる。先代盟主の許可も得てあるという。</p><p>あなたはグリダニアへ向かう。イルベルドはクリスタルブレイブの名誉にかけ、「アイヴィー」を暴き鎖で繋ぐまで休まぬと誓う。アルフィノは、誰もがアイスハートとの決着を急ぎたいが、聖域へ至る別の道が見つからぬ限り手が届かないと認める。ミンフィリアと賢人たちは代替経路の確保に尽力しており、その間は国の別の問題にも目を向けねばならない。アルフィノは先に会議の準備で向かうと言い、ノフィカの祭壇で合流し、ロータススタンドへ向かう段取りを告げる。</p><p>ロータススタンドで、首脳たちはガレマールの継承戦が終結し、新皇帝が即位したと確認する。即位したのはヴァリス・ヤエ・ガルヴァス――叔父から帝冠を奪い取り、混乱はあれどいずれ権力を盤石にするだろう。会議では、アルコン作戦以降も第十四軍団の残党とアラミゴ占領軍が陣地を固め続けていること、皇帝が命じれば再侵攻してくることが議論され、同盟はカルテノー問題を当面棚上げし、対ガレマール再戦への備えを優先すべきだと提案される。さらにイシュガルドを再び同盟へ引き戻す方策も俎上に載る。だがアルフィノは、計画がいずれ漏れる危険を見逃さない――「アイヴィー」を取り逃がす限り、秘密は守れない。会議後、彼は市民の根深い不信が各国の足並みを乱していると語り、オメガをめぐる強硬派を宥めるためにカルテノーの争いが「必要悪」たり得るとも述べる。そして肝心の「アイヴィー」については、イルベルドが容疑者をさらに絞り、最有力が近ごろグリダニアへ来ているという。あなたは双蛇党の巣の近くにいるイルベルドのもとへ向かい、獲物を追い詰める段階へ踏み込む――以後は最大限の警戒が必要だ。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> アルフィノ <small class="muted">（クルザス中央高地, X:26.0, Y:28.4）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="for-the-greater-good.html">雪上の追撃</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="chasing-ivy.html">木陰に隠れて</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'陰謀盤根錯節',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>在 Observatorium，Alphinaud 要 Captain Ilberd 提交報告。Ilberd 說你們抓到的異端者，對 Shiva 的事依舊吐不出任何新內容，已經轉交給 Ishgard 當局處理，之後將由 Holy See 獨立追查。相較之下，關於代號「Ivy」的調查反而有了進展——你們終於查清楚，異端者究竟是透過哪條管道拿到補給隊商的路線情報。</p><p>Ilberd 提醒你：你們先前鎖定過一名替 Ivy 效力的不滅隊（Immortal Flames）成員，順著那條線一路追查，確實找到一串共犯，眼看就要逼近主使者，線索卻突然中斷。擔心調查已被對方察覺，你們乾脆把所有可疑人士一口氣扣住——名單上共五人，其中就包含一名駐守 Revenant’s Toll 的不滅隊員。此人的職務是清點各地捐贈物資，並把明細提供給贊助者以確保需求不會落空；也因此，他掌握所有送往聚落的貨運細節，當然也包含 House Fortemps 的補給。他知道商隊將走哪條路，並把這份精準情報賣給某個商人——而你們也不必猜，正是那個與異端者勾結的商人。對方在「稍微被推一把」後，就承認自己明知對方是異端者仍出手協助。</p><p>但 Ilberd 強調，真正的關鍵仍是 Ivy。你們的緊追不捨逼得 Ivy 犯下重大失誤：他為了掩蓋行蹤，動用了只有不滅隊高階成員才辦得到的行政權限。既然知道你們在查這件事的高階人士只有極少數，嫌疑範圍立刻大幅縮小。Alphinaud 因此意識到：這代表內鬼極可能就在 Raubahn 最核心的圈子裡，甚至可能從不滅隊創設之初就已經混進去。Ilberd 也解釋，Ul’dah 的不滅隊比起 Limsa Lominsa 的 Maelstrom 與 Gridania 的 Order of the Twin Adder，更容易被滲透——因為不滅隊的兵力來源本就零散，許多部隊近乎傭兵團，只聽命於各自的金主；在那種混亂中，要趁創設期鑽進權力位置、再多年不被懷疑，反而容易得多。</p><p>同一時間，你們的 Doman 盟友正暗中尾隨多名不滅隊高階人士，其中任何一個都可能是 Ivy；他們急著削弱 Empire 的影響，因此很願意出手相助，你們很快就會收到回報。Alphinaud 立刻調整部署：要 Ilberd 繼續帶第一分隊追查；第二分隊去處理不穩定因素；第三分隊則加入第四分隊，一起檢查水晶貨運——如果 Shiva 的召喚方式與其他 primal 相同，異端者就一定會再尋找更多物資。Alphinaud 也表示會把你們找出協助者的成果回報給 Ser Aymeric。就在此時，新消息又壓了上來：Garlemald 發生變動，同盟首腦緊急召集會議；以 Crystal Braves 指揮官身分，Alphinaud 必須出席，他也要求你同行，並強調先代盟主已經同意。</p><p>你們轉往 Gridania。Ilberd 以 Crystal Braves 的名譽起誓，在 Ivy 被揭穿、戴上鎖鏈之前他絕不罷休。Alphinaud 也坦白，你們都想盡快與 Iceheart 做個了斷，但只要找不到通往她藏身處的另一條路，她就仍在你們觸及不到的地方。Minfilia 與賢者們正不計代價尋找替代路線；在他們成功之前，你們只能先把注意力轉向領域內的其他危機。Alphinaud 先行前往 Gridania 做會議準備，並要你到 Nophica’s Altar 與他會合，再一同前往 Lotus Stand。</p><p>在 Lotus Stand，同盟領袖們確認：Garlemald 的繼承戰已結束，新皇帝登基——Varis yae Galvus 擊敗叔父、奪得皇位。雖然繼位過程動盪，但眾人認為他終究會穩住權力，而且一旦他下令，帝國軍勢必捲土重來；畢竟自從 Operation Archon（三大城邦同盟發起的大規模聯合作戰行動，用以對抗 Garlean 帝國勢力並展開關鍵反攻；相關戰果也成為後續討論帝國可能再度進軍、同盟需重新備戰的重要背景）之後，第十四軍團殘部與駐守 Ala Mhigo 的軍勢只是一味強化防線。Kan-E-Senna 因此提議暫時擱置 Carteneau 的爭端，集中討論同盟該如何準備迎接與 Garlemald 的新一輪衝突，並同時重新檢討要如何說服 Ishgard 回到你們身邊，因為只要 Eorzea 真能站成一體，就能重挫敵人的野心。可 Alphinaud 更在意另一件事：同盟的準備再周全，只要 Ivy 還逍遙在外，你們的計畫遲早會提前被 Garleans 知道，沒有任何秘密是安全的。</p><p>會議後，Alphinaud 直言，各國嘴上說同心，實際上離「同一目的」仍很遠，因為民眾之間根深蒂固的不信任讓領袖的共識難以落地。他甚至推論，Carteneau 的衝突在某種意義上可能成了「必要的惡」，各國都有主張奪取 Omega 的強硬派，給他們一場「看起來像戰爭」的角力，反而能壓住真正全面開戰的慾望。可他隨即把話拉回 Ivy：自從你們在 Observatorium 談過之後，Ilberd 已經把嫌疑名單又縮短，而他認為最可能的人選最近正好來到 Gridania。獵捕即將收尾——你得去 Adders’ Nest 附近找 Ilberd，聽他交代細節，接下來要做的就是把獵物逼進死角；從這一刻起，任何一步都必須極度謹慎。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 阿爾菲諾 <small class="muted">(庫爾札斯中央高地, X:26.0, Y:28.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="for-the-greater-good.html">雪原追擊</a></div><div class="row">所有職業（不含限定職） 等級 50 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="chasing-ivy.html">追查躲在樹蔭下的身影</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
