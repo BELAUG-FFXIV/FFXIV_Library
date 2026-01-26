@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>First Blood | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – First Blood (ARR Patch 2.4)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/r5K4GmbAlTY"
+              title="First Blood" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">First Blood</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`First Blood`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Drillemont’s suspicions have been hardening for some time: the heretics have long used a network of secret tunnels to move through the highlands unseen. After what you overheard, he fears Snowcloak itself may be riddled with hidden passageways—and that the heretics in Boulder Downs mean to exploit them to catch your forces unawares. That cannot be allowed.</p><p>A contingent of House Durendaire knights is already patrolling the area, and Drillemont orders them to begin searching at once. Yet he admits the truth: without knowing the enemy’s numbers or readiness, he cannot be certain his men will be enough. He asks you to lend your strength to the search, certain his knights will take courage from the presence of a warrior with your reputation.</p><p>He tells you to rendezvous with them at Boulder Downs and pray that Halone grants you the chance to catch the heretics before their plans bear fruit. He leaves you with no room for hesitation—show them no mercy. The lives of your allies are at stake, and every moment of delay is another gift to enemies who can vanish into their cursed tunnels and strike from behind.</p><p>When you reach Boulder Downs, you sense a hostile presence—and the ambush comes at once. Shouts cut through the wind as heretics close in, forcing you to answer quickly and decisively.</p><p>You return to Whitebrim Front with proof in hand, only to find Drillemont shaken by what he learns. His knights sent no word of your coming, and when he sees what you carry, his expression hardens into disbelief. By the Fury—those were veterans with years of service, and now they lie dead in the snow. He begins to speak of recovering their bodies, then stops himself: there are no men to spare, not now, not while Iceheart prepares to summon an abomination.</p><p>The numbers you dispatched, he says, were not enough to challenge the combined strength of the Temple Knights and the Crystal Braves. There must be others—and he would wager they are on their way to Snowcloak even as you speak. Worse still, the traitor you pursued managed to deliver something of value after all.</p><p>The parchment you recovered is a timetable of the guardsmen’s watches at the Snowcloak outpost. The traitor had been stationed there long before suspicions fell on him, and Drillemont can only regret that you did not catch him sooner. With this schedule, the heretics would know exactly when the watch is weakest—free to use their tunnels with impunity and set their ambush at the perfect moment.</p><p>The timetable has not yet changed. It will be changed now, of course, but the heretics may already be in position. Drillemont sees only one course left: House Durendaire must send reinforcements, even if it means withdrawing knights from the Stone Vigil. He can find no other way to safeguard the lives of your allies.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Drillemont <small class="muted">(Coerthas Central Highlands, X:12.8, Y:17.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="dark-words-dark-deeds.html">Dark Words, Dark Deeds</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 50 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-path-of-the-righteous.html">The Path of the Righteous</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'別働隊を叩け',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ドリルモンは以前から疑っていた。異端者たちは、クルザス高地を人目につかず移動するために、秘密の坑道網を使っているのではないか――。あなたが耳にした話を踏まえれば、スノークロークにもそうした抜け道が張り巡らされ、ボルダーダウンの異端者たちがそれを利用して味方を不意打ちするつもりだとしても不思議ではない。そんなことは決して許せない。</p><p>周辺にはすでにデュランデル家の騎士たちが巡回しており、ドリルモンは直ちに異端者の捜索を開始するよう命じる。だが敵の人数も準備状況も分からない以上、彼らだけで十分だと言い切ることはできない――そう正直に認め、あなたにも捜索への加勢を頼む。名高い戦士であるあなたが同行すれば、騎士たちの士気も上がるはずだ。</p><p>ボルダーダウンで合流し、ハルオーネの加護があるなら、計画が実を結ぶ前に異端者を捉えられるかもしれない。ためらうな、とドリルモンは言う。容赦は不要だ。味方の命が懸かっている。立ち止まる一瞬一瞬が、敵に坑道へ潜り込み、背後へ回り込む機会を与えるのだから。</p><p>あなたがボルダーダウンへ到着すると、ただならぬ気配を感じる。次の瞬間、罵声と合図が飛び、異端者が襲いかかってくる。あなたはその場で応じ、迅速に排除していく。</p><p>そしてあなたは証拠を手に、ホワイトブリム前哨地へ戻る。だがドリルモンは、あなたの来訪を騎士たちから聞かされていなかった。何が起きたのか、と問い、あなたの手元にあるものを見た途端、顔色が変わる。フューリーよ――あれは年季の入った歴戦の騎士たちだった。それが今は雪の上に倒れている。遺体を回収しなければ、と言いかけて彼は言葉を切る。人員を割けない。今は。アイスハートが「忌まわしいもの」を召喚しようとしている、この状況では。</p><p>あなたが討ち取った異端者の数では、神殿騎士団とクリスタルブレイブを合わせた戦力に抗うには足りない。まだ他がいるはずだ――しかも、今この瞬間にもスノークロークへ向かっているに違いない。さらに悪いことに、追っていた裏切り者は、結局「価値あるもの」を異端者へ渡すことに成功していた。</p><p>あなたが回収した羊皮紙は、スノークローク前哨地における衛兵の巡回時刻表だった。裏切り者は疑われるより前からそこに配属されていたという。もっと早く捕らえていれば――。この情報があれば、異端者は警戒が最も薄い時間を知り、坑道を好きなだけ使って待ち伏せの準備ができてしまう。</p><p>時刻表はまだ変わっていない。もちろん今から変えるが、それでも異端者はすでに配置についているかもしれない。ドリルモンは結論を出す。デュランデル家は増援を送らねばならない――たとえストーンヴィジルから騎士を引き抜くことになっても、味方の命を守るには他に手がない。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ドリユモン <small class="muted">（クルザス中央高地, X:12.8, Y:17.4）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="dark-words-dark-deeds.html">疑惑の騎兵を追え</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-path-of-the-righteous.html">潜入スノークローク大氷壁</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'先發制敵',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Drillemont’s suspicions have been hardening for some time: the heretics have long used a network of secret tunnels to move through the highlands unseen. After what you overheard, he fears Snowcloak itself may be riddled with hidden passageways—and that the heretics in Boulder Downs mean to exploit them to catch your forces unawares. That cannot be allowed.</p><p>A contingent of House Durendaire knights is already patrolling the area, and Drillemont orders them to begin searching at once. Yet he admits the truth: without knowing the enemy’s numbers or readiness, he cannot be certain his men will be enough. He asks you to lend your strength to the search, certain his knights will take courage from the presence of a warrior with your reputation.</p><p>He tells you to rendezvous with them at Boulder Downs and pray that Halone grants you the chance to catch the heretics before their plans bear fruit. He leaves you with no room for hesitation—show them no mercy. The lives of your allies are at stake, and every moment of delay is another gift to enemies who can vanish into their cursed tunnels and strike from behind.</p><p>When you reach Boulder Downs, you sense a hostile presence—and the ambush comes at once. Shouts cut through the wind as heretics close in, forcing you to answer quickly and decisively.</p><p>You return to Whitebrim Front with proof in hand, only to find Drillemont shaken by what he learns. His knights sent no word of your coming, and when he sees what you carry, his expression hardens into disbelief. By the Fury—those were veterans with years of service, and now they lie dead in the snow. He begins to speak of recovering their bodies, then stops himself: there are no men to spare, not now, not while Iceheart prepares to summon an abomination.</p><p>The numbers you dispatched, he says, were not enough to challenge the combined strength of the Temple Knights and the Crystal Braves. There must be others—and he would wager they are on their way to Snowcloak even as you speak. Worse still, the traitor you pursued managed to deliver something of value after all.</p><p>The parchment you recovered is a timetable of the guardsmen’s watches at the Snowcloak outpost. The traitor had been stationed there long before suspicions fell on him, and Drillemont can only regret that you did not catch him sooner. With this schedule, the heretics would know exactly when the watch is weakest—free to use their tunnels with impunity and set their ambush at the perfect moment.</p><p>The timetable has not yet changed. It will be changed now, of course, but the heretics may already be in position. Drillemont sees only one course left: House Durendaire must send reinforcements, even if it means withdrawing knights from the Stone Vigil. He can find no other way to safeguard the lives of your allies.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 德里爾蒙 <small class="muted">(庫爾札斯中央高地, X:12.8, Y:17.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="dark-words-dark-deeds.html">追查可疑的騎兵</a></div><div class="row">所有職業（不含限定職） 等級 50 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-path-of-the-righteous.html">潛入 Snowcloak 大冰壁</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
