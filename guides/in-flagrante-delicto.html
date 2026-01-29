@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>In Flagrante Delicto | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – In Flagrante Delicto (ARR Patch 2.4)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/ILjbZzJY9mQ"
+              title="In Flagrante Delicto" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">In Flagrante Delicto</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`In Flagrante Delicto`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Your trail brings you to the East Shroud. Ilberd advises taking the ferry from Westshore Pier, and while you make your preparations, he goes on ahead to wait for you at Sweetbloom Pier in the Honey Yard.</p><p>Yugiri leads you onward, warning that your quarry is headed for the Hawthorne Hut—and that if Roaille truly is who you seek, she likely intends to make contact with her Garlean masters there.</p><p>Ilberd explains that the Garleans have a means of long-distance communication, and that Garlond Ironworks devices have been deployed around the city–states to disrupt it—forcing imperial agents into direct rendezvous. Roaille, as a recognizable Flame Marshal, cannot move through Thanalan unnoticed for long, so the Black Shroud is the better place to meet. Yugiri adds that Garlean agents have tried to destroy the devices, but her shinobi have repelled them so far.</p><p>At the Hawthorne Hut, Roaille is already gone. Yugiri’s people report she has departed for the Bramble Patch, and Ilberd insists you need damning proof—best obtained by catching her in the act of meeting her Garlean masters. Yugiri and her countrymen take to the shadows and urge you to tread warily.</p><p>Just beyond, Yugiri spots Roaille speaking with someone dressed like an adventurer—an imperial intermediary, no doubt. Ilberd charges in, arrests Flame Marshal Eline Roaille for treason and espionage, and the intermediary curses being followed. Roaille challenges the charge as mere “strolling” and “conversing,” but Ilberd orders her to come quietly; she says she will not struggle, and that she has naught to hide.</p><p>Afterward, Yugiri says Roaille’s surrender does not prove innocence—only that she knows her position is untenable—and hopes the “Ivy” being uprooted will let its tendrils within the Immortal Flames wither. When she learns the Scions seek a way into Iceheart’s sanctum, she sends you back to the Rising Stones and promises her people will handle the aftermath; she also notes your training in the art of the shinobi.</p><p>Back at the Rising Stones, Minfilia asks what task Alphinaud set you. She can scarce believe the accusations against Eline Roaille and wonders if there was a misunderstanding, but concludes you must trust the authorities to uncover the truth—then reports progress on the effort to find a way into Iceheart’s sanctum.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Ilberd <small class="muted">(New Gridania, X:12.2, Y:13.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="chasing-ivy.html">Chasing Ivy</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 50 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-simple-plan.html">A Simple Plan</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'写本師捕縛作戦',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>あなたの追跡は、黒衣森：東部森林へと及ぶ。イルベルドは渡し船で向かうよう提案し、あなたが準備を整えるあいだに先行して、ハニーヤードの花蜜桟橋で待つと言う。</p><p>ユウギリは先導し、標的がホウソーン家の山塞へ向かったと告げる。もしロアイユが真に探す相手なら、そこでガレマール帝国の主と接触するはずだ、と。</p><p>イルベルドは、帝国が遠距離で連絡を取る手段を持つこと、そしてガーロンド・アイアンワークスの用意した妨害装置を都市国家周辺に設置したことで、帝国の密偵が主君と連絡しづらくなったことを説明する。そのためロアイユは直接の落ち合いを選ばざるを得ず、しかし不滅隊の顔としてザナラーンを動けば見破られるのも時間の問題で、黒衣森での密会が都合がよいのだという。ユウギリは、装置破壊を狙う帝国の動きと、それを忍者が退けていることを補足する。</p><p>ホウソーン家の山塞に着いたとき、ロアイユの姿はない。標的は茨の森へ向かったとの報せを受け、イルベルドは地位ある者を裁くには決定的証拠が要るとして、帝国の主と会う現場を押さえる方針を示す。ユウギリは影で待ち伏せると言い、あなたに用心を促す。</p><p>その先で、ユウギリはロアイユが冒険者風の人物と話しているのを見届け、帝国の仲介役だろうと告げる。イルベルドは踏み込み、フレイムマーシャルのエリーヌ・ロアイユを反逆と諜報の罪で逮捕すると宣言する。相手は追跡を罵り、ロアイユは散策や立ち話を理由にするのかと問い返すが、イルベルドは従うよう命じる。ロアイユは抵抗しないと言い、自分には隠すことなどないと述べる。</p><p>ユウギリは、降伏は無実の証ではなく立場の不利を悟ったものだと語り、「蔦」が抜かれたことで不滅隊に絡んだものが衰えることを望む。そしてあなたがアイスハートの聖域へ至る道を求めていると聞くと、後始末は任せて石の家へ戻れと言い、あなたの忍者としての研鑽にも触れる。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> イルベルド <small class="muted">（グリダニア：新市街, X:12.2, Y:13.2）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="chasing-ivy.html">木陰に隠れて</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-simple-plan.html">賢人ムーンブリダ</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'當場逮個正著',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你的追查一路延伸到 East Shroud。Ilberd 建議你從 Westshore Pier 搭渡船過去；在你把需要的準備處理妥當時，他會先一步前往 Honey Yard，並在 Sweetbloom Pier 等你會合。</p><p>Yugiri 帶著你們前進，指出你們的目標正前往 Hawthorne Hut；若 Roaille 真是你們要找的人，她很可能打算在那裡與 Garlean 的上級接觸。</p><p>Ilberd 說明 Garleans 有一套遠距離通訊手段，而 Garlond Ironworks 提供了能干擾通訊的裝置，並已部署在各城邦周邊，讓帝國密探難以再靠遠距離聯絡，只能改成當面接頭。Roaille 身為 Immortal Flames 的要角，若在 Thanalan 行動太容易被認出，因此選在 Black Shroud 會面更不顯眼。Yugiri 補充，Garleans 也派人意圖摧毀裝置，但她的密探目前都成功擋下。</p><p>你們趕到 Hawthorne Hut 時，Roaille 已不在那裡；Yugiri 的人回報她改往 Bramble Patch。Ilberd 判斷，要讓像她這種身分的人定罪需要決定性的證據，而最好的方式就是在她與 Garlean 上級會面時當場抓到。Yugiri 與同伴將埋伏在暗處，並提醒你務必小心行動。</p><p>在前方，Yugiri 看見 Roaille 正與一名打扮成冒險者的人交談，認為對方多半是帝國的中間人。Ilberd 立刻現身，當眾宣布以叛國與諜報罪逮捕 Flame Marshal Eline Roaille；那名可疑的冒險者咒罵自己被跟蹤後倉皇離去。Roaille 反問是否要因她在 Twelveswood 散步、與路人交談就逮捕她；Ilberd 命她安靜就擒，否則會讓她後悔。Roaille 表示不會反抗，並稱自己無物可隱瞞。</p><p>事後，Yugiri 說 Roaille 的投降並非無罪的證明，而是她明白自己的立場已無以為繼；她希望「Ivy」被拔除後，纏在 Immortal Flames 之中的脈絡會逐漸枯萎。當她得知 Scions 正尋找進入 Iceheart 聖域的方法，她要你回到 Rising Stones，後續善後由她與同伴處理，並提到你在密探之術上的鍛鍊。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 伊爾伯德 <small class="muted">(新格里達尼亞, X:12.2, Y:13.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="chasing-ivy.html">追查躲在樹蔭下的身影</a></div><div class="row">所有職業（不含限定職） 等級 50 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-simple-plan.html">賢者 Moenbryda 的簡單計畫</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
