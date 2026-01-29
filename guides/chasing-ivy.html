@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chasing Ivy | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Chasing Ivy (ARR Patch 2.4)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/jCkMLLvdePs"
+              title="Chasing Ivy" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Chasing Ivy</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Chasing Ivy`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Ilberd stops you and speaks in a low, certain voice: the spy the Immortal Flames have hunted for so long is Flame Marshal Eline Roaille—Raubahn’s second-in-command. Before she ever wore a Grand Company uniform, she made her name as a mercenary, famed for a polearm technique people swore you had to see with your own eyes. Ishgardian-born, she rose higher than any other foreigner in the Flames, save for the Flame General himself—because when Raubahn founded the company, he chose by merit, not birthplace.</p><p>But Ul’dah’s Monetarists never shared that view. Having bankrolled the endeavor, they insisted on the right to veto appointments to high office, and it was common knowledge they distrusted foreigners—especially Ishgardians, after the Holy See abandoned the Alliance. And yet, when Roaille was promoted, they offered not even a whisper of objection. Ilberd lays the thought before you: is it possible the Ivy holds leverage over the Monetarists? Still, he insists this is secondary. What matters now is that Roaille is here in Gridania at all.</p><p>Ilberd reminds you what Roaille’s position means: when Raubahn leaves for councils with the Alliance leaders, the flame marshal should remain in the Hall of Flames to command in his stead. Roaille has no legitimate reason to be in Gridania—yet here she is, hiding behind some pretense. Ilberd is certain she is moving toward something, and he wants certainty you can act on. His men are already combing the Flames’ records for proof, but catching her in the act would end the matter at once.</p><p>He outlines the net he has thrown around the city: watchers at the gates, the airship landing, and the docks—every exit point. Roaille cannot leave without them knowing. The final piece is you: to shadow her until she reveals her true purpose. When you agree, Ilberd’s gratitude is brief and practical. You move out together, careful not to alert your quarry.</p><p>You soon spot Roaille savoring the forest air like a visitor with nothing to hide, praising Gridania for how it makes her feel renewed. Ilberd keeps you close and tracks her path toward the Blue Badger Gate. When she slips into the Carline Canopy, he pauses at the threshold, weighing possibilities—an illicit meeting, or an attempt to board an airship. He orders you inside: search the upper floor first, then the landing below. A contact named Ephemie is stationed there and may have seen something; Ilberd stays outside in case Roaille reappears.</p><p>At the airship landing, Ephemie greets you with cheerful surprise, playing along when you claim it’s merely a social visit. Beneath the pleasantries, her report is clear: she has noted every passenger, and no one resembling Roaille came through. When you return with the news that Roaille is nowhere to be found—and that she did not board an airship—Ilberd’s irritation flashes. She did not come back out either. For a moment, the trail seems impossible…until he snaps to the answer he missed: the Roost.</p><p>There, a peddler tries to sell Ilberd a tonic with a grin and an insinuation, but Ilberd brushes him off—then freezes on a detail you can’t ignore. The necklace. Ilberd calls it out for what it is: the mark of a shinobi of Doma. The shinobi speaks plainly: Roaille has already left Gridania by way of Westshore Pier, disguised as a merchant, but not well enough to fool trained eyes. He advises you to continue the search in the East Shroud, promising that they will keep supporting you from the shadows. Ilberd exhales his relief like a prayer, grateful to the Twelve for the Domans’ talents—without them, Roaille would have vanished without a trace.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Ilberd <small class="muted">(New Gridania, X:10.2, Y:11.6)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="tendrils-of-intrigue.html">Tendrils of Intrigue</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 50 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="in-flagrante-delicto.html">In Flagrante Delicto</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'木陰に隠れて',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>イルベルドは声を落として告げる。長らく追ってきた「密偵」の正体は、ラウバーンの副官にして不滅隊の「フレイムマーシャル」、エリーヌ・ロアイエその人だ、と。彼女は不滅隊に入る以前、名の知れた傭兵であり、槍術の腕前は「見なければ信じられない」とまで言われていた。イシュガルドの生まれでありながら、フレイムジェネラルを除けば不滅隊でもっとも高位に就いた異邦人――それは、ラウバーンが組織を創設した際、出自ではなく「価値」で人を選んだからだ。</p><p>だが、ウルダハのモネタリストは違った。資金を出した以上、高官の人事に異議を唱える権利があると考え、異邦人――とりわけ、同盟を見捨てた聖座の件で反感を買っていたイシュガルド人を好まないことは公然の事実だった。それなのに、ロアイエの任命には抗議ひとつなかった。不可解だろう、とイルベルドは言う。アイヴィーがモネタリストを押さえている可能性すらある。だが今は、それ以上に重要なことがある――ロアイエが「今ここにいる」ことだ。</p><p>イルベルドはロアイエの職務を確認する。フレイムジェネラルが同盟諸国の会議に出ている間、不滅隊を指揮するのはフレイムマーシャルであり、本来なら「ホール・オブ・フレイム」に残っているべきだ。ところがロアイエは、グリダニアにいる。正当な理由などないはずなのに、何らかの口実を作って現れている。彼女は何かを企んでいる――イルベルドはそう断じ、確実な証拠を求める。記録の洗い出しも進めているが、現場で取り押さえられれば、それで決着がつく。</p><p>彼はすでに手を回していた。城門、飛空艇乗り場、埠頭――あらゆる出入口に監視を置き、ロアイエが動けば必ず把握できる。残るのは、彼女が真の目的を露わにする瞬間まで尾行し続けることだ。あなたが目となってくれ、とイルベルドは頼む。あなたが応じると、彼は短く礼を言い、獲物に気取られぬよう慎重に動き出す。</p><p>やがてあなたは、森の空気を楽しむロアイエの姿を目にする。まるで何事もない旅人のようにグリダニアを称え、訪れるたびに生まれ変わった気分になる、と言う。イルベルドは足取りを追い、彼女が「ブルーバジャー門」方面へ向かったことを告げる。ロアイエが「カーラインカフェ」に入ると、イルベルドは入り口で立ち止まり、誰かとの密会か、飛空艇に乗るつもりかと考える。そしてあなたに、まず上階を探し、いなければ下の発着場へ行けと指示する。そこにはエフェミーという協力者がいる――見ていたかもしれない。イルベルドは、ロアイエが戻ってきた場合に備えて外で待つ。</p><p>飛空艇乗り場でエフェミーは、あなたを見て驚きつつも、あなたが「社交の用事」だと言うと明るく取り繕う。だが報告は明確だ。乗客は全員記録しており、ロアイエらしき者は見当たらない。戻ってその旨を伝えると、イルベルドは苛立ちを隠さない。飛空艇にも乗っていない、外にも出ていない――いったいどこへ消えたのか。だが次の瞬間、彼の表情が変わる。思い出したのだ。「ルースト」だ、と。</p><p>そこで声をかけてきた行商人は、妙に含みのある口調で強壮の薬を勧めるが、イルベルドは相手にしない。ところが、ふと目に入った首飾りに反応する。――ドマの忍者だ。忍者は淡々と告げる。ロアイエはすでに「ウェストショア埠頭」からグリダニアを離れた。商人に変装していたが、自分たちの目は誤魔化せない。捜索は「東部森林」へ向けるといい、と。そして影から支援を続けると約束する。イルベルドはその言葉に安堵し、ドマの者たちの技がなければ、ロアイエは跡形もなく消えていたと噛みしめる。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> イルベルド <small class="muted">（グリダニア：新市街, X:10.2, Y:11.6）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="tendrils-of-intrigue.html">絡まり合う陰謀</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="in-flagrante-delicto.html">写本師捕縛作戦</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'追查躲在樹蔭下的身影',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Ilberd 壓低聲音，要你把話聽清楚：他們追了這麼久的內鬼，正是 Immortal Flames 的 Flame Marshal——Eline Roaille，Raubahn 的副手。她在加入 Immortal Flames 之前，就是名聲不小的傭兵；據說她揮舞長槍的身手，非得親眼見過才會相信。她出身 Ishgard，卻能在 Immortal Flames 裡一路爬到僅次於 Flame General 的位置——因為 Raubahn 創立 Grand Company 時，看重的是人的本事，從哪裡來從來不是他的考量。</p><p>可 Ul’dah 的 Monetarists 從不這麼想。他們提供資金，便自認有權否決高層任命；而且眾所皆知，他們不喜歡外地人——尤其是 Ishgardian，因為 Holy See（Ishgard 的宗教政權）當初拋棄了 Alliance。正因如此，Roaille 被任命為 Flame Marshal 時，Monetarists 卻連一句抗議都沒有，這件事才顯得格外詭異。Ilberd 把疑點擺到你面前：會不會 Ivy 掌握了什麼把柄，讓 Monetarists（Ul’dah 的財閥派系／金錢至上勢力，由掌握資本與商業利益的權貴組成）不敢出聲？但他很快收斂思緒，強調眼下的重點不在這裡——而在於 Roaille 為何此刻會出現在 Gridania。</p><p>Ilberd 提醒你，Flame Marshal 的職責，是在 Flame General 不在時指揮 Immortal Flames。Raubahn 去參加 Alliance 領袖會議時，Roaille 理應留在 Hall of Flames 才對。她根本沒有理由出現在 Gridania，卻偏偏以某種藉口現身。Ilberd 斷言她一定在盤算什麼，而他不想只靠推測。雖然他已派人翻查 Immortal Flames 的紀錄尋找罪證，但若能當場抓到她露出破綻，就能得到最直接、最無可辯駁的證明。</p><p>他告訴你，包圍網已經布好：城門、飛空艇起降處、港口碼頭——所有可能離開的出口都有人盯著，Roaille 不可能悄悄脫身。現在只差最後一步：一路跟緊她，直到她露出真正目的。Ilberd 問你能不能把眼睛借給他，當他的目擊者。你答應後，他只簡短道謝，便示意出發——同時叮囑你務必小心，別讓獵物察覺。</p><p>很快，你看見 Roaille 像個普通訪客般呼吸著森林的空氣，甚至感嘆每次來到 Gridania 都彷彿被洗滌、像新生一般。Ilberd 立刻帶著你跟上，指出她正朝 Blue Badger Gate 的方向前進。當她走進 Carline Canopy，Ilberd 在門口停下，判斷她也許要見人，也可能想登上飛空艇。他命令你先去上層搜尋，若沒有，就去下方的起降區；那裡有他的人 Ephemie 駐守，也許看見了什麼。Ilberd 則留在外頭，以防 Roaille 再度現身。</p><p>在飛空艇起降處，Ephemie 熱情地向你打招呼。你以「社交拜訪」作掩護，她也立刻配合演出，但她給你的回覆很明確：她記錄了每一名乘客，沒有任何人看起來像 Roaille。你回去報告「人不見了，也沒有登上飛空艇」時，Ilberd 明顯惱火——她既沒回到門口，也沒登機離開，到底是怎麼消失的？就在他怒意翻湧的瞬間，他忽然想起了某個可能性，幾乎是咬牙切齒地喊出答案：The Roost。</p><p>你們趕到那裡，一名小販上前推銷帶著暗示意味的補藥，Ilberd 只冷冷擋回去。然而他下一秒就盯住了對方的項鍊，語氣驟變——那是 Doma shinobi（密探）的標記。shinobi 直接告訴你：Roaille 已經從 Westshore Pier 離開 Gridania。她換上了商人的打扮，但這雙眼睛不會被那種偽裝欺騙。對方建議你把搜尋方向轉往 East Shroud，同時保證他們會在暗處繼續支援。Ilberd 聽完長長吐出一口氣，幾乎像是在向 Twelve（Eorzea 普遍信奉的「十二神」）道謝——若不是 Domans 的本領，Roaille 早已無聲無息地消失得一乾二淨。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 伊爾伯德 <small class="muted">(新格里達尼亞, X:10.2, Y:11.6)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="tendrils-of-intrigue.html">陰謀盤根錯節</a></div><div class="row">所有職業（不含限定職） 等級 50 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="in-flagrante-delicto.html">當場逮個正著</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
