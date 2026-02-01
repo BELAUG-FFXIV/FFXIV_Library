@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Eyes Unclouded | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Eyes Unclouded (ARR Patch 2.4)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/zZNG1CsWhtM"
+              title="Eyes Unclouded" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Eyes Unclouded</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Eyes Unclouded`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>You hear Alphinaud say that you clearly have much to discuss back at Rising Stones. If what you report is true, Iceheart’s way of calling Shiva overturns every precedent, forcing a complete reappraisal of the primal threat—and of how you fight it.</p><p>He then warns of the political danger if the incident reaches Garlean Empire ears: the Empire already treats primals as an intolerable menace to the star, and uses that belief to justify its campaign. If it became known that civilized peoples of Eorzea could summon primals too, any remaining objections to the campaign would vanish—and instead of a single legion, you might face the combined might of all Garlemald. He cuts himself short and urges you to continue the conversation in Mor Dhona.</p><p>Back at Rising Stones, Minfilia welcomes you home “hale and whole,” asks if you’re ready to speak of what happened in Coerthas, and summons the others. The room catches on one point at once: Iceheart used her own body as a vessel for a primal’s soul—something Louisoix’s writings never addressed. Y’shtola questions whether you can be certain it was a primal at all; Papalymo answers that it was “ostensibly summoned,” much like Good King Moggle Mog XII.</p><p>Thancred refuses to get bogged down in definitions and points to the real implication: Iceheart appeared to retain her will even after being possessed—meaning a mortal wielded primal power. Yda pushes back that it can’t be so easy; there must be a cost, or something uniquely “special” about her. Urianger says he cannot speak to her qualities, but he is certain she was groomed for the role—few know summoning secrets, and only one party profits from spreading them. Moenbryda won’t speculate on how Iceheart learned, but states plainly that what was summoned was a primal—the readings were the same, near enough—and that however strange it sounds, it is not truly different from what you have faced before.</p><p>That answer shifts the focus: Y’shtola suggests reexamining your earlier encounters, and Papalymo orders Yda to pack—saying you are going back to Gridania. Minfilia then returns to Iceheart’s final words—“Hear… Feel… Think…”—and notes that Hydaelyn speaks to her as well. If Iceheart is blessed with the power of the Echo, then she may have used it to further her goals—or perhaps a revelation granted by the Echo set her on this path in the first place, given her claim that Ishgardians are blind to the truth.</p><p>Urianger reminds you that Iceheart urged you to seek the Keeper of the Lake, implying you would come to “see with eyes unclouded.” Minfilia adds that Midgardsormr was a king among kings who ruled for ages, yet is dead—his wisdom lost unless Ishgard’s fears prove well founded. And so you have another reason to stand watch over the Keeper of the Lake—thankfully, you are well positioned to do so—while she admits she shudders to think how Iceheart, Shiva, the Ascians, and Midgardsormr might all be connected.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Alphinaud <small class="muted">(Coerthas Central Highlands, X:26.7, Y:17.0)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-road-less-traveled.html">The Road Less Traveled</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 50 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-reason-roaille.html">The Reason Roaille</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'蛮族と呼ばれる者',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>あなたはアルフィノから、石の家の仲間たちと話し合うべきことが山ほどあると告げられる。あなたの報告が真実なら、アイスハートによるシヴァ召喚は前例を覆し、蛮神という脅威そのものと、対処の在り方を根本から見直さねばならないという。</p><p>さらに、今回の件が帝国の耳に入れば深刻だと彼は言う。ガレマール帝国は蛮神を「星そのものへの脅威」とみなし、蛮族への武力行使を当然視している。もし「蛮族だけでなく、エオルゼアの文明人も蛮神を召喚できる」と知れ渡れば、遠征への反対など一夜で消え、単一軍団どころかガレマルドの総力を相手にしかねない――そう言いかけ、話はモードゥナで続けようとあなたを促す。</p><p>石の家へ戻ると、ミンフィリアはあなたが無事に帰還したことを心から喜び、クルザスで起きたことを話せるなら聞かせてほしいと言って皆を呼び集める。焦点はすぐに定まる――アイスハートは己の肉体を「器」として蛮神の魂を宿したのだ、と。ルイゾワの記述にもない可能性に、ヤ・シュトラはそれでも蛮神と断言できるのかと問う。</p><p>パパリモは「召喚された」という点で確からしいと言い、サンクレッドは定義の揚げ足取りよりも重大な点を突く――憑依されてもアイスハートが意思を保っていたなら、蛮神の力を振るうのは“蛮神”ではなく“人”だ。イダは代償が要るはずだと疑い、ウリエンジェは彼女がその役目のために育てられたと断じる。ムーンブリダは経緯には踏み込まないが、観測結果は蛮神と同等だと言い切り、奇妙に聞こえても本質はこれまでと変わらないと言う。</p><p>その言葉を受け、ヤ・シュトラは過去の遭遇を洗い直すべきだと述べ、パパリモはイダに荷造りを命じてグリダニアへ戻ると宣言する。ミンフィリアは次に、アイスハートがあなたに残した「聞け……感じろ……考えろ……」という言葉に触れ、ハイデリンもまた彼女に語りかけていると言う。もし彼女がエコーの力を得ているなら、それを目的のために用いただろう――あるいは、エコーによる“啓示”こそが彼女をこの道へ向かわせたのかもしれない、と。</p><p>ウリエンジェは、彼女が「黙約の塔」を求めよと促したことを思い出させ、そこで曇りなき眼で見ることになると示唆していたと言う。ミンフィリアは、ミドガルズオルムが長きにわたり君臨した王の中の王でありながら、今は死して叡智も失われたと語り、恐れが真なら話は別だと付け加える。だからこそ、黙約の塔を見張る理由がまたひとつ増えた――そして彼女は、アイスハート、シヴァ、アシエン、ミドガルズオルムがどう結びつくのか想像するだけで身震いすると言う。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> アルフィノ <small class="muted">（クルザス中央高地, X:26.7, Y:17.0）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-road-less-traveled.html">白き女神殿騎士</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-reason-roaille.html">峻烈のエリヌ・ロアユ</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'明察秋毫',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你聽 Alphinaud 說，回 Rising Stones 後你們得和夥伴們好好談談。若你所說的都是真的，Iceheart 召喚 Shiva 的方式完全打破以往認知，迫使你們重新評估 primal 的威脅，也必須重整你們對付它的做法。</p><p>他接著提醒你更嚴重的後果：若這件事傳到 Garlean Empire 耳裡，影響將非常可怕。帝國一向把 primal 視為無法容忍的禍害，認定它們的存在本身就是對「這顆星」的威脅，因此也理所當然地認為對蛮族採取任何行動都正當。可想而知——如果世人得知不只 Eorzea 的蛮族能召喚 primal，就連「文明人」也能做到，那些對遠征尚存的反對聲浪會在一夜之間消失；原本你們只需面對一支軍團，接下來卻可能要面對整個 Garlemald 的合力。話說到這裡，他自己也覺得失言，催你先回 Mor Dhona 再把話說完。</p><p>回到 Rising Stones，Minfilia 看到你平安歸來，說言語不足以形容她有多高興；她問你是否準備好談 Coerthas 發生的事，得到肯定後便立刻把其他人召來。你一開口，眾人就抓住最震撼的核心：Iceheart 竟用自己的身體當作「容器」，承載 primal 的靈魂。Y’shtola 指出 Louisoix 的著作從未提過這種可能，質疑你們是否能確定那真的是 primal；Papalymo 則回應，至少就「被召喚」這點來看，它和 Good King Moggle Mog XII 並無二致。</p><p>Thancred 不願你們在定義上拉扯，因為更可怕的含意在後面：Iceheart 在「被附身」後仍保有自我意志——也就是說，一個凡人能握住 primal 的力量。Yda 直覺反駁這不可能那麼簡單，必定需要某種代價，或是 Iceheart 有某種特別之處。Urianger 說他無法斷言她具備哪些資質，但他可以確信她是被培養成這個角色的；召喚的祕密知道的人極少，而讓這些祕密流傳出去，只有一方會獲利。Moenbryda 不評論 Iceheart 如何得知召喚之道，但她斬釘截鐵說那就是 primal——觀測數值幾乎一樣；再離奇，本質上也和你們過去面對的並沒有不同。</p><p>這句話讓討論轉向「回頭檢視」。Y’shtola 說也許是時候重新審視你們先前的遭遇；Papalymo 乾脆要 Yda 收拾行李，表示你們要回 Gridania。Minfilia 這時改問 Iceheart 最後留給你的那句話：「聽……感受……思考……」她也指出 Hydaelyn 也在對 Iceheart 說話。若 Iceheart 同樣具備 Echo 的力量，她很可能利用 Echo 來推進自己的目的；又或者，正是 Echo 給她的「啟示」把她推上這條路——畢竟她曾說 Ishgard 的人對真相視而不見。Minfilia 也因此追問：Iceheart 是否掌握 Ishgard 與 Dravania 戰爭起源的真相？那或許能解釋她為何如此堅信不移。</p><p>Urianger 提醒你，Iceheart 要你去找 Keeper of the Lake，並暗示你到了那裡便能「以清明的眼」看見真相。Minfilia 進一步說，Midgardsormr 曾是統御諸王的王者，延續了漫長歲月——但他已死去，智慧也隨歲月埋葬，除非 Ishgard 的恐懼真的有其根據。於是，你們又多了一個理由去盯緊 Keeper of the Lake；幸好，你們的位置正好做得到。她最後低聲說，她光是想到 Iceheart、Shiva、Ascians 與 Midgardsormr 之間可能存在的連結，就忍不住發寒。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 阿爾菲諾 <small class="muted">(庫爾札斯中央高地, X:26.7, Y:17.0)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-road-less-traveled.html">不走尋常路</a></div><div class="row">所有職業（不含限定職） 等級 50 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-reason-roaille.html">Roaille 的盤算</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
