@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Reason Roaille | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – The Reason Roaille (ARR Patch 2.4)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/oRzUK9HUNEY"
+              title="The Reason Roaille" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">The Reason Roaille</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`The Reason Roaille`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Minfilia tells you she intends to scour the annals for knowledge of Midgardsormr, but she hears commotion outside the Solar and asks you to go see what is amiss.</p><p>Outside Rising Stones, Alphinaud calls you over at once: Roaille has escaped. Not long after the Immortal Flames took her into custody, she broke free from the dungeon cell where she was held ahead of trial—leaving the turnkey dead, along with two guards, clear proof of help from within. Witnesses saw her leave Ul’dah through the Gate of Nald with a bloodied spear, and Alphinaud is certain she is making for Castrum Meridianum—her only recourse now being flight to her imperial masters. He says Captain Ilberd and the 1st are already in pursuit, and bids you make haste to Camp Bluefog and join the hunt.</p><p>At Camp Bluefog, Ilberd thanks you for coming and relays what the soldiers saw: Roaille walked straight through the camp not long ago. He tells you why no one tried to detain her—Raubahn chose to keep the matter secret for morale’s sake—so the garrison let her pass, and now you are left racing to stop her before she reaches Castrum Meridianum.</p><p>Near Raubahn’s Push, you catch up amid bitter grumbling from Yuyuhase, who complains the exertion will require compensation. Ilberd identifies a wretch who was with Roaille and threw himself at you so she could escape—and he notes Roaille did not flinch when the man was cut down. With that, he orders you forward, insisting you are close.</p><p>When Roaille and her imperial allies stand their ground, Ilberd commands that Roaille be taken alive and the rest killed, and the clash draws reinforcements. Roaille calls you fools for thinking you can stand against the Empire, while Ilberd shouts to kill the healers first—and when Yugiri arrives, she apologizes for the delay, warns that a circle will fetter those who step within it, and tells you to lure the enemy into the trap. The fighting ends with Roaille breathless and bound, the Crystal Braves tightening the restraints as Alphinaud acknowledges the work.</p><p>Alphinaud confronts Roaille as a once-respected pillar of the Immortal Flames, and she snaps back at him as a pampered lordling who has never known want. She spits out the life she claims she had to live to survive—stealing, killing, even whoring herself—and says it is not her fault if fools mistook her for a paragon when she joined the Flames. Ilberd answers that Raubahn and he were born into poverty as well, yet they did not begrudge others their fortunes: they accepted the hand dealt and fought for everything they have. Roaille demands to know how they are different, and Ilberd draws the line—he sold his sword, but she sold her comrades—before ordering her returned to Ul’dah to face justice.</p><p>Afterward, Ilberd says he joined the Crystal Braves to strike a blow against the Empire, and that those who cast their lot with Garlemald should expect no better. Alphinaud, seeing no remorse, says he is glad the sordid business is finally at an end—and admits a friend’s betrayal cuts deeper than steel. Elsewhere in Ul’dah, Teledji Adeledji calmly treats the incident as “bothersome business,” orders the Brass Blades to watch Raubahn and the Flames day and night, says he will personally attend the sultana, and instructs that an East Aldenard trade route be severed to keep Lolorito occupied—before addressing Nanamo Ul Namo with a chilling request that she be a “good little sultana” to the last.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Minfilia <small class="muted">(The Rising Stones, X:6.1, Y:5.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="eyes-unclouded.html">Eyes Unclouded</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 50 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="let-us-cling-together.html">Let Us Cling Together</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'峻烈のエリヌ・ロアユ',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ミンフィリアは、ミドガルズオルムについて知るために記録を洗い直すつもりだと言いかけるが、石の家の外が騒がしいことに気づき、異変がないか見てきてほしいとあなたに頼む。</p><p>外へ出ると、アルフィノがあなたを呼び止める――エリヌ・ロアユが脱走したのだ。不滅隊に拘束された直後、裁判を待つ監獄房から抜け出し、看守と衛兵が殺されていたことから内通が疑われる。血塗れの槍を手にウルダハを出て行く姿が目撃され、ナル大門から逃走したという報せもある。彼女の行き先はカストルム・メリディアヌムに違いない――エオルゼアでの身の置き場がなくなった以上、帝国の主に逃げ込むしかないからだ。イルベルドと不滅隊第一軍団が追跡中だとして、あなたにキャンプ・ブルーフォグへ急ぎ、狩りに加われと促す。</p><p>キャンプ・ブルーフォグでイルベルドは兵から話を聞いたと言い、エリヌ・ロアユは少し前に“歩いて”ここを通り抜けたのだと告げる。拘束が試みられなかったのは、ラウバーンが士気を理由に件を秘匿すると決めていたからで、その結果として駐屯地の不滅隊は誰一人止めに入れなかった――だからこそ、今ここで追いつくしかない。彼女をカストルム・メリディアヌムへ到達させてはならない、と。</p><p>ラウバーン緩衝地の周辺で、ユユハセはため息まじりに「余計な労力」の補償を求め、イルベルドはエリヌ・ロアユと行動していた男が身代わりになったのだと言う。斬り伏せられても彼女は瞬きひとつせず、叫び声にも反応しなかった――そう吐き捨て、あなたに続けと命じる。</p><p>戦いが始まると、イルベルドはエリヌ・ロアユを生け捕りにし、他は殺せと叫ぶ。敵の増援が現れ、彼女は帝国に抗えぬと嘲るが、イルベルドは回復役から潰せと指示する。遅れてユウギリが駆けつけ、詫びると同時に「円環が中の者を縛る」と告げ、敵をそこへ誘導せよと指示する。戦いの果てに、息を切らしたエリヌ・ロアユは縛られ、クリスタルブレイブが拘束を固め、アルフィノが労をねぎらう。</p><p>アルフィノは、不滅隊の礎とまで見なされていた者がここまで堕ちたことを嘆くが、エリヌ・ロアユは「飢えを知らぬ坊ちゃん」と切り返し、自分は生き延びるために盗み、殺し、身を売ることさえしたのだと言い放つ。イルベルドは、ラウバーンも自分も貧しさの中で生きたが、他者の富を恨まず、配られた手札で戦い抜いてきたと返す。エリヌ・ロアユが「何が違う」と叫ぶと、イルベルドは違いを突きつける――自分は剣を売ったが、彼女は仲間を売ったのだ――そしてウルダハへ連行し、裁きを受けさせると宣告する。</p><p>その後、イルベルドは帝国に一矢報いるためにクリスタルブレイブへ加わったのだと言い、ガレマール帝国に与する者には相応の扱いを受けさせると告げる。アルフィノは悔いの欠片もないことに息をつきつつ、一連の醜聞がひとまず終わったことを良しとし、友の裏切りは鋼よりも深く刺さると語る。場面は変わり、ウルダハの香煙の間でテレジ・アデレジは淡々と指示を下し、真の懸念はラウバーンだと言って監視を命じ、ナナモ・ウル・ナモには自ら対応すると言う。さらに東アルデナードの交易路を断てと命じてロロリト・ナナリトを足止めし、最後にナナモ・ウル・ナモへ不穏な言葉を投げかける。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ミンフィリア <small class="muted">（石の家, X:6.1, Y:5.2）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="eyes-unclouded.html">蛮族と呼ばれる者</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="let-us-cling-together.html">氷結の幻想</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'Roaille 的盤算',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Minfilia 說她打算翻查史料，從記錄裡找出與 Midgardsormr 有關的線索；可她話才說到一半，就聽見外頭一陣騷動，便要你出去看看發生了什麼。</p><p>你一走出 Rising Stones，Alphinaud 立刻叫住你：Roaille 逃走了。她被 Immortal Flames 正式拘押後不久，就從等待審判的牢房脫逃；看守與兩名守衛被發現陳屍，顯然有人在內部接應。市民還目擊她手持染血長槍，從 Ul’dah 的 Gate of Nald 離城。Alphinaud 斷言她一定是要逃往 Castrum Meridianum——在 Eorzea 已無退路的情況下，她能做的只剩投奔帝國主子。Ilberd 與第一軍團已在追擊，他要你立刻趕往 Camp Bluefog 會合。</p><p>在 Camp Bluefog，Ilberd 向你道謝，並轉述駐軍回報：Roaille 不久前竟是「直接走過營地」而已。之所以沒人攔她，是因為 Raubahn 決定把這件事保密，說是為了士氣；結果就是駐軍裡沒有任何一名 Immortal Flames 出手拘留她，才會讓你們追到這一步。Ilberd 明確表示：絕不能讓 Roaille 抵達 Castrum Meridianum。</p><p>在 Raubahn’s Push 一帶，Yuyuhase 先嘆了口氣，抱怨你們害他多費力氣，最好得有人補償。Ilberd 指出有個跟著 Roaille 的人剛才撲上來拖住你們，好讓她脫身；那人被你們砍倒時，Roaille 連眼都沒眨一下，甚至在對方尖叫時也毫無反應。Ilberd 要你跟上，說你們已經很接近了。</p><p>戰鬥爆發後，Ilberd 下令一定要活捉 Roaille，其他人一律格殺；敵方增援趕到，Roaille 嘲諷你們不可能對抗帝國。Ilberd 注意到對方有治療者，要求先解決他們；隨後 Yugiri 也趕來致歉，並提醒「那道圓環會束縛踏入其中的人」，要你把敵人引進去。戰鬥結束時，Roaille 氣喘不止，被緊緊綁住，Crystal Braves 照 Ilberd 的命令加固束縛；Alphinaud 則對眾人說你們做得很好。</p><p>Alphinaud 望著 Roaille，說她曾是不滅隊裡受人敬重的軍官，是創隊成員之一、也是支柱，看到她墮落至此讓人難過；Roaille 反嗆他是從沒吃過苦的貴族小少爺，根本不懂什麼叫「低」。她怒斥像他這種人把財富與出身當成理所當然，覺得統治他人是神賜的權利；又說低階出身的 Ishgardians 受盡不公，在貴族眼裡甚至不是人，只是可被消耗的資源。她宣稱自己只是為了活下去，才不得不偷、不得不殺，甚至不得不賣身；若有人加入不滅隊後把她想像成完人，那不是她的錯。Ilberd 回敬她：Raubahn 與他同樣出身貧困，也同樣嚐過飢餓，但他們從不怨恨別人的富有，只會接受命運發下的牌，然後用盡全力把它打到最好；他們的一切都是自己拚來的。Roaille 反問這有何不同，Ilberd 便把差別說得一清二楚——他賣的是自己的劍，而她賣的是自己的同袍——並宣告要把她押回 Ul’dah 受審，去面對被她拖進泥沼的信任與公義。</p><p>事後，Ilberd 說他加入 Crystal Braves，就是為了對帝國揮出一擊；凡是投向 Garlemald 的人，就該承受相同的下場。Alphinaud 望著 Roaille，感嘆她連一絲悔意都沒有，並說這樁醜事終於告一段落，只希望你們在選擇同伴時比 Raubahn 更謹慎——因為朋友的背叛，比刀刃更深更痛。另一邊，在 Ul’dah 的 Fragrant Chamber，Teledji Adeledji 聽完通報後冷冷說這真是麻煩，並認定最大的變數是 Raubahn，命 Brass Blades 日夜監視他與 Immortal Flames；他說會親自「照料」sultana，還下令切斷東阿爾德納德的一條商路，好讓 Lolorito 忙上一陣子。最後，他對 Nanamo Ul Namo 低聲說了一句：為了他著想，請她「直到最後都當個乖巧的 sultana (Nanamo Ul Namo 的正式稱號，Ul’dah の女王／最高統治者」。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 敏菲利亞 <small class="muted">(石之家, X:6.1, Y:5.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="eyes-unclouded.html">明察秋毫</a></div><div class="row">所有職業（不含限定職） 等級 50 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="let-us-cling-together.html">冰封幻影</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
