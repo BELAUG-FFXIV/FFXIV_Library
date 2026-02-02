@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bait and Switch | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Bait and Switch (ARR Patch 2.5)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/bFcL7HPUBbE"
+              title="Bait and Switch" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Bait and Switch</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Bait and Switch`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Ilberd urges you to make for the Burning Wall at once and secure the weapons. He says the 1st Unit will ensure the clients do not escape, and orders you to come with him.</p><p>At the Burning Wall, Ilberd spots one man but assumes there are others. He lays out a plan: you approach the sentry and create a distraction while he and his men slip past to catch the black marketeer unawares. After you deal with the thugs, you are to wait outside the tunnel entrance.</p><p>When you move in, the hired thugs mistake you for an adventurer and lunge to kill you, and you feel the hostile presence close in. In the confusion, you hear a frightened cry from within—someone demanding to know what is happening—followed by a scream.</p><p>Afterward, Ilberd shows you the result and calls it a fine mess. He says that when he tried to restrain the black marketeer, the man drew a hidden blade and lashed out; before Ilberd could disarm him, one of Ilberd’s subordinates panicked, and that panic caused what you now see. Ilberd curses himself for underestimating the bastard and for bringing an inexperienced recruit, saying Commander Leveilleur will be disappointed—and that a golden opportunity has been wasted.</p><p>Worse, the clients slipped past the perimeter somehow. Ilberd says the 1st Unit is now tracking a party of Duskwight sellswords whom he suspects are the clients. He adds that he wishes they could have enlisted aid from the Immortal Flames or the Brass Blades, but because you are here to aid them, they are in no position to aid you. For now, at least, you have secured the weapons—though even that feels incomplete, because the intelligence spoke of a massive shipment, and what you seized is anything but.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Ilberd <small class="muted">(Eastern Thanalan, X:21.1, Y:21.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="good-intentions.html">Good Intentions</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 50 or above)</div><div class="row">Must have completed the following:</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="best-laid-schemes.html">Best Laid Schemes</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'闇取引の捜査協力',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>イルベルドはあなたに、遅滞なく「バーニングウォール」へ向かい、武器を確保すると告げる。第1部隊が買い手の逃走を防ぐので、あなたは彼と行動せよ、と。</p><p>バーニングウォールに着くと、イルベルドは標的らしき男をひとり見つけるが、他にもいるはずだと言う。そして策を示す。あなたが見張りに近づいて陽動し、その隙に自分と部下が潜り込んで闇商人を不意打ちする。チンピラを片づけたら、坑道入口の外で合流せよ、と。</p><p>あなたが動くと、雇われたゴロツキは「冒険者か」と叫んで襲いかかり、敵意が迫るのを感じる。混乱の中、奥から「どういうことだ」と取り乱した叫びが聞こえ、そして悲鳴が上がる。</p><p>その後、イルベルドは現状を「ひどい有様だ」と言い、闇商人を取り押さえようとした際、相手が隠し刃を抜いて斬りかかったと説明する。武装解除する前に部下のひとりが取り乱し、その結果がこれだ、と。相手を見誤り、未熟な新兵を連れてきた自分の愚かさを呪い、ルヴェユール司令はさぞ落胆するだろうと吐き捨てる。好機を無駄にした、と。</p><p>さらに買い手は周囲の包囲をすり抜けて逃げた。どうやったかは不明だが、第1部隊が「ダスクウィスの傭兵団」を追跡しており、奴らが買い手ではないかと疑っているという。加えて、不滅隊やブラスブレードの助力を得られればよかったが、こちらは彼らを助けに来ている以上、彼らは助ける側に回れない、と。少なくとも武器は確保した――だが入手した情報は「大量の搬入」だったのに、押収できた量はそれには程遠い、とイルベルドは言う。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> イルベルド <small class="muted">（東ザナラーン, X:21.1, Y:21.1）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="good-intentions.html">3本の柱</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 50～</div><div class="row">Must have completed the following:</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="best-laid-schemes.html">押収された武器</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'協助調查黑市交易',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Ilberd 要你立刻前往 Burning Wall，先把那批武器確保下來。他說第1部隊會負責封鎖，確保買家不會逃走，並要你跟著他行動。</p><p>抵達 Burning Wall 後，Ilberd 看到一個人影，但他判斷現場一定不只一人。他提出計畫：你先靠近哨兵製造騷動，把注意力拉過來；他與手下則趁機繞過去，對黑市商人來個措手不及。等你解決那些地痞後，就在坑道入口外等他們會合。</p><p>你一出面，受雇的地痞立刻把你當成「冒險者」，怒罵你不該來這裡，隨即撲上來要你命；你也明顯感到敵意逼近。混亂之中，坑道深處傳來有人驚慌的喊聲，質問到底發生了什麼事，緊接著是一聲淒厲的慘叫。</p><p>事後，Ilberd 讓你看眼前的結果，說這真是一團亂。他解釋自己試圖制住黑市商人時，對方抽出藏刃反擊；而在他還來不及卸掉對方武器之前，一名部下因驚慌失措而釀成了現在的局面。Ilberd 懊惱自己低估了那個混帳，也後悔帶了不夠老練的新兵，說 Commander Leveilleur 一定會非常失望——一個絕佳機會就這樣被浪費了。</p><p>更糟的是，買家不知怎麼突破封鎖，從你們的警戒圈溜走了。Ilberd 說第1部隊正在追蹤一群他們懷疑與此事有關的 Duskwight 傭兵。 他也感嘆，要是能得到 Immortal Flames 或 Brass Blades 的支援就好了，但你們是來支援他們的，他們現在根本無力反過來支援你們。至少，武器已經被你們掌握住；然而就連這點成果也不完整——情報說會有一大批貨，但你們實際拿到的量，完全稱不上「大量」。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 伊爾伯德 <small class="muted">(東薩納蘭, X:21.1, Y:21.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="good-intentions.html">善意的初衷</a></div><div class="row">所有職業（不含限定職） 等級 50 以上</div><div class="row">Must have completed the following:</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="best-laid-schemes.html">遭到扣押的武器</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
