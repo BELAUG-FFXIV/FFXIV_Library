@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aether on Demand | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Aether on Demand (ARR Patch 2.5)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/7fUj4QWoe3M"
+              title="Aether on Demand" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Aether on Demand</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Aether on Demand`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>You meet Alphinaud at the Rising Stones, and he asks you to pass on a message: Moenbryda has called the Scions together, likely with news about their efforts against the Ascians. He will join the gathering as soon as he finishes speaking with the Crystal Braves, and he wants Moenbryda to know their business with the Ishgardians is concluded for the moment.</p><p>Moenbryda greets you with brisk enthusiasm and ushers you into the solar, eager to shift the focus from dragons to Ascians. Alphinaud follows soon after, uneasy but hopeful—if Moenbryda’s research has truly advanced, it may finally give the Scions a way to face their most dangerous foe.</p><p>Inside, Minfilia says everyone has been summoned because Moenbryda has something to share, and Moenbryda wastes no time. She reminds you what makes an Ascian “immortal”: when its host is defeated, its soul does not return to the aetherial realm—it slips away to the space between the world and the void. To destroy an Ascian for good, that escape must be stopped, and Moenbryda has already confirmed that white auracite can briefly entrap an Ascian.</p><p>Thancred and Urianger press the next problem: trapping a soul is not the same as erasing it. Urianger explains that unmaking an Ascian soul would require striking it with a concentrated “blade” of pure aether, yet the Scions lack both the data and the means to forge such a weapon. Moenbryda admits the difficulty—without testing on an actual Ascian, they cannot know how much aether its soul contains, nor how dense their aetheric blade must be.</p><p>When Yda blurts out an idea of simply making the densest blade possible, Papalymo snaps her back to reality: white auracite cannot store aether for long, because aether disperses unless crystallized. The conversation turns to crystals as a stable source, but the sheer quantity needed—and the burden of carrying them—makes the plan feel impractical. Moenbryda answers that this is exactly what she set out to solve: if they cannot carry enough aether, they must draw upon another source—the land itself. Rather than tampering with the great river of aether, she proposes siphoning aether from corrupted crystals, and even dreams aloud of drawing upon their power from afar.</p><p>Minfilia gives Moenbryda her blessing and asks for an explanation, and Moenbryda suggests a more practical demonstration instead. She has built an aetheric siphon, but Mor Dhona’s profusion of corrupted crystals makes it a dangerous place to test; she needs an isolated specimen. Alphinaud recommends northern Thanalan as a suitable field—and then adds another urgent matter: activity has been observed at Castrum Meridianum. The imperials seek to rebuild and have set their sights on the Ceruleum Processing Plant, a bid for survival that promises desperate resistance. Minfilia agrees the Scions must help: you are to support the defense with Thancred and Papalymo, while Yda and Y’shtola assist Moenbryda by scouting crystal clusters, and Urianger continues his work with white auracite.</p><p>Back outside, the Rising Stones hum with hurried preparation as allies ready themselves for travel. Alphinaud tells you to head straight to the processing plant, where the Crystal Braves have already deployed and Wilred will brief you, while he himself must rendezvous with Captain Ilberd in Ul’dah. Nearby, F’lhaminn prepares to leave as well—at Minfilia’s urging, she will contact old acquaintances in the gilded city, seeking allies in a realm beset by civil unrest, imperial machinations, primals, and dragons. Hoary Boulder and Coultenet promise to escort her, trading grim warnings for brash reassurance as they depart.</p><p>At the Ceruleum Processing Plant in northern Thanalan, Wilred welcomes you as a veteran whose presence steadies the line. He reports that the Immortal Flames’ scouts have seen imperial soldiers assembling at Raubahn’s Push—an ominous sign that they intend to seize the resources here, and may march at any moment. He urges you to speak with Lieutenant Edelstein to coordinate a counterstrategy. Edelstein, recalling your deeds from Operation Archon, cuts quickly to new trouble: civilian draughtsmen discovered suspicious crates inside the compound, and the Flames’ sappers confirmed the worst—powerful explosive devices of imperial design. A full sweep is underway, but the spy escaped, and the scouts’ latest reports are troubling enough that Edelstein asks for your aid once more.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Alphinaud <small class="muted">(The Rising Stones, X:6.0, Y:6.0)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-rising-chorus.html">The Rising Chorus</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 50 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="on-the-counteroffensive.html">On the Counteroffensive</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'ムーンブリダの秘策',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ライジングストーンズであなたはアルフィノと顔を合わせ、ムーンブリダが暁の血盟を招集していることを知らされる。アシエンへの対抗策に進展があったのだろう、と彼は言い、イシュガルドの件はひとまず片がついたので、クリスタルブレイブとの連絡を終え次第合流すると告げる。あなたには、来客が帰ったことをムーンブリダへ伝えてほしいと頼んだ。</p><p>ムーンブリダは豪快にあなたを迎え、竜の話は終わりだと言わんばかりに、次はアシエンだとソーラへ導く。ほどなくアルフィノも現れ、アシエンこそ最も危険な敵だと口にしつつ、ムーンブリダの研究が実を結んでいることを願う。</p><p>ソーラには皆が集められていた。ミンフィリアが、ムーンブリダが何かを共有したいらしいと言うと、ムーンブリダは落ち着いた今こそ進捗を話す好機だとして、武器の開発が突破口に近いと宣言する。彼女はまず既知の整理から始め、アシエンが不死である理由を語る。宿主が倒されても魂がエーテル界へ還らず、世界とヴォイドの狭間へ逃れるからだ。恒久的に討つには、その逃走を阻まねばならず、白聖石ならば魂を一時的に封じられることを確認したという。</p><p>だがサンクレッドとウリエンジェは、その先が問題だと指摘する。封じても滅ぼせなければ意味がない。ウリエンジェは、アシエンの魂を消し去るには、純粋なエーテルを極限まで凝縮した一撃、すなわち刃で打ち据える必要があると説明する。しかし必要な情報も手段も足りず、ムーンブリダもまた、実物のアシエンで試さない限り魂のエーテル量も必要密度も測れないと認める。</p><p>イダが、とにかく最も濃い刃を作ればよいのではと勢いで言うと、パパリモが声を荒らげて戒める。白聖石は長期にわたりエーテルを貯蔵できず、エーテルは散逸しやすいのだ、安定した力として扱えるのは結晶化した状態だけだ、と。話題は結晶に戻るが、必要量が増えれば携行性が致命的になる。ムーンブリダは、だからこそ解決策が要るのだと言い、運べないなら別の源から引き出せばよい、土地そのものからだと答える。エーテルの大河に手を出す危険は避けつつ、各地に突き出た汚染クリスタルを利用し、しかも離れた場所からでも吸い上げられるかもしれないと語った。</p><p>ミンフィリアが許可を与え、理屈を知りたいと促すと、ムーンブリダは理論より実演がよいと言って、試験用のエーテル吸引装置を作ったと明かす。だがモードゥナは汚染クリスタルが多すぎて危険なため、孤立した標本が必要になる。アルフィノは北ザナラーンを提案し、さらに別件としてカストルムメリディアヌムの動きを報告する。作戦で打撃を受けた拠点は増援を得て再建を図り、生存のために青燐精製所の資源を狙っているという。ミンフィリアは要請を受け、あなたはサンクレッドとパパリモとともに防衛に向かい、イダとヤシュトラはムーンブリダの試験準備として結晶群を探すよう命じる。ウリエンジェは白聖石の研究を続けると申し出た。</p><p>ソーラを出ると、ライジングストーンズでは出立の支度が進み、休息を許さぬ状況が皆を急かしていた。アルフィノはあなたに青燐精製所へ直行してほしいと言い、現地にはクリスタルブレイブが展開済みで、ウィルレッドが状況を説明するはずだと告げる。彼自身はウルダハでイルベルド隊長と合流し指揮を執るという。さらにフラミンもウルダハへ向かう準備をしており、内乱と帝国の策動、蛮神と竜に脅かされるエオルゼアで同盟者を得るため、旧知の有力者に働きかけたいと語る。ホーリーとクルテネは護衛として同行し、危険を踏まえつつも彼女を守ると誓って出発した。</p><p>北ザナラーンの青燐精製所であなたはウィルレッドに迎えられる。偵察によれば帝国兵がラウバーンの押し場に集結しており、狙いはここにある資源で、いつ進軍してもおかしくないという。対抗策の調整のため、あなたはエーデルシュタイン中尉に会うよう促される。エーデルシュタインは作戦時の武勲を口にしつつ、差し迫った問題を伝える。施設内で不審な木箱が見つかり、工兵が調べた結果、帝国製の強力な爆発装置だと判明したのだ。現在は徹底捜索と無力化が進められているが、内通者は取り逃がした。さらに偵察から憂慮すべき報せが届き、彼は改めてあなたの助力を求めた。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> アルフィノ <small class="muted">（石の家, X:6.0, Y:6.0）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-rising-chorus.html">黙約の塔へ</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="on-the-counteroffensive.html">帝国軍迎撃作戦</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'即刻調度',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你在 Rising Stones 見到 Alphinaud，他提醒你：Moenbryda 已經要求召集 Scions，想必與對抗 Ascians 的計畫有了進展。他要你轉告 Moenbryda——來自 Ishgard 的訪客已經離開，而他得先和 Crystal Braves 完成聯絡，隨後就會立刻趕來會合。</p><p>Moenbryda 看到你便爽快地招呼，直說「聊完龍了吧？太好了，接下來輪到 Ascians！」她帶著你走進 solar。Alphinaud 也很快到場，語氣慎重地說：在所有敵人之中，Ascians 可能是最危險的，他只希望 Moenbryda 的研究真的已經接近成果。</p><p>solar 裡的人都到齊了。Minfilia 表示她把大家召集過來，是因為 Moenbryda 有令人振奮的消息要分享。Moenbryda 也不賣關子，她說局勢總算稍微平靜一些——相對而言——正適合公布武器的進度，而且他們正站在突破點邊緣。她先帶你們回顧已知事實：Ascian 之所以「不死」，是因為宿主被擊敗時，靈魂不會回到乙太界，而是逃往「世界與 void 之間」的所在。要徹底消滅 Ascian，第一步就是阻止那道逃亡；而她已確認白聖石具備足以暫時困住它們的容量。</p><p>但接下來的難題仍在。Thancred 與 Urianger 指出：困住不等於抹除。Urianger 說，要「消滅」Ascian 的靈魂，必須以極度濃縮、如同「刀刃」般的純乙太予以一擊，可是你們既缺乏資料，也缺乏打造手段。Moenbryda 進一步坦言：除非能在真正的 Ascian 身上做實驗，否則根本無法估算它的靈魂由多少乙太構成，也就無從得知那把「乙太之刃」需要達到何等乙太密度才會奏效。</p><p>當 Yda 一口氣說出「那就做出最密的刃，賭一把！」Papalymo 立刻把她拉回現實——白聖石無法長期儲存乙太，因為乙太會散逸；只有在結晶化之後，才能作為穩定的能量來源。話題繞回 crystals，但如果需要的量過於驚人，攜帶與運輸就成了不可忽視的負擔。Moenbryda 說，這正是她們要解決的問題：若不實際把乙太扛在身上，就得改從別的來源抽取——也就是從大地本身取得。她否定直接干預以太流那種高風險作法，轉而指向遍布各地的腐化水晶：就算屬性失衡，crystal 終究仍是 crystal——裡頭有乙太，而她相信可以把它「吸」出來。更進一步，她提出一個大膽的想法——若能從遠處抽取其力量，那麼在 Eorzea 幾乎任何角落，你們都能即時取得充足的乙太。</p><p>Minfilia 表示支持，也想了解過程。Moenbryda 卻說與其講理論，不如動手試，她已經為此打造好乙太虹吸器。但 Mor Dhona 的腐化水晶過於密集，一旦失控後果不堪設想，所以她需要一個「孤立的標本」來測試。Alphinaud 建議去 Northern Thanalan，並趁機提出另一件迫切的事：Castrum Meridianum 出現動靜。當初被重創的據點在獲得 Castrum Centri 的增援後開始補回兵力，如今企圖重建，並把目標放在 Ceruleum Processing Plant。失去帝國支援的第十四軍團資源匱乏，這是一場為了生存的奪取，他們勢必會像走投無路的人一樣死戰。Minfilia 於是做出部署：你要去支援防衛，Thancred 與 Papalymo 隨行；Yda 與 Y’shtola 則協助 Moenbryda 勘查 crystal 群，讓測試能在 Garleans 威脅排除後立刻開始；Urianger 會繼續進行白聖石的研究。</p><p>離開 solar 後，Rising Stones 充滿啟程前的忙碌氣息。Alphinaud 催你立刻趕往 processing plant，說 Crystal Braves 的第四分隊已先行部署，Wilred 會在現地向你簡報；而他自己得前往 Ul’dah 與 Captain Ilberd 會合、接掌總部的指揮。另一邊，F’lhaminn 也準備暫別 Rising Stones——她要去 Ul’dah 聯絡舊識，因為 Eorzea 正同時受內亂與帝國算計所困，又被 primals 與龍威脅，你們需要盡可能多的盟友。Hoary Boulder 與 Coultenet 擔任護衛，一邊提醒 Ul’dah 仍有風險，一邊以豪氣承諾守護她，於是眾人分頭踏上行程。</p><p>抵達 Northern Thanalan 的 Ceruleum Processing Plant，Wilred 迎上前來，說 Commander Leveilleur 已通知你會到，像你這樣身經百戰的人正是此刻最需要的支援。他轉述 Immortal Flames 的偵察：帝國士兵正在 Raubahn’s Push 集結，這種規模只可能是衝著這裡的資源而來，Garleans 隨時可能開始進軍；他要你去找 Lieutenant Edelstein，好讓你們能協調反制策略。Edelstein 見到你便提起 Operation Archon (Eorzean Alliance 針對 Garlean 帝國軍的聯合作戰行動；當時聯軍攻入 Castrum Meridianum 等帝國要塞並重創其兵力與設施，使其駐軍一度大幅削弱)時的事蹟，但很快把你拉回當下：civilian draughtsmen 在廠區內發現數個可疑木箱，工兵近距離檢查後證實——裡頭是強力的爆炸裝置，而且是帝國製式。Flames 已下令全面搜索並嘗試先行解除威脅，可惜暗中佈置的內應並未落網；同時偵察帶來更令人不安的最新動向，因此他再次請求你出手相助。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 阿爾菲諾 <small class="muted">(石之家, X:6.0, Y:6.0)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-rising-chorus.html">合聲漸起</a></div><div class="row">所有職業（不含限定職） 等級 50 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="on-the-counteroffensive.html">迎擊帝國軍</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem('ffxiv-guide-lang') || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem('ffxiv-guide-lang', next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
