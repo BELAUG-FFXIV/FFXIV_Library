@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mask of Grief | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Mask of Grief (ARR Patch 2.55)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/g1ckKUE8X98"
+              title="Mask of Grief" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Mask of Grief</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Mask of Grief`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Minfilia asks for a moment of your time. She says Yda has been wanting to speak with you, and she would take it as a personal favor if you would offer her a sympathetic ear. Since Moenbryda’s passing, Yda has not been herself, and it pains Minfilia to see her so downcast.</p><p>Inside the Rising Stones, you find Yda forcing a bright greeting that falters almost at once. She tries to stay positive, but the effort feels heavy, and she admits it is hard. She says Moenbryda would scold her for moping—so she decided to do something instead: obtain a special flower that Moenbryda loved.</p><p>Yda explains that she placed an order with Rowena for a moon daisy, and it is ready to be collected. But Rowena is difficult at the best of times, and right now Yda cannot make herself face the exchange. She presses the coin into your hands and asks if you will collect the flower for her. Then she says she will wait for you at Rathefrost—along with the daisy.</p><p>At Rowena’s House of Splendors, Rowena greets you with a merchant’s grin and a cutting tongue. She scoffs at the idea of you being sent on errands, jabs that you should learn to say no, and then produces the moon daisy all the same. Before you leave, she adds a parting remark—telling you to suggest Yda browse her selection of headwear if she ever plans to replace that old mask.</p><p>You bring the moon daisy to Rathefrost, where Yda vents about Rowena’s relentless insistence on “fashionable” replacements and then lets the irritation drain away. Looking at the flower, she speaks more softly, saying Moenbryda loved these things, and she hopes—somewhere, somehow—Moenbryda knows she is still being remembered. She promises she will never forget her.</p><p>Then, through the Echo, Midgardsormr’s voice reaches you: the song rises to a crescendo. Yda startles, as if she senses the meaning of it. Almost immediately, Alphinaud’s urgent voice comes over a linkpearl—grave tidings from Ishgard, and you are to return to the Rising Stones at once. Back there, Yda thanks you and says she thinks she will be all right, and Papalymo notes that her spark has returned—crediting you for it. Alphinaud offers his apologies for the interruption and his sorrow at Moenbryda’s passing, but says there is little time to mourn: an envoy from Coerthas will soon arrive, and you must hurry to hear her report.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Minfilia <small class="muted">(The Rising Stones, X:6.1, Y:5.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-memory-of-moenbryda.html">In Memory of Moenbryda</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 50 or above)</div><div class="row">Must have completed the following:</div><div class="row"><a class="link" href="the-light-of-hope.html">The Light of Hope</a></div><div class="row"><a class="link" href="the-labyrinth-of-the-ancients.html">The Labyrinth of the Ancients</a></div><div class="row"><a class="link" href="syrcus-tower.html">Syrcus Tower</a></div><div class="row"><a class="link" href="the-world-of-darkness.html">The World of Darkness</a></div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="defenders-for-ishgard.html">Defenders for Ishgard</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'イダの決意',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ミンフィリアはあなたを呼び止め、少し時間をもらえないかと頼む。イダがあなたに話したいことがあるらしく、どうか親身に耳を傾けてほしいという。モーンブリダを失って以来、イダはすっかり元気をなくしており、沈んだ様子を見るたび胸が痛むのだとミンフィリアは打ち明ける。</p><p>ライジングストーンズの中でイダを見つけると、明るく振る舞おうとする声はすぐに力を失う。前向きでいようとしても難しいのだと彼女は認め、それでもモーンブリダなら、こんなふうに落ち込む自分を叱るはずだと言う。だからこそ、気持ちを奮い立たせるために、彼女の好きだった特別な花を用意しようと決めたのだ、と。</p><p>イダは、ロウェナに「ムーンデイジー」を注文しており、受け取りの準備はできていると話す。だがロウェナはただでさえ相手をするのが骨で、今の自分には向き合う余裕がない。情けないと思いつつも、花代の貨幣をあなたに託し、代わりに受け取ってきてくれないかと頼む。そして花を持って、早霜峠で会おうと言う。</p><p>ロウェナ商会に行くと、ロウェナは商売人らしい笑みであなたを迎えつつ、容赦なく皮肉を飛ばす。あなたほどの者が使い走りとは、と嘲り、断り方を覚えたほうがいいとまで言う。それでも用件を確かめると、ムーンデイジーを手渡し、最後にひと言――あの仮面を替える気があるなら、頭装備はいくらでもある、とイダに伝えておけと付け加える。</p><p>早霜峠で花を渡すと、イダはロウェナの押しの強さに苛立ちをこぼしながらも、やがて静かに花を見つめる。モーンブリダはこれが好きだったのだと言い、どこかで、何らかの形で、今も自分が想っていることが伝わればいいのにと願う。そして、決して忘れない、と言い切る。</p><p>そのとき、エコーを通じてミドガルズオルムの声が届く――歌は頂点へと高まりゆく。イダは、今のは何だったのかと息をのむ。間髪入れず、リンクパール越しにアルフィノの声が響く。イシュガルドから重大な知らせが届いた、至急ライジングストーンズへ戻ってほしい、と。戻った後、イダは礼を言い、自分は大丈夫だと思うと告げる。パパリモも、彼女に少し活気が戻ったのはあなたのおかげだと感謝する。アルフィノは割り込んだことを詫び、モーンブリダの死を悼みつつも、嘆く暇はないと言う――まもなくクルザスから使者が到着するため、その報告を急いで聞かねばならないのだ。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ミンフィリア <small class="muted">（石の家, X:6.1, Y:5.2）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-memory-of-moenbryda.html">犠牲と誓い</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 50～</div><div class="row">以下をコンプリートしていること：</div><div class="row"><a class="link" href="the-light-of-hope.html">輝く希望</a></div><div class="row"><a class="link" href="the-labyrinth-of-the-ancients.html">古代の民の迷宮</a></div><div class="row"><a class="link" href="syrcus-tower.html">シルクスの塔</a></div><div class="row"><a class="link" href="the-world-of-darkness.html">闇の世界</a></div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="defenders-for-ishgard.html">イシュガルドの救援要請</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'戴上悲傷的面具',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Minfilia 叫住你，問你能不能撥出一點時間。她說 Yda 想跟你說幾句話，也希望你能以她的私人請託，去聽聽 Yda 的煩惱、給她一些安慰。自從 Moenbryda 過世後，Yda 就一直不太像平常的自己；看著她如此低落，Minfilia 也覺得心疼。</p><p>你在 Rising Stones 找到 Yda。她一開口還想用開朗的語氣把自己撐住，可話音很快就軟了下來。她努力想保持正面，卻還是忍不住嘆氣，坦白說這真的很難。她說，如果 Moenbryda 看見她這樣消沉，一定會把她罵醒——所以她決定做點什麼，去準備一朵「特別的花」，送給 Moenbryda。</p><p>Yda 告訴你，她前陣子已經向 Rowena 訂了一朵「月球雛菊」，現在可以去取了。但她說 Rowena 平常就很難應付，而現在她實在沒有力氣面對那個人。她把花錢交到你手上，拜託你替她把花領回來；然後說她會在 Rathefrost 等你——也等那朵花。</p><p>你前往 Rowena’s House of Splendors。Rowena 一邊用生意人的口吻招呼你，一邊毫不客氣地嘲諷：連你都被派來跑腿，Scions 也真是把你的本事用得徹底；還順便教訓你最好學會說「不」，不然下次可能就要你去清理陸行鳥的棚。嘴上刻薄歸刻薄，她還是把那朵月球雛菊交給你。臨走前，她又補一句：要你轉告 Yda——如果哪天想把那副老舊的面罩換掉，她這裡頭飾多得是。</p><p>你把花帶到 Rathefrost。Yda 先忍不住抱怨 Rowena 總逼她把護面換成更「時髦」的款式，怎麼拒絕都沒用，講一次還要講第二次、第三次。可抱怨完，她又把話收回來，認真向你道謝，然後小心地看著那朵花。她低聲說，Moenbryda 很喜歡這種花；她希望在某個地方、以某種方式，Moenbryda 也能知道——她一直沒有忘記。她說，她永遠都不會忘記 Moenbryda，你們所有人也都不會。</p><p>就在那一刻，透過 Echo，你聽見 Midgardsormr 的聲音傳來：歌聲正走向最高潮。Yda 一怔，像是也感覺到那句話的分量。緊接著，Alphinaud 的聲音透過 linkpearl 介入——Ishgard 傳來嚴重消息，要你立刻回到 Rising Stones。回去之後，Yda 再次向你道謝，說她想她會沒事的；Papalymo 也說她似乎找回了一點精神，而那多虧了你。Alphinaud 為打斷你們致歉，也表示聽聞 Moenbryda 的死訊讓他深感悲痛，但他說現在沒有太多時間哀悼：Coerthas 的使者很快就要抵達，你們必須趕緊去聽取她的報告。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 敏菲利亞 <small class="muted">(石之家, X:6.1, Y:5.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-memory-of-moenbryda.html">犧牲與誓約</a></div><div class="row">所有職業（不含限定職） 等級 50 以上</div><div class="row">必須先完成以下任務：</div><div class="row"><a class="link" href="the-light-of-hope.html">閃耀的希望</a></div><div class="row"><a class="link" href="the-labyrinth-of-the-ancients.html">遠古迷宮</a></div><div class="row"><a class="link" href="syrcus-tower.html">希爾科斯塔</a></div><div class="row"><a class="link" href="the-world-of-darkness.html">闇之世界</a></div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="defenders-for-ishgard.html">為守護 Ishgard 回應救援請求</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
