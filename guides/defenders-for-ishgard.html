@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Defenders for Ishgard | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Defenders for Ishgard (ARR Patch 2.55)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/4JRF0dkg7wg"
+              title="Defenders for Ishgard" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Defenders for Ishgard</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Defenders for Ishgard`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Reports reach Minfilia from settlers along the frontier: dragons have pushed as far as Mor Dhona. Before the weight of that can settle, Alphinaud announces that the envoy has arrived—Lucia, who thanks you for receiving her on such short notice and asks to dispense with pleasantries.</p><p>Lucia confirms the Dravanians have begun their assault in earnest. The first wave struck the central highlands, and battle followed soon after. Ser Aymeric led Temple Knights and the finest companies of the noble houses; the dragons were driven back, but the price was steep—far too many fell. Ishgard, she says, will not withstand a second wave if the Dravanians renew their attack.</p><p>Alphinaud reads the message clearly: Ishgard needs reinforcements. Lucia admits it wounds their pride, but their ranks have been thinned by the Horde, and Ser Aymeric wishes to speak with you about enlisting aid. Alphinaud agrees to depart for Coerthas at once, even as he warns that Crystal Braves involvement cannot be guaranteed while unrest in Ul’dah demands priority.</p><p>Lucia then makes another request, turning to the Scions of the Seventh Dawn’s ties with the Grand Companies of Eorzea. Would you plead Ishgard’s case to their leaders? Minfilia agrees to appeal, but refuses to promise success—past dealings with the Eorzean Alliance make the likely response easy to imagine. Still, Lucia insists Ishgard’s fate hangs in the balance; every path must be tried, however unpromising. Minfilia resolves to send envoys to each allied nation, while cautioning that any support, if granted, will come with conditions and demands. Lucia accepts this, speaking with Ser Aymeric’s authority and the Holy See’s sanction.</p><p>At last, Lucia offers a final request—personal, and aimed at you. The lord commander wishes to speak with you regardless of whether your fellows join. You faced Midgardsormr and survived; anything you can share may give Ishgard an advantage. With that, she thanks you, and Alphinaud says the road leads you both to Camp Dragonhead—seek him out when you arrive.</p><p>On the way, a voice rings out at the Gates of Judgement: Iceheart calls for sons to answer for their fathers’ sins, for a cycle to be broken, and exhorts her “brothers and sisters of the heavens” as she declares the sinners’ magicks undone and demands retribution. When you reach Camp Dragonhead, Haurchefant greets you warmly but cannot linger; the camp’s nerves are plain. Alphinaud notes the lord commander has yet to appear, and hears troubling murmurs about the Gates of Judgement—so he urges you to go and learn what has happened. There, anxious knights speak of Ishgard’s layered wards, of marrow-freezing dread at the sight of Lady Iceheart, of fury at heretics meddling with divine protections, and of fear that the outermost layer of magical wards was too easily shattered. Lucia arrives, surprised you did not wait at camp, and confirms it: Lady Iceheart led her followers, struck at the defenders, and came close enough to dispel the first ward. She urges you back to camp—Ser Aymeric is waiting.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Alphinaud <small class="muted">(The Rising Stones, X:6.1, Y:5.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="mask-of-grief.html">Mask of Grief</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 50 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-wyrms-roar.html">The Wyrm’s Roar</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'イシュガルドの救援要請',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ミンフィリアのもとへ、辺境の開拓民から報せが届く。竜が、ついにモードゥナにまで迫っているという。重い沈黙のさなか、アルフィノが告げる――使者が到着した、と。姿を現したルキアは、急な呼び出しに応じた礼を述べつつ、時間がないゆえ挨拶は省きたいと切り出す。</p><p>ルキアは断言する。ドラヴァニアの竜たちは本格的に攻勢を開始した。第一波はほどなくクルザス中央高地へ達し、戦端は開かれた。アイメリク卿自らが神殿騎士団と諸侯精鋭を率いて出撃し、竜たちは退いた――だが勝利と呼ぶにはあまりにも代償が大きい。失った者が多すぎる。次の波が来れば、イシュガルドは耐えきれない。</p><p>アルフィノはその言葉の裏を読む。求めるのは増援か、と。ルキアは苦い表情で認める。誇りは傷つくが、ホードによって兵は削られた。だからこそアイメリク卿は、あなたたちと会い、助力を得られる可能性を話し合いたいのだという。アルフィノはただちにクルザスへ向かうと答えるが、同時に、ウルダハの不穏を鎮める責務が優先される以上、クリスタルブレイブの参戦は確約できないと釘を刺す。</p><p>そこでルキアは、さらに別の頼みを重ねる。三大グランドカンパニーと深い縁を持つ暁の血盟に、指導者たちへ嘆願してほしい、と。ミンフィリアは請願自体は引き受けるが、良い返事を約束はできないと慎重に言う。過去の経緯を思えば、その嘆願がどう受け取られるかは想像に難くない。だがルキアは譲らない。イシュガルドの命運がかかっている以上、望み薄な道でも試さねばならない。ミンフィリアは各同盟国へ使者を送り、各グランドカンパニーの総司令へ直接申し入れさせると決める。ただし、仮に支援が得られても条件付きとなり、イシュガルドへ要求が突きつけられるだろう、と。ルキアは当然だと言い、アイメリク卿の権限と、教皇庁の正式な裁可があることを明言する。</p><p>そして最後に、ルキアはあなたへ個人的に願う。仲間が動くか否かにかかわらず、総司令はあなたと話したい。ミドガルズオルムと相まみえ、生き延びた経験は、竜との戦いに利をもたらすかもしれない――そう告げ、あなたが英雄の務めをよく果たしていると静かに称える。アルフィノは、行き先は共にドラゴンヘッドであるようだと述べ、到着したら自分を探してほしいと言う。</p><p>やがて「裁きの門」に、異様な声が響く。氷の巫女は、父の罪を子が償うべきだと叫び、天の兄弟姉妹へ呼びかけ、罪人の魔法は砕かれたとして報復を求め、哄笑する。ドラゴンヘッドへ着くと、オルシュファンは歓迎しながらも忙しさを詫び、陣営の緊張は隠せない。アルフィノは、総司令の姿がまだ見えず、「裁きの門」で騒ぎがあったらしいと耳にしたと言い、現地へ赴いて何が起きたのか確かめようと促す。門では、都市を守る多重の結界にすがろうとする者、氷の巫女を見て骨の髄が凍ったと震える者、異端者が神聖なる守りに干渉したことへ憤る者、最外郭の防衛が易々と砕かれたのではと怯える者がいる。そこへルキアが現れ、あなたたちが陣営にいないことを咎めつつも、真相を告げる――氷の巫女が異端者を率いて守備隊を襲い、第一の結界を打ち消しかけたのだ、と。続きは陣営で話すとして、アイメリク卿が待っていると急かす。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> アルフィノ <small class="muted">（石の家, X:6.1, Y:5.2）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="mask-of-grief.html">イダの決意</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-wyrms-roar.html">邪竜の咆哮</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'為守護 Ishgard 回應救援請求',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Minfilia 收到多名邊境移民的回報：龍似乎已經一路逼近到 Mor Dhona。話音未落，Alphinaud 就低聲提醒你——使者到了。Lucia 先向你們致意，隨即直說時間緊迫，願意省去客套，直接談正事。</p><p>Lucia 帶來的消息很明確：Dravanians 的龍已經真正開始全面進攻。第一波不久前抵達 Coerthas Central Highlands，雙方很快就交戰。Ser Aymeric 親自率領 Temple Knights 與各貴族家族的精銳出擊，雖然最終逼退了那些巨獸，但那場「勝利」付出的代價太慘重——己方死傷過多，多到令人不敢稱之為勝。若 Dravanians 再發動第二波攻勢，Ishgard 根本撐不住。</p><p>Alphinaud 聽得出她在求援。Lucia 也不否認：雖然傷了他們的自尊，但在 Horde 的消耗下，Ishgard 的兵力已經被削得太薄。Ser Aymeric 希望能與你們會面，商談爭取援助的可能。Alphinaud 當即表示會立刻前往 Coerthas，但也坦言 Crystal Braves 是否能介入並無把握——Ul’dah 的動盪必須優先處理。</p><p>Lucia 因此提出第二個請託。Scions of the Seventh Dawn 與 Eorzea 的三大 Grand Companies 關係緊密，她希望你們願意向各自的領袖轉達 Ishgard 的訴求。Minfilia 願意代為請求，卻不敢保證能得到善意回覆；Lucia 也說，她很能想像 Eorzean Alliance 會如何看待這份求援。然而她仍堅持：Ishgard 的命運正懸在半空，哪怕希望渺茫，也必須把仍然打得開的路都走一遍。Minfilia 於是決定派出使者前往各同盟國，直接向各 Grand Company 的首長遞交請求，同時提醒——即使回應是肯定的，支援也必然附帶條件，Ishgard 也將面臨要求與代價。</p><p>Lucia 表示這是理所當然，並保證自己是以 Ser Aymeric 的授權發言，一切行動也都得到 Holy See 的正式認可。接著她提出最後、也是私人的請託：她希望你——Warrior of Light——無論同伴是否參與，都能與 lord commander 見面。你曾直面 Midgardsormr 並存活下來；你能分享的任何經驗，都可能成為 Ishgard 對抗強敵的優勢。她向你致謝，說你確實擔得起「英雄」之名。Alphinaud 則表示，你們的路都通往 Camp Dragonhead，抵達後就去找他。</p><p>你前往 Coerthas，卻在 Gates of Judgement 聽見 Iceheart 的聲音——她宣告兒子必須為父親的罪行付出代價，唯有如此循環才會被斬斷；她呼喊「天上的兄弟姊妹」，說罪人的魔法已被瓦解，要他們前來討回報應，最後以笑聲收束。你抵達 Camp Dragonhead 時，Haurchefant 迎上來招呼你，卻也只能匆匆道別；營地裡的緊張顯而易見。Alphinaud 說 lord commander 尚未現身，但營地裡流傳著 Gates of Judgement 出了事的耳語，於是提議先去那裡查明究竟。門前的騎士們神色不安：有人仍試著相信城市有多層奧術防護；有人提到見到 Lady Iceheart 時骨髓都像結冰；有人怒罵 heretics 竟敢干擾神聖守護；也有人恐懼——若最外層的魔法防壁都能如此輕易被撼動，那接下來該怎麼辦。就在此時 Lucia 趕到，說你們本該在 Camp Dragonhead 等候；她聽完你們的說法後，直接證實：Lady Iceheart 率領追隨者襲擊守軍，幾乎已經近到足以解除第一道防護。她催促你們回營地——Ser Aymeric 正在等你們。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 阿爾菲諾 <small class="muted">(石之家, X:6.1, Y:5.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="mask-of-grief.html">戴上悲傷的面具</a></div><div class="row">所有職業（不含限定職） 等級 50 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-wyrms-roar.html">巨龍的怒吼</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
