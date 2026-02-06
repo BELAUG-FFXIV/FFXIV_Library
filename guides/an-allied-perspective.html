@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>An Allied Perspective | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – An Allied Perspective (ARR Patch 2.55)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/D9kJFBujkuk"
+              title="An Allied Perspective" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">An Allied Perspective</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`An Allied Perspective`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Word reaches you that dragons have pushed as far as Mor Dhona, and before the shock can settle, Lucia arrives with urgent tidings from Ishgard. The Dravanians have begun their assault in earnest—Aymeric led Temple Knights and noble houses to meet the first wave in the Central Highlands, forcing a retreat only at terrible cost. Another strike will break them.</p><p>Lucia asks for reinforcements and, with it, a meeting at Camp Dragonhead. Alphinaud agrees to go at once, yet warns that the Crystal Braves cannot be promised while unrest in Ul’dah demands attention. Even so, Lucia presses another request: that the Scions of the Seventh Dawn appeal to the Grand Companies, and she adds a final, personal plea—Aymeric wishes to speak with you, for you faced Midgardsormr and lived.</p><p>On the road, a chilling chorus rides the wind at Gates of Judgement as Iceheart calls for retribution, and the knights speak in shaken fragments of wards disrupted and fear turned to fury. Lucia confirms the heretics’ strike: Iceheart led her followers close enough to dispel the first ward, leaving a ragged weakness the dragons will surely test. With Aymeric waiting, you turn back to Camp Dragonhead.</p><p>Within the intercessory, Aymeric receives you and introduces Estinien, Ishgard’s Azure Dragoon. Captured heretics have confessed a design shared by Iceheart and the Dravanians: the reclamation of Nidhogg’s stolen eye—an Ishgardian relic of immense power hidden deep within the Vault. If returned, Nidhogg would rise to his full strength, and no wall or ward would withstand him; Estinien adds that dragons endure across centuries with patient, inexorable purpose.</p><p>Alphinaud challenges Ishgard’s hypocrisy—when the Alliance asked aid in Operation Archon, Ishgard refused—and demands reason for you to risk your lives in a war not your own. Aymeric answers plainly: if Ishgard falls, Coerthas becomes ruin and snow, and the Empire will claim the border without drawing steel. The danger would not stop at Ishgard’s gates. You commit to stand with them, and Estinien confirms what the “roar” truly meant—through the Eye’s lingering influence, he hears Nidhogg’s voice, and the great wyrm means to hurl the Horde against Daniffen’s Collar and shatter the remaining wards.</p><p>You return to Waking Sands and lay the truth before the Scions: wards compromised, the main host advancing, Ishgard poised to be struck again. One by one, resolve hardens—if Ishgard falls, all of Eorzea suffers. Minfilia names the choice for what it is: direct intervention in war. Then she sets the course—if all believe the cause just, you will walk the perilous path together, for those you have lost and those you can still save.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Tataru <small class="muted">(Mor Dhona, X:22.1, Y:8.3)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="volunteer-dragonslayers.html">Volunteer Dragonslayers</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 50 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-steps-of-faith.html">The Steps of Faith</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'それぞれの思惑',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>辺境の開拓者たちから報せが届く。ドラゴンがモードゥナにまで迫っている――そう告げられた直後、ルシアが現れ、イシュガルドの危機を切り捨てるように伝える。ドラヴァニアの襲撃は本格化し、第一波は高地に到達、セイ・アメリック自らが神殿騎士団と諸侯の精鋭を率いて迎え撃った。退けはしたが犠牲はあまりに大きく、次の波には耐えられない。</p><p>援軍を求め、キャンプ・ドラゴンヘッドでの会談を願うルシアに、アルフィノは即時出立を約する。ただしウルダハの不穏を鎮めねばならず、クリスタルブレイブの参戦は確約できないとも釘を刺す。ルシアはさらに、各国のグランドカンパニーへ嘆願してほしいと頼み、最後にあなたへ個人的な要請を重ねる。ミドガルズオルムと相対し生き延びた経験を、セイ・アメリックはぜひ聞きたいのだと。</p><p>道中、大審門には不穏なささやきが渦巻き、騎士たちは結界の破壊と、名を口にするだけで背筋が凍る「氷の巫女」の影を語る。ルシアは断言する。異端者たちは氷の巫女に率いられ、大審門で最初の結界を解かんとするところまで迫った――裂け目は残り、ドラゴンは必ずその弱点を試す。あなたは指示どおり、キャンプ・ドラゴンヘッドへ戻る。</p><p>執行官庁で出迎えたセイ・アメリックは、盟友として「蒼の竜騎士」エスティニアンを紹介する。そして捕縛した異端者の供述から、氷の巫女とドラヴァニアの目的が一致していると明かす――ニーズヘッグの「眼」を奪還することだ。かつてハルドラスが討ち取り、その頭蓋から得た「眼」は計り知れぬ力を宿す聖遺物で、ヴォールトに厳重に秘匿されている。もし返還されれば、ニーズヘッグは完全なる力を取り戻し、いかなる壁も結界も意味をなさない。エスティニアンはさらに、ドラゴンは歳月で衰えず、長い眠りから覚めても短い刻のように戦を再開する、と冷ややかに語る。</p><p>アルフィノは鋭く突く。かつて「アーチン作戦」で同盟が助力を求めた時、イシュガルドは拒んだではないか――なぜ今、あなたたちが「私戦」に命を賭けねばならないのか。セイ・アメリックは取り繕わず答える。もしイシュガルドが滅びればコエルザスは雪に埋もれ、やがて帝国が国境を呑み込む。剣すら抜かずに奪われるのは、次にエオルゼアだと。あなたは介入を決め、エスティニアンは「咆哮」の正体を告げる。眼の余韻によりニーズヘッグの声が聞こえる――奴は軍勢を集め、ダニフェンの首輪へ向けて結界を砕かんとしている。</p><p>ウェイキングサンズへ戻り、あなたは得た情報を仲間の前に差し出す。結界は破られつつあり、主力は進軍中、次の一撃は目前だ。放置すれば、やがて災いはエオルゼア全土へ波及する。ミンフィリアは言い切る――これは戦争への直接介入だ。それでも正義がここにあると信じるなら、危険な道を最後まで共に歩む。失われた者たちのために、そして今なお救える者たちのために。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> タタル <small class="muted">（モードゥナ, X:22.1, Y:8.3）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="volunteer-dragonslayers.html">立てよ義勇兵！</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-steps-of-faith.html">イシュガルド防衛戦</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'各自的盤算',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你收到邊境開拓者的回報：龍已經逼近到 Mor Dhona。還來不及消化這句話，Lucia 便帶著 Ishgard 的急報前來——Dravania 的攻勢已經全面展開，第一波不久前抵達 Coerthas Central Highlands，隨後便爆發交戰。Ser Aymeric 親自率領 Temple Knights 與貴族家臣迎戰，雖迫使敵軍撤退，卻付出了太多、太多的代價。若 Dravania 再發動第二波，Ishgard 撐不住。</p><p>Lucia 為此尋求增援，並請 Alphinaud 前往 Camp Dragonhead 與 Ser Aymeric 會談。Alphinaud 當即答應啟程，卻也提醒：Ul’dah 的動盪尚未平息，Crystal Braves 是否能投入戰事並無保證。正因如此，Lucia 進一步請求 Scions of the Seventh Dawn 代為向各國 Grand Company 領袖陳情；而她最後，也以 Ser Aymeric 的名義直接請託你——你曾與 Midgardsormr 正面相對並生還，你的經驗或許能成為對抗強敵的關鍵。</p><p>當你抵達 Gates of Judgement，空氣裡卻多了一種不對勁的顫動：有人談起結界遭到撼動、有人提到 Iceheart 的身影便忍不住發抖，也有人把憤怒全數指向異端者。Lucia 很快證實了真相——Iceheart 率眾突襲，甚至逼近到足以解除第一道結界的距離。結界因此被撕出缺口，而這道弱點，Dravania 的龍群絕不會放過。你依約回到 Camp Dragonhead，準備面對更殘酷的情報。</p><p>在 intercessory 內，Ser Aymeric 向你與 Alphinaud 致意，並介紹他的盟友 Estinien——Ishgard 的 Azure Dragoon。隨後，他說出從俘虜口中得知的計畫：Iceheart 與 Dravania 的目標竟一致——奪回 Nidhogg 被奪走的「the Eye（Nidhogg 被奪走的「眼」——Ishgard 視為聖物的戰利品，也是蘊含巨大力量的核心媒介。Aymeric 的說法是：它被藏在 The Vault、由忠於 Holy See 的人嚴密看守；一旦 the Eye 回到 Nidhogg 手中，Nidhogg 會恢復到巔峰力量，Ishgard 的城牆與結界都可能無法阻擋他）」。那是 Ishgard 珍藏於 Vault 深處的遺物，據說蘊藏難以估量的力量；一旦歸還給 Nidhogg，牠將回到巔峰之力，任何城牆或結界都無法阻擋。Estinien 也補上一句更冷的事實：龍不會因歲月而衰，尤其是 great wyrms（七大古龍，指 Dravania 側最頂層、近乎傳說級的古老巨龍個體，如 Midgardsormr、Nidhogg 等），牠們以漫長的沉睡度過世紀，醒來時卻能像只過了片刻般繼續戰爭。</p><p>Alphinaud 直指 Ishgard 的矛盾：當年 Eorzean Alliance 在 Operation Archon 尋求 Ishgard 支援時，Ishgard 斷然拒絕；如今卻要求你們為它的戰爭賭上性命，憑什麼？Ser Aymeric 不辯解，只讓你看清後果——若 Ishgard 倒下，Coerthas 將成廢墟並被風雪掩埋，而帝國會趁勢把這片土地納入版圖，甚至不必拔劍。那道邊界一旦落入帝國之手，威脅就會直逼 Mor Dhona，進而波及整個 Eorzea。你因此選擇介入，而 Estinien 也揭開「咆哮」的真相：因 the Eye 的殘留影響，他聽見 Nidhogg 的聲音——Nidhogg 正要把龍群投向 Daniffen’s Collar，粉碎守護城市的剩餘結界。</p><p>你隨後回到 Waking Sands，讓眾人聽見你們所見所聞：結界已被破壞、主力正逼近、下一波攻勢迫在眉睫。若放任 Ishgard 崩潰，代價不會只停留在北方。Minfilia 清楚地把提案說透：這是對戰爭的直接介入；但若所有人都認定此事正當，那就只能上路。你們將踏上一條危險的路——為了已失去的人，也為了仍來得及守住的人。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 塔塔露 <small class="muted">(摩杜納, X:22.1, Y:8.3)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="volunteer-dragonslayers.html">招募義勇屠龍者</a></div><div class="row">所有職業（不含限定職） 等級 50 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-steps-of-faith.html">Ishgard 防衛戰</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
