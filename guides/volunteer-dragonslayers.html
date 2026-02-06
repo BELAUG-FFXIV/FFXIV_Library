@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Volunteer Dragonslayers | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Volunteer Dragonslayers (ARR Patch 2.55)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/F7ph3faUFLI"
+              title="Volunteer Dragonslayers" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Volunteer Dragonslayers</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Volunteer Dragonslayers`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Minfilia tells you she has sent the Archons to their assigned nations. If the Alliance agrees to pledge Grand Company soldiers to Ishgard, your comrades will remain there as intermediaries for as long as the conflict lasts. The harder work—convincing the Alliance leaders—she leaves to Alphinaud.</p><p>For you, she has a different charge. You are to reach out to your fellow adventurers and gather whatever allies you can for the coming siege. And you must think, too, of your own security: Revenant’s Toll lies only a short flight from the snowfields of Coerthas, and it is not hard to imagine the fighting spilling across the border. You are to brief Slafborn, speak of contingencies, and see that the frontier settlers are prepared for anything that might wing its way over the walls. Before you go, Minfilia suggests that Tataru accompany you—she has a knack for administration, and an eye for the practical problems you will face.</p><p>At The Waking Sands, Tataru takes the urgency to heart at once. So close to Coerthas, she says—you must see to defenses, take stock of supplies, and lay out beds and bandages for any eventuality. Then she hurries you to Revenant’s Toll, already turning the warning into plans, already thinking in lists and logistics as she speaks.</p><p>Slafborn receives the report soberly. If war is coming to Coerthas, the Toll must be made ready: more patrols and lookouts, space for an infirmary, temporary housing for those driven from their homes. Ishgard has done well by them before, he says, and he would return the favor. But when it comes to sending fighters, his answer is firm—there will be no official Adventurers’ Guild presence at the siege. He will not order guild members to die on Ishgardian soil, though each adventurer is free to choose their own path. Still, he will speak to capable colleagues on your behalf, and he urges you to try your luck here in the Toll—there are stout souls in town who may answer a call to arms.</p><p>So you and Tataru begin to ask. You feel the Toll’s growth in the press of travelers and the strain it puts on those who watch the gates. You hear the restlessness of wandering hearts, the hard edge of those who weigh danger against coin, and the steady caution of those who have survived by listening to instinct. Tataru lifts her voice and tries to rouse them—heroes, she calls, Ishgard is in peril, and if you have ever dreamed of facing the Dravanian Horde, now is the time.</p><p>The answers come in all shapes. One frontier hand admits the rewards sound tempting, but a contract binds them to guard Revenant’s Toll. An adventurer at the forge refuses outright—dragons took every one of his brothers, and he will not offer them his life as well. Another eyes the purse and says he will sell his blade if the pay is good, even if he must endure a knight’s suspicion. Then one accomplished adventurer cuts through the speech with cold certainty: spare him talk of glory—his instincts say to keep far from Ishgard.</p><p>Amid that, Riol pulls you aside with a different worry. He asks if you have seen Wilred since the clash with the Empire at the processing plant. No one has—and around the time the boy stopped reporting for duty, black market weapons vanished from the vault in Ul’dah. Half the Braves suspect Wilred, but Riol does not. He calls the company what it is: a motley mix held together by pay and a vague oath, wolves among whom Wilred was a fresh-faced novice. The lad believed what he said about guarding Eorzea—and he had wanted to tell Riol about something strange in the ledgers, something about the Braves’ numbers not adding up. Riol leaves you with the thought that there is a villain at the end of this trail, and he would wager it is not young Wilred.</p><p>When you return, Tataru meets you with quick hope. One or two volunteers, she counts—and with her, that makes three or four, not including Slafborn’s friends. It will not be the largest company in the army, she admits, but she is certain a Revenant’s Toll veteran is worth a dozen clanking knights.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Minfilia <small class="muted">(The Rising Stones, X:6.1, Y:5.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="committed-to-the-cause.html">Committed to the Cause</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 50 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="an-allied-perspective.html">An Allied Perspective</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'立てよ義勇兵！',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ミンフィリアは告げる。賢者たちはそれぞれ割り当てられた国へ向かった。もし同盟がイシュガルド支援として各グランドカンパニーの兵を派遣するなら、仲間たちは戦の間じゅう、その調整役として現地に残ることになる。肝心の説得――同盟の指導者たちを動かす役目は、アルフィノに託したという。</p><p>あなたには別の務めが与えられる。迫る包囲戦に備え、冒険者たちに呼びかけ、集められる限りの助力を募ること。そして自分たちの安全も考えねばならない。レヴナンツトールはクルザスの雪原からほど近く、戦火が国境を越えて及ぶ可能性は否定できない。スラフボーンに情勢を伝え、想定される対策を相談し、開拓者たちが備えられるようにするのだ。出立の前に、ミンフィリアはタタルを同行させるよう勧める。実務に長け、現実の課題を見抜く才があるからだ。</p><p>ウェイキングサンズでタタルは頷き、矢継ぎ早に段取りを口にする。クルザスに近いのだから、防備を整え、物資を点検し、万一に備えて寝床と包帯も用意しなければならない。受付係はどんな事態にも備えるものだと、彼女はあなたを急かし、スラフボーンに会いに行こうとする。</p><p>レヴナンツトールでスラフボーンは重く受け止める。もし戦がクルザスに及ぶなら、トールも備えねばならない。巡回と見張りを増やし、救護所の場所を確保し、被災者のための仮住まいも用意する。過去にイシュガルドはトールに恩を与えてくれた、今度は返したい――そう言う。だが、戦いに赴く者を公的に集めることはできないとも断言する。冒険者ギルドとして包囲戦に参加することはない。とはいえ、各冒険者が自らの意思で動くのは自由だ。彼は有能な仲間に声をかけると約し、あなたにもトールで志願者を探してみるよう促す。竜と戦うのだ、餌になるような者は選ぶな、と。</p><p>こうしてあなたとタタルは町で呼びかけを始める。旅人が増え続けるトールでは、見張りの目が行き届かぬほどの忙しさが滲む。自由を求めてさまよう者、危険と報酬を秤にかける者、勘だけを頼りに生き延びてきた者――反応はさまざまだ。タタルは声を張り上げる。イシュガルドが危機にある、勇士が必要だ、ドラヴァニアの軍勢と戦う夢を抱いたことがあるなら今こそ――と。</p><p>返答もまた一様ではない。ある開拓者は報酬に心が動くが、レヴナンツトールを守る契約があると言って逡巡する。鍛冶場の冒険者は拒む。竜に兄弟を奪われた、同じ結末は望まないと。別の冒険者は金次第で剣を貸すと告げ、騎士に監視されようが重い財布なら耐えると言う。そして熟練の冒険者は冷たく退ける――名誉や栄光の話は不要だ、勘がイシュガルドに近づくなと言っている、と。</p><p>その最中、リオルがあなたを呼び止め、別件を囁く。セリウム精製所での帝国軍との一件のあと、リトルアラミゴ出身のウィルレッドを見たか――誰も見ていない。しかも彼が任務に現れなくなった頃、ウルダハの保管庫から闇市場の武器が消えたという。隊の半分は彼を疑っているが、リオルは信じない。クリスタルブレイブは規律ある軍勢などではなく、傭兵や冒険者、グランドカンパニーの古参が寄せ集まった集団で、金と曖昧な誓いで繋がっているだけだ、と。ウィルレッドはその中では若い新兵だったが、エオルゼアを守るという言葉に本気があった。そして彼は帳簿で妙な点を見つけたと語ろうとしていた――人数の辻褄が合わない、と。リオルは、辿り着く先に悪党がいるはずだが、それはウィルレッドではないと告げ、あなたに真相の影を残して去る。</p><p>やがてタタルのもとへ戻ると、彼女は結果を数えるようにして受け止める。志願者は一人か二人、それでも自分を加えれば三人か四人、スラフボーンの知己もいる。大軍にはならないが、レヴナンツトールの古参が一人いれば、がちゃがちゃ鎧の騎士十人に匹敵すると、彼女は力強く言う。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ミンフィリア <small class="muted">（石の家, X:6.1, Y:5.2）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="committed-to-the-cause.html">参戦の決意</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="an-allied-perspective.html">それぞれの思惑</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'招募義勇屠龍者',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Minfilia 告訴你，她已經讓賢者們分別前往各自負責的國家。若 Eorzean Alliance 願意把 Grand Company 的士兵派去支援 Ishgard，你們的同伴會在戰事期間留在當地，作為雙方溝通的中介。至於更棘手的那一關——說服 Alliance 的領袖點頭——她把這件事交給 Alphinaud。</p><p>而你要做的是另一件事：去聯絡其他冒險者，為即將到來的攻城戰盡可能募集盟友。同時，你也得把「自身的防線」放進考量。Revenant’s Toll 距離 Coerthas 的雪原很近，戰火不一定會被邊界攔住；一旦外溢，這裡也可能被波及。Minfilia 要你把局勢告知 Slafborn，一起討論應變方案，讓邊境的開拓者能為任何可能越牆而來的威脅做好準備。她只希望這些預防最後用不上。臨行前，她還建議你帶上 Tataru——她擅長行政安排，也最能把那些實際的麻煩先看見。</p><p>在 Waking Sands，Tataru 立刻進入「要把事情備好」的節奏。她提醒你們離 Coerthas 很近，得先檢查防禦、清點物資；甚至連床位與繃帶也要預先準備，避免真正出事時手忙腳亂。她一邊說，一邊催你動身去找 Slafborn，彷彿已經在腦中把所有清單列完。</p><p>到了 Revenant’s Toll，Tataru 把警訊與需求攤開來說。Slafborn 也不含糊：若戰爭真的逼近 Coerthas，Toll 就必須提前備戰。他會立刻增加巡邏與哨戒，想辦法騰出一處當作醫療點，並準備臨時收容空間，好安置可能被戰火牽連的人。他說 Ishgard 過去確實幫過你們，現在他也想回報。</p><p>但談到「要不要由 Adventurers’ Guild 官方募集人手上前線」，他的語氣轉得很硬——他不會把公會的人派去死在 Ishgard 的土地上，總部也不可能同意。因此，這場攻城戰不會有 Adventurers’ Guild 的正式出席。不過，他也承認：每個冒險者都可以自行決定要不要參戰。他答應會替你去問問幾位可靠的同僚，同時也要你直接在 Toll 試試運氣——城裡總有一些硬派人物會願意應召，但務必要確認對方真的有本事，因為你要的是能打 dragon 的人，不是拿去餵 dragon 的人。</p><p>你們開始在城裡奔走。Revenant’s Toll 人潮越來越多，連看守的人都坦白說有點顧不過來；也有人說自己早就厭倦了原本的束縛，只想自由闖蕩；有人只盯著報酬，問你有沒有付錢的活；也有人冷靜提醒，冒險本來就充滿變數，能做的只有靠準備降低風險，但最後能不能活下來，還是得信自己的直覺。Tataru 乾脆站出來大聲招呼：Ishgard 正在危急之中，需要英雄；若你曾夢想與 Dravanian 交手，現在就是時候。</p><p>回應很現實。有人坦承賞金聽起來誘人，但自己已簽約要守 Revenant’s Toll，不想違約；有人拒絕得更乾脆——dragon 奪走了他所有兄弟，他不打算把命也送上去；也有人說只要報酬夠好，他願意把劍賣給 Ishgardians，就算得忍受被騎士盯著也無所謂；還有人直接嘲諷你們的口號，說他不會替注定失敗的事做志願，他的直覺要他離 Ishgard 越遠越好。</p><p>就在這時，Riol 把你拉到一旁，提起另一個讓人不安的問題。他要你回想在 processing plant 對上 帝國 的那一戰：那天跟著 4th 一起行動的 Wilred，你之後有沒有再見過？答案是否定的——沒人見過他，像是憑空消失。更糟的是，差不多同一時間，Ul’dah 的保管庫裡那批黑市武器也不見了，於是 Crystal Braves 裡不少人立刻懷疑 Wilred 侵吞貨物逃走。Riol 卻不信。他說 Crystal Braves 表面像軍隊，實際上更像一群傭兵、冒險者與退役老兵的拼裝隊伍，靠著薪餉與一條含糊的誓言勉強綁在一起；而 Wilred 在裡頭只是個新手，但他談到「守護 Eorzea」時是真心的，不像會幹這種事的人。Riol 還低聲補了一句：Wilred 曾想告訴他帳本上有些奇怪的地方——數字對不上。Riol 認為這條線索背後一定有真正的惡人，而那個人不會是 Wilred。</p><p>你回到 Tataru 身邊，她迫不及待問結果。你說只勸動了一、兩個人，她立刻把數字算起來：再加上她，至少也有三、四個——還不算 Slafborn 可能拉來的幫手。她承認你們湊不出大隊伍，但仍用盡力氣替你打氣：一個 Revenant’s Toll 的老手，抵得過一打穿著吵死人的騎士。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 敏菲利亞 <small class="muted">(石之家, X:6.1, Y:5.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="committed-to-the-cause.html">參戰的決心</a></div><div class="row">所有職業（不含限定職） 等級 50 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="an-allied-perspective.html">各自的盤算</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
