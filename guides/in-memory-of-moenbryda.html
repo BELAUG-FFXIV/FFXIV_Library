@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>In Memory of Moenbryda | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – In Memory of Moenbryda (ARR Patch 2.5)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/c9VaOs1fsIU"
+              title="In Memory of Moenbryda" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">In Memory of Moenbryda</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`In Memory of Moenbryda`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>At the Rising Stones, Minfilia says that Moenbryda’s life and death were bound to Sharlayan, and that you should honor her in the Sharlayan manner—before the mark of the Scholar at Rathefrost, a monument sacred to Thaliak. There, you will pray for your friend’s soul and bid her return in peace to the light of the Mothercrystal.</p><p>Thancred can only condemn himself for arriving too late, while Yda struggles to accept that Moenbryda is truly gone. Papalymo admits that loss is never easy—least of all for Yda—while Y’shtola knows it is foolish to torment oneself with what-ifs, and yet the heart refuses to listen to reason.</p><p>You make your way to Rathefrost in Mor Dhona, and Minfilia’s voice is heavy with apology—if only she had been quicker, or wiser. She cannot change what happened, but she believes Moenbryda would not want you to sink into sorrow; she would tell you to stand up and carry on. So Minfilia vows that you will defend this realm and its people to the very last.</p><p>Then, through the Echo, Midgardsormr’s words reach you in a strange tongue you can nonetheless understand: life for death—a fair exchange. He adds that other bargains will be struck. The moment passes, leaving the meaning to linger.</p><p>Back at the Rising Stones, the grief does not lift. Thancred insists you must find a way to protect yourselves from Ascian intrusions. Yda asks only for time. Papalymo, usually quick with words, finds none that can ease her pain. Y’shtola says the place itself feels colder, as if Moenbryda’s warmth is missing from every corner.</p><p>In the solar, Minfilia confesses that even after farewells, the sadness remains. As Antecedent, she must be the pillar for others—yet she cannot pretend the grief is something to sweep aside. It feels like a dagger in her chest, but it is a pain she must learn to bear to keep moving forward. She speaks of those already lost—Louisoix, Moenbryda, and the comrades at the Waking Sands—and tells you their spirit will not be lost so long as you rise to fight again. And because there is no one else before whom she can show such weakness, she asks you to remain near—her steadfast presence, in the days to come.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Minfilia <small class="muted">(Rising Stones, X:6.1, Y:5.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="an-uninvited-ascian.html">An Uninvited Ascian</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 50 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="mask-of-grief.html">Mask of Grief</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'犠牲と誓い',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>石の家で、ミンフィリアは語る。シャーレアン出身のムーンブリダを偲ぶなら、学都の守護神サリャクに捧げられた碑の前――モードゥナの早霜峠にある「サリャクの印」に集うのがふさわしい、と。そこで友の魂を祈り、マザークリスタルの光へ安らかに還るよう見送ろう、と。</p><p>サンクレッドは、いつも一歩遅かったと悔やむばかりで、ヤ・ダは受け入れられず、パパリモは、身近な者を失う痛みの前では言葉を失うことすらあるのだと痛感する。ヤ・シュトラは救えた道があったのではと考えてしまう心の弱さを否定できない。</p><p>あなたが早霜峠へ辿り着くと、ミンフィリアはムーンブリダに詫びる。もっと早く、もっと賢くあれたなら――そう願っても現実は戻らない。けれど彼女は、あなたたちが悲しみに沈むことをムーンブリダは望まないはずだと言い、立ち上がって進め、と叱咤する友の声を思い浮かべる。だからこそ、最後までこの世界と人々を守り抜くのだと誓う。</p><p>そのとき、エコーを通じて、ミドガルズオルムの異なる言葉があなたに届く。命には命で応える――それは公平な取引だ、と。さらに、別の取引も交わされるだろう、とだけ告げ、その気配は遠のく。</p><p>石の家へ戻っても、喪失の影は薄れない。アシエンの侵入を防ぐ術を見つけねばならないとサンクレッドは言い、ヤ・ダは今は話す気になれないから時間がほしいとこぼす。パパリモは慰めの言葉を持てず、ヤ・シュトラは、ムーンブリダの温かさが消えたせいか石の家が一段と冷たく感じると言う。</p><p>ソーラでミンフィリアは打ち明ける。盟主として皆の支えであらねばならないのに、悲しみは消えず、胸に短剣を突き立てられたように痛む。だが職責を果たすためには、その痛みを抱えたまま前へ進まねばならない。ルイゾワ、ムーンブリダ、そして砂の家で散った仲間たち――その志は、あなたが再び立ち上がり戦う限り失われない。だからこそ、弱さを見せられる相手はあなたしかいないのだと認め、これからの日々も変わらぬ支えとして、そばにいてほしいと願う。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ミンフィリア <small class="muted">（石の家, X:6.1, Y:5.2）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="an-uninvited-ascian.html">その者、ナプリアレス</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="mask-of-grief.html">イダの決意</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'犧牲與誓約',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>在 Rising Stones，Minfilia 說，Moenbryda 既是 Sharlayan 的人，就該以 Sharlayan 的方式向她道別——前往 Mor Dhona 的 Rathefrost，在那座刻著「學者之印」的石碑前集結。那裡是獻給 Thaliak、學都守護神的聖地；你們將在那裡為她的靈魂祈禱，送她安然回歸母水晶之光。</p><p>Thancred 仍懊悔自己總是慢了一步；Yda 不願相信 Moenbryda 真的離開了。Papalymo 明白失去摯友的痛從不輕易，尤其對 Yda 更是如此；Y’shtola 也知道反覆追問「若當時如何」很愚蠢，但人的心往往聽不進冷靜的道理。</p><p>你抵達 Rathefrost，Minfilia 的歉意沉甸甸的——若她能更快、更明智一些就好了。可她也知道，Moenbryda 不會希望你們沉溺在悲傷裡；她一定會要你們把自己撐起來，繼續往前走。於是 Minfilia 發誓：你們會守護這個世界與人們，直到最後一刻。</p><p>隨即，透過 Echo，你聽見 Midgardsormr 以陌生的語言開口，卻仍能理解其意：以命償命——這是一場公平的交換。他又補上一句：還會有其他交易被迫締結。話語消散，卻把重量留在空氣裡。</p><p>回到 Rising Stones，哀傷依舊揮之不去。Thancred 說，必須想出能防止 Ascians 入侵的辦法；Yda 只求你們給她一些時間。Papalymo 罕見地找不到能安慰人的話；Y’shtola 則說，Rising Stones 像是變得更冷了——彷彿少了 Moenbryda 那份總能帶來的溫度與明朗。</p><p>Minfilia 坦承：就算道別了，悲傷仍未消退。身為 Antecedent，她必須成為眾人能倚靠的支柱，卻也無法否認這份痛像匕首刺進胸口。可若要履行責任，就得學會背負它前行。她提起 Louisoix、Moenbryda，以及在 Waking Sands 失去的同伴——只要你們還會再度站起來戰鬥，他們的精神就不會消失。最後，她把脆弱交給你：因為再沒有其他人能讓她如此卸下防備；而未來的日子裡，她仍需要你那份堅定的陪伴。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 敏菲利亞 <small class="muted">(石之家, X:6.1, Y:5.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="an-uninvited-ascian.html">不速之客</a></div><div class="row">所有職業（不含限定職） 等級 50 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="mask-of-grief.html">戴上悲傷的面具</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
