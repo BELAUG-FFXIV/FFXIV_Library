@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A Time to Every Purpose | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – A Time to Every Purpose (ARR Patch 2.55)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/G0YmGxeh6wQ"
+              title="A Time to Every Purpose" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">A Time to Every Purpose</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`A Time to Every Purpose`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Minfilia gathers her resolve and asks you to set the weight of recent events aside—at least for tonight. A grand commemoration awaits: the joint defense of Ishgard, the first time in fifteen years that the peoples of Eorzea have stood beside their northern neighbors to fight for a common cause. It could be the true rebirth of the Eorzean Alliance, or at the very least a step toward bringing the nations closer. And yet, when she speaks of celebration, her voice turns bitter.</p><p>Yes, you have fought and won—against Dravanians and Ascians alike. But primals still plague the land, and the Empire still schemes to subjugate Eorzea. The victories came at a terrible price: brave adventurers and allies broken on the Steps of Faith, and then—before your eyes, in that very room—Moenbryda. Minfilia admits the triumph tastes like ashes, and she would rather stay behind than face a feast.</p><p>But it is a royal banquet, and all allies will attend. Minfilia says it is your duty to present a united front—to be a beacon of hope. She tells you the others have been instructed to meet in Ul’dah so you can make your entrance together, though she could only leave a note for Tataru and F’lhaminn; if they return too late, they will have to settle for whatever leftovers she can smuggle out of the Fragrant Chamber.</p><p>As you prepare to depart, Riol catches you and tries to make light of the coming soirée—until he sees your mood. When you speak of what has happened, he reacts with shock: Wilred is dead, and that can only mean the enemy knows they have been exposed. He stops himself, then decides it is time to speak plainly. Since your last conversation, he has been tracing where certain funds were coming from—and he found the trail.</p><p>He tells you a significant amount of coin has flowed into the Crystal Braves’ coffers through a “Dodo Consortium,” a name so absurd it first made him suspicious. Searching deeper, he found more donations from equally ridiculous organizations. The common thread was ownership by the Mirage Trust—and behind that, Teledji’s influence. Riol spits out his contempt: the scheme is barely disguised, as if it were meant to mock their rules on financial contributions.</p><p>Riol says he cannot know how many in the first and third divisions are taking Teledji’s coin, but now that they know some are, he would wager those same men are responsible for Wilred’s death. Wilred had begun asking the wrong questions—questions that drew attention—and Riol curses himself for not seeing it sooner. Still, he insists Teledji is cleverer than this, which means they must be clever too. He swears they will purge every traitor from their ranks, and he warns you to be careful in Ul’dah: a storm is coming, the kind that can sweep a man overboard before he even realizes.</p><p>In Ul’dah, the others are waiting along the Royal Promenade. Thancred glances about as if he has seen something—then waves it off as an old habit of watching his back. Y’shtola needles him, wondering aloud if your bard has crossed another spurned lover, while Yda frets over the practicalities of a banquet: food, dancing, and the miserable timing of both. Papalymo cuts in sharply, reminding her that you are not there to make merry—you are, officially, Minfilia’s escort.</p><p>Minfilia tells you the celebration is about to begin. She had hoped you would all make your introductions together, but a message has just arrived: you are needed at the Quicksand.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Minfilia <small class="muted">(The Rising Stones, X:6.1, Y:5.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="ancient-ways-timeless-wants.html">Ancient Ways, Timeless Wants</a></div><div class="row"><a class="link" href="the-least-among-us.html">The Least among Us</a></div><div class="row"><a class="link" href="the-light-of-hope.html">The Light of Hope</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 50 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="come-but-not-gone.html">Come, but Not Gone</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'祝賀は誰のため',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ミンフィリアは、胸に重くのしかかる出来事はいったん脇に置こうとあなたに告げ、今宵がエオルゼア史の節目になると言う。イシュガルド防衛の大祝賀――十五年ぶりに北方の隣人と肩を並べ、共通の大義のために戦った、その記念だ。それはエオルゼア同盟の真の再生を示すのかもしれず、少なくとも諸国の距離を縮める契機になるはずだ。けれど彼女の語る「祝福」には、晴れやかさより苦味が滲む。</p><p>あなたはドラヴァニア勢力にもアシエンにも勝利した。だが蛮神の脅威は去らず、帝国は今も征服を企む。勝利はあまりにも大きな代償と引き換えだった。イシュガルド防衛戦で倒れた冒険者と盟友、そして――この部屋で、あなたの目の前で失ったムーンブリダ。ミンフィリアは、その勝利は口の中で灰のように苦いと認め、宴を楽しめる者に任せて自分は残りたいとさえ口にする。</p><p>しかし相手は王宮の晩餐会で、同盟者たちが一堂に会する。ミンフィリアは、希望の灯となるためにも団結を示すのが務めだと言い聞かせ、あなたとともに助言どおり行動すると決める。ほかの者たちはウルダハで合流し、揃って入場する手筈にしたという。タタルとフ・ラムインには書き置きしか残せなかったが、戻りが遅ければ「芳香の間」から持ち出せる残り物で我慢してもらうしかない、と。</p><p>出立の折、リオルがあなたを呼び止め、盛大な夜会の話を軽口で流そうとするが、あなたの様子を見て言葉を改める。やり取りの末、彼は衝撃を受ける――ウィルレッドが死んだのなら、こちらの動きは気づかれたのだ。言いよどんだあと、彼は腹を括り、ここで話すべきだと言う。前に話した後、資金の流れを密かに洗い直し、確かな痕跡を掴んだのだと。</p><p>彼は、クリスタルブレイブの金庫に「ドードー・コンソーシアム」なる妙な名義で相当額が入っていたと告げる。その名の胡散臭さが疑念の端緒になり、帳簿を辿ると似たような寄付がさらに見つかった。共通点は、いずれもミラージュ・トラストの傘下であること――そしてその背後にテレジ・アデレジの影があることだ。リオルは、規定を嘲るかのような露骨さだと吐き捨てる。</p><p>第１、第３の中でどれだけがその金を受け取っているかは分からない。だが、発覚している者がいる以上、ウィルレッドを消したのもそいつらだろうとリオルは言う。ウィルレッドは「聞いてはならない類の問い」を重ねて目をつけられたのだ、と。見抜けなかった自分を罵りながらも、テレジはもっと狡猾だ、だからこちらも狡猾でなければならないと語る。そして裏切り者を徹底的に粛清すると誓い、ウルダハでは身を慎めと忠告する。嵐が来る――人を甲板ごと攫って沈めるような嵐が。</p><p>ウルダハの王宮前で仲間たちが待っている。サンクレッドは何かを見たように身構えるが、すぐに気のせいだと笑って取り繕い、若い頃の癖だと言って肩をすくめる。ヤ・シュトラは、吟遊詩人がまた振られた相手に恨まれたのでは、と皮肉を飛ばし、イダは宴なら食事があるはずだと浮き足立ちながらも、踊りの時間を真剣に悩む。パパリモは、遊びに来たのではない、あなたたちは盟主の護衛としてここにいるのだと釘を刺す。</p><p>ミンフィリアは、祝宴の開始が近いとあなたに告げる。本当は揃って挨拶に向かいたかったが、モモディからの知らせで、あなたはクイックサンドへ来てほしいと言われたのだという。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ミンフィリア <small class="muted">（石の家, X:6.1, Y:5.2）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="ancient-ways-timeless-wants.html">吹っ切れタタルさん</a></div><div class="row"><a class="link" href="the-least-among-us.html">神経質な追加調査</a></div><div class="row"><a class="link" href="the-light-of-hope.html">輝く希望</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="come-but-not-gone.html">言伝の先に待つ者</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'萬事自有其時',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Minfilia 要你先把近來壓在心上的事放一放——至少此刻得如此。她說，Eorzea 正站在歷史的轉折點：為了共同防衛 Ishgard 而舉行的盛大紀念典禮，象徵著整整十五年來第一次，Eorzea 的人民與北方鄰邦並肩作戰、同心協力。這也許會成為 Eorzean Alliance 真正重生的起點；就算不到那一步，至少也能讓各國更靠近。可當她提到「慶祝」，語氣卻沉得像是吞不下去的苦味。</p><p>你們確實贏了——不只擊退 Dravanians，也與 Ascians 周旋並取勝。然而 primal 仍在肆虐，帝國仍在謀劃要讓 Eorzea 俯首稱臣。再耀眼的勝利，都伴隨難以承受的代價：在 Steps of Faith 倒下的冒險者與盟友，還有——就在這個房間裡、在你們眼前失去的 Moenbryda。Minfilia 直言，這份勝利像灰燼一樣苦，她寧可留在這裡，把宴席讓給更有胃口的人。</p><p>但那是王室宴會，所有盟友都會到場。Minfilia 說，你們有責任展現團結，成為眾人眼中的希望燈塔。她也只能照自己的話去做：她已通知其他人到 Ul’dah 會合，好讓你們一起盛大登場。只是 Tataru 與 F’lhaminn 她只能留下字條；若她們回來得不夠快，就只能吃她從 Fragrant Chamber 想辦法帶出來的剩菜了。</p><p>你正要上路時，Riol 叫住你，本想用一句「去大派對記得替我喝一杯」帶過，卻看出你神色不對。談到近況，他驚得失聲——Wilred 死了？那就代表你們已經被對方察覺、行跡曝光。他硬生生把話收回去，隨即承認：是時候把真相攤開講了。自從上次談完後，他一直在暗中追查某些資金來源，結果真的挖出了線索。</p><p>Riol 說，有一筆相當可觀的金額以「Dodo Consortium」之名流入 Crystal Braves 的金庫，那荒謬的名目反而讓他起了疑心。他又翻了一遍帳冊，找到更多同樣離譜的捐款名目，最後拼出共同點——那些組織全都屬於 Mirage Trust。Riol 冷笑說，對方幾乎像是在嘲諷你們的財務規範；而這些錢背後，指向的就是 Teledji 的手。</p><p>他說自己無法確定第１與第３分隊到底有多少人拿了 Teledji 的錢，但既然已知有人收了，他敢打賭——害死 Wilred 的就是那批人。Wilred 開始追問不該問的問題，勢必會引來注意；Riol 懊惱自己當時沒能及早察覺。可他也說，Teledji 不可能只有這點手段，因此你們也必須更精明，才能償還這筆血債。他發誓要把叛徒全部清出去，並警告你：到了 Ul’dah 務必小心——暴風雨正在逼近，會在人還沒反應過來時，就把人捲進深處。</p><p>你抵達 Ul’dah 的 Royal Promenade，其他人已在等你。Thancred 忽然像是察覺了什麼般回頭張望，又很快說只是自己多心——年少時留下的習慣，總會不時回頭確認身後。Y’shtola 用一句揶揄說不定是吟遊詩人又得罪了舊情人來打岔；Yda 則一邊惦記宴會一定有吃的，一邊苦惱到底該先跳舞還是先吃飽。Papalymo 不耐地提醒：你們不是來尋歡作樂的，你們名義上是 Minfilia 的護衛。</p><p>Minfilia 表示慶典很快就要開始了。她本想和大家一起出面介紹彼此，但 Mistress Momodi 剛送來訊息——你得先去一趟 Quicksand。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 敏菲利亞 <small class="muted">(石之家, X:6.1, Y:5.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="ancient-ways-timeless-wants.html">古法依舊 心願不變</a></div><div class="row"><a class="link" href="the-least-among-us.html">最不起眼的人</a></div><div class="row"><a class="link" href="the-light-of-hope.html">閃耀的希望</a></div><div class="row">所有職業（不含限定職） 等級 50 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="come-but-not-gone.html">心未曾離開</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
