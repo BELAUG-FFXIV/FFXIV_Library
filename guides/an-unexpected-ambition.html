@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>An Unexpected Ambition | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – An Unexpected Ambition (ARR Patch 2.55)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/UIi4M59s2gU"
+              title="An Unexpected Ambition" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">An Unexpected Ambition</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`An Unexpected Ambition`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Minfilia turns the idea over in her mind—Tataru seeking the power to defend herself is yet another surprise. Thinking back, she recalls Urianger mentioning Tataru’s growing interest in arcanima, and the likely destination becomes clear: the Arcanists’ Guild in Limsa Lominsa. Though she admits her worry may be unwarranted, she asks you to go in her stead and make sure Tataru is safe.</p><p>At the guild, Thubyrgeim seems to have already felt the same unease. She wonders if Tataru has gone below, and lets out a troubled sigh—enthusiasm is one thing, but too much of it can be its own danger.</p><p>Tataru soon appears, startled to see you. She insists she never meant to make Minfilia worry, and then declares—with all the theatrical certainty she can muster—that ending such worries is exactly why she is here. She proclaims that she will become a great and powerful arcanist, and rushes off to complete a “special training exercise” assigned by Thubyrgeim, promising you will meet again.</p><p>When Thubyrgeim speaks with you, her assessment is frank: Tataru’s potential is lacking, but her resolve refused to be turned away. Tataru has gone to undertake her first trial—a simulated inspection of three crates, the very sort of training you once received under K’lyhia. A practical thought follows: given your familiarity with the task and your relationship with Tataru, you are asked to oversee the exercise from a distance, as before, from the cliffs south of Zephyr Gate.</p><p>There, you find Tataru singing as she throws herself into the role, calling out techniques with flair and urging Carbuncle onward—only for the moment to collapse into panic when Carbuncle vanishes at the critical instant. She calls after it in disbelief, left flustered and exposed as the “test” turns into humiliation.</p><p>When she faces you again, she needs no explanation; your expression tells her you saw everything. Betrayed by her own Carbuncle and left to the mercy of wild beasts, she decides she has reached the limit of what she can become. She returns to Thubyrgeim and announces she will withdraw, apologizing for wasting the guild’s time—only to be stopped by a steadier truth. Thubyrgeim reminds her that limitations must be accepted, but strengths must not be forgotten: Tataru’s gift for numbers allowed her to grasp the fundamentals well enough to summon Carbuncle at all. In Thubyrgeim’s eyes, the Scions are fortunate to have such a capable and kind receptionist. Shaken but comforted, Tataru accepts the words, resolved not to let this failure crush her.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Minfilia <small class="muted">(The Rising Stones, X:6.1, Y:5.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="administrative-decision.html">Administrative Decision</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 50 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="ancient-ways-timeless-wants.html">Ancient Ways, Timeless Wants</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'タタルの本気',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ミンフィリアは「自分を守る力」を求めるタタルの言葉を思い返し、改めてその意外性に小さく唸る。そういえばウリエンジェが、タタルが巴術に興味を抱きはじめたと語っていたのを思い出す。となれば行き先はリムサ・ロミンサの巴術士ギルドだろう――そう結論づけた彼女は、心配しすぎかもしれないと認めつつも、タタルの無事を確かめてほしいとあなたに頼む。</p><p>巴術士ギルドでは、トゥビルゲイムがすでに落ち着かない様子を見せていた。タタルがもう下へ向かったのかと気にかけ、熱意は結構だが過ぎれば厄介にもなる、とため息混じりにこぼす。その言葉には、軽く見過ごせない不安がにじんでいる。</p><p>そこへタタルが現れ、あなたの姿に目を丸くする。ミンフィリアを心配させたくはなかった、と言い訳めいた言葉を置きながらも、心配を終わらせるためにここへ来たのだと胸を張る。そして自らを名乗り、「偉大で強力な巴術士」になるのだと高らかに宣言すると、トゥビルゲイムに命じられた「特別な訓練」を終えるため、勢いのまま走り去っていく。</p><p>トゥビルゲイムはあなたに状況を説明する。経験ある巴術士なら分かるだろうが、タタルの素質は決して高くない――それでも本人が引き下がらず、最初の試練として「木箱三個の模擬査察」に向かったという。その訓練は、かつてク・リヒャの監督のもとであなたも受けたはずだ。だからこそ、あなたが遠くから様子を見守るのが最適だとして、ゼファーゲート南方の崖へ向かうよう求める。</p><p>現地でタタルは、歌まで口ずさみながら意気揚々と臨み、技名を並べ立ててカーバンクルに号令をかける。ところが肝心な瞬間、カーバンクルが姿を消し、タタルの勢いは一転して悲鳴混じりの狼狽へ変わる。呼び戻そうと叫んでも戻らず、試練はそのまま恥ずかしい失敗として刻まれてしまう。</p><p>やがてあなたの前に戻ったタタルは、何も言わなくていいと言う。あなたの顔を見れば、すべて見られたのだと分かるのだと。自分のカーバンクルに裏切られ、獣に追われる羽目になった――その屈辱を噛みしめた彼女は、あなたや仲間のようにはなれないと悟り、巴術士ギルドを辞する決意を固める。だがトゥビルゲイムはそれを否定し、限界を知ることは大切だが、同時に長所を見失うなと諭す。数に強いあなたは巴術の基礎理解が早く、その力があったからこそカーバンクルを呼び出せたのだ、と。暁の血盟にとって、誠実で有能な受付係であるタタルの存在は大きい――その言葉に、タタルは肩を落としながらも受け止め、簡単にはくじけないと静かに頷く。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ミンフィリア <small class="muted">（石の家, X:6.1, Y:5.2）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="administrative-decision.html">タタルの決意</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="ancient-ways-timeless-wants.html">吹っ切れタタルさん</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'Tataru 的野心',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Minfilia 想著 Tataru 說要「獲得能保護自己的力量」，仍覺得意外。她回想起 Urianger 曾提過，Tataru 對「秘術」開始產生興趣——那麼她很可能是想進 Limsa Lominsa 的 Arcanists’ Guild。Minfilia 承認也許是自己多慮，卻還是請你跑一趟，替她確認 Tataru 一切平安；她說自己並不是唯一會擔心 Tataru 安危的人。</p><p>到了 Arcanists’ Guild，Thubyrgeim 的反應彷彿早一步印證了那份不安。她念著 Tataru 是否已經下樓，嘆氣說熱情固然好，但太過頭也可能出事——她希望自己沒有看錯。</p><p>很快，Tataru 出現在你面前，看到你明顯嚇了一跳。她急忙說自己不是想讓 Minfilia 擔心，還補上一句：她之所以來這裡，正是為了徹底結束那些擔心。她挺起胸口，自報姓名，宣告自己一定會成為「偉大又強大的秘術師」，接著便依 Thubyrgeim 的吩咐，匆匆去完成所謂的「特別訓練」，像是生怕自己一停下來就會動搖。</p><p>Thubyrgeim 隨後對你坦白：以你的經驗，應該看得出來 Tataru 的資質確實不足；但她怎麼也不肯被勸退，如今正去接受第一個測驗——模擬檢查三個木箱。這種訓練你當年也做過，而且是在 K’lyhia 的監督之下。正因你熟悉流程、又和 Tataru 相識，Thubyrgeim 認為你最適合從旁照看；你只要像以前一樣，前往 Zephyr Gate 以南的崖邊，保持距離觀察即可。</p><p>在 Zephyr Drift，你遠遠看見 Tataru 一邊哼唱，一邊把自己演得像個英勇主角，喊著招式名、催促 Carbuncle 出來配合，神情興奮得幾乎要飛起來。可當她真正要開始「檢查」時，Carbuncle 卻突然不見了。她先是一愣，隨即慌張尖叫，拼命呼喚 Carbuncle 回來——那份自信像被抽走一樣，留下的是失控的狼狽。</p><p>不久後她回到你面前，甚至不用你開口，就從你的說不出話的表情讀懂了一切。她哽咽承認自己親眼見證了丟臉：被自己的 Carbuncle「背叛」，還差點任由野獸宰割。那一刻她逼著自己接受現實——她永遠不可能像你或其他同伴那樣成為戰士。她說要回去告訴 Thubyrgeim 自己將退出 Arcanists’ Guild，因為秘術就像很多事一樣，終究超出她能做到的範圍。</p><p>然而回到公會，Thubyrgeim 沒有讓她把自責說完。她直言：若 Tataru 真如自己所說那般不堪，當初就不會允許她加入。人確實必須認清限制，避免野心把自己帶偏；但也不能因此看不見自己的長處。Thubyrgeim 指出，Tataru 對數字的天賦，讓她能牢牢掌握秘術的基礎，否則她連 Carbuncle 都不可能成功召喚。對 Thubyrgeim 而言，Scions of the Seventh Dawn 能擁有一位能幹又善良的接待員，是極其幸運的事。Tataru 聽著這些話，雖仍難掩沮喪，卻也終於點頭——她承認自己沒能通過這次考驗，但會把這份肯定放在心上，努力不讓挫敗把自己整個人壓垮。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 敏菲利亞 <small class="muted">(石之家, X:6.1, Y:5.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="administrative-decision.html">Tataru 的決心</a></div><div class="row">所有職業（不含限定職） 等級 50 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="ancient-ways-timeless-wants.html">古法依舊 心願不變</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem('ffxiv-guide-lang') || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem('ffxiv-guide-lang', next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
