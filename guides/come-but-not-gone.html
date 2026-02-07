@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Come, but Not Gone | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Come, but Not Gone (ARR Patch 2.55)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/gJVMzi8tCMA"
+              title="Come, but Not Gone" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Come, but Not Gone</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Come, but Not Gone`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Thancred pauses mid-step, as if he has glimpsed something just beyond sight—then dismisses it as imagination. He tells you not to mind him; looking over his shoulder now and then is a habit left over from a misspent youth. Y’shtola laughs it off with a barb, suggesting your bard has likely angered yet another jilted lover, while Yda turns the coming banquet into a serious dilemma of timing: food and dancing, or dancing and food, or both in an endless loop. Papalymo cuts through the chatter, warning that you are not there to make merry—you are, in name, the Antecedent’s escort.</p><p>Minfilia says the others will proceed without you and asks you to join them once your business at the Quicksand is resolved. Thancred adds a casual request of his own: give his regards to Momodi, and tell her he will pay a visit soon.</p><p>At the Quicksand, Momodi thanks you for coming on short notice and promises not to waste your time. She asks if you remember Alianne—the former adventurer now serving as a Crystal Brave, and someone you helped recruit. Alianne stopped by for a meal not long ago, and before leaving, asked Momodi to make sure you received a message before you made your grand entrance at the feast.</p><p>The message is brief and precise: meet her at the station west of the Coffer & Coffin, for there is something she must show you. Momodi remarks that Alianne chose those words carefully and barely touched her food; it looks like trouble, though not the sort of confession one expects. Either way, Momodi urges you not to keep Alianne waiting—nor your friends at the banquet.</p><p>You go to the platform in Black Brush and wait, your thoughts drifting in spite of yourself. Before long, memories of lost comrades and slain enemies march across your mind in a solemn procession. You force yourself back to the present and scan the horizon—no Alianne. When you listen more closely, you catch only the chatter of Qiqirn and the buzzing of syrphids, not the sound of approaching footsteps. With a sigh, you bow your head—and spot a vial lying at your feet.</p><p>Laurentius appears and greets you, asking what brings you out there. He says he has not seen Lieutenant Alianne, and insists that if she had come by, they would have crossed paths—he has passed the spot countless times. He explains he is patrolling the environs on the captain’s orders because of the royal banquet, and reminds you the feast is about to begin. You should be with the honored guests, enjoying a well-earned respite; if he meets the lieutenant, he will tell her you were there.</p><p>Elsewhere in Ul’dah, Nanamo Ul Namo prays in the Fragrant Chamber, calling on the sacred spirit of her line. She confesses that through her weakness, the glorious House of Ul has nearly vanished beneath the sands, and that without the strength to raise it again, perhaps it would be better to let it fall. She asks forgiveness, admitting she does not know what else to do.</p><p>Back in Black Brush, Laurentius speaks with envy of the food and wine awaiting you, yet tells you to enjoy the feast—you have earned it. You return to the Quicksand, and Momodi is surprised you are not headed straight for the banquet. When you tell her Alianne never appeared, but the vial did, she examines it and guesses it looks like an alchemist’s vial—nothing more she can say. She advises you to keep it safe for now. As for Alianne, she says there is no use fretting; she will likely turn up soon enough, and when she does, you will learn what all this was for. For now, you have more important matters to occupy your thoughts.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Minfilia <small class="muted">(Ul’dah - Steps of Thal, X:11.1, Y:11.6)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-time-to-every-purpose.html">A Time to Every Purpose</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 50 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-parting-glass.html">The Parting Glass</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'言伝の先に待つ者',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>サンクレッドはふと足を止め、何かに気づいたかのように視線を走らせるが、すぐに気のせいだと打ち消す。ときおり背後を窺うのは、放埒な若き日の癖だと言い、あなたに気にするなと笑ってみせる。ヤ・シュトラはそれをからかい、吟遊詩人がまた袖にされた相手の恨みを買ったのではないかと皮肉を飛ばす。イダは宴に向けて食事と踊りの順番を真剣に悩み、パパリモは、あなたたちは浮かれに来たのではなく、あくまで盟主の護衛としてここにいるのだと釘を刺す。</p><p>ミンフィリアは、あなたは先にクイックサンドで用件を済ませ、片がつき次第合流するよう告げる。サンクレッドはモモディによろしく伝え、後ほど自分も顔を出すと添えてくれと言う。</p><p>クイックサンドでモモディは、急な呼び出しに応じてくれたことへ礼を述べ、手短に済ませると約束する。彼女は、かつて冒険者で今はクリスタルブレイブに籍を置くアリアンヌのことを覚えているかと確かめ、あなたが彼女を勧誘したはずだと言う。アリアンヌは少し前に食事に立ち寄り、出立の前に、あなたへ必ず渡してほしい伝言を託したのだという――仲間に連れられて宴へ向かうなら、入場前にそれを受け取らせてほしい、と。</p><p>伝言は短い。「コッファー・アンド・コフィンの西にある停留所で会ってほしい。見せたいものがある。」モモディは、言葉を選ぶのに随分悩んだ様子で、食事にもほとんど手をつけなかったと話す。胸の内に何か抱えているようだが、どうやら恋の告白という雰囲気ではない。いずれにせよ、アリアンヌも宴の仲間も待たせるな、と背中を押される。</p><p>あなたは中央ザナラーンのブラックブラッシュ停留所へ向かい、平台で待つ。すると不意に思考がさまよい、失った仲間や討ち果たした敵の面影が、厳粛な行進のように脳裏を過ぎっていく。気を取り直して地平を見渡すが、アリアンヌの姿はない。耳を澄ましても聞こえるのはキキルンの話し声とスルフィドの羽音ばかりで、人の足音は届かない。ため息をついて俯いたそのとき、足元に小瓶が落ちているのに気づく。</p><p>そこへロレンティウスが現れ、あなたに声をかける。ここで何をしているのかと問われ、アリアンヌの名を出すと、彼は見かけていないと言い切る。もし通ったなら必ず出会っていたはずだ、と――彼は王宮の晩餐会に備え、隊長命令で市街周辺の巡回をしており、この場所も何度も通っているのだという。宴はもうすぐ始まるから、あなたは名誉ある客人としてウルダハへ戻り、束の間の休息を楽しむべきだ、と告げ、もし中尉に会ったら来ていたことを伝えると約束する。</p><p>一方その頃、ウルダハの芳香の間では、ナナモ・ウル・ナモが王家の系譜の霊に祈りを捧げ、自らの弱さゆえに「ウル家」は砂に埋もれ消えかけていると嘆く。それを再び立ち上がらせる力がないのなら、いっそ滅びた方がよいのかもしれない――そう口にし、どうすべきか分からないと赦しを請う。</p><p>ブラックブラッシュでロレンティウスは、あなたが宴で味わう食事と酒を羨みつつも、あなたほど相応しい者はいないのだから楽しめ、と言って送り出す。あなたがクイックサンドへ戻ると、モモディはアリアンヌに会ったあとそのまま宴へ向かったのだと思っていたと首をかしげる。あなたが彼女は現れず小瓶だけがあったと伝えると、モモディはそれを見て錬金術師の小瓶らしいと推測し、ひとまず大事に持っておくよう勧める。アリアンヌのことは心配しすぎるな、じきに姿を現し、これが何のためだったかも分かるだろう――今はもっと大切なことに心を向けな、と言う。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ミンフィリア <small class="muted">（ウルダハ：ザル回廊, X:11.1, Y:11.6）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-time-to-every-purpose.html">祝賀は誰のため</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-parting-glass.html">イシュガルド戦勝祝賀会</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'心未曾離開',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Thancred 忽然停了一下，像是看見了什麼似的，隨即又搖頭說只是自己想太多。他叫你別在意，偶爾回頭張望，是他年少放縱時留下的習慣。Y’shtola 立刻拿他開玩笑，說若不是這樣，她都要以為吟遊詩人又惹上哪個被甩的情人了。Yda 則把注意力全放在宴會上，苦惱到底該先吃再跳、還是先跳再吃，甚至想乾脆吃完跳、跳完再吃。Papalymo 看不下去，提醒她別誤以為你們是來尋歡作樂的，名義上你們是 Antecedent （Minfilia 的頭銜也就是「Scions of the Seventh Dawn」的領袖）的護衛。</p><p>Minfilia 表示她們會先行一步，你則先去 Quicksand 把事情處理好，結束後再來會合。Thancred 也順口要你替他向 Momodi 問好，並轉告他稍後會再去拜訪。</p><p>你趕到 Quicksand，Momodi 感謝你在這麼短的時間內過來，說她會直奔主題不浪費你時間。她問你是否認識 Crystal Brave 的 Alianne，以前也是冒險者，而且你應該還親手把她招進隊伍。Momodi 說 Alianne 不久前來吃過飯，臨走前托她務必把一則訊息交到你手上；如果其他人硬拉你去赴宴，她要你在「盛大登場」前先收到這段話。</p><p>訊息很短：「到 Coffer & Coffin 西邊的車站來見我，我有東西一定要給你看。」Momodi 說 Alianne 為了選這幾個字想了很久，甚至幾乎沒動盤子。若換作平常，她會以為那是情緒低落的徵兆，但直覺告訴她——Alianne 不是要來告白什麼「至死不渝的愛」。不管怎樣，她催你別讓 Alianne 久等，也別讓宴會那邊的人久等。</p><p>你來到 Black Brush 的月台上等待，思緒卻不受控制地飄遠；很快，失去的同伴與被你擊倒的敵人，像莊嚴的隊伍一樣在腦海裡一一走過。你勉強收回心神，抬頭望向遠方，卻看不見 Alianne 的身影。你再側耳傾聽，只聽到 Qiqirn 的喧鬧與 syrphid 的嗡鳴，沒有任何腳步聲接近。你嘆了口氣低下頭，這才注意到腳邊放著一只小瓶。</p><p>Laurentius 走上前來叫住你，問你怎麼會在這裡。你提到 Lieutenant Alianne，他斬釘截鐵地說自己沒見到；如果她真的來過，照理你們早該擦肩而過，他已經巡到這一帶好多次了。Laurentius 解釋，因為王室宴會的關係，他奉隊長命令巡邏 Ul’dah 周邊；而宴會眼看就要開始了。他勸你回去和其他貴賓一起享受難得的喘息，並表示若他遇到中尉，會替你轉告你曾在這裡等過她。</p><p>同一時間，在 Ul’dah 的 Fragrant Chamber，Nanamo Ul Namo 向祖先的神聖之靈祈禱。她自責說，由於自己的軟弱，榮耀的 House of Ul 幾乎已被沙海吞沒；若她沒有力量讓它重新振作，也許乾脆讓它就此沉沒才好。她低聲請求原諒，坦言自己已不知道還能怎麼做。</p><p>你回到 Black Brush，Laurentius 一邊羨慕你即將享用的美酒佳餚，一邊又說你比誰都更配得上那場宴會，叫你好好享受。你隨後回到 Quicksand，Momodi 看到你又回來有些意外，還以為你見完 Alianne 就會直奔宴席。你告訴她 Alianne 沒出現，只留下這只小瓶；Momodi 端詳後推測這像是煉金術士用的小瓶，但除此之外也說不出所以然，便要你先把它收好保管。至於 Alianne，她說現在擔心也沒用——她遲早會現身，到時候你們自然會知道這一切到底是為了什麼；而且，你眼下還有更重要的事要放在心上。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 敏菲利亞 <small class="muted">(烏爾達哈 扎爾迴廊, X:11.1, Y:11.6)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-time-to-every-purpose.html">萬事自有其時</a></div><div class="row">所有職業（不含限定職） 等級 50 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-parting-glass.html">舉杯餞別</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
