@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Least among Us | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – The Least among Us (ARR Patch 2.55)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/9hUNUiXN27c"
+              title="The Least among Us" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">The Least among Us</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`The Least among Us`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>The unsettled scholar informs you that the next survey will take place at Urth’s Fount. The ambient aether there is so dense that crystalline structures form on their own, and he insists that any anomalous fluctuations will be far easier to detect. Without waiting for a reply, he orders you to come along.</p><p>At Urth’s Fount, he tells you the routine should be familiar by now: pick a position, keep watch, and do not interrupt him while he takes his measurements. When you linger too close, he snaps that you will be there all night if you do not leave him be.</p><p>As the night stretches on, the scholar mutters over the readings. The concentrations are high—yet still clearly lower than historical measurements taken near the end of the Sixth Astral Era. He turns the question over aloud: could the presence of a primal explain the difference, or is there something else at work? His voice falters as he fixates on that possibility.</p><p>Then panic breaks through his focus. He calls for a Scion, urgently begging you to come closer. Before he can say more, Hoary Boulder’s voice carries through the dark—help has arrived—and Coultenet appears, saying they feared for you when you did not return at the appointed hour.</p><p>Hoary Boulder’s attention is drawn to a body: Wilred, gutted with blade wounds, with no sign of a real fight—no marks on sword or shield. Coultenet says he has heard nothing of Crystal Brave operations in the area and cannot understand why Wilred came. The scholar, shaken, can barely form words. Hoary Boulder and Coultenet take charge—protect the scholar and tend to Wilred’s remains—and tell you to return to the Rising Stones and report everything to the Antecedent.</p><p>Back in the solar, Minfilia sees your expression and asks if the escort duty troubled you—until she hears the truth. Wilred is dead, perhaps murdered, and she can scarcely believe it. She vows to send word to Alphinaud at once for a full investigation, and to notify Wilred’s family. Stunned, she can only ask who could do such a thing—and why.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Unsettled Scholar <small class="muted">(South Shroud, X:17.3, Y:28.6)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="where-we-are-needed.html">Where We Are Needed</a></div><div class="row">All classes and jobs (excluding limited jobs) (Level 50 or above)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-time-to-every-purpose.html">A Time to Every Purpose</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'神経質な追加調査',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>落ち着きのない学者は、次の調査はウルズの泉へ向かうと言い渡す。あの地は周囲の乙太濃度があまりに高く、結晶構造が自然に生じるほどで、ゆえに異常な変動も見つけやすいのだと得意げに語る。返答は求めぬと言わんばかりに、あなたに同行を促す。</p><p>ウルズの泉に着くと、彼は手順はもう承知だろうと言い、計測の間は邪魔をせず、見張りに適した位置へ下がれと命じる。あなたが近くに留まれば、放っておかねば一晩中ここにいることになるぞ、と苛立ちをぶつけた。</p><p>やがて学者は数値を追いながら独り言を重ねる。確かに高い――だが第六星暦の末に採られた過去の測定値に比べれば、はっきりと低い。primal の存在が差を生むのか、それとも別の何かがあるのか。彼は「別の何か」に囚われ、言葉を途切れさせる。</p><p>その直後、彼は怯えたようにあなたを呼び、暁の血盟員に助けを求める。そこへホーリー・ボルダーの声が闇を裂き、助けが来たと告げられる。クルトゥネも現れ、あなたと学者が定刻に戻らなかったため心配していたと言う。</p><p>ホーリー・ボルダーは、倒れているウィルレッドの遺体を見て息を呑む。刃物で裂かれた傷で、まともに抵抗した形跡もなく、剣も盾も傷ひとつない。クルトゥネはこの辺りでのクリスタルブレイブの作戦など聞いていないと言い、なぜウィルレッドがここへ来たのか疑問を口にする。震える学者を前に、ふたりは彼の護衛と遺体の処置を引き受け、あなたには石の家へ戻って盟主に報告するよう促す。</p><p>ソーラに戻ると、ミンフィリアはあなたの様子を見て案じるが、ウィルレッドが死んだと聞いた瞬間、言葉を失う。殺されたのかもしれないという報せに愕然とし、アルフィノへ直ちに連絡して徹底調査を行わせ、家族にも知らせねばならないと決意する。そして、誰が、なぜ――その答えを求めずにはいられないのだった。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> 神経質なエーテル学者 <small class="muted">（黒衣森：南部森林, X:17.3, Y:28.6）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="where-we-are-needed.html">護衛任務の代役</a></div><div class="row">すべて（リミテッドジョブを除く）Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-time-to-every-purpose.html">祝賀は誰のため</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'最不起眼的人',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>那位情緒緊繃的學者告訴你，下一次調查要前往 Urth’s Fount。那裡的環境乙太濃度高到會自發形成結晶構造，因此任何異常波動都更容易被偵測到。他丟下這些話後不等你回答，就催你立刻跟上。</p><p>抵達 Urth’s Fount，他說你應該早就熟悉流程：找個適合的位置負責警戒，讓他專心量測。你若還在旁邊晃，他就不耐地斥你別來打擾，否則你們會在這裡耗上一整夜。</p><p>夜色之中，他一邊讀取數據一邊喃喃自語。乙太濃度確實很高——但仍明顯低於第六星歷末期留下的歷史測量值。他不斷推敲原因：是 primal 的存在造成差異，還是還有別的什麼？他越說越像是被「別的什麼」牽住，聲音也逐漸失去鎮定。</p><p>緊接著，他忽然驚慌地喊你，急切求你靠近，甚至慌亂地呼叫 Scions of the Seventh Dawn。話還沒說完，Hoary Boulder 的喊聲就從黑暗中傳來——援手到了。Coultenet 也趕到，說你和你護送的對象沒有按時回去，讓他們擔心得不得了。</p><p>Hoary Boulder 很快就發現倒在地上的人是 Wilred。他盯著那具身體，咬牙低聲說：像被宰開一樣——可不是被野獸。那些傷是刀刃造成的，而且幾乎看不出他曾經抵抗；他的劍與盾都沒有留下任何痕跡。Coultenet 表示，他從未聽說 Crystal Braves 在這一帶有任何行動，更無法理解 Wilred 為何會出現在這裡。學者嚇得語無倫次，而 Hoary Boulder 與 Coultenet 立刻接手：他們會保護學者，也會處理 Wilred 的遺體；你必須回 Rising Stones，把這裡發生的一切告訴 Antecedent。</p><p>你回到 solar，Minfilia 先是注意到你神色不對，還以為是護衛任務讓你不自在——直到她聽見 Wilred 已死、甚至可能遭到殺害。她震驚得幾乎無法接受，立刻表示要通知 Alphinaud，展開徹底調查，也要把消息送到 Wilred 的家人那裡。她只剩下一個問題無法放下：究竟是誰做的，又為了什麼？</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 神經質的乙太學者 <small class="muted">(南部森林, X:17.3, Y:28.6)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="where-we-are-needed.html">緊急支援出動</a></div><div class="row">所有職業（不含限定職） 等級 50 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-time-to-every-purpose.html">萬事自有其時</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem('ffxiv-guide-lang') || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem('ffxiv-guide-lang', next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
