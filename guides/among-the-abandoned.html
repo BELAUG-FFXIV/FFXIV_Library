@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Among the Abandoned | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Among the Abandoned (DT Patch 7.1)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/yL_Q967sQ3A"
+              title="Among the Abandoned" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Among the Abandoned</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Among the Abandoned',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>You search the abandoned research station, knowing that even the remnants might reveal what became of the work done here. Your goal is twofold: find any clue that can lead you onward, and find a way up to the upper level where more records may remain.</p><p>The sight of what was done in this place stirs anger and unease among your companions. You hear the question of what became of the people who lived here, and the chilling realization that some may have willingly offered their souls for experiments whose success was never assured—and whose “best” outcome meant they would no longer be truly human. When you reach a locked gate that will not budge, you accept there is only one option: locate a verification key.</p><p>You begin with what the dead have left behind. Beside a mangled corpse lies a researcher’s journal, and you read how the author was assigned here to train villagers in electrope technology. The writer notes that operating common devices can be learned quickly, but developing new weapons—ones that require the manipulation of souls—demands a far greater skill. Two pupils stand out: the village chief and a field chirurgeon, both improving rapidly, driven by loyalty to their king. Yet nothing in the journal resembles the key you need.</p><p>You search further and find another record—this one from a test subject. At first it reads like a desperate hope: a volunteer seeking strength so others will not laugh. Then it becomes a grim proof of what the experiment did. The writer reports a soul transfer days ago, celebrates the ability to write, and then admits strength growing hard to control—harming a feeder, unable to help it—followed by hunger that overwhelms thought. Again, there is no key.</p><p>At last, inside an open cabinet stocked with staff supplies, you uncover a manual of regulations and emergency tranquilizing gas—and, tucked among the items, the verification key. When you use it on the security panel, the lift responds, and you bring the others to the upper level.</p><p>The upper chamber resembles an observatory, and much of the machinery still runs—auxiliary systems maintaining monitoring even through emergencies. Warnings point to anomalies likely tied to a failed seal, and you can only be grateful the beast was felled before it caused harm. With time short, you focus on what you came for: clues about the mother you seek. At a terminal, you narrow the search by entering the name of the field chirurgeon, finding a trove of research logs—too much to parse here, and likely encrypted. You decide to take the data back for analysis, transfer it to a storage device, and return. Along the way, you reflect on the depravity of treating souls as mere resources, agree the authorities must be informed about the facility, and deliver the device to the analyst. The files are encrypted and will take time; while the work begins, you and your companions resolve to check on the city’s people—still listless with grief—and wait for the results.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Krile <small class="muted">(Yuweyawata, X:11.8, Y:12.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-search-of-the-past.html">In Search of the Past</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="guidance-of-the-hhetso.html">Guidance of the Hhetso</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'放棄された施設にて',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>あなたは放棄された研究施設を調べ、残された痕跡からでも、ここで行われた研究の行く末を掴めるはずだと考える。手がかりを探すだけでなく、上層へ至る道も見つけなければならない──そうして周囲を捜索し始める。</p><p>施設に残る光景は、仲間たちの胸にも怒りと不安を呼び起こす。ここにいた人々はどうなったのかという疑問がこぼれ、さらに、魂を差し出してまで実験に志願した者がいたという事実が重くのしかかる。成功は保証されず、仮に最良の結果に至っても「もはや人ではなくなる」──そのほどの献身が王への忠誠から生まれたのかと、言葉は慎重にならざるを得ない。やがて頑丈な門の前で足が止まり、力任せでは開かないと判断し、認証鍵を探す方針を固める。</p><p>あなたは手始めに、遺体のそばに残された記録を読む。そこには、技術の扱いを村人に教えるためにこの地へ配属されたこと、単純な装置の操作は子どもでも覚えられるが、魂の操作を要する新兵器の開発には高度な技能が必要であることが記されていた。さらに、村長と野戦治療師の二名が際立った適性を示し、王への忠誠に突き動かされて急速に成長しているともある。だが、その記録のどこにも認証鍵に繋がるものは見当たらない。</p><p>別の場所で、今度は被験者の手記を見つける。最初は、嘲笑われないために強さを求め、志願したという痛切な動機が綴られている。ところが魂の移し替えの後、文字を書けるようになったと喜ぶ文面は、すぐに暗転する。力の制御が難しくなり、世話役を傷つけてしまったこと、止められない飢えに支配されていくことが、途切れがちな言葉で残されていた。ここにも鍵はない。</p><p>あなたは捜索を続け、備品が整然と収められた戸棚を開く。規則をまとめた手引きと、非常時に用いる鎮静ガスの用意が目に入り、さらにその奥から認証鍵を見つけ出す。認証鍵を操作盤に用いると昇降機が起動し、あなたは仲間たちとともに上層へ向かう。</p><p>上層は観測室のような造りで、装置の多くがなお稼働していた。非常時でも監視を続けられるよう、補助系統が備わっているのだろう。表示される警告は封印の破綻に伴う異常を示しており、あなたは獣が害をなす前に討ち倒せたことを幸いに思う。目的を思い出し、端末で野戦治療師の名を手掛かりに検索すると、実験処置を管理した者の研究記録が膨大に現れる。しかし現地で精査するには時間が足りず、しかも暗号化されている可能性が高い。あなたはデータを持ち帰って解析してもらうことに決め、記録媒体へ転送する。魂を資源として扱う発想が生む卑劣さを胸に刻みつつ、施設と内容について当局へ報告する必要を確認し、解析担当へ媒体を渡す。暗号化された大量のデータには時間が要ると言われ、作業を待つ間、あなたと仲間たちは人々の様子を確かめに街を巡ることにする──葬送の後もなお、喪失の影が濃く残っているからだ。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> クルル <small class="muted">（ユウェヤーワータ, X:11.8, Y:12.9）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-search-of-the-past.html">グルージャの冒険</a></div><div class="row">ファイター ソーサラー（リミテッドジョブを除く）Lv 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="guidance-of-the-hhetso.html">ヘイゾを知る</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'置身廢棄設施之中',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你在那座被遺棄的研究設施裡前進，心裡清楚：既然你們已經看出這裡研究的目的，那些殘留的痕跡也許能讓你們更進一步理解「結果」究竟走到了哪裡。你一邊尋找線索，一邊也在找能通往上層的路。</p><p>你聽見同伴對這裡發生的一切感到憤怒與不安：有人問起居民究竟怎麼了，是都離開了，還是你們早已在別處遇見；也有人難以置信地想到，竟有人自願把靈魂交出去，只為配合這些實驗。那不僅毫無保證，即使成功，也不過意味著「不再是人」。當你們在一扇打不開的門前停下，所有人都明白，硬闖沒有用──你們得找到「驗證鑰匙」。</p><p>你先在遺體旁找到一本研究者的日誌。你把上頭的文字讀下去：作者被派來此地，是為了訓練村民使用 electrope 技術。日誌寫道，基本裝置連孩子都能很快學會，可若要發展新武器──那些需要「操作靈魂」的武器──就必須具備更高的技術。作者也提到兩名學徒的資質特別出色：村長 Kanilokka，以及擔任野戰醫療者的 Teeshal Ja；他們因對國王的忠誠而進步神速，作者甚至盼望不久之後就能卸下指導的職責。然而，你在日誌裡找不到任何像是驗證鑰匙的東西。</p><p>你繼續搜查，又讀到另一份紀錄──出自被試驗者的手記。起初，那像是一種笨拙卻迫切的希望：對方說自己不如別人聰明，但若能變強，就不會再被笑，於是把這次招募當成機會。可在「靈魂轉移」之後，字裡行間很快變了樣：對方為自己能寫字而興奮，卻也寫下力量越來越難控制，甚至咬掉餵食者的手，並非出於本意卻無法停止；接著，只剩下被飢餓吞沒的斷裂句子。這裡同樣沒有你要的鑰匙。</p><p>你把搜尋範圍轉向工作人員的備品，打開一個敞開的櫃子。裡面整齊放著各種物資，其中還有一本規章手冊，以及「緊急狀況使用的鎮靜氣體」說明。你再往深處翻找，終於摸到那把驗證鑰匙──足以開啟鐵門、也能操作升降梯的鑰匙。你啟動安全面板，叫上同伴，一起上到上層。</p><p>上層像是一間觀測室，多數機械竟仍在運作，彷彿另有備援系統能在緊急狀況下維持監測。你們看到警告訊息指向多種異常，推測與封印失效有關；能在那頭野獸造成危害前將其擊倒，實在是不幸中的大幸。你們把注意力拉回原本的目標：尋找與 Gulool Ja 的母親相關的線索。你們在終端機前縮小搜尋範圍，輸入 Teeshal Ja 的名字，結果跳出大量「實驗處置管理者」的研究紀錄──內容看起來高度重複，數量又龐大，而且很可能已加密，現場根本不可能細讀。你們決定把資料帶回去交給 Shale 分析，並把檔案轉存到事先準備好的儲存裝置裡。</p><p>回程途中，你們一邊整理收穫，一邊也難以忘記那座設施帶來的衝擊：把靈魂當作可被榨取的資源，究竟能讓人走到多卑劣的地步。你們也明白，相關機關勢必得被告知那座設施與其內容；但眼下更重要的是把資料送到 Shale 手上。Shale 接過儲存裝置後坦言：資料量驚人而且全數加密，她需要時間才能處理完成。於是你和同伴先在城裡走走，看看葬禮之後人們是否依舊意志消沉──你們只能先做能做的事，然後等待解密的結果。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 克露兒 <small class="muted">(尤維亞瓦塔, X:11.8, Y:12.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-search-of-the-past.html">Gulool Ja 的冒險</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="guidance-of-the-hhetso.html">赫索的指引</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
