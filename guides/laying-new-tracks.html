@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Laying New Tracks | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – Laying New Tracks (DT Patch 7.15)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#ffffff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative;max-height:360px;overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:"";position:absolute;left:0;right:0;bottom:0;height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card));pointer-events:none;
+    }
+    .expand-wrap{margin-top:12px}
+    .expand-btn{display:inline-block;padding:8px 14px;border-radius:10px;background:var(--card);border:1px solid var(--border);cursor:pointer;font-weight:600}
+    .expand-btn:hover{background:#fffef8}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/DnRd57dixRg"
+              title="Laying New Tracks" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Laying New Tracks</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Laying New Tracks`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>A railroad employee spots you and hurries over, visibly relieved to have found you at last. He says he works for the railway company in Xak Tural, and that their supervisor asked him to send you along the moment he saw you—because there’s trouble again, and they need you to come speak with him at Shaaloani Station.</p><p>When you arrive, the station is tense despite the good news: the quieter locomotive is finished, and the company is finally running again. Yet the staff whisper that Nitowikwe and the chief have been at odds, and both insist nothing is wrong. The supervisor begs you to help anyway—after everything you’ve done, they’ll trust you—and he urges you to meet them at the office in Sheshenewezi Springs, promising he’ll follow as soon as he can.</p><p>Inside the office, the moment you step in, the argument spills into the open. The chief demands a reason to pull Nitowikwe out of the driver’s seat, while Nitowikwe refuses to budge and tells him to listen to reason. When they notice you, Nitowikwe snaps at the three of you for “shaking like rroneek calves,” but the chief concedes that now you’re here, an unbiased perspective might help—and agrees to tell you the full story.</p><p>They explain that you and Koana helped them build a far quieter locomotive, and service has resumed northbound to the end of the current track. But the company is now caught between two major priorities: keeping day-to-day operations profitable, and the far harder task of restoring the line through Vanguard all the way to Yyasulani Station. The repairs fall beyond their jurisdiction, however, because the land lies under the dome —so the chief has been negotiating in secret to make the work possible.</p><p>That negotiation, plus everything else, is grinding him down. The new train is still effectively a prototype, supplies are short, and Nitowikwe offered to step away from driving to manage the station—only to be refused, because the chief believes she belongs at the throttle. Nitowikwe argues she wouldn’t have to give up driving at all if they could secure a competent artisan to keep them stocked, and they ask what you’ll do. When you offer to take commissions and help with daily operations, the mood shifts at once: the chief accepts with obvious relief, and Nitowikwe asks you to step outside to talk details.</p><p>Outside, Nitowikwe thanks you again, admitting how much it eases her mind to have your help. She speaks plainly about the work ahead: keeping a locomotive quiet takes constant polish and even more maintenance to keep everything pristine. To make the job go smoothly, she introduces local vendors—one who can supply materials, and another who will trade scrips for quality goods—then tells you to begin, and to bring anything you have to deliver directly to her.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Railroad Employee <small class="muted">(Tuliyollal, X:14.1, Y:12.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-warmth-of-family.html">The Warmth of Family</a></div><div class="row"><a class="link" href="go-west-craftsman.html">Go West, Craftsman</a></div><div class="row">Disciples of the Land or Hand (Level 90)</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-weight-of-a-train.html">The Weight of a Train</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'お得意様ニトウィケ',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>鉄道会社の職員があなたを見つけると、ほっとしたように駆け寄ってくる。サカ・トゥラルの鉄道会社で働いており、見かけたらすぐにあなたを駅へ案内するよう頼まれていたという。会社でまた問題が起きていて、シャーローニ駅で話をしてほしい、と急かすように告げる。</p><p>駅に着くと、静音化した機関車が完成し、会社は営業を再開できたはずなのに、空気は落ち着かない。ニトウィケと主任の間に緊張が走っているらしく、問いただしても二人は何でもないと言い張るのだという。職員は、これまでのあなたの働きなら二人も信じるはずだと頼み込み、シェシェネ青燐泉の事務所へ先に向かってほしいと伝える。自分は片づけ次第、すぐに追いかけると約束する。</p><p>事務所に入った途端、言い争いは隠しようがなくなる。主任はニトウィケを運転席から外すべきだと声を荒らげ、ニトウィケは何を言われても考えは変わらないから理屈を聞けと言い返す。あなたに気づいたニトウィケは、三人をロネークの子どもみたいに震えていると茶化しつつ、なぜ来たのかと問い詰めるが、主任はあなたが来た以上、公平な目が必要だと認め、事情をすべて話すことにする。</p><p>主任は、あなたとコアナが尽力して機関車を静かにできたこと、そして線路の終点まで北行の運行を再開できたことを改めて述べる。だが会社には、日々の運行で収益を確保することと、さらに大きな課題として、ヴァンガードを越えてヤースラニ駅まで線路をつなぎ直すことの二つがのしかかっている。線路の先はドームに覆われた領域にかかっており、勝手に手を入れられないため、主任は必要な段取りを水面下で進めてきたのだという。</p><p>その負担は重く、新しい列車は試作同然で、物資も不足している。ニトウィケは運転を退いて駅務を引き受けると申し出たが、主任は彼女が運転台にいるのがいちばんだとして首を縦に振らなかった。ニトウィケは、腕の立つ職人さえ確保できれば運転を譲る必要などないと訴え、日々の運営を支える職人になってくれないかとあなたに頼む。あなたが依頼を受け、業務を手伝うと申し出ると、主任は安堵し、ニトウィケは具体的な話のため外へ出ようと促す。</p><p>外に出たニトウィケは、あなたの協力に胸をなで下ろし、これからの要点をはっきり告げる。機関車を静かに保つには、磨きと整備を重ね、常に万全の状態を維持し続けなければならない。作業を滞りなく進めるために地元の売り手を紹介し、材料が要るならそちらをあたり、スクリップを品物に替えるなら別の者に頼むよう案内する。そして、納品するものができたら自分に直接話しかけてほしいと言い、あなたに仕事の開始を任せる。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> XTRR社の社員 <small class="muted">(トライヨラ, X:14.1, Y:12.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-warmth-of-family.html">王の家族</a></div><div class="row"><a class="link" href="go-west-craftsman.html">職人、新たな世界へ</a></div><div class="row">クラフター ギャザラー Lv 90～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-weight-of-a-train.html">大陸横断鉄道の夢へ向かって！</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'鋪設新軌道',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>一名鐵路公司的員工終於在路上找到你，語氣裡滿是鬆了一口氣。他說自己在 Xak Tural 的鐵路公司工作，Shenza 先前交代過——只要碰到你，就立刻請你去找他。不是要嚇你，但公司又出狀況了；他說只要你願意抽空去一趟、跟 Shenza 談談，他們真的會很感激。Shenza 會在 Shaaloani Station 等你。至於他自己，得趕去 Wachumeqimeqi 張羅物資，公司正缺補給，他被派去找工匠補強存貨。</p><p>你抵達 Shaaloani Station，Shenza 一見到你就像終於放下心中大石，連聲說見到你真是太好了。他先感謝你和 Dawnservants 幫忙解決噪音問題，讓改良後的列車終於能重新上路，Xak Tural Railing 也因此恢復營運。可偏偏在這節骨眼上，Nitowikwe 和 Wawlika 之間的氣氛突然變得緊繃；你們問起來，他們卻都堅稱沒事。Shenza 說正因如此才需要你——以你先前為他們做的一切，他們不可能不信任你。他要你先去 Sheshenewezi Springs 的辦公室，他處理完手邊的事就會立刻跟上，否則要是被發現他擅離職守，恐怕會被綁在鐵軌上。</p><p>你踏進辦公室，爭執立刻攤在眼前。Wawlika 逼問為什麼要把 Nitowikwe 從駕駛位置換下來，Nitowikwe 則冷冷回敬：不管你怎麼說都改變不了她的想法，要他開始聽「理性」。當兩人注意到你，Nitowikwe 還嘲諷你們幾個抖得像 rroneek 幼崽，質問你們為何要插手；但你說明來意後，Wawlika 也只能承認——既然你已經到了，他們確實需要一個不偏不倚的角度，便答應把整件事說清楚。</p><p>他們先回顧你和 Vow Koana 為了打造更安靜的機關車所付出的努力，也說明目前已恢復往北的運行，直到軌道終點、接近 Vanguard 的位置。然而公司眼前同時扛著兩項大工程：一是維持日常營運順暢、確保收入；二是把軌道穿過 Vanguard，一路重新接回 Yyasulani Station。只是那片土地如今落在 Alexandria 的 the dome（罩住 Yyasulani 的巨型屏障）之下，不在他們的管轄範圍內，所以 Wawlika 才一直在私下與 Wing of Reflection 交涉，想把修復所需的安排談妥。</p><p>Nitowikwe 直指問題的核心：Wawlika 身上已經有太多職責，新列車在許多方面仍像原型機，偏偏又遇到物資短缺；她因此提出自己可以不再駕駛、改去負責車站管理，好讓工作撐得住，但 Wawlika 卻怎麼都不肯考慮，因為他認定她最適合待在操縱桿前。Nitowikwe 反過來說——只要能說服一位夠稱職的工匠穩定供貨，她根本不必放棄駕駛。於是你表示自己能接委託、也願意協助日常營運；Wawlika 聽完明顯鬆了一口氣，當場答應把日常面的工作交給你分擔，Nitowikwe 也請你到外頭談細節。</p><p>走到外面後，Nitowikwe 坦言有你的協助讓她安心許多，並把重點交代清楚：要讓機關車保持安靜，需要大量拋光，更需要更頻繁的保養，才能讓一切維持在最佳狀態。為了讓工作流程順利，她介紹你認識當地商人——需要材料時多半能向 Peyapewi 購買；而 Kenawna 則能用你的工票交換各式品質良好的貨品。她要你就此開始著手，之後只要有要交付的東西，就直接來找她。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> XTRR 社員 <small class="muted">(圖利約拉爾, X:14.1, Y:12.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-warmth-of-family.html">家人的溫暖</a></div><div class="row"><a class="link" href="go-west-craftsman.html">職人西行 開拓新天地</a></div><div class="row">生產與採集職能 Lv.90</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-weight-of-a-train.html">朝著橫跨大陸的鐵路之夢前進！</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
