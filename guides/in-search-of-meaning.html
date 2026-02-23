@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>In Search of Meaning | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – In Search of Meaning (DT Patch 7.2)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#ffffff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative;max-height:360px;overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:"";position:absolute;left:0;right:0;bottom:0;height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card));pointer-events:none;
+    }
+    .expand-wrap{margin-top:12px}
+    .expand-btn{display:inline-block;padding:8px 14px;border-radius:10px;background:var(--card);border:1px solid var(--border);cursor:pointer;font-weight:600}
+    .expand-btn:hover{background:#fffef8}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/HgwrQyUNHt8"
+              title="In Search of Meaning" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">In Search of Meaning</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`In Search of Meaning`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Wuk Lamat tells Sphene that if she has any troubles—or anything she wants to talk about—she will always listen. Gulool Ja notes that people have been worried about running out of neo regulators, but Lamaty’i managed to lift their spirits. Sphene apologizes for darkening the mood, yet admits she feels better for having shared her feelings, and thanks you. Wuk Lamat confesses she has not been much of a guide, unused to being approached so often, but Sphene says it is only natural: the people have endured so much, and they seek comfort and assurance from someone they trust. She adds that she was able to relax with a delicious cup of coffee and enjoy a lovely chat with you.</p><p>As you decide where to go next, Wuk Lamat suggests that looking inside Nexus Arcade can wait until you actually need something. Gulool Ja proposes returning to the recreation zone to see more on True Vue, and you head that way.</p><p>In the recreation zone, you find a man in distress. He is pale and struggling, and you look for a place where he can rest. Between breaths, he says that while he was on his way to handle some business, the memory of being killed here came flooding back. He knows the danger has passed, but the terror still lingers, and though he has comforted others in his work, he cannot seem to comfort himself. Wuk Lamat reflects that the regulators and the souls people used to spare themselves the horror of death ended up subjecting them to it again and again, and she wishes you had been able to help sooner. Sphene observes that even if he is physically unharmed, unseen wounds take time to heal.</p><p>The man admits he cannot shake the fear and feels his courage has deserted him, and he needs someone to rally his spirits. After you encourage him, he says he already feels better, and introduces himself as Malachite, an usher. Wuk Lamat recognizes ushers as those who once came to people with little time left to live, but Malachite explains that their duties have changed: they no longer attend to the dying. Now, after people pass away in their families’ care, ushers convey the remains to a government storage facility. Since the specifics of burial are undecided, bodies are kept in cold storage for the time being, and Wuk Lamat admits she did not know—she had heard there were graveyards near the submerged city, but like funerals, such customs must be long forgotten.</p><p>When Gulool Ja asks why Malachite is here, he explains he has taken to delivering the personal effects of the departed to their families. Even though memories are entrusted to the cloud, he still remembers where people once lived. The rule was to dispose of all belongings, and doing otherwise was forbidden, but he could not bear to see them thrown away like waste, so he began hiding what he could. He says he understands not everyone shares his feelings, so he leaves the choice to the families: some accept the deliveries, others refuse. He cannot say whether he is right, but believes families should be given the choice. When Gulool Ja asks you if you will help, you agree, and Malachite entrusts you with four items to deliver in the recreation zone, while he goes to the residential sector. Wuk Lamat, recalling similar episodes in Tuliyollal after the trauma of the siege, asks to accompany Malachite to keep an eye on him while you handle the deliveries.</p><p>With Sphene and Gulool Ja accompanying you—Sphene asking you to do the talking so her voice does not betray her identity—you deliver keepsakes to citizens on True Vue and nearby. One recipient accepts the keepsake because it belonged to their parents, and admits they now understand they will never see them again; they reflect that spare souls cannot save anyone from the inevitable, and find themselves thinking differently about how they spend their time. Another thanks you but says the keepsake does not help them remember; they speak bitterly of how the owner is dead and will never become one of the “Endless” Queen Sphene talks about, and confess doubts about becoming Endless themselves—if it means putting your memories into a new body of aether, does that not mean you still have to die first? They say they were glad to receive a neo regulator when they thought it meant not having to worry about souls, but now they have only doubts, even as they want to believe Queen Sphene’s recommendation.</p><p>A third citizen wavers at accepting something that belonged to someone who died, and admits it makes them think about what Alexandria did to Tuliyollal and how many people were killed—news they did not truly grasp until the funeral. Fearful of retaliation, they are reassured by Gulool Ja that Wuk Lamat would never do that, and that the leaders in Tuliyollal know his father was to blame, not the people of Alexandria. Still, the citizen confesses they cannot stop worrying about death, and hearing that neo regulators are running out makes it worse.</p><p>At the Neon Stein, you deliver the last keepsake to a lively citizen who says it stirs no memories, though it feels faintly familiar. They recognize you as the “unenhanced challenger”—a champion who achieved the incredible without using feral souls—and introduce themselves properly as Lithander, once a fighter in the Arcadion. Lithander says they took Queen Sphene’s words to heart and found new work, helping with rehabilitation after people were badly hurt when mechanical soldiers malfunctioned. They speak of someone learning to walk again who refuses the easy answer of becoming Endless, choosing instead to overcome it with the body they have, and that gave Lithander a renewed appreciation for their own body as a gift from their parents. Gulool Ja admits he is the only blue-scaled Hoobigo besides his father, and though it sometimes hurts to think about what they share, he does not want to lose that—he would never throw away this body, even if he could look the same as an Endless. Lithander agrees that the thought makes them uncomfortable about the whole becoming Endless affair, then thanks you again and returns to work.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Sphene <small class="muted">(Solution Nine, X:5.5, Y:13.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="memories-of-a-bygone-age.html">Memories of a Bygone Age</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-jewel-shattered.html">A Jewel Shattered</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'今ここに在る意味',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ウクラマトはスフェーンに、困ったことや話したいことがあればいつでも耳を傾けると言う。グルージャは、ネオレギュレーターが足りなくなることを人々が心配していたが、ラマティーが励ましてくれたと話す。スフェーンは場の空気を暗くしてしまったことを詫びつつも、気持ちを打ち明けられて楽になったと礼を言う。ウクラマトは案内役として不慣れで、こんなに声をかけられることがないからうまくできないとこぼすが、スフェーンはそれでいいのだと答える。人々は多くを経験し、信頼する者に慰めと安心を求めるのは自然だし、彼女自身も美味しいコーヒーで落ち着き、あなたと楽しく話せたのだと言う。</p><p>次にどこへ行くか考え、ウクラマトはネクサスアーケードの中を見るのは必要になった時でよいだろうと言う。グルージャは、それならレクリエーションゾーンへ戻り、トゥルーヴューで見られるものをもっと見ようと提案し、あなたたちは向かう。</p><p>レクリエーションゾーンで、苦しむ男を見つける。青白く、うめき声を漏らす彼に休める場所を探そうとする中、男は、用事の途中でここで殺された記憶が一気に押し寄せてきたのだと息も絶え絶えに語る。危険は去ったと分かっていても恐怖が残り、仕事では他人を慰めてきたのに自分を慰められないという。ウクラマトは、死の恐怖を避けるためにレギュレーターと魂を用いた結果、かえって恐怖を何度も味わうことになったのだと悔やみ、もっと早く助けられればと嘆く。スフェーンは、身体が無事でも見えない傷には癒える時間が必要だと静かに告げる。</p><p>男は恐怖を振り払えず、勇気が消え失せたと訴え、気持ちを奮い立たせてくれる誰かが必要だと言う。あなたが励ますと、男はすぐに楽になったと礼を述べ、名をマラカイト、職は案内人だと名乗る。ウクラマトは、案内人とは余命わずかな者のもとへ赴いていた者たちだろうと確認するが、マラカイトは今は違うと言う。もはや死にゆく者に付き添うのではなく、家族に看取られて亡くなった後に遺体を政府の保管施設へ運ぶのが役目になったのだ。埋葬の詳細が決まっていないため、当面は遺体を冷凍保管しているという。ウクラマトは、水没した街の近くに墓地があると聞いたが、葬儀と同じく埋葬の習わしも忘れ去られたのだろうと漏らす。</p><p>グルージャが来た理由を尋ねると、マラカイトは故人の私物を家族へ届けるようになったのだと説明する。記憶はクラウドに預けられていても、彼はかつて故人が住んでいた場所を覚えている。規則では所持品は処分し、それ以外は厳禁だったが、ゴミのように捨てられるのが悲しくて、可能な限り隠して取っておいたのだと言う。だが自分と同じ気持ちの者ばかりではないため、受け取るかどうかは家族に委ね、受け取る者もいれば拒む者もいる。正しいことをしているかは分からないが、家族には選ぶ機会があるべきだと語る。グルージャがあなたにも助けてほしいと問い、あなたが応じると、マラカイトはレクリエーションゾーンで届けるべき品が四つあるとしてあなたに託し、自分は住宅区の配達へ向かう。ウクラマトは、トライヨラでも攻城戦の心的外傷で似た発作を起こした者がいたと話し、マラカイトを見守るため同行してよいかと申し出て、あなたは配達を引き受ける。</p><p>スフェーンとグルージャを連れて、スフェーンの身元が声で露見しないようあなたが話す役を担い、トゥルーヴュー周辺の市民へ形見を届けていく。ある者は、両親の品だから受け取らずにはいられないと語り、もう二度と会えないのだと理解したと告白する。魂が余っていても避けられないものは避けられず、これからはあれこれ考えてしまうのだと言い、マラカイトへ伝言を頼む。別の者は形見を待っていたが記憶は戻らず、持ち主は死んでいて、理智の女王が語る「エンドレス」には決してならないのだと嘆く。自分もエンドレスになるべきか迷っており、記憶を乙太でできた新たな身体に移すのなら、結局自分自身は先に死なねばならないのではないかと疑問を呈する。魂の心配をしなくてよいと思ってネオレギュレーターを喜んだが、今は疑念ばかりだと吐露しつつ、理智の女王が勧めるのなら信じたいとも言う。</p><p>さらに別の者は、死んだ者の品を受け取るべきか迷っていたと認め、トライヨラにしたことを思い出して不安になると言う。葬儀で多くの者を殺したと知り、報復されるのではないかと怯えるが、グルージャは、ウクラマトがそんなことをするはずがないし、攻撃の責任は父にあり市民ではないとトライヨラの人々も理解していると断言する。それでもその者は死が怖く、ネオレギュレーターが不足していると聞くほど不安が募ると打ち明ける。</p><p>ネオンスタイン付近で最後の形見を届けると、快活な人物は記憶は刺激されないがどこか懐かしい気がすると言い、あなたの顔も見覚えがあると首をかしげる。そして自分はリサンダーだと名乗り、かつてアレキサンドリア闘技会場で戦っていたが今は違うと語る。理智の女王の言葉を胸に新しい仕事に就き、機械兵の暴走で負傷した人々のリハビリを手伝っているという。エンドレスになれば問題が解決するはずなのに、今の身体で乗り越えると決めて歩き直そうとしている者がいて、その姿が自分の身体への見方を変えたのだと話す。両親から授かったこの身体を、もっと大切にしたいのだと。グルージャは自分が父以外で唯一の青い鱗を持つ者だと語り、共有するものを思うと痛む時もあるが、それでも失いたくない、たとえエンドレスと同じ姿になれるとしてもこの身体は捨てないと言う。リサンダーも、その発想自体がエンドレスの件を不安にさせると頷き、配達への礼を告げて仕事へ戻っていく。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> スフェーン <small class="muted">(ソリューション・ナイン, X:5.5, Y:13.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="memories-of-a-bygone-age.html">遠ざかる思い出</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-jewel-shattered.html">砕かれた輝石</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'此刻存在的意義',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Wuk Lamat 告訴 Sphene：如果有任何困擾，或只是想找人說說話，她永遠都願意傾聽。Gulool Ja 說，大家最近很擔心沒有足夠的 neo regulators，但 Lamaty’i 把他們哄得振作起來。Sphene 先為自己讓氣氛變沉重而道歉，卻也坦白把感受說出口後反而輕鬆了些，並向你們致謝。Wuk Lamat 自嘲自己不太像個導覽員，因為她平常不會被這麼多人搭話；Sphene 則說這沒什麼——人們經歷太多，會向自己信任的人尋求安慰與確定感是再自然不過的事。她也補了一句：能喝到一杯好喝的咖啡、再和你聊上一段愉快的話，已經讓她放鬆不少。</p><p>你們商量下一站時，Wuk Lamat 說 Nexus Arcade 之後真的需要買東西時再逛也不遲；Gulool Ja 便提議回到 Recreation Zone，去 True Vue 看看還有什麼。於是你們轉往那邊。</p><p>剛到 Recreation Zone，你們就看見一名男子狀況很差，臉色發白、呼吸急促。你們趕緊想找地方讓他休息，他喘著氣說：自己本來只是去辦事，卻突然被「在這裡被殺死」的記憶淹沒。理智上他知道危險已過，但恐懼還殘留不散；明明他工作時總是在安慰別人，現在卻怎麼也安慰不了自己。Wuk Lamat 聽了很不是滋味，說那些人為了逃避死亡的恐怖而依賴 regulators 和靈魂，結果卻反過來被迫一次又一次重新面對那份恐怖——如果你們能更早出手幫忙就好了。Sphene 也說，就算身體看似沒有大礙，這種看不見的傷也需要時間才能癒合。</p><p>那名男子承認自己怎麼都甩不掉恐懼，勇氣像是完全消失了；他需要有人把他的精神重新拉起來。你出聲鼓勵他之後，他立刻說自己好受多了，並自我介紹：他叫 Malachite，是一名 usher。Wuk Lamat 想起 usher 以前會去探視那些時日無多的人；Malachite 則解釋，如今他們已不再陪伴臨終者——人是在家人照看下過世後，他們才會把遺體送往政府的保管設施。由於安葬的細節尚未決定，遺體暫時只能以低溫保存。Wuk Lamat 說自己原本只聽過 submerged city 那邊似乎有墓園，但像葬禮一樣，埋葬的習俗大概也早就被遺忘了。</p><p>當 Gulool Ja 問起他為何來這裡，Malachite 便說自己開始把逝者的遺物送回家屬手上。即使記憶被託付到雲端，他仍記得那些人曾經住在哪裡。規定原本是把所有物品一律丟棄，而且任何「不照規定」都被嚴禁；但他實在不忍看著遺物像垃圾一樣被丟掉，所以就把能留下的偷偷藏起來。他也知道不是每個人都會認同他的做法，因此他把選擇權交給家屬：有人願意收下，也有人拒絕。他說不確定自己做得對不對，但他覺得至少家屬應該有「可以選」的權利。Gulool Ja 聽了很受觸動，問你願不願意一起幫忙；你答應後，Malachite 把 Recreation Zone 這裡要送的四件遺物交給你們，自己則先去 Residential Sector 送件，並請你們完成後回來告訴他家屬的反應。Wuk Lamat 想到 Tuliyollal 也有人因攻城的創傷而出現類似狀況，便提議跟著 Malachite 走一趟、順便看著他，而把遺物投遞交給你們處理。</p><p>你帶著 Sphene 和 Gulool Ja 一起送件，Sphene 還請你代為開口，因為她怕自己的聲音會暴露身分。你們在 True Vue 附近把遺物交給幾位市民：有人說 Malachite 很體貼，特別強調「如果你覺得不舒服可以不收」，但他仍選擇收下——那是屬於父母的東西，而他也終於明白自己再也見不到他們了；他感慨靈魂再怎麼充裕也救不了人逃過必然，現在反而開始思考自己還能把時間浪費在什麼事上。另一位市民雖謝謝你，卻說遺物並沒有讓他想起什麼；他沉痛地說遺物的主人已經死了，也永遠不可能成為 Queen Sphene 口中的「Endless」。他更坦白自己其實也不確定要不要「成為 Endless」——如果所謂 Endless 是把你的記憶放進一個由乙太構成的新身體，那不就代表你本人得先死一次？他原本覺得有了 neo regulator 就不用再擔心靈魂的問題，所以當初拿到時很高興，但現在只剩更多疑慮；即便如此，他又很想相信 Queen Sphene 的推薦不會錯。</p><p>還有一位市民本來猶豫要不要收下遺物，因為那是死者留下的東西；這反而讓他想到 Alexandria 對 Tuliyollal 做過的事——他直到葬禮才知道你們殺了那麼多人，於是害怕對方會報復。Gulool Ja 立刻說 Wuk Lamat 絕不會那樣做，而且 Tuliyollal 的人都知道該為那次襲擊負責的是他父親，不是 Alexandria 的平民；但那名市民仍說自己控制不了對死亡的恐懼，而聽到 neo regulators 快用完更讓他不知所措。</p><p>你們接著到 Neon Stein 附近送出最後一件遺物。收件人說遺物雖喚不起記憶，卻隱約有種熟悉感，甚至覺得你也眼熟。隨後他想起來你是「沒有強化的挑戰者」，也是不靠 feral souls 仍成就驚人的冠軍；他自報姓名為 Lithander，說自己曾是 Arcadion 的鬥士，但現在不再上場了。他表示自己聽進了 Queen Sphene 的話，轉而做起新工作——機械士兵失控造成許多人受傷，他一直在協助復健。Lithander 說，有個人必須重新學走路；「成為 Endless」本來能直接解決問題，但那人卻堅持用自己現在的身體一步步走回來。看到那份決心，讓他重新珍惜自己的身體——那是父母給的禮物，是在競技場裡撐過來的結實身軀，他該更好好照顧。Gulool Ja 也說自己除了父親之外，是唯一的藍鱗 Hoobigo；想到彼此共享的某些東西有時會刺痛，但他仍不想失去這副身體——就算能變得和 Endless 看起來一樣，他也不會把它丟掉。Lithander 聽了點頭，說多數人恐怕都很難做到，而光是想到「成為 Endless」這件事，就足以讓他對整件事感到不安。說完，他向你道謝，便回去工作了。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Sphene <small class="muted">(Solution Nine, X:5.5, Y:13.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="memories-of-a-bygone-age.html">往昔的記憶</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-jewel-shattered.html">破碎的寶石</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
