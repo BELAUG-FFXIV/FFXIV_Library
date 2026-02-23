@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Crossroads | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Crossroads (DT Patch 7.1)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/1ZNb0xyv5p8"
+              title="Crossroads" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Crossroads</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Crossroads`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>You return to the Backroom as Shale continues working through the encrypted data, and the talk turns to the people’s unease—many worry whether they will ever reunite with friends and family before they pass on. Wuk Lamat says Koana is trying to restore the Xak Tural railroad, and since Shale needs time anyway, you agree to go see the situation for yourselves—hoping good news will ease the growing fear.</p><p>At Shaaloani Station, the crew explains the work has stalled for an unexpected reason: the rroneek are straying toward the tracks, and the Hhetsarro who follow them are angered and anxious that the locomotive will spook their hhetso. Koana offers a plan for a silent train, but that creates another danger—without noise, rroneek might wander onto the rails. With Erenville’s help, you all decide to ask the Hhetsarro directly why the herd has begun moving differently.</p><p>In Mehwahhetsoan, Hhwato and Shepetto confirm the change is real and unseasonal—nothing is wrong with the grazing where the rroneek once lingered, yet they push westward all the same. Koana admits his own tie to the Hhetsarro: he was left behind as a babe during a migration and survived only because a Pelupelu merchant found him. You press him not to turn away from what he does not understand, and he asks Hhwato to teach him what the rroneek mean to their people—promising to listen with an open mind.</p><p>You set to work beside the Hhetsarro, learning by doing: repairing tents, caring for rroneek hides, and brushing the thick coats until your arms ache. In the telling, you hear how the herd sometimes splits and families must part—yet they still exchange a wish to meet again wherever the hhetso guide them. When Koana returns from tending the rroneek, he admits that trusting their instincts carried him where he needed to be, and he begins to wonder if his parents’ choice was not as simple—or as cruel—as he once believed.</p><p>Your search soon yields a more immediate answer. The once-favored grazing grounds are unnaturally quiet, and Erenville senses a strong aetheric signature moving across the plain. The Hhetsarro name the threat: a tturuhhetso—“rroneek reaver”—a predator with impenetrable scales and wicked fangs. When it comes, panic sweeps the plains; you help calm and herd the terrified rroneek to safety while Koana stands with Hhwato to receive them. Facing the reaver, Koana throws himself into danger, searching for a weakness until he finds the point where its protective current of aether is densest—then breaks it, and you finish the fight before it can reclaim what it lost.</p><p>With the rroneek safe, Koana’s mind turns immediately to protection without cruelty: the reaver’s scales conduct aether so well that they might be repurposed into a device that emits controlled pulses—strong enough to deter rroneek from the tracks, but not so strong as to drive them into panic. Then a trader’s story cuts deeper: years ago, a reaver destroyed a camp in the night, and a young couple ran toward the monster to save their son and the hhetso. Koana realizes the place named is where he was found—so the truth lands at last: his parents did not abandon him; they tried to keep him alive. He vows that as Dawnservant, all of Tuliyollal is his family, and he will protect them as his parents protected him.</p><p>Back at Shaaloani Station, the repairs are swift: the locomotive runs quiet, and Koana’s aetherial whistle works—warning a rroneek away while leaving the rest of the herd calm. Railroad service is restored, and you return to Alexandria to spread the word and reunite families. In the Backroom, Shale finally shares what she prioritized first: audio recorded by Teeshal Ja. You listen as she explains her past as a chirurgeon with the Landsguard, her decision to remain in the region, her admiration for Zoraal Ja from afar, and the moment her hope collapses when he recoils from their child—ordering the baby taken away. Teeshal Ja soothes the little one, resolves to hide him, and the recordings end. Gulool Ja says he is fine, but the loneliness underneath is plain; still, he chooses the pain of knowing over the comfort of uncertainty, grateful that he is not alone anymore—with Wuk Lamat, Koana, and you beside him.</p><p>When you go out among the people, a new shock awaits in Praxis Park: fear has spread after a senseless death, and the talk turns to souls, regulators, and the dread of dying before one’s time. Then “Sphene” appears before them—alive, calm, and declaring an alternate solution now that Living Memory is shut down: a new system to make people Endless by transplanting memories into an aetherial vessel, with limited neo regulators to be distributed. Wuk Lamat calls out the lie—this is not the Sphene she knew—and you retreat to the Backroom to steady yourselves. With too little proof and too much danger in drawing attention, you agree to wait for Oblivion’s network to surface a lead…even as, elsewhere in Living Memory, a voice wakes in confusion and fear.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Wuk Lamat <small class="muted">(Shaaloani, X:18.0, Y:13.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-warmth-of-family.html">The Warmth of Family</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-glimmer-of-the-past.html">A Glimmer of the Past</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'未知との邂逅',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>あなたはバックルームへ戻り、シャーレが暗号化されたデータの解析を続けるあいだ、外の空気がなお重いままであることを聞く。かつて家族や友人と再会できるのか――老いた者ほど不安は深く、だからこそ出発するのは若者が多いという。ウクラマトはコーナがサカ・トゥラル鉄道の復旧に奔走していると語り、あなたは待つだけではなく現地を見に行こうと決める。</p><p>シャーローニ駅では、作業が思うように進まない理由が明かされる。機関車の騒音でヘツァーロの「ヘツォ」であるルノークが怯えるため、静かな機関車を用意する必要があるという。だが静けさは別の危険も生む――線路へ迷い込むルノークをどう遠ざけるのか。エレンヴィルの言葉も受け、あなたたちはルノークの行動が変わった理由を、ヘツァーロのもとで確かめることにする。</p><p>メワヘツォアンの野営地で、フワトとシェペットは季節外れの移動を告げる。草の量も質も問題はないのに、群れは西へ押し出され、鉄道へ近づいているのだ。コーナは自分がヘツァーロの血を引くこと、幼子のころ移動の途中で置き去りにされ、ペルペルの商人に拾われて生き延びたことを語る。あなたの問いかけに押され、コーナは痛みを避けるのではなく学ぶことを選び、ルノークの意味を教えてほしいと頭を下げる。</p><p>あなたはヘツァーロの仕事を手伝いながら、彼らがルノークとともに生きる術を身で覚えていく。幕の修繕、道具の受け渡し、分厚い毛並みの手入れ――そのすべてが移動の暮らしに結びついている。群れが二つに分かれると人も別れ、再会を願う言葉を交わすという話を聞いたとき、コーナもまた、自分が知らなかった重みを受け止めはじめる。</p><p>やがて手がかりは、草原の異様な静けさとして現れる。鳥も小動物も姿を消し、エレンヴィルは東に強い乙太の気配がゆっくり移動しているのを感じ取る。ヘツァーロはそれを「トゥルルヘツォ」――ルノークを奪うものだと呼ぶ。恐慌が広がり、あなたたちは怯え切ったルノークを宥め、誘導し、メワヘツォアンへ逃がす。現れた捕食者の鱗は硬く、牙は鋭い。コーナは命を賭して立ちふさがり、鱗を伝う防護の乙太の流れを見抜き、最も密度の高い一点を撃ち抜いて流れを断ち、あなたたちはその隙を逃さず討ち果たす。</p><p>危機が去ったあと、コーナは獣を縛るのではなく、群れを守るための道を探す。鱗の驚くべき乙太伝導性を利用し、制御された乙太の脈動を放つ装置を作れないか――それは線路へ近づく個体だけを遠ざけ、群れ全体を怯えさせないための「静かな笛」になるかもしれない。さらに交易商の語る過去が、コーナの胸を刺す。夜の襲撃で壊滅した野営地、子を守ろうと捕食者へ向かった若い夫婦――そこは幼いコーナが拾われた地でもあった。コーナは悟る。自分は見捨てられたのではない、守られたのだと。だからこそ、ドーンサーヴァントとなった今、トゥリヨラルのすべてを家族として守り抜くと誓う。</p><p>シャーローニ駅へ戻ると、機関車は静かに走り、乙太の笛も効果を示す。ルノークは怯えずに距離を取り、周囲の群れも乱れない。こうして鉄道は再び動き出し、あなたはアレクサンドリアへ戻って知らせを広めようとする。だがプラクシス・パークでは、人々が死を恐れ、記憶とレギュレーターをめぐる不安に飲み込まれていた。そこへ「スフェーン」が現れ、リビング・メモリー停止後の代替策として、記憶を乙太の器へ移してエンドレスになる新たな仕組みを語り、限られたネオ・レギュレーターで選ばれた者から救うと告げる。ウクラマトはそれを許さず、あなたたちはバックルームへ退いて正体を探る決意を固める――情報が足りぬまま、次の一手を待ちながら。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ウクラマト <small class="muted">（シャーローニ荒野, X:18.0, Y:13.9）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-warmth-of-family.html">王の家族</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-glimmer-of-the-past.html">過去より届いた輝き</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'在交會點與未知邂逅',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你回到 The Backroom，Shale 還在處理那堆加密資料，而外頭的氣氛卻比你想像的更沉。有人開始不安地談起「回到 Tural」這件事——年紀大的人擔心自己是否還有力氣踏上漫長歸途，也害怕在離開前再也見不到老朋友與家人；因此離開的多半是年輕人。Wuk Lamat 說 Koana 正在全力修復 Xak Tural 鐵路，既然 Shale 需要時間，你便點頭同意去看看鐵路的狀況，至少先把能安撫人心的消息帶回來。</p><p>到了 Shaaloani Station，你們聽見工程卡住的原因：機關車的聲響會驚擾 rroneek——那些被 Hhetsarro 視為 hhetso、一路追隨的夥伴。Koana 準備讓列車「安靜」起來，可是安靜也帶來另一個問題：沒有聲音警示，rroneek 可能會走上鐵軌。你們意識到必須先弄清楚 rroneek 為什麼忽然靠近鐵路；Erenville 也說，最好去問最了解牠們的人——Hhetsarro。</p><p>在 Mehwahhetsoan，Hhwato 和 Shepetto 證實 rroneek 的行為確實反常：草場的量與質都沒有變差，牠們卻不肯停留在原本熟悉的地方，反而推著整個群體往西移動，越來越接近鐵路。Koana 坦白自己其實有 Hhetsarro 的血統——他在嬰兒時期的遷徙途中被留下，若不是一位 Pelu 商人偶然路過把他帶走，他根本活不下來。你逼他正視那些他一直不願觸碰的傳統與傷口，他終於請求 Hhwato 教他理解 rroneek，也答應會用開放的心去聽。</p><p>你開始跟著 Hhetsarro 一起做事：幫忙修補帳篷、遞上工具、照料 rroneek 的厚毛與皮革。你聽見他們如何依著 rroneek 的腳步度過四季，也聽見更沉重的習俗——當群體分流、群半裂成兩路時，人也必須與親族分別，彼此交換「無論被引導到哪裡都要再相見」的祝願。當你把這些學到的事告訴 Koana，他也承認自己第一次真切感到：把命運交給 hhetso 的直覺，未必就是錯誤。</p><p>接著，你們找到更直接的答案。原本 rroneek 最愛的草場安靜得不自然，連鳥與小獸都像逃走了一樣；Erenville 察覺到東邊有一道強烈的乙太反應正在緩慢移動。Hhetsarro 說那是 tturuhhetso——「rroneek reaver」，會在夜裡奪走 hhetso 的掠食者。當牠真的逼近，整片平原陷入恐慌：你們先做的不是追殺，而是安撫、引導那些嚇到幾乎失控的 rroneek，讓牠們能被帶回 Mehwahhetsoan 安全處。那頭 reaver 的鱗片硬得像無法穿透，牙更是致命；Koana 卻在最危急的時刻衝上前，用身體擋下威脅，逼自己冷靜找出破綻——他順著鱗片之間的乙太流動追回源頭，找出最密的節點，一擊斷開牠的防護，你們才終於能合力擊倒牠。</p><p>危機解除後，Koana 的第一個念頭不是「把 rroneek 管住」，而是「怎麼保護牠們又不傷害牠們」。他說那頭 reaver 的鱗片具備驚人的乙太傳導性，也許能做成一種裝置，釋放受控的乙太脈衝——像一支「安靜的哨」，能讓靠近鐵軌的 rroneek 本能地退開，卻不至於把整群嚇到崩潰。就在此時，一名商人講起二十多年前的往事：某個營地在夜裡被 reaver 瞬間毀滅，一對年輕夫妻反而朝怪物衝去，只為替孩子爭取生路，還喊著要救兒子、救 hhetso。那個地名，正是 Koana 嬰兒時被發現的地方——他終於明白，父母不是拋下他，而是在用命把他護住。多年怨恨在那一刻瓦解，他低聲說：正因為他們，他才活到今天，才懂得「家人」的溫度；而如今身為 Dawnservant，Tuliyollal 的所有人都是他的家人，他會永遠守護。</p><p>回到 Shaaloani Station，列車修復完成，軌道也被調整得幾乎無聲；你們用那支乙太哨進行測試，rroneek 只是自然地退開，周圍的同伴卻毫不驚慌。鐵路終於恢復運行，你們立刻返回 The Backroom，準備一邊把好消息傳出去，一邊等 Shale 的解析結果。Shale 先播放 Teeshal Ja 的錄音：她說自己原本是 Landsguard 的 chirurgeon，曾被派去獵捕 tural vidraal，任務後選擇留下；她也承認自己其實不敢回 Tuliyollal，因為她再也無法面對 Zoraal Ja 連看都不看她一眼的現實。錄音裡，她談到期待實驗的下一階段，說自己終於能得到渴望；接著，最刺痛的一段來了——Zoraal Ja 面對孩子只看見「藍色的鱗片」，拒絕承認、拒絕成為父親，甚至要她把孩子帶走。Teeshal Ja 一邊哄著孩子，一邊說爸爸只是嚇到了，還說自己知道該把孩子藏到哪裡。錄音結束後，Gulool Ja 表面平靜，卻仍說得出那句更成熟的選擇：痛也好，知道總比不知道好——因為現在，他不再孤單，你也在他身邊。</p><p>不久，你們去 Praxis Park 觀察民心，卻撞見另一場動搖。人們因為一場意外死亡而恐懼，開始懷疑自己是否真的能「自然老去」；談話繞著 soul cells、regulators、以及對死亡的焦躁打轉。就在此時，「Sphene」現身，自稱要在 Living Memory 關閉後給出替代方案——把記憶移植到乙太容器，讓人們成為 Endless，而且只要配戴 neo regulators，就會被「召喚」去獲得永生。你看見 Wuk Lamat 的怒意壓不住——真正的 Sphene 不可能只願意拯救少數人。你們趕回 The Backroom，明白這個自稱「Queen of Reason」的存在正利用人們的恐懼與崇敬收攏人心；在資訊不足、不能打草驚蛇的情況下，你們只能先壓下情緒，等待 Oblivion 的線索，並準備迎接她的下一步。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 烏克拉瑪特 <small class="muted">(沙洛阿尼荒野, X:18.0, Y:13.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-warmth-of-family.html">家人的溫暖</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-glimmer-of-the-past.html">過往的一縷微光</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
