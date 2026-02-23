@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A Glimmer of the Past | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – A Glimmer of the Past (DT Patch 7.2)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#ffffff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative;max-height:360px;overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:"";position:absolute;left:0;right:0;bottom:0;height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card));pointer-events:none;
+    }
+    .expand-wrap{margin-top:12px}
+    .expand-btn{display:inline-block;padding:8px 14px;border-radius:10px;background:var(--card);border:1px solid var(--border);cursor:pointer;font-weight:600}
+    .expand-btn:hover{background:#fffef8}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/J48TytSo3fg"
+              title="A Glimmer of the Past" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">A Glimmer of the Past</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`A Glimmer of the Past`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Krile calls you over, saying your timing could not be better—there are things they want to share. She suggests they wait a moment for Wuk Lamat, who arrives shortly, ready to catch everyone up.</p><p>Wuk Lamat explains that she returned to Tuliyollal and spoke with Koana, reporting what she learned from the records left by Gulool Ja’s mother and the reappearance of Sphene. They agreed she should remain within the dome until things settle further, even as she stays mindful of her position: she is Gulool Ja’s guardian, but also a foreign ruler who must not appear to meddle in Alexandrian politics.</p><p>G’raha Tia says the rest of them have been watching this “new Sphene,” who has been appearing before the people again and again. Each time, she urges them to become Endless—yet almost everything else about her remains unknown, including why she has chosen to reveal herself now.</p><p>Geode adds what they have confirmed on their end: only those wearing regulators have had their knowledge of Queen Sphene’s death altered. Someone tampered with the devices to erase every memory of the event. They still don’t know who did it, but in light of recent events, Sphene is their chief suspect. Krile notes the confusion this has caused—many believe the Queen of Reason is alive and remember her funeral as a memorial for those lost in the attack.</p><p>With the investigation continuing, Geode prepares to head to Earthen Sky to coordinate. Krile then turns to the real reason she gathered everyone: she wants you to meet someone. The person is in the break room, unwell, with Y’shtola and Alisaie tending to her, and Gulool Ja insists on coming to see how she is doing.</p><p>In the break room, Wuk Lamat demands to know what “Sphene” is doing here when they’ve heard she has been spreading talk of becoming Endless among the Alexandrians. Y’shtola answers calmly: this is not the miraculous return of the Queen of Reason, but a flesh-and-blood woman with a soul. They found her in Living Memory, but she collapsed before they could speak, so they brought her here. Alisaie explains that lightning aether had suffused her body and left her badly paralyzed, and they are waiting to see whether the treatment has worked.</p><p>Y’shtola looks at her and states what she believes: given her condition, their encounter, and her extreme aetherial aspect, she is almost certainly the one from whom the Endless Sphene was created—the original Queen Sphene of Alexandria. Wuk Lamat protests that it cannot be: the real Sphene died of illness four centuries ago. The woman, terrified, insists she is not dead, demands to know where she is, and calls out for Otis and Zelenia. When Y’shtola gently confirms her identity and asks about what she saw before waking, Sphene describes opening her eyes in a strange dark room, with towering buildings outside clad in electrope. Y’shtola tells her she slept for many years at the heart of that city, inside a facility called the Meso Terminal. Shale adds that an electrope casket preserved her in cold stasis there until the systems were recently shut down—since the time of the old kingdom, for four centuries. Sphene struggles to accept it, and Shale says the records claimed she perished in the Storm Surge, but the truth appears to be different.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Krile <small class="muted">(The Backroom, X:6.0, Y:6.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="crossroads.html">Crossroads</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="memories-of-a-bygone-age.html">Memories of a Bygone Age</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'過去より届いた輝き',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>クルルはあなたに声をかけ、これ以上ないほど良いタイミングだと言って、共有したいことがあると告げる。ほどなくしてウクラマトも合流し、互いの状況を整理しようという流れになる。</p><p>ウクラマトは、トライヨラへ戻ってコアナと話し、グルージャの母が残した記録とスフェーン再出現の件を伝えたと説明する。情勢がもう少し落ち着くまで、彼女はドームの内側にとどまる方針になったという。ただし彼女はグルージャの保護者である一方、異国の統治者でもあるため、アレクサンドリアの政治に介入しているように見えないよう細心の注意が必要だ、と結ぶ。</p><p>グ・ラハ・ティアは、彼らが「新たなスフェーン」の動きを追ってきたと話す。彼女は人々の前にたびたび姿を現し、そのたびにエンドレスになることを勧めている。しかし、なぜ今になって名乗り出たのかを含め、彼女について分かっていることはほとんどないままだという。</p><p>ジオードは、こちらで確認できた事実を述べる。理智の女王スフェーンの死に関する認識が改変されているのは、レギュレーターを身につけていた者だけだった。誰かが装置に細工し、出来事の記憶をすべて消し去ったのだろう。犯人はまだ特定できていないが、最近の状況を踏まえると、スフェーンが最有力の容疑者だと見るしかない。クルルは、多くの者が理智の女王が生きていると信じ、葬儀を襲撃の犠牲者を悼む式だと記憶しているため、正しい記憶を持つ者ほど混乱していると補足する。</p><p>捜査は続行となり、ジオードはアースン・スカイへ向かって現地と連携すると言う。続いてクルルは、この集まりの要点として、あなたに会ってほしい人物がいると告げる。その人物は体調を崩しており、休憩室でヤ・シュトラとアリゼーが付き添っているという。グルージャも容体を見たいと同行を申し出る。</p><p>休憩室で、ウクラマトは事情を問う。アレクサンドリアの人々にエンドレスになる話を広めていると聞いたのに、なぜここにいるのか。ヤ・シュトラは、彼女はあなたが想像する人物ではないと静かに答える。奇跡の復活を遂げた理智の女王ではなく、魂を持つ生身の個人だという。彼女たちはリビング・メモリーで偶然彼女を見つけたが、言葉を交わす前に倒れたため、ひとまずここへ運んだ。アリゼーは、彼女の身体が雷の乙太に満たされ、重い麻痺を引き起こしていたと説明し、治療が効いたかどうかを見守っているところだと続ける。</p><p>ヤ・シュトラは外見や遭遇時の状況、そして極端な乙太属性から判断し、彼女こそエンドレスのスフェーンの元になった存在、すなわちアレクサンドリアの「本来の」女王スフェーンだとほぼ確信していると述べる。ウクラマトは、本物のスフェーンは四百年前に病で亡くなったはずだと反発する。女性は怯えながら自分は死んでいないと言い張り、この場所はどこなのか、オーティスやゼレニアはどこへ行ったのかと訴える。ヤ・シュトラが身元を確かめ、目覚める前にいた見知らぬ場所のことを尋ねると、スフェーンは暗い部屋で目を覚まし、外にはエレクトロープに覆われた高い建物が並んでいたと語る。ヤ・シュトラは、あなたはメソ・ターミナルと呼ばれる施設で長年眠っていたのだと告げる。シャーレは、そこには冷凍睡眠で居住者を保存するエレクトロープの棺があり、最近まで端末の機能が停止していなかった以上、あなたは四百年もの間そこに保管されていた可能性が高いと補足する。スフェーンが言葉を失う中、シャーレは記録ではストームサージで命を落としたことになっていたが、真実は異なるようだと結論づける。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> クルル <small class="muted">(バックルーム, X:6.0, Y:6.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="crossroads.html">未知との邂逅</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="memories-of-a-bygone-age.html">遠ざかる思い出</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'過往的一縷微光',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Krile 叫住你，說你來得正好——他們有些事想跟你分享。她提議先等一下 Wuk Lamat，對方很快就到，於是眾人便準備互相整理目前掌握的線索。</p><p>Wuk Lamat 先說她回到 Tuliyollal 去找 Koana，將 Gulool Ja 的母親留下的紀錄，以及 Sphene 再度現身的事都轉告給他。兩人也商量好，在局勢再穩定些之前，她會留在 the dome（罩住 Yyasulani 的巨型屏障）之內。但她同時提醒你：她雖是 Gulool Ja 的監護人，卻也是外來的統治者，因此必須避免讓人覺得她在干預 Alexandria 的政治。</p><p>接著 G’raha Tia 說，他們一直在追蹤這個「新的 Sphene」。她會定期在民眾面前現身，而且每一次都鼓動大家成為 Endless (在 Alexandria 的語境裡，Endless 指的是一種「被引導／被轉化後的存在形態」，表面上像是人仍能延續，但本質上已不再是一般「有血有肉、擁有靈魂的個體」。因此劇中才會特別對照：眼前這位是「有血有肉、擁有靈魂」的人，而外頭被鼓動去「成為 Endless」的，指的是另一種狀態)。然而除此之外，關於她的真相仍然迷霧重重——包括她為何偏偏選在現在現身。</p><p>Geode 補上他們目前確認到的關鍵：只有配戴了調節器（regulators）的人，對「Queen Sphene 之死」的認知才被改寫。有人動過那些裝置的手腳，把那場事件的所有記憶徹底抹除；雖然尚未找出動手的人，但以近期發生的事來看，Sphene 仍是最主要的嫌疑。Krile 也說，許多人相信 Queen of Reason 仍好端端活著，並把那場葬禮記成是為襲擊中罹難者舉行的追悼儀式——這讓記憶更接近真相的人反而更加困惑。</p><p>Geode 表示會繼續調查，並準備前往 Earthen Sky 與那裡的人手協調。就在你以為交代完畢時，Krile 轉而說出這場聚會真正的重點——他們想讓你見一個人。那名「客人」正在休息室，身體不適，Y’shtola 與 Alisaie 正在照看；Gulool Ja 也想親自去確認她的狀況，於是你們一同動身。</p><p>走進休息室，Wuk Lamat 當場質問：她為什麼會在這裡？你們才剛聽說她在 Alexandria 向民眾散播「成為 Endless」的說法。Y’shtola 冷靜回答：她不是你以為的那個人——不是那位奇蹟般「復活」的 Queen of Reason，而是一個有血有肉、擁有靈魂的個體。他們在 Living Memory 偶然發現她，但還來不及交談，她就先倒下了，所以才暫時把她帶到這裡。Alisaie 進一步解釋，她的身體被雷屬性的乙太充斥，導致嚴重的麻痺；他們正在等待治療是否有效。</p><p>Y’shtola 觀察她的外貌、遭遇的情況，以及她極端的乙太屬性後，幾乎可以確定：她正是 Endless Sphene 被「製作」出來的來源——也就是 Alexandria 的原初 Queen Sphene。Wuk Lamat 震驚反駁，說真正的 Sphene 應該在四百年前就因病去世。那名女子驚恐地否認自己已死，連聲問這裡是哪裡、大家都去哪了，還呼喚著 Otis 與 Zelenia 的名字。Y’shtola 溫和地確認她的身分，並追問她醒來之前是否也在另一個陌生的地方；Sphene 回想自己在一間陌生的黑暗房間醒來，房外是被 electrope 包覆的高聳建築。Y’shtola 告訴她，她在那座城市的核心沉睡了許多年，地點是一處名為 Meso Terminal 的設施。Shale 接著補充：那間黑暗房裡有一具 electrope 棺，設計用來以冷凍停滯保存裡頭的人；直到最近終端與系統被關閉之前，她很可能一直被安置在那裡——自舊王國以來，整整四個世紀。Sphene 難以置信地喃喃「四百年」；Shale 則說，紀錄記載 Queen Sphene 是在 Storm Surge 釋放的失控雷能量中喪命，但看來真相並非如此。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 克露兒 <small class="muted">(後室, X:6.0, Y:6.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="crossroads.html">在交會點與未知邂逅</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="memories-of-a-bygone-age.html">往昔的記憶</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
