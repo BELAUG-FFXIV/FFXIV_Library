@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A Jewel Shattered | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – A Jewel Shattered (DT Patch 7.2)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#ffffff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative;max-height:360px;overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:"";position:absolute;left:0;right:0;bottom:0;height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card));pointer-events:none;
+    }
+    .expand-wrap{margin-top:12px}
+    .expand-btn{display:inline-block;padding:8px 14px;border-radius:10px;background:var(--card);border:1px solid var(--border);cursor:pointer;font-weight:600}
+    .expand-btn:hover{background:#fffef8}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/Um5HfPHGsNo"
+              title="A Jewel Shattered" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">A Jewel Shattered</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`A Jewel Shattered`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Gulool Ja says he is glad to be the way he is—his parents’ gift, and the reason he could learn more about them and about himself. Sphene thanks you for taking charge and says the deliveries are finished. From what she has seen and heard, it is clear the people held their queen in high regard, and the simulant has exploited their love and admiration to win over so many. She urges you to report to Malachite, who should be waiting at the north of the recreation zone.</p><p>Back there, Wuk Lamat says she and Malachite have just returned, and Gulool Ja notes Malachite seems to be doing better. Malachite thanks you for the help and says every delivery he planned for today is accounted for, though the reactions were mixed—some were glad, others chose not to keep the items. Gulool Ja explains that everyone you met accepted their keepsakes, yet each felt differently: one could not remember the owner, another could not stop worrying about their own death. Malachite says it is hard to predict how people will react to reminders of loss, and admits he has begun to believe each person is the sum of the moments shared with loved ones—so when those people died and the memories were lost, a part of the living was lost as well. If memories of the departed are no longer to be entrusted to the cloud, he wishes those already taken could be returned. With that, he says he must resume his formal duties and thanks you again.</p><p>Sphene agrees that memories are what define you, and they form the path you walked to arrive where you are. She says her Endless self was likely much like her in the beginning, but she cannot become like that version any more than that version could become like her—once their paths diverged, so too did their lives and experiences. Wuk Lamat adds that even if you start from the same place, everyone’s journey differs, and goals and ways of thinking are bound to change. Sphene says Endless Sphene was one possibility: a version of herself who made choices she wants to believe she never would—and she is beginning to come to terms with the fact she did.</p><p>Then Wuk Lamat spots someone—Sphene realizes it is the simulant. Wuk Lamat says the simulant looked straight at you, as if she wanted you to follow her, and though she has a bad feeling, you may not get another chance to learn what she is doing. You give chase. Gulool Ja admits it was his first time seeing the simulant, and though she was smiling, something about her frightened him. Sphene says it is strange to pursue one’s spitting image, and wonders where she wants to lead you. The simulant disappears into the street, and you hurry after her toward Neon Stein.</p><p>You lose sight of her, and tension rises—until you hear voices nearby. Someone remarks that “he” did not die—vexing, but expected—while the simulant says that was about the strongest bolt Everkeep can produce, and asks what now. The unseen speaker says they will obtain more precise measurements and narrow variables to avoid unnecessary trial and error. Sphene recognizes the voice. The simulant calls to you and demands you return something you left in her keeping: the key to interdimensional fusion. When you refuse, she says it is a shame—if she had the key, she would not need to be cruel and turn away so many people, and far more than five thousand could become Endless and know eternal happiness. Wuk Lamat realizes she means stealing aether from other worlds again, and the simulant says it is all for the sake of his experiments. She claims that was why the previous “her” created the Endless: she was forced to attempt the impossible, turning every soul that dies into an Endless even though there is no end to them—yet that desperation was part of the plan, driving her to claim the key, which she did. She says she knows Wuk Lamat had a soft spot for her, offers an apology, and insists they are only pawns in his grand design. When Wuk Lamat rages, the simulant says you may strike her down if you wish—she will be made anew—and asks whether the Vow of Resolve of Tuliyollal would accept the repercussions of attacking a neighboring queen again.</p><p>When you press for answers, the unseen speaker responds directly: their goal is to usher in the next phase of mankind’s evolution. He argues that life has long used death to adapt—old and infirm weeded out through generational succession—but says the strategy is outdated, limited, and leads to unchecked population growth, scarce resources, conflict, and the loss of potential through death. He declares that bodies of flesh no longer make sense, and what must come next is carefully managed, eternal preservation.</p><p>Sphene names him: Calyx. She identifies him as the young genius who mastered electrope technology, founded Preservation, and devoted himself to curing the paralysis that plagued her people. She begs him not to deceive Alexandria, and not to manipulate its people with an imitation forged from her memories. The simulant dismisses her as rude and insists she is the one the people regard as queen, while Sphene is now no one—a frail, fleshy version who could die at any moment, of no use to the kingdom. Calyx repeats the demand: surrender the key, or consequences will follow.</p><p>Afterward, Gulool Ja calls the simulant’s words cruel, and Sphene speaks to you. She asks if you are all right, then apologizes—she once could use healing spells, but her long slumber seems to have sapped her magical reserves. Frustrated at being so powerless, she says she may have to accept her new limitations.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Sphene <small class="muted">(Solution Nine, X:17.1, Y:19.6)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-search-of-meaning.html">In Search of Meaning</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-meeting.html">The Meeting</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'砕かれた輝石',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>グルージャは、自分が自分であることが嬉しいと言う。これは両親から授かったものでもあり、だからこそ両親のこと、そして自分自身のことをより深く知ることができたのだと。スフェーンは配達は終わったとして、取りまとめてくれたあなたに礼を述べる。そして見聞きした限り、人々が王を深く敬愛していたのは明らかであり、シミュラントはその愛情と憧れを利用して実に多くの者を取り込んだのだと言う。だからマラカイトに報告しよう、彼はレクリエーションゾーン北側に戻っているはずだと促す。</p><p>北側で合流すると、ウクラマトは自分たちも戻ったところだと言い、グルージャはマラカイトの様子が良くなっていると口にする。マラカイトは協力に感謝し、今日予定していた配達はすべて片付いたと言う。ただ反応はさまざまで、喜ぶ者もいれば結局は受け取らないと決めた者もいた。あなたたちはどうだったかと問われ、グルージャは、受け取ってはくれたが受け止め方は人それぞれで、形見の持ち主を思い出せない者もいれば、自分の死ばかりを案じる者もいたと伝える。マラカイトは、喪失を思い起こさせるものを前にした時、人がどう振る舞うかを予測するのは難しいと言い、そして最近、ひとりひとりは愛する者と分かち合った瞬間の積み重ねなのだと考えるようになったと語る。だからこそ彼らが亡くなり、その記憶までも失った時、自分たちは自分自身の一部を失ったのだと思うと胸が痛むのだ、と。もし故人の記憶をクラウドに預けないという方針になるのなら、すでに奪われた記憶も返してほしい――そう言い残し、マラカイトは正式な職務に戻らねばならないとして、改めて礼を述べる。</p><p>スフェーンはマラカイトの言葉に頷き、記憶こそがあなたを形作り、今ここに至るまで歩んだ道そのものだと言う。自分のエンドレスである自分は、きっと最初は自分によく似ていたはずだが、もう彼女のようにはなれないし、彼女も自分のようにはなれない――道が分かれた瞬間から、生き方と経験もまた分かれたのだと語る。ウクラマトも、同じ出発点でも旅路は違い、いつか目標や考え方は変わっていくものだと言う。スフェーンは、エンドレススフェーンはひとつの可能性であり、自分なら決してしないと信じたい選択をした自分の姿だと述べ、しかし自分がそうしたのだという事実を受け入れつつあると言う。</p><p>その時、ウクラマトが異変に気づく。スフェーンは相手がシミュラントだと悟る。ウクラマトは、彼女がこちらをまっすぐ見ていた、まるで追ってこいと言わんばかりだったと言い、不吉な予感はあるが、正体を突き止める機会は今しかないかもしれないとして追うことを決める。グルージャは初めてシミュラントを見たが、笑っているのにどこか怖かったと漏らし、スフェーンは自分と瓜二つの存在を追うのは奇妙だと感じつつ、どこへ導こうとしているのかと考える。シミュラントは通りへ消え、あなたたちはネオンスタインの方へ急ぐ。</p><p>やがて見失い、不安が募る中、近くから会話が聞こえてくる。「彼は死ななかった。苛立たしいが想定内だ」と誰かが言い、シミュラントは、あれがエヴァーキープで生み出せる最強の落雷だったとして次を問う。姿の見えない者は、より正確な測定を行い、無駄な試行錯誤を避けるため変数の範囲を狭めろ、それが最も手っ取り早いと言う。スフェーンはその声を知っていると息を呑む。シミュラントはあなたに呼びかけ、次元融合の鍵を返せと言う。それはあなたに預けておいたものだ、と。あなたが拒むと、彼女は残念だと言い、鍵さえあれば残酷に多くの者を断らずに済み、五千人どころではない数がエンドレスとなって永遠の幸福を得られるのだと主張する。ウクラマトが、また他世界から乙太を奪うつもりかと怒鳴ると、シミュラントは、それはすべて彼の実験のためだと言う。そして以前の自分がエンドレスを作ったのもそのためで、彼女は不可能を強いられ、尽きることのない死者の魂をすべてエンドレスにしようとしたのだと語る。だがそれすら計画の一部で、追い詰められた彼女が鍵を奪い使うよう仕向けられていたのだ、と。ウクラマトが彼女に情を持っていたことも知っているとして謝罪めいた言葉を述べ、結局自分たちは彼の大いなる設計の駒にすぎないと言い切る。さらに、望むなら自分を倒せばいい、いくらでも作り直されるのだから、と言い放ち、トライヨラの決意の誓約者が隣国の女王を襲えば、しかも初めてではないのなら、その報いを受け入れるのかと迫る。</p><p>あなたが問いただすと、姿の見えない者が応じる。目的は人類進化の次の段階を招来することだ、と。生命は太古より死を用いて環境への適応を促し、老いた者や弱った者を淘汰し、世代交代で繁栄してきたが、その戦略はすでに限界に達しており時代遅れだと言う。子孫に依存するゆえ人口は際限なく増え、資源は枯渇して争いが起こり、そして死が常に可能性を奪う。今の段階にある人類にとって肉体はもはや合理的ではなく、次に目指すべきは厳格に管理された永遠の保存だ、と断言する。</p><p>スフェーンは相手を名指す。カリュクス――電気石の技術を極めた若き天才であり、「プリザベーション」と呼ばれる科学集団を創設し、人々を苦しめた麻痺の治療に身を捧げた人物だと。スフェーンは、未来を見据えるあなたの志は分かるが、アレクサンドリアの民を欺かないでほしい、私の記憶から作られた模造で操らないでほしいと懇願する。だがシミュラントは無礼だと言い返し、民が王として仰いでいるのは自分だと冷たく告げる。数年だけ冠を戴いたあなたは今や誰でもない、いつ死んでもおかしくない弱々しい肉の自分であり、王国には不要だと言い放つ。カリュクスは要求を繰り返し、鍵を差し出せ、拒むなら相応の結果が必要になると言う。</p><p>その後、グルージャはスフェーンに対してあまりに残酷だと呟き、スフェーンはあなたを気遣う。彼女は謝りつつ、かつては治癒の術を使えたが、長い眠りで魔力の蓄えが失われたらしいと言う。無力であることがもどかしいが、新たな限界を受け入れねばならないのかもしれない、とため息をつく。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> スフェーン <small class="muted">(ソリューション・ナイン, X:17.1, Y:19.6)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-search-of-meaning.html">今ここに在る意味</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-meeting.html">作戦会議</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'破碎的寶石',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Gulool Ja 說，他很慶幸自己就是現在這個樣子——這是父母送給他的禮物，也正因為如此，他才能更了解父母，也更了解自己。Sphene 表示投遞已經告一段落，謝謝你一路負責安排。她說從你們一路看到、聽到的情況來看，人們顯然非常敬愛自己的女王，而 simulant 也正是利用了這份愛與崇敬，才拉攏了那麼多人。她催促你們去向 Malachite 回報，說他應該已經回到 Recreation Zone 北側了。</p><p>你們回到北邊時，Wuk Lamat 說她們也才剛回來；Gulool Ja 也提到 Malachite 看起來狀況好多了。Malachite 向你們道謝，說他今天原本規劃的投遞全都已經完成。不過收件人的反應很兩極：有人很高興，也有人最後決定還是不要那些遺物。當他問你們那邊如何，Gulool Ja 說你們遇到的人都收下了，但每個人對遺物的感受都不一樣：有人連遺物主人的記憶都想不起來，也有人一直無法停止對自己死亡的恐懼。Malachite 說，面對失去的提醒，人們會做出什麼反應本來就很難預測。接著他低聲說，最近他愈來愈相信——每個人其實都是由「和所愛之人共同度過的那些瞬間」累積而成；當他們離世、而你們也失去了對他們的記憶時，你們同時也失去自己的一部分。這個念頭讓他難過得不得了。若未來不再把逝者的記憶託付到雲端，他希望那些已經被取走的記憶也能被還回來。說完，他表示自己得回去履行正式職務，並再次感謝你們的幫忙。</p><p>Sphene 說 Malachite 說得沒錯——記憶定義了你是誰，也構成你一路走到此刻的軌跡。她說，自己的 Endless 版本一開始大概也和她很相似；但她不可能變成對方，對方也不可能變成她，因為在你們的道路分岔之後，生活與經驗也就跟著分岔。Wuk Lamat 也說，即使從同一個起點出發，每個人的旅程仍會不同；到了某個時刻，目標與思考方式終究會改變。Sphene 說，Endless Sphene 只是眾多可能性之一——是一個做出某些選擇的「她」，那些選擇她很想相信自己永遠不會做；但她也開始不得不面對一件事：她確實做了。</p><p>就在這時，Wuk Lamat 察覺到前方的身影。Sphene 立刻認出那是 simulant。Wuk Lamat 說對方剛才直直盯著你們看，若不是太荒謬，她甚至會覺得對方是在示意你們跟上；雖然她有不好的預感，但如果要弄清楚對方在做什麼，這可能是唯一的機會。你們決定追上去。Gulool Ja 說那是他第一次親眼看到 simulant——她明明在笑，卻讓他覺得可怕。Sphene 也說追逐與自己長得一模一樣的存在很怪，忍不住想她究竟想把你們帶去哪裡。simulant 轉進街道，你們一路追向 Neon Stein 的方向。</p><p>你們很快就跟丟了，氣氛緊繃得讓人喘不過氣。就在這時，你們聽見附近傳來對話：有人冷冷說「他沒死，煩人，但在預料之中」。simulant 也說，那大概就是 Everkeep 之內能產生的最強落雷，接下來怎麼辦？那個看不見的人回應：要取得更精準的測量數據，縮小變因範圍，避免不必要的反覆試錯——這才是最快的做法。Sphene 聽見那聲音，立刻說她認得。simulant 隨即對你們喝道，要你把「留在你手上」的東西還回來——那是「跨次元融合的鑰匙」。你拒絕後，她惋惜地說真可惜；如果她拿到鑰匙，就不必再殘忍地拒絕那麼多人，甚至不只五千人，更多人都能成為 Endless，獲得永恆的幸福。Wuk Lamat 立刻反應過來，怒問她是不是又想從其他世界偷走乙太；simulant 則說一切都只是為了「他」的實驗。她聲稱，上一個「她」之所以創造 Endless，也是因為這個理由——那個人被迫去做不可能的事：把每一個死去的靈魂都變成 Endless，明明死亡永無止境。她甚至說這本來就是計畫的一部分，因為絕望會逼迫那個人去奪取鑰匙並使用它，而結果也確實如此。她知道 Wuk Lamat 對那個人心軟，於是說了句「很抱歉」，然後冷冷補上一句：你們都不過是棋子，是他偉大設計裡的一枚零件。Wuk Lamat 氣得大罵時，simulant 反而說：你要殺她也可以，她會被重新造出來；而且如果 Tuliyollal 的 Vow of Resolve 攻擊鄰國女王——還不是第一次——外界會怎麼看？你敢承擔後果嗎？</p><p>當你追問「實驗的目的」時，那個看不見的人終於接話，說目標是引導人類進化進入下一階段。他宣稱自古以來，生命依賴死亡來適應環境變化：老弱被淘汰，靠世代交替延續繁盛；但這套策略早已到達實用極限，已經過時。因為它依賴繁衍，導致人口失控成長，資源變得稀缺，衝突不可避免；同時死亡無所不在，奪走了人類無數的潛能。他斷言：人類走到今日，血肉之軀已經不再合理；下一步該追求的是受嚴格管理的、永恆的保存。</p><p>Sphene 立刻喊出他的名字：Calyx。她說他是那位掌握 electrope 技術的年輕天才，創立名為 Preservation 的科學集團，並把一切奉獻在研發治療讓人民受苦的麻痺之上。她懇求 Calyx：你看向未來的目光她一直知道，但請不要欺騙 Alexandria 的人民，更不要用從她記憶鍛造出的「模仿品」去操弄他們。simulant 卻冷笑說她太無禮，並反擊：被人民當作女王的是她，不是 Sphene；Sphene 不過是曾經戴冠幾年、如今卻誰也不是的人——一個虛弱、脆弱、隨時可能死去的血肉版本，王國不需要這樣的存在。Calyx 只重申要求：把鑰匙交出來；拒絕就必須付出代價。</p><p>短暫沉默後，Gulool Ja 低聲說那句話對 Sphene 太殘忍了。Sphene 則轉向你，問你還好嗎，並帶著歉意說：她過去曾能使用治癒魔法，但長久沉睡似乎耗盡了她的魔力儲備。她嘆了口氣，說自己對這份無力感很挫敗，卻也許只能接受如今的限制。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Sphene <small class="muted">(Solution Nine, X:17.1, Y:19.6)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-search-of-meaning.html">此刻存在的意義</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-meeting.html">作戰會議</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
