@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Meeting | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – The Meeting (DT Patch 7.2)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#ffffff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative;max-height:360px;overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:"";position:absolute;left:0;right:0;bottom:0;height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card));pointer-events:none;
+    }
+    .expand-wrap{margin-top:12px}
+    .expand-btn{display:inline-block;padding:8px 14px;border-radius:10px;background:var(--card);border:1px solid var(--border);cursor:pointer;font-weight:600}
+    .expand-btn:hover{background:#fffef8}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/iusuyjbkf84"
+              title="The Meeting" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">The Meeting</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`The Meeting`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Sphene says Alexandria has no need for Queen Sphene—the one the people love is the Queen of Reason, her Endless counterpart. She admits it is a hard truth to accept, but it is the truth nonetheless, and she must find a new way to serve. Gulool Ja tells her she is not alone, and that together you can get through anything. Wuk Lamat agrees, then says there is something only Sphene can do right now: start with Calyx—what can she tell you about him?</p><p>Sphene explains that Calyx was a prodigy who specialized in electrope and made his mark during the Storm Surge. Even while he was admired, he struggled with an illness from birth that left him with precious little time to live. For him to still be here four centuries later, she thinks it is safe to assume he too has become an Endless. Wuk Lamat says she understands, and though you are somewhat familiar with Preservation, she never imagined you would cross paths with one of them like this. When Sphene asks if you know about Preservation, Wuk Lamat says you do—they are said to have created Everkeep’s core system as well as Endless Sphene. Sphene reflects that this happened while she was slumbering, and Gulool Ja says Oblivion has investigated Preservation extensively—so you should head to the Backroom and tell them what has happened.</p><p>In the Backroom, Wuk Lamat says the others have been given a summary, and you can wait on the details if Sphene needs rest. Gulool Ja checks on her, and Sphene cannot help thinking that Krile’s parents were once members of Preservation. G’raha Tia says he heard about the ambush, and though you seem to have weathered it well, you should avoid straining yourself. Krile says you have told them what happened, and that Preservation has revealed itself at last.</p><p>G’raha Tia says that using the key, Preservation intends to turn even more people into Endless, and it seems safe to assume they too mean to steal aether from the other reflections. But unlike the previous Sphene, they have no intention of saving everyone. Calyx, of all people, would know exactly how much aether is required to sustain an Endless—so he can set a realistic limit on their creation without being swayed by emotion. Krile repeats the phrase “carefully managed, eternal preservation,” and says that whether or not this can be called evolution, it is plain that mankind’s very existence would be changed forever.</p><p>Wuk Lamat wonders if Calyx could have been the one who erased everyone’s memories of Endless Sphene’s death. Sphene says it is possible, though she cannot speak to his motives. Krile says that though Calyx has stated his ultimate goal outright, how his actions will further that agenda remains unclear. Still, she notes that anxiety toward death continues to spread among Alexandrians, and perhaps the simulant stokes that fear to entice them to become Endless. Sphene says everyone is afraid of death, and she does not blame the people for feeling as they do—but she wants to stop the simulant, and do what she can for those who believe in their queen. She adds that though she wears no crown, if she were to forsake the people, then she would truly have no place here.</p><p>Shale says she does not know if it will help, but she found something interesting. By analyzing the sign that Calyx appeared on, she determined the source of the transmission, and traced it back to a terminal used only by Preservation, located in the foundation sector. Gulool Ja says the foundation sector came up in his mother’s records—it is where the old castle was hidden. Shale explains that Everkeep was built atop the former kingdom’s castle, and access to the immediate area—the foundation sector—is highly restricted, with map data classified accordingly. Sphene repeats, stunned, that the old castle is inside the tower. Shale says it is an ideal place for Preservation to conceal a terminal, and since they have existed since the Storm Surge, they would be familiar with the castle’s layout.</p><p>Krile asks whether someone as versed in electrope as Calyx would be so careless as to leave a trail. Shale says she expects he intended for you to find the terminal. G’raha Tia says it may be a trap, but it is your only lead, and asks what you think. You decide that if you have a lead, you should follow it—you cannot leave them to their own devices. G’raha Tia agrees, adding that you owe him for that bolt of lightning.</p><p>Shale says that if you are set on this course, she will work on getting you access to the foundation sector, and asks you to wait for now. Sphene pleads to come with you—she may not have special skills, but she knows the castle better than anyone, so she asks you to let her. Wuk Lamat says that if that is what she wants, then you will go together: the rest of you will take point and secure the way, and you will rely on Sphene to guide you within the castle.</p><p>Afterward, Wuk Lamat says that at last you have a plan, and you must make it count. Gulool Ja explains that according to records from Yuweyawata, his mother was investigating Origenics as part of her research into souls, and the map data in those records is how you learned about the castle in the foundation sector. Krile reflects that Calyx decides how many will become Endless, yet leaves the choice of who in the hands of the people—she wonders if that is his idea of fairness, or if he simply does not care, but says it is too early to speculate. G’raha Tia notes that in the world of Sphene’s memories, the town was already submerged, and given the circumstances, the people likely considered stripping the castle for materials to rebuild; for the structure to endure even now speaks to its importance and to the Alexandrians’ resilience. Shale says she is working on securing a route to the foundation sector, and asks you to wait a while. Sphene thanks you for allowing her to accompany you, and says it may take time for her to find her place in this new Alexandria, but she will—slowly but surely.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Sphene <small class="muted">(Solution Nine, X:17.8, Y:17.8)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-jewel-shattered.html">A Jewel Shattered</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="descent-to-the-foundation.html">Descent to the Foundation</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'作戦会議',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>スフェーンは言う。アレクサンドリアに「女王スフェーン」の居場所はなく、人々が愛しているのは「理性の女王」――自分のエンドレスの相方なのだと。受け入れがたい事実ではあるが、それでも事実であり、自分は新しい形で仕える道を見つけねばならないのだと。グルージャは、ひとりではない、あなたたちが一緒ならどんなことでも乗り越えられると言って支える。ウクラマトも頷き、今この瞬間にスフェーンにしかできないことがあると言う。まずはカリュクスだ――彼について何が分かるのか、と。</p><p>スフェーンは、カリュクスは電気石の分野に秀でた天才で、「雷嵐」で名を馳せたと語る。周囲の称賛を浴びながらも、生まれつきの病を抱え、残された時間はわずかだったという。にもかかわらず四百年後の今も彼がいるのなら、彼もまたエンドレスになったと考えるのが自然だと述べる。ウクラマトは、なるほど、と頷き、「プリザベーション」については多少知っていたが、まさかその一員とこうして相まみえるとは思わなかったと言う。スフェーンがプリザベーションを知っているのかと尋ねると、ウクラマトは、エヴァーキープの中枢システムやエンドレススフェーンを作ったとされる集団だと答える。スフェーンは、自分が眠っている間にそんなことが行われていたのかと呟き、グルージャは「オブリビオン」の面々がプリザベーションを長く調べてきたのだから、バックルームへ戻って起きたことを伝えようと言う。</p><p>バックルームでは、ウクラマトが皆には概要だけ伝えてあり、スフェーンが休みたいなら詳細は後でもいいと言う。グルージャも体調を気遣い、スフェーンはクリルの両親がかつてプリザベーションの一員だったことを思うと胸がざわつく。グ・ラハ・ティアは奇襲の話を聞いたと言い、あなたたちは持ちこたえたようだが無理はするなと念を押す。クリルは、話を聞いた、ついにプリザベーションが姿を現したのだと告げる。</p><p>グ・ラハ・ティアは言う。鍵を用いて、プリザベーションはさらに多くの者をエンドレスにしようとしている。つまり他の鏡像世界から乙太を奪うつもりなのだろう。しかし以前のスフェーンとは違い、彼らは「皆を救う」つもりはない。カリュクスほどの人物なら、エンドレスを維持するのに必要な乙太量を正確に把握しているはずで、情に流されることなく現実的な上限を定められるのだと。クリルは「管理された永遠の保存」という言葉を受け、これが進化と呼べるかはともかく、人の在り方そのものが永遠に変わってしまうのは明らかだと言う。</p><p>ウクラマトは、カリュクスがエンドレススフェーンの死に関する皆の記憶を消した張本人なのではないかと問う。スフェーンは可能性はあるが動機までは分からないと答える。クリルは、カリュクスが最終目的を明言したとはいえ、その目的に向けて具体的に何をするのかはまだ不透明だと言い、ただアレクサンドリアでは死への不安が広がり続けているため、シミュラントがその恐怖を煽ってエンドレス化へ誘導しているのかもしれないと推測する。スフェーンは、誰もが死を恐れるし、人々がそう感じるのを責めるつもりはないと言いながらも、シミュラントを止めたい、女王を信じる人々のためにできることをしたいと語る。冠を戴いていなくとも、人々を見捨てるのなら本当に自分の居場所はなくなるのだと。</p><p>そこへシェールが、助けになるかは分からないが興味深いものを見つけたと言う。カリュクスが姿を現したサインを解析し、発信源を突き止めた結果、プリザベーション専用の端末へ辿り着いた――場所は「基礎区画」だという。グルージャは、基礎区画は母の記録にも出てきた、旧王国の城が隠されている場所だと言う。シェールは、エヴァーキープは旧王国の城の上に築かれており、その直上に当たる基礎区画への立ち入りは厳重に制限され、地図情報も機密扱いだと説明する。スフェーンは旧王国の城が塔の中にあるのかと驚き、シェールは、雷嵐以来存在してきたプリザベーションなら城の構造にも通じているだろうし、端末を隠すには理想的だと言う。</p><p>クリルは、電気石に精通したカリュクスほどの者が痕跡を残すほど不用意だろうかと疑問を呈する。シェールは、彼は端末を見つけさせるつもりだったのだろうと答える。グ・ラハ・ティアは罠かもしれないが唯一の手がかりだと言い、あなたに判断を求める。あなたは、手がかりがあるなら追うべきだ、彼らを好きにはさせられないと決める。グ・ラハ・ティアは同意し、あの落雷の借りも返さねばならないと付け加える。</p><p>シェールは、方針が固まったなら基礎区画へのアクセスを確保する手配を進めるので、しばらく待っていてほしいと言う。スフェーンは、どうか自分も同行させてほしいと願い出る。特別な技があるわけではないが、城のことなら誰よりも知っているのだと。ウクラマトは、本人が望むなら一緒に行こうと言い、皆で先導して道を確保し、城内ではスフェーンの案内を頼りにすると決める。</p><p>その後、ウクラマトはようやく方針が定まった、必ず成功させようと言う。グルージャは、ユウェヤーワータの記録によれば母は魂の研究のためにオリジェニクスを調べており、その記録にあった地図情報から基礎区画の城を知ったのだと説明する。クリルは、カリュクスはエンドレスになる人数を決めつつ、誰がなるかは人々の選択に委ねている――それが公平さのつもりなのか、あるいは無関心なのかと考えかけるが、今はまだ推測に過ぎないとして言葉を切る。グ・ラハ・ティアは、スフェーンの記憶の世界では町はすでに水没しており、状況が逼迫していれば再建のために城を資材として剥ぎ取ることも考えただろう、それでも今なお城が残っているのは城が彼らにとって重要であり、そしてアレクサンドリアの人々が強靭である証だと言う。シェールは基礎区画へのルート確保を進めているので少し待ってほしいと告げ、スフェーンは同行を許してくれたことに礼を言う。新しいアレクサンドリアで自分の居場所を見つけるには時間がかかるだろうが、ゆっくりでも必ず見つける、と。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> スフェーン <small class="muted">(ソリューション・ナイン, X:17.8, Y:17.8)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-jewel-shattered.html">砕かれた輝石</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="descent-to-the-foundation.html">決行</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'作戰會議',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Sphene 說，Alexandria 並不需要「Queen Sphene」——人們愛的是「Queen of Reason」，也就是她的 Endless 版本。就算這個事實很難接受，但它終究是事實；她必須找到一種新的方式去付出、去服務。Gulool Ja 立刻告訴她，她不是一個人；只要大家在一起，就能撐過任何事。Wuk Lamat 也認同，接著說眼下正好有一件事只有 Sphene 做得到——先從 Calyx 開始，她能告訴你們多少？</p><p>Sphene 說，Calyx 是 electrope 領域的天才，在 Storm Surge （四百年前 Alexandria 爆發的雷屬能量災害，造成乙太失衡與大量死傷，也與 Queen Sphene 的「死亡記錄」有關）期間嶄露頭角、聲名大噪；然而就算受到同儕景仰，他仍從出生起就帶著疾病，讓他幾乎沒有多少時間可活。如今他卻在四百年後仍然現身，她認為可以合理推定——Calyx 也已成為 Endless。Wuk Lamat 聽完點頭，說你們多少知道 Preservation (Alexandria 的科學研究團體（scientific collective）打造 Everkeep 的核心系統、製作 Endless Sphene，並在 foundation sector 设有僅供他們使用的終端機；Calyx 與之相關，Krile 的父母曾是成員)的事，但她從沒想過會以這種方式遇見 Preservation 的人物。Sphene 追問你們也知道 Preservation？Wuk Lamat 回答：知道——據說他們打造了 Everkeep 的核心系統，也打造了 Endless Sphene。Sphene 低聲感嘆，原來這一切都發生在她沉睡的期間。Gulool Ja 則說，Oblivion （Alexandria 的調查／行動組織；對話中提到他們長期追查 Preservation，並協助整理相關線索與記錄）的成員長期調查 Preservation，你們應該回 The Backroom 把剛才發生的事告訴他們。</p><p>回到 The Backroom，Wuk Lamat 說她們已先把大略情況講給其他人聽，如果 Sphene 需要休息，細節可以晚點再談。Gulool Ja 也關心她是否還好，而 Sphene 一想到 Krile 的父母曾經是 Preservation 的一員就難以平靜。G’raha Tia 說他聽說你們遭到伏擊；雖然你們看起來撐過去了，但務必要避免逞強。Krile 接著說她們都聽完了，Preservation 終於露面了。</p><p>G’raha Tia 說，Preservation 想用那把鑰匙把更多人變成 Endless；看來也可以合理推定，他們同樣打算從其他 reflection （指「其他映像世界／其他世界線」與你所在世界並行的世界）竊取乙太。但和先前的 Sphene 不同的是——他們根本沒打算拯救所有人。因為 Calyx 這樣的人，必定清楚維持一個 Endless 需要多少乙太，所以他能在不被情緒左右的情況下，替 Endless 的「製造數量」訂下現實的上限。Krile 也重複那句「受控的、永恆的保存」，並說不論這算不算進化，人類存在的樣貌都將被永遠改寫。</p><p>Wuk Lamat 進一步猜測：會不會就是 Calyx 抹除了大家對「Endless Sphene 死亡」的記憶？Sphene 回答那確實是可能性之一，但她無法替 Calyx 的動機下定論。Krile 說，Calyx 雖然已經直接說出最終目標，但他的行動要如何推進那個目標仍不明朗；不過你們確實看到 Alexandria 的人依舊在擴散對死亡的焦慮，也許 simulant 正是在煽動這份恐懼，引誘人們成為 Endless。Sphene 說，每個人都害怕死亡，人們想把恐懼先放到一旁，她並不怪他們；但即便如此，她仍想阻止 simulant （指「仿造體」，外表與 Endless Sphene 幾乎一樣、但本質是不同個體的「模仿品」），想為那些信任自己女王的人做點什麼。她補上一句：就算她已不再戴著王冠，若她選擇拋下人民——那她才會真的在這裡無處可去。</p><p>這時 Shale 說，她不確定這能不能幫上忙，但她找到一個很有趣的線索。她解析 Calyx 出現的那個「標誌」後，追出了訊號來源——是一座只有 Preservation 才會使用的 terminal，位置在 foundation sector。Gulool Ja 立刻說，foundation sector 在他母親的紀錄裡也出現過——那裡藏著舊王國的城。Shale 解釋：Everkeep 就建在舊王國城堡的正上方；而城堡所在的近接區域，也就是 foundation sector，出入限制極嚴，地圖資料自然也被列為機密。Sphene 聽到後震驚地重複：舊城堡竟然在這座塔裡？Shale 說，這對 Preservation 來說確實是個藏 terminal 的理想地點；他們自 Storm Surge 以來就存在，理應熟悉城堡的結構。</p><p>Krile 疑惑：像 Calyx 這麼精通 electrope （Alexandria 特有的導電／能源礦物材料，用於城內各種科技與設備）的人，會粗心到留下可追蹤的痕跡嗎？Shale 直言，她認為 Calyx 就是故意讓你們找到那座終端機。G’raha Tia 說，這也許是陷阱，但你們手上只有這條線索，他問你怎麼看。你做出決定：既然有線索，就該追；也不能放任他們繼續為所欲為。G’raha Tia 立刻同意，並說你也該「回敬」那道落雷了。</p><p>Shale 說，如果你們確定要走這條路，她會著手替你們取得進入foundation sector（基礎區）的權限，眼下先稍作等待。Sphene 卻急切請求：請讓她一起去。她或許沒有什麼特別技能，但她比任何人都熟悉那座城堡——所以拜託你們。Wuk Lamat 回答：既然這是她的心願，那就一起行動；其他人負責先行、確保道路安全，而你們則仰賴 Sphene 在城堡內引路。</p><p>之後，Wuk Lamat 說你們終於有計畫了，必須把握住。Gulool Ja 補充，根據 Yuweyawata 的紀錄，他母親為了研究靈魂而調查 Origenics；而紀錄中的地圖資料，正是你們得知 foundation sector（基礎區）內藏著城堡的原因。Krile 思索：Calyx 決定「會有多少人」成為 Endless，卻把「誰要成為」交給人民自己選——這算他的公平嗎？還是他根本不在乎？她剛要順著想下去，就又說現在還太早，先別做無根據的揣測。G’raha Tia 則提到，在 Sphene 記憶中的世界，城鎮早已沉沒；在那樣的困境下，人們很可能曾考慮拆取城堡的材料來重建。可那座建築仍然保存至今，足以看出它對 Alexandria 人的重要，也看得出他們的韌性。Shale 說她正在安排前往 foundation sector（基礎區） 的路線，請你們先等一會兒。Sphene 感謝你允許她同行，並說她在新的 Alexandria 找到自己的位置或許需要時間，但她一定會一步一步，慢慢地。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Sphene <small class="muted">(Solution Nine, X:17.8, Y:17.8)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-jewel-shattered.html">破碎的寶石</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="descent-to-the-foundation.html">付諸行動</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
