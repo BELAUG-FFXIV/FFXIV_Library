@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>My Memories and Yours | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – My Memories and Yours (DT Patch 7.3)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#ffffff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative;max-height:360px;overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:"";position:absolute;left:0;right:0;bottom:0;height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card));pointer-events:none;
+    }
+    .expand-wrap{margin-top:12px}
+    .expand-btn{display:inline-block;padding:8px 14px;border-radius:10px;background:var(--card);border:1px solid var(--border);cursor:pointer;font-weight:600}
+    .expand-btn:hover{background:#fffef8}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/NfPv2ntQUOQ"
+              title="My Memories and Yours" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">My Memories and Yours</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`My Memories and Yours`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>You gather what remains with care. Krile says she will keep hold of Geode’s gun, and asks you to take the soul cell. Sphene urges you to return to the Backroom at once—Shale and the others need to know what happened—and Krile agrees, promising she will ask Wayakkwe to meet you there as well.</p><p>Back in the Backroom, grief hits like a physical weight. Shale can only whisper Geode’s name, while Gulool Ja blames himself for failing to control the sentries. Nostalgia refuses that blame, insisting Calyx alone is responsible—yet the senselessness of it all still burns. Already furious at Calyx, Nostalgia turns that anger inward too, hating their own powerlessness, and tries to leave to clear their head.</p><p>Krile stops Nostalgia from wandering off alone and tells them to stay and rest, taking responsibility for keeping them out of trouble. Shale steadies herself just enough to acknowledge what you and Geode did—many people are alive because you rushed in. She says your new discovery may finally help her connect the leads she has been digging up and identify where Calyx is hiding…just not yet. She needs a little time before she can move again.</p><p>As the others regroup, more pieces of the day’s horror fall into place. Gulool Ja says he regained control of the sentries around the same time Calyx left, and apologizes for not stopping him. G’raha Tia reports that patrols across the other levels confirmed multiple targeted attacks—more harvesting of aether. Y’shtola warns you not to try anything alone. Genolt notes Geode’s gun was returned spent and scorched—proof he fought to the end. Wayakkwe arrives with the news that Isadora and Milos are guarded, then asks you to check on Shale; Shale will put on a brave face for Wayakkwe and her sister, but not for you.</p><p>When you speak with Shale, she admits her mind keeps drifting and she cannot focus on the hunt for Calyx. She decides to go to Earthen Sky to say goodbye, and asks you to come—she needs someone to cry to if you can spare a shoulder. She arranges air-wheelers with their communications modules removed so Calyx cannot seize them, and you fly low near the pylons, following her lead.</p><p>The trip clears her head a little. She tells you these air-wheelers are Genolt’s pride, and that she used to take one out whenever she needed to lighten her mood—sometimes racing Geode. She remembers how they used to talk about flying beyond the dome. When monsters block the path, you clear them out, and Shale—quietly impressed—leads you inside the hideout.</p><p>There, she asks you to raise a glass in remembrance, and Nostalgia appears as if on cue. As you sit together, Shale tells the story of how she first met Geode—back when she still wore a regulator, had recently lost someone close, and had taken work “keeping patrons company” at a bar. One drunken night, she and Geode ended up in a fistfight in the street, only to be scolded by an odd machine—Cahciua—who then tried to recruit them. Cahciua spoke of protecting the outside world from Zoraal Ja’s invasion, and of opposing the practice of resurrecting the memories of the dead. Searching the core system for traces of dissidents led them to an anomalous sector behind the Neon Stein—the Backroom—where they found records of a group called Oblivion, long gone. Reading those records, they chose to carry that work forward.</p><p>When the remembrance ends, resolve takes its place. Shale says these memories are hers alone, but they are the reason she will stay the course. Nostalgia, no longer drowning in grief, vows to stop Calyx—for everyone who ever believed in Oblivion. You return to the work ahead with the same conclusion: you will do your part, and she will do hers, and you will not face what comes next alone.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Sphene <small class="muted">(Solution Nine, X:9.6, Y:21.8)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-endless-choice.html">The Endless Choice</a></div>
+      <div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-darkness-in-the-heart.html">A Darkness in the Heart</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'君と僕の記憶',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>あなたは遺されたものを丁寧に拾い上げる。クルルはジオードの銃を預かると言い、あなたには魂細胞を託してほしいと頼む。スフェーンは急いでバックルームへ戻ろうと言い、シェールたちに何が起きたのか伝えるべきだと促す。クルルも同意し、ワヤックウェにも合流するよう連絡すると告げる。</p><p>バックルームに戻ると、喪失が胸を押し潰す。シェールはジオードの名を呼ぶことしかできず、グルージャジャは哨兵を制御できなかった自分を責める。ノスタルジアはそれを否定し、責められるべきはカリュクスただ一人だと断言する。それでも理不尽さは消えず、ノスタルジアは怒りを自分にも向け、無力だった自分を許せないと言って、その場を離れようとする。</p><p>クルルはノスタルジアを引き留め、ここで休むよう告げ、危険なことをしないよう見ていると約束する。シェールは、あなたとジオードが駆けつけなければ事態はもっと悪化していたと伝え、多くの命が救われたのはあなたたちのおかげだと言う。さらに、あなたが持ち帰った新しい手掛かりを既存の情報と突き合わせれば、カリュクスの潜伏先に近づけるはずだとも――ただし、今すぐではない。前へ進むには、ほんの少し時間が必要だと絞り出す。</p><p>皆が落ち着きを取り戻そうとする中で、追加の報告が集まる。グルージャジャは、カリュクスが立ち去った頃に哨兵の制御を取り戻したと話し、止められなかったことを詫びる。グ・ラハ・ティアは、他の階層の巡回で複数の標的型襲撃を確認したと告げ、目的は乙太の収穫だったようだと言う。ヤ・シュトラは、決して一人で動こうとしないよう念を押す。ゲノルトは戻ってきたジオードの銃が弾切れで銃身も焦げていたと語り、最後まで戦った証だと受け取る。ワヤックウェはイサドラとミロスが保護下にあると伝えたうえで、シェールの様子を見に行ってほしいとあなたに頼む。自分たちの前では平然としてしまうからだと。</p><p>あなたがシェールに声をかけると、彼女は思考が追いつかず、カリュクスを追うべきなのに集中できないと打ち明ける。彼女はアースンスカイへ行き、ジオードに別れを告げたいと言い、あなたにも同行を求める。泣きつける肩がほしいのだと。彼女は通信機能を外したエアウィーラーを用意し、カリュクスに乗っ取られないようにして、あなたは支柱の近くを飛びながら彼女の後を追う。</p><p>道中、少しだけ気持ちが整う。シェールは、そのエアウィーラーがゲノルトの自慢であり、気晴らしに乗り回していたこと、時にはジオードと競争したこと、いつかドームの外を飛ぼうと語り合ったことを話す。途中で魔物が道を塞ぐが、あなたが排除し、彼女はあなたの戦いぶりに目を見張る。そして隠れ家へ入ると、彼女は追悼の杯を求める。</p><p>そこへノスタルジアが現れる。シェールは、かつて自分がまだ調整器を身につけていた頃、親しい者を失った直後に酒場で働き、ある夜ジオードと口論から殴り合いになったことを語る。路上で倒れていた二人を叱りつけた妙な機械――カフキア――が、やがて勧誘の言葉を投げかけた。彼女は外の世界を守りたいこと、ゾラージャの侵攻を阻みたいこと、そして死者の記憶を蘇らせる行いに異を唱える者たちがいるはずだと語った。その後、同じ志の者を探して中枢を調べ、ネオン・スタインの奥にある異常区画――バックルーム――に辿り着き、そこに残された「オブリビオン」という集団の記録を見つけた。住人は去っていたが、彼らはその意志を継ぐと決めたのだ。</p><p>追悼の後、残るのは覚悟だ。シェールは、これらの記憶は自分だけのものだが、それこそが道を外れずに進み続ける理由だと言う。ノスタルジアも、沈みそうな悲しみから引き上げられたと告げ、オブリビオンを信じたすべての人のためにカリュクスを止めようと誓う。あなたもまた、同じ結論に辿り着く――一人では動かない。あなたはあなたの役目を果たし、彼女は彼女の役目を果たし、共に前へ進む。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> スフェーン <small class="muted">(ソリューション・ナイン, X:9.6, Y:21.8)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-endless-choice.html">未来の選択肢</a></div>
+      <div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-darkness-in-the-heart.html">心を這うもの</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'你和我共有的記憶',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你把遺留之物小心收起。Krile 說她會帶著 Geode 的槍，並請你收好那枚 魂細胞（裝有靈魂資訊的核心單元；此處是 Calyx 留下、與受害者相關的關鍵物件）。Sphene 要你們立刻回到 Backroom——Shale 和其他人必須知道發生了什麼；Krile 也同意，並說她會請 Wayakkwe 也到 Backroom 會合。</p><p>回到 Backroom，悲傷像沉重的石頭壓在每個人身上。Shale 只能低聲喚著 Geode；Gulool Ja 則痛苦地懊悔自己沒能控制那些 哨兵。Nostalgia 當場否定，說責任只在 Calyx 一人身上，可那份「毫無意義」的失去仍讓他幾乎站不住——他質問：既然大家明明已經在這裡好好生活，為什麼還要被迫接受那種計畫？他說自己永遠不會原諒 Calyx，也無法原諒自己竟然無力阻止，便想離開去冷靜一下。</p><p>Krile 立刻要 Nostalgia 留下休息，並承諾她會看著他、確保他不會做出任何冒險的事。Shale 也努力把話說完整：如果不是你和 Geode 當時衝進去，情況只會更糟——很多人之所以還活著，是因為你們及時趕到。她說，你們帶回來的新發現若能和她手上的線索拼起來，她相信就能更接近 Calyx 的藏身處；但不是現在。她需要一點時間，才能再往前走一步。</p><p>大家重新整理狀況時，更多報告陸續傳回。Gulool Ja 說他大概是在 Calyx 離開的同一時間，才重新奪回對哨兵的控制，他道歉自己終究沒能阻止。G’raha Tia 回報，他們巡查了其他樓層，確認 Calyx 進行了多起「鎖定目標」的攻擊——目的似乎都是為了收割乙太。Y’shtola 提醒你：別想著一個人硬闖，大家都在你身邊。Genolt 則說 Geode 的槍被帶回來時彈藥已盡、槍管燒灼——他確實是戰到最後一刻。Wayakkwe 也回到這裡，告訴你 Isadora 和 Milos 已經有人看守，並請你去看看 Shale；如果是她或 Nostalgia，Shale 會逞強，但你去問，她也許才會說真話。</p><p>你去找 Shale 時，她坦白自己心神完全不在狀態：你們必須繼續追捕 Calyx，可她怎麼都無法集中。她決定去 Earthen Sky 向 Geode 道別，並請你一起去——她需要有人可以依靠、可以哭出來。她安排了幾台空輪車，拆掉通訊模組，避免再被 Calyx 接管；你們沿著支柱附近低空飛行，由她帶路。</p><p>一路上，Shale 的呼吸終於稍微順了些。她說這些空輪車是 Genolt 的得意之作，自己心情低落時常會騎出去轉一圈；有時 Geode 也會同行，最後演變成比賽。她笑得很淡，說你可能想不到——他們的友情一直帶著競爭。她也提到，他們曾經談過，有一天要把空輪車騎出圓頂之外。抵達前遇到怪物擋路，你清出一條路；Shale 看著你近身戰鬥的模樣，說監控畫面根本呈現不出你的實力，然後帶你進入藏身處。</p><p>在藏身處裡，Shale 要你舉杯追念 Geode；Nostalgia 也在這時出現。席間，Shale 說起她第一次遇見 Geode 的過去：那時她還配戴調節器，剛失去重要的人，也才結束一段當「陪侍」的工作、轉去酒吧上班——店裡付錢要她陪客人坐著聊天。某個夜晚，Geode 走進來，兩人很快就吵起來，最後甚至動手；等他們醉得倒在街上，一台奇怪的機械停下來訓斥他們擋路、也不懂得照顧自己——那就是 Cahciua。訓完話後，Cahciua 反而開始招募，說她想保護「外面的世界」不被 Zoraal Ja 入侵，避免那片土地——她所愛之子居住的地方——被毀掉；她也暗示，應該還存在反對「違逆自然秩序、把死者記憶喚回」的人。你們因此去查核心系統，追蹤未經授權的存取痕跡，最後找到 Neon Stein 後方的一個異常區域——Backroom。那裡早已人去樓空，但設備裡留下了一個自稱 Oblivion（Alexandria 內負責巡邏、維安與危機應對的部隊；其理念源自更早期的抵抗組織紀錄，後由後來者承接延續） 的團體紀錄。讀完那些行動與願景後，他們決定把那份工作接續下去。</p><p>杯酒落下，留下的是更清醒的決心。Shale 說，失去同伴很痛，但回想起一起走過的時刻，她仍能看見他們的笑、聽見他們的聲音——那份存在感讓她明白：同伴依然與她同在。Nostalgia 也說，雖然痛還在，但他不再像快被淹沒一樣；他要為你、為自己、也為所有曾相信 Oblivion 的人，親手阻止 Calyx。你也在心裡把結論釘死：接下來的路不會好走，但你不會獨自行動；你會做好你的部分，而她也會做好她的部分，然後一起把 Calyx 逼到無路可退。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 斯菲恩 <small class="muted">(Solution Nine, X:9.6, Y:21.8)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-endless-choice.html">未來的分岔路口</a></div>
+      <div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-darkness-in-the-heart.html">盤踞心底的黑暗</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
