@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Seekers of Eternity | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Seekers of Eternity (DT Patch 7.2)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#ffffff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative;max-height:360px;overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:"";position:absolute;left:0;right:0;bottom:0;height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card));pointer-events:none;
+    }
+    .expand-wrap{margin-top:12px}
+    .expand-btn{display:inline-block;padding:8px 14px;border-radius:10px;background:var(--card);border:1px solid var(--border);cursor:pointer;font-weight:600}
+    .expand-btn:hover{background:#fffef8}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/1L6132I9MH0"
+              title="Seekers of Eternity" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Seekers of Eternity</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Seekers of Eternity`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>You pause with Wuk Lamat and the others, thinking of Milos—and of those who are no longer here to see him. Alisaie, having treated him with Angelo, can’t help but remember Ga Bu and Halric, and wonders how they’ve been. Sphene praises Milos’s kindness and courage, and quietly hopes that one day she can speak with him about “her other self.” With that in mind, you set out to return to the Backroom, planning to pick up small treats as thanks for everyone’s hard work.</p><p>Before you can go far, a citywide announcement rings out: the distribution of neo regulators has ended, and recipients are urged to equip and register them. The broadcast promises “evolution” and eternal life, and the crowd’s mood twists in an instant—bewilderment, fear, envy, and urgency colliding. Some claim those with neo regulators will become Endless; others recoil at the stares of neighbors who didn’t get one. A few confess they registered immediately just to escape the nightmares of being killed by mechanical soldiers, while others hesitate, uncertain about becoming something they don’t fully understand.</p><p>Sphene recognizes what’s taking root: the terror of that first encounter with death, still clinging to hearts that were once spared even the concept of it. Wuk Lamat points out the funeral was meant to help people grieve and move forward together—yet for those wearing regulators, the memories of that moment were erased. Those who still remember are left watching the oblivious and smiling, and you can feel how tempting it must be to wish for the same blank relief— to return to a time when death “didn’t exist.” Alisaie admits it’s easy to see why becoming Endless would look like an answer, and Sphene’s worry sharpens: if fear spreads, what will become of Alexandria? The planned gifts are forgotten—you turn back at once.</p><p>In the Backroom, Shale is relieved you’re safe, but reports the populace is on edge. A civilian has been killed by a mechanical soldier, and the details only deepen the unease: the unit was subdued by another sentry—something that should require the King of Resolve’s authority—yet Shale was blocked from the core system while checking. As you weigh what it could mean, Erenville contacts you from the outskirts: a mechanical soldier attacked a resident for no reason, hunters dealt with it, but more hostile sentries are already on the way. He means to lure them off and lose them, even as he realizes how dire this is. You don’t wait—Wuk Lamat and Gulool Ja insist on going, and you rush out to help.</p><p>In the outskirts, you search through the settlement and beyond until you find Erenville in a close call—he had spotted a frightened resident being pursued and tried to intervene, only to find himself outmatched. You arrive in time to drive the attackers back, and Erenville thanks you, shaken by how suddenly they struck. Wuk Lamat tells him what you saw on the way: some soldiers ignore you, others turn hostile without warning, and you can’t tell which is which until they attack. With no certainty that this was the last incident, you return to regroup.</p><p>Malachite soon brings a report from the aftermath of another killing: he was called to attend the victim, but found no body—only a pile of dust that the wind scattered away. The residents remembered the deceased, yet nothing remained. Even as that mystery hangs in the air, more reports pour in: a crash injures people, a hover cargo throws its driver and rampages, a riderless machine cuts into a crowd. You race back toward Solution Nine and find chaos—people panicked, pleading, blaming, grieving, and breaking under the shock of it happening “again.”</p><p>At Resolution, the immediate rampage has stopped as abruptly as it began, as if the machines ceased once they “fulfilled their purpose.” The timing is hard to ignore: the first attacks came shortly after the announcement that neo regulators had run out. Gulool Ja confirms his authority is back and disables the soldiers’ weapons, but shutting everything down isn’t simple—these machines also provide vital services like medical treatment and food production, and turning them off would cripple recovery. Sphene can no longer bear the helplessness. She looks at the wounded and the dead, calls it wrong, and begs for your aid—she will do anything to protect the people. Wuk Lamat answers with the words she once wished to hear: your strength is hers, and you will endure this together.</p><p>Back in the Backroom, the work of recovery begins: Malachite and others tend to the dead despite old trauma, couriers and cleaners clear wreckage, and patrols are organized to watch the machines. Sphene thanks you for the lives you saved and resolves to reclaim her healing magicks, seeking guidance from Y’shtola and Alisaie; among the books recovered from the castle is a grimoire she once used, and she intends to wield it again at everyone’s side. She asks that the key remain with you, even if it puts you at the greatest risk, and swears she will become capable enough to make Otis and Zelenia proud. Elsewhere, Calyx’s voice declares fragile flesh worthless and speaks of “evolution” as a new question—while you and your allies brace yourselves, knowing the next move could come at any time.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Sphene <small class="muted">(Solution Nine, X:4.3, Y:19.6)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="shared-paths.html">Shared Paths</a></div>
+      <div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="targeted-tragedy.html">Targeted Tragedy</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'永久の探究者',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>あなたはウクラマトたちと足を止め、ミロスのことを思う。そして、ここにいない者がこの光景を見られなかったことが胸を刺す。アリゼーはアンジェロとともにミロスを手当てしながら、ガ・ブやハルリクのことが脳裏をよぎり、いまどうしているのだろうとこぼす。スフェーンは、ミロスが優しく勇敢な少年だと語り、いつか「もうひとりの自分」のことを彼と話せる日を願う。あなたはバックルームへ戻る道すがら、仲間への感謝として甘味を用意しようと歩き出す。</p><p>だが、その矢先に街へ放送が響く。ネオレギュレーターの配布は終了し、受け取った者は装備し登録を済ませるよう促される。永遠の生命と「進化」を謳う言葉に、人々の空気は一気にざわめいた。ネオレギュレーターを得た者は永久人になるらしい、と戸惑う声が上がり、手にできなかった者は苛立ちを隠せない。見られることを恐れて身をすくめる者もいれば、悪夢を止めたい一心で即座に登録したと震える者もいる。迷いながらも、死から逃れられるという希望だけは、否応なく群衆の目に宿っていく。</p><p>スフェーンは悟る。初めて死に触れた恐怖が、いまも人々の心に残っているのだ、と。これまで死という概念すら遠かった彼らは、その感情の扱いを知らない。ウクラマトは言う。葬送は、皆が喪失を受け止め、ともに嘆き、前へ進むためのものだった——しかしレギュレーターを着けていた者たちは、その瞬間の記憶を消された。覚えている者は、無邪気に笑う者たちを見て、同じようになりたいと望んだに違いない。死がなかった頃へ戻りたい、と。アリゼーも、それが永久人という形で提示された以上、心が揺れるのは当然だと認める。スフェーンは不安を抑えられず、贈り物は後回しにして、ただちにバックルームへ戻ることを決める。</p><p>バックルームでは、シェールがあなたの無事に安堵しつつ、街全体が放送で張りつめていると告げる。さらに悪い報せが重なる。民間人が機械兵に殺害され、しかも問題の機体は別の哨兵によって鎮圧されたという。本来それを命じられるのは「決意の王」の権限を持つ者のはずだが、権限の状態を確認しようとしたシェールは中枢へのアクセスを遮断された。状況を測りかねる中、あなたのもとへエレンヴィルから連絡が入る。郊外で機械兵が理由もなく住民を襲い、狩人たちが対処したが、さらに敵対的な哨兵が集落へ向かっている——彼は引きつけて撒こうとする。あなたは迷わない。ウクラマトもグルージャも同行を申し出て、あなたは郊外へ駆け出す。</p><p>あなたは集落と周辺を捜索し、ついにエレンヴィルを見つける。彼は機械兵に追われる住民を見かけ、助けに入ったものの手に余り、危うい状況だった。あなたが間に合い、敵を退けたことで、彼は息をつき礼を述べる。ウクラマトは道中での異様さを共有する。多くの機械兵はあなたたちに無関心だったが、あるものは突然牙をむき、襲いかかってきた。相手が敵かどうかは、実際に襲われるまで分からない。エレンヴィルもまた、ここでは前触れなく襲撃されたと言う。あなたは郊外へ戻り、被害の全体像を確かめるべく合流する。</p><p>やがてマラカイトが、別の事件の後始末について語る。機械兵に殺された者のもとへ赴いたが、遺体はなく、そこにあったのは風に散る塵だけだった。住民は故人を覚えているのに、何ひとつ残っていない。不可解さが消えぬまま、さらに報せが押し寄せる。制御を失った乗り物が事故を起こし負傷者が出たこと、懸浮運輸艇が運転者を振り落として暴走していること、政府区画では無人の機械が群衆へ突っ込み重傷者を出したこと——あなたはソリューション・ナインへ急ぎ、混乱の只中へ踏み込む。恐怖と怒号と嘆きが渦巻き、かつての惨禍がよみがえったかのように人々は崩れていく。</p><p>レゾリューションに集まったあなたたちは、暴走が短時間で止まったことを確認する。機械兵も乗り物も、まるで目的を果たしたかのように一斉に沈黙した。発端の時刻が示唆するものは明白だ。ネオレギュレーターが尽きたと告げる放送の直後に、最初の襲撃が始まった。グルージャは奪われていた権限を取り戻し、機械兵が武器を使えないようにしたが、すべてを停止させるのは容易ではない——彼らは警備だけでなく治療や食糧管理など、生活の要も担っている。止めれば救護も復旧も立ち行かない。スフェーンは、傷ついた者と死者を前にして声を震わせる。これ以上の無力には耐えられない。人々を守りたい、幸福のためなら何でもすると、あなたに助力を請う。ウクラマトは応える。あなたたちの力はスフェーンのものだ、ともに乗り越えよう、と。</p><p>バックルームへ戻ると、復旧のための動きが始まっている。マラカイトたちは亡き者を弔い、回収班が残骸を片づけ、監視のための巡回が組まれる。スフェーンはあなたが救った命に感謝し、治癒の魔法を取り戻す決意を語る。城から持ち帰った書の中には、かつて彼女が使っていた魔導書があり、再びそれを手にしてあなたたちと並び立ちたいという。鍵は危険を承知であなたが持つべきだとし、その負担を軽くするため自ら強くなると誓う。そして別の場所で、カリュクスは脆い肉体を退け、「進化」の答えにたどり着いたと宣言する。あなたは仲間とともに、次の一手に備えて身構える。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> スフェーン <small class="muted">(ソリューション・ナイン, X:4.3, Y:19.6)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="shared-paths.html">ふたりが繋ぐ軌跡</a></div>
+      <div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="targeted-tragedy.html">闇夜の誘い</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'探尋永恆之人',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你和 Wuk Lamat 等人暫時停下腳步，腦中仍惦記著 Milos——也惦記著那些已經不可能親眼見到他的人。Alisaie 一邊和 Angelo 一起替 Milos 治療，一邊忍不住想起 Ga Bu 與 Halric，低聲說不知道他們近來如何。Sphene 看著 Milos，稱讚他善良又勇敢，能親眼見到他讓她感到寬慰；她也說，希望有一天能和他談談「另一個自己」。你們原本打算回到 Backroom，路上順便買些點心，送給夥伴們當作對辛勞的謝禮。</p><p>可你們才走沒多遠，整座城就響起廣播：neo regulators 的配發已經結束，所有領取者必須立刻配戴並完成裝置註冊。那道機械聲音高喊「進化」已至，說你們將一同超越死亡、享受永生的無限可能——人群卻只覺得背脊發冷。有人困惑地追問那是什麼「進化」，有人驚疑地說擁有 neo regulators （新型調節器：Alexandria 配發給市民的新式裝置，要求配戴並完成註冊。廣播宣稱完成後將引導所謂的「進化」，讓人超越死亡、獲得永生；市民之間也流傳「配戴 neo regulators 並註冊後，將成為 Endless」的說法）的人似乎會成為 Endless，也有人因為沒領到而怨怒外露。有人坦白自己還沒註冊，越想越不確定；也有人急著註冊，只求不再被「被機械士兵殺死」的惡夢折磨。</p><p>你聽著這些聲音，越來越明白 Sphene 為何沉下臉——第一次真正面對死亡的恐懼，仍牢牢盤踞在 Alexandria 人民的心裡。對那些過去甚至不必去想「死亡」的人而言，如今湧上的情緒太陌生，也太難以承受。Wuk Lamat 說，葬禮原本是要給所有人一個機會，去面對失去、一起哀悼、再一起往前走；可凡是配戴調節器的人，那一刻的記憶都被抹除。於是，仍記得的人看著那些毫不知情、依舊快樂的面孔，或許會動搖：是不是變得像他們一樣比較好？是不是回到那個彷彿不存在死亡的時代比較好？如今「成為 Endless」被當作選項丟到眼前，Alisaie 也承認，人們會心動並不難理解。Sphene 的不安變成了急迫——如果對死亡的恐懼持續蔓延，Alexandria 會變成什麼樣子？你們顧不上買點心，立刻折返 Backroom。</p><p>回到 Backroom，Shale 先是慶幸你們平安，隨即說那段廣播已讓整座城市人心惶惶。接著更壞的消息傳來：True Vue 有平民遭機械士兵殺害，而那台問題單位竟被另一名哨兵制伏——按理說，只有擁有 King of Resolve 權限的人才可能下達這種命令。Shale 試著查核權限狀態，卻被核心系統阻擋，情勢看來極不尋常。就在你們還在推敲時，Erenville 透過通訊珍珠傳來急報：郊外有機械士兵毫無緣由襲擊居民，雖然附近獵人已處理掉失控的機器，但更多敵對的哨兵正朝聚落逼近；他打算把它們引開，再設法甩掉。你們不再猶豫——你立刻出發支援，Wuk Lamat 和 Gulool Ja 也堅持同行。</p><p>你們趕到郊外後分頭搜尋，越走越感到不對勁：有些機械士兵對你們毫無反應，有些卻會突然轉為敵對，直到衝上來攻擊才看得出來。你終於找到陷入險境的 Erenville——他在引開機械士兵時，看見一名居民被追趕，便出手相助，卻發現自己其實應付不來。幸好你及時趕到擊退敵人，Erenville 才得以喘息並向你道謝；他也坦言，那些攻擊來得毫無預兆。Wuk Lamat 把你們一路上的遭遇說得更明白：敵不敵對根本無法事先判斷，直到它們真的撲上來。你們帶著不安返回郊外，準備盤點情況。</p><p>不久後，Malachite 帶來另一個令人發寒的細節：他被叫去處理那名遭機械士兵殺害的死者，抵達時卻找不到遺體，只看到一堆塵土，轉眼就被風吹散。居民仍記得那位死者，記憶並未被送上雲端，可「身體」卻完全消失。你們還來不及釐清這意味著什麼，各地通報就接連湧入：有人因車輛介面失靈而失控撞擊，Nexus Arcade 造成多人受傷；True Vue 的懸浮運輸艇把駕駛甩落後暴走；Government Sector 甚至出現無人機械在一群搶著要 neo regulators 的民眾旁突然啟動，衝進人群造成重傷。你們急返 Solution Nine，迎面而來的是恐慌、哭喊與指責——有人說這就像 Zoraal Ja 曾放出機械士兵那次一樣，有人哀求自己不想再死，有人崩潰地說如果成了 Endless，也許就不會失去至親。Sphene 看著滿地傷者與死者，顫聲說這一切都不對。</p><p>在 Resolution 會合後，你們確認暴走像是「達成目的」後就突然停止：機械士兵與車輛同時停擺，彷彿完成了某種指令。時間點也過於明顯——第一波攻擊，幾乎緊接著廣播宣布 neo regulators 已經發完之後發生。Gulool Ja 表示權限已恢復，並立刻讓機械士兵無法再使用武器；但要全面關停並不容易——這些機器不只負責警備，還承擔醫療與糧食生產等攸關民生的工作，若全部停機，救援與復原將更加困難。Sphene 終於再也承受不住那份無力：她看著傷者與死者，說自己無法再忍受這樣的束手無策；她想保護人民，為了他們的幸福願意付出一切，於是懇求你伸出援手。</p><p>回到 Backroom 後，復原工作開始推進：照料亡者、清理殘骸、安排巡邏監視機器——一切都在勉強把城市拉回正軌。Sphene 也下定決心重新鍛鍊治癒魔法，準備向 Y’shtola 與 Alisaie 請教；她說在從城堡帶回的書籍中，有一本她曾使用過的魔導書，她希望能再次學會運用它，站在你們身旁。而那把鑰匙，她認為仍應由你保管，即使最大風險落在你肩上——因為她要變得足夠強，能在你承擔危險時與你並肩，讓 Otis 與 Zelenia 引以為傲。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Sphene <small class="muted">(Solution Nine, X:4.3, Y:19.6)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="shared-paths.html">同行的軌跡</a></div>
+      <div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="targeted-tragedy.html">暗夜下的低語</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
