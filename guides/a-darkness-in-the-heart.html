@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A Darkness in the Heart | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – A Darkness in the Heart (DT Patch 7.3)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#ffffff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative;max-height:360px;overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:"";position:absolute;left:0;right:0;bottom:0;height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card));pointer-events:none;
+    }
+    .expand-wrap{margin-top:12px}
+    .expand-btn{display:inline-block;padding:8px 14px;border-radius:10px;background:var(--card);border:1px solid var(--border);cursor:pointer;font-weight:600}
+    .expand-btn:hover{background:#fffef8}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/oARM59Y5CYc"
+              title="A Darkness in the Heart" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">A Darkness in the Heart</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`A Darkness in the Heart`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>You catch Shale in the Backroom as she steels herself to resume the search for Calyx’s hiding place. She says she has a new strategy, and plans to ask Krile to help her reexamine the records—starting with the data left by Krile’s parents. After all, they were the first to break away from Preservation and build an organized resistance with Oblivion, and Shale is convinced something in those traces can point the way forward. Before she can say more, Sphene calls for you, uneasy about what she has been seeing in the outskirts, and asks you to come lend your perspective. Shale waves you on—your plans, it seems, have been decided for you.</p><p>Out in the outskirts, Sphene thanks you for coming and admits she cannot shake the feeling that something is “off.” It is not loud wailing or open violence, she says—just an oddness in the way people are carrying themselves, even for a city still reeling from recent bloodshed. She asks you to speak with the townsfolk and judge whether their behavior truly feels unusual.</p><p>One resident recognizes you from your earlier visit with Queen Sphene, and speaks with a brittle composure. Out here, too, fear hangs in the air: no one knows when the machinery might turn murderous again, and the clamor for neo regulators has reached a fever pitch. The resident claims to have secured one early, completed registration long ago, and now speaks as though death can no longer touch them—before slipping into prayer, repeating ominous words about darkness drawing nearer.</p><p>Another begs you for more neo regulators, insisting there must be leftovers, or some hidden stock held by the government—or even by Queen Sphene. They say they were once a hunter who scarcely thought about death, but now the truth consumes every thought, and they cling to any rumor that promises a way to hold on. A third recoils when they realize you are not wearing a regulator, then boasts that they registered a neo regulator some time ago—and that the device displayed the number of registered users: 4,168. After the machine malfunctions, they say, the total surged, and soon everyone will be registered; they pity those not “chosen,” but speak with certainty about becoming Endless and “living happily ever after.”</p><p>When you return to Sphene, you can only confirm what she sensed: tension is high, and fear is palpable. With each new registration, she says, that fear grows more insistent—until she can no longer deny what it may become. Before she can finish, Alisaie urgently calls you to Resolution, and Sphene insists you go at once.</p><p>At Resolution, a city-wide announcement is already underway—an unblinking, Omicron-like voice grinding through a relentless sermon about mortality: death as a constant companion, bodies as fragile and arbitrary, virtue powerless in the face of the end. Alphinaud notes it began after their meeting with Gossan; Sphene recognizes the hand behind it—Calyx. The broadcast turns from dread to command: fear will drive the people to conquer death; mankind must be preserved unto perpetuity; they will become Endless. In the crowd, one resident steels themselves to register, while others plead with Wuk Lamat to let them evacuate to Tuliyollal—because there are no more neo regulators, and staying means waiting for the next sentry to turn on them. Those who already have regulators argue that leaving changes nothing—death will follow anywhere—while Wuk Lamat urges calm and promises the Landsguard is on the way and evacuations are being arranged. Sphene, watching it all, can only whisper that she wants to save Alexandria’s people… but she is not their queen.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Shale <small class="muted">(Earthen Sky Hideout, X:6.2, Y:5.9)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="my-memories-and-yours.html">My Memories and Yours</a></div>
+      <div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="preservation-their-purpose.html">Preservation Their Purpose</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'心を這うもの',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>バックルームでシェールは、カリュクスの潜伏先を突き止めるため、探索を再開するとあなたに告げる。新たな方策を思いついたというが、手がかりになるかはやってみなければわからない――そこで彼女は、クルルの助けを借りてデータを洗い直すつもりだと話す。プリザベーションから最初に離反し、オブリビオンとして組織的な抵抗を打ち立てたのはクルルの両親だったのだから、必ずどこかに糸口が残っているはずだ、と。そう言い終える前に、スフェーンから通信が入る。郊外を見回っていて、どうにも不穏な違和感がある――あなたの視点を借りたい、というのだ。シェールは「予定は決まったようね」と背中を押し、あなたを送り出す。</p><p>郊外でスフェーンは、来てくれたことに礼を言い、住民たちの様子が妙だと打ち明ける。嘆き叫ぶ声や暴力沙汰のような、わかりやすい異常ではない――それでも、今の状況を差し引いても、どこかおかしい。郊外に不慣れな自分より、あなたのほうが判断できるだろうから、住民に話を聞いてほしいと頼む。</p><p>あなたが声をかけた住民は、かつて「女王スフェーン」と共に訪れたことを覚えていた。郊外でも緊張は高まり、いつ機械が殺意をむき出しにするかもわからない。死の影がつきまとい、ネオレギュレーターを求める声は熱に浮かされたように膨れ上がっているのだという。彼らは早々に手に入れて登録も済ませたと語り、もはや死は自分を縛れないと言い切る――そして、闇が近づく、深まる、祈りでそれを祓わねばならない、と不気味に言葉を重ねて祈りはじめた。</p><p>別の住民は、配布が終わったはずのネオレギュレーターがまだ残っているのではないか、と噂にすがって食い下がる。政府が隠し持っているのか、あるいはスフェーン女王なら――そう言い募り、かつては狩人として死を恐れなかったのに、真実を知ってからは死のことばかり考えてしまうのだと訴える。さらに別の住民は、あなたがレギュレーターを着けていないと見るや怯え、だが自分はネオレギュレーターを登録したのだと胸を張る。登録後、装置に登録者数が表示され、今は「四千百六十八」だという。機械の異常が起きてから登録が一気に増え、まもなく全員が登録する――自分はエンドレスとなり、進化し、幸せに暮らすのだと、熱に浮かされたように言い切った。</p><p>あなたが戻って報告すると、スフェーンはあなたの言葉にうなずく。張りつめた空気、肌で感じる恐怖――そして登録が進むほど、人々の内にある恐れがさらに強く迫ってくる、と。いずれ恐慌へと転じるのではないかと口にしたそのとき、アリゼーからレゾリューションへ来てほしいと急報が入る。スフェーンは一刻を争うと判断し、あなたと共に向かう。</p><p>レゾリューションでは、オミクロンのような機械音声による全市放送がすでに流れていた。死は常に傍らにあり、努力も偉業も平穏も、一瞬で奪われうる――身体は脆く、心臓も脳も臓器も偶然に左右され、徳では抗えない。アルフィノは、ゴッサンとの会議を終えた直後に始まったと説明し、スフェーンは発信者を悟る――カリュクスだ。放送は恐怖を肯定し、その恐れこそが死を征服へ導くと煽り立て、人の在り方を永遠に保存せよと語り、エンドレスになるのだと宣言する。群衆の中では、登録を決意する者がいる一方、ネオレギュレーターが尽きた以上、トライヨラへ避難させてほしいとウクラマトにすがる者もいる。だがレギュレーターを持つ者は、逃げても死は避けられないのだと言い返し、口論は鋭さを増していく。ウクラマトはランドガードの到着と避難の手配を告げ、どうか落ち着いてほしいと呼びかける。スフェーンは、その光景を前に、アレクサンドリアの民を救いたいのに、自分はもはや女王ではない、と絞り出すようにつぶやいた。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> シェール <small class="muted">(空の坑道のアジト, X:6.2, Y:5.9)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="my-memories-and-yours.html">君と僕の記憶</a></div>
+      <div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="preservation-their-purpose.html">保存する者たち</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'盤踞心底的黑暗',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你在 Backroom 找到 Shale，她強迫自己把情緒收好，準備回去繼續追查 Calyx 的藏身處。她說自己想出一個新策略，但能不能縮小範圍還得試了才知道；她打算請 Krile 一起把資料重新翻過，先從 Krile 父母留下的紀錄開始。畢竟他們是最早脫離 Preservation（由 Calyx 建立的研究機構／組織）並以 Oblivion（Alexandria 內負責巡邏、維安與危機應對的部隊）建立起有組織抵抗的人，資料裡一定有什麼能指向關鍵。你還沒來得及回應，Sphene 的通訊就插了進來——她在郊外巡視時總覺得哪裡不對，想請你陪她看看。Shale 只能嘆一口氣，說你的行程似乎被決定好了，叫你先去。</p><p>你趕到郊外，Sphene 立刻向你道謝，並坦言她無法忽視那種不安。這不是喧嘩哭號或暴力衝突那種明顯的異狀，而是人們的狀態「有點怪」——即使把近期的混亂算進去也一樣。她說自己對郊外還不熟，希望你用你見過的世界來判斷：這些反應到底正不正常。她請你去跟幾位住民聊聊，看看你會得出什麼結論。</p><p>第一個住民認得你，還提起你曾與「Queen Sphene」一起來過。他的語氣努力維持冷靜，卻藏不住緊繃：郊外同樣承受壓力，因為沒有人知道機械什麼時候又會變成殺人的東西；死亡的陰影揮之不去，而人們對 neo regulators（新型調節器；用來註冊、並以名額方式被宣稱可轉化為 Endless 的裝置） 的渴望已經到了近乎失控的地步。他自稱很早就拿到並完成註冊，彷彿因此不必再害怕死亡；說著說著，他忽然轉去喃喃祈禱，反覆提到黑暗正在逼近、變得更深，他們必須把它驅逐出去。</p><p>第二個住民幾乎是哀求你帶來更多 neo regulators。他說官方宣稱都發完了，但他聽說可能還有剩——政府手上或許仍留著一些，甚至 Queen Sphene 那裡也許會有。他一邊抓著那點傳聞不放，一邊說自己曾是獵人，從前幾乎不把死亡當一回事；可如今知道了真相之後，他腦中只剩死亡，怎麼也甩不掉，覺得一定要找到「撐下去」的方法。第三個住民則在看到你沒戴調節器時露出驚恐，隨即又用近乎炫耀的口吻說自己早已拿到 neo regulators 並完成註冊。註冊之後，裝置會顯示已註冊人數——他說目前是 4,168；而在那次機械故障之後，數字暴增，遲早會衝到上限 5,000。他一面憐憫那些「沒被選上」的人，一面把話說死：自己一定會成為 Endless、完成「進化」，然後幸福地活下去。</p><p>你把聽到的情況帶回給 Sphene，她沉默片刻，說你證實了她的不安——張力在升高，恐懼幾乎能摸得到。更糟的是，她感覺每新增一次註冊，那股恐懼就更像在人的胸口裡逼迫著他們，逼到最後可能會變成徹底的恐慌。就在她說到一半，Alisaie 的通訊急促地打斷你們，要你立刻趕去 Resolution；Sphene 聽出事態緊急，催你馬上動身。</p><p>你們抵達 Resolution 時，一段全城廣播正從 Omicron 類的裝置裡冷冷播出：死亡是永遠的同伴；再勤奮也可能在收穫前死去，再偉大的成果也可能在完成前崩毀；再安穩的日子，也只要一瞬間就會被死亡奪走。它用近乎殘酷的語氣把人的身體描寫成脆弱且全靠機率運作，說任何美德都無法改變那場「終局的裁決」。Alphinaud 說這段廣播是在他們與 Gossan 會談結束後才開始的；Sphene 立刻明白，這是 Calyx。廣播接著宣稱恐懼並不可恥，反而會驅使人征服死亡；它要人類走向「永恆保存」，要人們祈願、渴求、祈禱——並宣告他們將成為 Endless。人群中有人被煽動得立刻喊著要去註冊；也有人在恐慌中衝向 Wuk Lamat，要求立刻遷往 Tuliyollal，因為 neo regulators 已經用盡，留下來只是在等下一次哨兵翻臉。持有調節器的人卻反嗆：就算離開也逃不開死亡，這種機會不會再有。爭執越來越尖銳，Wuk Lamat 只能承諾 Landsguard 正在趕來、撤離也已安排，請大家先冷靜。Sphene 看著眼前的混亂，低聲說她想救 Alexandria 的人、想幫他們——可她不是他們的女王。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 謝爾 <small class="muted">(空之坑道藏身處, X:6.2, Y:5.9)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="my-memories-and-yours.html">你和我共有的記憶</a></div>
+      <div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="preservation-their-purpose.html">守護這一切的人們</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
