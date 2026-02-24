@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Targeted Tragedy | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Targeted Tragedy (DT Patch 7.3)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#ffffff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative;max-height:360px;overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:"";position:absolute;left:0;right:0;bottom:0;height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card));pointer-events:none;
+    }
+    .expand-wrap{margin-top:12px}
+    .expand-btn{display:inline-block;padding:8px 14px;border-radius:10px;background:var(--card);border:1px solid var(--border);cursor:pointer;font-weight:600}
+    .expand-btn:hover{background:#fffef8}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/KDOcVqVs4Fc"
+              title="Targeted Tragedy" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Targeted Tragedy</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Targeted Tragedy`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>You return to the Backroom, only to be pulled into an urgent briefing. Shale asks you to share what you’ve seen, and Geode admits he needs a clearer grasp of the dangers Alexandria now faces. Krile agrees—since the state funeral, too much has changed to keep guessing.</p><p>Shale lays out the situation plainly: across every sector, sentries attacked citizens without provocation, and vehicles abruptly stopped responding to their operators. The malfunctions ended quickly, but not before leaving a grim toll of injuries and deaths. For now, there have been no new reports—but that is the only comfort.</p><p>Gulool Ja explains the worst part: when the machines turned on the people, they ignored him even though he bears the King of Resolve’s authority. He only managed to make them relinquish their weapons after the chaos subsided, and he cannot promise they won’t defy him again. Geode voices what everyone is thinking—who could override that authority so easily?</p><p>Sphene answers: Calyx, a man of her era, famed for advances in electrope technology and the founder of Preservation. She says the wasting disease that once limited his years may have driven him to become Endless, continuing his work into the present. Yet she cannot claim to understand his heart—only that he raged at what he saw as mankind’s failures, insisting true evolution demands abandoning fragile flesh for eternal preservation.</p><p>Krile warns that the neo regulators—and the promise of “assured” eternal life for five thousand registrants—are only one piece of Calyx’s plan. He seeks the key to interdimensional fusion, intending to draw aether from the reflections and multiply Endless creation a thousandfold. Shale has found no trace of his activities in the terminal recovered from Everkeep, but vows he will. Until then, Geode proposes a street patrol through Solution Nine to listen, watch, and gather anything that might point toward Calyx—and Sphene asks to accompany you.</p><p>Out on patrol, the city looks calm on the surface, but the people’s words betray their fear and desperation. Some speak of needing a neo regulator at any cost, even warning that the last remaining slots will turn neighbors into enemies. Others grieve those lost when machines ran wild, remembering a time when death left no memories behind—and wondering whether that numbness was kinder than grief.</p><p>As you press for details, a stark pattern emerges. A sentry’s numbers for the recreation zone list casualties—and none of the dead were wearing regulators. A sanitation worker adds a chilling echo: no bodies remained when she arrived, only scattered white dust that was hard to clean away. When you regroup with Krile and Sphene, the pieces align: those without regulators—those who have chosen to live knowing death is inevitable—may be the ones Calyx is targeting to ignite terror. And the missing remains, the dust, matches what Malachite described before.</p><p>Before you can pursue the mystery further, Gulool Ja’s urgent call cuts in—he has lost control of the sentries in the residential area, and they may be attacking again. You rush to the scene, where a shaken resident describes a sentry entering an apartment despite a locked door, and someone being hurt trying to help. Even disarmed, the machine still followed orders—using its bare hands.</p><p>You learn of Isadora and her son, Milos, who haven’t been seen wearing regulators, and you run. Wayakkwe is injured but standing; Isadora is not. You find her badly hurt, and you force yourself to focus—she wasn’t struck anywhere vital. As Milos pleads at her side, you promise she will recover, and you set to making it true, even as the sounds of fighting elsewhere hint that not everyone made it back from this renewed terror.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Shale <small class="muted">(The Backroom, X:6.0, Y:6.3)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="seekers-of-eternity.html">Seekers of Eternity</a></div>
+      <div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-endless-choice.html">The Endless Choice</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'闇夜の誘い',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>バックルームへ戻ったあなたは、そのまま緊急の打ち合わせに呼び込まれる。シェールは、オブリビオンでは把握しきれない部分があるとして、あなたの視点を貸してほしいと言う。ジオードもまた、いまアレクサンドリアが直面している脅威を正確に掴む必要があると率直に告げ、クルルも「国葬以降、状況が激変した」と同意する。</p><p>まず話題に上がったのは、機械の異常動作だ。全区画で、セントリーが理由もなく市民を襲い、乗り物が操作不能に陥る事例が相次いだ。異常はほどなく収束したものの、その短い時間で負傷者と死者が出た。追加の報告は今のところない――それだけが、かろうじての朗報だった。</p><p>だがグルージャは、最も不気味な点を語る。人々が襲われている最中、彼が「決意之王の権限」をもって制御しようとしても、兵器は命令を聞かなかったのだ。落ち着いた後にようやく武装解除はできたが、次も同じとは限らない。ジオードは、最上位に近い権限すら無視できる存在がいるのかと疑問を突きつける。</p><p>スフェーンはその名を挙げる。カリュクス――彼女と同じ時代に生き、エレクトロープ技術の発展で知られ、研究のためにプリザベーションを設立した人物だ。命を削る病で余命わずかとされた彼が、活動を継続するためにエンドレス化を選んだのだろう、とスフェーンは推し量る。ただし彼の動機を理解しているわけではない。人類の「欠陥」に憤り、世代交代による適応は時代遅れで、肉体を捨てて永遠の保存へ進むべきだと主張していた――それだけは確かだと言う。</p><p>クルルは、ネオレギュレーターの登録枠「五千」と、登録者に「永遠の生命」が保証されるという誘いが、計画の一部にすぎないと警告する。カリュクスが狙うのは「次元融合の鍵」であり、それを得れば反映世界からエーテルを引き出し、エンドレス創出を千倍に拡大できるという。シェールはエバーキープ深部で見つけた端末を洗っているが、活動の痕跡は掴めていない。それでも必ず突き止めると言い、ジオードは手がかりを求めてソリューション・ナインの街路を巡回しようと提案する。そこへスフェーンがあなたの班に加わりたいと申し出た。</p><p>巡回に出ると、街は平静を取り戻したように見えるが、市民の言葉は不安と焦りに満ちていた。ネオレギュレーターを求める者は「手に入れなければ次は自分が死ぬ」と怯え、枠が残り少なくなれば醜い争いになるとさえ口にする。別の者は、暴走で友を失った痛みを語り、かつて死者の記憶が残らなかった時代と、いまの悲嘆の重さを比べて言葉を失う。</p><p>やがて、見過ごせない共通点が浮かび上がる。娯楽区画の死者は、いずれもレギュレーターを装備していなかった――セントリーが示した数値はそう告げた。さらに清掃員は、現場に遺体が残っておらず、白い粉のようなものだけが散っていたと話す。クルルとスフェーンに合流して報告すると、結論は一つに収束した。レギュレーターを外し、「死は避けられない」と受け入れて生きる者たちが、恐怖を煽るための標的にされているのかもしれない。そして遺体が消え、白い粉が残るという点は、以前にマラカイトが語った話とも一致する。</p><p>だが追及を始める間もなく、グルージャから緊急の連絡が入る。居住区画で再びセントリーの制御を失い、人々を傷つけようとしているという。現場へ駆けつけたあなたは、動揺する住民から、鍵をかけた部屋にセントリーが入り込み、逃げる途中で助けようとした者が傷ついたと聞かされる。武装はない。それでも命令は遂行され、素手で襲ったのだとクルルが唇を噛む。</p><p>そして、最近レギュレーターを着けていないらしいイサドラと、その子ミロスの名が出る。急いで向かうと、ワヤックウェは負傷しながらも立っていたが、イサドラはひどい状態だった。あなたは傷を確かめ、致命傷ではないと判断して治療に集中する。ミロスが母を呼び続ける中、あなたは「必ず良くする」と言い切る。だがその場を離れた場所から聞こえる戦いの音が、すべてを救えたわけではない現実を突きつけていた。※「ワヤックウェ／イサドラ／ミロス」の公式日本語表記は、このログ内では追加の典拠で核実できていないため、仮表記として扱っています。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> シェール <small class="muted">(バックルーム, X:6.0, Y:6.3)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="seekers-of-eternity.html">永久の探究者</a></div>
+      <div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-endless-choice.html">未来の選択肢</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'暗夜下的低語',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你回到 Backroom，Shale 立刻把你拉進一場緊急會議。她說 Oblivion (Alexandria 內負責巡邏、維安與危機應對的部隊) 在某些細節上掌握不夠，希望你把親眼所見補進討論裡。Geode 也直白地表示，他需要更清楚地掌握 Alexandria 目前面對的威脅；Krile 同意，因為自國葬之後發生的事太多，大家都需要一個更明確的全貌。</p><p>Shale 先整理「機械故障」的現況：各個區域都回報哨兵無故攻擊市民，車輛也突然失去操控、對駕駛的指令毫無反應。雖然故障很快就平息，但仍造成相當多的受傷與死亡。Wuk Lamat 追問是否有新的事件，Shale 說目前沒有更多通報——這是難得的好消息。</p><p>然而 Gulool Ja 說出最令人不安的一點：當哨兵開始傷人時，他明明擁有「King of Resolve (決意之王)」的權限，卻完全指揮不動它們；直到混亂結束後，他才勉強讓哨兵放棄武裝。但如果再發生一次，他無法保證自己不會再次被無視。Geode 因此質疑——究竟是誰，能如此肆無忌憚地凌駕那樣的權限？</p><p>Sphene 說是 Calyx。她解釋，Calyx 與她同屬 Storm Surge (Alexandria 過去的一個重大時代／事件時期。Sphene 表示 Calyx 與她一樣生活在那個年代；也就是說，Calyx 的研究與 Preservation 的起源可追溯到 Storm Surge 的時代背景) 的年代，以電解石技術的突破聞名，也是為了推進研究而建立 Preservation (由 Calyx 為推進研究而建立的研究機構／組織。依 Sphene 與 Krile 的說法，Preservation 早期曾從事看似「公益」的研究與建設，例如探索 levin sickness 的治療、參與 Everkeep 核心系統的設計；但在現況中，Calyx 被認為正透過相關手段操縱局勢、推動 Endless 轉化，並追求更大規模的計畫) 的那個人。據說他罹患的消耗性疾病讓他所剩時日無多，他很可能選擇轉化為 Endless，才能把研究延續到今天。Sphene 不敢說自己完全理解他的動機，只知道他曾因自己眼中的「人類缺陷」而憤怒，並宣稱靠世代更替來適應已經過時；真正的「進化」，必須捨棄脆弱的血肉之軀，轉向「永恆保存」。</p><p>Krile 接著提醒：Calyx 讓 Simulant (受 Calyx／Preservation 操控、用來對 Alexandria 市民進行宣傳與引導的「仿造體」。Krile 指出，Calyx 已經利用 simulant 去說服 Alexandrians，相信「轉化為 Endless」是他們唯一的生存希望，並配合新型調節器的註冊機制來推動他的計畫) 出面，已經把「成為 Endless」包裝成 Alexandrians 唯一的生存希望。只要註冊新型調節器，就能「被保證」獲得永生——而名額限定五千。可這只是計畫的一部分：Calyx 真正想要的是「跨次元融合之鑰」。一旦得到那件遺物，他就能從各個反映世界抽取乙太，把 Endless 的製造規模擴大到千倍。</p><p>Shale 表示要阻止 Calyx，就只能找出他藏身之處並將其擊倒；但她用 Everkeep 深處找到的終端機搜遍線索，仍抓不到任何痕跡。她請大家再給她一點時間，並承諾一定能把人揪出來。Gulool Ja 表示願意一起協助。Geode 則決定先在 Solution Nine 街頭巡查，一方面確認是否又出現新的「故障」，一方面找任何可能指向 Calyx 的情報。他邀你同行，也坦言若再爆發事故，他需要能打的同伴在背後。Krile 立刻加入；Wuk Lamat 則要去與城市管理者商談引入 Landsguard，以保護準備前往 Tuliyollal 的民眾。Sphene 請求加入你這一組，Geode 表示可以，但必須明白風險。</p><p>你們進入 Recreation Zone，城市表面似乎恢復了日常，但人們的神情仍緊繃。有人說自己確信這種事還會再發生，下一次死的可能就是自己；因此他一定要弄到一個新型調節器，甚至打算勸動搖的人把自己的讓出來。也有人完成註冊後反而變得輕鬆，還說裝置顯示名額進度：五千個名額裡，已經填滿三千八百多個。他警告，一旦剩下的名額變少，爭奪一定會變得很難看——要是拿到了，就趕緊註冊。</p><p>你也聽到另一種更沉重的聲音：有人失去了朋友。朋友的空輪車在那次機械暴走時從空中墜落，當場死亡；而他之所以會死，是因為當時沒有配戴調節器。那個人說，朋友早就接受了「終有一死」這件事，他原以為自己懂那是什麼意思，直到死亡真的發生。更讓他動搖的是——從前人死後，大家會遺忘，不留下記憶，也就沒有悲傷；如今記憶仍在，痛也就無法被抹去，他不確定那樣的世界是否反而更好。</p><p>你把這些線索拼在一起，發現了一個你們在 Backroom 的討論裡沒有正視的新因素：死者是否配戴調節器。Geode 也意識到同一點，決定進一步確認這次攻擊的死傷者是否有共同特徵。你們向東側繼續打聽，並直接向一名解除武裝的哨兵詢問資料。哨兵表示全市死傷統計尚在彙整，但能先提供 Recreation Zone 的估算：受傷87 人、死亡 19人——而死亡者配戴調節器的人數是零。</p><p>接著，一名清潔工補上另一個令人發寒的細節：她被派去清理殘骸，沒有親眼見到遺體；等她抵達時，現場已經沒有屍身，只剩下散落的白色粉塵，清理起來相當費力。她說光是想到死亡可能隨時降臨就令人恐懼，但也只能繼續工作、祈求自己不會是下一個。</p><p>你帶著 Geode 回到廣場與 Krile、Sphene 會合。當你們說出「死者都沒有配戴調節器」這件事時，連 Sphene 也想起自己剛治療的一名傷者同樣沒戴。Krile 冷靜地分析：只看「有沒有新型調節器」無法判斷一個人是否想成為 Endless，畢竟也可能是拿不到；但「完全不配戴調節器」的人，等同於明確拒絕舊系統——也就是拒絕靠靈魂復活的生活方式，選擇在知道死亡不可避免的前提下活下去。這樣的人，最不可能接受 Calyx 的願景；因此 Calyx 可能刻意把他們當成受害者，透過殺戮煽動恐懼與恐慌。Geode 雖怒斥根本不必殺人，但 Krile 也提醒：也許恐懼只是另一個陰謀的一部分，或者 Calyx 對「被奪走的生命」另有需求。</p><p>你提出「白色粉塵」這條線索，Sphene 立刻想起：你們在郊外救 Erenville 時，Malachite 也說過他抵達現場時只看見塵土、沒有遺體。兩邊都提到「遺體消失」與「白色粉塵」，過於一致，不能忽視。Krile 因此決定：必須確認其他現場是否也有這種物質，並設法查明它的性質；沿著這條線索追下去，或許能同時解釋遺體去哪了，以及 Calyx 為何要殺人。</p><p>但你們才剛要行動，Gulool Ja 的求援訊息就插了進來——居住區的哨兵再度失控，他又一次失去控制，哨兵可能正試圖傷人。你們立刻趕往 Residential Sector。現場一名住民驚恐地說，哨兵甚至闖入他上鎖的公寓；他雖然逃了出來，但試圖救他的人卻受了重傷。Krile 注意到哨兵沒有武器——按理說都已解除武裝——但它仍照命令攻擊，甚至用徒手也要達成目的。Geode 立刻去掃蕩周邊；你們則追問這一區是否有人不再配戴調節器，住民提到 Isadora 和她的孩子 Milos 最近似乎沒戴。Krile 立刻催促你們快去。</p><p>你們趕到時，Wayakkwe 受了傷卻仍說自己沒事，但 Isadora 情況很危急。Sphene 叫住她、立刻檢查傷勢，確認她沒有被打中要害，才稍微鬆一口氣。Wayakkwe 低聲自責自己來得太晚；Sphene 一邊止血一邊承諾會把 Isadora 治好。Milos 顫聲喊著母親，問她是不是會一直那樣沉睡下去。Sphene 回答不會——她很快就會醒來。Milos 這才勉強點頭，對 Sphene 道謝。可當 Wayakkwe 提起另一名同伴留在大廳、只聽見戰鬥聲時，Sphene 的語氣沉了下去——她只能告訴他：那個人恐怕已為了保護住民而倒下。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Shale <small class="muted">(The Backroom, X:6.0, Y:6.3)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="seekers-of-eternity.html">探尋永恆之人</a></div>
+      <div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-endless-choice.html">未來的分岔路口</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
