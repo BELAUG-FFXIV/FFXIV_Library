@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Endless Choice | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – The Endless Choice (DT Patch 7.3)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#ffffff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative;max-height:360px;overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:"";position:absolute;left:0;right:0;bottom:0;height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card));pointer-events:none;
+    }
+    .expand-wrap{margin-top:12px}
+    .expand-btn{display:inline-block;padding:8px 14px;border-radius:10px;background:var(--card);border:1px solid var(--border);cursor:pointer;font-weight:600}
+    .expand-btn:hover{background:#fffef8}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/EPQ6suiBdHY"
+              title="The Endless Choice" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">The Endless Choice</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`The Endless Choice`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>For their sakes, you force yourself to stay calm. Milos tells you how his mother once stayed by his side when he was too sick to move, and how he will now do the same for her. An Oblivion comrade insists on going to check on the friend left behind, but Sphene stops them—it’s not safe, and they still need rest. She asks them to remain with Milos and keep watch over his mother while you go to tend to the fallen.</p><p>Back in the residential area, the shock settles in: the brave Oblivion comrade who tried to protect a resident could not be saved. The resident shakes with confusion and fear—one moment the sentry seemed normal, the next it turned murderous. Krile states it plainly: weapons or no, Calyx commanded them to kill.</p><p>More Oblivion members arrive, only to learn they are too late. Then another worry cuts through the grief—Geode has stopped responding. With your theory in mind, Krile warns that Oblivion members, many of whom have sworn off regulators, could be prime targets if the attacks continue. They press the others to shepherd residents to safety while avoiding sentries at all costs, and accept modified communicators meant to prevent Calyx from intercepting the signal.</p><p>You search the nearby apartments, then push farther east when there is still no sign of Geode. Through the communicator, the calls continue—no answer, until at last Geode responds. He reports the next radius over is secured, and he is scouting the second floor…then his voice catches on a single word: dust.</p><p>Before anyone can steady the exchange, Geode blurts out what he has realized: this is not only about collecting souls—someone is draining bodies of corporeal aether, and the “dust” is all that remains. He warns you to run, but it is already too late. A voice you recognize steps in—Calyx, annoyed you have interfered, deciding to cut his foray short.</p><p>When you confront him, Calyx answers with cold arithmetic. To generate five thousand Endless, he needs aether—until he has the key, he must use whatever sources are at hand. He declares that a portion of Alexandria’s population can be harvested to power conversion for centuries, and dismisses the victims as bodies that would decay anyway—people who refused the “gift” of eternal life. He even asks if you would hand over the key in exchange for halting the harvest, then rejects the idea as foolish and withdraws, vowing he will take it by force.</p><p>All that remains is a pile of dust and a soul cell left behind. Sphene trembles between rage and grief—was that Calyx’s twisted way of “returning” Geode? Krile voices the ugly rationalizations others might make, then rejects them outright: there is nothing noble here. With Geode gone and Calyx’s intent laid bare, you and your companions steel yourselves—whatever happens next, the key cannot fall into his hands, and his violence must be stopped before it spreads to other reflections.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Wayakkwe <small class="muted">(Solution Nine, X:4.2, Y:18.9)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="targeted-tragedy.html">Targeted Tragedy</a></div>
+      <div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="my-memories-and-yours.html">My Memories and Yours</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'未来の選択肢',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>人々のために、あなたは平静を保とうとする。ミロスは、身動きできないほど病に伏したとき母がずっと寄り添ってくれたことを語り、今度は自分が母のそばを離れず見守るのだと告げる。仲間の行方を案じたオブリビオンの者は助けに向かおうとするが、スフェーンは制止し、危険だと言って休息を優先させる。ミロスと母のそばに残るよう頼み、あなたたちが仲間のことは引き受ける。</p><p>住居区に戻ると、現実が突きつけられる。救えなかった――オブリビオンの仲間は、住民を守って命を落としていた。住民は震えながら訴える。哨兵はそれまで普通に振る舞っていたのに、突然、命を奪おうとしたのだと。クルルは静かに断じる。武器がなくとも、カリュクスが殺害を命じたのだと。</p><p>駆けつけたオブリビオンの仲間たちは、間に合わなかった事実に言葉を失う。さらに不安が広がる。ジオードが連絡に応じないのだ。クルルは、仮説が正しければ調整器を身につけない者が次の標的になり得ると告げ、住民を安全な場所へ誘導しつつ、哨兵には決して近づかないよう求める。あなたたちは、信号を傍受されにくいよう改修した通信用具を受け取り、ジオードの捜索へ向かう。</p><p>あなたは近隣の集合住宅を探し、手がかりがないまま東へ進む。呼びかけは続き、やがて沈黙ののちにジオードの声が返る。隣の半径区画のロビーは確保した、二階を見てから合流する――そう言いかけて、彼は言葉を詰まらせる。「粉塵」だ、と。</p><p>次の瞬間、ジオードは気づいたことを吐き出す。これは魂を集めるだけではない。肉体の乙太が吸い上げられている。「粉塵」は犠牲者の残滓で、魂細胞に改変が施されたのだろうと。逃げろ、と叫ぶが、すでに遅い。あなたの前に現れたのはカリュクスだった。介入を疎ましく思い、探索を切り上げると言い放つ。</p><p>あなたが問い詰めると、カリュクスは冷ややかに答える。五千のエンドレスを生み出すだけの乙太が必要であり、鍵を得るまでは手元の資源で賄うしかない、と。一定割合の住民を「収穫」すれば変換は長く継続できるのだと算段し、肉体はいずれ朽ちるのだから、永遠の命を拒んだ者を乙太に還しても違いはないと切り捨てる。そして、収穫を止めると言えば鍵を渡すのかと問うが、愚かな問いだったと自嘲し、力ずくで奪うと告げて去っていく。</p><p>残されたのは粉塵の山と、置き去りにされた魂細胞だけだった。スフェーンは怒りと悲しみを抑えきれず、これはジオードを返したつもりなのかと唇を震わせる。クルルは、犠牲を正当化する声が生まれ得ることをあえて口にし、しかしすぐ否定する――この犠牲に崇高さなどない。あなたは決意を固める。鍵は決して渡さない。カリュクスの暴虐をここで止め、他の反映世界へ恐怖が及ぶ前に終わらせなければならない。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> ワヤッケ <small class="muted">(ソリューション・ナイン, X:4.2, Y:18.9)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="targeted-tragedy.html">闇夜の誘い</a></div>
+      <div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="my-memories-and-yours.html">君と僕の記憶</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'未來的分岔路口',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>為了他們，你逼自己一定要冷靜。Milos 說，自己曾經病得動不了時，母親總是守在身邊陪著他；所以現在，他也要守著母親、陪她一起撐過去。那位 Oblivion（Alexandria 內負責巡邏、維安與危機應對的部隊） 的同伴聽見你們提到失聯的戰友，立刻想去確認狀況，但 Sphene 叫住他——現在外頭不安全，他也需要休息。她請他留下來陪 Milos、照看 Milos 的母親，而你們會去處理戰友的事。</p><p>回到居住區，噩耗已經無法迴避。Krile 確認：那位勇敢的 Oblivion 同伴 已經救不回來了。受害住民發抖著說，自己到現在仍想不通——那具 哨兵 明明前一刻還像平常一樣行動，下一秒卻突然要殺了他。Krile 低聲卻清楚地指出：不管有沒有武器，這些殺戮都是 Calyx 下的命令。</p><p>更多 Oblivion 成員趕到，卻只能面對「太晚了」的現實。更糟的是，Geode 也失去聯絡。Sphene 立刻緊張起來；而 Krile 想到你們之前的推論，提醒大家：若那些不再配戴調節器的人真的是優先目標，那麼許多已經立誓不戴調節器的 Oblivion 成員，很可能就是下一波攻擊的重點對象。她請他們盡力護送住民撤到安全處，但無論如何都要避開哨兵；同時也交給你們一批改造過的通訊器，避免訊號被 Calyx 攔截，好讓附近的同伴能互相協調行動。</p><p>你和 Krile、Sphene 立刻在住宅周邊搜索，先查公寓、再往更東側推進——仍然找不到 Geode。通訊器裡傳來不斷呼叫的聲音，直到 Geode 終於回覆：他人在隔壁的住宅半徑區，大廳已經安全，他正要去二樓偵查後再合流。可他話音忽然一頓，只吐出一句——「粉塵……」。</p><p>下一秒，Geode 像是抓住了什麼關鍵，急促地說出他的判斷：他們不只是收集靈魂，還在抽乾受害者的 肉體乙太；你們先前見到的「粉塵」，就是受害者最後留下的殘渣——他們一定改造了那些魂細胞。Geode 罵聲還未落下，就猛然警告你們快逃；但話才出口，你們便聽見另一道冷冷的聲音介入——Calyx 現身，說自己本想再帶走一份乙太，卻因你們太急著插手，只能提早結束這次行動。</p><p>你質問他到底想從這些暴行中得到什麼，Calyx 給出的答案冷酷得像計算：要生成五千名 Endless，就需要足夠的乙太。在他拿到那把「鑰匙」之前，反映世界對他是封閉的，所以他只能先用手邊的來源。他甚至直接說出比例與年限——只要「收割」 Alexandria 現有人口的一部分，就能讓五千人的轉化成立，還能讓計畫持續運作數百年。他把人的身體視為終將腐朽的東西，又說那些拒絕「永生禮物」的人，現在被還原成乙太也沒差別。接著他拋出交易：若他承諾停止收割，你是否願意交出鑰匙？你表明不會屈服，他便嗤笑自己問得愚蠢，轉身回到「工作」之中，揚言必要時會用武力奪走鑰匙。</p><p>你們追到現場，只看見一堆白色粉塵，以及 Calyx 刻意留下的魂細胞。Sphene 顫著聲音質問——這算什麼？把 Geode 以這種方式「還給」你們嗎？她的憤怒與悲痛幾乎要失控。Krile 逼自己冷靜，說她知道有人會拿「五千名 Endless 的永生」來替每一條人命辯護，甚至把「更多 Endless」包裝成所謂更大的善；可她立刻否定——這裡沒有任何崇高，只有被扭曲的犧牲。你們只能下定決心：不惜一切也不能讓鑰匙落入 Calyx 手中，而且必須在他把恐怖帶往其他反映世界之前，先在 Alexandria 終結這場瘋狂。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 瓦亞克葵 <small class="muted">(Solution Nine, X:4.2, Y:18.9)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="targeted-tragedy.html">暗夜下的低語</a></div>
+      <div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="my-memories-and-yours.html">你和我共有的記憶</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
