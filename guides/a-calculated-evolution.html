@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A Calculated Evolution | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – A Calculated Evolution (DT Patch 7.3)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#ffffff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative;max-height:360px;overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:"";position:absolute;left:0;right:0;bottom:0;height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card));pointer-events:none;
+    }
+    .expand-wrap{margin-top:12px}
+    .expand-btn{display:inline-block;padding:8px 14px;border-radius:10px;background:var(--card);border:1px solid var(--border);cursor:pointer;font-weight:600}
+    .expand-btn:hover{background:#fffef8}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe src="https://www.youtube.com/embed/ibwdhnG4tcY" title="A Calculated Evolution" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">A Calculated Evolution</div>
+
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`A Calculated Evolution`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Shale gets the sealed door open with practiced ease, and you step into Deuterolab—only to freeze at what’s displayed inside. On the monitor is a schematic tied to the key to interdimensional fusion, and the room holds what looks like another “key” vessel. Wuk Lamat points out the crucial difference: it lacks the crystal shard like the one you carry. Krile realizes you’ve all been operating on a misconception. The “key” began as a Milalla relic; once Preservation obtained it, they built a vessel around it—here, in this facility—trying to harness its power. The crystal is the irreplaceable core, and the vessel is merely the device Preservation constructed to control what they never truly understood: no one knows who imbued the relic with its power, when, or why.</p><p>With that clarified, Shale pivots back to the real objective: finding Calyx. The lab’s research was highly confidential, which means higher-clearance staff—and potentially higher-level security cards. You spread out, searching for a Level 3 security card. After a brief sweep of drawers and shelves, you find one, and Shale confirms it’s exactly what you need to access the director’s office.</p><p>Inside Deuterolab, Sphene asks Shale to explain the “device” she mentioned. Shale admits she hadn’t fully laid it out: she’s looking for a data relay. When you first found this “abandoned” complex, she detected it was still connected to an external network. Tracing the routing, she confirmed traffic coming from Everkeep’s security cameras. Given how Calyx always stays a step ahead, Shale believes he’s seized the surveillance system to track your movements as the key holder. If she can locate and analyze the relay, she can follow the flow of surveillance data “upstream” to Calyx. Yet Calyx hasn’t tried to stop you, which makes her suspect she might be chasing the wrong lead.</p><p>Then Shale drops another discovery: someone deliberately disabled the surveillance feed in this room, and the latest recording was crudely deleted—though she managed to restore it. The footage shows a researcher trying to defect, frightened by the promise of eternal life and arguing that death is part of life’s necessary renewal. An “authoritative” colleague rejects the resignation as disloyalty to “Master Calyx,” then coldly invokes protocol—no exceptions—and executes her. Shale identifies the shooter as Director Demetrius, a man whose records suggest an obsessive devotion to Calyx. The cameras here have been offline ever since, and the deletion likely aimed to hide the murder from other staff.</p><p>Krile grows quiet. Her parents once described rushing her through a portal while Preservation agents closed in. She never asked what happened after, but the scene makes the implication hard to ignore. Shale says whatever conflict unfolded, Krile’s parents erased every trace of their movements so no one could follow them into the Source or threaten their child. Krile steadies herself and insists you press on: the story behind the key deserves its conclusion. With the Level 3 card in hand, you move to the director’s office.</p><p>The office holds grisly reports—calculations on reducing people to aether and harvesting energy per individual—yet Shale can’t find the data relay. Worse, the room feels smaller than the map suggests, as if something is missing. As you search, you find a crumpled note: Secure Room Lift Access requires passwords entered simultaneously at terminals in Protolab, Deuterolab, and the director’s office. There’s no secure room on the map, which implies it’s concealed. Krile recalls a wall that briefly “flickered,” and Gulool Ja repeats Cahciua’s old warning: never trust an electrope surface. Shale disables the projection, revealing another hidden door—but it’s locked behind the three-terminal password protocol.</p><p>Wuk Lamat heads to Protolab; Krile takes Deuterolab. You stay in the director’s office with Shale, Sphene, and Gulool Ja to find the passwords. Gulool Ja solves an electrope cube puzzle and finds a green gem—alexandrite—which fits into an empty slot on a jeweled electrope display already holding a sapphire and a garnet. A floor-plan-like circuit lights up, linking each gem to a lab: sapphire → Protolab, garnet → Deuterolab, alexandrite → Director’s Office. A handwritten phrase appears: “Heed the stones.” Sphene explains the old Alexandrian symbolism: alexandrite = protection, sapphire = honesty, garnet = devotion. Using the correct word at each corresponding terminal finally grants access, and the hidden lift opens.</p><p>In the secure room, you find what Shale believes is the target: the Meso Terminal infrastructure. Krile explains that Endless are, at their core, data entities—memories rendered as data—so they require a medium to interact with the physical world. One method is temporary bodies formed with corporeal aether (as seen in Living Memory); the other is remote operation of machinery (as Cahciua did). That implies the Endless “reside” in a virtual domain housed inside an electrope-based machine—and you’ve seen such a realm before. Shale confirms: Living Memory’s shutdown worked as intended, yet Calyx is a master of electrope engineering and could plausibly partition and protect a separate sector holding his own memories.</p><p>Shale also confirms her suspicion: security transmissions across Everkeep are still being tapped by the core system and routed elsewhere, and nearly all are focused on you—the key holder. At that moment, Calyx speaks directly. He mocks the idea of tracing security data to find him, says he has taken your measure, and invites you to the upper reaches of the Meso Terminal, where his memory storage device is kept. Break the memory bank and victory is yours, he says—otherwise he will continue converting Alexandrians into Endless. Wuk Lamat demands to know why he didn’t simply steal the key earlier; Calyx admits a miscalculation: near the end, Endless Sphene’s restructured memories became one with the terminal’s control systems, granting her authority greater than his in that singular moment—enough to shield you and entrust the key onward. Wuk Lamat’s answer is clear: Calyx will take nothing more from this nation. You regroup in the Backroom, and even as Shale fumes at having her “moment of triumph” stolen, the path forward is finally defined.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Shale <small class="muted">(Containment Complex 10-29, X:6.4, Y:6.6)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="preservation-their-purpose.html">Preservation Their Purpose</a></div>
+      <div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="one-of-our-own.html">One of Our Own</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'進化の方程式',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>シェールは扉のロックを難なく解除し、あなたたちはデュテロラボへ踏み込む。そこには、次元融合の鍵に関する設計図と思しき表示があり、さらに「もうひとつの鍵」を作ろうとした形跡が残っていた。だがウクラマトが気づく――それには、あなたが所持するもののような結晶片が入っていない。クルルはそこで、前提そのものが誤りだった可能性を指摘する。鍵は元来ミララの遺物であり、プリザベーションはそれを得てから“次元を越える力”を利用しようとして器（ヴェッセル）をここで作った。結晶こそが核で、器は制御のために作られた装置に過ぎない。そして今に至るまで、次元融合の仕組みは誰にも理解されていない――誰が、いつ、なぜ力を与えたのかさえ不明だ。</p><p>優先すべきはカリュクスの所在だとして、シェールは機密度の高い研究区画であることに着目し、上層の人員が残した可能性のあるセキュリティカードを探すよう促す。あなたは探索の末、レベル3のカードを見つけ、これで所長室へ入れると確認される。</p><p>そこでシェールは、狙っているのが「データリレー」だと説明する。見捨てられたはずの施設に外部ネットワークとの接続を検知し、経路を追うとエバーキープの監視カメラ群から通信が流れていた。常に先回りするカリュクスが監視網を掌握し、鍵の所持者であるあなたの行動を見張っていると考えれば筋が通る。データリレーを解析できれば、監視通信の流れを遡ってカリュクスに辿り着ける――ただし、彼が妨害してこない以上、読み違えている可能性もある。</p><p>さらにシェールは、デュテロラボの監視映像が意図的に無効化され、最新記録も雑に削除されていたが復元できたと告げる。映像には、永遠の命という発想に恐怖を覚え、プリザベーションを去ろうとする研究員が映っていた。彼女は「死は生命が枝を落として強く育つためのもの」だと語り、不死が停滞を生むなら自分たちは誤ったものを追っているのではないか、と訴える。だが相手は「マスター・カリュクスの理念への拒絶」だとして、規則だ、例外はない――と冷たく告げ、彼女を射殺する。引き金を引いたのは所長デメトリウスであり、彼は“マスター・カリュクス”への強い傾倒を示す人物だったという。以来この部屋のカメラは止まり、記録の抹消は事件の隠蔽だったのだろう。</p><p>クルルは、両親が自分をポータルへ押し込み、追手が迫るなか逃がしたと語っていたことを思い出し、胸の内を抑えきれなくなる。シェールは、詳細は不明だが、両親が痕跡を完全に消し、ソースへ渡って子の安全が脅かされないよう徹底したのは確かだと言う。あなたたちは所長室へ向かい、そこで「隠し区画」へ至る手掛かり――三つの端末で同時にパスワードを入力することで作動するリフト――の存在に辿り着く。</p><p>宝石を埋め込んだ装飾板と、隠されていたアレキサンドライト、そして「石に従え」という走り書き。スフェーンは宝石の象徴を語り、アレキサンドライトは守護、サファイアは誠実、ガーネットは献身を意味するという。対応する区画ごとに正しい語を入力し、隠しリフトが起動する。</p><p>奥で見つかったのはメソ・ターミナルに関わる設備だった。クルルは、エンドレスが「記憶＝データ」から生まれる存在である以上、物質世界と関わるには媒介が必要だと説明する。生身の身体を一時的に与える方法（リビング・メモリーで見たもの）と、機械を遠隔操作する方法（カフキアが用いたもの）。つまり彼らは、エレクトロープ機械の内部にある仮想領域に居るのではないか――そしてその可能性は十分にある。</p><p>シェールは、今もなお監視通信がコアシステムから別の場所へ転送され、ほとんどがあなた――鍵の所持者――を追っていると告げる。その瞬間、カリュクスが現れ、追跡など不要だと言い放つ。彼はあなたの力を測り、制圧に足る戦力を整えたという。そして、メソ・ターミナル上層へ来い――自分の記憶を収めた装置がそこにある、破壊すれば勝利だ、拒めばアレクサンドリアの人々をエンドレスへ変え続ける、と。ウクラマトは、これ以上一つの命も未来も奪わせないと誓い、あなたたちはバックルームで次の一手を固める。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> シェール <small class="muted">(格納殻10-29, X:6.4, Y:6.6)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="preservation-their-purpose.html">保存する者たち</a></div>
+      <div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="one-of-our-own.html">この国で生きるために</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'精算過的進化',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Shale 把那扇門打開後，你們踏進 Deuterolab，Krile 看到螢幕上的圖樣立刻倒抽一口氣——那像是「跨次元融合之鑰」的設計圖。更關鍵的是，Preservation（由 Calyx 建立的研究機構／組織）似乎確實做出了「另一把鑰」的器身；但 Wuk Lamat 一眼就看出差異：那個器身裡沒有你手上的那枚結晶碎片。Krile 因此意識到你們一直有個根本性的誤會：所謂「鑰」，最初其實是 Milalla 的遺物；Preservation 拿到它之後，才在這裡打造出器身，想把它用來跨越次元。也就是說——結晶本身才是關鍵，而器身只是他們為了「控制它」而製作的裝置。即使到了今天，也沒有人真正理解跨次元融合的機制：不知道是誰賦予它力量、不知道何時、也不知道為什麼。</p><p>你們把注意力拉回現實目標：找到 Calyx。這間實驗室顯然屬於高度機密區域，意味著曾在此工作的，很可能是 Preservation 的高層人員——也就更可能留下高等級的 security card。大家分頭翻找，最後你在抽屜裡找到一張卡，交給 Shale 確認後，正是你們需要的 Level 3，足以進入 director’s office。</p><p>在 Deuterolab 裡，Sphene 追問 Shale 先前提到的「某個裝置」到底是什麼。Shale 承認她還沒講清楚：她要找的是 data relay。你們發現這座看似「廢棄」的設施時，她做過初步探查，偵測到它仍連著外部網路；一路追蹤資料路由後，她確認流量來自 Everkeep 的監視攝影機。Calyx 總能比你們快一步，因此 Shale 推測他已悄悄接管整座城市的監控系統，用來盯著你——「鑰的持有者」——的一舉一動。只要能找到並解析 data relay，她就能沿著監控資料的「河流」逆流而上，直接鎖定 Calyx 的位置；但她也困惑，因為 Calyx 一路都沒有阻礙你們，讓她懷疑自己可能追錯了方向。</p><p>接著 Shale 說出另一件更陰冷的發現：這個房間的監控畫面曾被人刻意停用，而最新的錄影也被粗糙地刪除；她雖然成功復原，但內容令人發寒。影像中，一名研究員因「永生」的概念開始感到恐懼，決定離開 Preservation。她說死亡像是生命修枝，讓樹幹得以更強壯；人會死，物種才能繁盛。若停止這個過程，人類會變成什麼？若成果只是無盡的停滯，那他們或許正在追求錯誤的目標。另一名研究員冷冷回應：那等同於否定「Master Calyx」的願景。當那人仍試圖辯解時，對方只說「依照程序，沒有例外」——然後開槍處決。Shale 比對人員資料後指出，扣下扳機的人正是 Director Demetrius，而她查到的紀錄顯示，他對「Master Calyx」有近乎迷戀的崇拜。自那次事件後，這個房間的攝影機就一直停擺；而錄影被刪除，顯然是為了掩蓋這場屠殺。</p><p>Krile 因此想起父母談過的往事：他們曾在 Preservation 的追兵逼近時，匆忙把她推進傳送門。她從不敢追問後來發生了什麼；可若他們真的被追上、被抓走……那後果她不願去想。你回應她時，不管是安慰他們一定逃掉，或是說他們至少無悔於自己的選擇，Krile 都只能抓住那一點點能讓自己站穩的東西。Shale 則補充：你們雖不清楚衝突細節，但可以確定 Krile 的父母徹底抹除了所有行蹤痕跡，確保沒有人能追到 Source、也無法威脅到孩子的安全。</p><p>你們用 Level 3 security card 進入 director’s office，卻發現這裡充斥著把人「還原成乙太」與每個個體可榨取能量的報告。Shale 原以為 data relay 就在這裡，卻怎麼也找不到；更怪的是，辦公室的空間比地圖顯示得小，像是「少了一塊」。你們分頭搜查，找到一張皺巴巴的紙條，寫著：Secure Room Lift Access——必須在 protolab、deuterolab、director’s office 三個終端「同時」輸入密碼。地圖上沒有標示這個 secure room，顯然是被藏起來的；Krile 想起那面曾短暫「閃了一下」的牆，Gulool Ja 也想起 Cahciua 的話：「永遠別相信 electrope 的表面。」Shale 解除投影後果然露出隱藏入口，但門鎖仍要靠三終端密碼協議才能啟動升降梯。</p><p>Wuk Lamat 去 protolab，Krile 去 deuterolab，你留在 office 這邊找密碼線索。Gulool Ja 在抽屜裡翻出一個 electrope 的方塊拼圖，解開後在裡頭找到一顆綠色寶石——alexandrite。同一時間，你注意到室內有個鑲著寶石的 electrope 展示板：藍色的是 sapphire、紅色的是 garnet，旁邊還留著一個空槽。你把 alexandrite 插上去後，展示板立刻亮起像電路般的圖樣，構成一張設施平面圖：sapphire 對應 protolab、garnet 對應 deuterolab、alexandrite 對應 director’s office；旁邊還浮出一句手寫字——「Heed the stones」。你去問 Sphene，她說這是 Alexandria 的古老信仰：alexandrite 代表 protection，sapphire 代表 honesty，garnet 代表 devotion。你們依照各自實驗室對應的寶石意象，在三個終端分別輸入正確的詞，升降梯終於啟動，通往那個地圖上根本不存在的 secure room。</p><p>在 secure room 裡，你們找到 Shale 判斷的目標——與 Meso Terminal 相關的裝置。Krile 解釋：Endless 是由死者記憶生成的存在，本質上是「資料」，因此沒有真正的肉身；要與物質世界互動，只能靠兩條路——一種是像 Living Memory 那樣以 corporeal aether 讓他們短暫獲得可觸碰的身體；另一種則是像 Cahciua 那樣遠端操控機械。既然如此，當 Endless 不在肉身裡時，就很可能「居住」在某個完全由 electrope 機械承載的虛擬領域。Shale 也指出：你們確實關停了 Living Memory 的終端，Cahciua 的程式也如她預期運作；但 Calyx 是 electrope 工程的大師，他完全可能把「存放自己記憶的區域」切割出來，並保護起來。</p><p>Krile 進一步推測：如果 Calyx 真的躲在那個領域裡，他在那裡，而這座城市則位於 Source（第一世界）——那她原本以為可以透過關閉通往黃金城的門、切斷世界連結，來阻止他的遠端干預；可 Shale 承認她之前在 Living Memory 嘗試關閉時，系統要求行政授權，她當時以為那是 queen 設下的限制，如今卻更像是 Calyx 的手筆。她也證實：直到現在，整座 Everkeep 的安保傳輸仍被 core system 擷取並轉送到別處，而且幾乎每一條都把焦點鎖定在你身上——他在追蹤「鑰的持有者」。</p><p>就在這時，Calyx 直接現身，以居高臨下的口吻說：你們想靠追安全資料找到他，根本不必。他已經花了不小的力氣測量你的實力，並準備了足以壓制你的力量。接著他發出「邀請」：前往 Meso Terminal 的上層，那裡有存放他記憶的儲存裝置；你們若打碎 memory bank 就算勝利，而他也會用一切手段從你手中奪走鑰。若你們拒絕，他就繼續把 Alexandrians 轉化為 Endless。Wuk Lamat 逼問他：既然能操控那麼多事，為何不在 Endless Sphene 失敗時直接把鑰帶走？Calyx 回答那是他的失算——在 Sphene 臨終時，她與被重構的記憶成了終端控制系統的一部分，在那個地方、那個瞬間，她握有比他更高的權限，才能保護你、把國家的未來託付出去，也把那把無價的鑰交到你手上。Wuk Lamat 的結論只有一個：Calyx 不能再從這個國家奪走任何一條生命、任何一個未來、任何一個孩子的笑容。你們回到 Backroom，雖然 Shale 因他「搶走她的勝利」而怒不可遏，但至少下一步已經被逼得無比清晰——你們知道該去哪裡找他，也知道不得不面對什麼。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 謝爾 <small class="muted">(收容複合設施 10-29, X:6.4, Y:6.6)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="preservation-their-purpose.html">守護這一切的人們</a></div>
+      <div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="one-of-our-own.html">為了和同伴們並肩活在這片土地上</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
