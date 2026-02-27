@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Toward Trouble | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Toward Trouble (DT Patch 7.4)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#ffffff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative;max-height:360px;overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:"";position:absolute;left:0;right:0;bottom:0;height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card));pointer-events:none;
+    }
+    .expand-wrap{margin-top:12px}
+    .expand-btn{display:inline-block;padding:8px 14px;border-radius:10px;background:var(--card);border:1px solid var(--border);cursor:pointer;font-weight:600}
+    .expand-btn:hover{background:#fffef8}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe src="https://www.youtube.com/embed/jl5sK6_6sAM" title="Toward Trouble" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Toward Trouble</div>
+
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Toward Trouble`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Eyaney recalls the stories her grandmother told of the Milalla homeland, but it’s the moment the ocean itself froze that still grips her imagination—the endless open sea turned to ice, vast beyond belief. Before the thought can settle, your companions regroup, trading quick words about where everyone has gone and what still needs doing. Sphene admits she has only briefly satisfied Miayli’s curiosity for now, and Y’shtola urges that the discussion shouldn’t end there—Miayli has known of the key far longer than you did, and wants to speak with everyone.</p><p>Krile is eager to go at once, yet hesitates—G’raha Tia and the others should have been back by now. Still, there is time while Miayli makes her rounds, and the conversation turns inevitably to the key and to Alexandria’s difficult-to-explain circumstances. Krile reasons that if the Milalla arrived in Treno soon after fleeing the Source, then the city’s leadership—especially if the mayor is Milalla—could well have inherited knowledge of the relic. Sphene, meanwhile, begins weighing what it would mean to reopen ties with Treno, knowing even the simplest travel between your lands would require passage through Tural and careful coordination with those in authority.</p><p>Then the city is cut through by an evacuation alert: citizens are ordered to shelters, and a single name is repeated with chilling clarity—the Doomtrain is approaching. Sphene recognizes it as a weapon of war tied to Lindblum, and explains what she learned long ago: an armored vehicle meant to deliver war-beasts, kept in check by a powerful arcane entity bound within its engine. Eyaney adds the truth Treno has lived with for years—fueled by lightning-aspected aether, the Doomtrain has never truly stopped since the war ended, and wherever it runs, it carries death and devastation.</p><p>The warning isn’t abstract for Eyaney. She remembers the lives it took when it passed near Treno before—her parents among them—and she turns immediately to the barrier, determined to repair it before the train arrives. Lumull protests, terrified she’ll be caught in its path, but the moment demands action. Your companions step forward again: G’raha Tia prepares to fight, Sphene insists on joining to help with electrope if she can, and Y’shtola judges that destroying the Doomtrain would be ideal—but if that’s impossible, you must at least slow it.</p><p>Lumull, forced to accept the risk you’re taking, offers a desperate alternative. There is a freight depot nearby, and a train sits there halted by the emergency failsafe—if you reach it first, you can take it, match speed with the Doomtrain as it passes through the depot, and use the moving rail line as a platform for a sustained counteroffensive instead of being crushed head-on. Lumull insists on driving so you can focus on the battle, snatches what he needs, and tells you to meet him by the gate.</p><p>With the plan set, you and your companions divide responsibilities at once. While you move to intercept the metal serpent before it reaches the city, the others remain behind to guard Treno’s gate and help shepherd citizens into shelter—because if the Doomtrain’s influence can keep enthralled beasts in motion even at full speed, then the swarm that follows it could be as deadly as the engine itself.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Krile <small class="muted">(Treno, X:10.6, Y:11.0)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="in-her-heart.html">In Her Heart</a></div>
+      <div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="where-we-call-home.html">Where We Call Home</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'苦難の中にあろうとも',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ミララの故郷を語る祖母の昔話の中でも、海が凍りついた場面がいちばん胸を躍らせる――そう語る住人の言葉に、あなたはこの大陸が背負ってきた歳月の重みを思う。だが感傷に浸る暇はない。仲間たちはすぐに合流し、街で得た手がかりをつなぎ合わせる。鍵の事情は伏せきれず、しかし語ったことでかえって道が開ける予感もあった。古い伝承と現実の断片が重なり、街の中枢にいる者たちが、あなたたちよりずっと前から遺物の存在を知っていた可能性が浮かび上がる。</p><p>やがて、アレクサンドリアの現在地を説明するには鍵の話を避けられない、という結論に至る。もしミララが「原初世界」を離れてすぐにトレノへ辿り着いたのなら、街の統治者が鍵の知識を受け継いでいたとしても不思議ではない。さらに、アレクサンドリアとトレノの関係を結び直すには、移動経路や外交上の手続きといった現実的な障害が山ほどある――その整理を、あなたは仲間とともに急ぎ始める。</p><p>そのとき、街に非常警報が響き渡る。市民は避難所へ向かえ、同じ言葉が繰り返される――ドゥームトレイン接近。仲間のひとりは、それがかつて戦争で用いられた兵器であったと口にする。装甲車両に戦獣を輸送するため、暴走を防ぐべく機関部に強力な秘術存在を封じた、と。だが終戦はそれを止めなかった。雷属性の乙太に駆動され、大陸を走り続け、行く先々に死と破壊を撒き散らす――レール上の災厄だと、住人は吐き捨てるように言う。</p><p>警報が意味するものは、個人の記憶にも直結していた。数年前に街の近くを通過したとき、多くの命が失われ、住人の両親も帰らなかったという。彼女は迷わず結界の修復へ向かおうとする。間に合わない、危険すぎると引き留められても、それでも「トレノのために」やるしかない。あなたの仲間たちは再び前へ出る。正面から叩き潰せるならそれが最善だが、せめて進行を遅らせねばならない――そう判断が下る。</p><p>覚悟を固めたあなたたちに、住人は別の道を示す。近くに貨物デポがあり、非常停止で止まった貨物列車がある。ドゥームトレインはそこを通るはずで、避難警報が鳴ったばかりなら先回りできるかもしれない。その列車を使い、速度を合わせ、走行中の足場から継続して迎撃する――轢き潰されるのを待つよりは、まだ勝ち目がある。運転は自分が引き受けるから、あなたは戦いに集中してほしい、と彼は言う。</p><p>方針が決まると、あなたたちは役割を割り振る。あなたが「金属の大蛇」の先頭を断つあいだ、仲間は街門の防衛と避難誘導に回る。もし走りながらでも魅了された獣が集い続けるほどの影響力があるなら、押し寄せる数は読めない。最悪を想定し、トレノを守り抜くために、あなたは出発する。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> クルル <small class="muted">(トレノ, X:10.6, Y:11.0)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="in-her-heart.html">大地に根づく花のように</a></div>
+      <div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="where-we-call-home.html">隣人と手を取り合いて</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'仍在苦難之中',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Eyaney 說，Grandmother 以前總愛講 Milalla 故鄉的故事，但最讓她著迷的永遠是「海洋整片凍結」那段——遼闊無際的開放海域竟化作冰原，光是想像就令人屏息。你們短暫停留的片刻很快被拉回現實：Sphene 表示自己暫時回應了 Miayli 的好奇；Y’shtola 則提醒，你們其實得把「鑰」的資訊說得更清楚一些，Miayli 似乎早在你們之前就知道那件遺物，還想和所有人談談。</p><p>Krile 明明很想立刻動身，卻又放不下 G’raha Tia 還沒回來的事。你們一邊等、一邊整理眼前能說出口的部分：Alexandria 的現況很難不提到鑰，但現在看來，坦白反而可能是最好的選擇。Krile 推想，如果 Milalla 是在逃離 Source（原初世界）後不久就抵達 Treno，那麼這座城的領導層，尤其是同為 Milalla 的市長，確實有可能早就掌握鑰的線索。Sphene 也同時在衡量：若要和 Treno 重建往來，地理與路線本身就已是難題，更別說任何移動都得經過 Tural，勢必需要先與 Gossan 以及 Wuk Lamat 的體系協調。</p><p>就在你們要把話題接下去時，鐵道系統的撤離警報驟然響起：所有市民立刻前往緊急避難所，Doomtrain（Treno 一帶在 Storm Surge（雷災）後仍於 Mist Continent 上活動的「鐵道災厄」：一台以雷屬性乙太驅動、長年高速行駛的裝甲列車兵器。依 Sphene 的說法，它原本是 Lindblum 的戰爭武器，用來運送軍用魔獸；為防失控，引擎內封存了一個強大的秘術存在。它與其所攜帶的野獸會在沿途造成大規模死傷與破壞，因此被當地人視為「在鐵軌上行走的災厄」）正在接近。Sphene 聽見那名字便立刻想起 Zelenia 曾提過的舊聞：那是 Lindblum 的戰爭兵器之一，用裝甲車體運送戰獸上前線；為了防止牠們在投入戰場前失控，機關裡封存著一個強大的秘術存在。Eyaney 接著補上 Treno 長年承受的真相：戰爭結束並沒有讓它停下來，反而因雷屬性乙太而一路狂奔至今；Doomtrain 與其戰獸所到之處，盡是死亡與毀壞，它根本是「在鐵軌上行走的災厄」。</p><p>Eyaney 的語氣在提到「曾經靠近 Treno 的那一次」時變得更尖銳：那次奪走了無數性命，也帶走了她與 Lumull 的 parents。她當機立斷要去修復結界，因為沒有結界，你們根本不可能撐住。Lumull 怕她來不及、怕她正好落在 Doomtrain 的路徑上，幾乎要崩潰，但局勢不允許退縮。G’raha Tia 立刻表明自己又得上場；Sphene 也堅持同行，說不定自己對 electrope 的知識能派上用場；Y’shtola 則冷靜判斷：能摧毀 Doomtrain 當然最好，但至少也得拖慢它的前進速度。</p><p>Lumull 見你們決意已定，提出一個更「能活下去」的方案：附近有一座貨運集散站，主線因緊急防護而觸發停駛，正好有一列貨運列車停在那裡。Doomtrain 想抵達 Treno 必定得穿過集散站，而警報才剛響起，你們或許能先一步抵達，搶下那列貨運列車、把速度拉到與 Doomtrain 相近，改用行進中的車廂作為戰鬥平台，從旁展開持續迎擊，總比在正面被直接碾過更有勝算。Lumull 說他來開車，你專心戰鬥就好；他匆匆去準備物資，要你去城門集合。</p><p>計畫定下後，你們立刻分工。你要去處理那條「金屬巨蛇」的前端，盡可能在它逼近 Treno 前把它壓制；Krile 與 Y’shtola 則留在城門防線，同時協助市民盡快進入避難所。因為如果 Doomtrain 的影響強到能讓被迷惑的野獸一路追隨、邊跑邊聚集，那麼衝向城門的數量根本無法預估，你們只能用最壞的情況去準備。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 克露兒 <small class="muted">(特雷諾, X:10.6, Y:11.0)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="in-her-heart.html">如花扎根大地</a></div>
+      <div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="where-we-call-home.html">我們稱之為家的地方</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
