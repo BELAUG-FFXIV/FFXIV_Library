@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>One of Our Own | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – One of Our Own (DT Patch 7.3)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#ffffff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative;max-height:360px;overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:"";position:absolute;left:0;right:0;bottom:0;height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card));pointer-events:none;
+    }
+    .expand-wrap{margin-top:12px}
+    .expand-btn{display:inline-block;padding:8px 14px;border-radius:10px;background:var(--card);border:1px solid var(--border);cursor:pointer;font-weight:600}
+    .expand-btn:hover{background:#fffef8}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe src="https://www.youtube.com/embed/pY-N1EHivms" title="One of Our Own" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">One of Our Own</div>
+
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`One of Our Own`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Back in the Backroom, everyone confirms the immediate choice in front of you: Calyx has offered a direct confrontation, and even if it reeks of an ambush, you cannot ignore it. If his memories truly reside in the upper reaches of the Meso Terminal, then that is where you must go to end this. Shale adds one hard fact she verified despite her frustration—your team’s relay was transmitting surveillance data to a device somewhere in Living Memory.</p><p>Sphene steps forward and asks to fight at your side. She wants to fight for Otis and Zelenia, for the other Sphene she might have become, and for Alexandria’s tomorrow. You accept her resolve, and Wuk Lamat makes it clear she will come as well. Krile notes that the Scions have already insisted on joining—Alisaie and the others have gone ahead to Living Memory—and she is ready to follow. Erenville stays behind to patrol the streets, watching especially for trouble involving neo regulators, while Shale remains on standby in the Backroom.</p><p>Before you depart, Wuk Lamat and Krile insist on one more responsibility: you should speak to Gossan first. Preservation has shaped Alexandria for centuries under Calyx’s direction, and taking him down will shake the nation; leaving without warning the officials would be wrong—especially when your actions run counter to the wishes of those who still yearn to become Endless. With that decision made, you head for Resolution.</p><p>In Praxis Park, Gossan listens and admits his position is precarious: without an official sovereign, Preservation should not dictate Alexandria’s future—yet he cannot openly endorse your plan either. He confesses he has not registered his new regulator, trapped between fear of death and the duty to govern. Worse, he fears that ending the option of becoming Endless will make the recent deaths feel “meaningless” to the bereaved, stripping them of the only solace they can grasp. He asks how Alexandria is supposed to endure tragedies like this.</p><p>The answer comes from Alexandria’s citizens themselves. Lithander speaks bluntly: for too long, the people relied on Queen Sphene and inherited systems to shelter them, growing entitled to comfort while forgetting those who bled for it. Now they must learn to live with death, and to survive the pain of loss. Malachite, Mahuwsa, and Taapu pledge to support Oblivion—not as fighters, but in a “battle of ideas,” talking to neighbors and calming the wavering before fear hardens into fanaticism. Their words steady Gossan, and he rejects the thought of becoming Endless at the expense of his countrymen.</p><p>In the midst of it, the crowd acknowledges what they have all noticed: Sphene is the perfect likeness of their queen, yet she is not her. They refuse to cast her out for living in secrecy; they call her one of their own and ask her to return and tell her story. With Gossan freed from indecision, he removes his regulator—only then realizing how heavy it was—and warns that neo regulators in circulation already exceed five thousand, likely by Calyx’s design. There is no delaying it anymore. You move for Living Memory, where Y’shtola reports a new change: the Meso Terminal’s wall has receded, opening a convenient entrance—an electrope manipulation meant to welcome you into Calyx’s “invitation” to the upper levels.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Sphene <small class="muted">(The Backroom, X:6.0, Y:6.4)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="a-calculated-evolution.html">A Calculated Evolution</a></div>
+      <div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-terminal-invitation.html">A Terminal Invitation</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'この国で生きるために',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>バックルームに戻ると、あなたたちは次の一手を確認する。カリュクスは直接対決の機会を提示してきた。罠の匂いが濃いとしても、メソ・ターミナル上層に保管されたという彼の記憶を破壊するには、そこへ向かうしかない。シェールは悔しさを滲ませつつも、回収したリレーが監視データを「リビング・メモリー」内の装置へ送信していた事実を突き止めたと報告する。</p><p>スフェーンは、あなたに並んで戦わせてほしいと願い出る。オーティスとゼレニアの記憶のため、そして「もうひとりのスフェーン」になり得た可能性のため――何より愛する王国と明日のために。あなたがその覚悟を受け止めると、ウクラマトも同行を宣言し、クルルは暁の血盟（賢者たち）も参戦する意志を示す。アリゼーたちはすでにリビング・メモリーへ先行しており、クルルもすぐ追う構えだ。エレンヴィルは街の巡回を続け、特にネオ・レギュレーター装着者の動きに警戒する。シェールはバックルームで待機し、必要があれば支援すると約束する。</p><p>出発前に、ウクラマトとクルルはゴッサンへ筋を通すべきだと告げる。カリュクスの指揮下でプリザベーションは何世紀にもわたりアレクサンドリア社会を形作ってきた。彼を倒せば国家は大きく揺れる。しかも、エンドレス化を望む者たちの意思に反する行動でもある以上、何も告げずに去るのは誤りだ――そうしてあなたたちはレゾリューションへ向かう。</p><p>プラクシス・パークでゴッサンは苦しい立場を明かす。正式な主権者が不在なら、プリザベーションが国家の未来を決めるべきではない。しかし同時に、あなたたちのカリュクス討伐に公然と賛同することもできない。彼はネオ・レギュレーターを装着しているが、まだ登録していない――死への恐怖と統治の責務のあいだで揺れているのだ。さらに、エンドレス化が不可能になれば、人々は「愛する者の死が無意味になる」と感じ、かえって憎しみと悲嘆が増幅するかもしれない、と問う。どうすればこの悲劇を乗り越えられるのか、と。</p><p>その問いに、市民が自ら答える。リサンダーは言う――長きにわたり、女王スフェーンと先人の仕組みに守られ、苦しみも責任も遠いものとして生きてきた。けれど今後は、自分たちで学ばねばならない。死の約束と共に生きること、喪失の痛みに耐えること。マラカイト、マフウサ、タープらは、オブリビオンと共に立つと宣言する。戦場での武力ではなく、「思想の戦い」で隣人を説き、揺れる者の恐怖を鎮め、今この人生を生き抜く道へ導くために。彼らの言葉はゴッサンの背を押し、国民の命を犠牲にしてエンドレスになることなど選べない、と彼は断言する。</p><p>やがて人々は、スフェーンが女王と瓜二つであることを認めつつ、彼女が「本人ではない」ことも理解していると告げる。正体を隠して生きねばならなかった苦しみを思いやり、戻ってきたら自分のことを話してほしい、あなたは同胞だ――と受け入れる。迷いから解き放たれたゴッサンはレギュレーターを外し、その重さに気づいたと漏らし、ネオ・レギュレーターの流通数は五千を超えている可能性が高い、と警告する。遅らせる意味はない。あなたたちはリビング・メモリーへ向かい、ヤ・シュトラは現地で変化を告げる――メソ・ターミナルの壁が後退し、内部へ入る入口が開いた。カリュクスがエレクトロープを操作し、上層へ誘う「招待」を整えたのだ。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> スフェーン <small class="muted">(バックルーム, X:6.0, Y:6.4)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="a-calculated-evolution.html">進化の方程式</a></div>
+      <div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-terminal-invitation.html">約束のとき</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'為了和同伴們並肩活在這片土地上',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>回到 Backroom 後，你們再次確認眼前只剩一條路：Calyx 主動拋出「直接對決」的機會。即使怎麼看都像走進伏擊，你們也別無選擇——若要摧毀他聲稱存放在 Meso Terminal 上層的記憶庫（memory bank），就必須前往那裡。Shale 雖然還在氣自己被奪走「臨門一腳」，仍完成了查核：你們找到的 relay 的確把監控資料送往 Living Memory 某處的裝置。</p><p>Sphene 隨即請求加入戰鬥。她想為 Otis、Zelenia 的記憶而戰，也想為「可能走向另一條道路的自己」而戰，但最重要的是——為她深愛的王國與明天而戰。你接住她的決意，Wuk Lamat 也表明她同樣會同行。Krile 則提醒你：Scions of the Seventh Dawn 已經鐵了心要參戰，Alisaie 等人甚至先一步前往 Living Memory 等待會合。Erenville 會留在城內巡查，特別盯緊配戴新型調節器（neo regulator）的人，以防恐慌與暴力擴散；Shale 則在 Backroom 待命，隨時支援。</p><p>臨出發前，Wuk Lamat 與 Krile 堅持先去見 Gossan。Preservation 在 Calyx 的操弄下塑造了 Alexandria 的社會數百年，如今你們要推倒這根支柱，後果必然劇烈；更何況你們的行動也違逆了那些仍渴望成為 Endless（由記憶資料生成的不死存在）的人。無論 Gossan 會支持或反對，不告而別都不對——於是你們轉往 Resolution。</p><p>在 Praxis Park，Gossan 承認自己左右為難：既然正式主權者不在，他也同意 Preservation 不該主導國家未來；但他同時無法公開表態支持你們討伐 Calyx。你注意到他戴著 neo regulator，Gossan 坦白自己尚未註冊——他被「對死亡的恐懼」與「治理責任」撕扯著。更棘手的是：若從此再也無法成為 Endless，那些在襲擊中失去親友的人，可能會覺得「犧牲全都變得毫無意義」，連僅存的慰藉都被奪走。Gossan 問你們：要如何承受、又如何帶領人民走過這樣的悲劇？</p><p>回答不是由你們說出口，而是 Alexandria 的人民自己站出來。Lithander 直言：他們太久以來都被 Queen Sphene 與祖輩建立的系統保護，苦難與責任離他們太遠，甚至讓他們習慣把安逸視為理所當然，幾乎忘了有人為了讓他們安穩而賭上性命。可從現在起，他們得自己學——學著帶著「必將死亡」的承諾活下去，學著承受失去的痛。Malachite、Mahuwsa、Taapu 也宣告加入 Oblivion：他們不擅長真正的戰鬥，但可以投入「理念之戰」，去和鄰里對話、安撫動搖者的恐懼，勸他們珍惜此生。這些話讓 Gossan 重新站穩，他說自己若以同胞的性命為代價去換取成為 Endless，將會悔恨到永遠。</p><p>人群也把話說得很清楚：他們當然看得出 Sphene 與女王一模一樣，但他們也明白你不是她。你被迫隱姓埋名、不能坦白自己是誰——那一定很痛苦。等你平安回來，請把你的故事告訴大家；你是 Alexandria 的一員，他們不會拋下同胞。你們離開後，Gossan 甚至當場摘下調節器（regulator），才驚覺那份重量壓在心上有多沉；他也警告：目前流通的 neo regulator 數量恐怕早已超過「五千」上限，Calyx 很可能早就做了備案——所以你們再怎麼延也沒用。</p><p>你們隨即前往 Living Memory 與同伴會合。Y’shtola 在現地回報：Meso Terminal 的外牆「退縮」了，露出一個新的入口——上次來時並不存在。這顯然是 Calyx 操弄 electrope 的結果，刻意把路鋪好，好讓你們踏進他那場「盛情邀請」的上層決戰。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 斯菲恩 <small class="muted">(後室, X:6.0, Y:6.4)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="a-calculated-evolution.html">精算過的進化</a></div>
+      <div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-terminal-invitation.html">誓約之時</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
