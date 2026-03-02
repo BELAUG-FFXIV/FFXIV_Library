@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Jeuno | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Alliance Raid – Jeuno (DT Patch 7.1)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root{--bg:#fff8e6;--card:#fff;--fg:#222;--muted:#666;--border:#e5e1d8;--accent:#e11d48}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative;max-height:360px;overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{content:"";position:absolute;left:0;right:0;bottom:0;height:72px;background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card));pointer-events:none}
+    .expand-wrap{margin-top:12px}
+    .expand-btn{display:inline-block;padding:8px 14px;border-radius:10px;background:var(--card);border:1px solid var(--border);cursor:pointer;font-weight:600}
+    .expand-btn:hover{background:#fffef8}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <a class="home" href="../index.html">🏠 Home</a>
+      <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe src="https://www.youtube.com/embed/q-Wcy_GJpVE" title="Jeuno" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Jeuno</div>
+
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+
+        <div class="bd">
+          <div id="panel-story" class="tab-panel active"></div>
+          <div id="panel-acq" class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel"><div id="giscus_container" style="min-height:320px;"></div></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY='ffxiv-guide-lang';
+const i18n={
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Jeuno',
+    tabs:{story:'Story',acq:'Acquisition',unlockq:'Unlock Quest',followq:'Follow-Up Quest',comments:'Comments'},
+    readMore:'Show more',readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>You stay ready to move the moment Bakool Ja Ja gives the word. Beside you, Prishe is already eager to set out, while Alxaal drifts into a memory of Tavnazian tacos—how their hearty warmth once helped ward off fatigue before a fight, especially for those often forced onto the defensive. Bakool Ja Ja regrets that there is no time to show more of Tuliyollal, but insists that no one can be allowed to wander Jeuno unchecked, and Alxaal agrees you should make haste for Yak T’el.</p><p>At the rift, Prishe admits it’s hard to blame anyone for wanting a look inside, even as Bakool Ja Ja presses that the sooner you clear the place out, the better. Alxaal can only speak for himself, but says charging through a mysterious rift in search of treasure sounds absurd—yet Bakool Ja Ja counters that Tural has no shortage of legends like the city of gold to draw would-be treasure seekers, and that some believe no risk is too great if it might make their dreams real.</p><p>Within Jeuno, you find exactly that kind of stubbornness. Alxaal tells you again that none of this is real—that a Mamool Ja named Sareel Ja created the place—yet a thief only laughs and refuses to leave, boasting that a rare stone could be worth a fortune. Another explorer, unsettled by the danger, admits to finding a curious stone that was stolen by a Tonawawtan brute who fled south, and then chooses to withdraw while you continue on.</p><p>When you confront the thief, he proudly produces a block of raw electrope. Bakool Ja Ja recognizes the danger at once and refuses to let him leave with it, but the thief rejects any authority here. With more buyers gathering, Alxaal proposes a simple solution: hold an auction. The thief agrees—on the condition that he be paid in gil—while Bakool Ja Ja entrusts you to handle the bidding with a stash of savings.</p><p>You keep your bids measured, staying just ahead of the competition until the last rival falters. The thief hands over the stone, and Alxaal immediately studies the electrope—only to recoil as a familiar, bitter malice surges from it. He names it without hesitation: the Shadow Lord. He says the stone must have served as the heart of the Shadow Lord’s echo, a being of pure hatred tied to the Crystal War, and he adds that he fought as part of the company that would one day end that reign of terror.</p><p>Bakool Ja Ja decides to hold on to the electrope and urges a return to Tuliyollal to speak with the Landsguard. As you wait, Prishe restlessly insists there is always work to be found, and Bakool Ja Ja’s other head suggests you explore Tural so you won’t be lost when needed. Prishe seizes on the idea as a real adventure, declaring that Vana’diel has faced calamity countless times and that you can overcome this too if you have each other—while, elsewhere in the Echo of Tu’Lia, Shade of Reason exults at the slaughter to come, and Sareel Ja promises his false Dawnservant that soon none will stop him from claiming the throne as Sareel Ja chooses which echoes to draw upon next.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Bakool Ja Ja <small class="muted">(Tuliyollal, X:15.8, Y:11.5)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="that-world-was-called.html">That World Was Called</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="dreams-of-paradise.html">Dreams of Paradise</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'ジュノへ',
+    tabs:{story:'ストーリー',acq:'入手方法',unlockq:'開放クエスト',followq:'後続クエスト',comments:'コメント'},
+    readMore:'全文を表示',readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>あなたは、バクージャジャが合図を出し次第すぐ動けるよう身構える。プリッシュは最初から飛び出す気満々で、アルクサールはふと「タブナジア風タコス」の記憶を語る――腹持ちがよく、疲労を遠ざけてくれる食べ物で、戦いで守勢に回りがちな者ほど出発前に口にするといいのだと。バクージャジャはトゥリヨラルを案内する時間がないことを詫びつつ、ジュノに人をうろつかせるわけにはいかないと言い、アルクサールもヤクテル樹海へ急ごうと促す。</p><p>裂け目の前で、プリッシュは中を覗きたくなる気持ちはわかるとこぼすが、バクージャジャは「一刻も早く片づけるべきだ」と言い切る。アルクサールは、正体不明の裂け目に飛び込み宝探しをするなど馬鹿げていると述べるが、バクージャジャは「黄金の都のような伝説が、夢を追う者を駆り立てる」と返し、夢が叶うと信じるなら危険すら厭わない者もいるのだと断じる。</p><p>ジュノの中では、その強欲と頑なさが現実になる。アルクサールは「ここは現実ではない。サレージャというマムージャが造った」とあなたに言うが、盗賊は嘲笑して立ち去ろうとしない。別の探索者は、危険だと聞いて調査を控えると決めつつも、奇妙な石を見つけたがトナワウタンの荒くれ者に奪われたと告げ、南へ逃げたとだけ残して、この場を離れる。</p><p>あなたが盗賊を追い詰めると、彼は原石のエレクトロープを見せびらかす。バクージャジャは危険すぎるとして持ち出しを止めようとするが、盗賊はここでは従う理由がないと言い張る。買い手が集まり始めると、アルクサールは競売を提案し、盗賊はギル払いのみを条件に受け入れる。バクージャジャは蓄えを預け、あなたに入札を任せる。</p><p>あなたは手札を見せすぎぬよう慎重に、相手の一歩先を保ちながら入札を重ね、最後の競争相手が限界を見せたところで勝ち取る。石はあなたのものとなり、アルクサールはすぐにエレクトロープを確かめようとする――しかし次の瞬間、馴染み深い深い怨嗟の気配に顔をこわばらせる。彼は断言する。「シャドウロードだ」と。これはシャドウロードのエコーの核となった石であり、クリスタル戦争を招いた純粋な憎悪の存在で、自分はかつてその恐怖の支配を終わらせた一団に加わっていたのだ、と。</p><p>バクージャジャはエレクトロープを自分が預かると決め、トゥリヨラルへ戻ってランドガードに報告しようと急かす。待ち時間のなかでプリッシュは落ち着かず、ランドガードに頼めばやることはいくらでもあると言うが、もう一つの頭は「トラルを見て回り、土地に慣れておけ」と助言する。プリッシュはそれを本物の冒険だと喜び、ヴァナ・ディールでは幾度となく世界の危機があったが、いつも仲間と乗り越えてきたのだと語る――その一方、トゥ・リアのエコーでは「理王の影」が殺戮を待ちわび、サレージャは偽りの暁王に「まもなくだ」と囁きながら、次にどのエコーを選び取るべきかを思案していた。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> バクージャジャ <small class="muted">(トライヨラ, X:15.8, Y:11.5)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="that-world-was-called.html">その世界の名はヴァナ・ディール</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="dreams-of-paradise.html">一万年の夢の残響</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'啟程前往朱諾',
+    tabs:{story:'故事概要',acq:'取得方式',unlockq:'解鎖任務',followq:'後續任務',comments:'留言'},
+    readMore:'展開全文',readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你只等 Bakool Ja Ja 一聲令下就能立刻動身。Prishe 早就躍躍欲試，而 Alxaal 卻忽然提起自己曾吃過「Tavnazian tacos」，那種份量十足、能幫人撐住疲勞的食物；他說若你在戰鬥中經常被迫轉入守勢，開打前吃上一份會很有幫助。Bakool Ja Ja 遺憾沒時間帶你多看看 Tuliyollal，但也強調不能讓任何人繼續在 Jeuno 亂晃；於是 Alxaal 也催促你們趕緊前往 Yak T’el。</p><p>在裂隙前，Prishe 承認很難怪別人想探頭進去看看，但 Bakool Ja Ja 只說越快把這裡清掉越好。Alxaal 直言衝進不明裂隙、只為尋寶這件事荒謬至極；可 Bakool Ja Ja 反駁，Tural 從不缺「黃金城」這種傳說去誘惑尋寶者，只要他們相信夢想能成真，就會覺得再大的風險都值得。</p><p>而進到 Jeuno，你立刻看見這種頑固。Alxaal 再次告訴你：這一切都不是真實的，Jeuno 是一名叫 Sareel Ja 的 Mamool Ja 造出來的，但竊賊只會冷笑，聲稱自己不會走，因為他聽說有人在街上炫耀找到稀有的石頭，那種東西肯定能賣大錢。另一名探索者雖然被「很危險」這句話動搖，卻也提到自己撿到過一顆古怪的石頭，後來被一個 Tonawawtan 壯漢搶走，對方往南逃了；說完他選擇撤離，而你繼續追下去。</p><p>你逮到那名竊賊時，他得意地亮出一塊原石狀的 electrope（一種具有龐大力量的特殊礦石）。Bakool Ja Ja 一眼就看出問題，堅持不能讓他把那顆石頭帶走，因為太危險；但竊賊回嗆這裡不是 Tuliyollal，你們沒有任何權力。買家很快聚集，場面一發不可收拾，於是 Alxaal 提議乾脆辦一場拍賣。竊賊同意，但堅持只收 gil；而 Bakool Ja Ja 則把積蓄交給你，讓你代為競標。</p><p>你依照情勢保守出價，始終只比對手高一點點，直到最後的競爭者顯露出極限，你終於把 electrope 標下。竊賊把石頭交出來後，Alxaal 立刻檢視——卻在下一瞬間被一股熟悉又苦澀的惡意震得退開。他毫不猶豫說出那個名字：Shadow Lord（Vana’diel（FFXI）裡的重要反派）。他判定這顆石頭曾作為 Shadow Lord 的 Echo 的核心；那是一個由純粹憎恨構成、引發 Crystal War （Alxaal他自己曾在終結 Shadow Lord 恐怖統治的隊伍之中）的存在，而他曾是最終結束其恐怖統治的那支隊伍的一員。</p><p>Bakool Ja Ja 決定由自己保管 electrope，並催促你們立刻回 Tuliyollal 去找 Landsguard。等待聯絡的空檔裡，Prishe 說你們只能先把時間用在別的事上；Bakool Ja Ja 的另一個頭則建議你去熟悉 Tural 的地理，免得真正需要你時你反而迷路。Prishe 把這當成「真真正正的冒險」，還說 Vana’diel 過去也一次又一次遭遇足以毀滅世界的災厄，但無論情勢多糟，他們總能一起撐過去——可是同一時間，在 Echo of Tu’Lia 裡，Shade of Reason 正狂笑著期待屠戮，而 Sareel Ja 則向那個「Dawnservant」保證很快就再也沒人能阻止他登上王座，並開始盤算下一次要從那些回聲裡挑選什麼來完成自己的計畫。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Bakool Ja Ja <small class="muted">(Tuliyollal, X:15.8, Y:11.5)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="that-world-was-called.html">那個名為 Vana’diel 的世界</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="dreams-of-paradise.html">一萬年夢的回響</a></div></div>`
+  }
+};
+
+const langToggle=document.getElementById('langToggle');
+const pageTitle=document.getElementById('pageTitle');
+const tabBtns=[...document.querySelectorAll('.tab-btn')];
+const panels={
+  story:document.getElementById('panel-story'),
+  acq:document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments:document.getElementById('panel-comments')
+};
+
+function getLang(){return localStorage.getItem(LANG_KEY)||'EN';}
+function applyLang(lang){
+  const t=i18n[lang]||i18n.EN;
+  pageTitle.textContent=t.pageTitle;
+  langToggle.textContent=`🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn=>btn.textContent=t.tabs[btn.dataset.tab]);
+  const active=tabBtns.find(b=>b.getAttribute('aria-selected')==='true')||tabBtns[0];
+  renderPanel(active.dataset.tab,lang);
+}
+function wireClamp(panelEl,t){
+  const clamp=panelEl.querySelector('.clamp');
+  const btn=panelEl.querySelector('[data-role="expand"]');
+  if(!clamp||!btn)return;
+  function setLabel(){
+    const collapsed=clamp.getAttribute('data-collapsed')!=='false';
+    btn.textContent=collapsed?t.readMore:t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click',()=>{
+    const collapsed=clamp.getAttribute('data-collapsed')!=='false';
+    clamp.setAttribute('data-collapsed',collapsed?'false':'true');
+    setLabel();
+  });
+}
+function renderPanel(key,lang){
+  const t=i18n[lang]||i18n.EN;
+  Object.keys(panels).forEach(k=>panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if(key!=='comments') panels[key].innerHTML=t[key];
+  if(key==='story') wireClamp(panels[key],t);
+  if(key==='comments') loadGiscusForCurrentLang();
+}
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab,getLang());
+  });
+});
+langToggle.addEventListener('click',()=>{
+  const cur=getLang();
+  const next=cur==='EN'?'JP':(cur==='JP'?'ZH':'EN');
+  localStorage.setItem(LANG_KEY,next);
+  applyLang(next);
+});
+applyLang(getLang());
+
+const GISCUS_CFG={
+  repo:'BELAUG-FFXIV/FFXIV_Library',
+  repoId:'R_kgDOPyh4Kw',
+  category:'General',
+  categoryId:'DIC_kwDOPyh4K84CwPjL',
+  theme:'preferred_color_scheme'
+};
+function uiLang(code){return code==='JP'?'ja':(code==='ZH'?'zh-TW':'en');}
+function loadGiscusForCurrentLang(){
+  const mount=document.getElementById('giscus_container');
+  if(!mount)return;
+  mount.innerHTML='';
+  const langCode=getLang();
+  const s=document.createElement('script');
+  s.src='https://giscus.app/client.js';
+  s.setAttribute('data-repo',GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id',GISCUS_CFG.repoId);
+  s.setAttribute('data-category',GISCUS_CFG.category);
+  s.setAttribute('data-category-id',GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping','specific');
+  s.setAttribute('data-term',location.pathname+'｜'+langCode);
+  s.setAttribute('data-reactions-enabled','1');
+  s.setAttribute('data-emit-metadata','0');
+  s.setAttribute('data-input-position','bottom');
+  s.setAttribute('data-lang',uiLang(langCode));
+  s.setAttribute('data-theme',GISCUS_CFG.theme);
+  s.setAttribute('crossorigin','anonymous');
+  s.async=true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
