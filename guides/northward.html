@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Northward | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Alliance Raid – Northward (DT Patch 7.3)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root{--bg:#fff8e6;--card:#fff;--fg:#222;--muted:#666;--border:#e5e1d8;--accent:#e11d48}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:150px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative;max-height:360px;overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{content:"";position:absolute;left:0;right:0;bottom:0;height:72px;background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card));pointer-events:none}
+    .expand-wrap{margin-top:12px}
+    .expand-btn{display:inline-block;padding:8px 14px;border-radius:10px;background:var(--card);border:1px solid var(--border);cursor:pointer;font-weight:600}
+    .expand-btn:hover{background:#fffef8}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <a class="home" href="../index.html">🏠 Home</a>
+      <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe src="https://www.youtube.com/embed/XnIu-7yYwto" title="Northward" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Northward</div>
+
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+
+        <div class="bd">
+          <div id="panel-story" class="tab-panel active"></div>
+          <div id="panel-acq" class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel"><div id="giscus_container" style="min-height:320px;"></div></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY='ffxiv-guide-lang';
+const i18n={
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Northward',
+    tabs:{story:'Story',acq:'Acquisition',unlockq:'Unlock Quest',followq:'Follow-Up Quest',comments:'Comments'},
+    readMore:'Show more',readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Alxaal can hardly believe what you’ve done—defeating not only Kam’lanaut, but also his brother Eald’narche—and he calls it nothing short of miraculous. He says few adventurers in Vana’diel could match your caliber. Prishe, restless and frustrated, insists you can’t just stand around, but Bakool Ja Ja can only admit the truth: until Sareel Ja shows himself again, waiting is all you can do, and it feels like you’re playing right into his hands. Even so, he urges you to return to Tuliyollal to rest, promising to meet you at Brightploom Post.</p><p>At Brightploom Post, Bakool Ja Ja says he’s much improved thanks to Prishe and his brother’s healing magicks, and vows he won’t be in your way next time. Prishe relishes the brief chance to breathe after the Orcs and everything else Sareel Ja threw at you, and Bakool Ja Ja the Mystic asks what she and Alxaal did the first time you were granted a reprieve. Alxaal answers as any adventurer would: you explored Yok Tural, even coming upon a settlement of giants called the Yok Huy—uncannily like the Trolls of his world, though only in appearance, for Trolls are hostile looters and sellswords.</p><p>Prishe says you traveled everywhere, hoping someone had seen Sareel Ja—or at least knew something about electrope. Bakool Ja Ja crushes that hope: electrope isn’t native to Tural, but comes from the kingdom of Alexandria, inside the dome in Xak Tural. Prishe seizes on it—she remembers being told a permit is needed to cross the bridge north—and wonders if anyone there could help prove whether she and Alxaal are truly echoes. Bakool Ja Ja the Mystic suggests Oblivion might shed light on the truth, and since they’ve been working closely with the Landsguard, a request could be made through the Wing of Reflection.</p><p>Bakool Ja Ja agrees you should visit them, and says it will also help secure the travel passes Prishe and Alxaal will need; he expects the guard will expedite it if they’re accompanying you. Alxaal asks if such permits usually require rare goods or an exorbitant sum of gil, and Prishe mutters she’s heard of adventurers struggling to secure airship passes in Vana’diel—she’d rather walk than pay those prices. Then Bakool Ja Ja returns with good news: the Landsguard had no trouble preparing passes for both of them. Alxaal can only gape at how deep Bakool Ja Ja’s coffers must be.</p><p>Bakool Ja Ja adds that Oblivion is eager to learn more about them and has asked to meet on the outskirts of Alexandria, though it’s a long way from Tuliyollal to the dome. He decides you should stop at Sheshenewezi Springs to catch your breath and shore up supplies, and he’ll show you the way. There, a frantic father approaches Prishe, asking if she’s seen his little daughter. When Bakool Ja Ja recognizes he’s from the dome, the man introduces himself as Jasper and admits his daughter is missing.</p><p>Jasper explains that Scoria—an Eldite with long red hair—vanished while they were preparing to move from Solution Nine to Tuliyollal. They’d come ahead to learn about their future home, were waiting to ride the rroneek, and before he knew it she’d wandered off. Prishe says she saw a girl like that not long ago heading south, and Bakool Ja Ja insists you must find her before something in the wilds does. Plans are set aside without hesitation: Bakool Ja Ja will go with Jasper to ask around, while you, Prishe, and Alxaal search to the south—because what kind of adventurers would ignore someone in need.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Bakool Ja Ja <small class="muted">(Lower Jeuno, X:6.0, Y:7.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="dreams-of-paradise.html">Dreams of Paradise</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="for-whom-the-verse-is-sung.html">For Whom the Verse Is Sung</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'北の地への導き',
+    tabs:{story:'ストーリー',acq:'入手方法',unlockq:'開放クエスト',followq:'後続クエスト',comments:'コメント'},
+    readMore:'全文を表示',readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>あなたは、あの戦いを切り抜けて戻ってくる。あなたの働きを見た仲間は驚きを隠せず、あなたが成し遂げた勝利は奇跡に近いのだと口にする。だが喜びに浸る余裕はない。落ち着かない仲間は「ただ待つだけではいられない」と焦りを募らせる一方で、敵が次に姿を現すまで、いま出来るのは待つことだけだという現実も突きつけられる。あなたは疲れを感じながらも、ひとまず都へ戻り、体勢を整えることを選ぶ。</p><p>拠点に合流すると、負傷していた仲間は回復したと告げ、次は足手まといにならないと誓う。あなたたちは、これまでの騒動が続いたせいで、ここが作戦の拠点のようになってしまったと振り返る。束の間の休息に安堵しながら、仲間は「前に敵の策謀から解放された時、あなたたちは何をしていたのか」と問う。あなたは、冒険者なら当然だと言わんばかりに、各地を巡って探索していたと答える。</p><p>旅の途中で、巨人の集落に行き当たったことも語られる。見た目は、あなたの故郷の物語に出てくる荒々しい種族に似ていたが、外見が似ているだけで、性質はまったく違っていたという。もう一人の仲間は、各地を歩き回ったのは敵の手掛かりを探すためでもあり、少なくとも、あの不思議な石に関する情報が欲しかったのだと打ち明ける。</p><p>そこで明かされるのは、その石はこの地の産物ではないという事実だ。石の出所は、北方にある「巨大な障壁（未核実）の内側」に位置する王国だとされ、そこへ渡るには許可証が必要だという。あなたは、その場所に行けば、自分たちが何者なのか――敵が語った「エコー（未核実）」という言葉の真偽――それを確かめる糸口が得られるかもしれない、と希望を抱く。</p><p>さらに、事情に通じた組織（未核実）が調べに協力できるかもしれない、という提案が出る。彼らは警備隊と密接に動いているため、正式な窓口（未核実）を通して面会を取り付けられる見込みがあるらしい。あなたたちは訪問を決め、同行者に必要な通行証も手配することになる。通常なら高価な代償が必要なのでは、と心配の声が上がるが、移動許可は驚くほど早く整えられ、あなたは相手の資金力に圧倒される。</p><p>目的地へ向かう途中、あなたたちは湧き水の地（未核実）で休憩と補給を取ることにする。そこで、不安げな父親が助けを求め、幼い娘を見失ったのだと訴える。娘は赤い長髪の少女で、移住の下見に来ていた最中に、乗り物（未核実）を待つあいだにふらりと姿を消したという。あなたは南へ向かったという手掛かりを頼りに、すぐ捜索を引き受ける。あなたが困っている人を見捨てないと知っている仲間たちも迷わず同調し、あなたは南へ向かって聞き込みと捜索を始める。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> バクージャジャ <small class="muted">(ジュノ下層, X:6.0, Y:7.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="dreams-of-paradise.html">一万年の夢の残響</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="for-whom-the-verse-is-sung.html">歌うは誰がため</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'通往北方大地的指引',
+    tabs:{story:'故事概要',acq:'取得方式',unlockq:'解鎖任務',followq:'後續任務',comments:'留言'},
+    readMore:'展開全文',readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Alxaal 說你能同時擊倒 Kam’lanaut 與他的哥哥 Eald’narche，簡直像奇蹟一樣，Vana’diel 裡能有你這種實力的冒險者恐怕屈指可數。Prishe 卻不想再乾等下去，覺得一定還有什麼事能做；Bakool Ja Ja 只能無奈承認，直到 Sareel Ja 再度現身之前，你們能做的只有等待，而且這種等待就像正中他的下懷。不過他也看得出你被折騰得夠嗆，於是提議先回 Tuliyollal 休整，約好在 Brightploom Post 會合。</p><p>到了 Brightploom Post，Bakool Ja Ja 表示自己在 Prishe 與兄弟的治療魔法之下好多了，下次絕不會再成為你的累贅。Prishe 也鬆了口氣：經歷 Orcs 和 Sareel Ja 丟給你們的一切之後，終於能喘口氣了。Bakool Ja Ja the Mystic 便問起，你們上一次好不容易從他的算計中獲得短暫空檔時，到底都在做什麼。Alxaal 回答得理所當然：就像稱職的冒險者那樣去探索，尤其是在 Yok Tural。</p><p>Alxaal 說你們旅途中還遇見一個「巨人聚落」，他們自稱 Yok Huy，外表很像他所知的 Trolls——但也只是外表相像而已。Trolls 在他的世界裡屬於敵對的那一類，會搶掠、會劫掠，也常以傭兵身分替人賣命。Prishe 接著說，你們一路跑遍各地，其實也在找線索：希望有人看過 Sareel Ja，至少也該有人知道 electrope (一種具有龐大力量的特殊礦石) 的事。</p><p>Bakool Ja Ja 直接澆了冷水：electrope 並不是 Tural 的產物，它來自 Alexandria，那個位在 Xak Tural、被 the dome（罩住 Yyasulani 的巨型屏障）包覆的王國之中。Prishe 立刻想起來：她聽說要穿越通往北方的橋，需要某種通行許可。既然 electrope 的源頭在那裡，她便忍不住問，會不會有人能幫你們確認，你和她、以及 Alxaal 是否真的只是異界仿造體。</p><p>Bakool Ja Ja the Mystic 提出一個可能：Oblivion（Alexandria 的反抗組織） 或許能把事情查得更清楚。由於他們近來與 Landsguard 合作密切，透過 Wing of Reflection 之類的管道提出請求，並非不可能。Bakool Ja Ja 也同意去拜訪，順便把 Prishe 與 Alxaal 需要的旅行通行證一併辦好；他甚至覺得，只要提到他們是要陪你同行，守衛多半會加快流程。</p><p>Alxaal 卻擔心這種許可通常得拿稀有物品交換，或是得付一大筆 gil；Prishe 也說她聽過 Vana’diel 的冒險者為了拿到飛空艇通行證吃過不少苦，她寧願用走的，也不想付那種價錢。沒想到 Bakool Ja Ja 很快回來報喜：Landsguard 幾乎沒費什麼力氣，就把兩人的通行證都準備好了。Alxaal 當場傻眼，感嘆他的財力深得驚人；而 Bakool Ja Ja 也補充，Oblivion 希望多了解你們，約你們在 Alexandria 的外圍見面，只是從這裡到 the dome 路途遙遠，你們得先在 Sheshenewezi Springs 停一下，補給並喘口氣。</p><p>你們抵達 Sheshenewezi Springs 後，一名焦急的父親上前求助，問 Prishe 有沒有見過他的小女兒。Bakool Ja Ja 察覺他來自 the dome，便追問出了什麼事；對方自報姓名 Jasper，說女兒 Scoria 走失了。Jasper 解釋，他們原本打算從 Solution Nine 搬到 Tuliyollal，所以先來看看未來的家；等著搭乘 rroneek 的時候，Scoria 不知不覺就走遠了。Prishe 回想自己剛才確實看過像她那樣的孩子往南走，Bakool Ja Ja 立刻要你們趕緊行動，免得荒野裡的危險先一步找到她。你們毫不猶豫把原本行程先放一邊：Bakool Ja Ja 陪 Jasper 去四處打聽，而你、Prishe、Alxaal 則立刻往南搜索，因為你們都知道，真正的冒險者不會無視眼前需要幫助的人。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 巴庫爾・賈賈 <small class="muted">(朱諾下層, X:6.0, Y:7.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="dreams-of-paradise.html">一萬年夢的回響</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="for-whom-the-verse-is-sung.html">為誰而歌</a></div></div>`
+  }
+};
+
+const langToggle=document.getElementById('langToggle');
+const pageTitle=document.getElementById('pageTitle');
+const tabBtns=[...document.querySelectorAll('.tab-btn')];
+const panels={
+  story:document.getElementById('panel-story'),
+  acq:document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments:document.getElementById('panel-comments')
+};
+
+function getLang(){return localStorage.getItem(LANG_KEY)||'EN';}
+function applyLang(lang){
+  const t=i18n[lang]||i18n.EN;
+  pageTitle.textContent=t.pageTitle;
+  langToggle.textContent=`🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn=>btn.textContent=t.tabs[btn.dataset.tab]);
+  const active=tabBtns.find(b=>b.getAttribute('aria-selected')==='true')||tabBtns[0];
+  renderPanel(active.dataset.tab,lang);
+}
+function wireClamp(panelEl,t){
+  const clamp=panelEl.querySelector('.clamp');
+  const btn=panelEl.querySelector('[data-role="expand"]');
+  if(!clamp||!btn)return;
+  function setLabel(){
+    const collapsed=clamp.getAttribute('data-collapsed')!=='false';
+    btn.textContent=collapsed?t.readMore:t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click',()=>{
+    const collapsed=clamp.getAttribute('data-collapsed')!=='false';
+    clamp.setAttribute('data-collapsed',collapsed?'false':'true');
+    setLabel();
+  });
+}
+function renderPanel(key,lang){
+  const t=i18n[lang]||i18n.EN;
+  Object.keys(panels).forEach(k=>panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if(key!=='comments') panels[key].innerHTML=t[key];
+  if(key==='story') wireClamp(panels[key],t);
+  if(key==='comments') loadGiscusForCurrentLang();
+}
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab,getLang());
+  });
+});
+langToggle.addEventListener('click',()=>{
+  const cur=getLang();
+  const next=cur==='EN'?'JP':(cur==='JP'?'ZH':'EN');
+  localStorage.setItem(LANG_KEY,next);
+  applyLang(next);
+});
+applyLang(getLang());
+
+const GISCUS_CFG={
+  repo:'BELAUG-FFXIV/FFXIV_Library',
+  repoId:'R_kgDOPyh4Kw',
+  category:'General',
+  categoryId:'DIC_kwDOPyh4K84CwPjL',
+  theme:'preferred_color_scheme'
+};
+function uiLang(code){return code==='JP'?'ja':(code==='ZH'?'zh-TW':'en');}
+function loadGiscusForCurrentLang(){
+  const mount=document.getElementById('giscus_container');
+  if(!mount)return;
+  mount.innerHTML='';
+  const langCode=getLang();
+  const s=document.createElement('script');
+  s.src='https://giscus.app/client.js';
+  s.setAttribute('data-repo',GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id',GISCUS_CFG.repoId);
+  s.setAttribute('data-category',GISCUS_CFG.category);
+  s.setAttribute('data-category-id',GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping','specific');
+  s.setAttribute('data-term',location.pathname+'｜'+langCode);
+  s.setAttribute('data-reactions-enabled','1');
+  s.setAttribute('data-emit-metadata','0');
+  s.setAttribute('data-input-position','bottom');
+  s.setAttribute('data-lang',uiLang(langCode));
+  s.setAttribute('data-theme',GISCUS_CFG.theme);
+  s.setAttribute('crossorigin','anonymous');
+  s.async=true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
