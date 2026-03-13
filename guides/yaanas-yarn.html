@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Yaana’s Yarn | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Raid8 – Yaana’s Yarn (DT Patch 7.01)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#ffffff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative;max-height:360px;overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:"";position:absolute;left:0;right:0;bottom:0;height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card));pointer-events:none;
+    }
+    .expand-wrap{margin-top:12px}
+    .expand-btn{display:inline-block;padding:8px 14px;border-radius:10px;background:var(--card);border:1px solid var(--border);cursor:pointer;font-weight:600}
+    .expand-btn:hover{background:#fffef8}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/7KEuhd0Kjoo"
+              title="Yaana’s Yarn" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Yaana’s Yarn</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story" class="tab-panel active"></div>
+          <div id="panel-acq" class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Yaana’s Yarn`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Yaana tells you to follow her, saying the gym is not far, but the walk there quickly turns into something more complicated. In the Recreation Zone, people recognize you at once. Some stare at you in amazement, calling you the fighter who wins without a regulator and without relying on a feral soul. Others remember you as the one who protected them from the soldiers, and their admiration comes pouring out without restraint.</p><p>Not every voice raised toward you is kind. One fan lashes out in fury over Honey B. Lovely’s defeat, while another warns that whatever confidence surrounds you now will vanish in your next match. The crowd’s emotions run in every direction at once—adoration, resentment, curiosity, spite—and the noise around you swells with each passing moment.</p><p>Amid the uproar, a genial gentleman observes that the fans have grown unusually agitated. He remarks that their frustration might be better spent elsewhere, then apologizes for the interruption and introduces himself as a storyteller with a strong interest in seeing how the championship unfolds. He says that, when you have the time, he would like to ask you a few questions.</p><p>Then the mood sharpens again when someone notices Yaana at your side and mocks her for staying close to the one who defeated her. The taunt cuts deeper when her sister is brought up, and her loss is treated as proof of a lack of pride. Yaana does not rise to the bait. She only says this will never end if you stay, and urges you to leave with her at once.</p><p>Once the two of you manage to slip away, Yaana leads you to Tritails Training and presents it as the home of Alexandria’s finest fighters, though at present she is the only one there. She admits that it is not merely a gym, but also her actual home: she lives on the first floor, and trains in the basement. Inside, Neyuni greets you warmly and thanks you for looking after her sister, prompting Yaana to retort that being knocked out is a strange thing to be grateful for. From there, the conversation turns quiet and personal.</p><p>Yaana explains that she and her sisters once lived with parents who came from Tural. When the dome appeared over Yyasulani, their parents were trapped there and took up work as hunters. They never believed in regulators and refused to wear them, and one day they went out and never returned. Yaana tells you that you caught her attention because you reminded her of them: like them, you reject the use of souls. She and her sisters chose differently after their parents died, wearing regulators at their elder sister’s urging. And yet, she says, it is only because their parents died without regulators that they can still remember them. Neyuni, who was too young to understand at the time, admits that hearing this story has always made her anxious when she watches you fight, and she asks whether you would ever consider wearing a regulator in your matches—if only so you could be revived should the worst happen. Yaana gently tells her that views on soul use are not so easily changed, because they come from culture and upbringing.</p><p>Rather than remain in that heavy silence, Yaana tries to lift the mood by celebrating your two wins with drinks, even if all she has are energy tonics. She then tells you about her sister Eutrope, once a leading contender in the heavyweight division, who became a fighter to support the family and proved gifted in every respect. Neyuni adds that “Wicked Thunder” was her ring name, and that she wielded electrope together with the soul of a levinsteed, changing form in battle to answer her opponents. Yaana says that although Eutrope taught her to fight, she herself could never reproduce that style. One day, Eutrope simply vanished without a word.</p><p>Neyuni adds that she had been on the verge of being immortalized. Yaana then explains that Arcadion fighters retire young because feral soul transfiguration places too great a strain on the body, and that those who continue fighting until the age of twenty are immortalized in the hall of fame and granted the right to live in comfort in Everkeep’s upper residences. Eutrope abandoned all of that when she disappeared, and Yaana still cannot understand why. In the end, she sets those thoughts aside and says there is no time to dwell on the past—your next match cannot be far off. Neyuni wishes you luck and begs you to be careful, and when you return to the Greenroom, Yaana promises that as your second, she will do everything she can to support you.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Yaana <small class="muted">(Greenroom, X:6.1, Y:5.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="sweet-poison.html">Sweet Poison</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="vile-heat.html">Vile Heat</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'トライテールの姉妹',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ヤーナに導かれ、あなたは彼女のジムへ向かうことになる。だが、その道のりは思いのほか静かなものにはならない。レクリエーション区画に入るや否や、あなたの姿に気づいた人々が次々と声を上げる。レギュレーターも獣魂も使わずに勝ち抜く闘士として驚きと称賛を向ける者もいれば、兵士たちから自分たちを守った英雄として熱い声援を送る者もいた。</p><p>しかし、向けられる感情は好意ばかりではない。ハニー・Ｂ・ラブリーを打ち負かしたことに怒りをあらわにし、あなたを罵る者もいれば、次の試合では無様に命乞いすることになると不穏な言葉を投げつける者もいる。憧れと敵意、期待と悪意が入り混じり、その場の空気は次第に熱を帯びていく。</p><p>そんな騒ぎの中、ひとりの温厚な紳士が、今日はずいぶんと観客たちが苛立っているようだと穏やかに語りかけてくる。鬱憤を晴らしたい気持ちは理解できるが、その熱意をもっと別の形で使えればいいのにとこぼしつつ、自分は物語を語る者であり、この選手権がどのような結末を迎えるのかに強い関心を抱いているのだと明かす。そして、時間ができたらぜひあなたにもいくつか質問をしたいと申し出る。</p><p>だが、その場の緊張はすぐに別の形で高まる。ヤーナの姿に気づいた者が、あなたを打ち負かした相手と行動をともにしているのかと声を荒らげ、敗北の理由まで勝手に決めつける。さらには姉の名まで持ち出し、彼女の誇りを踏みにじるような言葉を投げる。ヤーナは言い返そうとはせず、このままではきりがないとだけ言って、あなたを連れてその場を離れる。</p><p>ようやく人目を逃れたあと、ヤーナはあなたをトライテールズ・トレーニングへ案内する。そこはアレクサンドリア屈指の闘士たちの拠点だと胸を張るものの、今いるのは自分ひとりだけだと苦笑する。しかもそこは単なるジムではなく、彼女自身の住まいでもあった。一階が生活の場で、地下が鍛錬の場だという。中へ入ると、ネユニがあなたを笑顔で迎え、姉の面倒を見てくれてありがとうと礼を述べる。それに対してヤーナは、気絶させられたことに感謝するなんて妙な話だと返しながらも、やがて家族の話をし始める。</p><p>ヤーナは、自分たち三姉妹の両親がもともとトラルの出身だったこと、そしてユヤスラニにドームが現れたとき、そこで閉じ込められてしまったことを語る。ふたりはそこで狩人として暮らし始めたが、レギュレーターに最後まで反対し、決して身につけようとはしなかった。そしてある日、狩りに出たまま戻らなかったのだという。ヤーナは、あなたに関心を抱いたのは、そんな両親を思い出させたからだと打ち明ける。あなたもまた、彼らと同じように魂の使用を拒んでいるからだ。けれど自分たちは違った。両親を失ったあと、姉に勧められるままレギュレーターを身につけるようになったという。それでも、両親がレギュレーターを着けずに死んだからこそ、自分たちは今もなおその記憶を失わずにいられるのだとヤーナは静かに語る。ネユニは当時まだ幼く事情を理解できなかったが、姉たちからその話を聞いて育ったため、あなたが戦う姿を見るたびにどうしても不安になるのだと告げる。そして、あなたの考えを承知のうえで、それでも試合のときだけでもレギュレーターを着ける気はないかと願う。最悪の事態になっても蘇生できるように、と。ヤーナは、その考え方は文化や育ちに根ざしたものだから、そう簡単に変わるものではないと、妹をやわらかく諭す。</p><p>重くなった空気を振り払うように、ヤーナはあなたの二連勝を祝おうと言い出し、用意できるのは栄養ドリンクくらいだが気持ちが大事だろうと明るく笑う。そして、あなたが気になっているであろう姉のことを語り始める。姉の名はユートロープ。ヘビー級で頂点を狙う実力者であり、何よりもまずヤーナとネユニを養うために闘士となったが、その道でもずば抜けた才を見せた。ネユニは「ウィケッドサンダー」がリングネームだったと補い、エレクトロープと雷馬の魂を組み合わせ、敵に応じて姿を変える戦いぶりだったと語る。ヤーナは、自分の力にもそれなりの自信はあるし、戦い方そのものは姉から教わったが、あの戦闘様式だけはどうしても真似できなかったと言う。しかもユートロープは、ある日突然、何ひとつ告げることなく姿を消した。</p><p>ネユニは、姉があと少しで「不朽の闘士」として刻まれるところだったのにと悔しそうに漏らす。そこでヤーナは、アルカディオンの闘士たちは獣魂変成の負担が大きすぎるため若くして引退すること、そして二十歳まで戦い続けた者だけが殿堂入りを果たし、エバーキープ上層の豪奢な居住区で安穏な余生を送る資格を得るのだと説明する。ユートロープは、そのすべてを捨てて消えたのだ。なぜそんなことをしたのか、今もヤーナには理解できない。けれど、いつまでも過去に浸っているわけにはいかない。あなたの次の試合もそう遠くないはずだと、彼女は気持ちを切り替える。ネユニはあなたに幸運を祈り、どうか気をつけてと見送る。そして控室へ戻ると、ヤーナはあなたのセコンドとして全力で支えると力強く告げる。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> ヤーナ <small class="muted">(控室, X:6.1, Y:5.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="sweet-poison.html">劇毒の愛</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="vile-heat.html">爆ぜる悪意</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'Yaana 的故事 崔泰爾姐妹',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Yaana 要你跟上她，說訓練館就在不遠處，但這段路很快就變得一點也不平靜。當你們來到 Recreation Zone，立刻就有人認出了你。有人驚呼你是那個不用 regulator（可保存與調用 soul、用於重傷或死亡時復生的裝置）、也不依靠 feral soul（用於戰鬥變身的獸魂） 仍能戰鬥並取勝的格鬥士，也有人把你當成曾經保護他們免於士兵威脅的英雄，毫不掩飾地對你投來熱烈的崇拜與期待。</p><p>可朝你湧來的聲音並不全是善意。有人因為 Honey B. Lovely 落敗而憤怒地責罵你，也有人帶著惡意預言，說你現在儘管享受這份風光，到了下一場比賽就只會狼狽求饒。讚美、怨恨、興奮與敵意混雜在一起，讓四周的氣氛愈來愈躁動。</p><p>就在這片喧嘩之中，一名態度溫和的紳士出聲感嘆，今天的觀眾實在比平時更容易激動。他說自己能理解人們想發洩不滿的心情，只是希望這股力氣能用在更有意義的地方。接著，他向你致歉，表示自己是一名說書人，也一直很想看看這場冠軍賽最後會如何發展；等你有空時，他很希望能向你問上幾個問題。</p><p>然而，現場的刺耳聲音很快又轉向了 Yaana。有人認出她就是 Black Cat，當場譏諷她居然和打敗自己的人同行，甚至把她的敗北說成是因為沒有自尊，還拿她的姊姊來踩她一腳。Yaana 沒有和那些人糾纏下去，只簡短地說這樣下去永遠沒完沒了，然後立刻帶著你離開。</p><p>等你們總算甩開那些目光後，Yaana 把你帶到 Tritails Training。她口氣輕快地介紹這裡是 Alexandria 最優秀格鬥士的據點，只不過現在實際待在這裡的只有她一個人。她也坦白說，這裡不只是訓練館，同時也是她真正的家：一樓是生活空間，地下室則是她訓練的地方。走進去之後，Neyuni 立刻熱情地向你打招呼，還認真地感謝你照顧她姊姊。Yaana 聽了忍不住反問，感謝把自己打昏的人，這算是哪門子的道理，但說著說著，話題還是慢慢轉進了她們一家人的往事。</p><p>Yaana 告訴你，她和姊妹們的父母原本來自 Tural。當那座 dome（罩住 Yyasulani 的巨型屏障）出現時，他們正好人在 Yyasulani，於是就這樣被困住了。之後，他們在那裡以獵人的身分生活下去，但始終反對使用 regulator，也從來不願意佩戴。直到某一天，他們像往常一樣外出，卻再也沒有回來。Yaana 坦白說，她之所以會特別注意你，就是因為你讓她想起了自己的父母——你和他們一樣，都排斥使用 soul。至於她們姊妹，則不是如此。父母去世後，在姊姊的勸說下，她們開始佩戴 regulator。可也正因為父母去世時沒有佩戴 regulator，她們直到現在才能依然清楚記得他們。Yaana 說不出這究竟算好還是不好。Neyuni 則說，當年她年紀太小，根本不明白發生了什麼，只是後來從姊姊們口中知道了一切，所以每當看見你上場，她都忍不住感到不安。即使她知道你的立場，她還是忍不住問你，能不能至少在比賽時考慮戴上 regulator——哪怕只是為了在最糟的情況發生時，還能把你救回來。Yaana 輕聲勸她別再試著改變別人的想法，因為對 soul 的看法，本來就深深繫在文化與成長背景裡，不是三言兩語就能動搖的。</p><p>為了不讓氣氛一直停在那份沉重裡，Yaana 很快又把話題拉開，說你都已經贏下兩場冠軍賽了，怎麼能不慶祝一下。就算她們手邊只有能量飲料，這份心意還是算數。接著，她主動談起剛才外頭那些人提到的姊姊。她的名字叫 Eutrope，曾是 heavyweight 分級最頂尖的有力競爭者之一。她會成為格鬥士，首先是為了照顧 Yaana 和 Neyuni，而事實也證明，她在這條路上同樣出色得驚人。Neyuni 接著補充，「Wicked Thunder」就是她的擂台名；她能將 electrope（Alexandria 的特殊變質素材，可依意念改變形態與性質）與 levinsteed 的 soul 結合，在戰鬥中隨著對手改變自己的姿態。Yaana 說，雖然她對自己的實力並非沒有信心，畢竟連戰鬥方式也是 Eutrope 親手教的，但唯獨那種戰法，她始終模仿不來。更讓人無法理解的是，Eutrope 有一天竟一句話也沒留下，就那樣消失了。</p><p>Neyuni 低聲說，她明明差一點就能名留不朽殿堂。Yaana 於是解釋，Arcadion 的格鬥士大多都在很年輕時退役，因為 feral soul transfiguration（以 feral soul 進行變身的戰鬥方式）對肉體造成的負擔實在太大；唯有戰鬥到二十歲的人，才會被刻進 Ascension Arcadia Hall of Fame，並獲得搬進 Everkeep 上層高級住宅、安穩度日的資格。可 Eutrope 卻在即將得到這一切之前親手將它全部拋下，這件事直到現在仍讓 Yaana 無法理解。不過，她最後還是把思緒收了回來，說現在不是沉浸在回憶裡的時候，你的下一場比賽想必很快就會到來。Neyuni 為你送上祝福，也小聲請你千萬要小心；而當你們回到 Greenroom 時，Yaana 則重新振作精神，向你保證，接下來她一定會以 second（協助格鬥士蒐集對手情報、提供訓練建議與場邊支援的人）的身分全力支援你。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Yaana <small class="muted">(控室, X:6.1, Y:5.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="sweet-poison.html">甜蜜的劇毒之愛</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="vile-heat.html">灼烈爆發的惡意</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
