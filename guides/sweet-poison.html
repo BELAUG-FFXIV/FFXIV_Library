@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sweet Poison | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Raid8 – Sweet Poison (DT Patch 7.01)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#ffffff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative;max-height:360px;overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:"";position:absolute;left:0;right:0;bottom:0;height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card));pointer-events:none;
+    }
+    .expand-wrap{margin-top:12px}
+    .expand-btn{display:inline-block;padding:8px 14px;border-radius:10px;background:var(--card);border:1px solid var(--border);cursor:pointer;font-weight:600}
+    .expand-btn:hover{background:#fffef8}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/yar82YnuY0Q"
+              title="Sweet Poison" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Sweet Poison</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Sweet Poison`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Although the unexpected company has appeared, Metem urges you to keep your attention on what matters—the match ahead. With practiced composure, he steps in to introduce your next opponent.</p><p>Metem presents Honey B. Lovely, the darling of the Arcadion. She fights with the soul of a bee—an exceptionally venomous one—but he warns that her true danger lies less in poison and more in her power to charm.</p><p>He explains that Honey’s winsome appeal as a songstress is only part of it: she can exude the pheromones of a queen bee and enthrall even her enemies. Those who fall under her spell come to delight in the torment she inflicts. To prevent a disaster, the audience will watch through special contraptions cloaked in holograms, rather than in person.</p><p>Black Cat cuts in bluntly that there is nothing lovely about her, and that—despite Honey’s own claims—you are in for a bad time. Metem acknowledges the warning, yet tells you he believes you will prevail, and sends you forth to prove your mettle.</p><p>When you return victorious, Metem bursts with praise, declaring he knew you could do it. Black Cat can hardly believe you brought Honey down, and admits you are the real deal. Metem says this win makes you eligible to challenge the reigning champion of the light-heavyweight division—but arrangements will take time.</p><p>While you wait, Metem suggests you find a “second,” someone to support you by gathering information on opponents and advising your training. Black Cat immediately volunteers, stammering that she wants the role—she cannot fight for a while anyway, and more than anything, she wants to see the one who defeated her defeat everyone else. If you agree, she reveals her real name: Yaana. With that settled, Metem calls her a sound choice, and Yaana invites you to her gym—messy, but far more comfortable than this dreary place—while Metem takes his leave until the next match.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Metem <small class="muted">(Greenroom, X:6.1, Y:5.9)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-claw-in-the-dark.html">The Claw in the Dark</a></div>
+      <div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div>
+      <div class="row"><b>Unlock Raid</b> <a class="link" href="aac-light-heavyweight-m2n.html">AAC Light-heavyweight M2 (M2N)</a></div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="yaanas-yarn.html">Yaana’s Yarn</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'劇毒の愛',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>予期せぬ来客が現れたとしても、メテムは「まずは目の前の試合に集中しよう」とあなたに促し、落ち着いた口調で次の対戦相手を紹介すると告げる。</p><p>メテムが映し出したのは、至天の座アルカディアの寵児、ハニー・Ｂ・ラブリー。彼女は蜂の魂――しかも極めて猛毒の蜂の魂を用いるが、警戒すべきは毒そのものよりも、人を魅了する力だという。</p><p>歌姫としての愛らしい魅力に加え、女王蜂のフェロモンを放ち、敵すら虜にしてしまう。術中に落ちた者たちは、彼女が与える責め苦さえ甘美に感じてしまうらしい。だからこそ、観客は全息投影で覆われた特殊な装置越しに観戦する――大勢が魅了されては困る、というのだ。</p><p>そこへブラックキャットが割って入り、「要するに、まったく『ラブリー』じゃない。本人が何を言おうと、ひどい目に遭う」と言い捨てる。メテムはそれを受け止めつつも、あなたなら勝てると信じていると告げ、意気を示して戦いに臨むよう背中を押す。</p><p>激闘の末に戻ったあなたを、メテムは興奮気味に称賛し、「やれるとわかっていた、我が友よ」と喜びを隠さない。ブラックキャットも、あなたがハニー・Ｂ・ラブリーを倒した事実に驚き、あなたこそ本物だと認める。メテムは、この勝利によってライトヘビー級の現王者に挑む資格を得たと告げるが、試合の段取りには少し時間がかかるという。</p><p>待ち時間のあいだ、メテムは「セカンド」を探してはどうかと提案する――対戦相手の情報を集め、鍛錬の助言で支える存在だ。するとブラックキャットが慌てて名乗り出て、「自分にやらせてほしい」と頼み込む。敗者はしばらく戦えないから時間はあるし、何よりも、あなたに自分を倒した勢いで全員を倒してほしいのだと言う。あなたが受け入れると、彼女は本名を明かす――ヤーナだ。話がまとまると、メテムは現役闘士であるヤーナなら相手に詳しいはずだと述べ、ヤーナはあなたを自分のジムへ案内しようと言う。散らかってはいるが、この陰気な控室よりずっと居心地がいい――そう言い残し、メテムは次の試合まで席を外す。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> メテム <small class="muted">(控室, X:6.1, Y:5.9)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-claw-in-the-dark.html">爪研ぐ猫魂</a></div>
+      <div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div>
+      <div class="row"><b>レイドダンジョン開放</b> <a class="link" href="aac-light-heavyweight-m2n.html">至天の座アルカディア：ライトヘビー級2層(M2N)</a></div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="yaanas-yarn.html">トライテールの姉妹</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'甜蜜的劇毒之愛',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>雖然出現了意料之外的訪客，Metem 仍要你把注意力拉回眼前——先專心面對接下來的比賽。他很快穩住場面，表示要為你介紹下一位對手。</p><p>Metem 介紹的，是 Arcadion 的寵兒 Honey B. Lovely。她使用的是「蜂」的靈魂，而且是毒性極強的那種；但他提醒你，比起毒，更該警戒的是她能夠迷惑眾人的魅惑能力。</p><p>Metem 說，Honey B. Lovely 不只是一名以甜美魅力取勝的歌姬，她還能釋放女王蜂的費洛蒙，連敵人都會被她迷住。中了她的「咒」的人，甚至會在她的折磨之中感到愉悅。也正因如此，觀眾將透過披上全息投影的特殊裝置來觀戰——要是幾百人一起被迷住，後果不堪設想。</p><p>Black Cat 冷冷插話，說她一點也不 lovely，不管她怎麼自稱，你都只會迎來一段很糟的時間。Metem 也不否認這點，但他仍相信你能取勝，於是催你上場，去證明自己的能耐。</p><p>當你帶著勝利回來，Metem 激動地稱讚你的表現，直說他早就知道你辦得到。Black Cat 也難以置信你竟然把 Honey B. Lovely 打倒了，承認你確實不一樣。Metem 表示，這場勝利讓你取得挑戰 light-heavyweight 分級現任冠軍的資格，只是要安排比賽還需要一些時間。</p><p>趁著等待，Metem 建議你找一位 second（在你身旁支援你、蒐集對手情報並提供訓練建議的人）作為後援。Black Cat 立刻結結巴巴地請求讓她來做——反正輸了的人暫時不能再打，她有空，而且她更想看到「打敗她的人」把所有對手都擊倒。你同意之後，她說你也該知道她的本名：Yaana。事情定下來，Metem 認為身為現役格鬥士的 Yaana 對對手肯定更熟，是很合適的選擇；Yaana 則邀你去她的 gym——雖然有點亂，但一定比這個陰沉的地方舒服得多。Metem 看你一切都安排妥當，便告辭離開，說等到下一場比賽時再見。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 梅特姆 <small class="muted">(控室, X:6.1, Y:5.9)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-claw-in-the-dark.html">暗處磨爪的貓魂</a></div>
+      <div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div>
+      <div class="row"><b>解鎖團隊副本</b> <a class="link" href="aac-light-heavyweight-m2n.html">至天座阿爾卡迪亞：輕量級 第2層 (M2N)</a></div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="yaanas-yarn.html">Yaana 的故事 崔泰爾姐妹</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
