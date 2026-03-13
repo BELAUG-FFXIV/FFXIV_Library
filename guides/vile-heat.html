@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Vile Heat | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Raid8 – Vile Heat (DT Patch 7.01)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#ffffff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative;max-height:360px;overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:"";position:absolute;left:0;right:0;bottom:0;height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card));pointer-events:none;
+    }
+    .expand-wrap{margin-top:12px}
+    .expand-btn{display:inline-block;padding:8px 14px;border-radius:10px;background:var(--card);border:1px solid var(--border);cursor:pointer;font-weight:600}
+    .expand-btn:hover{background:#fffef8}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/Vs2_CRiLINQ"
+              title="Vile Heat" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Vile Heat</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story" class="tab-panel active"></div>
+          <div id="panel-acq" class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Vile Heat`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Yaana tells you that if you win the coming fight, you will become champion of the light-heavyweight division. Fired up by the thought, she urges you to give everything you have. When she turns to the matter at hand, her expression tightens. Your next opponent, she says, is none other than Brute Bomber, the reigning champion. He wields the might of the bomb king, setting aflame all he touches, but that raw power is not what worries her most. What truly makes him dangerous is that he will cast aside any rule if it means victory, and many of those who faced him have been carried away to the infirmary. Even so, she insists that if you were able to defeat her, then you can defeat him as well, and sends you out with fierce encouragement to drive him from his own ring and return as the new champion.</p><p>With those words still at your back, you step into the match and emerge victorious. When you return, Yaana can barely contain herself. Even though you once defeated her, she says she is genuinely overjoyed for you, and marvels again at what you have managed to achieve without a feral soul. Your triumph has made you the new light-heavyweight champion. There will soon be a ceremony to crown you officially, she explains, and the eyes of countless people will be on you. She tells you to make sure you wear something you will not regret, then leads you toward the stage for what should have been your moment of recognition.</p><p>Before the assembled crowd, Metem calls out to the citizens and declares that all have gathered to honor a new champion of the Arcadion—a rising star who climbed to the top of the light-heavyweight division with astonishing speed. He draws out the moment, then presents you in grand fashion as the unstoppable upstart, the unenhanced but unbeatable fighter who has captured the title. You step forward into the cheers, greeted by the full weight of public attention as the ceremony begins.</p><p>But the celebration is shattered almost at once. Brute Bomber storms in, shouting for everything to stop. He refuses to accept the result of the match, calling your victory a farce and claiming that you fought with eight people, not alone. He demands that the matter be settled one-on-one, just you and him, and in the same breath summons his feral soul. Yaana immediately calls out the hypocrisy, telling him that if he truly wants fairness, then he should fight without the bomb king. Brute Bomber only roars that he makes the rules, then charges straight at you.</p><p>Before he can reach you, a sudden bolt of lightning strikes him down. He collapses unconscious, and the entire arena is swallowed by darkness. In the stunned confusion, Metem cries out in disbelief. When the power returns, a mysterious figure stands in the arena. Yaana recognizes her at once—Eutrope. Metem can scarcely believe what he is seeing and announces that Wicked Thunder, the heavyweight fighter who vanished without warning, has returned. Eutrope wastes no time. She fixes her eyes on you and declares that she will have your soul, ordering you to prepare yourself.</p><p>Metem, caught between shock and excitement, announces that Wicked Thunder has challenged the unstoppable upstart. Yet he also says that because her license was revoked when she disappeared, he cannot authorize such a bout. Then another voice cuts across the arena: the president. Finding the situation intriguing, the president grants permission for a special exhibition match and orders Wicked Thunder’s ring to be prepared, along with you. Seizing the moment, Metem turns back to the crowd and proclaims that, by the president’s leave, a match will indeed be held. The question now before everyone is who will prevail—the neoteric witch or the unenhanced warrior. The ceremony meant to honor your victory is swept away, and in its place a new clash is set in motion.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Yaana <small class="muted">(Greenroom, X:6.1, Y:5.9)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="yaanas-yarn.html">Yaana’s Yarn</a></div>
+      <div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div>
+      <div class="row"><b>Unlock Raid</b> <a class="link" href="aac-light-heavyweight-m3n.html">AAC Light-heavyweight M3 (M3N)</a></div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-neoteric-witch.html">The Neoteric Witch</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'爆ぜる悪意',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ヤーナは、次の試合に勝てばあなたがライトヘビー級の王者になるのだと力強く告げ、全力をぶつけようと励ます。そして気持ちを引き締めるように、次の相手について語り始める。相手は現ライトヘビー級王者、ブルートボンバー。爆王の力を借り、触れるものすべてを燃え上がらせる闘士だという。だが、ヤーナが本当に警戒しているのは、その力そのものではない。彼は勝つためなら規則など意にも介さず、どんな卑劣な手でも使う危険な相手であり、これまでにも多くの対戦相手が医務室へ運ばれていったのだという。それでも彼女は、あなたが自分を倒したのなら、ブルートボンバーも倒せるはずだと信じ、あの憎たらしい男を自分のリングから叩き出し、新たな王者として戻ってきてほしいと送り出す。</p><p>その言葉を胸に、あなたは試合へ向かい、ついに勝利をつかみ取る。戻ってきたあなたを迎えたヤーナは、興奮を隠しきれない。自分を倒した相手であっても、心の底からうれしいのだと語り、獣魂を使わずにここまで成し遂げたあなたの力にあらためて驚嘆する。そして、この勝利によってあなたが新たなライトヘビー級王者になったのだと祝福する。まもなく正式な戴冠式が行われ、多くの人々が見守ることになるから、あとで悔やまない格好をしておくようにと念を押し、彼女はあなたを晴れの舞台へと連れていく。</p><p>やがてメテムが観衆の前に立ち、新たな王者を称えるために皆が集ったのだと高らかに告げる。目にも止まらぬ勢いでライトヘビー級の頂点まで駆け上がった新星――そう言って場を盛り上げたあと、彼はついにあなたを呼び込む。強化なきまま無敗を貫く新鋭、ただひとりの王者としてあなたを華々しく紹介し、あなたは歓声に包まれながら壇上へ進み出る。</p><p>だが、その祝賀は一瞬で断ち切られる。ブルートボンバーが声を荒らげながら現れ、そこで止まれと叫ぶのだ。あの勝利は茶番であり、自分は決して認めないと吐き捨て、あれは一対一ではなく八人がかりだったではないかと不満をぶつける。そして今度こそ、あなたと自分だけで決着をつけようと言い放つと、すぐさま獣魂を呼び出す。ヤーナは、そんなことを言うなら爆王抜きで戦ってみろと怒りをあらわにするが、ブルートボンバーは自分がルールを決めるのだと怒鳴り返し、そのままあなたへ突進する。</p><p>その瞬間、不意の落雷がブルートボンバーを撃ち倒す。彼はその場に崩れ落ち、闘技場は一気に闇に包まれる。何が起こったのかとメテムが叫ぶなか、やがて明かりが戻り、ひとりの謎めいた人物が姿を現す。ヤーナはその姿を見るなり、ユートロープだと息をのむ。メテムも信じられないと動揺しながら、突如として姿を消したヘビー級闘士、ウィケッドサンダーが戻ってきたのだと告げる。ユートロープはためらいなくあなたを見据え、あなたの魂をもらう、覚悟しろと宣言する。</p><p>衝撃に包まれながらも、メテムはウィケッドサンダーが無敗の新鋭に挑戦状を叩きつけたのだと場内へ伝える。だが同時に、彼女は失踪した時点で資格を失っているため、自分にはこの試合を認めることができないとも言う。すると、場内に別の声が響き渡る。社長だ。その声はこの成り行きを実に興味深いと評し、特別試合を許可すると告げる。そしてウィケッドサンダーのリングを用意しろ、あなたも備えろと命じるのだった。メテムはその言葉を受け、社長の許可のもと試合が行われると観衆へ高らかに宣言する。新時代の魔女が勝つのか、それとも強化なき戦士が勝つのか。あなたの戴冠を祝うはずだった舞台は、いつしか新たな激突の幕開けへと変わっていく。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> ヤーナ <small class="muted">(控室, X:6.1, Y:5.9)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="yaanas-yarn.html">トライテールの姉妹</a></div>
+      <div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div>
+      <div class="row"><b>レイドダンジョン開放</b> <a class="link" href="aac-light-heavyweight-m3n.html">至天の座アルカディア：ライトヘビー級3層(M3N)</a></div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-neoteric-witch.html">次世代魔女</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'灼烈爆發的惡意',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Yaana 告訴你，只要贏下接下來這場比賽，你就會成為 light-heavyweight 分級的冠軍。她語氣高昂，要你把所有本事全都拿出來，然後很快把話題拉回眼前的對手。那個人正是目前的 light-heavyweight 冠軍 Brute Bomber。據 Yaana 所說，他借用 bomb king 的力量，能點燃自己碰觸到的一切；但真正麻煩的，還不是那股單純的破壞力。她提醒你，Brute Bomber 是個為了取勝什麼都做得出來的人，根本不把規則放在眼裡，至今已有不知多少對手被人抬進醫務室。即便如此，她依然堅信，既然你能打敗她，就一定也能打敗 Brute Bomber，還催你乾脆把那個討人厭的傢伙從他自己的擂台上轟出去，然後以新冠軍的身分回來。</p><p>你帶著這番話走進比賽，最後也真的贏了下來。回到 Yaana 身邊後，她幾乎壓不住那份激動，直說你真的辦到了。即使曾經敗在你手上，她還是打從心底替你高興，也再次為你在沒有 feral soul（用於戰鬥變身的獸魂）的情況下做到這一切而感到震撼。如今，你已經成了新的 light-heavyweight 冠軍。Yaana 接著告訴你，很快就會舉行正式的加冕儀式，到時候所有人都會看著你，所以最好換上不會讓自己之後後悔的衣服。她確認你準備好了之後，便帶你走向本該屬於你的高光時刻。</p><p>在眾人面前，Metem 高聲向全場宣告，今天大家齊聚在此，是為了見證 Arcadion 的新冠軍誕生——那位以驚人的速度一路衝上 light-heavyweight 分級頂點的新星。他刻意把氣氛推到最高點，然後隆重地把你介紹給所有人，稱你是勢不可擋的新秀，是未經強化卻無人能敵的存在。你在歡呼聲中走上舞台，迎向滿場的注視與喝采。</p><p>然而，這場慶祝才剛開始，就被 Brute Bomber 粗暴地打斷了。他大喊要所有人停下，怒斥你的勝利根本是一場鬧劇，還表示自己絕不接受那樣的結果。在他看來，那根本不是公平的對決，而是你們八個人一起對付他。於是他當場要求重新算帳，要和你一對一分出勝負，說完便立刻召出自己的 feral soul。Yaana 立刻反駁，既然他口口聲聲要公平，那就別再依賴那個 bomb king 來打。可 Brute Bomber 根本聽不進去，只怒吼說規則由他來定，然後就朝你直衝而來。</p><p>就在他撲向你的那一刻，一道突如其來的雷擊狠狠劈在他身上，當場把他打得失去意識，整座競技場也隨之陷入黑暗。Metem 在混亂中驚愕失聲，完全不知道發生了什麼。等到電力恢復時，場中央已經多出了一道神祕的身影。Yaana 一看見對方，立刻震驚地喊出 Eutrope 的名字。Metem 同樣不敢相信自己的眼睛，因為那位曾突然消失的 heavyweight 格鬥士 Wicked Thunder，如今竟然回來了。Eutrope 沒有半分遲疑，直接朝你宣告，她要奪走你的 soul，要你做好準備。</p><p>在震驚與興奮交雜的氣氛裡，Metem 高聲宣布，Wicked Thunder 已向這位勢不可擋的新秀發出了挑戰。可他同時也不得不承認，Eutrope 在失蹤時就已被撤銷資格，因此自己本來無法批准這場比賽。就在這時，另一道聲音透過場內傳了出來——那是總裁的聲音。對方只淡淡說了一句「真有意思」，接著便下令准許這場特別表演賽，命人準備 Wicked Thunder 的擂台，也要你做好準備。Metem 一聽到這道命令，立刻轉向全場，高聲宣告這場比賽已在總裁的許可下正式成立。接下來所有人都將親眼見證，最後勝出的究竟會是那位新世代的魔女，還是這位未經強化的戰士。原本屬於你的加冕時刻，就這樣在眨眼之間，被推向了另一場更激烈的對決。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Yaana <small class="muted">(控室, X:6.1, Y:5.9)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="yaanas-yarn.html">Yaana 的故事 崔泰爾姐妹</a></div>
+      <div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div>
+      <div class="row"><b>解鎖團隊副本</b> <a class="link" href="aac-light-heavyweight-m3n.html">至天座阿爾卡迪亞：輕量級 第3層 (M3N)</a></div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-neoteric-witch.html">新世代魔女</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
