@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Art at War | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Raid8 – Art at War (DT Patch 7.2)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#ffffff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative;max-height:360px;overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:"";position:absolute;left:0;right:0;bottom:0;height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card));pointer-events:none;
+    }
+    .expand-wrap{margin-top:12px}
+    .expand-btn{display:inline-block;padding:8px 14px;border-radius:10px;background:var(--card);border:1px solid var(--border);cursor:pointer;font-weight:600}
+    .expand-btn:hover{background:#fffef8}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/nu8C3op2xjQ"
+              title="Art at War" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Art at War</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story" class="tab-panel active"></div>
+          <div id="panel-acq" class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Art at War`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Yaana urges you to carry the momentum of your last victory forward and turn it into another win. With that, she introduces your next opponent: Sugar Riot, a fighter who lives and breathes art and treats the ring itself as her personal gallery. Before joining the Arcadion, she made her name as a graffiti artist, and Yaana explains that much of the graffiti scattered across Solution Nine was either painted by Sugar herself or by others trying to imitate her style.</p><p>Sugar Riot’s power comes from injecting herself with the feral soul of a deadly pudding. Through it, she creates a special paint capable of causing real changes to the world around her—even reshaping the ring itself. To her, combat is not merely a contest, but a medium for artistic expression. Because her imagination knows no bounds, Yaana warns you that the danger lies in being overwhelmed by whatever strange and unpredictable things she may bring forth. If you can remain calm through all of it, she believes you will overcome Sugar Riot and continue climbing toward the top of the cruiserweight division. She adds, almost as an afterthought, that the audience will be watching remotely this time through avatars personally designed by Sugar, and tells you to take a look if you get the chance.</p><p>You do as she asks, and when the fight is over, you return victorious once again. Yaana greets you with warm praise, saying she knew all along that you could do it. Your next match, she tells you, will be against the cruiserweight champion himself. Yet before that day arrives, there is something else she cannot leave undone. She wants to tell Dancing Green and Sugar Riot the truth about psychonekrosis and determine whether they have begun to show symptoms. If there is any chance to save them, then she means to take it.</p><p>To avoid drawing notice, Yaana has borrowed Neyuni’s terminal and prepares to perform the examinations in the greenroom after first checking carefully for listening devices. Before long, the two fighters arrive. Dancing Green breezes in with his usual teasing levity, asking whether a party is about to begin, while Sugar Riot is ready to excuse herself at once if this is only idle chatter, eager as she is to shape the inspiration your battle gave her into new work. But the mood changes the moment Yaana explains the results. Neither of them has fully manifested the disease yet, but both stand dangerously close to doing so. Just one more feral soul injection, she says, could be enough to push them past the point of no return. For their own safety, she urges them to stop fighting in the Arcadion.</p><p>The truth lands heavily. Dancing Green admits that he will retire. In confidence, he confesses that he has always struggled to live as “Dancing Green.” To maintain the image of a reckless party animal, he has forced himself night after night into clubs and bars, and when he is not doing that, he is in the studio drilling dance until exhaustion hollowed him out. He endured it all only because he could not bear to disappoint his fans, but now, for the first time, the revelation feels like release. Dancing was once something he truly loved, and he begins to hope that perhaps he can find that love again. Yaana, stunned, admits she had always believed the carefree reveler was his true self, never imagining how heavy that persona had become.</p><p>Sugar Riot accepts the truth more quietly, though no less painfully. The ring, she says, has been her cherished studio, and the thought of never setting foot in it again leaves her deeply saddened. Yet before the Arcadion, she made her art on the streets, and she chooses to see this revelation as a sign calling her back to where she began. If she can no longer paint within the ring, then she will return to a time when the whole city was her studio and every wall her canvas. Dancing Green adds that watching you fight without a feral soul helped him realize that perhaps it is all right to simply be himself. Moved by their decision, Yaana thanks them both for listening. They answer that they would rather not die, and that they owe you for the warning. Still, they know better than to linger too long. Suspicion would grow if they stayed, so they decide they will discuss later how and when to break the news to management. When they are gone, Yaana reflects with some relief that, like Honey, those two still have other places where their talents can live on. But for Brute Bomber and the Howling Blade, the Arcadion is everything. And because of that, she knows better than most how difficult retirement will be for them, even when the matter has become one of life and death.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Yaana <small class="muted">(Greenroom, X:6.1, Y:5.9)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-dancing-king.html">The Dancing King</a></div>
+      <div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div>
+      <div class="row"><b>Unlock Raid</b> <a class="link" href="aac-cruiserweight-m6n.html">AAC Cruiserweight Tier 2 (M6N)</a></div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="twisted-vengeance.html">Twisted Vengeance</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'リングはアトリエ',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ヤーナは、この勢いのまま次の勝利へ進もうとあなたを励まし、そのまま次の対戦相手を紹介する。相手はシュガーライオット。芸術に生き、芸術に息づく闘士であり、リングそのものを自らの展示場として扱う存在だという。アルカディアに入る前の彼女はグラフィティアーティストであり、ソリューションナインで見かける落書きの多くは彼女自身の作品か、彼女の作風を真似たものなのだとヤーナは語る。</p><p>シュガーライオットは、危険なプリンの獣魂をその身に注ぎ込み、現実にまで影響を及ぼす特殊な絵の具を生み出す。その力はリングそのものさえ変えてしまうほどだという。彼女にとって戦いとは単なる勝負ではなく、自己表現のための創作手段なのだ。だからこそ、その想像力に呑まれないことが何より重要になる。何を仕掛けられても冷静さを失わなければ、きっと打ち破り、クルーザー級の頂へ向かう道を進み続けられるはずだとヤーナは言う。そして今回は観客が遠隔で観戦しており、そのアバターはシュガーライオット自らが手がけたものだから、余裕があれば目を向けてみるといいと付け加える。</p><p>あなたはその言葉どおりに戦い、再び勝者として戻ってくる。ヤーナは満面の喜びで迎え、あなたならやれると信じていたと心から称える。次の試合はいよいよクルーザー級王者との対決になるという。だがその前に、どうしても済ませておきたいことがあると彼女は言う。ダンシンググリーンとシュガーライオットに魂蝕症の真実を伝え、症状が出始めていないかを確かめたいのだ。もし救える可能性があるのなら、見過ごすわけにはいかない。</p><p>ネユニの端末を借りて、この部屋で検査を行う準備は整っていた。盗聴器の有無もすでに確認済みだという。やがてふたりが姿を見せる。ダンシンググリーンはいつもの調子で、ここで何か楽しい騒ぎでも始まるのかと軽口を叩き、シュガーライオットは、もし違うのならすぐ戻りたいほど、あなたとの戦いから得た着想を形にしたいのだと口にする。だがヤーナが検査結果を伝えた瞬間、場の空気は一変する。ふたりともまだ発症には至っていないものの、きわめて危ういところまで来ており、あと一度でも獣魂注入を行えば、取り返しのつかないところへ踏み越えてしまうかもしれない。だからこそ、自分たちの身を守るためにもアルカディアを去るべきだとヤーナは訴える。</p><p>その事実を前に、ダンシンググリーンはやがて引退を決意する。そして、この話は外へ漏らさないでほしいと前置きしたうえで、自分はずっと「ダンシンググリーン」という役を演じ続けることに苦しんでいたのだと打ち明ける。陽気なパーティー好きであり続けるため、毎晩街へ繰り出し、そうでないときはスタジオで踊りの稽古を重ねる。その生活は疲れ果てるほど過酷で、魂が削られるようだった。それでもファンを失望させたくなくて耐えてきたが、この真実を知った今、それはむしろ解放に思えるのだという。踊ることはもともと自分の情熱だったのだから、もう一度それを好きになれるかもしれないと彼は静かに語る。ヤーナは、ただ享楽に生きる人間なのだと思っていた相手が、そんな重荷を背負っていたことに驚きを隠せない。</p><p>一方のシュガーライオットは、もっと静かに、しかし深くその現実を受け止める。リングは自分にとってかけがえのないアトリエであり、もうそこへ立てなくなるのはつらいと認める。それでも、自分の原点は街頭にあった。ならばこれは、そこへ戻れというしるしなのだろうと彼女は受け止める。もうリングで創作できないのなら、街そのものを再び自分のアトリエにし、壁をキャンバスにして描けばいいのだと。さらにダンシンググリーンは、獣魂に頼らず戦うあなたの姿を見ていたからこそ、もしかしたら自分自身として生きてもいいのではないかと思えるようになったのだと打ち明ける。ヤーナはほっとしたように礼を述べ、ふたりもまた、死にたくはないし、警告してくれたあなたたちには感謝していると応える。ただ、あまり長くここに留まれば不審を招く。管理側へいつどう伝えるかは、後で相談することにして、ふたりは部屋を去っていく。残されたヤーナは、ハニーと同じように、あのふたりにはまだ才能を活かせる別の場所があることに安堵する。だがブルートボンバーとハウリングブレードにとっては、アルカディアこそがすべてだ。だからこそ、引退という選択がどれほど難しいものかを、彼女は誰よりもよくわかっていた。いまやそれが、生きるか死ぬかに関わる問題であったとしても。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> ヤーナ <small class="muted">(控室, X:6.1, Y:5.9)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-dancing-king.html">パーティー野郎</a></div>
+      <div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div>
+      <div class="row"><b>レイドダンジョン開放</b> <a class="link" href="aac-cruiserweight-m6n.html">至天の座アルカディア：クルーザー級2層(M6N)</a></div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="twisted-vengeance.html">反則王のリベンジ</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'擂台即畫室',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Yaana 要你趁著現在這股氣勢，直接朝下一場勝利衝過去，接著便介紹起你的下一位對手。那個人就是 Sugar Riot——一名幾乎把生命都獻給藝術的闘士，對她而言，擂台本身就是她的展示空間。Yaana 告訴你，在來到 Arcadion 之前，Sugar Riot 原本是一名塗鴉藝術家，而你在 Solution Nine 看到的大部分塗鴉，不是出自她之手，就是模仿她風格而來。</p><p>Sugar Riot 透過注入致命布丁怪的 feral soul（用於戰鬥變身的獸魂），調製出能夠實際改變現實的特殊顏料，甚至連擂台本身都能被她重新塑形。對她來說，戰鬥從來不只是勝負，而是一種創作形式，是讓她表達自我的媒介。也正因如此，Yaana 提醒你，最危險的不是單一招式，而是她那幾乎沒有邊界的想像力。無論她拋出什麼樣的變化，你都必須維持冷靜，不能被她的節奏與創意吞沒。只要你做得到，你就一定能跨過 Sugar Riot，繼續往 cruiserweight 分級的頂點邁進。她還補充說，這一場觀眾會以遠端方式觀看比賽，而那些虛擬化身全都是 Sugar Riot 親自設計的；若你有餘裕，不妨也分神看上一眼。</p><p>你照樣走進戰鬥，也照樣帶著勝利回來。見到你回到 Greenroom，Yaana 立刻露出欣喜的神情，直說她就知道你一定辦得到。接下來，你將要面對的就是 cruiserweight 冠軍本人。但在那之前，她還有一件事無論如何都想先做。她想把 psychonekrosis（過度使用 feral soul 的人可能罹患的致命疾病，會逐步侵蝕靈魂與身體）的真相告訴 Dancing Green 和 Sugar Riot，並確認他們身上是否已經出現症狀。只要還有機會，她就想把他們也救下來。</p><p>為了不引人注意，Yaana 借來了 Neyuni 的終端裝置，打算就在這個房間裡替兩人做檢查，並且事先確認過周圍沒有任何竊聽裝置。沒過多久，兩人果然到了。Dancing Green 一進門還是那副輕浮隨性的樣子，笑著問是不是這裡也要開派對；Sugar Riot 則一臉想趕快離開的模樣，因為她正急著把你帶給她的靈感化成新的作品。可當 Yaana 把檢查結果說出口後，房間裡的氣氛立刻變了。她告訴兩人，雖然他們都還沒有真正發病，但都已經危險地逼近那條界線，只要再進行一次 feral soul 注入，就很可能徹底越過無法挽回的邊緣。也正因如此，她真心勸他們立刻停止在 Arcadion 戰鬥。</p><p>這番話重重落下之後，Dancing Green 最終做出了決定。他說自己會引退，並要求這件事暫時別傳出去，因為其實他一直都很痛苦地在扮演「Dancing Green」這個角色。為了維持那種永遠熱愛狂歡、夜夜笙歌的形象，他不得不一晚又一晚流連在城裡的酒館與夜生活場所；而在那之外的時間，他又得在練舞室裡不斷練習。那樣的生活讓他精疲力竭，甚至像是在一點一點磨碎自己的靈魂。可即便如此，他還是撐了下來，因為他不想讓喜歡自己的粉絲失望。如今，這個殘酷的真相反而讓他感到解脫。跳舞原本曾是他真心熱愛的事，也許現在，他終於能重新找回那份喜歡。Yaana 聽完後十分震驚，因為她一直都以為他就是那種天生只為狂歡而活的人，從沒想過那副模樣其實是壓在他肩上的負擔。</p><p>Sugar Riot 對這一切的反應則沉靜得多，卻同樣帶著難以忽視的重量。她說，擂台一直都是她最珍惜的工作室，一想到自己再也不能踏進那裡，心裡就覺得難受。但她也明白，自己的創作本來就是從街頭開始的。既然如此，也許這個真相正是在提醒她回到自己的原點。若不能再把擂台當作工作室，那她就重新讓整座城市成為她的工作室，讓牆面再次成為她的畫布。Dancing Green 也坦白說，正是因為看著你在沒有 feral soul 的情況下戰鬥，他才第一次意識到，也許自己其實不必永遠扮演那個被期待的樣子，只要做自己也可以。聽見這些話，Yaana 顯然鬆了一口氣，真心向兩人道謝；而他們也坦率地回應，誰都不想死，能及時得到這份警告，確實該感謝你們。只是他們不能在這裡停留太久，否則很容易引人懷疑，所以關於何時向管理層說明這件事，之後再另外商量。等兩人離開之後，Yaana 低聲感嘆，幸好就像 Honey 一樣，這兩人都還有其他地方能施展自己的才華。可是對 Brute Bomber 和 Howling Blade 來說，Arcadion 幾乎就是他們生命的全部。也正因為如此，她比誰都更明白，要他們引退究竟有多困難——哪怕這件事，早已是攸關生死的問題。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Yaana <small class="muted">(控室, X:6.1, Y:5.9)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="the-dancing-king.html">派對狂人</a></div>
+      <div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div>
+      <div class="row"><b>解鎖團隊副本</b> <a class="link" href="aac-cruiserweight-m6n.html">至天座阿爾卡迪亞：中量級 第2層 (M6N)</a></div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="twisted-vengeance.html">犯規之王的復仇</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
