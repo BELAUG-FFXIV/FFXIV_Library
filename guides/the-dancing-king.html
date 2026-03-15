@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Dancing King | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Raid8 – The Dancing King (DT Patch 7.2)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#ffffff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative;max-height:360px;overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:"";position:absolute;left:0;right:0;bottom:0;height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card));pointer-events:none;
+    }
+    .expand-wrap{margin-top:12px}
+    .expand-btn{display:inline-block;padding:8px 14px;border-radius:10px;background:var(--card);border:1px solid var(--border);cursor:pointer;font-weight:600}
+    .expand-btn:hover{background:#fffef8}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/qS72101ENMc"
+              title="The Dancing King" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">The Dancing King</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story" class="tab-panel active"></div>
+          <div id="panel-acq" class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`The Dancing King`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Yaana sees that you are ready, and with bright excitement she declares that the unstoppable upstart’s cruiserweight campaign is about to begin. She then turns at once to your first opponent and tells you it is time to have a proper look at the man waiting for you in the ring.</p><p>That opponent is Dancing Green, the verdant reveler. Yaana describes him as a shameless playboy who loves to spend his nights in pubs and clubs, forever chasing the thrill of a party. Even his Arcadion matches are no different in his eyes—just another stage where he can stand at the center of attention and lose himself in the celebration.</p><p>She explains that he fights using a terrible toad’s feral soul, gaining greater physical prowess and weaving dance movements seamlessly into combat. Because of that, she warns that victory will depend on whether you can keep up with his rhythm and endure the strange flow of the battle he creates.</p><p>Rather than resist that nature outright, Yaana suggests that your best chance may lie in meeting him on his own ground. If you treat the fight like a party as well, and allow yourself to move with the flow instead of against it, you may find that the fight opens before you in ways you did not expect.</p><p>With that, she urges you to step into the ring and show that swaggering party animal that you have moves of your own. She wants you to seize your first victory in the cruiserweight division and make it clear that your rise is far from over. She also reminds you that the ring itself will be transformed into a dazzling dance floor, and that the crowd will be absolutely electric, so you must take in the atmosphere and become the star of the show.</p><p>When the battle is over and you return victorious, Yaana greets you with open admiration. She tells you that you fought splendidly, and that with this win you have already proven yourself a force to be reckoned with in the cruiserweight division.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Yaana <small class="muted">(Greenroom, X:6.1, Y:5.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="souls-under-siege.html">Souls under Siege</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="art-at-war.html">Art at War</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'パーティー野郎',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ヤーナは、あなたの準備ができているのを確かめると、勢いよく、無敵の新鋭によるクルーザー級での挑戦がいよいよ始まるのだと告げる。そしてすぐに気持ちを切り替え、最初の対戦相手について見ていこうとあなたに促す。</p><p>その相手こそ、緑の享楽者、ダンシンググリーン。ヤーナいわく、彼は酒場やクラブで夜通し騒ぐことを何より愛する、隠しようもない遊び人だという。アルカディアでの試合ですら、彼にとっては自分が主役となるための華やかな宴にすぎない。</p><p>彼は恐るべき大蛙の獣魂を用いて戦い、身体能力を大きく高めながら、その動きの中に踊りを自然に織り交ぜてくる。だからこそ、この勝負は、あなたがどれほど彼の刻むリズムに乗り、その流れに呑まれずにいられるかに懸かっているのだとヤーナは言う。</p><p>むしろ真正面から拒むよりも、あなたもまたこの戦いを一種の宴として受け止めたほうがいいかもしれないと、彼女は半ば本気で勧める。その流れに逆らうのではなく、あえて身を委ねてみれば、その先に思いがけない道が開けるかもしれないからだ。</p><p>そうしてヤーナは、あの享楽に酔う男に向かって、あなたにもあなたの動きがあることを見せつけてこいと力強く送り出す。そしてクルーザー級での最初の勝利をつかみ取り、ここから先の快進撃がまだ終わらないことを示してほしいと願う。さらに今回のリングは眩いダンスフロアとなり、観客の熱気も最高潮に達するはずだから、その空気を味方につけ、この舞台の主役になれと念を押す。</p><p>そして激闘を終え、勝者としてグリーンルームへ戻ってきたあなたを、ヤーナは心からの称賛で迎える。見事な戦いだったと告げ、この一勝によって、あなたはすでにクルーザー級でも決して侮れない存在であることを証明したのだと語る。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> ヤーナ <small class="muted">(控室, X:6.1, Y:5.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="souls-under-siege.html">魂を蝕む病</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="art-at-war.html">リングはアトリエ</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'派對狂人',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Yaana 看你已經準備好了，便振奮地宣布，這位勢不可擋的新秀終於要正式展開 cruiserweight（Arcadion 更高一級的重量分級，闘士使用更強力的 feral soul）分級的征途了。接著，她立刻把注意力放到你的第一位對手身上，要你先好好看看即將站在你面前的人。</p><p>你的第一個對手，就是 Dancing Green——那位沉迷狂歡的綠色享樂者。Yaana 形容他是一個毫不掩飾的風流玩家，最愛整夜流連在酒館與夜店之中，追逐那些喧鬧又炫目的夜晚。對他來說，就連 Arcadion 的比賽也只是另一場派對，一個讓自己站上最中央、成為所有人目光焦點的舞台。</p><p>她告訴你，Dancing Green 使用的是巨型毒蟾蜍的 feral soul（用於戰鬥變身的獸魂）。靠著那股力量，他的身體能力會明顯提升，還能把舞步毫無破綻地融進戰鬥裡，讓攻擊與節奏緊緊纏在一起。也正因如此，這場勝負很可能取決於你能不能跟上他的節拍，在那種混亂卻華麗的流動裡站穩自己。</p><p>Yaana 甚至半認真地建議，你最好的對策或許不是硬碰硬地抗拒，而是乾脆把這場戰鬥也視作一場派對。若你願意順著那股節奏去感受、去移動，而不是一味逆著它掙扎，也許反而會看見意想不到的機會。</p><p>說到最後，Yaana 再次為你打氣，要你走進擂台，讓那個把一切都當成狂歡的男人看看，你也有屬於自己的節奏與招式。她希望你親手拿下 cruiserweight 分級的第一場勝利，讓所有人知道，你的腳步還遠遠沒有停下。她也提醒你，這次的擂台會是一片炫目的舞池，觀眾的情緒也肯定會格外高漲，所以你要好好把那股氣氛化成自己的力量，成為整場表演最耀眼的主角。</p><p>當戰鬥結束，你帶著勝利回到 Greenroom 時，Yaana 立刻毫不掩飾地讚賞你，說你打得非常精彩。她告訴你，憑著這一勝，你已經向 cruiserweight 分級的所有人證明，你絕不是一個僥倖闖進來的挑戰者，而是一股誰都不能小看的力量。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Yaana <small class="muted">(控室, X:6.1, Y:5.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="souls-under-siege.html">受困的靈魂</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="art-at-war.html">擂台即畫室</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
