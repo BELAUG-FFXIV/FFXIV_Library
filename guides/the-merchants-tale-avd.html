@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Merchant's Tale (Advanced) | BELAUG · FFXIV Library</title>
+  <meta name="description" content="FFXIV DT 7.45 Side Feature — The Merchant's Tale (Advanced)（商客物語 AVD / The Merchant's Tale (Advanced)）：故事概要、需求條件、解鎖任務、後續任務、BGM，附影片。" />
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#ffffff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif; background:var(--bg); color:var(--fg);}
+    .container{max-width:1080px; margin:0 auto; padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border); background:#fff9edb3; backdrop-filter:saturate(120%) blur(6px); position:sticky; top:0; z-index:10}
+    .nav{display:flex; align-items:center; justify-content:space-between; height:60px}
+    .left{display:flex; align-items:center; gap:12px}
+    .home{border:1px solid var(--border); background:#fff; padding:4px 8px; border-radius:8px; text-decoration:none; color:var(--fg); font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex; align-items:center; gap:8px}
+    .icon-btn{background:none; border:none; cursor:pointer; font-size:14px; padding:6px 10px; border-radius:8px}
+    .icon-btn:hover{background:#fff; border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid; grid-template-columns:1.1fr 1fr; gap:20px; align-items:start;}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative; padding-top:56.25%}
+      .video-wrap iframe{position:absolute; inset:0; width:100%; height:100%}
+    }
+    .card{background:var(--card); border:1px solid var(--border); border-radius:16px; box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px; border-bottom:1px solid var(--border); font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%; height:420px; border:0; display:block; border-radius:16px}
+
+    .tabs{display:flex; gap:8px; padding:12px 12px 0; flex-wrap:wrap}
+    .tab-btn{background:#fff; border:1px solid var(--border); color:var(--fg); border-radius:999px; padding:8px 14px; cursor:pointer; font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent); color:#fff; background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+
+    .stack{display:flex; flex-direction:column; gap:10px}
+    .stack .row{padding:12px 14px; border:1px dashed var(--border); border-radius:12px; background:#fffdf6}
+
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8; text-decoration:none}
+    .link:hover{text-decoration:underline}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <!-- 左：影片 -->
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/il2xHJt9nuU" title="The Merchant's Tale (Advanced)" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：標題 + Tabs -->
+      <section class="card">
+        <div class="hd" id="pageTitle">The Merchant's Tale (Advanced)</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true" data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="req">Requirements</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlock">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="bgm">BGM</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story" class="tab-panel active"></div>
+          <div id="panel-req" class="tab-panel"></div>
+          <div id="panel-acq" class="tab-panel"></div>
+          <div id="panel-unlock" class="tab-panel"></div>
+          <div id="panel-bgm" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const LANG_KEY = 'ffxiv-guide-lang';
+
+    const i18n = {
+      EN:{
+        langLabel:'EN',
+        pageTitle:"The Merchant's Tale (Advanced)",
+        tabs:{story:'Story', req:'Requirements', acq:'Unlock Quest', unlock:'Follow-Up Quest', bgm:'BGM', comments:'Comments'},
+        story:`<p>The dutiful mammet Memolivia listens to your every word with what you can only guess is rapt attention, speedily writing down the details in incomprehensible shorthand. It then begins trimming the text further until naught remains but concise descriptions of the fiercest battles you encountered in The Merchant’s Tale. As you read the record over, you find that without the trappings of that wondrous story to soften them, the foes you faced were terrifying beyond your wildest imaginings…</p>`,
+        req:`<div class="stack">
+          <div class="row"><strong>Players:</strong> 1–4 players</div>
+          <div class="row"><strong>Class/Job:</strong> Disciples of War or Magic (excluding limited jobs)</div>
+          <div class="row"><strong>Level:</strong> 100</div>
+          <div class="row">※ Level will be synced upon entry.</div>
+          <div class="row"><strong>Avg. Item Level:</strong> 760</div>
+          <div class="row"><strong>Item Level Sync:</strong> 785</div>
+          <div class="row">※ While synced, all item stats are adjusted.</div>
+          <div class="row">※ Role and item level restrictions are lifted for parties meeting minimum size requirements.</div>
+        </div>`,
+        acq:`<div class="stack">
+          <div class="row"><a class="link" href="abridged-too-far.html">Abridged Too Far</a></div>
+        </div>`,
+        unlock:`<div class="stack">
+          <div class="row">None</div>
+        </div>`,
+        bgm:`<div class="stack">
+          <div class="row">BGM: To be added.</div>
+        </div>`
+      },
+
+      JP:{
+        langLabel:'JP',
+        pageTitle:'商客物語 AVD',
+        tabs:{story:'ストーリー', req:'必要条件', acq:'開放クエスト', unlock:'後続クエスト', bgm:'ＢＧＭ', comments:'コメント'},
+        story:`<p>生真面目なマメットの メモリヴィア は、あなたの話す一言一句に熱心に耳を傾けている……ように見え、たちまち判読不能な速記で詳細を書き留めていく。やがて彼女はその文章をさらに削り落とし、「商客物語」 であなたが遭遇した最も苛烈な戦いだけを、簡潔な記述として残していった。記録を読み返してみれば、あの不思議な物語という装いに包まれていた時には気づかなかったが、あなたが立ち向かった敵たちは、想像をはるかに超えるほど恐ろしい存在だったのだと知る……。</p>`,
+        req:`<div class="stack">
+          <div class="row"><strong>プレイヤー数：</strong>1～4人</div>
+          <div class="row"><strong>クラス／ジョブ：</strong>ファイター／ソーサラー（リミテッドジョブを除く）</div>
+          <div class="row"><strong>レベル：</strong>100</div>
+          <div class="row">※ コンテンツ参加時にレベルシンクされます。</div>
+          <div class="row"><strong>平均IL：</strong>760</div>
+          <div class="row"><strong>ILシンク：</strong>785</div>
+          <div class="row">※ シンク中は全装備ステータスが調整されます。</div>
+          <div class="row">※ 最低人数を満たすパーティではロール／IL制限が解除されます。</div>
+        </div>`,
+        acq:`<div class="stack">
+          <div class="row"><a class="link" href="abridged-too-far.html">略されすぎた禁書</a></div>
+        </div>`,
+        unlock:`<div class="stack">
+          <div class="row">なし</div>
+        </div>`,
+        bgm:`<div class="stack">
+          <div class="row">BGM：追記予定</div>
+        </div>`
+      },
+
+      ZH:{
+        langLabel:'ZH-TW',
+        pageTitle:"The Merchant's Tale (Advanced)",
+        tabs:{story:'故事概要', req:'需求條件', acq:'解鎖任務', unlock:'後續任務', bgm:'BGM', comments:'留言'},
+        story:`<p>盡忠職守的 mammet Memolivia 聽著你說出的每一句話，看起來簡直像是全神貫注，並以讓人完全看不懂的速記飛快記下所有細節。接著，她又開始把內容一再刪減，直到最後只剩下你在 The Merchant’s Tale 中遭遇過的那些最激烈戰鬥的精簡記述。當你重新讀過這份紀錄時，才驚覺一旦失去了那段奇妙故事外衣的修飾，你曾面對的敵人竟比自己最狂野的想像還要可怕……。</p>`,
+        req:`<div class="stack">
+          <div class="row"><strong>人數：</strong>1–4 人</div>
+          <div class="row"><strong>職業：</strong>戰鬥職業／魔法職業（不包含限定職業）</div>
+          <div class="row"><strong>等級：</strong>100</div>
+          <div class="row">※ 進入後將進行等級同步。</div>
+          <div class="row"><strong>平均裝等：</strong>760</div>
+          <div class="row"><strong>裝等同步：</strong>785</div>
+          <div class="row">※ 同步時，所有裝備數值將自動調整。</div>
+          <div class="row">※ 當隊伍僅達最低人數時，角色定位與裝備品級限制將解除。</div>
+        </div>`,
+        acq:`<div class="stack">
+          <div class="row"><a class="link" href="abridged-too-far.html">刪減過頭的禁書</a></div>
+        </div>`,
+        unlock:`<div class="stack">
+          <div class="row">無</div>
+        </div>`,
+        bgm:`<div class="stack">
+          <div class="row">BGM：後續補上</div>
+        </div>`
+      }
+    };
+
+    const langToggle = document.getElementById('langToggle');
+    const pageTitle  = document.getElementById('pageTitle');
+    const tabBtns    = [...document.querySelectorAll('.tab-btn')];
+
+    const panels = {
+      story   : document.getElementById('panel-story'),
+      req     : document.getElementById('panel-req'),
+      acq     : document.getElementById('panel-acq'),
+      unlock  : document.getElementById('panel-unlock'),
+      bgm     : document.getElementById('panel-bgm'),
+      comments: document.getElementById('panel-comments')
+    };
+
+    function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+
+    function applyLang(lang){
+      const t = i18n[lang] || i18n.EN;
+      pageTitle.textContent = t.pageTitle;
+      langToggle.textContent = `🌐 ${t.langLabel}`;
+      tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+      const activeBtn = tabBtns.find(b=>b.getAttribute('aria-selected')==='true') || tabBtns[0];
+      renderPanel(activeBtn.dataset.tab, lang);
+      if (activeBtn && activeBtn.dataset.tab === 'comments') loadGiscusForCurrentLang();
+    }
+
+    function renderPanel(key, lang){
+      const t = i18n[lang] || i18n.EN;
+      Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+      panels[key].classList.add('active');
+      if (key !== 'comments') panels[key].innerHTML = t[key] || '';
+      else loadGiscusForCurrentLang();
+    }
+
+    tabBtns.forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+        btn.setAttribute('aria-selected','true');
+        renderPanel(btn.dataset.tab, getLang());
+      });
+    });
+
+    langToggle.addEventListener('click',()=>{
+      const cur=getLang();
+      const next=cur==='EN'?'JP':(cur==='JP'?'ZH':'EN');
+      localStorage.setItem(LANG_KEY,next);
+      applyLang(next);
+    });
+
+    applyLang(getLang());
+
+    const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+    };
+
+    function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+
+    function loadGiscusForCurrentLang(){
+      const mount = document.getElementById('giscus_container');
+      if (!mount) return;
+      mount.innerHTML = '';
+      const langCode = getLang();
+      const s = document.createElement('script');
+      s.src = 'https://giscus.app/client.js';
+      s.setAttribute('data-repo', GISCUS_CFG.repo);
+      s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+      s.setAttribute('data-category', GISCUS_CFG.category);
+      s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+      s.setAttribute('data-mapping', 'specific');
+      s.setAttribute('data-term', location.pathname + '｜' + langCode);
+      s.setAttribute('data-reactions-enabled', '1');
+      s.setAttribute('data-emit-metadata', '0');
+      s.setAttribute('data-input-position', 'bottom');
+      s.setAttribute('data-lang', uiLang(langCode));
+      s.setAttribute('data-theme', GISCUS_CFG.theme);
+      s.setAttribute('crossorigin', 'anonymous');
+      s.async = true;
+      mount.appendChild(s);
+    }
+  </script>
+</body>
+</html>
