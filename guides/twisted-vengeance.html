@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Twisted Vengeance | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Raid8 – Twisted Vengeance (DT Patch 7.2)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#ffffff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative;max-height:360px;overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:"";position:absolute;left:0;right:0;bottom:0;height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card));pointer-events:none;
+    }
+    .expand-wrap{margin-top:12px}
+    .expand-btn{display:inline-block;padding:8px 14px;border-radius:10px;background:var(--card);border:1px solid var(--border);cursor:pointer;font-weight:600}
+    .expand-btn:hover{background:#fffef8}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/y4N8zlvWo2c"
+              title="Twisted Vengeance" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Twisted Vengeance</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story" class="tab-panel active"></div>
+          <div id="panel-acq" class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Twisted Vengeance`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Yaana tells you that, for now, your priority has to be the title match. She urges you to return to the gym and prepare, adding that Neyuni will be relieved to hear that both Dancing Green and Sugar Riot plan to retire—and that you should share the good news at once.</p><p>But when you arrive, Neyuni meets you in a panic and thrusts a broadcast in front of you. On the screen, Brute Bomber is demanding that someone hand over every feral soul they have. Metem’s commentary is frantic: Brute Bomber is threatening to use unregulated feral souls—several at once—and that would turn him into an abomination. Metem declares it a rules violation and warns that Brute Bomber will be banned, but Brute Bomber only roars back, tells him to get out of the way, and calls you out directly. If you are watching, he says, meet him at the demolition site on the eighth level. He promises a rematch—and swears he will destroy you.</p><p>Yaana explodes in anger at his recklessness, and Neyuni forces herself to explain what makes this so dangerous. The “doping” tonic Brute Bomber drinks during matches is actually a harmless prop, part of his ring persona—which is why his matches can go on even when he is disqualified. Using multiple feral souls at once, however, is strictly forbidden. It irreversibly warps the flesh, can kill in the worst case, and likely accelerates the soul’s degradation so severely that it drives a fighter toward psychonekrosis.</p><p>Metem arrives in distress and demands to know if you told Brute Bomber about the disease. Yaana admits you did—because you could not simply abandon him. Metem says Brute Bomber took the matter to the president, who denied psychonekrosis outright, and Brute Bomber chose to believe him. Worse, the president has sanctioned a grudge match between Brute Bomber and you—on the condition that Brute Bomber inject multiple feral souls to “stand a chance.” Metem confesses that his outrage on the broadcast was staged, because everything is proceeding exactly as the president scripted it. The president wants you gone, and he is using Brute Bomber to accomplish it, even though Brute Bomber is already showing symptoms and this could kill him.</p><p>Metem insists the match will happen regardless. Even if you ignore the challenge, Brute Bomber will inject himself and come for you. And if you still intend to become grand champion and release all the souls in the Arcadion’s repository, then there may be no path forward except through this fight. He tells you to prepare, then meet him at the Arcadion—he will have a chauffeur take you to the venue. Yaana says she is coming too, because she feels responsible for what was set in motion when she revealed the disease to Brute Bomber.</p><p>You waste no time. The chauffeur escorts you by air-wheeler to the eighth level demolition site, where Yaana pleads with Brute Bomber to stop before he throws his life away. Brute Bomber spits back that he fears nothing and obeys no rules, and then—before you can reach him—he does it. Metem cries out that Brute Bomber has injected several feral souls and transformed into a chimerical fiend: no longer Brute Bomber, but the Brute Abombinator. Yaana wants to fight, but in the end she can only place her trust in you to knock sense into him. After the battle, Yaana can only say you were too late, and that the feral souls took their toll.</p><p>The president has the broadcast cut the instant the match ends, so the ugliest side of his entertainment will not be seen. Metem says the president is furious that information about psychonekrosis was divulged, and that he will try to appease him—though he expects little success. Then Howling Blade appears and speaks to Brute Bomber as an old friend, saying he will join him soon. He admits that he has suffered the same dizziness for some time and only grasped its seriousness after overhearing your conversation: he too has psychonekrosis. He believes Eutrope began suffering at the same time he did, shortly before she vanished, and that she must have been searching for a way to fight her fate. He, however, chose to accept his. He says that, as someone from beyond the barrier, you may find it unsettling that they use souls to cheat death. Raised without regulators, he once felt the same—thinking those who wore them lived a dull, numb existence. The life prepared for him was tedious, and there was no escape from the nation’s dreary reality…until he found joy in the Arcadion. Being his fighting persona is everything to him, as it was for Brute Bomber. If the price is death by psychonekrosis, he will gladly pay it when the time comes. Yaana is left staring, unable to understand how he can accept it so readily.</p><p>Back at the gym, Yaana breaks with frustration and apologizes to you, insisting you did what you could. She says the president has already moved to cover everything up: after Brute Bomber’s body was retrieved, the company announced that he has chosen to retire following his defeat. Matches at the Arcadion will continue, but only after a delay—and it will be some time before your cruiserweight title fight. And then Yaana notices something else that feels wrong: Neyuni is gone. She was not there when Yaana returned.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Yaana <small class="muted">(Greenroom, X:6.1, Y:5.9)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="art-at-war.html">Art at War</a></div>
+      <div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div>
+      <div class="row"><b>Unlock Raid</b> <a class="link" href="aac-cruiserweight-m7n.html">AAC Cruiserweight Tier 3 (M7N)</a></div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="family-matters.html">Family Matters</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'反則王のリベンジ',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ヤーナは、ともかく今はタイトルマッチに勝つことが最優先だと言い、ジムへ戻って備えようとあなたに促す。ダンシング・グリーンとシュガーライオットが引退を考えていると聞けば、ネユニもきっと安心するはずだ、早く良い知らせを伝えよう――そう言って足を急がせる。</p><p>ところがジムに着くと、ネユニが青ざめた顔で駆け寄ってくる。緊急事態だと言い、彼女が示したのは放送の映像だった。画面の中でブルートボンバーは、手持ちの獣魂を全部よこせと叫んでいる。メテムは信じられないと声を震わせ、無許可の獣魂を、それも複数同時に使うつもりだと実況する。それは規則違反で、そんな真似をすれば永久追放だと警告するが、ブルートボンバーは黙れと怒鳴り返し、邪魔をするなと言い捨てる。そしてあなたに向けて、八層の解体現場へ来い、もう一度戦う、今度こそ叩き潰す――そう叫ぶのだった。</p><p>ヤーナは苛立ちを爆発させ、ネユニは必死に危険性を説明する。試合中に彼が飲んでいた「ドーピング剤」は、実は演出用の無害な小道具にすぎない。だから失格になっても試合が続いてきた。だが獣魂を複数同時に扱うことだけは、危険が大きすぎるため明確に禁じられている。肉体は取り返しのつかないほど歪み、最悪の場合は死に至る。しかもそれは魂の劣化を急激に進め、魂蝕症を加速させる可能性が高いのだ。</p><p>そこへメテムが顔色を変えて現れ、警告したのにブルートボンバーへ魂蝕症の話をしたのかと詰め寄る。ヤーナは、見捨てることはできなかったと謝罪する。だがメテムは続ける。ブルートボンバーは社長に訴え、社長は当然のように魂蝕症の存在を否定した。ブルートボンバーは社長の言葉を信じた。さらに社長は、あなたとブルートボンバーの遺恨試合を認可した――条件は、勝負になるよう複数の獣魂を注入すること。放送での大騒ぎは芝居であり、すべて社長の台本どおりだ。社長はあなたを排除したい、そのためにブルートボンバーを使っているのだと、メテムは吐き捨てる。ヤーナが、彼はすでに魂蝕症の症状が出ている、そんなことをしたら死んでしまうと叫んでも、メテムは首を振る。説得しようとしたが、彼は聞かなかった。社長の命令は絶対なのだ。</p><p>そしてメテムは、試合は必ず行われると言い切る。挑戦を無視しても、ブルートボンバーは集めた獣魂を注入してあなたの前に現れるだろう。あなたが統一王者となり、保管庫の魂を解放するつもりなら、この試合を避けて通る道はない。できる限り備え、アルカディアで落ち合おう。運転手を手配し、会場へ連れて行く――そう告げる。ヤーナも同行を申し出る。病のことを伝えた結果、ここまで事態を招いたのは自分だ、せめて最後まで見届けたいのだと。</p><p>あなたはすぐに動き、運転手の案内で飛行車に乗って八層の解体現場へ向かう。ヤーナはブルートボンバーに、今すぐやめろ、命を危険にさらすなと叫ぶ。だがブルートボンバーは、俺は史上最悪最凶の闘士だ、何も恐れず規則など踏みにじる、勝つためなら何だってやるのだと吠え、ついに複数の獣魂を注入してしまう。メテムは絶叫し、彼はもはやブルートボンバーではない、忌まわしき合成の魔獣――ブルートアボミネーターになったと告げる。ヤーナは自分も戦えると言いかけるが、最後にはあなたに託し、あの愚か者を止めてほしいと願う。激闘の後、ヤーナは、間に合わなかった、獣魂が彼を蝕みきったのだと唇を噛む。</p><p>社長は、試合が終わった瞬間に放送を打ち切らせ、娯楽の醜い一面が露見しないようにした。メテムは、魂蝕症の情報が漏れたことに社長が激怒していると告げ、自分がなだめようとしても望み薄だろうと沈んだ声で言う。そこへハウリングブレードが現れ、ブルートボンバーを旧友と呼び、すぐに自分もそちらへ行くと言う。彼は、以前から同じめまいの症状に苦しんでおり、あなたたちの会話を立ち聞きして初めて深刻さを理解した、つまり自分も魂蝕症なのだと明かす。ユトロープも自分と同じ時期に症状が出始め、失踪直前まで運命に抗う術を探していたのだろう。だが自分は受け入れることを選んだ。結界の外から来たあなたには、魂で死を誤魔化す文化が不気味に映るかもしれない。レギュレーターなしで育った自分も、かつては同じように感じ、装着者は緊張も刺激もない鈍い人生を送っていると思っていた。退屈な仕事ばかりで、この国の陰鬱な現実から逃げ場もなかった。それでもアルカディアで喜びを見つけた。闘士としての自分はすべてであり、旧友にとってもそうだった。魂蝕症で死ぬのが代償なら、そのとき喜んで払う――そう言って彼は去り、ヤーナは、なぜそこまで容易く死を受け入れられるのかと呟く。</p><p>ジムへ戻ったヤーナは、やり場のない苛立ちをこぼしながらあなたに詫びる。あなたはできることをした、そのことに心から感謝していると。社長はすでに隠蔽を進め、ブルートボンバーの遺体を回収したあと、会社は敗北を機に彼が引退を選んだと発表した。アルカディアの試合はしばらく間を置いて再開されるが、あなたのクルーザー級タイトルマッチは当分先になる。そしてヤーナは気づく。戻ってきたとき、ネユニの姿がなかったのだ。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> ヤーナ <small class="muted">(控室, X:6.1, Y:5.9)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="ring-is-atelier.html">リングはアトリエ</a></div>
+      <div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div>
+      <div class="row"><b>レイドダンジョン開放</b> <a class="link" href="aac-cruiserweight-m7n.html">至天の座アルカディア：クルーザー級3層(M7N)</a></div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="family-matters.html">家族の事情</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'犯規之王的復仇',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Yaana 低聲說，不管發生什麼事，眼下最重要的仍是贏下頭銜戰。她要你先回訓練館準備，同時也說 Neyuni 聽見 Dancing Green 和 Sugar Riot 都打算引退，一定會鬆一口氣；你們得趕快把這個好消息帶回去。</p><p>可你一踏進 Tritails Training，迎面而來的卻是 Neyuni 驚慌的呼喊。她說出事了，立刻把一段播送畫面推到你面前。畫面裡的 Brute Bomber 正在怒吼，要人把所有 feral soul（用於戰鬥變身的獸魂）都交出來。Metem 在旁邊的播報又急又亂，說 Brute Bomber 竟打算使用未經許可的 feral soul，而且還要一次用好幾個；照他的說法，這種瘋狂行徑會把人變成不成人形的怪物。他大聲指出這是規則違反，警告 Brute Bomber 會因此被封殺，但 Brute Bomber 只回以粗暴的咆哮，叫他閉嘴、別擋路，還直接向你放話：如果你在看，就到第八層的拆除工地來，他要再跟你打一次，這一次他一定要把你徹底摧毀。</p><p>Yaana 氣得發抖，Neyuni 則逼自己冷靜下來解釋：一般觀眾不知道，但 Brute Bomber 在比賽中喝下的「禁藥」補劑其實只是無害的道具，是他角色演出的一部分，所以即使他被判失格，對戰仍能照常進行。可「同時注入多個 feral soul」完全不同，這是明文禁止的重罪，因為危險大到無法控制。這種作法會不可逆地扭曲肉體，把人變成畸形的怪物，最嚴重甚至會致命；而且它極可能會讓靈魂劣化的速度暴衝，進一步加速 psychonekrosis（會侵蝕靈魂、並使身體逐步失去連結的致命疾病）。</p><p>很快，Metem 臉色慘白地趕到，質問你們是不是把病的事告訴了 Brute Bomber，明明他早就警告過。Yaana 立刻道歉，說她不可能眼睜睜放任他走向毀滅。可 Metem 接著揭露了更糟的真相：Brute Bomber 把這件事直接捅到總裁那裡，而總裁當然一口否認 psychonekrosis 的存在；Brute Bomber 也理所當然選擇相信總裁。更糟的是，總裁還批准了 Brute Bomber 與你之間的「復仇賽」，而且設下條件，為了「有機會取勝」，Brute Bomber 必須在那場比賽注入多個 feral soul。Metem 承認，他在播送中對「未受管制的 feral soul」大吵大鬧其實全是演戲，一切都照著總裁的劇本在走：總裁想除掉你，所以拿 Brute Bomber 當工具。Yaana 震驚地喊出重點：Brute Bomber 明明已經出現症狀，這樣做會要了他的命。Metem 只能說他也試過勸阻，但 Brute Bomber 根本不聽，對他而言，總裁的命令就是絕對。</p><p>Metem 斷言，這場比賽無論如何都會發生。就算你不理會挑戰，Brute Bomber 也會把那些收集來的 feral soul 注入體內，主動找上你；而且如果你仍打算成為 grand champion、釋放 Arcadion 儲藏庫裡的所有靈魂，那你就沒有繞路可走，只能跨過這一戰。他要你立刻做好準備，回到 Arcadion 和他會合，他會安排專人把你們送去會場。Yaana 也堅持要同行，說把病的事告訴 Brute Bomber 才引爆這一切的是她，至少她要在場承擔後果。</p><p>你們不再拖延，由 Arcadion 的司機以 air-wheeler（Alexandria 的空中載具，用於在城區間快速移動）載往第八層拆除工地。Yaana 一見到 Brute Bomber 就大喊要他立刻停手，別把命丟在這種瘋狂上；Brute Bomber 卻嘲笑危險算什麼，還自誇自己是 Arcadion 史上最兇惡、最遭人憎恨的闘士，規則他從來不放在眼裡，為了勝利他什麼都做得出來。下一瞬間，他真的把好幾個 feral soul 一口氣注入體內。Metem 驚叫出聲，說他已經不再是 Brute Bomber，而是變成了可怖的合成怪物，Brute Abombinator。Yaana 明明想出手，最後卻只能咬牙退下，把一切都交給你，請你把那個蠢到發狂的人打醒。戰鬥結束後，Yaana 只能顫聲說太遲了，那些 feral soul 已經徹底奪走了他。</p><p>總裁在比賽一結束就立刻切斷播送，不讓觀眾看見這場娛樂背後最醜陋的代價。Metem 說總裁仍因你們外洩 psychonekrosis 的情報而暴怒，他會盡力安撫，但恐怕無濟於事。就在此時，Howling Blade 出現了。他望著倒下的 Brute Bomber，低聲稱呼他為老朋友，說自己很快也會追上去。當 Yaana 意識到他的話不對勁時，Howling Blade 承認自己其實早就出現相同的暈眩症狀，只是直到他偷聽到你們的對話，才真正明白那有多嚴重，他也罹患了 psychonekrosis。他說自己與 Eutrope 幾乎在同一時期開始發作，就在她無聲消失前不久；如今想來，她一定是在找方法對抗命運。可他選擇接受自己的結局。他也坦言，你是從屏障之外而來，或許會對這裡用靈魂來逃避死亡的作法感到不安；他在沒有 regulator 的價值觀中長大時，也曾認為配戴者的人生麻木而乏味，毫無緊張與刺激。那些替他安排的工作令他厭倦，這個國度陰沉的現實更讓他無處可逃，直到他在 Arcadion 找到了快樂。成為自己那個「闘士的身分」對他而言就是一切，就像對他的朋友一樣；若代價是死於 psychonekrosis，他到時候也願意付出。Yaana 只能怔怔望著他離去，喃喃問出一句：怎麼會有人能把死亡說得如此理所當然。</p><p>回到訓練館後，Yaana 終於壓不住挫敗與憤怒，轉而向你道歉，說一切都讓人難以承受；但她也清楚地告訴你，你已經做了你能做的事，她真的很感激。她說總裁動作極快地把事情蓋了下去：公司在回收 Brute Bomber 的遺體後，對外宣布他在這次敗北後選擇引退。Arcadion 的比賽會在延後後繼續，但你的 cruiserweight 頭銜戰還得再等一段時間。說著說著，Yaana 又猛然想起另一件不對勁的事，她回來時沒有看到 Neyuni，而她現在也不在這裡。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Yaana <small class="muted">(控室, X:6.1, Y:5.9)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="art-at-war.html">擂台即畫室</a></div>
+      <div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div>
+      <div class="row"><b>解鎖團隊副本</b> <a class="link" href="aac-cruiserweight-m7n.html">至天座阿爾卡迪亞：中量級 第3層 (M7N)</a></div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="family-matters.html">家族之間的事</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
