@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Family Matters | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Raid8 – Family Matters (DT Patch 7.2)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/ivihTiC6iCY"
+              title="Family Matters" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Family Matters</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Family Matters`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>After everything that has happened, Yaana cannot shake the feeling that something is wrong. She checks Neyuni’s terminal signal and is alarmed to find that Neyuni has gone outside Everkeep without telling anyone. Neyuni has never disappeared like this before, and the unease in Yaana’s voice quickly turns to urgency. She asks you to help search for her, and the signal leads the two of you to East Yyasulani.</p><p>There, your fears are confirmed almost at once. Yaana finds Neyuni and demands to know why she came here alone, only for Neyuni to explain that Eutrope contacted her and asked to meet in secret, saying it was urgent. Eutrope then reveals herself and admits, with clear remorse, that she used Neyuni to lure you here because she had no other choice. Yaana immediately pleads with her to stop, but Eutrope refuses, saying it is already too late to turn back. When Yaana moves to stand in her way, she finally voices the truth she has long suspected: Eutrope was never truly trying to save herself by taking your soul. She was trying to save the man she loves.</p><p>Eutrope confesses that it is not only him she wants to save, but every fighter in the heavyweight division. All of them suffer from psychonekrosis, yet they continue to trust the president because he once reached out to them in the darkest moments of their lives. The Howling Blade—Retsarra—is no exception. She knows that he would choose to remain at the Arcadion rather than leave it and stay with her. That is why she chose to act alone. If her friends were determined to fight until death claimed them, then she would find a cure no matter the cost.</p><p>But in the midst of this confrontation, Yaana suddenly falters. The strain of everything she has done catches up with her, and even Eutrope is horrified to realize that Yaana too has now begun to manifest the illness. Neyuni, caught between anger and despair, can only say that she does not know what to do with either of them anymore. Then she reveals the reason she came: she believes she has found a treatment for psychonekrosis that does not require your soul. While Eutrope searched the Arcadion’s records and found nothing, Neyuni gained access—through Oblivion—to the military’s research logs, where she discovered references to something called the “regeneration factor.” She explains that it is the force within living beings that stimulates recovery when the body is wounded or ill, and that Lindblum scientists once developed a stimulant to enhance it. The problem is that the formula itself is missing. To find it, Neyuni says, they will need Eutrope’s help. Eutrope apologizes sincerely for everything she has done, but before she can say more, her strength gives out and she collapses. Neyuni checks her at once and confirms, with relief, that she has only fainted.</p><p>Back at Tritails Training, the cost of the truth settles heavily over the room. Eutrope is resting upstairs, too weakened by psychonekrosis to move, and Neyuni warns that Yaana herself must also be careful now that the illness has manifested in her as well. Yaana apologizes, saying she could not stand by and let Eutrope harm you. When the talk turns to what must come next, she insists that even while they search for the cure, the fights at the Arcadion will continue—and so must their efforts to save those still trapped there. The next to be saved must be the Howling Blade, your coming opponent, not least for Eutrope’s sake. Yet Neyuni asks the obvious question: how can they persuade someone who is determined to fight until he dies?</p><p>At that, Yaana reveals that she already has a plan. If the Howling Blade will not listen in private, then you will confront him in public. With Honey B. Lovely’s help, you set up a live broadcast at Mosaic, where the Howling Blade is known to relax before his matches. Once the show begins, Honey gleefully turns the spotlight on you and Yaana, then springs the challenge on the unsuspecting champion: if you defeat him in the upcoming title match, he must retire. He is amused at first and refuses, but the crowd quickly turns on him, jeering that a champion who cannot accept such a wager must simply be afraid to lose. Pressed from all sides, he shifts the terms and declares that if he is to stake the purpose of his life, then you must do the same.</p><p>When he asks what gives your life meaning, you answer from your own heart, and he accepts the wager. Honey immediately whips the moment into a spectacle, proclaiming to all her viewers that the two rivals will wager the very meaning of their lives on the outcome of the match. Once the broadcast ends, Yaana can only marvel at how smoothly Honey manipulated the crowd. But there is no time to dwell on it. For Brute Bomber’s memory, for Eutrope, and for everyone still in danger, the only thing left now is to win. Together, you and Yaana head for the greenroom and the cruiserweight title match that now carries far more than a championship on the line.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Yaana <small class="muted">(Tritails Training, X:6.2, Y:5.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="twisted-vengeance.html">Twisted Vengeance</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-lone-wolf.html">The Lone Wolf</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'黒猫と魔女',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ここまでの出来事を経て、ヤーナはどうしても嫌な胸騒ぎを抑えられずにいた。そこでネユニの端末の位置情報を調べてみると、彼女がエバーキープの外へ出ていることがわかる。何も告げずに姿を消すようなことはこれまで一度もなかっただけに、ヤーナの不安は一気に現実味を帯びる。彼女はあなたに協力を求め、ふたりは反応の示す東ユヤスラニへ急ぐ。</p><p>そこで待っていたのは、まさに最悪の予感どおりの状況だった。ヤーナはネユニを見つけるなり、なぜひとりでこんな場所へ来たのかと問い詰める。ネユニは、ユートロープからどうしても話があると連絡を受け、ここで会う約束をしていたのだと打ち明ける。やがて姿を現したユートロープは、ネユニを利用するような形になってしまったことを詫びつつも、こうするしかなかったのだと告げる。ヤーナは必死にやめてほしいと訴えるが、ユートロープはもう後戻りできないと拒む。そこでヤーナは、ずっと胸に引っかかっていた違和感をついに言葉にする。あなたの魂を奪おうとしていたのは、自分を救うためではない。あなたが本当に救おうとしていたのは、愛する人なのだと。</p><p>ユートロープは、それだけではないと答える。救いたいのはその人だけでなく、ヘビー級の闘士たち全員だという。誰もが魂蝕症に蝕まれながらも、人生の暗闇の中で手を差し伸べてくれた社長をなお信じ続けている。ハウリングブレード――レツァラも同じだ。彼は自分とともに去るのではなく、アーカディアに残るほうを選ぶだろう。だからこそ、自分ひとりで動くしかなかった。友人たちが死ぬまで戦うと決めているのなら、自分はどんな代償を払ってでも治療法を見つけるしかないのだと、ユートロープは苦しい胸の内を明かす。</p><p>だが、そのやり取りの最中、ヤーナの身体が突然ふらつく。無理を重ねた代償は、ついに彼女自身にも及んでいた。ユートロープでさえ、ヤーナにも発症の兆しが現れていることに気づいて言葉を失う。ネユニは、もう本当にどうしたらいいのかわからないと嘆きながらも、ここで諦めるつもりはなかった。そして彼女は、あなたの魂を必要としない魂蝕症の治療法を見つけたかもしれないと告げる。ユートロープが調べていたアーカディア側の資料には存在しなかったが、オブリビオンの助けで閲覧できた軍の研究記録には、「再生因子」と呼ばれるものへの言及があったのだという。ネユニは、傷ついたり病んだりしたときに身体が自然に回復しようとする、そのはたらきを促す生命の力こそが再生因子なのだと説明する。さらに、かつてリンドブルムの科学者たちは、その再生因子を高める刺激剤を兵士向けに開発していたらしい。必要なのはその処方だが、肝心の式そのものは記録に残っていない。だからこそ、真相を追うためにはユートロープの力も必要になる。ユートロープは、自分がしてきたことを許してほしいとは思わない、それでも本当に申し訳なかったと詫びるが、次の瞬間、その場に崩れ落ちてしまう。ネユニがすぐに確かめ、ただ気を失っただけだとわかり、ようやく皆は胸をなで下ろす。</p><p>トライテールズ・トレーニングへ戻ると、事態の重さがいっそう現実のものとなる。ユートロープは上の階で休ませており、かなり重い状態だから、治療法が見つかるまでは安静が必要だという。ネユニはヤーナにも、あなたを守ろうとした結果、ついに病が表に出てしまったのだから、自分のことも心配してほしいと念を押す。ヤーナは、それでもあなたが傷つけられるのを見過ごすことはできなかったのだと謝る。そして今後の話になると、治療法を探し続ける一方で、アーカディアの試合も止まらない以上、これからも闘士たちを引退へ説得し続けなければならないと語る。次に救うべき相手は、あなたの次の対戦相手であるハウリングブレードだ。少なくともユートロープのためにも、彼を見捨てるわけにはいかない。だがネユニは、死ぬまで戦うと決めている相手をどうやって説得するのかと問いかける。</p><p>そこでヤーナは、すでに策があるのだと言う。ハウリングブレードが裏で耳を貸さないのなら、公の場で逃げられない形にすればいい。ハニー・Ｂ・ラブリーの協力を得て、彼が試合前によく立ち寄るモザイクで生配信を仕掛けるのだ。放送が始まると、ハニーは大勢の視聴者を前に、ブラックキャットとあなたを華々しく紹介し、何も知らないハウリングブレードへ不意打ちのように宣言させる。次のタイトルマッチであなたが勝ったなら、彼は引退しなければならない、と。ハウリングブレードは最初こそ一笑に付し、負けるつもりはないし、負けても引退する気はないと拒む。</p><p>だが周囲の客たちが、そんな態度では王者らしくない、ただ負けるのが怖いだけではないかと煽り立てるにつれ、彼も無視できなくなっていく。やがて彼は、もし自分が人生の意味を賭けるのなら、あなたも同じものを差し出すべきだと言い、何が生きる意味なのかを問う。あなたが自分の答えを返すと、彼はそれを受け入れ、賭けは成立する。ハニーはすかさず、それぞれの生きる意味を賭けた決戦が実現したのだと大々的に盛り上げる。放送が終わったあと、ヤーナはハニーの手際のよさにあらためて感心しながらも、残る道はただひとつだと気持ちを引き締める。ブルートボンバーの記憶のためにも、皆を救うためにも、あとは勝つしかない。そうしてあなたとヤーナは、クルーザー級タイトルマッチへ向けてグリーンルームへ向かう。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> ヤーナ <small class="muted">(ジム・トライテール, X:6.2, Y:5.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="twisted-vengeance.html">反則王のリベンジ</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-lone-wolf.html">孤高の狼</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'家庭風波',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>經歷了這一連串的事，Yaana 怎麼也無法壓下心裡那股不安。她立刻去追 Neyuni 終端裝置的訊號，卻發現 Neyuni 人竟然在 Everkeep 外面。這太不對勁了——Neyuni 從來不會一句話也不說就自己跑掉。Yaana 越想越不安，只能請你陪她一起去找人，而終端裝置的定位顯示，Neyuni 很可能就在 East Yyasulani 一帶。</p><p>當你們趕到那裡時，Yaana 幾乎立刻就找到了 Neyuni。她又急又氣地問，怎麼會一個人跑來這種地方。Neyuni 只能愧疚地解釋，說是 Eutrope 聯絡了她，表示有很重要的事必須當面說，所以她才會照約定來到這裡。話音剛落，Eutrope 便現身了。她對 Neyuni 說抱歉，坦白自己其實是利用了她，因為除此之外，她已經想不到別的辦法把你引來。Yaana 一見到她就立刻大喊不要再繼續下去，可 Eutrope 卻只是痛苦地回絕，說現在早就已經沒有回頭路了。Yaana 也在這時終於把自己一路以來的懷疑說了出來：她從一開始就覺得不對勁，因為 Eutrope 根本不像是那種會為了救自己而奪走別人性命的人。如今她終於明白，Eutrope 真正想救的從來不是自己，而是那個她深愛的人。</p><p>Eutrope 沉默片刻後承認，事情不只如此。她想救的，不只是那個人，而是整個 heavyweight 分級的所有闘士。那些人全都正被 psychonekrosis（會侵蝕靈魂、並使身體逐步失去連結的致命疾病）折磨著，卻依舊選擇相信總裁，因為總裁都曾在他們人生最黑暗的時候向他們伸出手。Howling Blade，也就是 Retsarra，也一樣。他寧可留在 Arcadion，也不會選擇和她一起離開。正因如此，她才決定獨自行動。既然她的朋友們都執意要一路戰鬥到生命燃盡，那她就只能不惜一切代價去找到治療的方法。</p><p>可就在這場對峙之中，Yaana 的身體突然一晃，整個人幾乎站不穩。連 Eutrope 都瞬間變了臉色，因為她立刻看出來，Yaana 也已經出現病症了。Neyuni 看著她們兩個，只能又氣又無奈地說，她真的不知道該拿這對姊妹怎麼辦才好。可下一刻，她還是把自己趕來這裡真正想說的事說了出來，她認為自己已經找到了一種不需要你的靈魂，也能治療 psychonekrosis 的方法。Eutrope 震驚地反駁，說自己明明已經把能找到的資料全都翻遍了，根本沒有這種東西。Neyuni 這才解釋，Eutrope 查的是 Arcadion 檔案中的資料，但她在 Oblivion 的協助下，接觸到了軍方的研究紀錄，而她就是在那裡看見了「regeneration factor（生命體在受傷或生病時，自然促使身體修復的再生作用）」這個概念。她進一步說明，過去 Lindblum 的科學家曾開發出一種刺激劑，用來強化士兵的 regeneration factor，而那或許就是她們現在最需要的東西。問題在於，報告裡只明確提到那份配方曾被確立，卻沒有把配方本身留下來。所以接下來還得繼續追查，而這一次，她們需要 Eutrope 一起幫忙。Eutrope 聽完之後，低聲說自己不敢奢望被原諒，但她是真心為自己做過的一切道歉。可她才剛說完，整個人就忽然失去力氣倒了下去。Yaana 驚叫著衝上前，Neyuni 急忙檢查，這才鬆了一口氣，說她只是昏了過去，至少暫時還沒有更糟。</p><p>回到 Tritails Training 後，Neyuni 立刻告訴你，Eutrope 正在樓上休息。她的病情已經相當嚴重，在找到治療方法之前，必須絕對安靜地休養。可 Neyuni 也同時提醒 Yaana，現在連她自己都已經正式出現症狀了，不能再只顧著別人。Yaana 只能低聲道歉，說她沒辦法站在原地，眼睜睜看著 Eutrope 對你出手。當你要她答應不要再使用 feral soul（用於戰鬥變身的獸魂）時，她也終於點頭承諾，說自己總得先做到一直勸別人做的事。可現實並不會因此停下。Yaana 很清楚，就算她們現在開始研究解藥，Arcadion 的比賽也不會因此中止；既然如此，她們就還得繼續想辦法，勸更多闘士引退。下一個非救不可的人，就是你接下來要面對的 Howling Blade。至少為了 Eutrope，她們也不能放任他繼續走向毀滅。Neyuni 卻忍不住問：像那樣連死都準備接受的人，到底要怎麼說服？</p><p>Yaana 這時卻露出一點堅定的神情，說她其實已經想到辦法了。既然私下勸不動，那就乾脆在公開播送裡逼他表態。她們決定向 Honey B. Lovely 求助，利用 Honey 自己那個擁有大量觀眾的節目，在 Mosaic 設下局，等 Howling Blade 現身時，由你當場向他發出挑戰：如果你贏下這場頭銜戰，他就必須引退。Honey 一聽就立刻答應，甚至比誰都還興奮。等到播送正式開始，她用一貫華麗又帶點煽動性的語氣把你和 Black Cat 推到鏡頭中央，然後把話題猛地丟向毫無防備的 Howling Blade。面對這突如其來的挑戰，他先是愣住，隨即冷笑，說自己根本不覺得會輸，更別說就算真輸了，也沒有引退的打算。</p><p>可你們周圍那些被 Honey 煽動起來的客人立刻接連起鬨，說這樣哪像冠軍，分明只是怕輸而已。聲浪一波接一波，把 Howling Blade 逼得再也無法裝作若無其事。最後，他終於改口，說若要他拿自己生命中最重要的東西來下注，那麼你也必須押上同樣分量的代價，於是反問你：你活著的意義是什麼？你照自己的心意回答之後，他便正式接受了這場賭局。Honey 立刻抓住機會，對著所有觀眾高聲宣布，接下來這場萬眾矚目的對決，兩位對手將賭上自己生命中最重要的事物。播送結束後，Yaana 看著剛才那一切，只能苦笑著說，Honey 果然不是普通人。可事到如今，也已經沒有別的路了。為了所有人，也為了 Brute Bomber 留下的那份遺憾，你們接下來唯一能做的，就只有贏下這場 cruiserweight 頭銜戰。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Yaana <small class="muted">(Tritails 訓練館, X:6.2, Y:5.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="twisted-vengeance.html">犯規之王的復仇</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-lone-wolf.html">離群之狼</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
