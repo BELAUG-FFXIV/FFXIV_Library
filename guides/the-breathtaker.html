@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Breathtaker | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Raid8 – The Breathtaker (DT Patch 7.4)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/LqmkSxtLPr8"
+              title="The Breathtaker" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">The Breathtaker</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`The Breathtaker`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Yaana seethes at the president’s latest trick, saying that every time she thinks she has seen the worst of him, he finds some new underhanded move. After a weary breath, she admits that if Metem is telling the truth, there is little hope of persuading your coming opponents to withdraw. That leaves only one path. You must keep fighting toward the title of grand champion, while the others place their hopes in rescuing her sisters. If, in the end, the president can be forced to reveal the location of the Drop of Life, then perhaps everyone can still be saved.</p><p>With that settled, Yaana turns to your first opponent in the heavyweight division. The woman waiting for you is Vamp Fatale, whom you already had the displeasure of seeing during the broadcast. Yaana describes her as a vicious fighter who draws upon the feral soul of the desmodont, a giant bat whose power allows her to drain the life from those she faces.</p><p>Yet her reputation rests on something darker still. More infamous than her strength is her cruelty. She delights in causing pain, and the ring she fights in is filled with devices meant for exactly that purpose. Yaana warns you not to lose sight of your surroundings, because if you do, you risk becoming nothing more than her toy.</p><p>Even so, she reminds you of something no broadcast can take away: there are many fans who believe in you. Because of that, she tells you to believe in yourself as well, and to show everyone the true strength of an unenhanced warrior. Then she sends you forward with fierce resolve, urging you to go out there, put Vamp Fatale in her place, and claim your first heavyweight victory.</p><p>You do exactly that. When you return, Yaana is radiant with pride. She says she never doubted you for even a moment, and points out that the audience’s reaction said the same—the crowd had gone absolutely wild. Before that, she had also warned you of another layer to the fight: Vamp Fatale and Honey are bitter rivals who never stop hurling spite at one another, and when they once met in an open-weight bout, the clash turned ugly. All of that only sharpens the meaning of what you have just achieved. With this victory, your path through the heavyweight division has truly begun.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Yaana <small class="muted">(Greenroom, X:6.1, Y:5.9)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="feral-fandom.html">Feral Fandom</a></div>
+      <div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div>
+      <div class="row"><b>Unlock Raid</b> <a class="link" href="aac-heavyweight-m9n.html">AAC Heavyweight Tier 1 (M9N)</a></div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="daring-devils.html">Daring Devils</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'魔性の処刑人',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ヤーナは、社長という男は底が知れないとでも言いたげに、またしても卑劣な手を打ってきたことに苛立ちを隠せない。これでもう出尽くしたと思うたびに、さらに下劣な一手を重ねてくるのだと吐き捨てる。そしてひと息ついたあと、メテムの言葉が本当なら、これから対峙するヘビー級の闘士たちを引退へ説得する望みはほとんどないのだろうと認める。そうである以上、進むべき道はひとつしかない。あなたはグランドチャンピオンを目指して戦い続け、そのあいだ自分たちは姉妹を救い出す望みを仲間たちに託すしかないのだ。もし最終的に社長から「ドロップ・オブ・ライフ」の在り処を聞き出せれば、皆を救えるかもしれないのだから。</p><p>気持ちを切り替えるように、ヤーナはあなたが最初に相対するヘビー級の相手を見ていこうと告げる。その相手こそ、先の放送でも顔を見せていたヴァンプファタールだった。彼女はデスモドントという巨大な蝙蝠の獣魂を操り、相手の命を吸い上げる力を振るう凶悪な闘士なのだという。</p><p>だが、彼女が恐れられている理由は、それだけではない。何より悪名高いのは、その残忍な嗜虐性だ。痛みを与えることそのものに愉悦を見いだし、彼女のリングにはそのための仕掛けが数多く備えられている。だからこそヤーナは、戦っている最中も決して周囲への注意を怠ってはならないと強く念を押す。気を抜けば、たちまち彼女の玩具にされてしまうからだ。</p><p>それでもヤーナは、放送でどんな印象操作があろうと揺るがないものがあるとあなたに伝える。あなたを信じ、応援している者たちは確かにいるのだ。だからあなた自身も自分を信じ、強化なき戦士の力を見せつけてほしいと願う。そしてヴァンプファタールを打ち倒し、ヘビー級での最初の勝利をつかみ取ってこいと力強く送り出す。</p><p>そしてあなたは、その期待に応えて戻ってくる。勝利したあなたを迎えたヤーナは、誇らしさを隠そうともせず、最初から一瞬たりとも疑っていなかったと告げる。観客の熱狂も、その言葉を裏づけていた。場内はまさに割れんばかりの歓声に包まれていたのだ。なお、試合前にヤーナはもうひとつ付け加えていた。ヴァンプファタールとハニーは筋金入りの犬猿の仲で、顔を合わせれば絶えず嫌味を投げ合い、かつて無差別級でぶつかったときも目も当てられないほど険悪だったという。その相手を退けたことで、あなたのヘビー級での戦いは、ここから本格的に幕を開けたのだった。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> ヤーナ <small class="muted">(控室, X:6.1, Y:5.9)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="feral-fandom.html">アルカディアのファンたち</a></div>
+      <div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div>
+      <div class="row"><b>レイドダンジョン開放</b> <a class="link" href="aac-heavyweight-m9n.html">至天の座アルカディア：ヘビー級1層(M9N)</a></div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="daring-devils.html">温度差兄弟</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'令人窒息的劊子手',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Yaana 氣得咬牙切齒，說總裁這個人每次都像是在挑戰別人的底線，明明才剛讓人以為自己已經見識過他最卑劣的一面，下一刻又能拿出新的下三濫手段。她重重吐出一口氣後，也只能承認，如果 Metem 說的是真的，那麼想再說服你接下來要面對的 heavyweight 闘士主動退出，恐怕已經幾乎沒有可能了。既然如此，眼前就只剩下一條路。你必須繼續朝 grand champion（Arcadion 全分級之上的最終冠軍頭銜）前進，而其他人則把希望寄託在救出她姊妹這件事上。若到最後真能逼總裁交出「Drop of Life（可用來治療 psychonekrosis 的刺激劑）」的所在地，也許所有人都還有得救的機會。</p><p>把這件事說定後，Yaana 立刻把注意力轉向你在 heavyweight 分級的第一位對手。那個人正是你先前在節目裡已經看過、也早就感到不快的 Vamp Fatale。Yaana 告訴你，她是一名兇狠又危險的闘士，所驅使的是 desmodont 這種巨型蝙蝠的 feral soul（用於戰鬥變身的獸魂），能夠從對手身上吸走生命力。</p><p>可真正讓她惡名昭彰的，還不只是這種力量本身，而是她那赤裸裸的施虐本性。對她而言，讓別人痛苦本身就是一種快感，因此她的擂台裡也設滿了各種為此而準備的裝置。Yaana 特別提醒你，等到上場之後，絕不能只顧著盯住對手本身，還得時時注意周圍環境，否則一不小心，你就會淪為她手裡任意擺弄的玩物。</p><p>即便如此，Yaana 還是要你記住一件事，無論那場節目怎麼惡意操弄輿論，你依然有很多真正支持你的觀眾。正因為如此，她要你也相信自己，並且把未經強化的戰士究竟擁有怎樣的力量，堂堂正正地展現給所有人看。最後，她用近乎咬牙的氣勢把你送進這一戰，要你親手收拾 Vamp Fatale，拿下你在 heavyweight 分級的第一場勝利。</p><p>而你也確實做到了。當你回到 Greenroom 時，Yaana 幾乎是帶著壓不住的欣喜迎向你，直說你拿下了這場勝利，而她從頭到尾都沒有懷疑過你半分。她還提醒你，剛才擂台上的反應你自己一定也聽得很清楚，觀眾早就徹底沸騰了。在這之前，她也曾順口提起一件事：Vamp Fatale 和 Honey 一直是關係極差的死對頭，兩人平時就不斷互相譏刺，甚至曾在 open-weight（不受重量分級限制的比賽形式）的比賽裡正面交鋒，而那一場鬥得極其難看。也正因如此，你這場勝利的分量顯得更加鮮明。隨著這一步踏出，你在 heavyweight 分級的道路，終於真正開始了。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Yaana <small class="muted">(控室, X:6.1, Y:5.9)</small></div></div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="feral-fandom.html">狂熱粉絲</a></div>
+      <div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div>
+      <div class="row"><b>解鎖團隊副本</b> <a class="link" href="aac-heavyweight-m9n.html">至天座阿爾卡迪亞：重量級 第1層 (M9N)</a></div>
+    </div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="daring-devils.html">大膽雙煞</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
