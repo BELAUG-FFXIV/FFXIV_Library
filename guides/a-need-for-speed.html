@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A Need for Speed | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Hildibrand – A Need for Speed (DT Patch 7.45)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#ffffff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative;max-height:360px;overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:"";position:absolute;left:0;right:0;bottom:0;height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card));pointer-events:none;
+    }
+    .expand-wrap{margin-top:12px}
+    .expand-btn{display:inline-block;padding:8px 14px;border-radius:10px;background:var(--card);border:1px solid var(--border);cursor:pointer;font-weight:600}
+    .expand-btn:hover{background:#fffef8}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/n23ATLZlBVA"
+              title="A Need for Speed" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">A Need for Speed</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`A Need for Speed`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Hardiboiled shows you the new data he managed to pry from the damaged storage device. One file reveals what became of Carnelian: his soul was transplanted into one of the clot-type creatures, monsters capable of mimicking shapes and faces. That, Hardiboiled explains, is how Carnelian deceived you before with a false Kemakka. The second file concerns another transformed criminal, this one notorious for reckless air-wheeler offenses and now apparently inhabiting the body of a cactuar. If the same researcher sent him beyond the dome, then your next target is already somewhere outside Alexandria’s protection.</p><p>Before the trail can go cold, Hildibrand arrives with exactly the clue Hardiboiled needs. According to the real Kemakka, a walking cactus riding a flying machine was seen tearing southward through the sky. Though the local sheriff dismissed the tale as drunken nonsense, Hildibrand followed his instincts and took Nashu farther south to question witnesses in Tuliyollal. There, they heard matching reports of a cactus-like rider on a machine resembling those used by Alexandria’s forces, last seen speeding past a dirigible before vanishing into the southern clouds.</p><p>Hardiboiled accepts the lead, though he is almost suspicious of how neatly it falls into place. Even so, he decides the information is solid enough to act on. If you are going to catch a fugitive who travels by air-wheeler, then you will need one of your own. He takes you to a nearby custom shop, where the mechanic Monom immediately recognizes him. Hardiboiled asks for his old machine back, but Monom warns that the neglected vehicle is in miserable condition and will need at least a new high-voltage battery and a superconductor coil before it can run again.</p><p>With no time to waste, Hardiboiled goes off to secure the battery and entrusts you with obtaining the coil. Monom advises that the quickest way is to salvage one from the rides of defective sentries still wandering the western side of old Alexandria, and he lends you a device that will draw them out. You use the signal, fight off the hostile machine that answers it, and bring back the superconductor coil. Monom is satisfied with the part, but puzzled that Hardiboiled has not yet returned from what should have been a simple errand, and sends you to the Nexus Arcade to find him.</p><p>When you catch up with Hardiboiled, he explains that buying the battery was easy; the problem was keeping Hildibrand and Nashu from wandering off after he caught “a whiff of tantalizing familiarity.” Searching for them together, you find the pair in the company of a smiling zombie—an old acquaintance of Hildibrand’s from the Gentle Dead Men. Though unsettled, Hardiboiled listens as the undead gentleman recounts how he befriended one of the reanimated researchers in the facility. From that conversation comes a crucial revelation: after the toxic leak that killed the staff, only one man survived—a gas-masked researcher named Keshkayi, second only to the overseer and known for pouring himself into a secret side project after his official duties were done.</p><p>That is enough for Hardiboiled. At last, the mastermind behind the monstrous fugitives has a name. Uneasy though he is about receiving vital testimony from a walking corpse, he accepts the help, takes the parts, and returns to Monom’s shop to have his air-wheeler repaired. Not long after, he rides back to you on the completed machine with unmistakable pride. The custom-built Night Stallion is, in his telling, a beast far beyond the handling of ordinary fools—equipped with anti-gravity capability and tuned for extreme ground speed through the use of quick-heating motor coils.</p><p>As Hardiboiled begins lecturing you on its engineering, Hildibrand nearly lays hands on the vehicle, drawing an immediate warning away from it. Nashu then asks why Hardiboiled ever stopped riding such a machine. He answers by briefly returning to the day he captured Carnelian: a time when vengeance burned so fiercely in him that imprisoning the Crime King took the heat out of everything else. Once his assistant was avenged, he no longer had the will to ride. But Carnelian is loose again, and that old fire has returned. When he hears once more that the cactuar fugitive passed south beyond Tuliyollal and a dirigible, he chooses Yak T’el’s dirigible landing as the next starting point and rides ahead to meet you there.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Hardiboiled <small class="muted">(Solution Nine, X:17.0, Y:18.3)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="on-the-trail-of-destruction.html">On the Trail of Destruction</a></div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="meteorites-and-meteor-wrongs.html">Meteorites and Meteor-wrongs</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'モノクロの過去',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ハルディボイルドは、ひびの入った記録装置から新たに引きずり出した情報をあなたに見せる。ひとつ目の記録には、カーネリアンに施された処置が残されていた。彼の魂は「血餅型」の魔物へと移されており、その魔物は姿形や顔をまねる厄介な性質を持つという。ハルディボイルドは、それこそがカーネリアンが偽のケマッカを使ってあなたたちを欺いた手口だったと語る。もうひとつの記録には、別の魔物化した犯罪者の情報が記されていた。飛行乗機での危険運転を繰り返していたその男は、今やサボテンダーの体で動き回っているらしい。研究者の手口から見て、その厄介な逃亡者もまたドームの外へ放たれているはずだった。</p><p>そこへヒルディブランドが現れ、まさに必要としていた手掛かりを持ち込む。本物のケマッカの話では、空飛ぶ乗り物にまたがった歩くサボテンダーが、南へ向かって空を駆け抜けていったという。保安官は酔客のたわごととして退けたものの、ヒルディブランドは長年の勘に突き動かされ、ナシュ・マカラッカとともにさらに南のトライヨラへ向かい、目撃者を探した。そこで聞き集めた話は一致していた。アレクサンドリア兵のものに似た乗り物に乗ったサボテンダーが、驚くべき速さで飛び去り、飛空船のそばをかすめたのち、南の雲の中へ消えていったというのである。</p><p>ハルディボイルドは、その話ができすぎていると感じながらも、追うだけの価値はあると判断する。空を行く相手を捕まえるなら、こちらにも飛行乗機が必要になる。そう言って彼はあなたたちを近くの改造工房へ連れて行く。そこで待っていた整備士モノムは、久々に姿を見せたハルディボイルドをすぐに迎えた。ハルディボイルドは自分の愛車を返してほしいと頼むが、モノムは、長く放置されたその機体はすっかり傷みきっており、少なくとも高電圧バッテリーと超電導コイルを交換しなければ走れないと告げる。</p><p>時間を惜しんだハルディボイルドは、自分はバッテリーを調達しに行くと言い、コイル探しをあなたに任せる。モノムによれば、手っ取り早いのは旧アレクサンドリア西側をさまよう故障兵の乗機を解体して部品を得ることだった。彼は敵を呼び寄せる装置まで貸してくれる。あなたは指定の場所で信号を発し、応じて現れた敵機を退け、超電導コイルを持ち帰る。モノムはその部品に満足する一方で、簡単な買い物のはずなのに戻ってこないハルディボイルドを不審に思い、ネクサス・アーケードへ向かうようあなたに勧める。</p><p>ようやく見つけたハルディボイルドは、バッテリー自体はすぐに買えたのだと話す。だが、ヒルディブランドが「懐かしい匂い」を嗅ぎ取った途端、ナシュ・マカラッカともどもふらりといなくなってしまい、連れ戻せなくなったのだという。あなたは彼とともにふたりを探し、やがて笑みを浮かべた死人と一緒にいる姿を見つける。それはヒルディブランドの旧知であるジェントルデッドマンの一員だった。戸惑いながらも話を聞いたハルディボイルドは、その死人が例の施設で蘇生した研究員のひとりと親しくなり、そこから得た話を知ることになる。有毒物質の漏出事故によって研究員たちはほぼ全滅したが、防毒面を常につけていた男だけは生き残った。その名はケシュカイ。所長に次ぐ立場にありながら周囲には煙たがられていたが、仕事への執念だけは誰もが認めており、公務の研究を終えたあとも密かな計画へ力を注ぎ続けていたという。</p><p>それを聞いたハルディボイルドは、ついに黒幕の名へ辿り着いたと確信する。歩く死体から重要な証言を得ることには複雑な思いを抱きつつも、その助力には礼を述べ、受け取った部品を持ってモノムのもとへ戻る。そしてほどなくして、修理を終えた愛車にまたがり、誇らしげにあなたたちの前へ戻ってくる。彼が「ナイトスタリオン」と呼ぶその特注機は、並の者には扱えない代物だという。反重力機能は当然として、地上速度を極限まで高めるため、急速加熱式のモーターコイルまで組み込まれていた。</p><p>ハルディボイルドがその仕組みを得意げに語り始めたところで、ヒルディブランドが愛車に手を伸ばしかけ、即座に制止される。続いてナシュ・マカラッカが、なぜこれほどの機体をずっと乗らずにいたのかと問う。するとハルディボイルドは、かつてカーネリアンを捕らえた日のことを口にする。あのときの彼は復讐心に煮えたぎっており、犯罪王を牢へ送り込んだことで、その熱がすっかり冷めてしまったのだという。助手の仇を討ち終えたあと、彼にはもう走る理由が残っていなかった。だが、カーネリアンは再び街に現れた。南へ飛び去ったサボテンダーの足取りを改めて聞き取ったハルディボイルドは、次の出発点をヤクテルの飛空船発着場に定め、自らナイトスタリオンで先行することを決める。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ハーディボイルド <small class="muted">(ソリューション・ナイン, X:17.0, Y:18.3)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="on-the-trail-of-destruction.html">つかえる紳士</a></div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="meteorites-and-meteor-wrongs.html">ひび割れた絆</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'追逐速度的往事',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Hardiboiled 把他從那個破損儲存裝置裡再挖出的新資料交給你看。第一份檔案記錄了 Carnelian 接受的處置──他的靈魂被灌進了一種「clot」類型的魔物體內。那種魔物擅長模仿外形與臉孔，Hardiboiled 也因此明白，先前 Carnelian 正是利用這個特性，才用假的 Kemakka 把你們耍得團團轉。第二份資料則指向另一名被魔物化的罪犯。那人過去就因為飛空機車危險駕駛、超速與魯莽操作而惡名昭彰，如今似乎成了附在仙人掌怪身上的逃犯。照那名研究者一貫的做法來看，這個棘手的傢伙多半也早已被放到穹頂之外。</p><p>就在 Hardiboiled 思索那人究竟會被放去哪裡時，Hildibrand 帶著恰到好處的線索現身。真正的 Kemakka 親口提到，有人目擊到一株會走路的仙人掌怪騎著飛行裝置，朝南方高速掠過天空。雖然當地保安官最後把這件事當成醉漢的胡言亂語，但 Hildibrand 還是憑著老練直覺，帶著 Nashu Mhakaracca 繼續往南，前往 Tuliyollal 找人查問。兩人在那裡聽到的說法十分一致：有人看見一個騎在機械載具上的仙人掌怪，以驚人的速度飛過空中，那台機體看起來和 Alexandria 士兵使用的飛空機車很像，最後從飛空船旁掠過，消失在南方雲層之中。</p><p>Hardiboiled 雖然覺得這條線索順得有些可疑，卻也不得不承認，它至少值得一追。若想追上駕著飛空機車逃跑的對手，你們自己也得有一台能用的機體。於是他帶你們前往附近一間能做客製改裝的店，店裡的技師 Monom 一眼就認出了他。Hardiboiled 開口要回自己的愛車，Monom 卻毫不客氣地說，那台車在車庫地板上鏽了太久，現在恐怕連慢慢滑都辦不到，更別說全速奔馳。若想讓它重新上路，至少得換上新的高壓電池和超導線圈。</p><p>時間緊迫，Hardiboiled 決定自己去買電池，並把尋找超導線圈的任務交給你。Monom 告訴你，最快的方法就是去舊 Alexandria 西側，拆下那些故障士兵載具上的零件。他還借給你一個能發出求援訊號的裝置，好把徘徊在那裡的失控機械引出來。你照他的說法行動，擊退被訊號吸引而來的敵人，順利取得超導線圈並交回店裡。Monom 對零件很滿意，卻也開始納悶：Hardiboiled 不過是去買顆電池，怎麼拖了這麼久都沒回來，於是要你到 Nexus Arcade 去找人。</p><p>你找到 Hardiboiled 時，他先告訴你，電池其實很快就買到了；真正的問題，是 Hildibrand 聞到某種「令人懷念的熟悉氣味」後，就和 Nashu Mhakaracca 一起不見了。你和 Hardiboiled 只好動身去找，最後卻看到兩人正和一具面帶笑容的屍體待在一起。那是 Hildibrand 的舊識，也是 Gentle Dead Men 的一員。Hardiboiled 雖然明顯不自在，還是耐著性子聽對方把話說完。那位紳士殭屍表示，自己在那座設施裡認識了一名被重新喚醒的研究員，並從對方口中得知，當年事故發生後，研究所裡幾乎所有人都死於高毒性物質外洩，只有一個平常總戴著防毒面具的男人活了下來。那個人的名字叫 Keshkayi，是所長之下的第二把交椅。雖然同僚都覺得他自以為是，但也不得不承認，他對研究近乎執著，即使白天已經做完正式實驗，之後還會把剩下的時間與精力全都投入某個神祕的私人計畫。</p><p>對 Hardiboiled 來說，這已經足夠了。追查至今，那個在幕後操弄一切的人終於有了名字。即使這條關鍵情報是從一具會走路的屍體口中得來，他仍然鄭重道謝，接著帶著零件返回 Monom 那裡修理愛車。沒過多久，他果然騎著修復完成的機體回到你們面前，神情裡滿是久違的驕傲。他把那台車叫作 Night Stallion，說這是專門為自己打造的客製機，不是一般人能駕馭的貨色。除了基本的反重力性能之外，它還被調校到極限，靠著快速加熱型馬達線圈，把地面速度推到最高。</p><p>Hardiboiled 才剛開始興致高昂地解說 Night Stallion 的構造，Hildibrand 便試圖伸手去碰他的愛車，立刻被他喝止。接著，Nashu Mhakaracca 問出最直接的問題：既然一直有這麼厲害的機體，Hardiboiled 為什麼這些年都不騎了？Hardiboiled 的思緒於是回到逮捕 Carnelian 的那一天。那時的他被復仇心燒得發燙，滿腦子只剩下要讓 Crime King 付出代價。可等到助手的大仇得報、Carnelian 被送進牢裡之後，那股支撐著他的熱度也一起熄了，讓他再也沒有重新上路的理由。但現在不同了。Carnelian 已經重返街頭，那股沉寂已久的火也跟著回來。當他再次確認那名仙人掌怪逃犯是越過 Tuliyollal、掠過飛空船後往南而去時，便立刻把下一步的起點定在 Yak T’el 的飛空船起降場，並決定先騎著 Night Stallion 過去與你會合。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Hardiboiled <small class="muted">(Solution Nine, X:17.0, Y:18.3)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="on-the-trail-of-destruction.html">追循破壞足跡，盡責紳士前來相助</a></div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="meteorites-and-meteor-wrongs.html">隨隕石一同崩裂的情誼</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
