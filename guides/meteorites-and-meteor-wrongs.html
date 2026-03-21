@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Meteorites and Meteor-wrongs | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Hildibrand – Meteorites and Meteor-wrongs (DT Patch 7.45)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#ffffff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative;max-height:360px;overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:"";position:absolute;left:0;right:0;bottom:0;height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card));pointer-events:none;
+    }
+    .expand-wrap{margin-top:12px}
+    .expand-btn{display:inline-block;padding:8px 14px;border-radius:10px;background:var(--card);border:1px solid var(--border);cursor:pointer;font-weight:600}
+    .expand-btn:hover{background:#fffef8}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/1O8n2oDA_Mc"
+              title="Meteorites and Meteor-wrongs" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Meteorites and Meteor-wrongs</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Meteorites and Meteor-wrongs`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p><b>Nashu</b> envies the detective’s gleaming air-wheeler, convinced that only a machine like that would let her keep pace with Hildibrand. After your group reunites at the dirigible landing in Yak T’el, Hardiboiled admits that even he was impressed by the view over the treetops. More importantly, he has already questioned the locals and learned that the cactuar fugitive was seen flying down toward the lower forests. The largest settlement in that direction is Mamook, and he decides that is where your search must continue. Though Hildibrand is curious about Night Stallion, Hardiboiled refuses to ride it openly, judging that such a conspicuous machine would draw too much attention. He leaves it in reserve and chooses to continue on foot.</p><p>The deeper you go into the forest, the darker and denser it becomes, until Mamook rises ahead in a form unlike anything above. Hardiboiled has no patience for sightseeing. He sends everyone out to gather testimony, and the stories that come back point to the same absurd figure: a green, spiky rider tearing through the woods on a roaring machine. One witness remembers the terrible noise and the pilot’s incomprehensible shouting more than any real fear. Another saw the creature smashing apart giant meteorites with a club and carrying off the fragments. A third can only marvel at the speed of the machine, which left even a wivre behind as though it were standing still.</p><p>When you report what you have learned, Hardiboiled immediately understands that this is no aimless joyride. The meteorites matter. Once you explain what is known about their unusual aetheric properties, he sees the outline of a purpose behind the cactuar’s rampage, even if Keshkayi’s larger plan remains unclear. If the fugitive is collecting meteorite fragments, then the surest way to find him is to wait near the stones themselves. Hardiboiled insists that once the target appears, only he and Night Stallion will be able to pursue properly, while Hildibrand boasts that his own legs need no such aid. Even so, the search begins along the road outside town, where several large meteorites lie scattered.</p><p>The first waiting place yields nothing, nor does the second, unless one counts Hildibrand’s increasingly suspicious movements as a clue. By the time you reach the next stone, the long pursuit is fraying everyone’s patience. Then the cactuar finally bursts onto the scene, loudly proclaiming himself to be the incomparable Spike and preparing to smash yet another meteorite. Hardiboiled moves at once to stop him, but Spike only laughs, boasting that his machine is fitted with black-market modifications no one can match. He tears away at full speed, and Hardiboiled gives chase on Night Stallion. Yet even with his beloved machine at full gallop, he cannot close the distance. Hildibrand somehow catches up on foot, and in a desperate change of plan the detective allows him to turn sheer Manderville absurdity into propulsion. Between Hardiboiled’s steering and Hildibrand’s explosive assistance, they overtake Spike at last.</p><p>Defeat strips the fight out of Spike as quickly as speed once filled him. He admits that the researcher forced him into service and ordered him to smash and steal meteorites from the forest, though he was never told why. Hardiboiled is furious that after all this effort he still has no direct answer about Keshkayi or Carnelian, and more furious still at the damage done to Night Stallion during the chase. Only then does Spike casually reveal the information that matters most: Keshkayi is waiting for the meteorite delivery at the cliffs to the southwest, and Carnelian is likely there with him. Hardiboiled surges forward at once, leaving Spike in your custody while Hildibrand, still determined to uphold a gentleman’s justice, follows after with you and Nashu close behind.</p><p>At the cliffs, you arrive just in time to overhear Keshkayi confirming that the meteorites are the perfect energy source for his work and that he would rather gather more than risk staying too long. Hardiboiled steps in and corners him, but when Keshkayi tries to flee, the detective lets him go in order to seize Carnelian instead. In that moment, vengeance rather than justice governs him. Hildibrand throws himself between them and rejects murder outright, and the brief confusion is enough for Carnelian to escape once more, mocking Hardiboiled for having grown soft. Bitter over the failure and over Hildibrand’s interference, Hardiboiled declares that the inspector is no longer to involve himself in the case. Back in Solution Nine, he makes one thing clear: whatever his opinion of Hildibrand, he trusts you. He wants you beside him from here on, as his guide beyond the dome and as someone tougher than he is willing to admit. Elsewhere, Keshkayi exults that his long-prepared scheme is finally ready and dreams not of wisdom, but of multiplying his own mind until the world must acknowledge his genius. And while Hardiboiled’s own thoughts sink into darker places, Nashu refuses to despair, certain that with you and Hildibrand still moving forward, the story can yet reach a happier end.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Hildibrand <small class="muted">(Solution Nine, X:7.9, Y:14.6)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-need-for-speed.html">A Need for Speed</a></div></div>`,
+    followq:`<div class="stack"><div class="row">To be continued</div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'ひび割れた絆',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p><b>ナシュ・マカラッカ</b>は、探偵のような輝く飛行乗機があれば、自分もヒルディブランドにようやく追いつけるのにと羨ましがる。やがてあなたたちはヤクテルの飛空艇発着場で再び合流し、ハルディボイルドは、樹海の上を越えてくる景色だけは自分でも認めざるをえなかったとこぼす。だが彼が本当に重く見ているのは、地元の者から聞き出した新たな目撃情報だった。サボテンダーの逃亡者は、下層の森へ向かって飛んでいったという。そちらで最も大きな集落はマムークだと聞き、次の目的地はすぐに定まる。ヒルディブランドがナイトスタリオンの行方を尋ねても、ハルディボイルドは目立ちすぎる機体を表に出す気はなく、必要になるまでは徒歩で動くと決める。</p><p>森の奥へ進むにつれて、頭上を覆う木々はますます濃くなり、足元まで影に沈んでいく。その先に現れたマムークの造りは上層とはまるで異なっていたが、ハルディボイルドにはそれを眺めている暇がない。彼は手分けして聞き込みをするよう指示し、集まった証言はどれも奇妙な犯人像へと収束していく。緑色で棘だらけの異様な存在が、轟音を立てる機械にまたがって森を駆け抜けていたのだ。ある者は、耳をつんざく機体の音と操縦者の意味不明な叫びに驚かされたと語り、またある者は、その怪物が巨大な隕石を棍棒で砕き、その破片を持ち去るのを見たという。別の者は、あまりの速さに、並走した生き物が止まって見えるほどだったと振り返る。</p><p>それらを聞いたハルディボイルドは、これはただの暴走ではないと見抜く。隕石に意味があるのだ。あなたがその石の特異な性質について知るところを伝えると、ケシュカイの企みの全貌まではまだ見えなくとも、少なくともその先にある意図の輪郭だけは浮かび上がってくる。隕石の破片を集めているのなら、犯人を待ち伏せする場所はそこしかない。そう判断したハルディボイルドは、いざ追跡となれば飛行乗機なしでは太刀打ちできないと断言するが、ヒルディブランドは己の脚力だけで十分だと胸を張る。こうして一行は、町外れの道沿いに点在する大きな隕石のそばで張り込みを始める。</p><p>だが最初の場所でも次の場所でも、待ち人は現れない。進むほどに焦れが募り、ヒルディブランドの挙動まで妙に怪しく見えてくる。そうして辿り着いた次の隕石の前で、ようやく相手は姿を現す。自らを無敵無双のスパイクと名乗り、大声でまくしたてながら、またひとつ隕石を叩き壊そうとしていた。ハルディボイルドは即座に止めに入るが、スパイクは闇改造を施した自慢の機体に絶対の自信を見せ、追いつけるものなら追ってみろと言い残して全速力で飛び去る。ナイトスタリオンで追うハルディボイルドもすぐには差を詰められず、ついには地を駆けるヒルディブランドが横に並ぶ。ここで計画は半ばやけくそに変わり、操縦をハルディボイルドが担い、推進をヒルディブランドが担うという無茶な追撃が始まる。理屈を超えた勢いの果てに、あなたたちはついにスパイクを追い詰める。</p><p>敗北したスパイクは、先ほどまでの威勢が嘘のように大人しくなる。研究者に脅され、森の隕石を壊して破片を奪うよう命じられていたことは認めるが、その目的までは知らされていなかったという。苦労して捕まえた相手からケシュカイやカーネリアンに繋がる答えが得られず、しかも追跡のせいでナイトスタリオンまで傷ついたとあって、ハルディボイルドの苛立ちは隠せない。だがその直後、スパイクはあっさりと最も重要な情報を口にする。ケシュカイは南西の崖で隕石の受け取りを待っており、カーネリアンもそこにいるはずだというのだ。ハルディボイルドはその言葉に即座に食いつき、スパイクの身柄をこちらに任せると、自ら先んじて崖へ向かう。ヒルディブランドもまた、紳士の正義を貫くために後を追う。</p><p>崖のそばであなたたちが耳にしたのは、隕石が計画に必要な理想のエネルギー源であり、できるなら余剰まで確保したいというケシュカイの言葉だった。ハルディボイルドは姿を現し、彼を追い詰める。だがケシュカイが逃げに転じたとき、彼はその場で追うべき相手を切り替え、なおも執着の消えないカーネリアンへ狙いを定める。そこにヒルディブランドが割って入り、殺しは答えにならないと止めに入った一瞬の混乱の中で、カーネリアンはまたも逃げ去ってしまう。逃がした痛手も、愛車を傷つけられた怒りも、すべてがハルディボイルドの胸で煮え返り、彼はヒルディブランドに二度と邪魔をするなと言い放つ。やがて一行がソリューション・ナインへ戻ると、彼はただひとつ確かなことだけをあなたに伝える。ヒルディブランドをどう思おうと、あなたの力は見込んでいるということだ。ドームの外を導けることも、自分以上に肝が据わっていることも認め、これから先も自分と行動をともにしてほしいと頼む。その一方で、別の場所ではケシュカイが、ついに計画が完成の時を迎えたと歓喜し、自分の才知を複製して世に広げる未来を夢見ていた。しかもハルディボイルド自身の胸中にも、壊れかけた殻をいっそ完全に砕いてしまいたいような危うい思いが沈んでいく。それでもナシュ・マカラッカは諦めず、あなたとヒルディブランドが動き続けるかぎり、きっとこの事件にも幸福な結末は訪れると信じている。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ヒルディブランド <small class="muted">(ソリューション・ナイン, X:7.9, Y:14.6)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-need-for-speed.html">モノクロの過去</a></div></div>`,
+    followq:`<div class="stack"><div class="row">つづく</div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'隨隕石一同崩裂的情誼',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p><b>Nashu Mhakaracca</b> 看著偵探那台發亮的飛空機車，忍不住羨慕起來，彷彿只要自己也有那樣的座駕，終於就能跟上 Hildibrand 的步調。等你們在 Yak T’el 的飛空船起降場會合後，Hardiboiled 先承認了一件事：就連像他這樣早已見慣一切的老偵探，也不得不承認穿過樹海上空時的景色確實驚人。不過，比起風景，他更在意的是打聽到的線索。有人親眼看見那個仙人掌怪逃犯朝下層森林飛去，而那個方向最大的聚落名叫 Mamook。於是下一步很快就決定了。即使 Hildibrand 問起 Night Stallion 的去向，Hardiboiled 也不打算把那台過於顯眼的機體直接開出去，寧可先靠自己的雙腳行動。</p><p>你們一路走進密林深處，頭頂的樹冠愈來愈厚，光線也被壓得愈來愈暗。等 Mamook 出現在眼前時，那與上方截然不同的建築風格確實醒目，但 Hardiboiled 根本沒有停下來欣賞的心情。他立刻要大家分頭去問，而居民提供的證詞，最後全都拼成了同一幅荒謬又鮮明的畫面：一個綠色、滿身尖刺的怪傢伙，正騎著轟隆作響的機械在森林裡狂飆。有人記得最清楚的是那台機體震耳欲聾的噪音，以及駕駛者讓人完全聽不懂的怪叫；也有人看見那東西用棍棒敲碎巨大的隕石，再把碎片帶走；還有人只記得那驚人的速度，快到連一旁的 wivre 都像是停在原地一樣。</p><p>當你把這些見聞整理後告訴 Hardiboiled，他立刻意識到，這絕不是單純的胡鬧兜風。那些隕石才是關鍵。等你把自己所知的異常乙太性質說給他聽後，他雖然還無法完全看穿 Keshkayi 的整個計畫，卻已經看見了其中至少一條清楚的脈絡。既然那個仙人掌怪正在收集隕石碎片，那麼最穩妥的辦法，就是直接守在隕石附近等他出現。Hardiboiled 很直白地表示，真要開始追逐時，能靠得住的只有他和 Night Stallion；至於 Hildibrand，則照例信心十足地宣稱，自己根本不需要任何機械幫忙。於是你們開始沿著離開聚落的道路前進，逐一在那些巨大的隕石旁守候。</p><p>第一處沒有動靜，第二處也沒有，只有 Hildibrand 那愈來愈可疑的行蹤讓人無法忽視。等你們抵達下一塊隕石旁時，目標終於自己衝了出來。那個仙人掌怪大聲報上名號，自稱是無人能敵、無人能追上的 Spike，還一邊誇口，一邊準備再敲碎一塊隕石。Hardiboiled 立刻出手制止，但 Spike 對自己那台裝滿黑市改裝零件的飛空機車極有自信，丟下一句「追得上就來吧」之後便高速逃竄。Hardiboiled 騎上 Night Stallion 緊追在後，卻怎麼也拉不近距離。偏偏就在這時，Hildibrand 居然靠雙腿硬是追了上來。計畫瞬間被迫改變，最後演變成由 Hardiboiled 操控方向、由 Hildibrand 以匪夷所思的方式提供推進力的荒唐追逐。可笑歸可笑，這場追逐終究還是成功了，你們真的把 Spike 逼停了下來。</p><p>一旦敗下陣來，Spike 的銳氣也跟著散了。他承認自己和其他怪物化的逃犯一樣，是被那名研究者逼著做事，只知道要把森林裡的隕石敲碎、搶走碎片，卻不知道那些東西究竟要拿來做什麼。Hardiboiled 聽完後只覺得滿腹火氣，畢竟你們費了這麼大功夫才抓到這個小角色，結果對 Keshkayi 和 Carnelian 的下落依然沒有真正的答案，連 Night Stallion 都在追逐裡被折騰得不輕。可就在他怒氣正盛時，Spike 卻輕描淡寫地補上了最重要的那句話：如果你們在找 Keshkayi，那個人現在正等在西南方的懸崖邊，準備接收這批隕石，而 Carnelian 多半也和他在一起。Hardiboiled 一聽便再也按捺不住，立刻把 Spike 留給你們看管，自己先一步衝向那片懸崖。Hildibrand 也不肯落後，說什麼都要親眼見證那些惡人接受屬於紳士的制裁。</p><p>到了懸崖附近，你們正好聽見 Keshkayi 親口說出，那些隕石正是他計畫所需要的完美能源，如果可以，他甚至還想多收集一些，只是再留下去風險太高。Hardiboiled 隨即現身，用槍口逼住他，可當 Keshkayi 試圖逃跑時，Hardiboiled 卻選擇先放過那個人，只把全部注意力都投向 Carnelian。那已經不是單純的逮捕，而是多年未熄的執念幾乎要化成殺意。Hildibrand 當場出手阻止，直言殺人不是答案，而這短短的一瞬混亂，就足夠讓 Carnelian 再次脫身，還順手嘲諷 Hardiboiled 依舊和從前一樣心軟。這次失敗讓 Hardiboiled 徹底惱火，不只因為仇敵又一次從眼前逃走，也因為 Hildibrand 的介入讓一切再次功虧一簣。回到 Solution Nine 後，他對 Hildibrand 的不滿已經不再掩飾，但對你卻給出了截然不同的答案：他相信你，並且要你從現在開始繼續跟他一起查下去。對他而言，能在穹頂之外替他帶路、又比他自己更靠得住的人，已經沒有第二個。與此同時，Keshkayi 也在別處為自己的計畫終於成熟而狂喜，滿心想著要複製自己的頭腦，讓整個世界都不得不承認他的才智。而 Hardiboiled 自己的思緒，則在無人看見的角落變得愈發陰沉，像是連那層早就裂開的外殼都想親手砸得粉碎。但 Nashu Mhakaracca 仍然不肯放棄。她相信，只要你和 Hildibrand 還在這場追查之中，Hardiboiled 就還沒有走到無法挽回的地步，這個故事也還沒有失去迎向好結局的可能。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Hildibrand <small class="muted">(Solution Nine, X:7.9, Y:14.6)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-need-for-speed.html">追逐速度的往事</a></div></div>`,
+    followq:`<div class="stack"><div class="row">未完待續</div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
