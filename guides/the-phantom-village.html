@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Phantom Village | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – The Phantom Village (DT Patch 7.25)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#ffffff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative;max-height:360px;overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:"";position:absolute;left:0;right:0;bottom:0;height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card));pointer-events:none;
+    }
+    .expand-wrap{margin-top:12px}
+    .expand-btn{display:inline-block;padding:8px 14px;border-radius:10px;background:var(--card);border:1px solid var(--border);cursor:pointer;font-weight:600}
+    .expand-btn:hover{background:#fffef8}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/uH0zW2dvAYo"
+              title="The Phantom Village" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">The Phantom Village</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`The Phantom Village`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Ofangeim remains by the ship while you and Ketenramm move deeper into the phantom village. The silence feels wrong from the moment you begin. No voices answer your footsteps, no sign of life stirs among the ruined buildings, and the stillness only sharpens the unease of having been brought here by forces none of you understand. Ketenramm tells you that as long as the vessel remains secure, the provisions are safe as well, and that at least gives the expedition one less danger to fear while the two of you begin to take stock of your surroundings.</p><p>As you search the area, the village reveals only fragments of its story. One sealed door resists entry. A faintly glowing stone, carefully worked and infused with aether, suggests craft and purpose rather than accident. Elsewhere, overgrown walls and collapsing structures show that the settlement has long since been surrendered to time and weather. From a high vantage, you see two wrecked ships lying in the unnaturally still bay, and their position makes the truth all the more unsettling: they appear to have sunk while trying to leave the island, not while approaching it.</p><p>When you return and share what you found, Ketenramm admits that the village looks ancient, and that whatever people once lived here are likely long gone. Even so, he had hoped there might at least be survivors from one of the wrecks. His attention has already settled on one particular building, whose lock he managed to force open, and though he quickly insists he is not in the habit of such behavior unless absolutely necessary, the attempt at humor does little to lessen the tension as the two of you step inside.</p><p>Within, you find what looks like a sarcophagus surrounded by candles that are clearly not burning by natural means. Ketenramm senses arcane workings immediately and warns you not to draw too near. Then the strange voice reaches you again and declares that only one deemed worthy may lay claim here. Before Ketenramm can make sense of what is happening, the ward yields to your touch, and what should have remained sealed gives way. What emerges is not some silent relic, but a tonberry who wakes as if from deep and satisfying rest.</p><p>The creature introduces himself grandly as Archive and speaks the common tongue with complete confidence. He is offended at the thought that his present form should make him seem witless, and demands that both you and Ketenramm introduce yourselves properly. Yet the moment he hears of Tuliyollal, his certainty falters. He claims to have traveled to all twelve city-states and to know their peoples and cultures, yet the name means nothing to him. When he learns that Tuliyollal belongs to the Seventh Astral Era, the truth begins to settle over all of you: he came to this island to prevent the affliction that changed him from spreading further, then fell into a sleep so deep that more than fifteen hundred years seem to have passed.</p><p>Though much of his memory is clouded, Archive quickly recognizes that the island is not as he remembers it. The memorial fountain is fouled with algae, strange aether hangs over the land like a ward, and the knowledge that once defined him now comes only in flashes. Even so, his pride has not dimmed. He insists that once he regains his bearings, he could become a great asset to the expedition, and he declares that he will join your efforts. Ketenramm, seeing that nothing in the settlement has yet tried to kill you, decides it is time to bring the crew ashore at last. With Archive now at your side, the mystery of the island only deepens, but so too does the sense that the answers hidden here may finally be within reach.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Ketenramm <small class="muted">(Phantom Village, X:7.0, Y:6.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="one-last-hurrah.html">One Last Hurrah</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="unfamiliar-territory.html">Unfamiliar Territory</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'無人の町',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>オファンゲイムが船の見張りに残り、あなたはケテンラムとともに蜃気楼の町の奥へと足を踏み入れる。歩き始めた瞬間から、この場所の静けさはどこか不自然だった。朽ちた建物のあいだから人の気配はまるで感じられず、声ひとつ返ってこない。その沈黙は、正体の知れぬ力によってここへ運ばれたという現実を、いっそう不気味なものにしていた。ケテンラムは、船さえ無事なら積み荷も守られると語り、それだけでも周囲の様子を探るあいだの不安がひとつ減るとあなたに告げる。</p><p>周辺を調べるうち、町は断片的な痕跡だけをあなたに見せてくる。固く閉ざされた扉。巧みな細工が施され、エーテルを帯びてかすかに光る石。草木に覆われ、風雨に晒され続けたことを物語る荒廃した建物。そして高所から見下ろせば、不気味なほど静まり返った入江に、二隻の難破船が沈んでいるのが見える。その向きからして、あれらの船はこの島へ来る途中ではなく、ここから脱出しようとして沈んだのだとしか思えなかった。</p><p>戻って報告を受けたケテンラムは、この集落はかなり古いものだろうと口にする。かつての住人が今も生きているとは考えにくいが、それでもせめて難破船の生存者くらいは見つかるかもしれないと、どこかで期待していたようだった。彼が特に気にかけていた建物は、どうにか鍵をこじ開けることができたらしい。もっとも、必要に迫られたとき以外はそんな真似をしないのだと慌てて弁明するが、その軽口も胸に差す緊張を和らげるには足りなかった。</p><p>建物の中であなたたちを待っていたのは、棺のように見えるものと、不自然な力で灯り続ける蝋燭だった。ケテンラムはただちに魔術的な仕掛けの気配を察し、あまり近づかないほうがいいとあなたに忠告する。するとあの奇妙な声が再びあなたにだけ届き、資格ある者だけがここに触れることを許されるのだと告げる。ケテンラムが状況を飲み込めぬまま、あなたの手によって結界は反応し、閉ざされていたものが開かれる。その中から現れたのは、沈黙する遺物ではなく、長い眠りから気持ちよく目覚めたと言わんばかりのトンベリだった。</p><p>その者は自らをアーカイブと名乗り、流暢な共通語で尊大に語り始める。今の姿を見て愚か者と思われるのは心外だと言い放ち、まずはあなたとケテンラムに名乗るよう求める。だがトライヨラの名を聞いた瞬間、その自信にわずかな揺らぎが走る。彼は十二都市国家すべてを巡り、人々と文化を知り尽くしたと胸を張るのに、その国名にはまるで覚えがないというのだ。さらにトライヨラが第七星暦の時代の国だと知ったとき、事態の異様さがようやく輪郭を帯びる。彼は今の姿に変わった病を広めぬためにこの島へ移り住み、そのまま深い眠りに落ち、気づけば千五百年以上もの時が流れていたのだった。</p><p>多くの記憶はまだ霞んだままだが、それでもアーカイブはこの島が自分の知る姿とは違っていることをすぐに感じ取る。慰霊の噴水は藻に覆われ、島全体には見知らぬエーテルが結界のように満ちている。かつてあらゆる知識を誇った頭脳も、今は断片的にしか戻ってこない。それでも彼の自負は少しも失われてはいなかった。調子を取り戻せば遠征の大きな助けになれると豪語し、当然のようにあなたたちの探索に加わると宣言する。集落に今のところ命を脅かすものがいないと見たケテンラムは、いよいよ仲間たちを上陸させるべきだと決める。アーカイブという思いがけない同行者を得たことで、島の謎はさらに深まったが、その答えに近づきつつあるという感覚もまた、確かに強まっていた。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ケテンラム <small class="muted">(蜃気楼の町, X:7.0, Y:6.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="one-last-hurrah.html">ケテンラム、最後の冒険</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="unfamiliar-territory.html">使えない使い魔</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'空無一人的城鎮',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Ofangeim 留在船邊看守，你則與 Ketenramm 一同往 Phantom Village 更深處走去。才剛開始調查，你就立刻感受到這座村落異樣的寂靜。四周沒有半點人聲，殘破建築間也看不見任何生活痕跡，彷彿整個地方早已被世界遺忘。Ketenramm 說，只要船還安全，船上的補給就還在，至少在你們釐清這座島的情況之前，能少一個必須分神擔心的問題。</p><p>你在附近找到的線索零零碎碎，卻讓人更加在意。某扇門被牢牢封住；一顆做工精細、帶著乙太光芒的石頭靜靜發亮，看不出那光究竟來自材質本身，還是來自內部的機關；被藤蔓吞沒的建物與嚴重風化的痕跡，則都說明這裡已經荒廢了很久。當你站上較高處往海灣看去時，又看見兩艘沉船靜靜躺在過分平靜的水面上。更令人不安的是，從它們的方向判斷，那些船似乎不是在靠近島嶼時沉沒，而是在試圖離開時失事的。</p><p>你把所見所聞告訴 Ketenramm 後，他也認為這座聚落年代久遠，原本的居民多半早已不在，只是他原本還抱著一絲希望，想著至少也許能找到難破船上的倖存者。他特別在意其中一棟建築，還說自己已經設法把門鎖撬開了。雖然他立刻補上一句，除非萬不得已，否則自己平常並不會做這種事，但那點故作輕鬆的語氣，並沒有真正沖淡眼前這個地方帶來的壓迫感。</p><p>你們進入屋內後，看見一具像是石棺的物體，以及一圈顯然不是靠自然方式燃燒的蠟燭。Ketenramm 立刻察覺這裡有魔法性質的異樣，提醒你不要太靠近。就在這時，那道只有你能聽見的聲音再次在意識深處響起，低聲宣告只有被認可的人才有資格取得這裡的一切。Ketenramm 還沒弄明白發生了什麼，你觸碰之後，封印便開始回應，原本封住的東西也隨之開啟。從裡面現身的，不是沉默的遺物，而是一名像是剛從長眠中徹底醒來的 tonberry。</p><p>那名 tonberry 自稱 Archive，開口便用流利的共通語高談闊論，還對你們因他的外表而低估他這件事顯得十分不滿。他要你與 Ketenramm 先好好自我介紹，接著卻在聽見 Tuliyollal 這個名字時明顯愣住。按照他的說法，他曾經走遍十二座城邦，也熟悉那裡的人民與文化，可這個國名對他而言竟完全陌生。等他得知 Tuliyollal 屬於第七星曆之後，事情才終於顯露出驚人的輪廓──他是為了不讓把自己變成這副模樣的病症繼續擴散，才搬到這座島上，之後又立刻陷入長眠，一睡便睡過了一千五百多年的歲月。</p><p>雖然許多記憶依舊模糊不清，但 Archive 很快就察覺這座島早已不是自己記得的模樣。紀念噴泉覆滿藻類，整座島還瀰漫著一種陌生的乙太氣息，像是某種結界正籠罩著此地。他曾引以為傲的知識如今只剩斷續片段，可那份自信卻絲毫沒有削弱。他聲稱只要再花點時間整理思緒，自己一定能成為這次遠征的大助力，甚至主動表示要加入你們的行動。Ketenramm 眼看這座聚落目前似乎沒有什麼立刻威脅性命的東西，便決定是時候把其他船員也帶上岸。隨著 Archive 這位意想不到的新同伴出現，這座島的謎團不但沒有減少，反而變得更加深不可測，但你也開始隱約覺得，真正的答案或許已經離你們不遠了。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Ketenramm <small class="muted">(幻影村, X:7.0, Y:6.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="one-last-hurrah.html">最後一場的壯遊</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="unfamiliar-territory.html">派不上用場的使魔</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
