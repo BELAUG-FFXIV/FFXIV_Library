@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mysteries Abide | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – Mysteries Abide (DT Patch 7.25)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/kRF77ohByH8"
+              title="Mysteries Abide" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Mysteries Abide</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Mysteries Abide`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>As your bond with Archive deepens, so too does the strange link between your journey and the seal that binds his knowledge. He admits that each mystery you unravel causes that seal to weaken further, and though neither of you fully understands why, the connection is now impossible to deny. Yet even with that progress, Ketenramm refuses to let curiosity alone dictate the next step. The southern tower may have revealed itself, but he remains committed to the greater lead: the counterpart said to stand on the north horn. Whatever secrets wait there, he believes they are closer to the heart of the island’s design.</p><p>Even so, he has no wish to throw the crew into needless danger. Too much remains unknown, and there is no telling what may lie within the towers or beyond the island’s shifting wards. With both the phantom village and the expedition base camp now secured, he decides this is the right moment to pause, gather what has been learned, and consider the road ahead. For all the discoveries made so far, he cannot call this expedition a success while his people remain stranded on the island. Until every member of the crew is safely back in Tuliyollal, free to raise a drink at Xbalyav Ty’e, the work remains unfinished.</p><p>There are still too many questions left unanswered. The true identity of the island’s architect remains hidden, and Ketenramm is troubled by another mystery as well: for all the traces of those who came before, you have found no survivors. The silence of the island has not yet given up that truth. Still, he does not intend to abandon the search. He promises that as soon as a route to the north horn is established, word will reach you.</p><p>Until then, he asks something only you can do. Since you alone were called to this island and are not bound by the ward that traps the others, he tells you to return to Tuliyollal and deliver a report to the expedition messenger. Archive confirms it as well: the rest of them cannot leave, but you still can. So you make use of the aetherial current near the harbor and depart the island behind, carrying with you the weight of everything you have seen there.</p><p>When you arrive back in Tuliyollal, the expedition messenger is stunned to see you return alive. His relief quickly gives way to alarm when he learns that Ketenramm and the rest of the crew are still trapped on the island. What had once sounded like a dangerous voyage through Shades’ Triangle now seems, in his eyes, even more perilous after landfall than before. Yet amid the shock, there is at least one measure of comfort: you have managed to secure a foothold there. He urges you to rest and recover your strength for whatever lies ahead, because the mystery of the island is far from over, and your journey there is clearly not yet at an end.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Ketenramm <small class="muted">(Phantom Village, X:7.0, Y:6.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="past-and-crescent.html">Past and Crescent</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div></div>`,
+    followq:`<div class="stack"><div class="row">To be continued</div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'蜃気楼、いまだ消えず',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>あなたが島の謎をひとつずつ解き明かしていくたびに、アーカイブの知識を縛る封印もまた少しずつ崩れていく。彼自身も、その奇妙な結びつきをはっきりと認めるようになる。なぜあなたの歩みが彼の封印に影響するのか、その理由はまだわからない。だが、ふたりのあいだに確かなつながりが生まれていることだけは、もはや疑いようがなかった。それでもケテンラムは、ただ好奇心に任せて動くつもりはない。南の塔の存在は気になるものの、彼の意識はすでに北角にある対となる塔へ向けられていた。島の核心に迫るなら、そちらを追うべきだと考えていたのだ。</p><p>とはいえ、彼は乗組員たちを軽々しく危険へ送り込むつもりもない。塔の中に何が待ち受けているのかも、島を覆う結界の先に何があるのかも、まだ何ひとつ確かなことはわかっていない。蜃気楼の町と遠征隊の拠点がひとまず安全になった今こそ、いったん立ち止まり、これまでの成果を整理し、次の一手を見極めるべき時だと彼は判断する。どれほど多くの発見があろうとも、乗組員全員が無事にトライヨラへ戻り、シュバラブ・ティエで心ゆくまで杯を傾けられる日が来るまでは、この遠征を成功と呼ぶつもりはない。それがケテンラムの率直な思いだった。</p><p>しかも、なお解けていない謎は多い。島の建築主の正体は依然として闇の中にあり、さらに彼の胸に引っかかっているのは、これだけ多くの痕跡を見つけながら、生存者にはひとりとして出会っていないという事実だった。島の沈黙は、まだ肝心な真実を隠したままでいる。それでも彼は追及をやめない。北角への道が開けしだい、すぐに知らせるとあなたに約束する。</p><p>それまでのあいだ、彼はあなただけに託せる役目を命じる。この島へ招かれ、なおかつ結界に縛られていないのは、いまのところあなただけだからだ。トライヨラへ戻り、遠征隊の使者にここまでの経過を報告してほしいと、ケテンラムは言う。アーカイブもまた、その事実を静かに認める。自分たちは結界に囚われ、この島を離れられないが、あなただけは外へ出ることができるのだ。そうしてあなたは港近くのエーテルの流れを利用し、島に残された者たちの思いを背負って、いったんトライヨラへ戻ることになる。</p><p>トライヨラへ戻ったあなたの姿を見た遠征隊の使者は、まず生還を心から喜ぶ。だがその安堵は、ケテンラムたちがなお島に取り残されていると知った瞬間、強い驚きへと変わる。シェード・トライアングルを越える航海だけでも十分に危険だと思われていたのに、上陸した先の島は、それ以上に恐ろしい場所だったのだと彼は息をのむ。それでも、少なくとも現地に足場を築くことには成功した。その事実だけは確かな前進だった。使者は、これから先に備えて十分に休み、力を取り戻してほしいとあなたに告げる。島の謎はまだ終わっておらず、あなたの旅もまた、ここで終わるわけではなかった。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ケテンラム <small class="muted">(蜃気楼の町, X:7.0, Y:6.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="past-and-crescent.html">断絶した文明</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div></div>`,
+    followq:`<div class="stack"><div class="row">つづく</div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'謎團仍在',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>隨著你一步步解開這座島上的謎團，Archive 身上束縛知識的封印也在持續崩解。他親口承認，你與他之間似乎產生了一種難以解釋的聯繫，每當你更接近真相一分，他被封住的記憶就會再鬆動一些。雖然連他自己也無法完全說清其中原因，但這份連結如今已經真實存在，無法否認。不過即使如此，Ketenramm 也沒有打算單純順著好奇心行動。比起眼前這座已經顯現出來的南方之塔，他更在意的是北角那座被視為對應存在的塔，因為他相信，那裡才更可能接近這整座島真正的核心。</p><p>只是，他也不願意在一切仍然不明朗的情況下，貿然把整支隊伍推進未知的危險裡。無論是塔內到底有什麼，還是這座島的結界後面還藏著什麼，你們現在都還無法確定。既然 Phantom Village 與遠征隊的基地如今都已暫時站穩腳步，他認為現在正是重新整頓情報、規劃下一步的時候。對 Ketenramm 而言，直到所有船員都能平安回到 Tuliyollal，在 Xbalyav Ty’e 裡好好喝上一杯之前，這場遠征都還不能算是真正成功。只要還有人被困在這座島上，他就不會把這一切當作圓滿結束。</p><p>更何況，眼前仍有太多疑問尚未解答。這座島的建造者究竟是誰，至今仍沒有真正浮現；而另一件讓他始終放不下的事，則是你們到現在都還沒遇見任何倖存者。明明島上留下了那麼多曾有人來過的痕跡，卻沒有任何活著的人現身，這份沉默本身就像另一道更深的謎。即便如此，他並沒有打算停止追查，而是承諾，一旦遠征隊找到通往北角的路，就會立刻把消息傳給你。</p><p>在那之前，他要你先去做一件只有你能做的事。因為在所有人之中，只有你是被召喚到這座島上、卻又沒有被結界束縛住的人。Ketenramm 要你先回到 Tuliyollal，向遠征隊的使者報告目前的進展。Archive 也證實了這件事，其他人都被結界困在島上，唯獨你還能離開。於是你借助港口附近的乙太流動，暫時離開這片充滿謎團的土地，把島上所有人的處境與希望一併帶回 Tuliyollal。</p><p>當你回到 Tuliyollal，遠征隊使者看見你平安現身，先是震驚，接著明顯鬆了一口氣。可在得知 Ketenramm 與其他船員仍然被困在島上之後，他的神情立刻又被不安取代。原本只是聽來危機四伏的 Shades’ Triangle，如今在他眼裡，連成功登島之後都比想像中更加凶險。不過，即使情況嚴峻，你們至少已經在那座島上建立起可以立足的據點，這仍然是一項重要的進展。他沒有再多留你，只是要你好好休息，恢復體力，為接下來的事做好準備。因為那座島的祕密遠遠還沒有結束，而你與它之間的旅程，也顯然尚未走到終點。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Ketenramm <small class="muted">(幻影村, X:7.0, Y:6.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="past-and-crescent.html">過去與新月島上斷絕的文明</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div></div>`,
+    followq:`<div class="stack"><div class="row">未完待續</div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
