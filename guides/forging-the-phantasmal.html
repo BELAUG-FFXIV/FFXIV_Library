@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Forging the Phantasmal | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – Forging the Phantasmal (DT Patch 7.25)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/bWHgdYlzJ5g"
+              title="Forging the Phantasmal" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Forging the Phantasmal</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Forging the Phantasmal`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Now that Gerolt’s tools have been properly imbued, he wastes no time in turning to the next requirement. If he is to draw upon the island’s thick ambient aether, he says, he needs a material sturdy enough to contain and channel that power. By his reckoning, the island has already provided exactly that in the form of arcanite, and he assumes plenty has been unearthed already.</p><p>That confidence is quickly checked. The expedition leader explains that every valuable material recovered from the island legally belongs to Rowena’s House of Splendors, as that was the price of securing the venture’s financial backing in the first place. At that moment, a representative of the House of Splendors introduces herself and calmly confirms the arrangement. Their organization invested heavily in the expedition, and in return they claim ownership of the resources it yields. If Gerolt wants arcanite, then it will have to be purchased. The price is set plainly before you: five hundred Allagan tomestones of heliometry for a single piece.</p><p>The sheer smell of commerce is enough to sour Gerolt’s mood at once. He snarls at the thought of craft being strangled by business, though in the end his demand is simple enough: he only needs three pieces. Even so, he refuses to handle every part of the process himself. As his irritation flares and his enthusiasm falters, another figure steps forward—a metallurgist who offers to prepare the ore in Gerolt’s stead. Once you gather enough arcanite, you are told to hand it over so the necessary work can begin.</p><p>With that, the next stage falls to you. Gerolt fumes over Rowena’s people profiting from the island’s metals and minerals, while the others make the practical arrangements around him. You obtain the three pieces of arcanite required and deliver them to the metallurgist, who readily accepts them and sets about making the proper preparations before yielding the forge to Gerolt himself.</p><p>When the work is finally underway, Gerolt’s temper gives way to brilliance. He forges a shimmering, shifting, multilayered mesh of aether into tangible form and presents it with unmistakable pride as the pinnacle of his craft: the Phantom Weapon Penumbrae. Even he admits this is only a proof of concept made with the materials presently at hand, yet he is already convinced that finer resources and further refinement will allow him to achieve still greater wonders. The display even catches Archive’s curiosity, though the conversation takes an absurd turn when he asks not for a weapon enhancement, but for a kitchen knife from his sarcophagus to be sharpened. The request is refused on the spot, and the moment breaks into exasperation and laughter. At last, with the forge proven and his tools fully imbued, Gerolt reminds you of one important point before celebrating: he will not need any more demiatma, even if you wish to enhance another weapon. From this point on, arcanite alone will be required.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Lydirceil <small class="muted">(Phantom Village, X:6.6, Y:7.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="arcane-artistry.html">Arcane Artistry</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="keeping-the-old-ways-alive.html">Keeping the Old Ways Alive</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'ファントムウェポンの創造',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ゲロルトは、十分に力を宿した自分の道具を前に、すぐさま次の素材の話へ移る。この島に満ちる濃密な乙太を武具へ流し込むには、その力を受け止め、制御できるだけの器が必要だという。そして、その条件を満たすものとして、すでに島から採れる上弦鉱石に目をつけていた。これまでの調査で、相当量が掘り出されているはずだと、彼は当然のように言う。</p><p>だが、その見込みにすぐ水が差される。遠征の責任者は、この島で得られた価値ある資源はすべてロウェナ商会に帰属すると説明する。遠征への出資を取りつける条件として、そう取り決められていたのだという。そこへ商会の代表が姿を現し、その契約内容を静かに認める。遠征に多額の資本を投じた対価として、発見された資源の所有権は商会にある。もし上弦鉱石が必要なら、正式に代価を払って譲り受けるしかない。その価格は、アラガントームストーン：天道五百で一個だった。</p><p>露骨な商売の気配に、ゲロルトの機嫌はたちまち悪くなる。ものづくりの熱が金勘定で踏みにじられるようだと毒づきながらも、必要な量はたった三つだと言い切る。とはいえ、すべての工程に自ら手を下す気はないらしい。彼の苛立ちが頂点に達したところで、冶金師が名乗りを上げ、下準備なら自分が引き受けると申し出る。必要な上弦鉱石さえそろえば、あとは自分が整え、最後の鍛造をゲロルトへ託すという。</p><p>こうして次の段階は、再びあなたの役目となる。ゲロルトはロウェナ商会がこの島の鉱物を吸い上げようとしていることに怒りをあらわにし、その周囲では現実的な段取りが着々と整えられていく。あなたは求められた三つの上弦鉱石を手に入れ、冶金師へ託す。冶金師はそれを受け取ると、鍛造に必要な準備を進め、やがて炉をゲロルトへ明け渡す。</p><p>そして作業が始まると、ゲロルトの荒っぽさは、そのまま凄まじい技へと変わる。揺らめき、幾重にも重なり合う乙太の網を自在に練り上げ、ひとつの形として定着させた彼は、それを自らの技術の到達点として誇らしげに示す。こうして生まれたのが、ファントムウェポン・ペナンブラだった。もっとも、彼自身もこれは現時点の素材で実現した概念実証にすぎないと認めている。より上質な素材と改良を重ねれば、さらに途方もない仕事ができると確信していた。その出来栄えにアーカイブまでもが強い興味を示すが、彼が頼んだのは武器の強化ではなく、棺の中で見つけた台所用の刃物を研いでほしいという妙な願いだった。当然その場で止められ、呆れと笑いが入り交じる。こうして鍛造法の手応えを得たゲロルトは、祝杯をあげる前にひとつだけ念を押す。今後、別の武器を強化したい場合でも、もはやデミアートマは不要であり、必要になるのは上弦鉱石だけだと。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> リディルセイル <small class="muted">(蜃気楼の町, X:6.6, Y:7.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="arcane-artistry.html">蜃気楼に包まれし武具</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="keeping-the-old-ways-alive.html">古の匠たちの技術</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'鍛造幻影武器',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Gerolt 的工具既然已經順利灌注了力量，他立刻把注意力轉向下一步。他說，如果要把這座島上瀰漫的龐大乙太導入鍛造過程，就需要一種足以承受並引導那股力量的材料。而在他看來，這座島早就提供了正合適的東西──arcanite。照他的說法，調查隊應該早已挖出不少這種礦石。</p><p>可這份自信很快就被潑了冷水。遠征的負責人說明，島上挖掘出來的一切高價值資源，依法都歸 Rowena’s House of Splendors 所有。那是他們為了換取資金支援，不得不答應的條件。緊接著，來自 Rowena’s House of Splendors 的代表親自現身，平靜地確認了這項安排。既然商會為這次遠征投入了大筆資本，那麼過程中取得的資源，自然也歸他們所有。若 Gerolt 想要 arcanite，就只能正式向她購買，而她開出的價格也毫不含糊：一塊 arcanite，五百枚 Allagan tomestones of heliometry。</p><p>濃厚的生意氣味一下子就把 Gerolt 的興致壓了下去。他惱火地抱怨，手藝人的熱情總是被這種銅臭味踩得粉碎，不過最後還是咬著牙表示，自己只需要三塊就夠了。只是接下來的準備工作，他顯然不想一手包辦。就在他脾氣越發暴躁、幾乎要把話題整個甩開時，一名冶金師主動站了出來，表示前置處理可以由自己代勞。只要你把足夠的 arcanite 帶來，他就會先把礦石整理妥當，再交到 Gerolt 手中。</p><p>於是，下一個階段再度落到了你身上。Gerolt 一邊怒罵 Rowena’s House of Splendors 想把這座島上的金屬與礦物全都吸走，一邊仍不得不接受現實安排。你照著要求取得三塊 arcanite，並把它們交給那名冶金師。對方接過礦石後，便立刻開始進行鍛造前的準備，等一切就緒，再把爐火與材料正式交回 Gerolt。</p><p>等到真正動手時，Gerolt 那股粗暴的脾氣，反而化成了令人無法忽視的才能。他把層層交疊、流動不定的乙太編織成可塑的形體，再以驚人的精準將它穩定下來，最後帶著毫不掩飾的得意，展示這項成果──那就是 Phantom Weapon Penumbrae。可即便如此，他也坦率承認，這還只是利用眼下資源做出的概念驗證而已；若能再加以改良，並換上更高階的素材，他還能做出更加驚人的東西。就連 Archive 都因此被勾起了濃厚興趣，只是他提出的要求卻完全偏了方向──不是想強化武器，而是希望 Gerolt 幫忙磨利自己在石棺裡找到的那把廚房刀。這個請求當場就被攔了下來，場面頓時在錯愕與無奈中鬧成一團。到最後，在準備把剩下的酒搬出來慶祝之前，Gerolt 還特地提醒你一件事：從今以後，就算你想強化別的武器，也不再需要 demiatma；往後唯一還要準備的，就只剩 arcanite。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Lydirceil <small class="muted">(幻影村, X:6.6, Y:7.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="arcane-artistry.html">被蜃景包圍的奧術武具</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="keeping-the-old-ways-alive.html">傳承古法匠藝</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
