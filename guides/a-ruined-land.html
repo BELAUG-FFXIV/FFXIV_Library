@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A Ruined Land | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – A Ruined Land (DT Patch 7.25)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/jrml0bXVrAk"
+              title="A Ruined Land" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">A Ruined Land</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`A Ruined Land`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Archive sends you toward the ruins rising above the trees south of camp and waits impatiently for your return, eager to hear every last detail of what they reveal. When you report what you saw, the effect on him is immediate. Another flood of sealed knowledge breaks loose inside his mind, and from the shape, scale, and character of the structure, he identifies it as an Amdapori keep. He explains that the mages of Amdapor were famed for developing white magic, arts devoted to restoration and purification, and that such strongholds were places where they refined those arcane disciplines in earnest.</p><p>That answer only deepens the mystery for Ketenramm. Ancient Amdapor belonged to the land now known as the Twelveswood, far from these distant reaches of the Indigo Deep. He cannot recall ever hearing of the Amdapori venturing so far. As the implications settle, another question follows close behind. A fortress of that scale could not have raised itself, nor could so much stone simply have appeared by chance on an island like this.</p><p>Archive answers as much as he is able. The Amdapori, he says, were renowned for employing life-imbued statues in both construction and defense, and he believes the structure you surveyed was likely built by just such stone familiars. Yet even as he reaches that conclusion, the seal closes over the rest. He can feel that there is more he should be able to say, but once again his knowledge stops at the very point it matters most. To force that barrier wider, he asks you to return to the ruins and bring back a sample of the stonework, preferably one still carrying a trace of aether. Deep within the keep, he says, there should be a ceremonial chamber where such creations were once brought to life, and stone taken from there ought to serve the purpose.</p><p>When you place the aether-imbued stone in his hands, Archive feels more of his memory stir awake. What he says next overturns the conclusion he seemed ready to accept. The ruins were not built by the Amdapori themselves. The lingering magic within the stone matches the same power he sensed from Iris, and from that link he realizes the truth: it was Iris’s master who built those ruins. Ketenramm is left trying to reconcile what he has heard. If Iris is Nymian, then could the one who summoned her also command Amdapori golems?</p><p>Archive does not dismiss the possibility. On the contrary, he says you are dealing with someone whose ability rivals even his own formidable talents. But once more the seal denies him the fuller answer. If the island has already shown traces of more than one civilization, then there must be more evidence waiting elsewhere. He turns to you again and asks for further fieldwork: find the ruins of three distinct civilizations on the island and examine them. Only by following those scattered remnants across the land can you hope to force more of the buried truth into the light.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Archive <small class="muted">(South Horn, X:38.8, Y:7.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="creatures-of-the-crescent.html">Creatures of the Crescent</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-common-thread.html">A Common Thread</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'島内に佇む古城',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>アーカイブは、拠点の南で木々の上にそびえる遺跡を次の調査先として示し、そこで見たものを余さず聞かせるようあなたに求める。やがてあなたが戻り、遺構の様子を伝えると、彼の頭にはまた新たな知識が解き放たれたらしかった。構造や規模、そしてそこに残る面影から見て、あなたが訪れた建物はアムダプールの城砦に違いないという。アムダプールの魔道士たちは、癒やしと浄化を重んじる白魔法を発展させたことで名高く、そうした城砦の奥深くで、その魔法体系を研ぎ澄ませていったのだと彼は語る。</p><p>だがその答えは、ケテンラムにとってむしろ新たな不可解さを増すものだった。古代アムダプールがあったのは現在の黒衣森であり、このようなインディゴディープの彼方にまで人々が進出していたなど、彼は聞いたことがないという。これほどの規模を持つ城砦が築かれるには、それ相応の労力と手段が必要だったはずであり、この孤島にそれが存在していたという事実そのものが、ますます異様に思えてならなかった。</p><p>アーカイブは、答えられる範囲でその疑問に応じる。アムダプールの人々は、生命を吹き込まれた石像を建築や防衛に用いたことで知られており、あなたが調べた城砦もまた、そうした石像使い魔によって築かれた可能性が高いという。だがその先へ踏み込もうとしたところで、またしても封印が彼の知識を塞いでしまう。まだ思い出せるはずのことがあると感じながらも、肝心な部分だけが届かない。その閉ざされた記憶をさらにこじ開けるため、彼はあなたに再び遺跡へ向かい、できればエーテルを帯びた石材の一片を持ち帰ってほしいと頼む。城砦の中心には、そうした造形物へ命を吹き込む儀式の間があったはずであり、そこから得た石材なら十分手掛かりになるというのだった。</p><p>あなたがエーテルを帯びた石材を持ち帰ると、アーカイブの閉ざされた記憶はさらに軋みながら開いていく。そして彼が口にしたのは、先ほどの推測を覆す内容だった。あの遺跡を築いたのは、アムダプールの民そのものではない。石材に残る魔力の気配は、彼がアイリスから感じ取ったものと同質であり、その一致から導かれる答えはひとつしかない――あの遺跡を築いたのは、アイリスの主であるということだった。ケテンラムは、その話を受けてさらに思案する。アイリスがニームの使い魔であるなら、その主はアムダプールのゴーレムまでも操っていたのだろうか、と。</p><p>アーカイブは、その可能性を否定しない。むしろ、相手は自分にも匹敵するほどの力を持つ存在だとさえ言う。だが、その先の肝心な知識へ届こうとすると、やはり封印が行く手を阻む。ならば必要なのは、あなたによるさらなる現地調査だった。この島には、これまで見てきただけでも複数の文明の痕跡が残されているに違いない。アーカイブは、三つの異なる文明に属する遺跡を探し出してきてほしいとあなたに求める。島中に散らばるその痕跡をたどることが、埋もれた真実へ迫るための次の一歩になるのだった。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> アーカイブ <small class="muted">(三日月島南部, X:38.8, Y:7.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="creatures-of-the-crescent.html">三日月島に棲む魔物</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-common-thread.html">見えない共通項</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'佇立於荒土之上的古城',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Archive 指向營地南方、從樹海上方高高突出的那片遺跡，催促你立刻前去調查，並在回來後把看到的一切完整告訴他。等你帶著觀察結果返回時，他腦中又有一部分被封住的知識像潮水般湧了上來。根據你描述的建築外觀、規模與整體特徵，他判斷那裡應該是一座屬於 Amdapor 的堡壘。接著他解釋，Amdapor 的魔道士以發展白魔法聞名，而那種魔法的核心正是治癒與淨化。正是在這類堡壘的深處，他們一步步磨練並深化了自己的魔法技藝。</p><p>然而，這個答案反而讓 Ketenramm 更加困惑。古代 Amdapor 明明位於如今的 Twelveswood，一般來說根本不該和這片遙遠的 Indigo Deep 扯上關係。他從未聽說 Amdapor 的人曾遠行至此，更別說在這樣的孤島上留下如此規模的建築。這不只是歷史上的空白，而像是整段本該互不相連的過去，被某種力量強行拼接在了一起。</p><p>Archive 接著補充，就他目前能想起來的內容，Amdapor 以在建築與防衛中運用被賦予生命的石像而聞名，因此你所調查的那座堡壘，很可能正是由那類石製使魔建造而成。但當他試圖再往更深處說明時，那道惱人的封印又再次把後續知識截斷。明明感覺自己還知道更多，卻偏偏卡在最關鍵的地方。為了再往前逼出更多記憶，他要你重新前往那片遺跡，帶回一塊帶有乙太痕跡的石材樣本。他推測，在堡壘深處應該存在一處儀式用的空間，專門用來賦予那些造物生命；若能從那裡取得石材，應該就足以成為新的線索。</p><p>當你把那塊帶著乙太反應的石材交到 Archive 手中後，他被封住的記憶果然又向外鬆開了一些，而他說出的內容，也立刻推翻了先前看似合理的結論。建造那片遺跡的，並不是 Amdapor 的人本身。殘留在石材中的魔法痕跡，與他從 Iris 身上感受到的力量完全相同。也正因如此，他終於意識到，真正建起那座遺跡的，應該是 Iris 的主人。Ketenramm 聽到這裡，腦中立刻浮現新的疑問：既然 Iris 屬於 Nym 的體系，那麼召喚她的人，難道同時也能操縱 Amdapor 的石像造物嗎？</p><p>Archive 並不否定這種可能，反而直接表示，你們面對的很可能是一位才能足以與他匹敵的存在。可惜，當他試圖繼續往下說明時，那道封印又再次把剩餘的知識擋了回去。於是，他只能再次把希望寄託在你的調查上。既然目前已經在島上看見了不只一種文明留下的痕跡，那麼其他地方多半也還藏著更多證據。他要你接下來去尋找三種不同文明的遺跡，並把它們的特徵帶回來。對現在的你們而言，唯有繼續沿著這些殘存的建築與痕跡追查下去，才可能一步步逼近這座島真正隱藏的過去。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Archive <small class="muted">(南角, X:38.8, Y:7.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="creatures-of-the-crescent.html">棲息在新月島的魔物</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-common-thread.html">彼此之間看不見的共通之處</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
