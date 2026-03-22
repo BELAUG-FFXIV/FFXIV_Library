@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Creatures of the Crescent | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – Creatures of the Crescent (DT Patch 7.25)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/kTn854g2lyk"
+              title="Creatures of the Crescent" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Creatures of the Crescent</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Creatures of the Crescent`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Ketenramm admits that the more you uncover about the island, the further its true nature seems to recede. Every answer only leads to another question. There is the voice that speaks only to you, the ward spread across the entire isle, the seal binding Archive’s knowledge, the faerie familiar and the unseen master behind her, and beyond all of that, the very existence of a settlement on such a remote island. The mysteries are piling higher by the moment, yet before any of them can be pursued properly, he insists that the expedition must first concern itself with something more immediate.</p><p>That concern is safety. Ketenramm says he has seen even the finest explorers undone not by lack of courage, but by carelessness and poor preparation. However capable the crew may be, that alone is not enough. If the expedition is to survive beyond the camp, then the threats lurking outside the walls must be understood before anything else. With that in mind, he gives you a task suited to the role he now sees you filling within the expedition: you are to defeat three different kinds of fiends and bring back your findings from each encounter.</p><p>Archive is just as eager in his own way. He urges you to share everything you learn, convinced that every new observation chips away at the stubborn seal that keeps so much of his knowledge locked away. Ketenramm, meanwhile, makes it clear that however tempting it may be to scour every corner of the island at once, reckless curiosity will help no one if the camp cannot prepare for what is out there. The survey of the local creatures is not merely a trial of strength, but a first attempt to understand the island on terms that might keep everyone alive.</p><p>When you return, your notes reveal something immediately troubling. You encountered a whole herd of garula, which strikes Archive as deeply unusual for creatures known to be fiercely territorial. He wonders whether that behavior may be some adaptation unique to this region. You also faced a flying lizard and a bandersnatch, and from what he remembers, those kinds of creatures belong to very different habitats. One is associated with nests high among the trees, while the other is known to roam mountainous terrain in search of prey.</p><p>To Ketenramm, that makes little sense. None of those creatures sound like species that should naturally gather on an island like this, and although he concedes that someone might have brought them here, he cannot imagine why anyone would go to such lengths. Archive insists that he could answer that question if not for the seal still frustrating him, and Ketenramm, half in exasperation and half in acceptance, says that from now on the expedition will have to depend on the records you make in the field. Archive, unwilling to let that be the final word, pushes you onward instead. If the local fauna have now been surveyed, then the next step should be to search for traces of former habitation. He directs you toward ruins lying due south of the camp and asks you to examine their architectural motifs, certain that whatever you find there will bring both the expedition and his buried knowledge one step closer to the truth.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Ketenramm <small class="muted">(South Horn, X:38.3, Y:7.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-ancient-arts-of-war.html">The Ancient Arts of War</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-ruined-land.html">A Ruined Land</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'三日月島に棲む魔物',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ケテンラムは、この島について知れば知るほど、かえって真相が遠のいていくようだとこぼす。ひとつ謎に触れれば、すぐまた別の謎が姿を現すのだ。あなたにだけ聞こえる声、島全体を覆う結界、アーカイブの知識を閉ざす封印、あの妖精の使い魔とその主、そして何より、これほど隔絶された島に集落が存在していたこと自体が異様だった。だが彼は、そうした好奇心を満たすより先に、まず取り組むべき切実な問題があると言う。</p><p>それは安全の確保だった。どれほど優れた探検家であっても、不注意や準備不足であっけなく倒れるところを自分は何度も見てきたのだと、ケテンラムは語る。乗組員たちの腕前に疑いはない。もちろん、あなたもそのなかに含まれている。それでも、拠点の外にどのような脅威が潜んでいるのかを見極めぬままでは、この遠征を先へ進めることはできない。そう考えた彼は、今や遠征隊きっての頼れる自由人であるあなたに、三種類の魔物を討伐し、それぞれの遭遇から得た情報を持ち帰るよう依頼する。</p><p>アーカイブもまた、別の意味でその報告を待ち望んでいた。あなたが見てきたこと、知ったことを一つ残らず伝えてほしいという。そうして情報が積み重なるたび、自分の知識を縛るあの忌々しい封印も少しずつ削られていくはずだと信じているのだ。一方でケテンラムは、島中を端から端まで調べ尽くしたくなる気持ちはよくわかるが、安全をおろそかにしては元も子もないと釘を刺す。今回の調査は、ただ敵を倒すためのものではなく、この島で生き延びるための最初の備えでもあった。</p><p>やがてあなたが持ち帰った記録は、ただならぬ事実を示していた。まず、大型の獣が群れをなしていたこと自体が不自然だった。アーカイブの記憶では、本来そうした獣は非常に縄張り意識が強く、群れで行動することは珍しい。もし本当に群れていたのだとすれば、この土地ならではの変化が起きているのかもしれないという。さらにあなたは、樹上に巣を作る飛行生物と、山岳地帯で獲物を追う獣まで討伐してきた。少なくともアーカイブの知るかぎり、それらは本来まったく異なる環境に生息する存在だった。</p><p>ケテンラムには、その取り合わせがどうにも腑に落ちなかった。そんな生き物たちが、こんな島に自然とそろうとは思えない。誰かが外から運び込んだ可能性はなくもないが、いったい何のためにそんな手間をかけたのか、見当もつかない。アーカイブは、その理由にも答えられるはずなのに、なお封印のせいで肝心なところへ手が届かないと悔しがる。結局、遠征隊はこれからもあなたが現地で見て記した記録に頼るほかないのだろう。そうして次の方針としてアーカイブが示したのは、集落以外に残る建造物の調査だった。拠点の南に見える遺跡へ向かい、その建築意匠を確かめてきてほしいと彼は言う。そこに残された痕跡は、この島の過去にも、彼自身の封じられた知識にも、きっと新たな光を投げかけるはずだった。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ケテンラム <small class="muted">(三日月島南部, X:38.3, Y:7.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-ancient-arts-of-war.html">古の戦闘技術</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-ruined-land.html">島内に佇む古城</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'棲息在新月島的魔物',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Ketenramm 坦白說，這座島越是查下去，真相反而越像是在不斷後退。你們每多知道一件事，就會冒出更多無法解釋的問題。只有你能聽見的聲音、籠罩整座島的結界、封住 Archive 知識的限制、那名妖精使魔與她背後的主人，還有這座偏遠島嶼上竟然存在聚落這件事本身，全都透著說不出的異樣。只是，在你們真正有餘裕去滿足這份好奇心之前，Ketenramm 認為眼下還有一件更迫切的事必須先處理。</p><p>那就是安全。Ketenramm 說，他見過太多優秀的探險者不是敗在怯懦，而是敗在疏忽與準備不足。即使他的船員個個都很可靠，當然也包括你在內，但若連牆外潛伏著什麼危險都還沒摸清，就貿然深入這座島，只會讓整支遠征隊陷入更大的風險。因此，他希望你以遠征隊中最值得信賴的自由戰力身分，先去擊倒三種不同的魔物，再把每一次遭遇得到的情報帶回來。</p><p>Archive 對這件事同樣表現出強烈興趣。他催促你把看到的一切都告訴他，因為每多獲得一分資訊，他那被封住的知識就可能再鬆動一些。至於 Ketenramm，則反覆強調，哪怕你和他一樣都恨不得把整座島每一寸土地都查遍，探索之前也必須先確保安全。這次行動表面上是在狩獵魔物，實際上卻是在替整支遠征隊建立最基本的判斷，讓之後的調查不至於毫無準備地撞進危險之中。</p><p>當你帶著紀錄返回時，最先浮現出來的不是答案，而是更多讓人不安的矛盾。你遇見的其中一種大型獸類竟然是成群行動，而在 Archive 的認知裡，這類生物向來領域意識極強，極少會聚在一起。若你看到的情況無誤，那很可能代表牠們在這座島上已經出現了與其他地區不同的適應方式。除此之外，你還擊倒了棲息型態與活動環境明顯不同的另外兩種魔物，一種通常會在樹梢築巢，另一種則多半在山地地帶遊獵獵物。</p><p>Ketenramm 聽完後直覺覺得不對。照理來說，這些生物不該自然地同時出現在這樣的島上。雖然他勉強承認，也許有人曾把牠們特地帶到這裡，但若真是如此，背後的理由又是什麼，他完全想不透。Archive 則懊惱地表示，這個問題他原本應該答得出來，偏偏那道惱人的封印仍擋在最關鍵的地方。到了這一步，Ketenramm 也只能半無奈地承認，接下來遠征隊恐怕還是得更加依靠你在外調查時留下的紀錄。</p><p>在確認過當地魔物的情況後，Archive 很快便提出下一個方向。他認為，比起繼續只盯著周圍的生物，更該開始尋找過去有人生活在這座島上的痕跡。畢竟除了最初發現他的那座聚落之外，這裡還散落著其他建築遺構。於是他要你前往營地正南方能看見的那片廢墟，仔細查看那裡殘留的建築樣式與裝飾痕跡。對他而言，你接下來帶回來的觀察，不僅可能讓遠征隊更接近這座島的過去，也可能再次撬動他腦中那道遲遲未能完全解開的封印。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Ketenramm <small class="muted">(南角, X:38.3, Y:7.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-ancient-arts-of-war.html">古代戰技</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-ruined-land.html">佇立於荒土之上的古城</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
