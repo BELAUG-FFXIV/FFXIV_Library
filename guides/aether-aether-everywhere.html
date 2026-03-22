@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aether, Aether, Everywhere | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – Aether, Aether, Everywhere (DT Patch 7.31)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/a7QZSzz9vL4"
+              title="Aether, Aether, Everywhere" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Aether, Aether, Everywhere</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Aether, Aether, Everywhere`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Gerolt studies Archive’s tablet and concludes that you are, at last, on the proper path toward aetheric infusion. The method itself is within reach now. What remains is simple in concept, if not in effort: the four vessels must be filled with aether. When Lydirceil thanks you for gathering everything needed so far, she turns at once to the next step and wonders whether the aether concentrated in battle might be enough to charge the aetherwells while you continue your work.</p><p>Gerolt is not convinced the island alone will serve. His instincts tell him the ambient aether there is too unstable, and he urges you not to confine yourself to a single place. If these vessels are to be filled properly, then you must cast your net wide and gather battle-born aether from many corners of the realm. Faced with that prospect, you answer without hesitation, ready to throw yourself into yet another relentless round of combat. Gerolt, amused by your resolve, sounds certain that no fiend will know peace while you are at work.</p><p>To make the task easier, he hands the vessels over to you already fitted into a rough device of his own making—an aetherwell array. With it, you can keep track of how much aether each vessel has absorbed as you fight. The burden is laid squarely on your shoulders once again: take the array into battle, let the ceaseless struggle of the realm feed the four waiting vessels, and return only when all of them are brimming with power.</p><p>When you finally come back, the aetherwells are indeed swollen with energy, just as Gerolt hoped. He sees your weary expression at once and cannot resist taking a jab at the effort it must have cost you. Even so, he makes one thing clear: without his special solution, the work would have demanded far more slaughter still. More importantly, all the aether you gathered will not be spent on a single attempt. It is enough to support the enhancement of many weapons to come. Satisfied, he tells you to hand over the array so he can prepare the vessels for the forge.</p><p>The moment the aetherwell array is connected, the stored energy surges into Gerolt’s forge with overwhelming force. He revels in it, hearing in that torrent of concentrated power the promise of something extraordinary. You have done your part, and done it well. Now the ancient art of aetheric infusion is truly in his hands. With new materials still to come and this immense power now under his control, Gerolt declares that phantom weapons will soon be raised to heights of martial strength they have never before known.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Lydirceil <small class="muted">(Phantom Village, X:6.6, Y:7.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="keeping-the-old-ways-alive.html">Keeping the Old Ways Alive</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="wrought-by-hands-phantasmal.html">Wrought by Hands Phantasmal</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'属性の力秘めし魔道球',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ゲロルトはアーカイブの石板を読み込み、ついにエーテル注入へ至る正しい道筋が見えてきたと断じる。方法そのものは、すでに手の届くところまで来ていた。残るのは、四つの器を乙太で満たすことだけ。これまで材料集めに力を貸してきたあなたへ礼を述べたリディルシールは、次の段階へすぐに話を進め、戦いの最中に凝縮される高純度の乙太なら、エーテルウェルを満たす力になり得るのではないかと口にする。</p><p>だがゲロルトは、この島だけで事足りるとは考えていなかった。彼の勘では、島に満ちる乙太は不安定すぎるという。だからこそ、ひとつの土地にこだわらず、もっと広く戦いの場を巡るべきだとあなたに告げる。そうして各地の戦闘で拡散する乙太を集めてこそ、器は確かな力で満たされる。あなたが迷いなく引き受けると、ゲロルトは半ば呆れ、半ば感心したように笑い、あなたが動くかぎり魔物に安息はないだろうと応じる。</p><p>彼は配慮のつもりか、四つのエーテルウェルを即席の装置へ組み込み、ひとまとめにしてあなたへ託す。それは彼いわく、エーテルウェル・アレイという代物だった。戦いの合間に器を確かめれば、それぞれにどれほど乙太が蓄えられたか把握できるという。こうして再び、役目はあなたの手へ渡る。装置を携えて各地を巡り、果てしない戦いの中で四つの器を満たしていくことになる。</p><p>やがてあなたが戻ったとき、四つのエーテルウェルは見事に力で満ちていた。ゲロルトはその成果を見て満足しながらも、あなたの疲れた表情から、その道のりが決して楽ではなかったことも見て取る。それでも彼は、特製の溶液がなければ、あなたはいまなお何倍もの戦いを強いられていただろうと言い放つ。そして、ここで集めた乙太は一度きりで尽きるものではなく、今後いくつもの武器強化に活かせるとも明かす。そう言って彼は、鍛冶場の準備に移るため、エーテルウェル・アレイを自分へ渡すよう求める。</p><p>装置が鍛冶場へ接続された瞬間、蓄えられていた高濃度の乙太が一気に炉へ流れ込み、その奔流はゲロルトを激しく昂らせる。制御されぬまま渦巻く圧倒的な力の中に、彼は新たな可能性を見ていた。あなたが成し遂げた働きは十分すぎるほどだった。ここから先は、彼が古の技法を己のものとして振るう番である。やがて新たな素材も加われば、ファントムウェポンはこれまで誰も見たことのない領域へと押し上げられていく。ゲロルトは、その確信を隠そうともしなかった。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> リディルセイル <small class="muted">(蜃気楼の町, X:6.6, Y:7.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="keeping-the-old-ways-alive.html">古の匠たちの技術</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="wrought-by-hands-phantasmal.html">ファントムウェポンの強化</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'無處不在的乙太與蘊含屬性之力的魔導球',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Gerolt 檢視過 Archive 交出的石板後，終於確信你們如今正走在實現「乙太灌注」的正確道路上。方法本身已經近在眼前，現在真正欠缺的，只剩把那四個器皿用乙太徹底填滿。Lydirceil 一邊感謝你先前為蒐集材料所付出的努力，一邊立刻把注意力轉向下一步，推測若戰鬥中真的會凝聚出高純度的乙太，那麼你在各地奔走時，也許就能順勢替這些 aetherwells 充能。</p><p>不過，Gerolt 並不認為只靠這座島就足夠了。他直覺判斷，這裡瀰漫的乙太過於不穩定，若想真正把器皿填滿，就不能把自己困在同一個地方，而是得把戰鬥的範圍拉得更廣，從各處戰場去收集散逸出來的力量。面對這個幾乎等於要再度投身無盡戰鬥的要求，你卻沒有絲毫猶豫，乾脆地表示自己照做就是。Gerolt 聽了你的回答，帶著幾分譏諷又幾分滿意地笑了，彷彿只要你開始行動，整個世界的魔物就別想再有安寧。</p><p>為了讓你行動起來更方便些，Gerolt 事先把那四個器皿裝進一個臨時拼湊出的裝置裡，再交到你手上。他還煞有其事地替那東西取了個名字，叫作 aetherwell array。只要你把它帶進戰鬥之中，並隨時查看那些器皿，就能知道每一個 aetherwell 究竟累積了多少乙太。於是，這份差事再一次落回你身上。你必須帶著那組器皿穿梭於一場又一場戰鬥之中，讓四個空無一物的容器，在無數交鋒裡慢慢吸飽力量。</p><p>等你終於回到 Gerolt 面前時，那四個 aetherwells 已經充滿了驚人的能量。Gerolt 一眼就看出成果確實達到了要求，也同樣從你吃力的神情裡讀出了這一路上究竟有多折磨人。可他還是不忘挖苦你幾句，說若不是靠著自己調製的那份特殊溶液，你恐怕到現在都還得繼續沒完沒了地斬殺魔物。儘管如此，他也明白地告訴你，這次蒐集到的乙太不會只夠用上一次；你費盡辛苦帶回來的這股力量，足以支撐往後更多武器的強化。說完，他便要你把那組裝置交給他，好讓自己著手進行下一步。</p><p>當 aetherwell array 接上鍛爐的那一刻，裡頭儲存的高濃度乙太立刻如洪流般灌入其中。那股幾乎難以駕馭的龐大力量，讓 Gerolt 整個人都興奮了起來，彷彿鍛爐深處正有某種前所未見的可能性在呼喚他。你已經把自己該做的部分完成得無可挑剔，接下來，終於輪到他親手施展那門古老的技法。隨著新的材料陸續到位，Gerolt 也毫不掩飾地宣告，phantom weapons 很快就會被推向前所未有的戰鬥境界。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Lydirceil <small class="muted">(幻影村, X:6.6, Y:7.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="keeping-the-old-ways-alive.html">傳承古法匠藝</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="wrought-by-hands-phantasmal.html">幻影武器強化</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
