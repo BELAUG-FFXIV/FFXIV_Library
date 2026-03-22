@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Keeping the Old Ways Alive | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – Keeping the Old Ways Alive (DT Patch 7.31)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/md_3bvfl1II"
+              title="Keeping the Old Ways Alive" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Keeping the Old Ways Alive</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Keeping the Old Ways Alive`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>When word spreads that the surveyors have uncovered a new and mysterious ore, Lydirceil tells you Gerolt believes it may be vital to further enhancing the phantom weapons. The amount still needs to be excavated, however, and while the surveyors continue their work, she turns her thoughts to the problem of what comes next. Without a proper plan, all of their efforts could easily collapse. Gerolt, meanwhile, has done little beyond grumbling about the island’s lack of rum, and Lydirceil suggests that doubting his ability to perform another feat of genius might be the only way to stir him into action.</p><p>When you confront him, Gerolt bristles at once. He reminds you of the weapons he has already crafted for you and insists that though his hands may be idle, his mind certainly is not. Yet the bluster soon cracks. He admits he has only the vaguest notion of how to proceed, and the closer he feels to grasping the answer, the more it slips away from him. Seeing him cornered between frustration and wounded pride, Lydirceil reaches for another source of inspiration and decides to summon Archive.</p><p>Archive arrives with exactly the spark Gerolt needs. He explains that your work on the phantom weapons has weakened the seal on his memories, allowing him to recall a stone tablet in his possession that once belonged to a master artisan of the Fifth Astral Era. The tablet preserves ancient crafting techniques, and the thought of inheriting such lost knowledge immediately reignites Gerolt’s passion. What had been a shapeless idea suddenly takes form in his mind, and he seizes on the possibility of building his next breakthrough upon forgotten methods from a distant age.</p><p>Archive then explains the technique recorded on the tablet: aetheric infusion. It is a method of imbuing weapons with highly concentrated energy through vessels known as aetherwells, and it requires four of them, each aligned to wind, water, fire, and earth. Dodokkuli recalls that the surveyors recently unearthed four such vessels, but they were found empty, stripped of their lingering energies. Archive notes that they would normally need to rest in a place of dense aether for years to recharge, but offers a far swifter alternative. If carried into relentless battle, the aetherwells can absorb the aether released in combat and be filled again through violence and attrition.</p><p>Gerolt recognizes the shape of the task immediately and accepts it with rough enthusiasm. To hasten the process, he says he can coat the aetherwells in a special solution that will improve their rate of absorption. Dodokkuli is prepared to formulate it, but only if the right ingredients are obtained first. Gerolt names the qualities required: a liquid metal with sound aetheric conductivity, a suitable binding agent, and a pure psychosensitive substance. Dodokkuli and Gerolt then narrow those needs into specific components—rroneek glue, Ut’ohmu siderite, and three varieties of synthetic dark matter.</p><p>Once the requirements are laid out, the burden falls to you again. You travel where you must, secure every ingredient, and return with the full set in hand. Gerolt receives them with clear approval, and Dodokkuli at once begins the synthesis. Before long, the solution is complete and applied to the aetherwells, leaving them ready to draw in battle-born aether far more efficiently than before. With that preparation finished, Gerolt wastes no time in pushing onward. The preliminary work is done, and now the real task begins: the aetherwells must be filled.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Lydirceil <small class="muted">(Phantom Village, X:6.6, Y:7.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="forging-the-phantasmal.html">Forging the Phantasmal</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="aether-aether-everywhere.html">Aether, Aether, Everywhere</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'古の匠たちの技術',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>調査隊が現地で新たな謎の鉱石を掘り当てたと聞き、リディルシールは、その鉱石がファントムウェポンのさらなる強化に不可欠かもしれないとゲロルトが考えていることをあなたに伝える。もっとも、必要な量を掘り出すにはまだ時間がかかるらしい。調査員たちが採掘を続けるあいだ、彼女は次の一手を考えなければならないと言う。このままでは、せっかくの試みも方針を欠いたまま霧散しかねない。一方のゲロルトはといえば、島に酒がないと愚痴をこぼしてばかりで、リディルシールは、彼の才覚をあえて疑ってみせれば、その自尊心に火がつくかもしれないと考える。</p><p>あなたがその言葉どおりに揺さぶりをかけると、ゲロルトはすぐさま反発する。これまでどれほど見事な武器を作ってきたと思っているのかと声を荒らげ、自分の手が止まっていても、頭まで止まっているわけではないと言い返す。だが、その勢いはやがて崩れ、次の強化法について考えはあるものの、まだ曖昧な着想にすぎないことを認める。答えに近づいたと思えば思うほど、それは幻のように指のあいだから逃げていく。苛立ちと焦りをにじませる彼の姿を見て、リディルシールは別の刺激が必要だと判断し、アーカイブを呼ぶことにする。</p><p>現れたアーカイブは、まさにゲロルトが求めていた火種をもたらす。あなたがファントムウェポンの開発に関わったことで、彼の知識を封じる封印が少しずつ弱まり、第五星暦時代の名工が残した石板の記憶を思い出したのだという。そこには古代の鍛造技術が記されており、その失われた知識を自らのものにできるかもしれないと知った瞬間、ゲロルトの闘志は一気に燃え上がる。輪郭のなかった着想はたちまち形を帯び、彼は遠い時代の秘法を足がかりに、新たな飛躍を遂げようとする。</p><p>やがてアーカイブは、その石板に刻まれていた技法の名を明かす。それは「エーテル注入」と呼ばれるもので、「エーテルウェル」という器を媒介にして、高密度の力を武器へ注ぎ込む手法だった。しかも工程を完結させるには、風、水、火、土の性質を持つ四つの器が必要になるという。ドドックリは、ちょうどその四つにあたる器を調査隊が掘り出していたことを思い出すが、報告によれば、どれも残留する力を失い、空になっていた。通常なら、濃密な乙太に満ちた場所へ何年も安置して再充填するところだが、アーカイブはもっと早い方法を知っていた。絶え間ない戦いのただ中へ持ち込めば、戦闘で拡散した乙太を器が吸収し、短期間で力を取り戻せるという。</p><p>その話を聞いたゲロルトは、やるべきことをすぐに見定める。器に特殊な溶液を塗布すれば吸収効率を高められると考え、その調合をドドックリに任せようとする。だが、そのためには材料が要る。必要なのは、乙太伝導性に優れた液状金属、結合材になる物質、そして純度の高い感応性物質だった。話を詰めていくうちに、それらはそれぞれロネーク膠、ウトォーム・シデライト、そして三種類の人工ダークマターでまかなえるとわかる。</p><p>求められるものが定まると、再びその役目はあなたに託される。あなたは必要な品々を集めて持ち帰り、すべてをゲロルトへ渡す。彼は満足げにそれを受け取り、ドドックリもすぐに調合へ取りかかる。やがて溶液は完成し、エーテルウェルへ丁寧に塗布される。それによって器は、戦いの中で生じる乙太をこれまで以上の速度で吸収できるようになる。準備が整った今、ゲロルトはもう迷わない。下ごしらえは終わった。次はいよいよ、本番として器を満たしていく段階へ進むことになる。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> リディルセイル <small class="muted">(蜃気楼の町, X:6.6, Y:7.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="forging-the-phantasmal.html">ファントムウェポンの創造</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="aether-aether-everywhere.html">属性の力秘めし魔道球</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'傳承古法匠藝',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>當調查隊在野外發現一條全新的神秘礦脈後，Lydirceil 便告訴你，Gerolt 認為那種礦石很可能是進一步強化 phantom weapons 的關鍵。只是，真正需要的數量還得花些時間才能挖掘出來。趁著調查員們繼續揮動十字鎬，她也開始思考接下來的安排。若沒有一套明確可行的計畫，這整件事很可能會像四散的乙太一樣，最後什麼都留不下。至於 Gerolt，這段時間幾乎只顧著抱怨島上沒有 rum。Lydirceil 於是想，也許只有故意質疑他的本事，才能再次逼出他的鬥志。</p><p>當你真的把懷疑拋到 Gerolt 面前時，他果然立刻炸了開來。他不滿地提醒你，自己打造過多少出色的武器，怎麼能輪到你來懷疑，還強調就算雙手暫時閒著，腦子也從來沒停下來過。可那股逞強很快就鬆動了。他承認，自己對下一步的強化方式確實有過一個想法，只是那念頭始終模糊得難以捉住。每當他以為自己快要碰到答案時，那個答案又像幻影一樣從眼前滑走。看著他在煩躁與不甘之間進退不得，Lydirceil 判斷，他現在需要的不是催促，而是另一道能點燃靈感的火花，於是決定把 Archive 找來。</p><p>Archive 帶來的，正是 Gerolt 最缺的那一點契機。他告訴你，隨著你參與 phantom weapons 的開發，封住他知識的封印也逐漸鬆動，因此他想起自己持有一塊石板，那原本屬於第五星曆時代的一位大工匠。那塊石板上記錄著古代流傳下來的鍛造技術，而「自己或許能成為這份失落知識的繼承者」這個念頭，幾乎瞬間讓 Gerolt 整個人重新燃燒起來。原本模糊不清的構想，終於開始在他腦海裡凝聚成形。他立刻抓住這份來自遙遠時代的智慧，想把它化為自己下一次突破的根基。</p><p>接著，Archive 說明了石板上記載的技術內容。那是一種名為「乙太灌注」的方法，必須透過被稱作「aetherwells」的容器，把高度濃縮的能量灌入武器之中。而這項工序需要四個不同屬性的容器，分別對應風、水、火、土。Dodokkuli 想起，調查隊最近正好挖出了這樣的四個器皿，但報告也說得很清楚，它們裡頭殘留的力量早已消失，幾乎空空如也。照一般做法，必須把這些球體放在高濃度乙太環境中靜置數年，才能慢慢重新充能；可 Archive 知道另一種更快得多的方法。只要把它們帶進無休止的戰鬥裡，它們便能吸收戰鬥中逸散的乙太，用更短的時間重新蓄滿力量。</p><p>聽完這些話後，Gerolt 很快就抓住了該怎麼做。他表示，若能先替那些 aetherwells 塗上一層特殊溶液，就能提升它們吸收乙太的效率。Dodokkuli 願意負責調製，但前提是必須先準備好正確的材料。Gerolt 提出的條件很明確：需要一種具有良好乙太傳導性的液態金屬、一種能作為黏合劑的材料，以及一種純淨的感應性物質。隨著兩人進一步推敲，所需之物也逐漸明朗起來，也就是 rroneek glue、Ut’ohmu siderite，以及三種 synthetic dark matter。</p><p>等到所有需要的材料都被說清楚後，這份奔走收集的責任便再次落到你身上。你前往各處，把所有東西一一備齊，再帶回 Gerolt 面前。Gerolt 接過材料時，語氣裡已經帶上明顯的滿意，Dodokkuli 也立刻開始進行調合。不久之後，溶液終於完成，並被仔細地塗覆在那些 aetherwells 表面。經過這道處理，它們便能以更高效率吸收戰鬥中產生的乙太。到了這一步，Gerolt 也不再停留於構想與準備之中。前置工作已經完成，接下來真正要做的，就是把那些器皿徹底填滿。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Lydirceil <small class="muted">(幻影村, X:6.6, Y:7.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="forging-the-phantasmal.html">鍛造幻影武器</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="aether-aether-everywhere.html">無處不在的乙太與蘊含屬性之力的魔導球</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
