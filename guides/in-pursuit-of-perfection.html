@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>In Pursuit of Perfection | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – In Pursuit of Perfection (DT Patch 7.41)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/hI9TSbOFYGE"
+              title="In Pursuit of Perfection" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">In Pursuit of Perfection</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`In Pursuit of Perfection`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Gerolt examines the flawed vessel he shaped and remarks that, although he accidentally chipped away part of it, the damage at least became a usable mouth. Since the summoned voidsent still cannot wield its full power, the group turns to the obvious problem: the vessel is not close enough to the creature’s true form. Dodokkuli explains that perfect accuracy is unnecessary, but the closer the vessel resembles the original, the better it will function as a conduit. When pressed, the voidsent can recall only one detail—that it once had hands and feet. Gerolt immediately seizes on the next step. If they are to rebuild the body anyway, he wants to mix crystal paste into the clay, a substance rich in pulverized crystal and aether that should strengthen the bond between vessel and occupant. You and the voidsent then set out together to gather what is needed.</p><p>When you return with the first great batch of crystal paste, Gerolt reshapes the vessel and gives it fresh hands and feet just as the voidsent described. The creature admits the new form feels more limber, yet something is still missing. Its mind remains clouded, and Dodokkuli cannot help observing that the present body hardly seems suited to great intelligence. The voidsent bristles at that suggestion and insists it is meant to be smarter and statelier than this. Gerolt, already thinking ahead, decides a more ambitious reconstruction is needed. If this vessel is to hold the creature properly, then it will require not only limbs, but a stronger structure worthy of the presence within. You are sent out again to gather still more crystal paste.</p><p>With the second reconstruction, Gerolt indulges the voidsent’s demand for a more dignified form. He adds flourishes—a cane, a crown, touches meant to suggest refinement and authority. This time the creature’s voice grows clearer, and it admits that a spark has begun to kindle within its soul. Yet even then, the power does not fully awaken. When Lydirceil asks what is still absent, the voidsent’s answer reveals more of its nature than before: beauty matters. It insists that it was once radiant, a being attended by countless thralls, and that only a truly beautiful vessel can restore what has been lost. Though the demand exasperates everyone, Gerolt accepts it as another requirement of the craft and asks you for an even greater quantity of crystal paste so he can finally do the face justice.</p><p>You bring back the third vast collection, and Gerolt throws himself into the task again. This time he fashions the vessel in the image of someone unmistakable, hoping that cleverness, vanity, and beauty combined will satisfy the voidsent at last. The result pleases the creature far more than any prior attempt, and it can already feel the reverence its appearance commands. Even so, it soon senses one final deficiency. Beauty and bearing are not enough. If it is to call forth the true extent of its power, it requires a focus—an orb infused with aether. At that realization, Gerolt suddenly sees the answer that had been before him all along. Because this technique was born from aetheric infusion, the final vessel must embody that same principle. He sends you out one last time for an immense final measure of crystal paste so he can complete the design now fully formed in his mind.</p><p>When you return with the last supply, Gerolt begins the final reconstruction in earnest. Once the work is done, the bond between vessel and occupant becomes complete, and the voidsent is at last restored to its rightful form. The fog over its thoughts breaks apart, and it reveals its name: Brigid. She declares that among the denizens of the void, few can rival her command of aether, and the power now brimming within the vessel and its brilliant orb is more than sufficient to transform a mortal tool. Gerolt, hardly believing what he is hearing, offers up his hammer at her command. Brigid channels her power through the orb, and when the work is finished, Gerolt withdraws a hammer utterly reborn—blessed with voidsent power that devours aether and binds the soul of the tool itself. In his delight, he proclaims it a new technique born of the void and another triumph of ancient wisdom. Brigid, thrilled by the praise, revels in her restored might. And with this transformed hammer in hand, Gerolt turns at once to the next stage: your phantom weapon will soon be raised to still greater heights, though minerals will be needed before he can put his newly perfected tool to work.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Lydirceil <small class="muted">(Phantom Village, X:6.6, Y:7.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="timeworn-techniques.html">Timeworn Techniques</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-phantom-reborn.html">A Phantom Reborn</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'正しき姿を求めて',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ゲロルトは、自分が成形した器の欠けた部分を見やり、うっかり削ってしまった箇所が結果的には使いものになる口になったと語る。だが、召喚されたヴォイドセントがなお本来の力を発揮できない以上、問題は明らかだった。器がその真の姿に十分近づいていないのである。ドドックリは、完全に同一である必要はないが、元の姿に近ければ近いほど、こちらの世界で力を通すための媒介として機能しやすくなると説明する。問いかけに対し、そのヴォイドセントがようやく絞り出した記憶は、自分には手と足があったということだけだった。そこでゲロルトは、どうせ作り直すなら結晶粉膏を粘土へ混ぜ込もうと思い立つ。砕いた結晶と豊かな乙太を含むその素材なら、器と中身の結びつきがより強くなるはずだった。こうしてあなたは、そのヴォイドセントとともに必要な素材を集めに向かう。</p><p>最初の大量の結晶粉膏を持ち帰ると、ゲロルトはそれを用いて器を作り直し、ヴォイドセントの望みどおり新たな手足を与える。たしかにその姿になったことで、相手は以前より動きやすくなったと認める。だが、それでもなお何かが足りない。思考にはまだ靄がかかったままで、ドドックリは遠慮がちに、いまの姿はとても高い知性を備えた存在の器には見えないと指摘する。その言葉にヴォイドセントは強く反発し、自分は本来、もっと賢く、もっと威厳ある存在なのだと言い張る。ゲロルトはすぐさま次の改修を思い描き、手足だけでなく、その本質に見合う骨格そのものを与えるべきだと判断する。そして再び、さらなる結晶粉膏を求めてあなたを送り出す。</p><p>二度目の改修では、ゲロルトはその要求に応えるように、より威厳を感じさせる意匠を器へ施していく。杖や冠まで加えられたその姿は、明らかに前よりも堂々としていた。その変化により、ヴォイドセントの口調も次第に整い始め、自らの魂の内に火種が灯ったようだと語る。だが、まだ力は完全には目覚めていない。何が足りないのかと問われた相手は、自分はかつて輝かしく、数多の下僕を従えるほどの存在だったと述べ、美しさこそが不可欠だと言い出す。周囲が呆れながらも、ゲロルトはそれを器の完成に必要な条件のひとつと受け止め、その顔立ちにふさわしい仕上がりを実現するため、さらに膨大な量の結晶粉膏を求める。</p><p>あなたが三度目の素材を持ち帰ると、ゲロルトは再び器へ手を加える。今度は、知性と尊大さと美しさのすべてを満たすべく、ある人物を思わせる姿をもとに形を整えていく。完成した器に、ヴォイドセントはこれまでになく強い満足を示し、その姿を前にした者たちの反応からも、自分が敬意を集めるに足る姿へ近づいたことを感じ取る。だが、それでもまだ決定的な何かが欠けていた。真の力を呼び起こすためには、その中心となる乙太を帯びた宝珠が必要だというのである。その言葉を聞いた瞬間、ゲロルトはようやく核心を掴む。この技法がエーテル注入に着想を得たものである以上、その完成形にもまた同じ理が組み込まれていなければならない。彼は最後の仕上げに必要な、さらに莫大な量の結晶粉膏をあなたへ求める。</p><p>最後の素材を携えて戻ると、ゲロルトは満を持して最終調整に取りかかる。完成した器は、もはや単なる代用品ではなく、そこに宿る存在と完全に結びついた新たな依代となっていた。するとヴォイドセントを覆っていた思考の霧はようやく晴れ、その者は自らをブリギッドと名乗る。ヴォイドに住まう者たちの中でも、自分に並ぶほど乙太を操れる者はいないと誇るその声には、揺るぎない自信が宿っていた。そして器と輝く宝珠に満ちる力は、ひとつの道具を変質させるには十分すぎるという。半信半疑のままゲロルトが槌を差し出すと、ブリギッドはその宝珠を通して力を流し込み、ついに変成を完了させる。引き上げられた槌は、乙太を喰らい、道具の魂そのものを結び直す力を宿した、まったく新しい存在へと生まれ変わっていた。ゲロルトは、その結果をヴォイドより生まれた新技法だと高らかに称え、古の知恵の勝利に笑い声を上げる。称賛を浴びたブリギッドもまた、取り戻した力に歓喜する。そしてゲロルトは、この新たな槌さえあれば、次はあなたのファントムウェポンをさらに高みへ押し上げられると宣言する。ただし、その仕事を始めるには、なお新たな鉱物が必要になるのだった。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> リディルセイル <small class="muted">(蜃気楼の町, X:6.6, Y:7.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="timeworn-techniques.html">最適な技術を求めて</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-phantom-reborn.html">ファントムウェポンの新生</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'追求完美',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Gerolt 一邊打量著自己塑出的器皿，一邊承認說，先前塑形時不小心敲掉了一塊，不過那個缺口反倒成了還算能用的嘴巴。可即使如此，眼前這名被召來的 voidsent 依舊無法發揮完整力量，問題顯然就出在器皿本身並不夠貼近它原本真正的模樣。Dodokkuli 解釋，雖然未必要做到完全一模一樣，但只要越接近真身，這個臨時容器就越能在這個世界裡穩定地承載它。當你們試著追問更多線索時，那名 voidsent 只能勉強想起，自己曾經有手，也曾經有腳。Gerolt 聽完後立刻決定，既然本來就得重做，乾脆把 crystal paste 摻進黏土裡。那種混合了研碎水晶與豐富乙太的素材，應該能讓器皿與寄宿其中的存在建立更穩固的連結。於是，你便與那名 voidsent 一同動身，開始蒐集所需的材料。</p><p>等你帶回第一批大量的 crystal paste 後，Gerolt 立刻著手重塑器皿，照著對方勉強記得的線索，替它補上新的手與腳。這副新身體確實讓那名 voidsent 感覺比之前靈活許多，可它很快又察覺，自己仍有某種重要部分尚未恢復。腦海裡依舊籠著濃霧，無法清晰思考。Dodokkuli 甚至坦白地說，眼前這副模樣實在不像是足以容納高等知性的身軀。這句話立刻惹得對方不滿，強調自己原本絕不只是這樣，應該更聰明，也更有威儀。Gerolt 於是馬上看出，單純補上四肢遠遠不夠，接下來必須替它打造一副更完整、更像樣的結構，於是又要你再去蒐集更多 crystal paste。</p><p>有了第二批素材後，Gerolt 便朝著「聰明又高貴」的方向替它重塑外形。他甚至特意加上手杖與王冠，讓整副姿態看起來更加講究。這一次，效果的確比之前更進一步。那名 voidsent 的語氣變得清楚許多，也承認自己的靈魂裡彷彿真的點起了一絲火種。可即便如此，那股力量仍沒有真正熊熊燃起。當 Lydirceil 問它現在還缺少什麼時，它終於透露出更多關於自身本質的渴望：它想要的不只是端正與威嚴，還有美麗。它堅稱自己曾經是光彩奪目的存在，身邊圍繞著無數聽命行事的僕從，因此若想讓它恢復真正的樣子，就必須替它打造出一副足以稱得上「美」的容器。雖然這要求讓眾人都感到頭痛，Gerolt 還是把它當成工藝上必須完成的一步，又向你要來更大批的 crystal paste，準備把這副面容徹底做好。</p><p>當你帶回第三次蒐集來的材料後，Gerolt 便再度投入塑形。這一回，他索性以某個再明顯不過的對象作為靈感來源，試圖一次滿足對方對聰明、傲氣與外貌的所有要求。完成後的器皿，的確讓那名 voidsent 露出前所未有的滿意神色。它甚至從你們看向它時流露出的敬意裡，感受到自己的形象終於有了幾分昔日風采。然而，就在你們以為這次終於完成時，它卻再次指出，還差了最後一樣決定性的東西。若沒有那個存在，它就無法真正喚出自己全部的力量。答案很快被說了出來，它需要一顆灌注乙太的 orb，作為自身力量的焦點。Gerolt 聽到這裡，像是猛然抓住了整件事的核心。既然這項技法本就是從乙太灌注發想而來，那麼最終完成的器皿，自然也得把同樣的原理納入其中。於是他向你提出最後一次要求，要你再帶回一大批 crystal paste，好讓他把腦海中那個真正完整的形象做出來。</p><p>等你帶著最後一批材料回來時，Gerolt 終於開始了最終的重塑。當那副器皿完成的瞬間，寄宿其中的存在與容器之間的連結，終於達到真正完整的狀態。籠罩在那名 voidsent 思緒上的迷霧一下子徹底散去，它也終於報上自己的名字，Brigid。她驕傲地宣稱，在以虛無為家的眾多存在之中，幾乎沒有誰能在操控乙太這件事上與她匹敵。而如今，這具嶄新的器皿與其中閃耀的 orb 所蘊含的力量，已經足夠讓一件凡人的工具徹底蛻變。Gerolt 聽得幾乎像在聽童話，卻還是依照她的要求，把自己的鐵鎚交了出去。Brigid 將力量灌入 orb，再由 orb 傳導進那把鐵鎚之中，當整個過程完成後，Gerolt 抽回來的已經不再只是原本那件工具，而是被徹底重生過、擁有吞食乙太與束縛器物本質之力的新存在。Gerolt 狂喜地大笑起來，宣稱這是一門誕生於虛無的全新技法，也是古代智慧再一次的勝利。Brigid 則在讚美聲中愈發陶醉，盡情享受著自己終於恢復的力量。至此，Gerolt 已經篤定，只要有這把全新的鐵鎚在手，你的 phantom weapon 很快就能被推向更高的境界。不過在那之前，他仍需要再準備一些礦物，才能真正開始下一步。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Lydirceil <small class="muted">(幻影村, X:6.6, Y:7.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="timeworn-techniques.html">尋覓最合適的古老技法</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-phantom-reborn.html">重獲新生的幻影武器</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
