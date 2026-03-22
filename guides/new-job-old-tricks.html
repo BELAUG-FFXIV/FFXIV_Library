@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>New Job, Old Tricks | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – New Job, Old Tricks (DT Patch 7.25)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/2t1NtxHKVhc"
+              title="New Job, Old Tricks" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">New Job, Old Tricks</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`New Job, Old Tricks`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Ketenramm looks over the base camp with obvious satisfaction and tells you that there could hardly be a better place from which to launch an expedition. Even here, on this impossible island, you have something akin to an aetheryte at your disposal. He urges you to attune to it before leaving camp, then explains that the advance party has already searched the nearby area and returned with a few curious objects. Archive was examining the haul, but he abruptly wandered off to investigate a pile of rubble on his own, and Ketenramm decides the two of you had better see what has caught his attention.</p><p>When you find Archive, he is visibly pleased with himself. He tells you that he has something crystalline to show you, and the moment you lay eyes on it, he seems to recover another fragment of the knowledge that had remained sealed away from him. He complains that having so much learning locked out of reach is maddening, but he wastes no time explaining what he has uncovered. The crystal, he says, is a soul shard from the Fifth Astral Era, and within it is preserved a phantasmal record of arcane arts and martial disciplines once developed by the twelve city-states of old.</p><p>Archive readily admits that the methods used by warriors of the present age may well surpass those ancient techniques in refinement. Even so, he believes the old ways still carry value, and that you may stand to gain from them. Under ordinary circumstances, he says, he would simply take up a soul shard himself and fight beside you. But once again, the seal placed upon his knowledge bars his way. He still cannot reach what lies within the crystal, and his frustration at being thwarted again is impossible to miss.</p><p>Even so, Archive is convinced that the same restriction does not apply to you. Ever since your arrival, too many things on this island have responded to you alone for that to be coincidence. If you were summoned here for a reason, then perhaps this shard will open itself to you as well. He urges you to affix it to your garb and see what answer it gives. When you do, the sealed knowledge answers your touch, and new paths of battle open before you.</p><p>Through the soul shard, you gain access to three phantom jobs: Phantom Knight, Phantom Monk, and Phantom Bard. These are not replacements for the strength you already possess, but supplementary roles that can be assumed while on the Occult Crescent, each granting its own phantom actions. Until you choose one, you stand as a Phantom Freelancer, poised at the threshold of something unfamiliar. What had first seemed like a strange relic reveals itself instead as a new means of surviving whatever trials this island has prepared for you.</p><p>Archive watches with satisfaction, unsurprised that the shard yields to you, and tells you again that being summoned to the island must mean something. Ketenramm, for his part, takes the matter in more practical terms. If the crystal truly carries ancient battle knowledge, then it may prove a vital asset in your excursions beyond camp. On this island, where every answer seems to lead to a deeper mystery, even the tools placed in your hands feel less like gifts and more like signs that some hidden purpose has been guiding you onward from the very beginning.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Ketenramm <small class="muted">(South Horn, X:38.3, Y:7.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="unfamiliar-territory.html">Unfamiliar Territory</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-ancient-arts-of-war.html">The Ancient Arts of War</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'「サポートジョブ」の継承',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ケテンラムは遠征拠点を見渡し、これほど遠征の足場にふさわしい場所もそうそうないだろうと満足げに語る。しかもこの島には、驚くべきことにエーテライトのようなものまで存在していた。彼は、拠点を離れる前に必ずそれと交感しておくようあなたに勧める。そして先遣隊が周辺を調べ、いくつか気になる品を持ち帰ってきたことを話す。アーカイブはその戦利品を吟味していたはずが、いつの間にか瓦礫の山へ駆けていき、何かを探り始めたらしい。ケテンラムは、妙な真似をしていなければいいがと言いながら、あなたとともに様子を見に向かう。</p><p>アーカイブを見つけると、彼はどこか誇らしげな様子で、結晶めいたものを見せたいのだと言う。そしてあなたがその結晶を目にした瞬間、彼のなかで封じられていた知識の一端がまたしても呼び覚まされたようだった。知識を蓄えていながら、それを自由に引き出せないのは実にじれったいと不満を漏らしつつも、彼はすぐにその正体を語り始める。それは第五星暦時代のソウルシャードであり、その内部には、古の十二都市国家が編み出した魔法や戦技の幻影記録が封じられているのだという。</p><p>アーカイブは、現代の戦い方のほうが当時より洗練されているのだろうと素直に認める。だがそれでも、昔日の技には今なお学ぶ価値があり、あなたにとってもきっと役立つはずだと断言する。本来であれば、自分がソウルシャードを手にしてあなたと肩を並べて戦いたいところだとも口にする。だが彼の知識を縛る封印は依然として解けておらず、その結晶の奥に眠るものへは、彼自身ですら手が届かない。その事実は、彼にとってもまた新たな苛立ちとなっていた。</p><p>それでもアーカイブは、その制限があなたには及ばないと考えていた。この島に来てからというもの、数々のものがあなたにだけ反応している。それがただの偶然であるはずがない。あなたが特別にこの島へ招かれたのだとすれば、このソウルシャードもまた、あなたにこそ応えてくれるはずだと彼は言う。そして試してみるよう促され、あなたがそれを身に帯びると、封じられていた知識は確かにあなたへと開かれていく。</p><p>そのソウルシャードによって、あなたは三つのサポートジョブを扱えるようになる。ナイト、モンク、吟遊詩人――それぞれがこの島での探索を支える新たな力であり、固有の技をあなたにもたらす。まだどの力を選ぶかを決めていない今のあなたは、いわば何者にも定まらぬ立場にありながら、新たな戦い方の入口に立っているのだった。奇妙な遺物にしか見えなかった結晶は、いつしかこの島を生き抜くための確かな手段へと姿を変えていた。</p><p>アーカイブは、やはりこの島に招かれたあなたなら応えを引き出せると思っていたと満足げに語る。ケテンラムもまた、その結晶に古い戦技の知識が詰まっているのなら、これから先の探索で大いに役立つだろうと期待を寄せる。この島では、謎をひとつ知るたびにさらに深い謎が顔を覗かせる。だが少なくとも今、あなたの手に渡されたこの新たな力は、見えない何かが最初からあなたをこの先へ導こうとしていたことを、静かに物語っているようだった。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ケテンラム <small class="muted">(三日月島南部, X:38.3, Y:7.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="unfamiliar-territory.html">使えない使い魔</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-ancient-arts-of-war.html">古の戦闘技術</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'新職業，老把戲',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Ketenramm 看著眼前的 Expedition Base Camp，語氣裡帶著明顯的滿意。他說，要作為遠征據點，幾乎找不到比這裡更合適的地方了，更令人意外的是，這裡竟然還有類似乙太水晶的設施可用。他提醒你，在離開營地之前務必要先完成共鳴。接著他提起，先遣隊剛剛在附近搜尋時帶回了一些值得注意的東西，而 Archive 原本正在替那批物品做鑑定，卻沒多久就突然跑去翻看那堆瓦礫。Ketenramm 擔心他是不是又發現了什麼，於是帶著你一起前去查看。</p><p>你找到 Archive 時，他的神情明顯帶著幾分得意，還立刻要你看看他手中的結晶。就在你視線落到那東西上的瞬間，他像是又從自己被封住的知識之中取回了一部分記憶。他忍不住抱怨，明明腦中裝著無數學問，卻偏偏無法隨心所欲調用，實在令人惱火。不過他很快便說明了那枚結晶的來歷──那是一枚來自第五星曆時代的靈魂碎片，其中封存著古代十二城邦所創造的魔法與戰鬥技藝的幻影紀錄。</p><p>Archive 並不否認，現代的戰鬥方式很可能已經比他那個時代更加成熟精緻。但即便如此，他仍認為那些古老技藝並沒有失去價值，反而可能讓你在這座島上的行動得到新的助力。照理來說，他本想親自拿起這類靈魂碎片，與你並肩作戰。可惜封住他知識的那道限制依然存在，使他到現在仍無法真正觸及碎片裡封存的力量。那種明明看得見、卻碰不到的挫折感，在他語氣裡表露得十分明顯。</p><p>然而 Archive 很快又把注意力放回你身上。他認為，既然你是被這座島特地召來的人，那麼這枚靈魂碎片多半也會對你作出回應。從你踏上這座島開始，已經有太多事物只對你一人產生反應，這不可能只是巧合。於是他催促你，把這枚碎片裝備到身上試試看。當你照做之後，原本封存於其中的知識果然開始向你敞開，新的戰鬥道路也隨之展現在你面前。</p><p>透過這枚靈魂碎片，你得以接觸三種新的幻影職業：Phantom Knight、Phantom Monk，以及 Phantom Bard。這些並不是取代你原本力量的存在，而是只在 Occult Crescent 上才能運用的輔助戰鬥體系，並各自附帶專屬的幻影行動。在你真正選定其中之一之前，你會先以 Phantom Freelancer 的姿態站在起點上，彷彿正站在某種全新力量的門前。原本只是看似古怪的遺物，如今卻成了你在這座島上繼續前進的重要手段。</p><p>Archive 看著結果，顯得一點也不意外，甚至像是早就認定這枚靈魂碎片只會對你敞開。對他而言，這再一次證明了你被召喚到這座島上並非偶然。Ketenramm 則從更實際的角度看待這件事──如果那枚結晶裡真的封存著古老戰技的知識，那麼它勢必會成為你今後外出探索時的重要助力。這座島上的每一道謎團，似乎都在把你推向更深處；而現在連握在你手中的新力量，都像是在無聲地告訴你，從你踏上這片土地的那一刻起，就已經有某種更深的安排，在悄悄引領你前行。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Ketenramm <small class="muted">(南角, X:38.3, Y:7.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="unfamiliar-territory.html">派不上用場的使魔</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-ancient-arts-of-war.html">古代戰技</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
