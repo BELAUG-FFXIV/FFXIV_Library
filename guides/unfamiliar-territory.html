@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Unfamiliar Territory | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – Unfamiliar Territory (DT Patch 7.25)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/FvIV5K9Vp_w"
+              title="Unfamiliar Territory" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Unfamiliar Territory</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Unfamiliar Territory`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>As you continue speaking with Archive, the mystery surrounding the island only grows stranger. When he learns that Shades’ Triangle has claimed many ships over the years, he finds it entirely reasonable to assume that at least some of the sailors from those wrecks must have reached shore alive. What unsettles him most is not merely the passage of time, but the thought that no one ever came to wake him. Even after everything that has already happened, his bafflement remains sharp, and your lingering concern returns to the same unanswered detail as before: the strange voice that only you can hear.</p><p>Before that mystery can be pursued any further, a faerie suddenly appears and asks whether it is knowledge you seek. The moment catches all of you off guard. Ketenramm recognizes the creature as a familiar resembling the faeries once used by the scholars of Nym, while Archive immediately bristles at the suggestion that he might have summoned such a companion. The newcomer introduces herself as Iris, and what follows is less a meeting than a clash of tempers, with Archive’s pride and Iris’s sharp tongue colliding almost at once.</p><p>Yet beneath that bickering lies something far more important. Iris reveals that a seal has been placed upon Archive’s worldly knowledge, preventing him from freely using what he once knew. More than that, she explains that he can now speak only of things that you yourself have directly seen and learned. That revelation gives sudden shape to his confusion. It explains why his memory comes in fragments, why his knowledge seems incomplete, and even why the magic he tried to invoke for his own aching body failed him. The man who once defined himself through boundless learning now finds his understanding narrowed to the edge of your own experience.</p><p>Ketenramm presses Iris for answers, asking first after her master and then why she herself was summoned here, but she can provide no clearer explanation than Archive can. Even so, the encounter leaves behind one crucial truth. Archive senses that Iris is steeped in the same strange aether that permeates the island, and from that he concludes that a powerful ward covers the isle in its entirety. Suddenly the wrecks in the bay, the vanished ships, and the inescapable pull of this place begin to form part of the same pattern.</p><p>Ketenramm quickly reaches the grim conclusion that such a ward could not have appeared on its own. Someone must be responsible for the force that has trapped ships, claimed lives, and drawn your expedition here. That makes the search for the ward’s creator more urgent than ever, and the strange voice you alone continue to hear can no longer be dismissed as a separate oddity. It may be bound to the island’s secrets just as tightly as the ward itself.</p><p>For now, however, the expedition must move from speculation to action. Jeffroy reports that the advance party has already begun establishing a base camp for expeditions into the island’s southern reaches while the ship is unloaded and the support crew organizes the town behind you. A weaponsmith of great renown has also been hired to aid the venture. With preparations underway and the path ahead opening at last, the south horn of the Occult Crescent becomes accessible, and Iris is added to your Occult Record. Even amid the bustle of sailors and new arrangements, the sense remains that this island is watching, waiting, and withholding truths that you have only just begun to uncover.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Archive <small class="muted">(Phantom Village, X:6.1, Y:6.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-phantom-village.html">The Phantom Village</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="new-job-old-tricks.html">New Job, Old Tricks</a></div><div class="row"><a class="link" href="arcane-artistry.html">Arcane Artistry</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'使えない使い魔',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>アーカイブと語り合ううちに、この島をめぐる謎はますます深まっていく。シェード・トライアングルで幾隻もの船が消息を絶ってきたと知った彼は、難破船の乗組員のなかには島へたどり着いた者がいても不思議ではないと考える。だからこそ、なぜ誰ひとり自分を目覚めさせなかったのかという疑問が、彼の胸に強く引っかかっていた。長い眠りから覚めた今もなお、状況は理解しがたく、そしてあなたの意識には、相変わらず自分にだけ届くあの奇妙な声が残り続けていた。</p><p>その不可解さを追う間もなく、一体の妖精がふいに姿を現し、知識を求めるのかと問いかける。その登場に、その場の空気は一変する。ケテンラムは、その存在をかつてニームの学者たちが使役していた使い魔に似ていると見抜くが、アーカイブは自分がこんなものを呼び出したはずがないと即座に反発する。妖精はアイリスと名乗り、礼を欠いた口ぶりでアーカイブを言い負かしにかかる。誇り高い彼と遠慮のない彼女は、出会った瞬間から火花を散らすことになった。</p><p>だが、その言い争いの奥にこそ重要な事実が隠されていた。アイリスは、アーカイブの持つ世界の知識には封印が施されており、かつてのように自在には使えないのだと告げる。さらに今の彼は、あなた自身が見聞きしたことについてしか語れないのだという。その言葉によって、彼の記憶が断片的にしか戻らない理由も、知識の広がりが失われている理由も、そして自身の痛みを癒やそうとして魔法を使えなかった理由までもが、ひとつにつながっていく。あれほど博識を誇っていた存在が、今はあなたの経験の範囲に縛られているのだった。</p><p>ケテンラムはアイリスに対し、主人はどこにいるのか、なぜここへ呼び出されたのかと問いただす。だが彼女自身もまた、はっきりしたことは何も知らない。答えは得られなかったものの、ひとつだけ確かな手がかりは残った。アーカイブによれば、アイリスは島全体に満ちているものと同じ異質なエーテルをまとっていたという。その感覚から彼は、この島全土を覆う強力な結界の存在を確信する。湾に沈む難破船も、この島から逃れられなかった者たちも、すべてはその力に引き寄せられたのだと考えるほかなかった。</p><p>ケテンラムは、結界が自然に生じるはずはないと断じる。ならば、それを張った何者かがいるはずであり、その存在こそがシェード・トライアングルで命を落とした者たちの悲劇の原因なのだろう。そう考えれば、あなたにだけ聞こえ続けるあの声も、決して切り離しては考えられない。島の秘密を解くためには、その正体を突き止める必要があると、皆の思いはひとつになっていく。</p><p>とはいえ、遠征隊は立ち止まってばかりはいられない。ジェフロイからは、先遣隊がすでに島の南方へ向かうための拠点づくりを進めており、船の荷下ろしと並行して町には支援要員も配置されつつあると知らされる。さらに名高い鍛冶職人まで遠征に加わっているという。準備が整い始め、いよいよ探索の足場が築かれていくなかで、オカルトクレセントのサウスホーンは新たに踏み入れるべき地として開かれていく。そしてアイリスもまた、あなたの記録の一部として加わることになる。船乗りたちの喧騒に包まれながらも、この島がなお多くの真実を秘めたまま、静かにあなたたちを見つめているような感覚は消えなかった。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> アーカイブ <small class="muted">(蜃気楼の町, X:6.1, Y:6.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-phantom-village.html">無人の町</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="new-job-old-tricks.html">「サポートジョブ」の継承</a></div><div class="row"><a class="link" href="arcane-artistry.html">蜃気楼に包まれし武具</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'派不上用場的使魔',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>隨著你繼續向 Archive 說明事情的來龍去脈，這座島帶來的疑問不但沒有減少，反而越來越多。當他得知 Shades’ Triangle 多年來吞沒了無數船隻時，很自然地認為那些難破船上的水手之中，理應有人曾成功登上這座島。也正因如此，他才更加無法理解，既然可能有人活著來過這裡，為什麼始終沒有人試著喚醒沉睡中的他。就在這份困惑還未理清之際，你的思緒又一次回到同一個問題上──那道只有你能聽見的奇怪聲音，究竟來自哪裡。</p><p>下一刻，一名妖精突然現身，開口便問你們是不是在尋求知識。這個突如其來的出現，讓原本的困惑又添上新的變數。Ketenramm 一眼就覺得她像是古代 Nym 學者曾使用過的使魔，而 Archive 則立刻否認這是自己召來的東西，甚至嫌她一點也不夠體面。那名妖精自稱 Iris，語氣尖銳又毫不客氣，於是她與 Archive 幾乎在見面的瞬間就針鋒相對起來，誰也不肯退讓。</p><p>然而，在這場火藥味十足的爭執底下，真正重要的事很快浮現出來。Iris 指出，Archive 原本擁有的世間知識已經被某種封印限制住，因此無法像從前那樣自由取用。更奇特的是，他現在能夠說出口的內容，只限於你親眼見過、親耳聽過、親身得知的事物。這番話讓許多零散的現象一下子連成了線。為什麼他的記憶總是殘缺不全，為什麼他明明自詡博學卻又處處顯得受限，甚至連想替自己緩解身體疼痛的魔法都施展不出來，如今都終於有了解釋。曾經以知識為傲的他，現在竟只能沿著你的見聞去回想、去理解這個世界。</p><p>Ketenramm 沒有放過這個機會，立刻追問 Iris 她的主人究竟是誰，又為什麼會被召喚到這裡。可惜 Iris 自己也說不出明確答案。雖然沒有立刻得到真相，但這場相遇仍留下了一個關鍵線索。Archive 察覺到，Iris 身上纏繞著與整座島相同的異樣乙太氣息。由此他判斷，這座島從頭到尾都被某種強力結界覆蓋著，而海灣裡那些難破船，多半也是被那股力量拖進來，最終再也無法離開。</p><p>Ketenramm 很快便意識到，這種結界不可能憑空自行出現。既然如此，就一定有某個人，或某種存在，在背後操控著一切。Shades’ Triangle 中那些失蹤的船、葬身其中的人，以及你們這次被強行帶到這座島上的遭遇，很可能全都與那個看不見的施術者有關。到了這一步，你持續聽見的那道聲音，也不可能再被當成無關緊要的怪事。它極有可能與這座島的秘密緊緊相連。</p><p>不過，在更多答案浮現之前，遠征隊也必須先把眼前能做的事做好。Jeffroy 告訴你，先遣隊已經在為探索島嶼南側建立前線營地，船上的貨物也正同步卸下，留在鎮上的支援人員將負責後勤與補給。此外，遠征隊還聘來了一位名聲極高的武器匠人，之後也能協助整備裝備。隨著各項準備逐步到位，Occult Crescent: South Horn 也正式成為你接下來能夠展開探索的區域，而 Iris 則被加入 Occult Record，成為這趟異常旅程的新一頁。即使四周逐漸熱鬧起來，你仍能感覺到，這座島真正隱藏的東西，還遠遠沒有全部顯露出來。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Archive <small class="muted">(幻影村, X:6.1, Y:6.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-phantom-village.html">空無一人的城鎮</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="new-job-old-tricks.html">新職業，老把戲</a></div><div class="row"><a class="link" href="arcane-artistry.html">被蜃景包圍的奧術武具</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
