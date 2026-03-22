@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Timeworn Techniques | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – Timeworn Techniques (DT Patch 7.41)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/nEjZaPEDe_A"
+              title="Timeworn Techniques" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Timeworn Techniques</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Timeworn Techniques`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Lydirceil greets you warmly and is pleased to hear that your phantom weapon has served you well. Though neither she nor the expedition crew are meant for the heart of battle, she says there is still satisfaction in equipping a worthy adventurer like you. Even so, the next stage of enhancement cannot begin just yet. Gerolt has not gone idle, but neither has he set hammer to metal. Instead, he has been brooding over the problem, and she sends you to hear what he has been planning for yourself.</p><p>When you find Gerolt, he tells you he has no intention of letting your weapon stagnate now that he has mastered the ancient method from Archive’s stone tablet. He wants to push his craft further still and turn your phantom weapon into something truly fearsome. But he is equally certain that blind tinkering will only squander everything achieved so far. To avoid that, he has already asked the expedition’s archaeologist to search the old records for a technique worthy of the next step. Too deep in his cups to stomach a lecture on ancient theory, he leaves the meeting to you and sends you west to hear the report in his stead.</p><p>The archaeologist has indeed found three possible methods. The first is hexcarving, a Skallic art developed to alter dense stone through hammers imbued with many curses. The second is Karnak forgecraft, a technique from Karnak in which neutral blades are forged so they can later be infused with chimerical powers through the use of unaspected crystals. The third is a Mhachi method called aetheric conversion. Unlike the others, it appears to build directly upon the same principle that raised your weapon to its current form. Much of the inscription is damaged, but what remains suggests a technique that works not upon the weapon itself, but upon a tool used in the process. Though the final result is unclear, the required materials and procedure can still be read.</p><p>When you bring these findings back, Gerolt dismisses the first two without hesitation. Hexcarving, he says, may suit stone, but not a weapon as intricate as yours. Karnak forgecraft fares no better in his eyes, for he has no interest in producing some empty frame that must be dressed up afterward with borrowed magic. Only aetheric conversion earns his approval. Since it was inspired by aetheric infusion, he believes it is the only method truly compatible with the phantom weapon’s nature. If they can use it to enhance his hammer, then your weapon can be driven to still deadlier heights. Lydirceil remains uneasy about the gaps in the record, but Gerolt brushes the concern aside. The materials are clear enough, and that is all he needs.</p><p>Dodokkuli then reviews the notes and confirms what must be gathered: umbral clay, one lump each of aspected aether agglomerate, aspected aetheroconductor, and aspected aetherocatalyst, along with a great quantity of aether. The aether, he assures you, can be collected on the island by the expedition itself if given enough time. The burden placed on you is to secure the four physical ingredients. You do so and deliver them to Gerolt, who reveals that while you were away, an empty aetherwell was filled in preparation for the experiment. With everything finally ready, he asks for the notes and begins the work.</p><p>Following the instructions, Gerolt kneads the umbral clay until it becomes pliable, shapes it while combining it with the aspect additives, and then pours life-giving aether into the form. He recites the final words recorded in the notes, expecting some advancement of technique or tool. Instead, a strange little creature appears before all of you. Startled voices fill the room at once. Dodokkuli quickly identifies it as a voidsent of the kind commonly called a hecteye, though the being itself protests that this frail body is not its true form. Gerolt realizes that the clay vessel he shaped must merely be a makeshift body, one unsuited to whatever this creature once was.</p><p>The confusion deepens when the voidsent admits that it cannot remember what it was supposed to be and only wants to return home. Yet before it can depart, it makes one demand: if you want its services, it must be fed aether—much aether. You agree to form a pact, offering the power it craves in exchange for its aid. The creature senses the sweetness of your aether at once and accepts. With that bargain struck, the disaster becomes a path forward. Lydirceil can only conclude that if this summoning truly is part of the process, then the little voidsent’s real power must be awakened before Gerolt’s hammer can be enhanced. However strange the turn of events, you find yourself with yet another unsettling ally, and the next step in the weapon’s evolution now depends on it.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Lydirceil <small class="muted">(Phantom Village, X:6.6, Y:7.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="wrought-by-hands-phantasmal.html">Wrought by Hands Phantasmal</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="in-pursuit-of-perfection.html">In Pursuit of Perfection</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'最適な技術を求めて',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>リディルシールはあなたを迎え、ファントムウェポンの使い心地が良いと聞いて安堵する。自分たち遠征隊の面々は戦場の只中に立つ者ではないが、あなたのような立派な冒険者を支えることには確かなやりがいがあるのだという。もっとも、次の強化はまだすぐには始められない。ゲロルトは怠けているわけではなく、むしろ次の一手をずっと考え続けているらしい。詳しい話は本人から聞いてくれと、彼女はあなたを送り出す。</p><p>ゲロルトのもとを訪ねると、彼はアーカイブの石板に記されていた古代技法をものにした以上、このままあなたの武器を止まらせておく気はないと言う。さらに技を広げ、いまの武器を真に恐るべきものへ引き上げたいのだという。だが、明確な構想もないまま手を加えれば、これまで積み重ねてきた成果がたちまち霧のように消えてしまうとも考えていた。だからこそ彼は、遠征隊の考古学者に命じて、次の段階にふさわしい技法を古文書から探させていたのだという。もっとも、自分は酒が入りすぎていて、長々しい説明や小難しい理屈を聞く気分ではない。そこで、当事者であるあなたが代わりに話を聞きに行くことになる。</p><p>考古学者はすでに三つの有力な技法を選び出していた。ひとつ目は、ギラバニアの堅牢な石材を加工するために生まれたスカラの技法「呪刻彫り」で、数多の呪いを宿した槌によって素材そのものに構造変化を起こすというもの。ふたつ目は、カルナック由来の「カルナック鍛冶術」で、無属性の結晶を用いて、後からさまざまな力を宿せる中立的な武具を打つ技法。そして三つ目が、マハの「エーテル変換」だった。これは、いまのあなたの武器を成立させたエーテル注入の理に触発されて編み出された技法らしい。石板の損傷が激しく、結果そのものについては不明な点が多いが、武器ではなく道具のほうへ作用させる技術であり、必要な素材と手順だけは判読できるという。</p><p>その報告を持ち帰ると、ゲロルトは最初のふたつをほとんど即座に切って捨てる。呪刻彫りは石を相手にする技であって、複雑な構造を持つあなたの武器には向かない。カルナック鍛冶術もまた、ただの器だけを用意して後から魔力で飾り立てるようなやり方では、自分の求める武器にはならないという。だが、エーテル変換だけは違った。エーテル注入を源流に持つ技法ならば、いまのファントムウェポンとも高い親和性があるはずだと彼は見る。まずはその手法で自分の槌を強化し、その先にあなたの武器をさらに危険な領域へ押し上げるつもりだった。欠落した記述に不安を示すリディルシールに対し、ゲロルトは必要な素材と工程さえわかっていれば十分だと意に介さない。</p><p>続いてドドックリが手元の記録を整理し、必要なものを読み上げる。求められるのは、アンブラルクレイ、属性化エーテル凝集塊、属性化エーテル伝導塊、属性化エーテル触媒塊、そして莫大な量の乙太だった。ただし乙太そのものは、時間をかければ島で遠征隊が集められるという。あなたに任されるのは、四つの素材の調達だった。あなたはそれらをそろえてゲロルトへ渡し、そのあいだに彼らは空のエーテルウェルをひとつ満たし、実験の備えまで済ませていた。すべての準備が整い、いよいよ技法の再現が始まる。</p><p>記された手順どおり、ゲロルトはアンブラルクレイをこねて柔らかくし、そこへ属性添加材を混ぜ込みながら形を整えていく。さらに命を与える乙太を注ぎ込み、最後に記録の末尾にあった文言を唱える。だが、そこで現れたのは新たな鍛造の成果でも、槌の変化でもなかった。目の前にいたのは、見慣れぬ小さな存在だった。場は一気に騒然となり、ドドックリはそれを一般にヘクトアイズと呼ばれるヴォイドセントの一種だと見立てる。だがその存在は、自分は本来このように弱々しい姿ではなかったと否定する。どうやらゲロルトが作った粘土の器は、その本来の姿を受け止めるには不完全な代物だったらしい。</p><p>混乱のなか、そのヴォイドセントは自分が何者だったのかも思い出せず、ただ帰りたいとこぼす。だが立ち去る前に、もし自分の力を求めるのなら、対価として大量の乙太を寄越せと要求する。あなたはその申し出を受け、契約を結ぶ。あなたの乙太の甘美さを感じ取ったその存在は、力が満ちれば協力すると応じる。こうして思わぬ失敗は、新たな道筋へ変わる。これが本当にエーテル変換の一部なのだとすれば、まずはこの小さなヴォイドセントの真の力を解き放たなければならない。奇妙極まりない展開ではあったが、あなたは再び、武器強化のために不穏な力と手を組むことになった。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> リディルセイル <small class="muted">(蜃気楼の町, X:6.6, Y:7.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="wrought-by-hands-phantasmal.html">ファントムウェポンの強化</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="in-pursuit-of-perfection.html">正しき姿を求めて</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'尋覓最合適的古老技法',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Lydirceil 看到你前來，先是高興地問起你的 phantom weapon 用得是否順手。聽到你毫不猶豫地表示肯定後，她也露出滿足的神情，說雖然自己和遠征隊的人都不是適合站上激烈戰場的人，但能替像你這樣正直可靠的冒險者備妥裝備，本身就已經是一種值得珍惜的回報。只是，她也很快提到，下一次的強化還無法立刻開始。並不是 Gerolt 懶得動手，而是那傢伙最近像是一直在思考整件事的下一步。至於他到底盤算了什麼，Lydirceil 讓你直接去問本人。</p><p>當你找到 Gerolt 時，他果然立刻把話題拉回你的武器上。他說，自從掌握了 Archive 石板上的古老技法後，自己就一直想著如何進一步拓展手藝，讓你的武器蛻變成真正可怕的存在。可若沒有一個明確的方向，就貿然開始折騰，那麼之前好不容易累積起來的一切成果，很可能會像 conjurer 的把戲一樣轉眼消散。因此，他早已叫遠征隊裡的考古學者去翻查紀錄，想找出最適合下一階段的技法。只是現在的他喝了不只幾口 rum，實在沒心情去聽那些冗長的解說與術語，所以乾脆要你替他跑一趟，去西邊樓梯後那棟建築裡找那位考古學者。</p><p>那名考古學者已經整理好了結果，並且在 Archive 的協助下，挑出了三種看來可行的強化方式。第一種，是來自古代 Skalla 的「hexcarving」，原本是為了處理 Gyr Abania 那種極為堅硬的石材而誕生的技法，能藉由帶有多重咒術的鐵鎚，直接改變材料本身的結構。第二種，則是來自 Karnak 的「Karnak forgecraft」，其特點在於先打造出成分上完全中性的武器，再於後續注入各種不同的異質力量。至於第三種，則是 Mhach 的「aetheric conversion」。她說，這項技法最特別的地方在於，它本身就是受到「乙太灌注」原理的啟發而誕生的。雖然石板上的相關內容已經殘缺不全，無法得知最終成果會是什麼模樣，但至少可以確定，這項技術作用的對象並不是武器本身，而是工匠在過程中所使用的工具，而且所需材料與大致程序仍然清晰可辨。</p><p>當你把這些結果帶回去後，Gerolt 幾乎立刻否定了前兩種方法。在他看來，hexcarving 再怎麼適合敲打石頭，也不可能適用於像 phantom weapon 這樣複雜的造物；而 Karnak forgecraft 雖然聽起來巧妙，卻只像是在做一個空殼，之後再拿各種魔法裝飾上去，完全不是他想替你打造的東西。唯有 aetheric conversion，讓他真正起了興趣。正因為它的構想直接承襲自乙太灌注，所以他認定沒有哪個方法會比它更適合現在這把 phantom weapon。只要先把自己的鐵鎚用這種技法強化完成，他就能把你的武器進一步磨礪到更加致命的境地。Lydirceil 雖然仍對那些缺失的記述感到不安，Gerolt 卻毫不在意，認定只要材料和做法看得懂，就足夠往前推進。</p><p>接著，Dodokkuli 依照你帶回來的筆記，把所需材料一一整理出來。你們需要的是 umbral clay、一塊 aspected aether agglomerate、一塊 aspected aetheroconductor、一塊 aspected aetherocatalyst，以及大量的乙太。只不過，乙太本身不必再由你去奔波蒐集，因為只要給遠征隊足夠時間，他們就能在島上自行累積出需要的份量。你真正需要準備的，是前面那四樣具體材料。於是你依照安排把它們全部找齊並交給 Gerolt，而在你忙著往返市場與工房之間時，他們也早已另外填滿了一個空的 aetherwell，為接下來的實驗做好準備。等所有前置工作都就位後，Gerolt 便正式開始嘗試重現這門技法。</p><p>照著筆記上的程序，Gerolt 先把 umbral clay 揉成柔軟可塑的狀態，再將各種屬性添加材一邊混入，一邊替它塑形。接著，他又將「賦予生命的乙太」灌注進去，最後照著殘頁末尾記錄的句子把那段話唸了出來。可出現在你們眼前的，卻不是什麼強化過後的鐵鎚，也不是預期中的工藝成果，而是一個前所未見的奇怪存在。Lydirceil 當場驚叫出聲，Dodokkuli 則立刻判斷，那東西顯然是一種 voidsent，而且從外形推測，應該屬於俗稱「hecteye」的類型。然而，那個存在卻馬上否認，表示自己原本絕不是這麼孱弱的樣子。聽到這裡，Gerolt 也意識到，自己用黏土和材料拼湊出來的這副身體，多半只是個勉強成形的容器，根本不足以承載這名 creature 真正應有的姿態與力量。</p><p>事情到了這一步，混亂反而更深了。那名 voidsent 自己也說不清原本的模樣，只隱約知道這副身體讓它極不舒服，甚至只想立刻回家。可在它離開之前，Lydirceil 急忙叫住了它，不願讓整個計畫就這樣回到原點。這時，那個存在終於提出條件：如果你們還想要它的「服務」，那就必須給它乙太，而且是大量的乙太。面對這個要求，你選擇與它締結 pact，以你的力量作為交換，換取它日後的協助。那名 voidsent 很快就感知到你體內甜美的乙太，隨即答應，只要自身的力量恢復流動，就會成為你們的助力。於是，原本像是失控的實驗，反而變成了新的前進方向。若這真的是 aetheric conversion 的一部分，那麼在強化 Gerolt 的鐵鎚之前，你們首先得設法讓這個小小的 voidsent 取回真正的力量。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Lydirceil <small class="muted">(幻影村, X:6.6, Y:7.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="wrought-by-hands-phantasmal.html">幻影武器強化</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="in-pursuit-of-perfection.html">追求完美</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
