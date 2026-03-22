@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Past and Crescent | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – Past and Crescent (DT Patch 7.25)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/27HQTLT98-Q"
+              title="Past and Crescent" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Past and Crescent</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Past and Crescent`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Ketenramm and Archive ask you to press farther on, for the island has already revealed ruins of Amdapor, Nym, Mhach, and Skalla, and they believe still more lies hidden beyond them. The path forward is not simple, however. To continue, you must first unlock the relevant entries in the Occult Record, and only then can you return with news of yet another unexplored site. When you do, Archive urges you to recount everything you saw, and the moment you describe a towering structure of interlocking stairways, he feels the seal on his knowledge begin to crack further.</p><p>From your account, Archive identifies the ruin as a palace modeled after the city of Karnak. He speaks of its warriors with reverence, recalling their magnificent turbans, their arcane weaponry, and the strength with which they once upheld a mighty nation. Ketenramm admits he has never heard of Karnak and asks whether it was yet another civilization that flourished during the Fifth Astral Era. Archive confirms that it was, and adds with open regret that though Karnak once rivaled the twelve city-states in prestige and power, neither the nation nor its history endured the passing of ages.</p><p>When you ask how such a civilization met its end, Archive can offer no answer of his own. That knowledge was lost to him while he slept. Instead, he turns the question back upon Ketenramm and asks how the nations of the Fifth Astral Era were destroyed. Ketenramm answers without hesitation: the War of the Magi. The city-states turned their sorceries against one another, and the conflict consumed countless lives while throwing the land’s aether out of balance. In the end, a catastrophic flood rose and swallowed the nations whole. Archive hears this with visible pain, for even before his long sleep, there had already been voices warning against the reckless abuse of magic.</p><p>From there, the shape of the island’s purpose grows clearer. Ketenramm reasons that Karnak must have fallen either in that war or in the Sixth Umbral Calamity that followed, leaving only this fragment of its legacy behind on the Occult Crescent. Archive agrees, and at last says plainly what he now remembers: the architect of the island foresaw catastrophe and built these hollow monuments to preserve a piece of each nation. When Ketenramm demands to know who this architect was, the seal closes in again before Archive can name him. Searching for another way through, Archive proposes a dangerous course. Since Mhachi mages sealed pacts with voidsent in blood, and the architect may have raised the island’s voidsent in the same way, a contract taken from one of those creatures might restore more of his memory.</p><p>You follow that lead, confront one of the island’s powerful voidsent, and return with a blood-marked contract. The moment Archive sees it, he knows it bears the architect’s own blood, and the weakening seal finally gives way enough for the truth to emerge. The architect feared that something might be stolen, so he set voidsent to guard his monuments, while the island-wide barrier served the same purpose on a greater scale, hiding the isle, repelling intruders, and destroying those who reached it. Before Archive can finish explaining what was being protected, Iris cuts in and reveals the answer herself: the crystallized wisdom of mankind, forbidden knowledge powerful enough to threaten the very star, sealed away in the Forked Tower and preserved forever beyond easy reach. Ketenramm understands at once that the architect could not bear to lose such knowledge, yet feared even more what might happen if it fell into the wrong hands. When Archive asks whether the knowledge in that tower stirs your interest, you answer that your only wish is to keep it from misuse. Archive then reveals that there are two towers on the isle, one in the south and one in the north, and judges that the northern Tower of Magic is the more likely refuge of a mage capable of raising such a ward. Yet before plans can settle, Ofangeim arrives with new word from the scouts: when strange auroras light the sky, a western tower appears, and an aetherial node on Heathcliff may carry you inside. If you wish to know what lies within the Tower of Blood, you must investigate it yourself and then return to the phantom village to tell Ketenramm what you have learned.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Archive <small class="muted">(South Horn, X:38.8, Y:7.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-common-thread.html">A Common Thread</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="mysteries-abide.html">Mysteries Abide</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'断絶した文明',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ケテンラムとアーカイブは、あなたにさらに奥へ進むよう求める。これまでにアムダプール、ニーム、マハ、そしてスカラの遺構が見つかっており、この島にはまだ別の文明の痕跡が隠されているはずだというのだ。だが先へ進むには、まず「オカルトレコード」の該当記録を解放しなければならない。そうして新たな未踏の遺跡を見つけたあなたが戻り、その光景を語り始めると、幾重にも組み合わさった階段を持つ巨大な建造物の話を聞いた瞬間、アーカイブは封印がさらに崩れ始めるのを感じ取る。</p><p>あなたの話から、アーカイブはその遺跡を「カルナック」の都を模した宮殿だと見抜く。彼は、見事なターバンをまとい、魔法の武具を備えた勇敢な戦士たちの国だったと、どこか懐かしむように語る。ケテンラムは「カルナック」という名を聞いたことがなく、それもまた第五霊災時代に栄えた文明のひとつなのかと問う。アーカイブはそれを認め、かつては十二都市国家にも劣らぬ威光と力を持っていたにもかかわらず、その国も歴史も時代の流れのなかに消え去ってしまったのだと、悔やむように口にする。</p><p>あなたが、その文明はいかにして滅びたのかと尋ねても、アーカイブ自身には答えられない。彼が長い眠りに沈んでいたあいだに失われた知識だからだ。そこで彼は問いを返し、第五霊災時代の諸国がどのような終焉を迎えたのかをケテンラムに尋ねる。返ってきた答えは「魔大戦」だった。都市国家同士は互いに魔法を向け合い、その戦いは数えきれない命を奪うだけでなく、大地のエーテルの均衡をも破壊した。そして最後には破滅的な大洪水が起こり、国々はことごとく呑み込まれたのだという。アーカイブは、その話を苦い思いで受け止める。彼が眠りにつく以前から、魔法の濫用を危ぶむ声は確かにあったのだから。</p><p>こうして、島の目的は少しずつ輪郭を帯びていく。ケテンラムは、カルナックもまた魔大戦か、それに続く第六霊災によって滅び、このオカルトクレセントに残された遺構だけが最後の名残なのだろうと推し量る。アーカイブもそれに同意し、ついに思い出したことを語る。この島の建築主は、迫り来る破滅を予見し、各国の一側面を保存するために、空ろな記念碑のような遺構を築かせたのだという。だがケテンラムが、その建築主はいったい何者なのかと問い詰めたところで、封印は再び肝心な記憶を閉ざしてしまう。そこでアーカイブは別の突破口として、危険ではあるがヴォイドセントとの契約書を探すよう提案する。マハの魔道士たちは血によってヴォイドセントと契約を結んでいた。もし島の建築主も同じやり方で島のヴォイドセントを使役していたなら、その契約書こそが記憶を取り戻す鍵になるはずだというのだ。</p><p>あなたはその手掛かりを頼りに強力なヴォイドセントを討ち、血に染まった契約書を持ち帰る。アーカイブはそれを見るなり、そこに島の建築主自身の血が使われていることを見抜き、封印がさらに緩んだことで、ついに真相を語れるようになる。建築主は、何かが奪われることを恐れていた。だからこそ遺構には番人としてヴォイドセントを置き、さらに島全体を覆う結界によって蜃気楼を映し、外からの接近を退け、たどり着いた者すら死へ追いやっていたのだ。だが、いったい何をそこまで守ろうとしたのかという答えを、アーカイブが口にするより早く、イリスが割って入る。守られていたのは、人の叡智を結晶の形で封じた禁断の知識であり、星そのものを脅かしかねないほどの力を秘めたものだという。それは「フォークタワー」に封じられ、保存されながらも、決して容易には届かぬようにされていた。ケテンラムは、建築主が失われゆく知識を惜しみながらも、それが誤った手に渡ることを何より恐れていたのだと悟る。やがてアーカイブは、島には南の「血の塔」と北の「魔の塔」という二つの塔があると明かし、島全体に結界を張れるほどの魔道士なら北の塔にいる可能性が高いと見る。だがその矢先、オファンゲイムが斥候からの報せを携えて駆け込んでくる。空に奇妙なオーロラが現れる時だけ、西方に塔が姿を現し、ヒースクリフの離れたあずまやには、その塔へ送ってくれるエーテルノードが出現するというのだ。もし「血の塔」の内側に何があるのか知りたいのなら、あなた自身が足を踏み入れて確かめるしかない。そしてその後、蜃気楼の町へ戻り、ケテンラムに見聞きしたすべてを伝えることになる。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> アーカイブ <small class="muted">(三日月島南部, X:38.8, Y:7.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-common-thread.html">見えない共通項</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="mysteries-abide.html">蜃気楼、いまだ消えず</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'過去與新月島上斷絕的文明',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Ketenramm 和 Archive 要你繼續往更深處探索。到目前為止，你們已經看過 Amdapor、Nym、Mhach 與 Skalla 的遺跡，而他們相信，這座島上一定還藏著完全不同的其他遺構。不過，要推進這件事，你得先解開 Occult Record 裡相關的記錄，之後才能真正帶回新的發現。當你再度返回，把自己在未探索遺跡中看見的一切說出口時，Archive 聽見那座由層層交錯階梯組成的高聳建築，立刻感覺到束縛自己知識的封印又鬆動了一些。</p><p>根據你的描述，Archive 判定那是一座仿照 Karnak 城市樣貌建造的宮殿。他說起 Karnak 時，語氣裡帶著清楚的敬意，提到那裡的戰士曾戴著華麗頭巾，配備各種帶有魔法力量的武器，以強盛的武力支撐起一個強大的國度。Ketenramm 坦白說自己從未聽過 Karnak，於是追問那是否也是一個曾在第五星曆時代繁盛的文明。Archive 回答是，而且帶著明顯惋惜補充，Karnak 當年在聲望與國力上都足以與十二城邦並列，只可惜無論是這個國家本身，還是它的歷史，最後都沒能熬過漫長歲月的流逝。</p><p>當你進一步問起那樣的文明究竟是如何滅亡時，Archive 卻無法回答。那段知識發生在他漫長沉睡之後，對現在的他而言依舊是一片空白。於是他反過來詢問 Ketenramm，第五星曆時代的諸國究竟是如何迎來終結。Ketenramm 給出的答案十分明確，那就是 War of the Magi。正如這場災禍的名字所揭示的那樣，城邦彼此把魔法當成武器對準對方，那場衝突不僅奪走了無數生命，也徹底破壞了大地乙太的平衡，最終引來毀滅性的洪水，將那些國家一口氣全部吞沒。Archive 聽完後顯得格外沉重，因為在他沉睡之前，早已有人對魔法被毫無節制地濫用發出過警告，而那些警告終究還是沒有被聽進去。</p><p>隨著這些線索逐漸拼湊起來，這座島真正的用途也開始浮現輪廓。Ketenramm 推測，Karnak 多半也是在 War of the Magi，或是之後的第六靈災之中毀滅，而如今留存在 Occult Crescent 上的，就只剩下這些遺跡作為殘存的痕跡。Archive 同意這個推論，並終於說出自己想起來的重點：這座島的建造者早已預見災難將至，因此才打造出這些空洞卻帶有象徵性的遺構，想要替每一個國家保留某一部分面貌。可當 Ketenramm 追問那名建造者究竟是誰時，封印又一次把最關鍵的記憶壓了回去。為了找出新的突破口，Archive 提出一個相當危險的辦法。他說，Mhach 的魔道士在召喚 voidsent 時，往往會以鮮血簽下契約；若這座島的建造者也是用同樣的方式操控島上的 voidsent，那麼從那些存在身上找到契約書，也許就是讓更多記憶解封的最好方法。</p><p>你照著這條線索行動，擊敗了一名強大的 voidsent，並把找到的契約書帶回來。Archive 一看見那份契約，立刻確認上頭沾著的正是這座島建造者本人的血，而隨著封印再次削弱，更多真相也終於得以說出口。那名建造者害怕有什麼東西會被奪走，因此才讓 voidsent 擔任這些遺構的守衛；而包覆整座島的魔法障壁，顯然也是同樣的防衛手段，用來投映幻影、排斥一切接近者，甚至讓那些勉強登島的人迅速走向毀滅。就在 Archive 要說出建造者究竟想如此拼命保護什麼時，Iris 卻搶先一步揭開答案，那是以結晶形式保存下來的人類智慧，是強大到足以威脅整顆星球的禁忌知識。那些知識被封存在 Forked Tower 裡，被好好保存，卻也永遠被隔絕在輕易無法觸及的地方。Ketenramm 聽完後立刻明白，建造者無法接受那些知識徹底消失，卻又比任何人都更害怕它落入錯誤的人手中。之後 Archive 又告訴你，島上其實有兩座塔，一座是南方的 Tower of Blood，另一座則是北方的 Tower of Magic；若要找那位有能力替整座島施加結界的魔道士，他多半就在後者之中。只是還沒等你們真正擬定下一步，Ofangeim 便帶著斥候的新消息趕來，說每當天空出現奇異極光時，西邊就會顯現出一座塔，而在 Heathcliff 那座孤立的亭子裡，也會同時出現一個可以把人送進塔內的乙太節點。若你想知道 Tower of Blood 之中究竟藏著什麼，就只能親自前往調查，之後再回到 Phantom Village，把一切告訴 Ketenramm。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Archive <small class="muted">(南角, X:38.8, Y:7.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-common-thread.html">彼此之間看不見的共通之處</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="mysteries-abide.html">謎團仍在</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
