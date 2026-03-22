@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A Common Thread | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – A Common Thread (DT Patch 7.25)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/y34B1doTzwA"
+              title="A Common Thread" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">A Common Thread</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`A Common Thread`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>After your survey of the island’s ruins, you return to Archive, and he immediately sees from your expression that you have found exactly what he asked for. When you describe the three distinct sites, his reaction is swift and certain. The coastal ruins, with their rounded forms, are unmistakably Nymian to him, so familiar that he recognizes in them the style of his own birthplace. The immense pyramid overrun by voidsent fits Mhachi design just as clearly, while the chambers carved directly into stone bear all the marks of Skalla. What first seemed like scattered remnants of unrelated civilizations now begins to take on a more deliberate shape.</p><p>Archive explains that Nym, Mhach, and Skalla all flourished during the Fifth Astral Era, and Ketenramm quickly offers a theory of his own. Perhaps, he suggests, once those nations discovered the island and its rich reserves of aether, they began competing for control, raising monuments and structures to stake their claims. Archive refuses to let that thought stand uncontested, joking that since he had been sleeping there long before any of them arrived, his own claim should outrank them all. Yet once the moment of humor passes, he offers a more serious possibility: the monuments were likely built not by rival city-states themselves, but by the master of Iris and that master’s familiars, just as with the first structure you had investigated.</p><p>With that in mind, Archive sends you out once more. If you can bring back aether-imbued stone from each of the ruins, he believes the seal that limits his knowledge may weaken further. Ketenramm agrees that the island is strewn with remnants of the Fifth Astral Era, and while you now have more certainty about what these places are and when they were made, the deeper reason behind their presence here remains frustratingly out of reach. So you continue your search, pressing farther into the island in hopes that the answers hidden there can finally be drawn into the light.</p><p>When you return with the stones from the Wanderer’s Haven, the Crystallized Caverns, and the Shadowed City, Archive receives them with obvious delight. The moment he examines them, he feels the seal begin to crack and weaken. That change confirms what he had already suspected: every ruin you have explored was created at the command of a single person. The island’s many styles are not proof of competing powers after all, but traces of one will expressed through many forms. Even so, the full explanation still sits just beyond his grasp.</p><p>Archive then asks what impression the island left on you as you traveled through its wilds, and when you answer that it feels like a vast, unreachable, and deeply dangerous museum, both he and Ketenramm pause on the thought. Ketenramm admits that you may have grasped something important. If the island’s purpose is indeed preservation, then perhaps all these ruins were meant to protect the legacy of the Fifth Astral Era for ages yet to come. But that only sharpens the next mystery: if preservation was the goal, why hide such a place on a tiny island so far from the mainland, where almost no one could ever reach it?</p><p>That question strikes at the heart of the matter. Archive says that isolation may have been exactly the point—that whoever built this place did not want visitors. Yet just as he nears the answer, the limits of the seal close around his thoughts again, and the missing knowledge slips from him before he can speak it aloud. Frustrated but undeterred, he turns to you once more. Since his own memories remain chained, he asks you to keep exploring ever farther into the unknown ruins of the isle, believing that with each new discovery, the locked flood of his knowledge will finally begin to return.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Archive <small class="muted">(South Horn, X:38.8, Y:7.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-ruined-land.html">A Ruined Land</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="past-and-crescent.html">Past and Crescent</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'見えない共通項',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>島の遺跡を調べ終えたあなたがアーカイブのもとへ戻ると、彼はその表情を見るなり、求めていただけの成果を得てきたのだと察する。あなたが三つの異なる遺構について語ると、彼の反応は迷いなく鋭かった。海辺に築かれた丸みを帯びた建造物群は、まぎれもなくニーム様式であり、自らの故郷の造りとしてすぐに見分けがつくという。ヴォイドセントに侵食された巨大なピラミッドはマハの技術によるもの、そして岩そのものをくり抜いて作られた広大な空間はスカラの意匠に一致していた。ばらばらに見えていた遺跡群は、ここで初めて歴史の流れの中へと結びつき始める。</p><p>アーカイブは、ニーム、マハ、そしてスカラはいずれも第五霊災時代に栄えた都市国家だったと説明する。それを受けてケテンラムは、この島に満ちる豊かなエーテルを目当てに、各都市国家がこの地を見つけたのち支配権を争い、己の領分を示すために記念碑のような建造物を築いたのではないかと推測する。だがアーカイブは、そんな話なら自分こそ誰より早くこの島で眠っていたのだから、もっとも強い権利を持つはずだと冗談めかして言い返す。そして笑いを引っ込めると、より本気の見立てを語り始める。これらの建造物を造らせたのは、それぞれの都市国家ではなく、イリスの主人とその使い魔たちではないかというのだ。最初にあなたが調べた遺構と同じように。</p><p>その可能性を確かめるため、アーカイブはあなたに再び遺跡へ向かうよう求める。それぞれの場所から、エーテルを宿した石を持ち帰ってほしいというのだ。それによって、自らの知識を封じている封印がさらに弱まるかもしれないと考えていた。ケテンラムもまた、この島には第五霊災時代の遺構が数多く散らばっていると口にする。何があり、いつ築かれたのかは少しずつ見えてきたが、なぜそれらがこの島に集められているのかという肝心の理由だけが、なおも霧の中に残されていた。そうしてあなたは、答えへ近づく手掛かりを求めて、さらに探索を続けることになる。</p><p>やがてあなたは、さすらい人の庵、結晶洞窟、そして影に沈む都で見つけたエーテルを帯びた石を携え、アーカイブのもとへ戻る。彼はそれらを受け取るなり、封印が確かにほころび、崩れ始めているのを感じ取る。その反応は、彼の推測が正しかったことを裏づけていた。あなたが巡ってきた遺跡は、どれもひとりの人物の意志によって築かれたものだったのだ。多様な文化様式が並び立っているのも、複数の勢力が競い合った痕跡ではなく、ひとつの意思が多彩な姿を借りて形になった結果なのだと考えられた。</p><p>そこでアーカイブは、島を巡るなかであなたが何を感じたのかを尋ねる。あなたが、この島は近づきがたく危険に満ちた巨大な博物館のようだったと答えると、ケテンラムもその印象には一理あると頷く。もしこの島の役割が保存にあるのだとすれば、それは第五霊災時代の遺産を後の世まで残すための場所だったのかもしれない。だがその考えが浮かんだことで、むしろ別の疑問がいっそう強くなる。遺産を残すことが目的なら、なぜ人目につかぬこの小さな孤島に、それも本土から遠く隔てられた場所に築く必要があったのかという疑問だった。</p><p>その問いこそが真実の核心に迫っていた。アーカイブは、まさにそこが重要なのだと語る。つまり、この場所を築いた者は、誰にも訪れてほしくなかったのではないかというのだ。だが答えに届きかけたその瞬間、封印の制約が再び彼の知識を押しとどめ、肝心な記憶は言葉になる前に閉ざされてしまう。悔しさをにじませながらも、彼は歩みを止めようとはしない。自分の知識がまだ鎖につながれている以上、さらに奥の未踏の遺跡を探ってほしいと、再びあなたへ託す。新たな発見を積み重ねていけば、封じられた知識の奔流も、いずれ再びあふれ出すはずだと信じながら。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> アーカイブ <small class="muted">(三日月島南部, X:38.8, Y:7.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-ruined-land.html">島内に佇む古城</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="past-and-crescent.html">断絶した文明</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'彼此之間看不見的共通之處',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>在你調查完三處風格明顯不同的遺跡後，Archive 一看到你的神情，就知道你確實帶回了值得一聽的發現。當你描述那些遺跡時，他幾乎立刻做出判斷。海岸邊那些帶著圓潤結構的建築，毫無疑問出自 Nym 的風格，那種形式讓他一眼就認出那是自己故鄉的建築語言；被 voidsent 盤踞的巨大金字塔，則明顯屬於 Mhach 的工程造物；至於直接從岩層內部開鑿出的巨大空間，則與 Skalla 的設計一致。原本只是零散分布在島上的遺跡，到了這一刻，終於開始顯露出能彼此連接的歷史脈絡。</p><p>Archive 接著說明，Nym、Mhach 與 Skalla 都是第五星曆時代曾經繁盛一時的城邦。聽到這裡，Ketenramm 提出一個推測：也許是那些城邦發現了這座島與島上充沛的乙太之後，開始彼此爭奪控制權，於是建起各種紀念性建築與地標，好宣示自己對這座島的主張。Archive 當場打趣反駁，說如果真要論主張，那自己早在其他人到來之前就已經在這座島上沉睡，當然才是最有資格聲稱擁有這裡的人。不過在玩笑收起之後，他又提出一個更值得深究的可能性：這些遺跡未必是那些城邦各自建立的，而更可能是 Iris 的主人，以及那位主人的使魔們所打造的，就和你最先調查過的那座遺構一樣。</p><p>帶著這個想法，Archive 要你再一次返回那些遺跡，從每一處帶回一塊蘊含乙太的石頭給他。他相信，只要蒐集到那些東西，封鎖他知識的封印就有可能進一步鬆動。Ketenramm 也認同，這座島上到處都是第五星曆時代留下的遺跡。現在你們對「這些東西是什麼」以及「它們來自什麼時代」已經有了更多把握，可最關鍵的「為什麼會集中出現在這座島上」，卻依舊沒有答案。於是你只能再次出發，繼續深入這座島，試著把那個始終懸而未解的理由找出來。</p><p>之後你帶著從 The Wanderer’s Haven、Crystallized Caverns 與 Shadowed City 取得的乙太石回到 Archive 面前。他接過那些石頭後，立刻感受到封印正在削弱、崩解。那樣的反應，也讓他的推測獲得印證──你所探索過的每一處遺跡，都是在同一個人的指示下建造的。這座島上呈現出的多種文化風格，並不是不同勢力彼此角力後留下的結果，而更像是一個意志透過不同形式所留下的痕跡。只是即便如此，整件事最核心的理由，仍然還差最後一段記憶才能真正拼湊完整。</p><p>Archive 接著反問你，在島上穿行探索時，你對這個地方有什麼感受。當你回答說，這裡像是一座巨大、難以靠近、而且危險得驚人的博物館時，Ketenramm 也覺得這個說法很可能抓到了重點。如果這座島真正的用途是保存某些東西，那麼它或許就是為了把第五星曆時代的遺產留存下來，讓那些事物不會隨歲月徹底消失。然而這樣的理解，反而又把另一個問題推得更加鮮明──若目的真是保存，為什麼要特地把這些東西放在離最近港口都相當遙遠的小島上，而不是設在更容易被人看見、也更方便往來的大陸上？</p><p>而這個問題，正好碰觸到整座島最大的祕密。Archive 說，這正是關鍵所在──建造這裡的人，也許從一開始就不希望有人前來造訪。可惜他才剛要說出理由，封印便再次壓住了那段知識，使答案在出口之前又一次被硬生生截斷。即使如此，他並沒有就此停下，而是再度把希望寄託在你身上。既然自己的記憶還被鎖住，就只能靠你繼續深入探索那些尚未踏足的遺跡。只要你帶回更多發現，他相信自己那座被囚禁的知識之泉，終究會重新湧流而出。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Archive <small class="muted">(南角, X:38.8, Y:7.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-ruined-land.html">佇立於荒土之上的古城</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="past-and-crescent.html">過去與新月島上斷絕的文明</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
