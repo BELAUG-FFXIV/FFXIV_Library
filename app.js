@@ -417,7 +417,7 @@ const i18n = {
     tagline: `<b>FFXIV Library</b> is an extension of my YouTube channel.<br>
 Here you’ll find additional story details — quest records, background notes, and elements that couldn’t be fully shown in each video.<br>
 Every entry also has a message board where you can share your thoughts and connect with fellow travelers.<br>
-If you enjoy your time here, feel free to visit <a href="https://ko-fi.com/belaug" target="_blank" rel="noopener">Ko-fi</a> and buy me a cup of coffee — a small resting spot along the journey. ☕`,
+,
     searchPH: 'Search title, series, tags, chapter…',
     itemsSuffix: 'items',
     sortOptions: [
@@ -475,7 +475,7 @@ If you enjoy your time here, feel free to visit <a href="https://ko-fi.com/belau
     tagline: `<b>FFXIV Library</b> は、私の YouTube チャンネルを補完する資料館です。<br>
 映像だけでは伝えきれない物語の細部──クエスト記録や背景設定などをここに収めています。<br>
 各ページにはメッセージボードもあり、感じたことを旅人同士で共有できます。<br>
-もしこの場所を気に入っていただけたなら、<a href="https://ko-fi.com/belaug" target="_blank" rel="noopener">Ko-fi</a> でコーヒーをごちそうください。旅の途中の小さな休憩所として。☕`,
+,
     searchPH: 'タイトル・シリーズ・タグ・章… を検索',
     itemsSuffix: '件',
     sortOptions: [
@@ -533,7 +533,7 @@ If you enjoy your time here, feel free to visit <a href="https://ko-fi.com/belau
     tagline: `<b>FFXIV Library</b> 是我 YouTube 頻道的延伸資料館。<br>
 這裡收錄了更多在影片中無法完整呈現的內容──任務紀錄、背景資料與細節補充。<br>
 每部影片下方也設有留言板，歡迎留下你的想法與感受，與其他旅人一同分享。<br>
-若你喜歡這裡的內容，也歡迎到 <a href="https://ko-fi.com/belaug" target="_blank" rel="noopener">Ko-fi</a> 請我喝杯咖啡，就當作旅途中一個小小的休息站。☕`,
+,
     searchPH: '搜尋標題、系列、標籤、章節…',
     itemsSuffix: '項內容',
     sortOptions: [
