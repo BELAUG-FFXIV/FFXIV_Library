@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A Phantom Reborn | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – A Phantom Reborn (DT Patch 7.41)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/AXXE1hbQgy4"
+              title="A Phantom Reborn" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">A Phantom Reborn</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`A Phantom Reborn`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Gerolt cannot even look at Brigid without Rowena’s face flashing through his mind like a curse he cannot shake. The thought that some portion of this success was made possible through that woman only deepens his irritation. Brigid, however, is unmoved by his resentment. Though she considers her part of the bargain fulfilled, she asks to remain a little longer, curious to see what shape your weapon will take once this latest process is complete.</p><p>Lydirceil wastes no time dwelling on the past. Thanks to everything you have endured, the experiment with aetheric conversion has succeeded beyond expectation, and now it is finally time for Gerolt to do what only he can do. The surveyors have already unearthed a new ore—waning arcanite—and Gerolt insists that three chunks will be needed for the next enhancement. As expected, that means dealing with Ermina once again. Once you obtain the ore, you are told to hand it to Dodokkuli so the first stage of processing can begin without delay.</p><p>Even as preparations move forward, Gerolt cannot resist remarking on the absurdity of what brought him here. To improve upon perfection, it seems, one must summon a voidsent and gather impossible amounts of aether. Brigid dryly observes that voidsent seldom act without compensation worthy of their efforts, and that this so-called House of Splendors appears to follow much the same principle. You secure the waning arcanite regardless and place it in Dodokkuli’s hands, and he eagerly prepares it for the moment when Gerolt’s reborn hammer will finally be tested in earnest.</p><p>When that moment comes, Gerolt is struck at once by the force radiating from the hammer. The power coursing through it feels utterly unlike anything he has known before—something alien, almost otherworldly—and he laughs as he sets it to work. Under that transformed hammer, your weapon changes again, so seamlessly reborn that its new form seems as though it had always been meant to exist. What emerges is your Phantom Obscurum Weapon, a manifestation of the void’s frightening power made complete through craft, aether, and will.</p><p>Yet even in the wake of that success, Gerolt cannot fully rejoice. There is unease in him, a feeling that this triumph does not wholly belong to his own hands. The power reminds him of a voidsent draining life from another, and he confesses that the result feels as though it was taken rather than earned. Brigid immediately rejects that doubt, reminding him that whatever force flowed through the process, it was still his hand that wielded the hammer with such mastery. Archive, listening in delight, notes that using voidsent to strengthen one’s tools sounds curiously familiar, and recalls that aetheric conversion was once a Mhachi innovation. To him, it is heartening to see ancient knowledge brought forth once more.</p><p>That praise for the past leaves Gerolt thoughtful rather than pleased. He has no quarrel with the old ways, and readily admits their worth, but he bristles at the idea that only ancient masters deserve remembrance. Surely, he says, his own god-given skill has earned its place as well. When you answer that his talent and their wisdom together make a force beyond compare, the tension in him breaks. He realizes this is not a contest between past and present after all. What matters is joining the best of modern craft with the strength of forgotten knowledge. With that thought settled, he declares that it is time to build something entirely new upon the foundation those ancient techniques have given him.</p><p>The mood shifts when Archive turns from philosophy to his latest success at the shore. He proudly announces that he has hooked a monstrous fish, only for the conversation to veer into speculation over why such a creature appeared as it did. Archive suspects the island’s ward granted it a crude magical glamour, making it seem much larger than it truly was for the sake of survival. Gerolt, far less interested in theory, would rather open a bottle and eat the fillets while they are fresh. Archive, however, has grander ambitions. Rather than settle for the fish as it is, he proposes sharpening his blade and fusing its essence with the island’s aether to enlarge the catch itself. Brigid refuses outright, unwilling to spend her power on something she finds revolting. Archive, deeply offended, vows to devise his own solution, while Gerolt can only sigh that he would have been satisfied with an ordinary slice of fish. Still, whether the task ahead involves deadly weapons or battered old cleavers, he makes one thing plain: you know exactly where to find him.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Lydirceil <small class="muted">(Phantom Village, X:6.6, Y:7.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-pursuit-of-perfection.html">In Pursuit of Perfection</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="to-be-continued.html">To be continued</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'ファントムウェポンの新生',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ゲロルトは、ブリギッドの姿を見るたびに、まるで呪いのようにロウェナの顔が脳裏をよぎるとぼやく。この成果の一端に、あの女の存在が関わっていると思うだけで、傷口に塩を塗られるような気分になるのだ。だがブリギッドは、その苛立ちを意に介さない。契約上の義務は果たしたつもりではあるものの、最後にあなたの武器がどのような姿へ至るのか見届けたいとして、もうしばらくこの場に留まることを望む。</p><p>リディルシールは、余計な感傷に浸ることなく話を先へ進める。あなたの尽力によってエーテル変換は見事に成功し、あとはゲロルトが己の役目を果たして打ち上げる番だという。調査隊はすでに新たな鉱石――ウェイニング・アルカナイトを掘り出しており、次の強化にはその鉱石を三つ要するとゲロルトは見込んでいた。手に入れるには、案の定エルミナのもとへ赴かねばならない。必要な鉱石をそろえたら、まずはドドックリへ渡し、下準備を任せることになる。</p><p>準備が進むなかでも、ゲロルトはこの状況の異様さを皮肉らずにはいられない。完璧をさらに超えるには、ヴォイドセントを呼び出し、途方もない量の乙太までかき集めねばならないらしい。ブリギッドは、ヴォイドセントとは相応の報酬なくして動かぬものだと冷ややかに語り、この「スプレンダーズ商会」とやらも似たような理屈で動いているようだと評する。そうしてあなたはウェイニング・アルカナイトを集め、ドドックリへ託す。彼は、ゲロルトの生まれ変わった槌がついに本格的に振るわれる時を楽しみにしながら、鉱石の処理に取りかかる。</p><p>やがてその時が訪れると、ゲロルトは自らの槌から放たれる力に息を呑む。そこからあふれ出す気配は、これまで感じたどんな力とも異なり、まるで異界そのもののようだった。だが彼はその異質さすら笑い飛ばし、ためらいなく作業へ入る。その生まれ変わった槌のもとで、あなたの武器は再び姿を変えていく。あまりに自然な変化ゆえに、まるで最初からその形であったかのようにすら思える。そしてついに現れたのが、ファントム・オブスキュラムウェポン――ヴォイドの恐るべき力が、技と乙太と意志によってひとつの武器として結実した姿だった。</p><p>それでも、成功を前にしたゲロルトの胸には、晴れきらぬものが残る。たしかに成し遂げはしたが、この成果は本当に自分のものと言えるのか。まるでヴォイドセントが誰かの生命力を奪うように、この力もまた自分の手で勝ち取ったというより、借り受けたもののように思えてならないのだ。そんな迷いを、ブリギッドはすぐさま退ける。どれほど異質な力が働こうとも、槌を振るい、その力を形にしたのはゲロルト自身だと告げる。傍らで聞いていたアーカイブも、ヴォイドセントの力で道具を強める発想に覚えがあると楽しげに語り、それがかつてマハで生まれたエーテル変換の技法であったことを思い出す。古の知識が再び前面へ現れたことを、彼は心から喜んでいた。</p><p>だが、過去の偉業を称える言葉は、ゲロルトの胸に別の思いも呼び起こす。古き技法の価値を認めぬわけではない。むしろ、それを真っ先に擁護するのは自分だとさえ言う。だが、その一方で、自らの腕前もまた歴史に刻まれるだけの価値があるはずだという思いを隠せない。そこであなたが、彼の技と古の知恵が結びついた今こそ比類なき力なのだと答えると、ゲロルトの中で張っていたものがふっと解ける。これは過去と現在の優劣を争う話ではない。現代の技術の良さと古代の知恵の強みを掛け合わせてこそ、新たな進歩が生まれるのだと、彼はついに得心する。そして失われた技法をただ継承するだけではなく、その土台の上にまったく新しいものを築き上げると宣言する。</p><p>そんな話のあと、アーカイブは一転して海辺での成果を誇らしげに語り出す。自分はとてつもない大物を釣り上げたのだと言い、その奇妙な魚のありようについて考察まで始める。どうやら島の守りがその生き物に簡素な幻惑の力を与え、実際よりもはるかに大きく見せていたのではないかというのだ。ゲロルトは理屈よりも、さっさと酒を開けて新鮮な切り身を食いたいとこぼす。だがアーカイブはそれでは満足しない。魚そのものをより大きな姿で味わうために、自分の刃を研ぎ、その本質を島の乙太と融合させられないかとまで言い出す。ブリギッドは、そんな不快な生き物のために力を使う気はないと即座に拒絶する。侮辱されたアーカイブは、自分で解決策を考えてみせると息巻き、ゲロルトはただ、普通の魚の切り身で十分だったのにと肩を落とす。とはいえ、相手が命を奪う武器であれ、錆びた古包丁であれ、改良が必要なら自分のところへ来ればいい――そう言い残し、彼はまた次の仕事へ意識を向けるのだった。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> リディルセイル <small class="muted">(蜃気楼の町, X:6.6, Y:7.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-pursuit-of-perfection.html">正しき姿を求めて</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="to-be-continued.html">つづく</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'重獲新生的幻影武器',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Gerolt 每次看見 Brigid，腦海裡就會像撞見陰魂不散的幽靈一樣，立刻浮現 Rowena 的臉。偏偏這次的成功，多少還真得算她一份功勞，這件事只讓他覺得像是在傷口上灑鹽一樣難受。Brigid 倒是完全不在意他的怨氣。雖然她認為自己在契約上該盡的義務已經完成，但她仍希望再多留一陣子，想親眼看看你的武器最後會變成什麼模樣。</p><p>Lydirceil 沒讓這些情緒岔開正事。她直說，多虧你一路上的奮戰與協助，這次的乙太轉換算是大獲成功，現在終於輪到 Gerolt 拿出真正的本事，好好動起鐵鎚了。調查隊已經挖出了新的礦石，正被稱作 waning arcanite，而 Gerolt 判斷下一次強化需要三塊。問題只是，你終究還是得再去面對 Ermina 一次。等你把礦石買到手後，就先交給 Dodokkuli，讓他把前置處理完成。</p><p>即使事情已經推進到這一步，Gerolt 還是忍不住諷刺了一句。原來所謂「超越完美」，竟然得靠召喚 voidsent，再硬是堆出一大堆讓人頭皮發麻的乙太才行。Brigid 聽了，只淡淡地說，voidsent（來自虛無界的異界存在，會以乙太為食，常透過召喚或依附容器現身於此世）向來不願白白出力，若沒有相稱的代價，誰也別想使喚他們。照她看來，這個所謂的 House of Splendors，做起事來倒也差不多是同一套道理。你仍照計畫把 waning arcanite 交到 Dodokkuli 手中，而他也興致勃勃地完成初步處理，等著看 Gerolt 用那把新生的鐵鎚真正展現威力。</p><p>等到那一刻終於來臨時，Gerolt 幾乎立刻就察覺到，那把鐵鎚散發出的力量和他過去接觸過的一切都截然不同。那不是單純強大，而是某種帶著異界氣息的東西，彷彿不屬於這個世界本身。他卻沒有退縮，反而放聲大笑，像是終於等到這股力量有了能被好好使用的時候。在那把新生鐵鎚的敲擊之下，你的武器再次被徹底改造，變化自然得近乎不可思議，彷彿它原本就該是這個樣子。最終出現在你眼前的，是 Phantom Obscurum Weapon——虛無的可怖力量被完整具現為形的證明。</p><p>可即使結果如此驚人，Gerolt 的心裡卻並沒有完全因此痛快起來。他低聲承認，自己總覺得這份成功並不像是真正由自己掙來的。就好像某個 voidsent 會奪走別人的生命力一樣，如今寄宿在成果裡的力量，也讓他覺得那不完全屬於自己。Brigid 馬上否定了這種說法。她提醒 Gerolt，不管力量源自何方，真正穩穩揮動鐵鎚、把一切轉化成成果的人，始終是他自己。Archive 聽著這番話，則像忽然想起什麼似地笑了出來，說利用 voidsent 來強化工具這件事，自己聽來實在很熟悉。果然，這正是來自 Mhach 的乙太轉換技法。對他而言，能看見古代知識重新在現世發揮作用，本身就是件令人由衷欣喜的事。</p><p>然而，「古代智慧」這幾個字，卻讓 Gerolt 陷入另一層思考。他不是不認可古老技法的價值，甚至可以說，他比誰都更願意為那些舊方法說話。可話說回來，他自己的天賦與手藝，難道不也早該在歷史裡占有一席之地嗎？當你回答說，真正無可匹敵的不是誰贏過誰，而是他的本事與那些古老智慧合在一起之後所形成的力量時，Gerolt 終於像是把心裡那股彆扭徹底放下。他開始明白，這從來就不是現代與古代之間的比高下，而是要把現代工藝最鋒利的部分，和失落知識最深厚的部分接在一起。想到這裡，他當場下定決心，與其只是替失落的技術延續火種，不如乾脆站在那份基礎上，做出真正全新的東西。</p><p>就在這番話落定之後，Archive 又開開心心地把話題扯到自己剛從岸邊帶回來的成果上。他自豪地說，自己釣上來了一條貨真價實的怪物，接著還煞有介事地分析起那條魚為什麼會呈現出如此異常的樣子。在他看來，多半是這座島的守護力量賦予了那生物粗淺的魔法能力，使它能投射出某種簡單的幻象，讓自己看起來遠比實際更巨大，藉此提高生存的機會。Gerolt 對這種理論興趣不大，他只想趕快開瓶好酒，趁魚肉還新鮮時把切片吃掉。誰知道 Archive 卻不肯就此罷休，反而提出更誇張的想法，與其吃它原本的模樣，不如先把自己的刀磨利，再讓刀的本質和這座島瀰漫的乙太融合，說不定就能把魚恢復成那種放大後的樣子。</p><p>Brigid 聽了立刻拒絕，明白表示自己才不會把力量浪費在那種令人作嘔的生物身上。Archive 被這句話惹得勃然大怒，當場放話說自己會想出辦法。Gerolt 只能無奈地嘆氣，說他本來只想吃片普通得不能再普通的魚而已。不過說到最後，他還是照舊把話收回到最實際的地方，不管你要強化的是致命武器，還是生鏽的舊菜刀，只要需要動手改造，你都知道該去哪裡找他。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Lydirceil <small class="muted">(幻影村, X:6.6, Y:7.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-pursuit-of-perfection.html">追求完美</a></div><div class="row">任一戰鬥／魔法職（不含限制職業）Lv.100</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="to-be-continued.html">未完待續</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
