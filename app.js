@@ -11,7 +11,7 @@ const state = {
   category: '',
   expac: '',
   patch: '',
-  sort: 'addedDesc', // ✅ 預設：新增順序（新 → 舊）
+  sort: 'addedDesc', // 預設：新增順序（新 → 舊）
 };
 
 const grid         = document.getElementById('grid');
@@ -26,7 +26,7 @@ const clearBtnEl   = document.getElementById('clear');
 const activeTags   = document.getElementById('activeTags');
 const themeToggle  = document.getElementById('themeToggle');
 const langToggle   = document.getElementById('langToggle');
-const subscribeCta = document.getElementById('subscribeCta'); // ✅ 新增：訂閱按鈕
+const subscribeCta = document.getElementById('subscribeCta');
 
 /* =========================
    推薦影片設定
@@ -45,18 +45,18 @@ const featuredVideo = {
    ========================= */
 const THEME_KEY = 'ffxiv-lib-theme';
 
-function applyTheme(mode){
-  if(mode === 'dark'){
+function applyTheme(mode) {
+  if (mode === 'dark') {
     document.documentElement.setAttribute('data-theme', 'dark');
     if (themeToggle) themeToggle.textContent = '☀️';
-  }else{
+  } else {
     document.documentElement.removeAttribute('data-theme');
     if (themeToggle) themeToggle.textContent = '🌙';
   }
 }
 applyTheme(localStorage.getItem(THEME_KEY) || 'light');
 
-themeToggle?.addEventListener('click', ()=>{
+themeToggle?.addEventListener('click', () => {
   const cur = localStorage.getItem(THEME_KEY) || 'light';
   const next = (cur === 'dark') ? 'light' : 'dark';
   localStorage.setItem(THEME_KEY, next);
@@ -71,7 +71,6 @@ fetch('data/library.json')
   .then(json => {
     state.data = (json.items || []).map((it, idx) => deriveFields({ ...it, _addedIndex: idx }));
 
-    // ✅ 初始化：把 state.sort 與下拉選單同步（避免「改了但沒變」）
     if (sortSel && sortSel.value) state.sort = sortSel.value;
 
     applyFilters();
@@ -84,22 +83,22 @@ fetch('data/library.json')
     grid.innerHTML = `<p>載入資料失敗：${err?.message || err}</p>`;
   });
 
-function deriveFields(it){
-  const patchNum = parseFloat((it.patch || '0').replace(/[^\d.]/g,'') || 0);
+function deriveFields(it) {
+  const patchNum = parseFloat((it.patch || '0').replace(/[^\d.]/g, '') || 0);
   const dateNum  = it.date ? +new Date(it.date) : 0;
   const addedIdx = Number.isFinite(it._addedIndex) ? it._addedIndex : 0;
-  return {...it, _patchNum: patchNum, _dateNum: dateNum, _addedIndex: addedIdx};
+  return { ...it, _patchNum: patchNum, _dateNum: dateNum, _addedIndex: addedIdx };
 }
 
 /* =========================
    篩選 / 排序 / 分頁
    ========================= */
-function applyFilters(){
+function applyFilters() {
   const qstr = state.query.trim().toLowerCase();
 
   let arr = state.data.filter(it => {
-    const byCat  = state.category ? it.category === state.category : true;
-    const byExp  = state.expac ? it.expac === state.expac : true;
+    const byCat = state.category ? it.category === state.category : true;
+    const byExp = state.expac ? it.expac === state.expac : true;
 
     let byPatch = true;
     if (state.patch) {
@@ -116,7 +115,7 @@ function applyFilters(){
 
     const byQuery = qstr ? [
       it.title?.EN, it.title?.JP, it.title?.ZH,
-      it.series, it.category, it.expac, it.patch, ...(it.tags||[])
+      it.series, it.category, it.expac, it.patch, ...(it.tags || [])
     ].filter(Boolean).join(' ').toLowerCase().includes(qstr) : true;
 
     const visible = !(it.hidden === true || it.publish === false);
@@ -125,25 +124,25 @@ function applyFilters(){
   });
 
   switch (state.sort) {
-    case 'addedAsc':   // 舊 → 新
-      arr.sort((a,b)=> a._addedIndex - b._addedIndex);
+    case 'addedAsc':
+      arr.sort((a, b) => a._addedIndex - b._addedIndex);
       break;
 
-    case 'addedDesc':  // 新 → 舊
-      arr.sort((a,b)=> b._addedIndex - a._addedIndex);
+    case 'addedDesc':
+      arr.sort((a, b) => b._addedIndex - a._addedIndex);
       break;
 
-    case 'dateAsc':    // 最舊 → 最新（缺 date 放最後）
-      arr.sort((a,b)=>{
+    case 'dateAsc':
+      arr.sort((a, b) => {
         const ad = a._dateNum || Number.POSITIVE_INFINITY;
         const bd = b._dateNum || Number.POSITIVE_INFINITY;
         return ad - bd || (a._addedIndex - b._addedIndex);
       });
       break;
 
-    case 'dateDesc':   // 最新 → 最舊（缺 date 放最後）
+    case 'dateDesc':
     default:
-      arr.sort((a,b)=>{
+      arr.sort((a, b) => {
         const ad = a._dateNum || 0;
         const bd = b._dateNum || 0;
         return bd - ad || (b._addedIndex - a._addedIndex);
@@ -159,11 +158,11 @@ function applyFilters(){
 /* =========================
    Pagination helpers
    ========================= */
-function getPagerDelta(){
+function getPagerDelta() {
   return window.matchMedia("(max-width: 520px)").matches ? 1 : 2;
 }
 
-function getPaginationItems(current, total, delta){
+function getPaginationItems(current, total, delta) {
   if (total <= 1) return [1];
 
   const items = [];
@@ -180,13 +179,13 @@ function getPaginationItems(current, total, delta){
   return items;
 }
 
-function renderPagerUI(totalPages){
+function renderPagerUI(totalPages) {
   pager.innerHTML = '';
   if (totalPages <= 1) return;
 
   const delta = getPagerDelta();
 
-  const makeBtn = (label, page, { disabled=false, active=false, ellipsis=false, ariaLabel='' } = {}) => {
+  const makeBtn = (label, page, { disabled = false, active = false, ellipsis = false, ariaLabel = '' } = {}) => {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = `pagebtn${active ? ' active' : ''}${ellipsis ? ' ellipsis' : ''}`;
@@ -222,7 +221,7 @@ function renderPagerUI(totalPages){
   pager.appendChild(makeBtn('»', totalPages, { disabled: state.page === totalPages, ariaLabel: 'Last page' }));
 }
 
-function render(){
+function render() {
   resultCount.textContent = state.filtered.length;
 
   const start = (state.page - 1) * state.perPage;
@@ -233,8 +232,8 @@ function render(){
   const pages = Math.ceil(state.filtered.length / state.perPage);
   renderPagerUI(pages);
 
-  grid.querySelectorAll('[data-play]').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
+  grid.querySelectorAll('[data-play]').forEach(btn => {
+    btn.addEventListener('click', () => {
       const ytId  = btn.dataset.play;
       const title = btn.dataset.title;
       openPlayer(ytId, title);
@@ -250,7 +249,7 @@ function render(){
   });
 
   grid.querySelectorAll('[data-tag]').forEach(t =>
-    t.addEventListener('click', ()=> addTag(t.dataset.tag))
+    t.addEventListener('click', () => addTag(t.dataset.tag))
   );
 
   renderActiveTags();
@@ -259,21 +258,25 @@ function render(){
 /* =========================
    卡片 HTML
    ========================= */
-function cardHTML(it){
+function cardHTML(it) {
   const thumb = it.thumb || `https://i.ytimg.com/vi/${it.ytId}/hqdefault.jpg`;
   const lang  = getLang();
-  const safe = s => (s||'').replace(/[&<>"']/g, m => ({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  const safe = s => (s || '').replace(/[&<>"']/g, m => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
   }[m]));
   const title = it.title?.[lang] || it.title?.EN || it.title?.JP || it.title?.ZH || 'Untitled';
 
   const metaL = [
-    it.expac   && `<span class="badge">${it.expac}</span>`,
-    it.patch   && `<span class="badge">${it.patch}</span>`,
-    it.category&& `<span class="badge">${it.category}</span>`,
+    it.expac    && `<span class="badge">${it.expac}</span>`,
+    it.patch    && `<span class="badge">${it.patch}</span>`,
+    it.category && `<span class="badge">${it.category}</span>`,
   ].filter(Boolean).join('');
 
-  const tags = (it.tags||[]).slice(0,6)
+  const tags = (it.tags || []).slice(0, 6)
     .map(t => `<span class="tag" data-tag="${t}">#${t}</span>`).join('');
 
   const detailHref = it.slug ? `guides/${it.slug}.html` : it.pageUrl;
@@ -319,9 +322,9 @@ function cardHTML(it){
 /* =========================
    推薦影片渲染
    ========================= */
-function renderFeatured(){
+function renderFeatured() {
   const box = document.getElementById('featured');
-  if(!box || !featuredVideo) return;
+  if (!box || !featuredVideo) return;
 
   const lang  = getLang();
   const title = featuredVideo.title?.[lang] || featuredVideo.title?.EN || '⭐ Featured';
@@ -346,43 +349,64 @@ function renderFeatured(){
 const modal      = document.getElementById('playerModal');
 const modalTitle = document.getElementById('modalTitle');
 const ytFrame    = document.getElementById('ytFrame');
-document.getElementById('modalClose')?.addEventListener('click', closePlayer);
-modal?.addEventListener('close', ()=>{ ytFrame.src=''; });
 
-function openPlayer(ytId, title){
+document.getElementById('modalClose')?.addEventListener('click', closePlayer);
+modal?.addEventListener('close', () => { ytFrame.src = ''; });
+
+function openPlayer(ytId, title) {
   if (modalTitle) modalTitle.textContent = title || '播放中…';
   if (ytFrame) ytFrame.src = `https://www.youtube.com/embed/${ytId}?autoplay=1`;
   modal?.showModal();
 }
-function closePlayer(){ modal?.close(); }
+function closePlayer() {
+  modal?.close();
+}
 
 /* =========================
    Tag 操作
    ========================= */
-function addTag(tag){
-  if(!state.tags.includes(tag)){
+function addTag(tag) {
+  if (!state.tags.includes(tag)) {
     state.tags.push(tag);
     applyFilters();
   }
 }
-function removeTag(tag){
+function removeTag(tag) {
   state.tags = state.tags.filter(t => t !== tag);
   applyFilters();
 }
-function renderActiveTags(){
-  activeTags.innerHTML = state.tags.map(t => `<span class="tag">#${t}<span class="x" data-rm="${t}">×</span></span>`).join('');
+function renderActiveTags() {
+  activeTags.innerHTML = state.tags
+    .map(t => `<span class="tag">#${t}<span class="x" data-rm="${t}">×</span></span>`)
+    .join('');
+
   activeTags.querySelectorAll('[data-rm]').forEach(x =>
-    x.addEventListener('click', ()=>removeTag(x.dataset.rm))
+    x.addEventListener('click', () => removeTag(x.dataset.rm))
   );
 }
 
 /* =========================
    事件綁定
    ========================= */
-q?.addEventListener('input', e => { state.query = e.target.value; applyFilters(); });
-categorySel?.addEventListener('change', e => { state.category = e.target.value; applyFilters(); });
-expacSel?.addEventListener('change', e => { state.expac = e.target.value; applyFilters(); });
-patchSel?.addEventListener('change', e => { state.patch = e.target.value; applyFilters(); });
+q?.addEventListener('input', e => {
+  state.query = e.target.value;
+  applyFilters();
+});
+
+categorySel?.addEventListener('change', e => {
+  state.category = e.target.value;
+  applyFilters();
+});
+
+expacSel?.addEventListener('change', e => {
+  state.expac = e.target.value;
+  applyFilters();
+});
+
+patchSel?.addEventListener('change', e => {
+  state.patch = e.target.value;
+  applyFilters();
+});
 
 sortSel?.addEventListener('change', e => {
   state.sort = e.target.value || 'addedDesc';
@@ -390,15 +414,18 @@ sortSel?.addEventListener('change', e => {
 });
 
 clearBtnEl?.addEventListener('click', () => {
-  state.query=''; state.category=''; state.expac=''; state.patch='';
-  state.tags=[];
-  state.sort='addedDesc'; // ✅ 清除條件時也回到「新→舊」
+  state.query = '';
+  state.category = '';
+  state.expac = '';
+  state.patch = '';
+  state.tags = [];
+  state.sort = 'addedDesc';
 
-  if(q) q.value='';
-  if(categorySel) categorySel.value='';
-  if(expacSel) expacSel.value='';
-  if(patchSel) patchSel.value='';
-  if(sortSel) sortSel.value = state.sort;
+  if (q) q.value = '';
+  if (categorySel) categorySel.value = '';
+  if (expacSel) expacSel.value = '';
+  if (patchSel) patchSel.value = '';
+  if (sortSel) sortSel.value = state.sort;
 
   applyFilters();
 });
@@ -416,8 +443,7 @@ const i18n = {
     subscribeCta: '🔔 Subscribe',
     tagline: `<b>FFXIV Library</b> is an extension of my YouTube channel.<br>
 Here you’ll find additional story details — quest records, background notes, and elements that couldn’t be fully shown in each video.<br>
-Every entry also has a message board where you can share your thoughts and connect with fellow travelers.<br>
-,
+Every entry also has a message board where you can share your thoughts and connect with fellow travelers.`,
     searchPH: 'Search title, series, tags, chapter…',
     itemsSuffix: 'items',
     sortOptions: [
@@ -449,7 +475,7 @@ Every entry also has a message board where you can share your thoughts and conne
       { value: 'PVP',            label: 'PvP' },
     ],
     expansions: [
-      { value: '',   label: 'All Expansions' },
+      { value: '',    label: 'All Expansions' },
       { value: 'ARR', label: 'A Realm Reborn (ARR)' },
       { value: 'HW',  label: 'Heavensward (HW)' },
       { value: 'SB',  label: 'Stormblood (SB)' },
@@ -474,8 +500,7 @@ Every entry also has a message board where you can share your thoughts and conne
     subscribeCta: '🔔 チャンネル登録',
     tagline: `<b>FFXIV Library</b> は、私の YouTube チャンネルを補完する資料館です。<br>
 映像だけでは伝えきれない物語の細部──クエスト記録や背景設定などをここに収めています。<br>
-各ページにはメッセージボードもあり、感じたことを旅人同士で共有できます。<br>
-,
+各ページにはメッセージボードもあり、感じたことを旅人同士で共有できます。`,
     searchPH: 'タイトル・シリーズ・タグ・章… を検索',
     itemsSuffix: '件',
     sortOptions: [
@@ -507,7 +532,7 @@ Every entry also has a message board where you can share your thoughts and conne
       { value: 'PVP',            label: 'PvP' },
     ],
     expansions: [
-      { value: '',   label: 'すべての拡張' },
+      { value: '',    label: 'すべての拡張' },
       { value: 'ARR', label: '新生エオルゼア（ARR）' },
       { value: 'HW',  label: '蒼天のイシュガルド（HW）' },
       { value: 'SB',  label: '紅蓮のリベレーター（SB）' },
@@ -532,8 +557,7 @@ Every entry also has a message board where you can share your thoughts and conne
     subscribeCta: '🔔 訂閱頻道',
     tagline: `<b>FFXIV Library</b> 是我 YouTube 頻道的延伸資料館。<br>
 這裡收錄了更多在影片中無法完整呈現的內容──任務紀錄、背景資料與細節補充。<br>
-每部影片下方也設有留言板，歡迎留下你的想法與感受，與其他旅人一同分享。<br>
-,
+每部影片下方也設有留言板，歡迎留下你的想法與感受，與其他旅人一同分享。`,
     searchPH: '搜尋標題、系列、標籤、章節…',
     itemsSuffix: '項內容',
     sortOptions: [
@@ -565,7 +589,7 @@ Every entry also has a message board where you can share your thoughts and conne
       { value: 'PVP',            label: 'PVP' },
     ],
     expansions: [
-      { value: '',   label: '全部資料片' },
+      { value: '',    label: '全部資料片' },
       { value: 'ARR', label: '新生艾奧傑亞（ARR）' },
       { value: 'HW',  label: '蒼天的伊修加德（HW）' },
       { value: 'SB',  label: '紅蓮的解放者（SB）' },
@@ -586,7 +610,7 @@ Every entry also has a message board where you can share your thoughts and conne
   }
 };
 
-function refillSelect(selectEl, options, keepValue=true) {
+function refillSelect(selectEl, options, keepValue = true) {
   if (!selectEl) return;
   const prev = keepValue ? selectEl.value : '';
   selectEl.innerHTML = options.map(o => `<option value="${o.value}">${o.label}</option>`).join('');
@@ -599,25 +623,22 @@ function applyLangUI(lang) {
   if (!dict) return;
 
   if (langToggle) langToggle.textContent = `🌐 ${dict.langLabel}`;
-  if (taglineEl)   taglineEl.innerHTML   = dict.tagline;
-  if (q)           q.placeholder         = dict.searchPH;
+  if (taglineEl) taglineEl.innerHTML = dict.tagline;
+  if (q) q.placeholder = dict.searchPH;
   if (itemsSuffixEl && dict.itemsSuffix) itemsSuffixEl.textContent = ` ${dict.itemsSuffix}`;
-
   if (subscribeCta && dict.subscribeCta) subscribeCta.textContent = dict.subscribeCta;
 
   refillSelect(categorySel, dict.categories, true);
-  refillSelect(expacSel,    dict.expansions, true);
-  refillSelect(patchSel,    dict.patches,    true);
+  refillSelect(expacSel, dict.expansions, true);
+  refillSelect(patchSel, dict.patches, true);
 
   if (dict.sortOptions) refillSelect(sortSel, dict.sortOptions, true);
 
-  // ✅ 確保 state.sort 跟目前 UI 一致
   if (sortSel && sortSel.value) state.sort = sortSel.value;
-
   if (clearBtnEl) clearBtnEl.textContent = dict.clear;
 }
 
-function getLang(){
+function getLang() {
   return localStorage.getItem(LANG_KEY) || 'EN';
 }
 
@@ -633,7 +654,9 @@ function cycleLang() {
 langToggle?.addEventListener('click', cycleLang);
 applyLangUI(getLang());
 
-// ✅ 視窗寬度變化時，重新渲染分頁
+/* =========================
+   視窗寬度變化時，重新渲染分頁
+   ========================= */
 window.addEventListener('resize', () => {
   const pages = Math.ceil(state.filtered.length / state.perPage);
   renderPagerUI(pages);
