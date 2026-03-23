@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mission of Gravity | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – Mission of Gravity (DT Patch 7.41)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/-aqaKb97C9A"
+              title="Mission of Gravity" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Mission of Gravity</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Mission of Gravity`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Searchingway’s behavior draws Namingway’s attention the moment you arrive. He demands an explanation for the furtive glances, and Searchingway can barely contain his excitement as he calls you over. Namingway recognizes that gleam immediately—this is the look of someone who has found the next destination.</p><p>Searchingway confirms it with pride. The scans are complete, and the Stellascope has identified their next star. He announces it with practiced certainty: “RG 4-6.” Namingway recoils at the sound of yet another provisional designation, offended to the core by a title so bland it feels like an insult to his craft.</p><p>Searchingway urges him to endure it a little longer. What awaits is not merely resources, but the remains of an entire civilization—something far beyond what the Loporrits can pursue alone. An advance party is already securing a safe place for a new base, and Searchingway asks if you will take another leap into the great unnamed and help unravel what was left behind.</p><p>Namingway’s indignation turns into renewed purpose. If the star lacks a true name, then he will find one—along with fitting appellations for the cultural legacies scattered across it. Searchingway insists your skills and experience are indispensable, and with that he calls for the captain to see everyone aboard. You set your course once more, leaving the familiar behind.</p><p>The voyage is smooth at first, though the captain warns of unusual gravity readings ahead and advises you to brace for a rough landing. Engines roar, trajectories align, and the ship surges into the stellar current toward RG 4-6. When the ride finally yields to the view outside, Namingway falls silent at what greets you—bedrock blasted into the air, a star that looks as though it was torn apart, yet still endures with scars that refuse to fade. He gives it a name born of pain: Oizys.</p><p>On the surface, Searchingway leads you through the largest ruins recorded on Oizys so far. A researcher joins the discussion—an editor from the great library in Old Sharlayan, brought in to compare civilizations and guide the investigation. She explains that while no intelligent life remains among the wreckage, the star still holds abundant flora, fauna, and minerals, and the density of the aether—along with its instability—is remarkable.</p><p>That unstable aether has manifested in gravitational anomalies, including the immense mass looming above you like a moon, its pull waxing and waning without pattern. Approaching it would be reckless. You are told that specialists have reinforced the expedition’s crystal warding with gravitational magicks to counterbalance the worst of the environment, but the effect is only mitigated, not negated—so you must stay alert for objects that may float or fall without warning.</p><p>Even with all these hazards, the ruins prove that civilization once flourished here. Yet the structures show little variation, and there is nothing to suggest they were built over more than a single generation. The researcher suspects they were part of an outpost—perhaps established by visitors who came from another star, just as you did—and the scale implies a purpose beyond simple exploration. Searchingway’s curiosity burns brighter as the questions multiply: who these people were, why they came, and what tragedy erased them. He asks you to lend your strength here on Oizys, promising to keep you informed as discoveries unfold, while Namingway vows to name every legacy you help uncover.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Searchingway <small class="muted">(Phaenna, X:27.2, Y:13.8)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-brightest-star.html">The Brightest Star</a></div><div class="row">Disciples of the Land or Hand Lv. 10</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="memorys-orbit.html">Memory's Orbit</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'重力への探究',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ネミングウェイは、サーチングウェイがあなたに向けて落ち着かない視線を送っているのを見逃さない。何を隠しているのか吐けと迫られると、サーチングウェイは抑えきれない高揚をにじませながら、あなたを呼び止める。ネミングウェイはその浮き立つ目を見て察する――ついに次の行き先が決まったのだ。</p><p>サーチングウェイは胸を張り、観測装置で次なる目的地を探っていたことを改めて告げる。そして、その星の仮称を言い放つ。「アールジー・ヨンロク。」ネミングウェイは即座に嘆き、無味乾燥な仮称に耐えがたい屈辱を覚える。名を紡ぐ者として、そんな呼び方は魂への冒涜だとまで言い切る。</p><p>だがサーチングウェイは、いまは計画の呼びかけに従ってほしいと促す。待ち受けるのは資源だけではない。そこには文明の痕跡がある――少なくとも、その残骸が。いつか彼らが自らの仕事に与えていた名を知る日が来るかもしれないが、それまでのあいだは、こちらの探索を進めるためにネミングウェイの力が必要だという。</p><p>先遣隊が新たな拠点の安全を確保しつつある今、サーチングウェイはあなたにも問いかける。名もなき未知へ、もう一度飛び込む気はあるか。ネミングウェイは嘆きを飲み込み、星の名だけでなく、その地に残る文化の遺産へも相応しい呼び名を与えるのだと奮い立つ。サーチングウェイもまた、もはや自分たちだけでは成し遂げられない規模になったと認め、あなたの経験が不可欠だと告げる。</p><p>こうしてあなたは船へ導かれ、出航の準備が整う。目的地では異常な重力が観測されていると伝えられ、着地は荒れるかもしれないと注意を受ける。推進が点火され、航路が定まり、星の流れへ乗って進む――そして窓外に現れた光景に、ネミングウェイは言葉を失う。大地の岩盤が空へ投げ出され、引き裂かれたかのような星が、それでも傷跡を抱えたまま存在している。彼はその痛みを名に変え、「オイジュス」と呼ぶ。</p><p>オイジュスの地表で、サーチングウェイはこれまでで最大規模の遺構へあなたを案内する。そこへ研究に加わる者が現れ、文明比較の専門家として、この探索の評価を担っていると語る。遺構に知的生命の気配は残っていないが、動植物や鉱物は豊富であり、何より乙太の濃度と不安定さが際立っているという。</p><p>不安定な乙太の影響は重力異常として現れており、頭上には月のように巨大な塊が浮かび、その引力が不規則に強弱を繰り返している。近づくのは危険だと断じられる。さらに、環境の影響を和らげるための対策は施されているものの、完全に無効化できるわけではないため、周囲の物が突然浮いたり落ちたりする可能性があると警告される。</p><p>それでも、これほどの遺構が残っている以上、かつてここに文明が栄えていたのは確かだ。だが建造物には大きな変化が乏しく、一世代以上にわたって増改築された痕跡も薄い。研究者は、これらを拠点に近いものと見なし、さらには外から来た者たちが築いた可能性を示唆する。では彼らは何のためにここへ来たのか、どこから来たのか、そしてなぜ姿を消したのか。疑問は増えるばかりだ。サーチングウェイはあなたに協力を求め、重大な進展があれば伝えると約束する。ネミングウェイは袖をまくり、あなたが見つけ出す遺産のすべてに名を与えると宣言する。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> サーチングウェイ <small class="muted">(惑星パエンナ, X:27.2, Y:13.8)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-brightest-star.html">希望の輝き</a></div><div class="row">ギャザラー／クラフター レベル10以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="memorys-orbit.html">辿る砂星の記憶</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'探索重力的使命',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你一踏進來，Namingway 就立刻察覺 Searchingway 正在偷瞄你，當場追問他到底在搞什麼名堂。Searchingway 卻像是終於等到你一樣，難掩興奮地叫住你。Namingway 一眼就看穿那種藏不住的得意，那代表「時候到了」，下一個目的地已經被找出來了。</p><p>Searchingway 直接承認。他們一直用觀星鏡掃描接下來要前往的星體，而現在答案已經很明確：RG 4-6。Namingway 立刻哀嚎，痛斥這種毫無靈魂的暫定代號簡直在羞辱他的存在。對一個以命名為志業的人而言，這樣的稱呼比沉默更殘忍。</p><p>Searchingway 讓他先把怨氣吞下去，因為這次等待你們的，不只是資源，而是「整個文明」，至少，是它留下來的遺跡。也許有一天，你們會知道他們曾為自己的造物取過什麼名字；但在那之前，你們更需要 Namingway 的「文字魔法」，去替那些尚未被理解的文化痕跡，找出足以承載它們重量的稱呼。</p><p>先遣隊正忙著替新基地確認安全地點。Searchingway 問你願不願意再次投身這片尚未被命名的未知。Namingway 的情緒在一瞬間轉為燃燒的使命感，不只要替那顆星命名，還要替星上遺留下來的一切文化遺產命名。Searchingway 也坦白，這項探索早就超過 Loporrits 能單獨完成的規模，你的能力與經驗將會是理解之路上不可或缺的一環。</p><p>你被帶去登船，準備出發。Cruisingway 提醒目的地偵測到異常的重力讀數，著陸時恐怕會很顛簸。航行進入星流後，視野終於打開，大片基岩像被撕裂般拋進大氣之中，彷彿整顆星體曾被扯碎，卻仍頑強地存在著，滿身都是無法癒合的傷痕。Namingway 望著那片創傷，替它取了名字：Oizys。</p><p>抵達 Oizys 後，Searchingway 帶你來到目前記錄中規模最大的遺跡群。Dylise 自我介紹為 Noumenon 的 Bibliotheca Historica 編輯，專長是文明比較研究，並把自己的專業帶進這項計畫。她說，遺跡中找不到仍然存續的智慧生命，但動植物與礦物都很豐富；同時，乙太密度高得異常，而且極度不穩定。</p><p>這些乙太條件造成了重力異常，你頭頂上那個巨大存在像月球一樣懸著，引力忽強忽弱、毫無規律，想靠近只會是魯莽行為。Dylise 也補充，Studium 的專家已替 rainbow crystal 加上重力魔法來平衡環境影響，但那只能緩和，無法真正消除，所以你必須留意周圍的物體，它們可能會突然漂浮，或毫無預警地墜落。</p><p>即便如此，眼前的建築仍證明這裡曾經繁盛。可 Dylise 指出，結構幾乎沒有風格上的變化，也看不出跨越一代以上的增建痕跡，讓她傾向把它們視為某種前哨據點，就像你們現在建立的基地一樣。再加上規模遠超單純探勘所需，她認為建築者很可能也像你們一樣，來自另一顆星。於是問題接連浮現：他們為何在此建造殖民地、從何而來、又為何不在了。Searchingway 要你在 Oizys 盡可能協助調查，承諾會把重大的進展告訴你；Dylise 也表示會透過 exotablet 或其他方式保持聯繫。Namingway 則把話說得乾脆，你翻起任何一塊石頭，他都會替那份遺產取名。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Searchingway <small class="muted">(Phaenna, X:27.2, Y:13.8)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-brightest-star.html">最耀眼的星辰</a></div><div class="row">採集職或生產職 10 級以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="memorys-orbit.html">追尋沙星的記憶</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
