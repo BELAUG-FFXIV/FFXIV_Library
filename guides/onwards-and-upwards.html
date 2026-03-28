@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Onwards and Upwards | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Onwards and Upwards (HW Patch 3.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/RxtZkgEw7hc"
+              title="Onwards and Upwards" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Onwards and Upwards</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Onwards and Upwards`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>When Honoroit tells you that Emmanellain wishes to speak with you, the young lord wastes no time in sweeping you into his plans. He greets you with easy familiarity and introduces himself again with theatrical pride, making certain to remind you that he is Count Edmont’s second son—trueborn, no less. Yet beneath the jesting tone lies a grievance he no longer bothers to hide. In a world where the eldest son inherits everything, he says, being born second is cruel fortune indeed. Even if his brother would never cast him aside, Emmanellain cannot imagine being content to live forever on a modest allowance, forever diminished in another man’s shadow.</p><p>That, he declares, is why he needs your help. Whatever awaits in the Sea of Clouds must be handled perfectly, so that word of his deeds might spread among the people and raise him in their esteem—perhaps even above Artoirel. He speaks with such shameless ambition that for a moment it sounds as though he means to send a legendary hero ahead as his servant. But just as quickly he laughs it off as a jest and turns to the matter at hand. You are to aid the men and women of House Haillenarte, steadfast allies of House Fortemps who have suffered greatly since the Calamity. As for the details, he refuses to reveal them yet. Instead, he tells you only to come with him to the airship landing, for you must fly to Camp Cloudtop.</p><p>At the landing, Emmanellain assures you with breezy confidence that every arrangement has already been made. All you need do is signal when you are ready, and the airship will carry you away. Honoroit, however, quietly reminds his lord that there remains the matter of the bill, a small intrusion of reality that Emmanellain seems all too eager to ignore. Soon after, you board the vessel and rise skyward aboard an airship born of Cid Garlond’s remarkable genius, ascending toward the floating isles of the Sea of Clouds—toward a frontier the knights of Ishgard have barely begun to understand. There, in a fledgling outpost where weary scouts forever watch the heavens for winged threats, you arrive at last.</p><p>The cold strikes at once. Even Emmanellain, so quick with words, cannot help but complain that the air here cuts far more sharply than the chill of Coerthas below. He notices, too, that you remain as unreadable as ever, and lightly mocks the strong, silent composure that never seems to leave you. But before his chatter can wander too far, he reminds himself of your purpose. You must find Lady Laniaitte, the commander of the garrison stationed here. And when you do, he adds with sudden nervousness, you should let him do the talking.</p><p>At the Rosehouse, Ser Laniaitte de Haillenarte receives you with unmistakable sincerity. To meet you, she says, has long been her wish. She owes you more than thanks, for had you not intervened, her younger brother Francel would have been executed on the accusation of a false inquisitor. Duty kept her from seeking you out before, but now, by Halone’s grace, she has been given not only the chance to thank her brother’s savior in person, but also to ask for that savior’s help. Before Emmanellain can bear her attention in silence, he interrupts with polished charm, trying to draw her eye back to himself, praising her as a rose in steel equally suited to battlefield and ballroom. Laniaitte, unmoved, asks him with cool restraint to allow her to finish speaking with you.</p><p>Then she explains the true state of Camp Cloudtop. The outpost was established to give warning of Dravanian incursions, its floating height making it an ideal watchpoint over the skies. Yet that same elevation leaves it terribly exposed. Their greatest defense is the Protector, their largest and most advanced airship, capable of bringing down all but the mightiest dragons. But the vessel is presently under repair, leaving them weakened at the worst possible time. Worse still, their efforts have been disrupted by the Vanu Vanu, an indigenous beast tribe with whom they have already fought several skirmishes. Emmanellain immediately blusters that no beastman can stand against a man of Ishgard, swaggering at the thought of proving himself against these so-called birdmen. Laniaitte answers with a weary sigh, already seeming to understand how much patience may soon be asked of you.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Emmanellain <small class="muted">(Fortemps Manor, X:5.9, Y:6.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-better-half.html">The Better Half</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 50</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="an-indispensable-ally.html">An Indispensable Ally</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'雲上の騎兵団',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>オノロワから、エマネランがあなたに話があると告げられると、当の本人は待っていたかのようにあなたを呼び寄せる。気安い調子で出発を促したかと思えば、改めて自分がエドモン・ド・フォルタン伯爵の次男であり、しかもれっきとした嫡男ではないかとでも言いたげに、自嘲と芝居気を交えて身の上を語り始める。長子がすべてを継ぐこの国において、次男として生まれることがどれほど不遇か。兄が冷たいわけではないと認めつつも、わずかな手当で満足し、生涯その背に隠れて暮らすなど、自分には耐えられないのだと彼は言う。</p><p>だからこそ、雲海での務めを成功させねばならないのだと、エマネランはあけすけに言い切る。そこでの功績が語られれば、人々の心に自分の名が刻まれるかもしれない。できることなら、兄アルトアレール以上に評価されたい――そんな野心を隠そうともせず、しかも伝説の英雄たるあなたを従えてそれを成し遂げるつもりだと、半ば本気とも冗談ともつかぬ口調で笑う。もっとも、あなたの視線に気づくと、すぐに戯れだと取り繕い、本題へと話を戻す。向かう先は雲海、協力すべき相手はアインハルト家の人々。フォルタン家の良き盟友でありながら、霊災以来、苦しい時を過ごしてきた家だという。だが何をするのかまでは明かさず、詳しくは後の楽しみに取っておけと言わんばかりに、ただ飛空艇乗り場へ来いとあなたを促す。</p><p>乗り場に着くと、エマネランは得意げに、すべて手配済みだと胸を張る。準備ができたと告げさえすれば、あとは飛空艇がキャンプ・クラウドトップまで運んでくれるという。そんな彼の横で、オノロワはまだ請求書の件が残っていると小声で釘を刺すが、エマネランはそれすら軽く受け流そうとする。やがてあなたは飛空艇へ乗り込み、シド・ガーロンドというガレマール出身の異才が生み出したその船に乗って、大空へと上っていく。雲のごとく浮かぶ土と岩の島々が広がる雲海――イシュガルドの騎士たちでさえ、まだ踏み込み切れていない辺境へ。そこには、翼ある影を警戒しながら空を見張る、疲れた斥候たちの小さな前哨地があった。</p><p>クラウドトップへ降り立った瞬間、空気の鋭い冷たさが身を刺す。饒舌なエマネランでさえ、ここはクルザスよりもなお骨身にこたえる寒さだとこぼさずにはいられない。そして、そんな環境でも平然としているあなたを見て、相変わらず無言で強そうに構えすぎだと軽口を叩く。だが、その冗談も長くは続かない。ここで会うべき相手、すなわち駐屯地を預かるラニエットのもとへ向かわねばならないからだ。しかも彼は、彼女に会ったら余計なことは言わず、自分に合わせてほしいと、どこか妙に落ち着かぬ様子で付け加える。</p><p>ローズハウスで待っていたラニエット・ド・アインハルトは、あなたを見るなり、はっきりとした敬意と真心をもって迎える。こうして会える日を長く願っていたのだと、彼女は少しも飾らずに語る。自分はあなたに恩があるのだという。もしあなたがいなければ、弟フランセルは偽りの異端審問官の言葉だけで処刑されていたはずだった。騎士である以上、任務に従って動かねばならず、これまで礼を伝えに行くこともかなわなかった。だが今こうして、弟の恩人に直接感謝を伝えられるだけでなく、その寛大な助力まで願える機会を得たことを、ハルオーネの加護にほかならないと彼女は言う。そこへエマネランが、満を持したように割って入り、久々に会えた喜びとともに、鋼の甲冑に包まれた薔薇だの、戦場にも舞踏会にも似合うだのと、気障な賛辞を並べ立てる。ラニエットは少しも心を動かされず、まずは自分があなたに話し終えるまで黙っていてほしいと、冷静に言い渡す。</p><p>そして彼女は、この地の実情を語り始める。キャンプ・クラウドトップは、Dravanian Horde の侵攻をいち早く察知するために築かれた前哨基地であり、浮島の高所という立地は、その役目にはこの上なく適している。だが同時に、その高さゆえに敵の標的にもなりやすい。幸い、最大にして最新鋭の飛空戦艦「プロテクトゥール」があり、並の竜であれば撃ち落とせるだけの力を持っている。だがその切り札はいま修理中で、戦力として十分に機能していない。しかも現地では、先住の蛮族バヌバヌとの小競り合いまで起きており、事態はますます厄介になっているのだという。するとエマネランは、蛮族などイシュガルドの男の敵ではないと威勢よく言い放ち、鳥人風情なら自分が何とかしてみせると勇ましく息巻く。ラニエットはただ深く息をつき、これから先、あなたには想像以上の苦労をかけることになるだろうと、半ば覚悟したようにこぼすのだった。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> エマネラン <small class="muted">（フォルタン伯爵邸, X:5.9, Y:6.1）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-better-half.html">わだかまる雲霧</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="an-indispensable-ally.html">困ったヤツのあしらい方</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'雲上的騎兵團',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>當 Honoroit 來到你面前，說 Lord Emmanellain 想找你談談時，那位年輕的貴族很快就把你捲進了自己的步調裡。他先是熟絡地催你一同出發，接著又像生怕你忘了似的，重新報上自己的全名，還特別強調自己是 Count Edmont de Fortemps 的次子，而且還是名正言順的那一種。可在那副輕浮又自得的語氣底下，藏著的卻是不加掩飾的不甘。在這樣一個一切都由長子繼承的社會裡，身為次子究竟有多麼吃虧，他顯然早已想過無數次。即使兄長未必會真的虧待他，但要他一輩子靠著微薄的零用、永遠活在兄長的影子底下，他無論如何都無法甘心。</p><p>也正因如此，他才更加需要你幫忙。他直白地說，Sea of Clouds 這一趟無論如何都得辦得漂漂亮亮，只有這樣，人們才會開始傳頌他的功績，讓他在眾人心中的地位一步步往上抬，最好還能高過 Artoirel。那份野心說得毫不遮掩，甚至還半開玩笑似地把你這位傳奇英雄當成替他辦事的人。可當他看見你投來的目光後，又立刻把話收了回去，笑著說自己只是說笑罷了。接著他才終於把話題拉回正事，告訴你們此行要去協助的是 House Haillenarte 的人。那一直是 House Fortemps 忠實的盟友，只是自從 Calamity（通常指重創 Eorzea、終結舊時代的那場大災厄；在本段語境裡，就是讓各地勢力與貴族在災後持續承受損失的「Seventh Umbral Calamity」）之後，這一家的處境便每況愈下。至於你們到底要去做什麼，他卻故意不肯先說，只要你跟著他前往飛空艇起降處，一起搭船去 Camp Cloudtop。</p><p>到了起降處後，Emmanellain 便帶著一貫輕鬆的神情，說一切都已經安排妥當。只要你準備好、向工作人員表示可以登船，接下來便能直接前往 Camp Cloudtop。可就在他把話說得彷彿毫無後顧之憂時，Honoroit 卻還是不忘小聲提醒，自家主子還有帳單的事沒有處理。Emmanellain 顯然不太想理會這點現實裡的小麻煩，只想趕快把你帶上飛空艇。很快地，你便搭上了那艘出自 Cid Garlond 構想的飛空艇，隨著它一路升向天空，飛往那片由漂浮島嶼與雲海構成、就連 Ishgard 騎士們也還沒有真正完全掌握的前線。就在那片高空之中，一座年輕而孤立的據點正持續警戒著天空，隨時提防任何長著翅膀的黑影出現，而你也終於抵達了那裡。</p><p>真正踏上 Camp Cloudtop 時，迎面而來的寒意立刻刺進骨子裡。就連向來話多的 Emmanellain 也忍不住抱怨，說這裡的冷和 Coerthas 完全不是同一回事，相較之下，下面的寒氣甚至都顯得溫和了。他隨後又轉過頭來，半是打趣地看著你，說你這位英雄未免也太習慣擺出那副沉默又堅強的模樣，彷彿無論去哪裡都不會真的被任何事動搖。不過他很快又把話拉回正題，提醒自己此行是有目的的。你們得先找到 Lady Laniaitte，她正是這座駐地的指揮官。而等真的見到她時，他還特別有些不自然地補了一句，要你到時只管照著他的步調來就好。</p><p>到了 Rosehouse 後，Ser Laniaitte de Haillenarte 一見到你，便帶著毫不掩飾的誠意迎了上來。她說，雖然聽起來也許有些奇怪，但自己其實一直希望能親眼見到你。因為她始終欠著你一份恩情，若不是你當初出手相助，她的弟弟 Francel 早就會因為一名假冒異端審問官的誣告而被處死。只是身為騎士，她總得優先前往 duty 要求的地方，因此始終沒有機會親自去向你道謝。如今，能夠在 Halone 的庇佑下，不只當面向救了自己弟弟的人表達謝意，甚至還能請求對方再度伸出援手，對她而言簡直像是一次難以言喻的雙重恩賜。偏偏就在她那番鄭重的話語還沒說完時，Emmanellain 便迫不及待地插了進來，裝模作樣地向她問候，稱讚她依舊優雅動人，說她像是一朵披著鋼甲的玫瑰，無論置身戰場還是舞會都一樣耀眼。可 Laniaitte 顯然對這套早已見怪不怪，只冷靜地請他若不介意，先讓她把和你的話說完。</p><p>接著，她才把 Camp Cloudtop 真正的情況清楚告訴你。這座據點之所以建立起來，是為了在高空中及早發現 Dravanian Horde（以 Nidhogg 為中心、盤踞 Dravania 一帶的龍族與龍類眷屬勢力，長年與 Ishgard 對立，是 Dragonsong War 中的主要龍族陣營）的動向。這些漂浮島嶼所提供的高度，讓這裡成了理想的監視點，可也正因為如此，它同時成了極容易遭到攻擊的目標。所幸他們並非毫無防備，駐地最大的倚仗，就是名為 Protector 的大型飛空艇。</p><p>那是他們最先進、也最具戰力的飛空艇之一，除了最強大的龍之外，理論上足以擊落大部分空中的敵人。可惜的是，如你所見，那艘船現在正處於修理狀態，使得整個駐地的防衛力量受到不小影響。更糟的是，他們這段時間還持續受到當地原生獸人部族 Vanu Vanu 的妨礙，雙方之間已經發生過好幾次衝突。聽到這裡，Emmanellain 立刻又抬高了聲音，說區區獸人根本不是 Ishgard 男人的對手，要是真有什麼鳥人出現在眼前，他自然會讓對方見識見識。Laniaitte 只沉沉嘆了一口氣，像是已經能預見未來幾天還有更多麻煩在等著你。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Emmanellain <small class="muted">(福爾唐伯爵府, X:5.9, Y:6.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-better-half.html">籠罩在心頭的陰霾</a></div><div class="row">任一戰鬥／魔法職業（不含受限職業）Lv. 50</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="an-indispensable-ally.html">不可或缺的盟友</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
