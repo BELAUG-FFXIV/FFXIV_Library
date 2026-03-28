@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>An Indispensable Ally | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – An Indispensable Ally (HW Patch 3.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/HQXsrJdi028"
+              title="An Indispensable Ally" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">An Indispensable Ally</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`An Indispensable Ally`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Emmanellain wastes no time in indulging his own fantasy, loudly declaring that he will win Lady Laniaitte’s heart one day. At his side, Honoroit can only plead with him not to do anything reckless. Laniaitte, meanwhile, has no patience to spare for such foolishness. Though she understands Count Edmont’s intentions in sending the young lord here, she has no wish to lose precious time making certain he does not stumble into danger underfoot.</p><p>She admits that this experience might teach Emmanellain something. Yet left entirely to himself, she believes it far more likely that he will only turn the situation into a greater mess. So instead of confronting him directly, she turns to you. She asks that you tell him she wishes him to keep watch for Dravanian outflyers, and then, when the chance presents itself, speak privately with his manservant and impress upon him that keeping Emmanellain from shirking his duty is now his responsibility.</p><p>Even after entrusting you with this delicate task, Laniaitte adds one more instruction. You are to make it sound urgent—something vital to the continued survival of Camp Cloudtop, or near enough. The meaning is plain enough: if Emmanellain is to be useful at all, he must first be steered into taking himself seriously.</p><p>When you bring the message to him, Emmanellain is at first more wounded than alarmed, wondering why Laniaitte did not ask him in person when he was standing only a few yalms away. But the moment he hears that he is being entrusted with a mission of real importance, his whole manner changes. Whatever vanity or disappointment he may feel is swallowed at once by the chance to appear capable in her eyes. He straightens himself immediately and declares that he will do exactly as his lady asks.</p><p>Afterward, you speak with Honoroit in private. He takes the matter with far more sobriety, first introducing himself properly as the one who serves Lord Emmanellain, and then accepting Laniaitte’s wish without complaint. He understands at once what is being asked of him, and promises to do everything in his power to keep his lord from harm. When you return, Laniaitte thanks you and reflects, not without weariness, that if Emmanellain belonged to another house, she might not feel obliged to go to such lengths to preserve both his safety and his dignity. Yet she cannot deny the result. For whatever reason, he listens to you more readily than he does to most others. Perhaps, she muses, you are simply more practiced than most at humoring difficult men.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Laniaitte <small class="muted">(The Sea of Clouds, X:17.0, Y:37.3)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="onwards-and-upwards.html">Onwards and Upwards</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 50</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="meeting-the-neighbors.html">Meeting the Neighbors</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'困ったヤツのあしらい方',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>エマネランは、会うなりラニエットへの熱を隠そうともせず、いつか必ず彼女の心を射止めてみせると声高に言い放つ。隣ではオノロワが、どうか軽率なことだけはなさらないでくださいと気をもむばかりだ。だが当のラニエットには、そうした浮ついた言動に付き合っている余裕はない。エドモン伯爵の意図は理解しているものの、この忙しい折に、若君が足手まといにならぬよう気を配ることへ貴重な時間を割きたくはないのだ。</p><p>たしかに今回の経験を通じて、エマネランが何かを学ぶ可能性はある。けれど彼を好きにさせれば、学ぶより先に事態をかき回してしまうほうがよほどあり得ると、ラニエットは冷静に見ている。だからこそ彼女は、直接本人に言うのではなく、あなたに頼みごとを託す。エマネランには、Dravanian の飛行偵察を警戒する見張りを任せたいと伝えてほしい。そして、そのあとで使用人にこっそり話し、この任務の最中に彼が職務を放り出さぬよう見張るのが、おまえの役目だとしっかり念を押してほしいというのだ。</p><p>さらにラニエットは、その伝え方にも注文をつける。これはキャンプ・クラウドトップの存続に関わる重大な務めなのだと、そういう調子で強調してほしいのだという。その意図は明白だった。エマネランを少しでも真面目に動かしたいのなら、まずは本人に、その役目がいかに重要かを信じ込ませる必要があるのだ。</p><p>あなたがその言葉を携えて彼のもとへ戻ると、エマネランは最初、なぜラニエットが目と鼻の先にいる自分へ直接頼まなかったのかと、不満とも寂しさともつかぬ反応を見せる。だが、重要な任務を任されたのだと聞いた途端、その態度ははっきり変わる。どれほど気を引きたかったとしても、彼女の期待に応える機会を前にしては、ふざけてばかりもいられない。彼はたちまち気持ちを切り替え、自分こそその務めを果たすのにふさわしいのだとばかりに、勢いよく引き受ける。</p><p>その後、あなたは人目を避けてオノロワに事情を伝える。彼はまず、エマネランに仕える者として改めて名乗りを上げ、それからラニエットの意向を聞くと、すぐにすべてを理解する。驚きはしても異論はなく、主君を危険から遠ざけるため最善を尽くすと真摯に答える。報告を受けたラニエットは、もし相手が他家の若君であれば、ここまでしてその安全と体面を守ろうとは思わなかったかもしれないと、半ばあきれたようにこぼす。それでも彼女は、あなたが代わりに話してくれたことへ感謝を示す。どうやらエマネランは、ほかの誰よりもあなたの言葉になら耳を傾けるらしい。あるいはあなたは、扱いの難しい男に付き合うことに人より慣れているのかもしれないと、彼女はわずかに苦笑するのだった。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ラニエット <small class="muted">（アバラシア雲海, X:17.0, Y:37.3）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="onwards-and-upwards.html">雲上の騎兵団</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="meeting-the-neighbors.html">対するはバヌバヌ族</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'不可或缺的盟友',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Emmanellain 一開口，便又把自己的心思全擺在了 Laniaitte 身上，信誓旦旦地說，總有一天自己一定會贏得她的芳心。站在一旁的 Honoroit 聽得心驚，只能低聲勸他千萬別做出什麼魯莽的事。可對 Laniaitte 而言，她現在根本沒有餘裕陪他浪費時間。雖然她明白 Count Edmont 把這位年輕貴族送來的用意，但她實在不想把寶貴的精力花在防止他在眼前闖禍、甚至被人踩在腳下這種事情上。</p><p>她承認，這一趟也不是完全沒有可能讓 Emmanellain 學到什麼。可若真的放任他照自己的意思行動，那麼比起有所成長，她更相信他只會把事情搞得一團亂。於是，她沒有直接去和本人說，而是把這件麻煩事交給了你。她要你轉告 Emmanellain，說自己希望他去負責警戒 Dravanian 的空中斥候。接著，等你有機會私下和他的僕從說話時，也要清楚告訴對方——讓 Emmanellain 不要逃避自己的職責，正是他該負起的責任。</p><p>即使把事情交代給你之後，Laniaitte 仍覺得這樣還不夠。她還特地補上一句，要你務必把這項任務說得夠重要，最好讓人聽起來像是和 Camp Cloudtop 能否持續撐下去息息相關。那份心思其實再明白不過。若想讓 Emmanellain 暫時收起那些浮誇與任性，最有效的方法，便是先讓他相信自己正肩負著一項不能輕忽的使命。</p><p>等你把話帶到他面前時，Emmanellain 起初顯得有些不是滋味，忍不住抱怨，明明自己就站在離 Laniaitte 不遠的地方，她為何不直接親口交代。可當他聽見這是一項極其重要的任務時，整個人的態度立刻變了。他心裡那點失落與抱怨，幾乎一下子就被新的興奮取代。能在她眼中顯得可靠，顯然比任何不滿都來得重要得多。於是他當場振作起來，毫不遲疑地答應，說自己一定會照她所希望的那樣去做。</p><p>之後，你又找了機會私下和 Honoroit 說明情況。他先鄭重地向你重新自我介紹，說自己正是服侍 Lord Emmanellain 的人，接著便立刻理解了 Laniaitte 的真正意思。即使聽見自己也得陪著出任務，他也沒有推託，只認真答應，說自己一定會盡全力確保主人的安全，不讓他陷入危險。等你把這一切回報給 Laniaitte 後，她才半是無奈地說，若 Emmanellain 不是 Fortemps 家的人，也許她根本不會費這麼大力氣去維持他的安全與體面。可不管怎麼說，她仍感謝你替她把話帶了過去。至少在這件事上，Emmanellain 顯然比面對其他人時更願意聽你的話。又或者，她淡淡地補上一句，也許你只是比大多數人更擅長應付這種麻煩人物而已。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Laniaitte <small class="muted">(阿巴拉提亞雲海, X:17.0, Y:37.3)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="onwards-and-upwards.html">雲上的騎兵團</a></div><div class="row">任一戰鬥／魔法職業（不含受限職業）Lv. 50</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="meeting-the-neighbors.html">初遇 Vanu Vanu 族</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
