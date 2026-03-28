@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Taking in the Sights | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Taking in the Sights (HW Patch 3.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/BVNw0MSdxYY"
+              title="Taking in the Sights" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Taking in the Sights</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Taking in the Sights`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Alphinaud knows that House Fortemps has already shown you more generosity than anyone could reasonably expect, and because of that, he is determined that you should not become a burden upon them. If you are to remain in Ishgard for any length of time, then you must learn how the city works, where to go, and how to stand on your own feet. Tataru agrees at once. The streets themselves must be learned, she says, but so must the markets, the taverns, and all the little places where goods are bought and rumors are traded. Hearing that, Alphinaud accepts Count Edmont’s advice without hesitation.</p><p>Count Edmont is pleased by your decision. He appoints one of his manservants to guide you through the city and answer whatever questions may arise, but before you depart, he entrusts you with official papers identifying you as wards of House Fortemps. Ishgard’s borders have been closed for decades, he reminds you, and many of its people are not accustomed to dealing with foreigners. Should anyone challenge your presence, those documents may be needed as proof that you remain under House Fortemps’s protection. Alphinaud promises that you will do everything in your power to avoid invoking the count’s name unless absolutely necessary. Then, with that final caution resting quietly over you all, you set out.</p><p>Once you step into the city proper, Tataru is immediately grateful for the map in her hands, while Alphinaud admits that visiting Ishgard had once been one of his childhood dreams. In those earlier days, its towers, bridges, and stone-paved streets had seemed to him like something from a faerie tale, and even now, standing within the city at last, he realizes that part of that wonder never truly left him. Your guide tells you that, for a first visit, there can be no better place to begin than the Hoplon, where the splendor of the Holy Vault may be seen in full. After that, he says, he will show you the Jeweled Crozier and then lead you down to Foundation’s Aetheryte Plaza.</p><p>At the Hoplon, Tataru notices the many statues and jokes that perhaps sculpting would be a profitable trade in a city like this, especially when every gil matters. Alphinaud, however, is drawn at once to the Holy Vault, seat of both rule and faith. There your guide explains that the Hoplon, named for the bronze greatshield borne by Ishgard’s patron deity, is the largest plaza in the city, and that the great cathedral to the north serves both as the nation’s center of government and as the residence of the archbishop. When Alphinaud asks about the statues standing to the south, the manservant confirms that they are the famed knights twelve, the men who stood beside King Thordan I, cast down Nidhogg, and laid the foundations of Ishgard itself. In that moment, the city seems to rise before you not only as a fortress, but as a place built upon centuries of pride, memory, and sacred history.</p><p>From there you are taken to the Jeweled Crozier, where trade continues with an ease that feels almost strange after all that has happened. Tataru, already eager to bargain, insists that any buying should be left to her. Alphinaud, looking over the orderly stalls and merchants at their work, cannot help but note how untouched everything appears. There is not even a scorched stone in sight. To watch such commerce continue so calmly, one might almost believe the dragons had never attacked at all. When Mistress Elaisse receives you, she quickly realizes that you are neither locals nor ordinary peddlers, and is intrigued to learn that you are wards of House Fortemps. Alphinaud explains that Count Edmont has granted you leave to remain in Ishgard for as long as needed, and that you will therefore require provisions. He begins with courtesy, even offering to withdraw if she is uneasy serving foreigners, but Elaisse cuts through the concern at once. In matters of money, she says, there is no discrimination. If you have coin, the merchants of the Crozier will gladly serve you.</p><p>At last your guide leads you down to Foundation’s Aetheryte Plaza. There, amid the movement of the city, Tataru wonders aloud whether anyone else feels a strange tingling whenever they attune to an aetheryte, only to realize that the sensation may be hers alone. Alphinaud, meanwhile, has already completed his attunement and assumes you have done the same. Your guide advises you to attune there if you have not yet done so, and with that, the formal tour draws to a close.</p><p>When you return to Fortemps Manor, Count Edmont sounds almost surprised to see you back so soon, having thought you might wish to remain out in the city longer. Artoirel reminds you with quiet courtesy that you are free to come and go as you please, and that the house will provide what aid it can should you require anything. Emmanellain, amused as ever, remarks that your presence will only make House Fortemps seem all the more mysterious by association. Yet beneath the lightness of those words, something more certain has begun to settle into place. Ishgard is still unfamiliar, still guarded, still full of distance and reserve—but it is no longer wholly closed to you. Step by step, street by street, it is becoming a city you may learn to live in.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Alphinaud <small class="muted">(Fortemps Manor, X:6.1, Y:6.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="coming-to-ishgard.html">Coming to Ishgard</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 50</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-better-half.html">The Better Half</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'壮麗なる皇都',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>アルフィノは、フォルタン家がすでに十分すぎるほどの厚意を示してくれている以上、これ以上その庇護に甘えすぎるわけにはいかないと考える。イシュガルドにしばらく滞在することになるのなら、この都の成り立ちや人々の暮らしを知り、自分たちの力で動けるようにならなければならない。タタルもすぐにうなずき、道順を覚えるだけでは足りず、市場や酒場の場所、品を買うところや噂の集まるところまで知っておく必要があると言う。その言葉を受けて、アルフィノはエドモン・ド・フォルタン伯爵の助言に素直に従うことを決める。</p><p>その返答を聞いた伯爵は満足げにうなずき、案内役として使用人をひとり付けてくれる。だが別れ際、伯爵は大切なものを渡し忘れていたと思い出したように、あなたたちのために用意させた書類を差し出す。それは、あなたたちがフォルタン家の客分であることを示す証だった。長きにわたり国境を閉ざしてきたイシュガルドでは、異邦人への対応に慣れていない者も多い。もし都であなたたちの存在を訝しむ者が現れたなら、その書類によってフォルタン家の庇護下にあることを示さねばならないかもしれない。アルフィノは、伯爵の名を持ち出さねばならないような事態はできるかぎり避けると約束し、その言葉とともに、あなたたちは都へ向かう。</p><p>街へ出ると、タタルはさっそく地図があって助かったと胸をなで下ろす。一方アルフィノは、イシュガルドを訪れることが幼いころからの夢だったと静かに打ち明ける。少年の目には、この都の塔や橋、石畳の道のひとつひとつが、まるで御伽噺の世界のように映っていたのだという。そして実際にその中へ足を踏み入れた今も、その憧れはまだ少しも消えていないのだと、どこか感慨深げに語る。使用人は、初めて都を訪れたあなたたちには、まずホプロンから教皇庁の威容を見てもらうのがふさわしいと告げ、その後に宝杖通りを案内し、最後に下層のエーテライト広場へ向かう予定だと説明する。</p><p>ホプロンに着くと、タタルはあちこちに立つ彫像を見回し、この都の人々はよほど像が好きなのだろうかと冗談めかす。彫刻師になれば儲かるのではないかとまで言い出し、どんな形でも稼ぎが必要だと現実的なことも忘れない。アルフィノの目はしかし、すでに教皇庁へ向けられていた。使用人は、ホプロンとは守護神が携える青銅の大盾にちなむ名であり、ここがイシュガルド最大の広場であると教える。そして北にそびえる壮麗な大聖堂こそ教皇庁であり、そこが国政の中枢であると同時に、正教の頂点たる教皇の居所でもあるのだと語る。さらに南側の像について尋ねたアルフィノに対し、使用人はそれが建国の十二騎士であると答える。彼らは初代国王とともにニーズヘッグを討ち、この国を築いた勇士たちだった。そうして語られる都の歴史は、この街がただ堅牢なだけではなく、長い歳月の誇りと信仰の上に築かれてきた場所であることを改めてあなたに感じさせる。</p><p>続いて案内された宝杖通りでは、戦の気配を忘れさせるほど整った商いの光景が広がっていた。タタルは買い物をするなら自分に任せてほしいと張り切り、アルフィノは、焦げ跡ひとつ見当たらない石畳と忙しなく働く商人たちを見つめながら、まるで竜の襲撃など最初からなかったかのようだとこぼす。やがて市場を束ねるエレーズが現れ、あなたたちがこの都の住人でも旅の行商人でもないことにすぐ気づく。そしてフォルタン家の客分だと知ると、興味深そうにその肩書を受け止める。アルフィノは、エドモン伯爵の許しを得て当面イシュガルドに留まること、そのため各種の品が必要になることを丁寧に説明し、もし異邦人を相手にすることに抵抗があるなら無理は言わないとまで言い添える。だがエレーズは、その気遣いをあっさりとはねのける。金銭に関わることに差別はない、と彼女は言う。武器も防具も薬も素材も、望むものは宝杖通りで揃うし、金を払う客を拒む商人はいないのだと、はっきり言い切る。</p><p>最後に使用人は、あなたたちを下層のエーテライト広場へ案内する。行き交う人々の中で、タタルはエーテライトに交感するときだけ妙なぴりぴりした感覚があるのは自分だけだろうかと首をかしげる。アルフィノはといえば、すでに交感を済ませており、あなたも当然終えているものと思っている。使用人は、まだならこの機会に交感しておくのがよいと勧め、こうして都の案内はひとまず終わりを迎える。</p><p>フォルタン伯爵邸へ戻ると、エドモン伯爵は思いのほか早い帰宅に少し驚いたように、もっと街を見て回るものと思っていたと語る。アルトアレールは、あなたたちが望むまま自由に出入りしてよいこと、何か必要があれば遠慮なく告げてほしいことを穏やかに伝える。エマネランはいつもの軽い調子で、あなたたちがいることでフォルタン家までいっそう謎めいて見えるだろうと面白がる。だが、その言葉の底には確かな変化がある。イシュガルドはまだ見知らぬ都であり、よそよそしさも警戒も残している。それでも、完全に閉ざされた場所ではなくなりつつあった。少しずつこの街を知ることで、あなたたちはここで生きていく足場を築き始めていた。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> アルフィノ <small class="muted">（フォルタン伯爵邸, X:6.1, Y:6.2）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="coming-to-ishgard.html">イシュガルドへ</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-better-half.html">わだかまる雲霧</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'皇都巡禮',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Alphinaud 很清楚，House Fortemps 已經給了你們遠超過常理的保護與善意，所以你們更不能一味依賴這份款待。如果接下來真的要在 Ishgard 待上一段時間，那麼熟悉這座城市、弄清楚該怎麼在這裡生活，便成了理所當然的事。Tataru 也立刻附和。光是記住街道還不夠，她說，你們還得知道市場在哪裡、酒館在哪裡、該去哪裡買東西、又該去哪裡聽那些零零碎碎的流言與消息。聽到這裡，Alphinaud 便不再猶豫，接受了 Count Edmont 的建議。</p><p>Count Edmont 對你們的決定很是滿意，隨即指派一名僕從陪同你們在城內走一趟，替你們回答一路上可能遇到的疑問。不過在你們出發前，他又想起還有一件事必須先交給你們。那是一份正式文件，用來證明你們是 House Fortemps 的受庇護者。Ishgard 封閉國門已有數十年，許多人並不習慣與外來者接觸。若有人質疑你們為何會出現在城中，這份文件或許就會成為必要的證明，讓對方知道你們仍在 House Fortemps 的保護之下。Alphinaud 鄭重保證，你們會盡一切可能避免讓 Count Edmont 的名義被迫出現在不必要的場合。就這樣，在那份提醒與謹慎之下，你們正式走進了這座新城市。</p><p>真正來到街上後，Tataru 先是慶幸自己手上有地圖，而 Alphinaud 則低聲承認，造訪 Ishgard 一直是他從小以來的願望。對年幼時的他而言，這座城市的高塔、橋梁與石板街道，總像童話裡才會出現的景色。直到今天真正站進來，他才發現那份憧憬從未真正消失。House Fortemps 的僕從告訴你們，既然是第一次來到這座美麗的城市，那麼最該先看的，便是能夠一覽 Holy Vault 壯麗景象的 Hoplon。之後，他會再帶你們前往 Jeweled Crozier，最後再一路往下到 Foundation 的 Aetheryte Plaza。</p><p>到了 Hoplon，Tataru 先被四周林立的雕像吸引了注意，忍不住感嘆 Ishgard 人似乎真的很喜歡立像，甚至半開玩笑地說，說不定自己改行做雕刻也能在這種地方賺上一筆，畢竟你們現在正缺 gil。Alphinaud 的視線則早已落向 Holy Vault。僕從解釋說，Hoplon 這個名字來自守護神所持的青銅大盾，而這裡也是 Ishgard 最大的廣場。北方那座宏偉的大教堂，正是 Holy Vault，不但是整個國家的權力中心，也是 Ishgardian Orthodox Church 大主教的居所。當 Alphinaud 問起南方那些雕像時，僕從點頭確認，那正是傳說中的「十二騎士」──與 King Thordan I （Ishgard 建國時期的初代國王，率領「十二騎士」對抗 Nidhogg，並被後世奉為建國傳說的核心人物）並肩作戰、討伐 Nidhogg，並建立起 Ishgard 的勇士們。就在那一刻，你感覺自己眼前所見的不只是堅固的城牆與高聳的建築，而是一座由歷史、信仰與驕傲共同塑造出來的城市。</p><p>之後你們來到 Jeweled Crozier。這裡的商業景象井然有序，平靜得幾乎讓人一時忘了外頭仍有 Dragonsong War （Ishgard 與 Dravanian Horde （以 Nidhogg 為中心、盤踞 Dravania 一帶的龍族與龍類眷屬勢力，長年與 Ishgard 對立，是 Dragonsong War 中的主要龍族陣營）之間持續約千年的戰爭，起因是 King Thordan 與十二騎士背叛人龍盟約、殺害 Ratatoskr 並奪走她的雙眼，之後引發 Nidhogg 的復仇）的陰影。Tataru 立刻擺出熟門熟路的架勢，說若要買東西，最好還是讓她來交涉。Alphinaud 卻望著眼前那些來來往往的商人與整潔無損的街景，低聲說，看不見半塊焦黑的石頭，若只是看著這一切，幾乎會讓人以為 dragons 從未來襲過。很快地，市場的負責人 Elaisse 出現在你們面前。她一眼便看出你們既不是本地人，也不是四處行走的商販，而在得知你們是 House Fortemps 的受庇護者後，更露出明顯的興趣。Alphinaud 禮貌地向她說明，Count Edmont 已准許你們在 Ishgard 停留一段時間，因此你們會需要各式各樣的日用品與裝備；若她對與外來者交易感到不自在，你們也不願勉強。然而 Elaisse 很快便打消了他的顧慮。她直白地表示，面對金錢，這裡沒有人會分你我。武器、防具、配件、藥品、材料，只要你們願意付錢，Jeweled Crozier 的商人們都會樂意做這筆生意。</p><p>最後，僕從帶你們來到 Foundation 的 Aetheryte Plaza。一路走到這裡時，Tataru 忽然又提起，每次和 aetheryte 產生共鳴時，她總會有一種奇怪的刺麻感，也不知道是不是只有自己才會這樣。Alphinaud 則已經先一步完成了 attune，還反問你是不是也早就做好了。僕從提醒你，若你還沒有和這座以太之光共鳴，最好就趁現在完成，最好就趁現在辦妥。於是，這場帶著你們熟悉 Ishgard 的初次巡行，也在這裡暫時告一段落。</p><p>等你們回到 Fortemps Manor 時，Count Edmont 還有些意外，原本以為你們會想在城裡多待一會兒。Artoirel 以一貫平穩的態度告訴你，你們可以自由進出這座宅邸，若有任何需要，也只管開口。Emmanellain 則帶著他那種輕快又愛出風頭的口吻打趣，說你們住進來之後，House Fortemps 只會顯得更加神祕迷人。可是在這些輕鬆的話語底下，某種更實際的改變已經慢慢開始了。Ishgard 依舊陌生，依舊保守，依舊與你們之間隔著距離，但它已經不再是完全拒你們於門外的地方。你們正一步一步，開始學著在這座城市裡立足。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Alphinaud <small class="muted">(福爾唐伯爵府, X:6.1, Y:6.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="coming-to-ishgard.html">啟程前往伊修加德</a></div><div class="row">任一戰鬥／魔法職業（不含受限職業）Lv. 50</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-better-half.html">籠罩在心頭的陰霾</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
