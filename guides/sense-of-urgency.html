@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sense of Urgency | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Sense of Urgency (HW Patch 3.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/WN40LFzw538"
+              title="Sense of Urgency" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Sense of Urgency</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Sense of Urgency`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Marielle speaks to you with blunt honesty. Aside from the recent clashes with the Vanu Vanu, life at Camp Cloudtop is so uneventful that the stillness itself has become a problem. Though the outpost was built as an observation post, not a single incursion by the Horde has ever been recorded here. Because of that, the camp has come to be seen as an insignificant backwater, a place far removed from true danger. The Protector, once held up as the camp’s pride, is forever in need of repairs, and even if Ishgard itself were attacked, this garrison would be powerless to fly to its aid. In Marielle’s eyes, this is the sort of place where ambition withers and discipline slowly dies.</p><p>Yet she refuses to surrender entirely to that mood. If apathy can spread from man to man, she believes enthusiasm might do the same. And so she asks something simple of you: go to the sentries, stir their blood, and remind them that watchfulness still matters. In other words, she wants you to rouse them from the dullness that has settled over the camp.</p><p>When you first pass by Emmanellain, the sight before you does not inspire confidence. Honoroit is still taking his charge seriously, promising to give warning at once if he sights a Dravanian outflyer, but Emmanellain himself drifts somewhere between boredom and sleep. He yawns, asks whether you have slain any great Vanu champions yet, and then nearly dozes off mid-sentence. Even when your presence startles him, his thoughts turn at once to grander things. Mere sentry duty, he insists, is beneath him. Lady Laniaitte, he is certain, will soon entrust him with a mission worthy of his station.</p><p>The rest of the camp proves little better. One knight is so lost in idle thoughts that he wonders whether anything in the world might be softer than a cloud, and only your sudden interruption shocks him fully awake. Another scarcely bothers to hide his indifference, claiming that the Vanu are no true threat and that the Dravanians have no reason to care about a place so distant from the front lines. Yet when you press them—by force of urgency, by refusing to accept their complacency, by confronting their drowsiness with your own unshaken seriousness—their manner begins to change. Sleep is driven off, excuses falter, and however reluctantly, they are forced back into awareness of the duty they had begun to treat as empty routine.</p><p>By the time you return, Marielle can already see the difference. The sentries are behaving differently now, more alert than before, and for that she thanks you. When she then hears what Emmanellain has been saying—his certainty that Laniaitte will eventually grant him some glorious mission—she can only laugh. Whatever else may be said of him, his confidence has not yet deserted him. And with dry amusement, she remarks that she has no doubt Laniaitte will do everything in her power to oblige him.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Marielle <small class="muted">(The Sea of Clouds, X:15.3, Y:37.7)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="meeting-the-neighbors.html">Meeting the Neighbors</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 50</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="hope-springs-eternal.html">Hope Springs Eternal</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'マリエルの憂鬱',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>マリエルは、遠慮のない率直さでこの駐屯地の現実を語る。最近こそバヌバヌとの衝突が続いているとはいえ、それを除けばキャンプ・クラウドトップは驚くほど平穏で、その平穏さがかえって守備隊の規律を蝕んでいるのだという。本来ここは監視拠点として築かれたにもかかわらず、これまでドラヴァニア軍の侵入は一度として記録されていない。そのため、ここは誰の目にも取るに足らぬ辺境の地と映っている。さらに駐屯地の誇りであるはずの「プロテクトゥール」は、いつまでたっても修理ばかりで、たとえ教皇庁が襲われても救援に飛び立つことすらできない。マリエルに言わせれば、ここは志ある者の意欲が静かに死んでいく場所だった。</p><p>それでも彼女は、ただ諦めてはいなかった。無気力が人から人へ伝わるのなら、熱意もまた伝わるかもしれない。そう信じて、彼女はあなたに頼みごとをする。見張りたちのもとへ行き、戦う気持ちを呼び起こしてやってほしいというのだ。たるみきった空気の中で、いま必要なのは理屈よりも、眠りかけた心を揺さぶる刺激なのだろう。</p><p>だが最初に目に入るのは、希望に満ちた光景ではない。オノロワは変わらず真面目に、ドラヴァニアの飛行偵察を見つけ次第すぐ知らせると務めを果たそうとしているのに、当のエマネランは退屈に耐えかねて欠伸を噛み殺している。あなたを見るなり、もうバヌバヌの勇士でも討ち取ったのかと軽口を叩き、そのままうとうとと眠りに落ちかける始末だ。たとえ少し驚かされても、彼の頭にあるのは依然として、自分にふさわしい華やかな任務のことばかりだった。ただの見張りなど自分には向かない。ラニエットなら、いずれ自分の立場に見合う大任を与えてくれるはずだと、そう信じて疑わない。</p><p>ほかの見張りたちも似たようなものだった。ある騎士は雲より柔らかなものがあるのかと夢うつつに考え、あなたに叩き起こされてようやく目を覚ます。別の騎士は、バヌバヌなど大した脅威ではなく、ドラヴァニア勢もこんな場所には興味を示さないだろうと、高を括っている。だが、あなたがその弛緩を見過ごさず、眠気も無関心も正面から揺さぶっていくうちに、彼らの態度は少しずつ変わり始める。眠りは追い払われ、言い訳は勢いを失い、彼らは渋々ながらも、見張りという務めを再び務めとして意識せざるを得なくなる。</p><p>やがてあなたが戻ると、マリエルはすぐにその変化を見て取る。見張りたちの振る舞いは明らかに以前とは違っており、そのことに彼女は素直に礼を述べる。そしてエマネランが何を口にしていたのかを聞くと、思わず笑みをこぼす。ラニエットが自分にふさわしい立派な任務を与えてくれると、本気で信じているらしい。その自信ばかりは相変わらずだと感じながらも、彼女は乾いた可笑しみをにじませて言う。ラニエットなら、きっとその期待に応えるために全力を尽くすだろうと。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> マリエル <small class="muted">（アバラシア雲海, X:15.3, Y:37.7）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="meeting-the-neighbors.html">対するはバヌバヌ族</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="hope-springs-eternal.html">湧水のクリスタル</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'籠罩在心頭的憂慮',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Marielle 很直接地把 Camp Cloudtop 的現況攤開來告訴你。除了最近和 Vanu Vanu 的幾次衝突之外，這裡平靜得幾乎不像一座前線據點，而那份過於漫長的平靜，反而正在慢慢磨掉整個駐軍的紀律。明明這裡原本是為了監視而建立的觀測據點，卻直到現在都還不曾真正記錄到任何 Dravanian Horde 的入侵。正因如此，在大多數人眼裡，Camp Cloudtop 不過是個無足輕重的偏遠角落。至於這座營地引以為傲的 Protector，也總是處在永遠修不完的狀態裡；就算 Holy See 真的遭到龍族襲擊，他們也根本不可能立刻飛回去支援。說得更直接一點，Marielle 認為，這裡就是讓人把野心一點一點耗盡的地方。</p><p>可她並沒有因此就放棄。既然怠惰會在人與人之間蔓延，那麼振作與幹勁，說不定也一樣能傳開。於是她拜託你去見見那些負責警戒的哨兵，替他們重新點起一點戰意，讓他們不要再被眼前這份過度安穩的日常徹底吞掉。她要的並不是什麼華麗的手段，而只是有人能走到他們面前，把他們那早已鬆散下來的精神重新拉回來。</p><p>可當你真的走過去時，眼前的景象確實和她說的一模一樣。Honoroit 依舊老老實實地守在 Emmanellain 身邊，認真表示只要發現 Dravanian 的空中斥候，就會立刻通知自己的主人；可 Emmanellain 本人卻幾乎已經被無聊磨得快要睡著。他打著呵欠問你是不是已經宰了什麼了不起的 Vanu Vanu 勇士，話才說到一半便差點直接打起呼來。即使被你嚇了一下，他也很快又把重點拉回自己身上，抱怨這種單調的哨兵工作根本不適合他，還堅信 Laniaitte 遲早會交給他一項配得上身分的大任。</p><p>其他哨兵的情況也沒有好到哪裡去。有的人昏昏欲睡，腦子裡想的竟是這世上是否還有比雲更柔軟的東西；有人被你一驚，才總算徹底清醒過來，連聲保證自己接下來絕不會再睡。也有人滿不在乎地表示，Vanu Vanu 根本算不上真正的威脅，而 Dravanian Horde 更不可能對這種遠離前線的地方感興趣。可你並沒有順著這份鬆懈放過他們。你把那種漫不經心一點一點逼退，讓他們重新意識到，哪怕這裡看似平靜，警戒本身也不該只是空有形式。於是，那些原本鬆垮到幾乎快散掉的精神，總算開始被一點一點拉了回來。</p><p>等你回到 Rosehouse 時，Marielle 立刻就看出了變化。她向你道謝，因為光是從那些哨兵現在的樣子，她就已經能看出他們的狀態和剛才不同了。可當她又聽見 Emmanellain 說了些什麼之後，還是忍不住笑了出來。原來他仍一心認定，Laniaitte 遲早會給他一項華麗又重大的任務。對此，Marielle 倒沒有真的反駁，只是帶著幾分乾脆的幽默說，她毫不懷疑 Laniaitte 會盡她所能，「滿足」這位年輕貴族的期待。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Marielle <small class="muted">(阿巴拉提亞雲海, X:15.3, Y:37.7)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="meeting-the-neighbors.html">初遇 Vanu Vanu 族</a></div><div class="row">任一戰鬥／魔法職業（不含受限職業）Lv. 50</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="hope-springs-eternal.html">希望不滅</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
