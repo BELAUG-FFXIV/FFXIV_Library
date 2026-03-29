@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hope Springs Eternal | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Hope Springs Eternal (HW Patch 3.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/6cAXnjK4L_M"
+              title="Hope Springs Eternal" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Hope Springs Eternal</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Hope Springs Eternal`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Marielle has little doubt how matters will unfold. If Emmanellain insists upon a task more dangerous than standing watch, then Laniaitte will almost certainly decide that you must accompany him. There is no point pretending otherwise, she says. Since she has nothing further to assign you for the moment, you had best go and see whether the inevitable has already come to pass.</p><p>When you return, Emmanellain is already boasting that he trained under some of the finest instructors in Ishgard and could march straight into a Vanu stronghold if given the chance. Honoroit, hearing this, can only despair that things had been going well until now. Laniaitte then turns to you with dry understanding. Emmanellain, it seems, has declared that mere sentry duty is beneath him, and she plainly suspects that your earlier words may have helped awaken this new sense of purpose. Since there is no changing his mind, she resolves to give him something more demanding and asks if she may count on you to keep him safe.</p><p>The task she chooses is no small one. Camp Cloudtop is in constant need of fresh water, for no wells may be sunk here, and so the garrison must look for other means of securing it. Recently, they discovered a peculiar kind of crystal that may allow them to draw water by other methods. These spring crystals can be found in Voor Sian Siran, east of the camp, and Laniaitte wants you and Emmanellain to bring one back. The route is not without danger. Wild beasts haunt the lakes, and Vanu scouts range from a nearby settlement. Yet she remarks, with a weariness she does not bother to hide, that keeping the young lord occupied may prove the more troublesome challenge. As before, she asks you to brief him in her stead, believing he will receive the duty better from you than from her.</p><p>Emmanellain reacts exactly as she anticipated. He grumbles that if he did not know better, he would think Laniaitte was avoiding him, but the moment he hears that the mission concerns the very survival of Camp Cloudtop through the procurement of drinkable water, all complaint vanishes. At last, he says, she has entrusted him with a task of real importance. So the three of you set out, and upon reaching the famed lakes of Voor Sian Siran, Honoroit marvels that they are real at all, having only heard of them in song. Emmanellain, however, quickly grows bored by the lack of visible danger. Finding no Vanu in sight, he decides that the search for a spring crystal should become a contest between you, with Honoroit to judge the winner on size, purity, and beauty. Before any objection can slow him, he runs ahead and claims a stretch of the lakeshore as his own.</p><p>Left to your part in this absurd competition, you search the crystals until at last you find one that matches Laniaitte’s description, steadily secreting water of its own. When you bring it back, Honoroit examines it with open fascination. Though he admits such matters are beyond his expertise, he cannot help but marvel that a crystal like this might draw moisture from the air as a pump draws water from the ground. Emmanellain, meanwhile, is nowhere to be seen yet. Even in a mission tied to necessity, his restlessness has once again turned the work into something half practical and half theatrical.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Marielle <small class="muted">(The Sea of Clouds, X:15.3, Y:37.7)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="sense-of-urgency.html">Sense of Urgency</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 50</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-series-of-unfortunate-events.html">A Series of Unfortunate Events</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'湧水のクリスタル',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>マリエルは、これからどうなるかをほとんど見通していた。エマネランが見張りより危険な任務を望むのなら、ラニエットがあなたを同行させようと考えるのは目に見えている。避けようとしても無駄なのだから、早いうちに彼女のもとへ向かったほうがよいと、マリエルは淡々と言う。今のところ自分から与える用事はもうない。ならば、起こるべくして起こることに備えるしかなかった。</p><p>あなたが戻ると、エマネランはすでに自分がイシュガルド屈指の教師たちに鍛えられたのだと胸を張り、バヌバヌの根城へだって踏み込めると言わんばかりの勢いを見せていた。オノロワは、せっかく物事がうまく進んでいたのにと頭を抱えるばかりだ。ラニエットはそんな様子を見て、乾いた理解をにじませながら、エマネランが「ただの見張り役では物足りない」と言い出したと告げる。そして、その自覚の芽生えには、どうやらあなたにも一枚かんでいるらしいと半ば見抜いたうえで、ならば彼にもう少し骨のある仕事を与えるしかないと決める。その代わり、彼を無事に保つ役目はあなたに任せたいという。</p><p>彼女が選んだ任務は、決して軽いものではなかった。キャンプ・クラウドトップは常に真水を必要としているが、この地では井戸を掘って地下水を得ることができない。そこで最近見つかったのが、別の方法で水を得られる可能性を持つ特殊な結晶だった。湧水結晶と呼ばれるそれは、東のヴール・シアン・シランで見つかるという。ラニエットは、あなたとエマネランにその結晶をひとつ持ち帰ってほしいと頼む。もっとも、その道中には湖に棲む野生の獣もいれば、近くの集落から出てくるバヌバヌの斥候もいる。だが彼女は、それ以上に厄介なのは若君を退屈させずに連れて歩くことかもしれないと、疲れを隠さず口にする。そして以前と同じく、この任務の説明は自分ではなくあなたからしてほしいと頼む。どうやら彼は、あなたの口からのほうが素直に受け入れるらしい。</p><p>案の定、エマネランの反応もまた彼女の予想どおりだった。ラニエットがまたあなたを通して任務を伝えてきたことに不満げな様子を見せ、よほど避けられているのではないかとぼやく。けれどそれが、キャンプ・クラウドトップの生存さえ左右しかねない、飲み水確保のための重大任務だと聞いた瞬間、その不満はきれいに消え去る。ついに自分にふさわしい大事な役目が回ってきたのだと、彼はたちまち上機嫌になる。そうして三人でヴール・シアン・シランへ向かうと、オノロワは吟遊詩人の歌でしか知らなかった湖が本当に存在していたことに素直な驚きを見せる。だがエマネランは、肝心の敵影がまるで見えないことにすぐ物足りなさを覚え、結晶探しをあなたとの勝負にしようと提案する。大きさ、透明さ、そして見た目の美しさで競い、判定役はオノロワに任せるというのだ。そう言うが早いか、彼は自分の担当場所を勝手に決めて、さっさと駆け出していく。</p><p>あなたは半ばあきれながらも、自分の側で結晶を探し始める。そしてついに、ラニエットの言葉どおり、絶えず水をにじませている結晶を見つけ出す。持ち帰られたそれを前に、オノロワは自分にはこうした分野の知識が乏しいと認めながらも、まるで汲み上げるように空気中の水分を引き出せるのかと感心を隠せない。実用のための任務であるはずなのに、エマネランが加わることで、物事はどこか競争めいた騒がしさを帯びる。それでも、必要なものは確かに手に入ったのだった。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> マリエル <small class="muted">（アバラシア雲海, X:15.3, Y:37.7）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="sense-of-urgency.html">マリエルの憂鬱</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-series-of-unfortunate-events.html">雲海より現れしもの</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'希望不滅',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Marielle 幾乎已經看見接下來會怎麼發展了。既然 Emmanellain 已經開始要求更危險、更像樣的任務，那麼 Laniaitte 多半也會順勢把你派去陪著他。既然遲早躲不掉，還不如早點去見她。反正眼下她這邊也沒有別的事能交給你了，與其拖延，不如乾脆去面對那個幾乎已成定局的安排。</p><p>等你回去時，Emmanellain 果然已經又開始誇耀自己受過 Ishgard 最優秀教官的訓練，甚至說只要有機會，他和你兩個人就能直接殺進 Vanu Vanu 的據點，好好給對方一點教訓。Honoroit 在旁邊聽得直發愁，只覺得原本一切都進行得好好的，如今卻又開始往失控的方向滑去。Laniaitte 則帶著一點無可奈何地看著你，說 Emmanellain 剛剛已經明白表示，「區區站哨」這種事根本配不上他，而她大概也猜得到，促成這份「覺悟」的人正是你。既然如此，她也只能真的給他一件更有分量的事去做，前提則是你得陪著他，確保他別把自己送進危險裡。</p><p>她交給你們的任務，確實和 Camp Cloudtop 的生存息息相關。由於這片高空地帶無法像地面那樣挖井取水，駐地始終面臨淡水不足的問題。最近他們發現了一種特殊的結晶，也許能用別的方法取得水源。那種 spring crystal 就位在東邊的 Voor Sian Siran，而她希望你和 Emmanellain 能把其中一塊帶回來。只是前往那裡並不輕鬆。浮湖周圍有野生猛獸出沒，附近聚落也會有 Vanu Vanu 的斥候巡行。可就連這些危險，在她看來，恐怕都還比不上一路上要想辦法讓那位年輕貴族別覺得無聊來得麻煩。和前一次一樣，她還是請你代為向 Emmanellain 說明任務，因為這種事由你開口，他似乎總比較願意接受。</p><p>果然，Emmanellain 一聽見又是由你來轉達任務，先是忍不住嘀咕，說要不是自己早就知道情況，幾乎要懷疑 Laniaitte 根本是在躲著他。可當你告訴他，這是一項關係到 Camp Cloudtop 能否持續存活的重要任務，而且內容是去取得可飲用水源時，他的不滿立刻煙消雲散。這下他終於覺得，自己總算被託付了真正有價值的使命。於是你們三人動身前往 Voor Sian Siran。到了那片傳說中的浮湖後，Honoroit 忍不住感嘆，自己從前只在吟遊詩人的歌裡聽過這些湖泊，從沒真心相信它們真的存在。Emmanellain 卻很快對眼前的平靜感到失望，因為四周竟連一個 Vanu Vanu 的影子都看不見，根本沒有半點他想像中的刺激。於是他心血來潮，乾脆提議把尋找 spring crystal 這件事變成你和他之間的比賽，誰找到更優秀的樣本，誰就算贏，而評判的工作則交給 Honoroit，從大小、純度，甚至外觀美感來分出高下。話才說完，他便自顧自地劃定地盤，轉身跑開了。</p><p>你也只能在這場莫名其妙的競賽裡繼續做正事，沿著湖邊尋找符合描述的結晶。最後，你終於找到一塊持續滲出穩定水流的 crystal，看起來正是 Laniaitte 想要的那種 spring crystal。當你把它帶回去時，Honoroit 帶著幾分驚奇端詳著它，坦白說自己對這些原理懂得不多，卻仍忍不住讚嘆，像這樣的結晶竟然真能像水泵一樣，把空氣中的水氣引出來。明明是為了前線生存而執行的任務，最後卻又被 Emmanellain 弄得像一場帶著任性的遊戲。不過至少，真正需要的東西，你還是確實帶回來了。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Marielle <small class="muted">(阿巴拉提亞雲海, X:15.3, Y:37.7)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="sense-of-urgency.html">籠罩在心頭的憂慮</a></div><div class="row">任一戰鬥／魔法職業（不含受限職業）Lv. 50</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-series-of-unfortunate-events.html">自雲海現身之物</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
