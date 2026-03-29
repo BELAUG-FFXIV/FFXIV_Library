@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Meeting the Neighbors | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Meeting the Neighbors (HW Patch 3.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/21579oIGu3I"
+              title="Meeting the Neighbors" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Meeting the Neighbors</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Meeting the Neighbors`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Now that Emmanellain has been placed somewhere he is less likely to endanger himself, Laniaitte finally turns to the matter she truly cares about. With him safely occupied, she says, you are free to discuss the real difficulty facing Camp Cloudtop: the Vanu Vanu. Years earlier, when Ishgard first began exploring the Sea of Clouds, the two peoples had not met as enemies. There had been gifts, civil words, and enough mutual goodwill for the knights to gain permission to build a permanent lookout post in these floating heights. For a time, that fragile understanding held.</p><p>But the peace did not last. After half a year, the Vanu Vanu’s attitude changed without warning. No reason was ever made clear. They began attacking Ishgardian foraging parties without provocation, and what had once been a cautious coexistence gave way to hostility. Since then, Camp Cloudtop has been forced to depend more heavily upon supplies flown in from Ishgard, its daily survival made more difficult by an enemy it still does not fully understand. Laniaitte does not linger on explanation for long. Words, she says, can only carry you so far. If you are to understand the truth of the situation, you must see it for yourself. To that end, she sends you to Ser Marielle.</p><p>Marielle receives you at once, already expecting your arrival. She quickly learns that you have never faced the Vanu before, and tells you that if you spend enough time patrolling these skies, an encounter is inevitable. The Vanu, she explains, are native to the floating isles. Calling them birdmen is convenient, though she adds with dry humor that they are nothing like the Ixal—unless one imagines an Ixal born of a gigas mother. Then, setting humor aside, she marks several points on your map and orders you to search those places. If you find any Vanu, you are to kill them or drive them away. If you find nothing at all, then perhaps that absence may be taken as a fortunate omen.</p><p>So you set out across the high and wind-cut reaches of Cloudtop, searching the marked ground for any sign of danger. At one point you feel the unmistakable tension of a hostile presence nearby and steel yourself for battle, only to find no Vanu waiting there after all. Yet the warning comes again elsewhere, and this time the threat proves real enough. The uneasy quiet of the patrol gives way to action, and whatever brief hope there was for a bloodless day is broken by another clash in the endless strain between Ishgard and the Vanu Vanu.</p><p>When you return to the Rosehouse, Marielle asks at once whether your patrol is complete and whether you have anything to report. Hearing that the day did not pass without conflict, she gives a rueful response. It had been too much, perhaps, to hope for even a single day without a skirmish. Even so, she takes comfort in one thing: Halone has seen fit to grant Camp Cloudtop a formidable ally. In a place worn thin by vigilance, cold, and uncertainty, your presence is no small reassurance.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Laniaitte <small class="muted">(The Sea of Clouds, X:17.0, Y:37.3)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="an-indispensable-ally.html">An Indispensable Ally</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 50</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="sense-of-urgency.html">Sense of Urgency</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'対するはバヌバヌ族',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>エマネランがひとまず危険の及びにくい場所へ追いやられたことで、ラニエットはようやく本当に話すべきことへ向き直る。これで実際に重要な問題、すなわちキャンプ・クラウドトップを悩ませ続けるバヌバヌとの争いについて話せるようになったのだと、彼女は言う。イシュガルドが雲海の探索を始めたばかりのころ、両者の出会いはまだ敵意に満ちたものではなかった。挨拶を交わし、贈り物を交わし、そのうえで浮島に恒久的な監視拠点を築くことまで許されたのだ。しばらくのあいだ、その関係は静かな均衡の上に保たれていた。</p><p>だが、その平穏は長くは続かなかった。およそ半年が過ぎたころ、理由もわからぬまま、バヌバヌの態度は突然変わる。彼らは何の前触れもなく採集部隊を襲うようになり、イシュガルド側は食糧や物資の確保を本国からの空輸に頼らざるを得なくなった。ラニエットは、それ以上言葉を重ねても仕方がないと判断する。実際に体験することに勝るものはない。そう言って彼女は、あなたをマリエルのもとへ向かわせる。</p><p>マリエルは、あなたが来ると聞いていたらしく、迷いなく迎え入れる。そして、あなたがまだバヌバヌと戦ったことがないと知ると、巡回を続けていればいずれ嫌でも遭遇することになると告げる。彼らは浮島に暮らす先住の民であり、便宜上「鳥人」と呼ばれることはあっても、イクサルとはまるで違う存在だという。もっとも、イクサルの母親がギガースだったなら話は別だが、と皮肉めいた冗談も忘れない。そうして彼女は地図にいくつかの地点を書き込み、そこへ向かってバヌバヌの有無を確かめるよう命じる。もし現れたなら討ち払うか追い返すこと。何も見つからなければ、それはそれで吉兆と思うことにしようと、半ば願うように言う。</p><p>あなたは高く風に晒されたクラウドトップを巡り、示された地点をひとつずつ見て回る。ある場所では、敵意を帯びた気配に身構えながらも、待ち伏せしていたバヌバヌの姿は見当たらない。だが別の場所では、その不穏な気配が現実のものとなる。束の間の静けさはあっけなく破られ、平穏な巡回になるかもしれないという淡い期待は、またしても小競り合いによって打ち砕かれる。雲海の空の下では、警戒が緩む暇などないのだと、現実がはっきりと突きつけてくる。</p><p>やがてローズハウスへ戻ると、マリエルは巡回を終えたあなたに、何か報告すべきことはあるかと問いかける。今日こそ何事もなく終わるかもしれないという望みは、やはり少し欲張りすぎたのだろう。そう苦く笑いながらも、彼女はひとつの救いを口にする。ハルオーネは、この駐屯地に頼もしい助力を与えてくれたのだと。絶えず空を見張り、敵意と寒さに耐え続けるこの地にあって、あなたの存在はそれほどまでに心強いものとなっていた。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ラニエット <small class="muted">（アバラシア雲海, X:17.0, Y:37.3）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="an-indispensable-ally.html">困ったヤツのあしらい方</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="sense-of-urgency.html">マリエルの憂鬱</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'初遇 Vanu Vanu 族',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>等 Emmanellain 總算被安置到比較不容易闖禍的地方後，Laniaitte 才終於把話題轉回真正重要的事。既然那位年輕貴族暫時不會再妨礙眼前的局面，她便能和你好好談談 Camp Cloudtop 眼下真正棘手的問題——也就是他們與 Vanu Vanu （棲息於 Sea of Clouds 浮空島的鳥型獸人部族，長年生活在高空群島之中，後因 Ishgard 勢力進入當地而與之發生衝突）之間的衝突。她告訴你們，Ishgard 當年剛開始探索 Sea of Clouds 時，最初與 Vanu Vanu 的接觸其實並不是以敵對開始的。雙方曾交換過禮物，也曾有過表面上的友善往來，而在那之後，他們甚至獲准在這片浮空群島上建立固定的監視據點。那段時間裡，彼此之間曾經維持過一段短暫而脆弱的和平。</p><p>可那份平靜並沒有持續太久。大約半年之後，Vanu Vanu 對 Ishgard 的態度突然改變，而且直到現在也沒有人真正知道原因是什麼。他們開始毫無預警地襲擊外出的採集隊伍，使 Camp Cloudtop 不得不更加依賴從 Ishgard 空運過來的補給。Laniaitte 並沒有繼續把話講得太長。對她而言，單靠聽人敘述，終究比不上親眼去看、親自去碰上一次。於是她要你去找 Ser Marielle，因為比起繼續聽她說下去，你更需要的是對 Vanu Vanu 的第一手體會。</p><p>Marielle 早已知道你會過來，見到你後便直接切入正題。她聽說你還沒真正和 Vanu Vanu 交過手，便告訴你，只要在這裡巡邏得夠久，遲早都會遇上他們。她也順勢向你說明，Vanu Vanu 是這些浮空島嶼的原生居民。雖然嘴上方便時也會叫他們「鳥人」，但他們和 Ixal 完全不是同一回事——除非那隻 Ixal 的母親碰巧是個 gigas。說完這句帶著乾笑的玩笑話後，她便在你的地圖上標出幾個地點，要你前去查看。若在那些地方發現 Vanu Vanu，就把他們擊退或驅離；若什麼都沒遇上，那就當作今天難得碰上了一個好兆頭。</p><p>於是你沿著 Cloudtop 那些高懸於雲上的地帶展開巡查，一處一處確認那些被標記出來的位置。途中，你一度感覺到附近有明顯的敵意，於是立刻繃緊神經、做好迎戰準備，可真正找過去時，卻沒有發現任何埋伏著的 Vanu Vanu。可那份不安並沒有就此消失。之後，你又再次察覺到同樣的危險氣息，而這一次，威脅終於化為真正的衝突。原本也許還能平安度過的一日，很快便再次被小規模戰鬥打斷，彷彿在提醒你，這裡的平靜從來都只是表面。</p><p>等你回到 Rosehouse 時，Marielle 立刻問你巡邏是否結束了，還有沒有什麼值得回報的事。聽完你的經歷後，她苦笑了一聲，像是早就知道自己不該奢望今天能毫無衝突地過去。至少，在這樣的日子裡，她還能安慰自己一件事——Halone 至少替 Camp Cloudtop 帶來了一位強而可靠的援手。在這片長年被寒風、戒備與不安籠罩的前線上，像你這樣的存在，的確足以讓人稍微放下心來。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Laniaitte <small class="muted">(阿巴拉提亞雲海, X:17.0, Y:37.3)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="an-indispensable-ally.html">不可或缺的盟友</a></div><div class="row">任一戰鬥／魔法職業（不含受限職業）Lv. 50</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="sense-of-urgency.html">籠罩在心頭的憂慮</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
