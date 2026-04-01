@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Proper Procedure | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – Proper Procedure (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/_PfM5xRhK4U"
+              title="Proper Procedure" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Proper Procedure</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Proper Procedure`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Sweetnix introduces himself in his usual excitable way, proud to be both a handsome goblin and a shrewd trader. Yet for all his confidence in business, he falters when faced with one particular errand. He has a letter that must be delivered to Mealvaan’s Gate, but fear has left him trembling, and so he begs you to carry it in his place to the tax official, P’tahjha.</p><p>When you arrive, P’tahjha is in the midst of worrying over Sweetnix’s absence. Without the required import records, she says, she has been forced to consider driving him out of the city altogether. The matter is plainly serious, and her frustration is sharpened by the thought that the records have still not appeared.</p><p>The moment she sees the documents in your hands, however, her mood changes. These are indeed Sweetnix’s records, and they have been submitted in time. Relief replaces irritation, though not entirely. She admits that, month after month, the same delay forces her to weigh the same harsh possibility, all because the goblin never seems able to overcome his fear of her offices.</p><p>Even so, P’tahjha does not speak without kindness. As long as traders follow proper procedure, she says, Limsa Lominsa has no wish to shut its doors to foreigners. She asks you to carry those words back to Sweetnix, hoping they may calm the poor goblin’s fears at last.</p><p>When you return, Sweetnix is overjoyed to hear that you made the delivery and that P’tahjha spoke kindly of him. Your help, your swift feet, and your generous heart all earn his enthusiastic praise. Delighted and greatly relieved, he rewards you with a shining gift, the joy of the moment spilling over too strongly for him to contain.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Sweetnix Rosycheeks <small class="muted">(Limsa Lominsa Lower Decks, X:4.3, Y:11.5)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row">Any Class or Job Lv. 1</div></div>`,
+    followq:`<div class="stack"><div class="row">None</div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'筆まめスウィートニクス',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>スウィートニクスは、いつもの調子で、自分は見目うるわしいゴブリンであり、商いにも抜け目のないやり手だと胸を張る。だが、そんな彼にもどうしても気後れしてしまう用向きがあった。メルヴァン税関公社へ届けねばならない書状があるというのに、震えが止まらず、自分では行けそうにないのだと訴え、税関職員のペ・タージャへ代わりに届けてほしいとあなたに頼む。</p><p>あなたが税関公社を訪れると、ペ・タージャはちょうどスウィートニクスの到着を案じていた。輸入記録が提出されなければ、このままでは彼を都市から退去させることまで考えねばならない――そう口にするほど、事態を軽くは見ていない様子だった。</p><p>だが、あなたが差し出した書類を目にした途端、彼女はそれがまさしくスウィートニクスの記録であり、期限内に提出されたことに安堵する。もっとも、その安堵の裏にはあきれもにじんでいた。毎月のように同じ書類を出すことになっているのに、そのたびに提出が遅れ、彼の処遇を考え直さねばならなくなるのだと、彼女は率直にこぼす。</p><p>それでも、ペ・タージャの言葉は厳しさばかりではない。正しい手続きを踏むかぎり、リムサ・ロミンサは異国の商人たちにも十分に門戸を開いているのだと彼女は語る。そして、そのことをスウィートニクスに伝えてほしいとあなたに頼み、その言葉が少しでも彼の不安をやわらげることを願う。</p><p>あなたが戻ってその言葉を伝えると、スウィートニクスは書状が無事に届いたことにも、ペ・タージャが自分にやさしい言葉を向けてくれたことにも、心から喜ぶ。広い心と素早い足で助けてくれたあなたを盛んにたたえ、あふれるうれしさのままに、きらめく品を礼として差し出すのだった。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> スウィートニクス <small class="muted">（リムサ・ロミンサ：下甲板層, X:4.3, Y:11.5）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row">いずれかのクラス・ジョブ Lv 1～</div></div>`,
+    followq:`<div class="stack"><div class="row">なし</div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'合乎規矩的做法',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Sweetnix 一如往常地用那種誇張又熱鬧的語氣介紹自己，得意地說自己既是漂亮的哥布林，也是精明能幹的生意人。可即使在買賣上再怎麼自信，他面對某件差事時還是明顯怯了下來──有一封信必須送去 Mealvaan’s Gate，但他自己卻怕得發抖，只好拜託你代他跑這一趟，把信交給稅務官 P’tahjha。</p><p>當你來到 Mealvaan’s Gate 時，P’tahjha 正為 Sweetnix 遲遲沒有出現而感到頭痛。她直言，若沒有把該交的進口紀錄按規定送來，她恐怕就不得不考慮把他逐出城去。從她的語氣裡聽得出來，這件事並不是隨口嚇唬，而是她不得不認真面對的問題。</p><p>但當她看見你帶來的文件後，態度立刻轉了過來。那些確實是 Sweetnix 的紀錄，而且還算是在期限內送達。她因此鬆了一口氣，卻也忍不住感嘆，那個哥布林明明每個月都得交同樣的文件，卻每個月都因為拖拖拉拉，逼得她不得不再次考慮是否要把他趕出 Limsa Lominsa。</p><p>即使如此，P’tahjha 的話裡仍有明白的寬容。她要你轉告 Sweetnix，只要外來商人願意遵守正當程序，Limsa Lominsa 其實相當願意接納他們。她希望這番話多少能安撫那個可憐哥布林長久以來的恐懼，也讓他別再如此提心吊膽。</p><p>等你把消息帶回去之後，Sweetnix 一聽說信已順利送到，又知道 P’tahjha 還特地說了寬慰他的話，立刻高興得幾乎要跳起來。他一面誇你心地寬厚、腳程俐落，一面把滿滿的喜悅全都傾瀉出來，最後還歡天喜地地送你一份亮晶晶的謝禮。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Sweetnix Rosycheeks <small class="muted">(利姆薩・羅敏薩下層甲板, X:4.3, Y:11.5)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row">只要任一職業達到等級 1 以上即可</div></div>`,
+    followq:`<div class="stack"><div class="row">無</div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
