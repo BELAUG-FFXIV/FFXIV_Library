@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>From on High | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – From on High (HW Patch 3.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/I5El8d2wYfI"
+              title="From on High" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">From on High</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`From on High`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>As you prepare to make for Falcon’s Nest, Thierremont stops you with an awkward request. There is a knight stationed at the Anvil to the west—Ser Ysaudore—who, he says, has always shown him a kindness and respect he scarcely feels he deserves. While you were away, she passed through on patrol, and he believes she may have left a package behind. He cannot abandon his post at the Pike to return it himself, and so he asks whether you might make the detour in his stead. The favor is small, but the earnestness in his voice makes plain that it means more to him than he wishes to say.</p><p>When you find Ysaudore at the Anvil and present the parcel, her first reaction is confusion. She insists she knows nothing of it, but the denial does not last. A sharp breath and a weary sigh betray the truth before she can keep it hidden. The package was never something she had misplaced. It was a gift, meant for Thierremont. She explains, with restrained frustration, that he works himself relentlessly and gives little thought to his own health. If nothing else, he ought to eat better.</p><p>Yet when the obvious question is raised—why she did not simply give it to him herself—her answer comes with almost equal parts embarrassment and indignation. A highborn knight, she says, cannot be seen openly favoring a lowborn mason in such a way. Whatever concern she feels must be buried beneath decorum, however foolish that may seem. Even so, she thanks you for your thoughtfulness, and for helping Thierremont in spite of the inconvenience.</p><p>She then bids you return safely and swiftly to Falcon’s Nest, and asks that you give her regards to Ser Redwald. But even that attempt at composure falters. For a brief moment, caught in the tangle of her own feelings, she lets slip more than she means to, only to stop herself and hastily correct course. All she wishes conveyed, she insists, are her warmest regards to Ser Redwald—and nothing more.</p><p>When you return to the Pike, Redwald is already aware that you have been keeping busy. He praises your initiative, but there is no leisure to dwell on such matters. Pressing concerns leave little room for gratitude. Instead, he tells you that there is a task at hand demanding every able-bodied man and woman available—including you, and Lord Artoirel as well. Whatever brief human warmth you passed between the Pike and the Anvil is set aside at once, and the needs of Coerthas call you onward again.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Thierremont <small class="muted">(Coerthas Western Highlands, X:32.5, Y:28.5)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-first-and-foremost.html">The First and Foremost</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 50</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="reconnaissance-lost.html">Reconnaissance Lost</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'届かぬ届け物',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ファルコンズネストへ向かおうとしたところで、ティエルモンがどこか気まずそうにあなたを呼び止める。西のアニヴィルに駐留しているイゾルデールという騎士に、ひとつ頼まれごとをしてほしいのだという。彼女はこれまでずっと、自分にはもったいないほどの優しさと敬意をもって接してくれたのだと、彼は少し照れくさそうに語る。あなたが留守にしているあいだ、彼女は巡回の途中でここを通り、その際に荷物をひとつ置き忘れていったらしい。だが彼自身は持ち場であるパイクを離れられない。だからこそ、少し遠回りにはなるが、代わりに届けてほしいと頼むのだった。</p><p>あなたがアニヴィルでイゾルデールにその包みを差し出すと、彼女はまず怪訝そうな顔を見せ、自分には心当たりがないと言う。だが、その態度は長くは続かない。思わず漏れた苛立ちとため息が、かえって事情を物語っていた。その荷物は、彼女が落としたものではなかったのだ。むしろティエルモンに渡すために用意した贈り物だった。彼は昼も夜もなく働き続け、自分の身体をいたわろうともしない。せめて食事くらいはもう少しまともに取るべきだと、彼女は抑えた口調の奥に本物の案じる気持ちを滲ませる。</p><p>ではなぜ、直接本人に渡さなかったのか。そう問われた彼女は、困惑と苛立ちをないまぜにしたように言い返す。高貴な家柄の騎士が、身分の低い石工にそこまで肩入れしていると人目に映るわけにはいかないのだ、と。礼儀や体面というものがある以上、その気遣いを表立って示すことはできない。どれほど不器用な形であれ、彼女なりに守ろうとしている一線がそこにはあった。それでもなお、あなたが気を回し、ティエルモンを助けようとしてくれたことには素直に感謝を示す。</p><p>やがて彼女は、ファルコンズネストへ戻る道中の無事を祈りつつ、レドヴァルトへよろしく伝えてほしいと言う。だが、その言葉にもどこか落ち着かぬ気配が混じる。自分でも何か余計なことを口走りかけたのだと気づいたのか、彼女は慌てて取り繕い、伝えるべきはあくまで温かい挨拶だけで、それ以上は何もないのだと念を押す。胸の内にあるものを隠しきれず、それでも隠そうとする不器用さが、その短いやり取りに滲んでいた。</p><p>パイクへ戻ると、レドヴァルトはすでにあなたが精力的に動いていたことを聞き及んでいた。機転を利かせた働きぶりを称えてはくれるものの、今はその礼を尽くしている余裕はないという。すぐに取りかからねばならぬ務めがあり、そのためには動ける者をひとり残らず投入したいのだと、彼は告げる。その中には、あなたも、そしてアルトアレールも含まれていた。ささやかな人情の機微に触れた直後であっても、クルザスの現実は休むことなく、あなたを次の務めへと押し出していくのだった。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ティエルモン <small class="muted">（クルザス西部高地, X:32.5, Y:28.5）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-first-and-foremost.html">征竜将の彫像</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="reconnaissance-lost.html">哨戒部隊を捜索せよ！</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'無法送達的物品',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>當你正準備前往 Falcon’s Nest 時，Thierremont 卻忽然叫住了你，神情裡還帶著一點說不出口的遲疑。他有件事想拜託你。西邊的 Anvil 那裡駐守著一位騎士，名叫 Ysaudore，而在他的口中，這位騎士一直都以遠比自己應得更多的善意與尊重對待著他。就在你不在的時候，她巡邏經過此地，而他覺得，她可能把一個包裹落在這裡了。只是 Pike 這邊離不開人，他自己無法親自送去，所以才想拜託你幫忙繞一趟路，把東西交還給她。那語氣聽來像是在說一件小事，可其中那份小心翼翼，卻讓人很難不察覺這件事對他而言其實並不只是舉手之勞而已。</p><p>等你在 Anvil 找到 Ysaudore，並把包裹拿給她時，她起初還露出明顯的困惑，直言自己完全不知道你在說什麼。可那份否認很快就撐不住了。她低低咒了一句，又忍不住長長嘆了口氣，像是一下子被逼到了無法再裝作若無其事的地方。原來，那根本不是她不小心遺落的東西，而是她原本準備送給 Thierremont 的禮物。她說，那個人日夜不停地工作，幾乎完全不顧自己的身體；若別的事暫時做不到，至少也該先把飯吃得像樣一點。她說得很克制，可那份關心卻已經從字裡行間洩了出來。</p><p>可當你順著這層意思問下去，為何不乾脆直接把東西交給他時，Ysaudore 卻立刻像被針刺到一樣，帶著窘迫與惱意回了你一句。身為出身高貴的騎士，她不能讓人看見自己用那樣的方式去關照一位出身低微的石匠。這種事，在外人眼裡終究是不合體面的。於是，那份本來再自然不過的關心，只能被硬生生壓進禮數與身分之中，變成連親手送出都做不到的東西。即便如此，她仍然真心感謝你的關心，也感謝你願意替 Thierremont 多走這一趟。</p><p>之後，她祝你回 Falcon’s Nest 的路上一切平安，也請你替她向 Ser Redwald 問候。可這句話說出口後，她自己卻像忽然意識到什麼似的，話音一頓，整個人又顯得有些彆扭起來。她像是被自己的處境夾在中間，一時脫口說出了不該讓人多想的語氣，於是又急忙把話收回去，重新強調，你只要替她向 Ser Redwald 轉達最真摯的問候就好，除此之外，什麼都不用多說。那份不肯坦白卻也藏不住的情緒，就這樣停在她最後的叮囑裡。</p><p>等你回到 Pike，Redwald 已經從 Rothe 那裡聽說你這段時間做了不少事，並對你的主動與效率表示讚賞。可眼下顯然不是能慢慢道謝的時候。Coerthas 的局勢依然緊迫，他手上正有一件必須立刻處理的任務，甚至恨不得把所有還能動的人全都投進去，包括你，也包括 Lord Artoirel。於是，方才那段藏在寒風與克制裡的細微心意，還來不及真正沉下去，你就又被下一件更迫切的責任推著繼續往前走。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Thierremont <small class="muted">(庫爾札斯西部高地, X:32.5, Y:28.5)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-first-and-foremost.html">首要之務</a></div><div class="row">任一戰鬥／魔法職業（不含受限職業）Lv. 50</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="reconnaissance-lost.html">失聯的偵察隊</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
