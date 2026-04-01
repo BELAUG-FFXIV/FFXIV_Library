@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Over the Wall | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Over the Wall (HW Patch 3.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/I1wM_hE6x5s"
+              title="Over the Wall" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Over the Wall</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Over the Wall`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Artoirel begins again with formality, introducing himself not simply as Count Edmont’s eldest son, but as a man determined to be judged by the duties placed upon him. He asks that you forgive his earlier outburst, insisting that it was never meant as disrespect. He merely takes pride in being equal to the responsibilities entrusted to him, unlike certain others he pointedly leaves unnamed. Still, Haurchefant has spoken of you often, and if you are even half the man his brother claims, Artoirel says he will be glad to have you beside him.</p><p>He then turns to the task before you. Together, you are to assist the people of House Durendaire and House Dzemael. Though he assumes you already know of the rivalry between the great houses, he does not hide that the prospect brings him little pleasure. Yet the Holy See has willed that such differences be set aside in this critical hour, and so he will obey. Before any of that work can begin, however, you must first secure passage to Falcon’s Nest. With that, he leads you to the chocobo stables in Foundation.</p><p>There, a chocobokeep presents you with a black chocobo prepared under Artoirel’s orders. If this is your first time riding one, he says, then you are in for a rare experience. Unlike the more familiar breeds, this one can fly, and under the right conditions can bear you high above the land—even over Snowcloak itself. You are told not to trouble yourself with guiding the bird, for like all porters she is trained to carry you safely to her destination. All you need do is hold fast and take in the view.</p><p>And so you cross into the western highlands from the back of a flying mount, passing over a land that was once green and living, but was blanched and broken by the Calamity. Beyond walls of ice lie territories long abandoned, places the knights of Ishgard have struggled ceaselessly to reclaim. At the end of that journey waits Falcon’s Nest, once left behind, but now emerging from beneath years of snow and ash. When you arrive, Artoirel remarks that the world feels strangely different when seen from the back of an airborne chocobo, and admits that he still finds the sensation unexpectedly liberating.</p><p>Then duty calls him back to himself. Ser Redwald is in command here, and he has been expecting your arrival. Redwald receives you warmly, recognizing your name from Lord Drillemont’s account, and welcomes you to Falcon’s Nest as a ward of House Fortemps. Before speaking of work, however, he judges it best that you understand the recent history of the place. Falcon’s Nest, he explains, was once a small hamlet defended by a modest garrison and inhabited by a few villagers—until the Calamity came. When it became clear the snows would never cease, they had no choice but to withdraw entirely, abandoning not only the settlement but all of the western highlands.</p><p>Artoirel adds bitterly that the abandoned land then fell to the heretics, with Lady Iceheart and her followers moving through it unchecked ever since. But Redwald answers that this is no longer to be tolerated. The Holy See has commanded that the western highlands be reclaimed and all heretical elements driven out. Falcon’s Nest stands at the center of that effort, yet rebuilding it is no small undertaking. The craftsmen laboring there need both protection and aid. Artoirel immediately gives House Fortemps’s answer: as promised, you are at Redwald’s disposal. All that remains is to be told where to begin.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Artoirel <small class="muted">(Fortemps Manor, X:6.1, Y:5.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-better-half.html">The Better Half</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 50</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="work-in-progress.html">Work in Progress</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'鷹の巣',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>アルトアレールは、改めてあなたに向き直り、エドモン・ド・フォルタン伯爵の長男として名乗る。そして先日の感情的な言葉について、どうか許してほしいと静かに告げる。無礼を働くつもりはなかったのだという。ただ、自分は与えられた務めに見合うだけの力を持つと信じている――そうではない者もいるが、と含みを残しながらも、彼は誇りを隠さない。それでも、オルシュファンからあなたのことはたびたび聞かされてきたらしく、もしその言葉の半分でも真実なら、自分の隣にいてくれることを嬉しく思うと率直に言う。</p><p>そうして彼は、今回の任務へ話を進める。あなたとともに助力する相手は、デュランデル家とデゼマール家の者たちだ。名家どうしの友好的な競い合いについては、すでに耳にしているだろうと前置きしつつも、その両家を助けることに喜びを覚えているわけではないと、彼は隠そうとしない。だが、今は聖教都市の意志に従い、この重大な局面においては私情を脇へ置かねばならない。そう語ったうえで、まずはファルコンネストへ向かうための足を確保しようと、あなたを下層の厩舎へ案内する。</p><p>そこで待っていた厩務員は、アルトアレールの指示に従い、あなたのために黒チョコボを用意していた。もしこれが初めての騎乗なら、きっと忘れがたい経験になるだろうと彼は言う。この種のチョコボは空を飛ぶことができ、条件が整えばスノークロークを越えるほど高く舞い上がることもできるという。もっとも、行き先を案じる必要はない。運搬用として訓練された個体である以上、自ら目的地まで連れて行ってくれる。あなたはただ手綱をしっかり握り、広がる景色を見届ければよいのだ。</p><p>そうしてあなたは、空飛ぶ黒チョコボの背から西部高地へ渡る。かつては緑に満ちていた土地は、霊災によって色を失い、凍てつく荒野へと変わっていた。氷の壁の向こうには、長く見捨てられてきた領域が広がり、イシュガルドの騎士たちはそれを取り戻すために絶えず力を尽くしてきた。その果てにあるのがファルコンネストだった。いったんは見捨てられたこの集落も、いまは雪と灰の覆いを払いながら、再び人の手によって立ち上がろうとしている。到着したアルトアレールは、空を飛ぶチョコボの背から眺める世界はまるで別物だと語り、その感覚には今なお不思議な解放感があると漏らす。</p><p>だが彼はすぐに気持ちを引き締め、ここを預かるレドヴァルトのもとへ向かわねばならないと言う。出迎えたレドヴァルトは、ドリユモン卿からあなたの話を聞いていたらしく、フォルタン家の客分としてファルコンネストへようこそと迎えてくれる。もっとも、仕事の話に入る前に、この土地の近年の歩みを知っておいてほしいと彼は言う。ファルコンネストは、もとは小さな騎兵隊とわずかな村人たちが暮らす寒村にすぎなかった。だが霊災が訪れ、雪がやむ気配もないとわかったとき、彼らは撤退を命じるほかなかった。集落だけでなく、西部高地そのものが放棄されたのだ。</p><p>そこへアルトアレールが、捨てられた土地はその後ずっと異端者たちに委ねられ、氷の巫女とその徒党が好き放題に歩き回ってきたのだと苦々しく言葉を継ぐ。だがレドヴァルトは、もはやそれを許しはしないと応じる。聖教都市は西部高地の奪還と異端者勢力の排除を命じており、その目的を果たすうえでファルコンネストは要となる場所だ。とはいえ、見てのとおり集落の再建は容易ではなく、作業にあたる職人たちには支援と護衛が必要だという。アルトアレールはすぐに、約束どおりフォルタン家は力を貸すと答える。あとは、どこから始めるべきかを示してもらうだけだった。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> アルトアレール <small class="muted">（フォルタン伯爵邸, X:6.1, Y:5.9）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-better-half.html">わだかまる雲霧</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="work-in-progress.html">ゼーメル家の大工</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'越過高牆',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Artoirel 重新以更正式的態度向你開口，表明自己是 Count Edmont de Fortemps 的長子，也希望你能原諒他先前一時失控的反應。他說，那並不是出於對你的不敬，而只是因為他始終相信，自己完全有能力承擔被交付給自己的責任，不像某些人那樣。即使話裡仍隱隱帶著對兄弟的評價，他還是補上一句，說 Haurchefant 經常提起你。若你真有他所說的一半可靠，那麼能有你同行，對他而言便是一件值得高興的事。</p><p>說完這些之後，他很快便把話題拉回眼前的任務。接下來，你們將去協助 House Durendaire 與 House Dzemael 的人。至於這幾個高位家族之間一向帶著競爭意味的關係，他想你應該多少已經知道一些。也正因如此，要他去幫這兩家做事，顯然並不是什麼令他愉快的安排。可在這種關鍵時刻，Holy See 已經下令各方必須先把彼此的分歧擺到一旁，其餘的事之後再說。眼下最重要的，是先設法前往 Falcon’s Nest。於是，他帶著你前往 Foundation 的 Holy Stables，準備取得路上的交通工具。</p><p>到了那裡後，照料陸行鳥的人已經替你們準備好了行程。你的坐騎是一隻黑色陸行鳥，依照 Artoirel 的指示早已備妥。那名管理人還特地問你，這是不是你第一次騎乘黑色陸行鳥；若真是如此，那麼這趟路上你應該會有一段很特別的體驗。因為這種品種不只善於長途載運，還能飛行。只要條件合適，甚至能載著你飛得很高，高到越過 Snowcloak。當然，你不必擔心如何操控牠。和所有運送用的陸行鳥一樣，牠早已受過訓練，會自己把你平穩送到目的地。你只需要牢牢握住韁繩，安心看著沿途的景色展開就行。</p><p>於是，你從高空之中前往 Coerthas Western Highlands。從飛行中的黑色陸行鳥背上俯瞰，眼前的世界呈現出與平地上截然不同的模樣。這片如今被冰雪吞沒的荒地，曾經也是一片綠意尚存的土地，卻在 Calamity（通常指重創 Eorzea、終結舊時代的那場大災厄；在本段語境裡，就是讓各地勢力與貴族在災後持續承受損失的「Seventh Umbral Calamity」）之後，逐漸失去了原本的顏色與生氣。穿過高聳的冰壁之後，便是那些多年來被迫放棄、卻始終有人試圖重新奪回的領域。而在那片寒冷、孤絕、長久遭遺棄的地方之中，Falcon’s Nest 正等待著你。那座曾經被迫撤離的聚落，如今終於開始從覆蓋多年的雪與灰燼之下，一點一點重見天日。抵達之後，Artoirel 也罕見地露出一絲近乎感慨的語氣，說從會飛的陸行鳥背上俯瞰世界，總會讓人覺得一切都變得不一樣，而那種感覺至今仍讓他覺得有種奇異的解放感。</p><p>不過，他很快便收回了那點短暫的感觸，提醒你該回到正事上來。負責這裡的人是 Ser Redwald，而他應該已經知道你們要到了。等你們真正走進 Falcon’s Nest 後，Redwald 果然出面迎接，並在聽見 Artoirel 的介紹後，立刻認出你就是 Lord Drillemont 曾經提過的人。他以 House Durendaire 的騎士身分向你致意，歡迎你來到 Falcon’s Nest。只是，在談及該如何幫忙之前，他認為你有必要先知道這個地方近年發生過什麼。因為 Falcon’s Nest 原本不過是一個小聚落，裡頭只有一支規模不大的駐軍與少數居民。可後來，Calamity 降臨了。</p><p>當他們終於明白，漫天大雪不會停下時，唯一能做的便只有全面撤離。於是，不只是 Falcon’s Nest 本身，整個 western highlands 都被迫放棄。Artoirel 接著把話接了過去，低聲補上一句——而那片被放棄的土地，也就從那時起落入了異端者手中。Lady Iceheart 與她的同夥，自此便在這片地帶毫無顧忌地來去。可 Redwald 很快便表示，這樣的局面如今不會再被放任下去。Holy See 已經下令，要重新收復 western highlands，並將其中的異端勢力逐出。而 Falcon’s Nest，正是完成這一切的關鍵據點。只是，就像你現在親眼所見的那樣，要把這座聚落真正重建起來，絕不是輕而易舉的事。這裡的工匠需要支援，也需要保護。對此，Artoirel 立刻代表 House Fortemps 表明態度：正如先前承諾的那樣，你們會全力協助。現在要做的，只剩下聽 Redwald 指示，看看一切該從哪裡開始。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Artoirel <small class="muted">(福爾唐伯爵府, X:6.1, Y:5.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-better-half.html">籠罩在心頭的陰霾</a></div><div class="row">任一戰鬥／魔法職業（不含受限職業）Lv. 50</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="work-in-progress.html">Dzemael 家仍在進行中的工程</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
