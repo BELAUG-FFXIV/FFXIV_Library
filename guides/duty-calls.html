@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Duty Calls | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – Duty Calls (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/OXH84sVfsgY"
+              title="Duty Calls" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Duty Calls</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Duty Calls`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>At Mealvaan’s Gate, you learn that every good brought into Limsa Lominsa is meant to be inspected, and the required duty collected according to law. Yet not every merchant is willing to meet that obligation, and so there are times when those who would avoid payment must be pursued.</p><p>P’tahjha entrusts you with two ledgers. One is to be delivered to a man named Sundhimal at the Octant, and the other to a woman named Latisha, who works at the Bismarck.</p><p>Should the Bismarck prove difficult to find, you are told that Sundhimal will be able to direct you there when you meet him.</p><p>When you place the ledger in Sundhimal’s hands, he immediately understands what it concerns. Faced with yet another case of unpaid duty, he voices open disgust, wondering when such merchants will ever learn. He makes it plain that if any of the offenders come into view, he will haul them back to Mealvaan’s Gate by force if he must.</p><p>When you mention the second ledger, Sundhimal points you onward. Following the path to the upper decks, you find the Bismarck and deliver the ledger to Latisha. The thought of tax evaders dining among the establishment’s patrons clearly troubles her, though she says that what is done is for the good of the city-state. Should any merchant named in the ledger appear at the restaurant, she promises that Mealvaan’s Gate will be informed at once.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> P’tahjha <small class="muted">(Limsa Lominsa Lower Decks, X:4.3, Y:11.3)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row">Any Class or Job Lv. 1</div></div>`,
+    followq:`<div class="stack"><div class="row">None</div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'関税逃れ包囲網',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>メルヴァン税関公社では、リムサ・ロミンサへ持ち込まれる品々を検め、法に従って関税を徴収している。だが、その義務を逃れようとする商人もおり、ときにはそうした者たちを追わねばならない。</p><p>ペ・タージャはあなたに、二冊の帳簿を届けてほしいと頼む。一冊はスンドヒマルへ、もう一冊は「ビスマルク」で働くラティシャへ渡すためのものだった。</p><p>もし「ビスマルク」の場所がわからなければ、先にスンドヒマルを訪ね、そのときに道を尋ねればよいとも告げられる。彼なら行き先を教えてくれるはずだ。</p><p>あなたがスンドヒマルに帳簿を手渡すと、彼はそれが何を意味するのかすぐに察する。またしても関税の未納が出たと知り、そうした商人たちはいつになれば学ぶのかと、あからさまに不快さをにじませる。そして、もし当の相手を見つけたなら、必要とあらば無理やりにでも税関公社へ引き立てるつもりだと言い放つ。</p><p>続いて、もう一冊をラティシャへ届ける必要があると伝えると、スンドヒマルはその道順を示してくれる。あなたはその案内に従って「ビスマルク」へ向かい、ラティシャへ帳簿を渡す。</p><p>帳簿に記された者たちが店の客の中にいるかもしれないと知り、ラティシャは驚きと戸惑いを隠せない。それでも、すべては都市国家のために必要なことだと受け止め、もし帳簿に名のある商人が店を訪れたなら、ただちにメルヴァン税関公社へ知らせると約束する。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ペ・タージャ <small class="muted">（リムサ・ロミンサ：下甲板層, X:4.3, Y:11.3）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row">いずれかのクラス・ジョブ Lv 1～</div></div>`,
+    followq:`<div class="stack"><div class="row">なし</div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'圍堵逃避關稅者的天羅地網',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>在 Mealvaan’s Gate，你得知凡是進入 Limsa Lominsa 的貨物，都要依照法令接受檢查，並繳納應付的關稅。可惜並不是每個商人都願意履行這份義務，因此也總有人試圖逃避，而他們正是 Mealvaan’s Gate 必須追查的對象。</p><p>P’tahjha 把兩本帳簿交到你手上，請你代為送出。其中一本要交給在 Octant 的 Sundhimal，另一本則要送去 Bismarck，交給在那裡工作的 Latisha。</p><p>如果你一時找不到 Bismarck，也不用擔心。P’tahjha 要你先去見 Sundhimal，到了那裡再向他問路，他自然會指給你看。</p><p>當你把帳簿交給 Sundhimal 時，他立刻明白這又是一起拖欠關稅的事。面對那些一再逃避義務的商人，他語氣裡滿是厭惡，甚至直說若讓他看見名單上的人，必要時就算要硬拖，也會把他們押回 Mealvaan’s Gate。</p><p>之後，你再把另一冊帳簿的去向告訴他，Sundhimal 便為你指出通往上層甲板的路。你循著那條路來到 Bismarck，將帳簿交給 Latisha。她一聽說連來店裡用餐的客人之中都可能混有逃稅者，不由得吃了一驚，也感到十分不是滋味；但她仍明白，這一切都是為了 Limsa Lominsa 的利益。她答應你，只要帳簿上有名字的商人踏進店裡一步，她就會立刻通知 Mealvaan’s Gate。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> P’tahjha <small class="muted">(利姆薩・羅敏薩下層甲板, X:4.3, Y:11.3)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row">只要任一職業達到等級 1 以上即可</div></div>`,
+    followq:`<div class="stack"><div class="row">無</div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
