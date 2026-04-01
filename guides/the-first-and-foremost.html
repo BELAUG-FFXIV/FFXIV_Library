@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The First and Foremost | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – The First and Foremost (HW Patch 3.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/71Kgzd5JSuQ"
+              title="The First and Foremost" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">The First and Foremost</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`The First and Foremost`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Rothe looks at you and sees at once what your actions have already proven. He has no gift for battle himself, he says, yet even a man with little skill at arms can recognize true skill when he sees it. Keeping such help to himself would be a waste when others are struggling just as he was, and so he asks you to continue north to the Pike, the immense statue standing out in the wastes. There, a mason named Thierremont has been laboring alone, and Rothe fears the burden set upon him may be too much for one man to bear.</p><p>When you find Thierremont at the monument, he welcomes the sight of another pair of hands without hesitation. He explains that he has been charged with restoring the sculpture, but five years of neglect have left it in a sorry state. Even so, he has already found the very tool he needs for the work—though not in his own possession. The coarse bristles of deepeyes, he says, would serve perfectly for scouring away the soot that clings to the stone, and so he asks you to slay three of the creatures and bring their bristles back to him.</p><p>You go out and do as he asks. In the frozen reaches around the Pike, you hunt down the deepeyes and shear from them the rough dark bristles he requires. It is simple work compared with greater trials, but no less necessary for that. In a land where war, loss, and abandonment have worn away at everything, even small acts of restoration carry their own quiet importance.</p><p>When you place the bristles in Thierremont’s hands, he immediately shows you why he wanted them. Their roughness is exactly what he needs to scrub away the soot blackening the statue’s surface. And as he speaks of the figure before you, his voice fills with pride. This is no ordinary monument, but the image of Haldrath, first of the Azure Dragoons and one of Ishgard’s founding fathers. More than stone, the Pike is a statement—one the Dravanians hate enough to scorch with dragonfire whenever they pass.</p><p>That is why this labor matters so much to him. He refuses to let the monument remain defiled, and vows that it will soon stand as it once did: proud, shining, and unbowed. To him, restoring the Pike is not merely maintenance, but an act of devotion to Ishgard itself, a visible sign that the nation has returned and will not yield. The work is harsh, the cold unforgiving, and the task far from finished—but as an Ishgardian, he says, he could ask for no greater honor than to tend the likeness of such a hero.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Thierremont <small class="muted">(Coerthas Western Highlands, X:32.5, Y:28.5)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="work-in-progress.html">Work in Progress</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 50</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="from-on-high.html">From on High</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'征竜将の彫像',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ローテは、あなたをひと目見るなり、その腕前を疑わなかった。自分には武芸の才などないが、それでも本物の力量くらいは見ればわかるのだと彼は言う。そんな助けを自分ひとりのために使い続けるのは惜しい。まだ同じように手を必要としている者がいるのなら、そちらへ向かってほしいと、彼はあなたに頼む。行き先は北方の荒野にそびえる巨大な石像、「パイク」。そこで石工ティエルモンが修復作業にあたっているが、ひとりでは抱えきれぬほどの仕事を背負っているに違いないと、ローテは案じていた。</p><p>あなたがパイクへ赴くと、ティエルモンは差し伸べられた助力をためらいなく受け入れる。彼に任されているのは、この彫像の修復だった。だが五年にも及ぶ放置は、石肌に深い傷みを残している。それでも彼には当てがあった。必要なのはディープアイの剛毛だという。その粗い毛なら、石像にこびりついた煤を削り落とすのにうってつけなのだ。そこで彼は、三体のディープアイを倒し、その剛毛を持ち帰ってほしいとあなたへ頼む。</p><p>あなたは雪と風に晒される高地へ出て、言われたとおりディープアイを狩り、その毛を集める。大戦の行方を左右するような務めではない。けれど、この地ではそうした小さな力もまた、確かに必要とされている。傷つき、荒れ果て、長く顧みられなかったものを、ひとつずつ手で立て直していくことにもまた、戦いとは別の意味があった。</p><p>剛毛を受け取ったティエルモンは、その手触りを確かめるなり、これこそが欲しかったものだと満足げに語る。石像を覆う煤をこすり落とすには、この荒々しい感触がちょうどよいのだ。そして彼は、あなたの前にそびえるその像を誇らしげに見上げる。そこに刻まれているのは、蒼天騎士の始祖ハルドラス、そしてイシュガルド建国の父のひとりの姿だった。パイクはただの彫像ではない。だからこそドラヴァニアの者たちは、それを憎み、通るたびに竜の炎で焼こうとするのだ。</p><p>それでも、ティエルモンはその冒涜を受け入れるつもりはない。いずれこの像を、かつてのように誇り高く、輝く姿へ戻してみせるのだと彼は語る。イシュガルドが再びここへ戻ってきたのだという証として、そして異端者たちへの宣言として。作業は過酷で、寒さも厳しく、終わりもまだ遠い。だがイシュガルドの民である自分にとって、この英雄の像を守り整える以上の名誉はないのだと、彼は静かに言い切る。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ティエルモン <small class="muted">（クルザス西部高地, X:32.5, Y:28.5）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="work-in-progress.html">ゼーメル家の大工</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="from-on-high.html">届かぬ届け物</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'首要之務',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Rothe 一眼就看出了你在戰鬥中的本事。他坦率地說，自己雖然談不上懂得使用武器，可就算不是什麼行家，也分得出真正的能耐。像你這樣的人，若只留在自己身邊幫忙，未免太可惜了，因為還有其他人也同樣需要援手。於是他請你繼續往北前往 The Pike，那座佇立在荒野中的巨大石像。那裡有位名叫 Thierremont 的石匠正在照料它，而在 Rothe 看來，那份工作顯然已經重到不是一個人能輕易扛下的程度。</p><p>等你來到 The Pike，Thierremont 對你的到來毫不掩飾地表示歡迎。這座雕像的修復工作如今由他負責，但五年的荒廢已經讓它受損得相當嚴重。所幸，他心裡早有該用什麼來處理的打算，或者更準確地說，那些 deepeyes 身上正好有他需要的東西。只要能取來牠們的硬毛，就能拿來刷掉覆在雕像表面的煤灰，因此他請你去擊倒三隻 deepeye，並把牠們的毛帶回來交給他。</p><p>於是你再次走入寒風與荒雪之中，照著他的請求獵殺 deepeyes，替他取回那些粗硬的毛。這不是什麼足以改變戰局的大事，也不是會被人高聲傳頌的功績。可在這片被戰火與漫長歲月消磨過的土地上，像這樣一點一點把破敗的東西重新拾起來，本身也有它不可取代的意義。</p><p>當你把硬毛交到 Thierremont 手上時，他立刻讓你感受到那東西真正派得上用場的原因。那粗糙得近乎刺手的質地，正適合用來刷去附著在石面上的焦黑痕跡。而當他抬頭看向眼前那座巨大雕像時，語氣裡也跟著浮現出真正的敬意。那是 Haldrath（Azure Dragoons 的始祖，也是 Ishgard 建國時期的重要人物之一）的形象，不只是單純的石雕，更是 Ishgard 意志的象徵。也正因如此，Dravanians 才會每次經過時都以龍焰焚燒它，像是非得把這份象徵抹去不可。</p><p>可對 Thierremont 而言，這樣的褻瀆絕不能繼續放任下去。他希望讓這座雕像重新恢復成從前那樣，驕傲、明亮、挺立不屈，既是 Ishgard 決心的見證，也像是在向異端者宣告，你們已經回到了這片地方。這份工作艱苦，環境也惡劣，可他並沒有半點退縮。身為一名 Ishgardian，能親手維護這樣一位英雄的雕像，對他來說，就是再沒有比這更值得承擔的榮耀了。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Thierremont <small class="muted">(庫爾札斯西部高地, X:32.5, Y:28.5)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="work-in-progress.html">Dzemael 家仍在進行中的工程</a></div><div class="row">任一戰鬥／魔法職業（不含受限職業）Lv. 50</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="from-on-high.html">無法送達的物品</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
