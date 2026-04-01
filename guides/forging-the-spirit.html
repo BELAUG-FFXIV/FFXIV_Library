@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Forging the Spirit | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – Forging the Spirit (ARR Patch 2.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+    .story-head{margin:18px 0 10px;font-weight:800}
+    .story-head:first-child{margin-top:0}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/5DsMFy7GTkA"
+              title="Forging the Spirit" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Forging the Spirit</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Forging the Spirit`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <div class="story-head">Forging the Spirit</div>
+      <p>Swynbroes begins with a question that seems almost impossible at first: what if even lifeless objects could possess a soul? He explains that they can, in a fashion—not a soul born from the object itself, but one left within it by its owner. Through long and faithful use, weapons and armor gradually come to hold the spiritual energy of the one who bears them, and from that bond a spiritbond is formed.</p>
+      <p>From that gathered energy, he tells you, materia can be created. It is a special crystal drawn out from the spiritual force that clings to well-used gear, and once attached to equipment, it can enhance the qualities of the item that bears it.</p>
+      <p>He speaks of this process with easy confidence, making it plain that materia extraction is a field he knows well. If you truly wish to understand how it works, he says, he would be glad to teach you.</p>
+      <p>When you declare yourself ready to learn, Swynbroes continues. Materia, he explains, is the crystallized form of a person’s spiritual energy, but because that energy comes from the mind and spirit of an individual—something never entirely stable—no two results can be expected to be exactly alike. In practice, that means the nature of a piece of materia cannot be known for certain until it rests in your hand.</p>
+      <p>Yet he is quick to add that materia alone is of little use. Its strength must be drawn forth by melding it to gear, and that work requires the skillful hands of a craftsman. Though you may always ask others to attach materia for you, he tells you that if you would rather learn to do it yourself, you should seek out F’hobhas, whose expertise lies in the art of melding.</p>
+
+      <div class="story-head">Waking the Spirit</div>
+      <p>F’hobhas greets your readiness with brisk approval and immediately turns your attention to the first principle of melding: materia slots. Every weapon and piece of armor, she explains, is made with a fixed number of places where materia may be attached, and that limit determines how many crystals the item can properly hold.</p>
+      <p>Under ordinary circumstances, gear cannot accept more materia than the number of slots it bears. That, she tells you, is the basic rule by which melding is governed.</p>
+      <p>And yet, she adds, the world is not without exceptions. There are cases that do not follow the ordinary limits, though she makes it clear that such matters lie beyond what you need to concern yourself with now.</p>
+      <p>For the present, she leaves you with only a glimpse of that deeper craft. When you have gained more experience and are ready to go further, she says, you may wish to speak with Master Mutamix. With that, she sends you on your way and wishes you well in the work of melding.</p>
+
+      <div class="story-head">Melding Materia Muchly</div>
+      <p>Mutamix Bubblypots greets you in his usual strange, hissing manner, but there is no mistaking his delight. To him, your skill in melding is already worthy of notice, and so he decides that you are ready to be entrusted with a secret known only to those who would push the craft further.</p>
+      <p>He explains that, in most cases, a weapon or piece of armor can bear only a small number of materia. That limit is the ordinary way of things, and no item is meant to hold more than it was made to receive.</p>
+      <p>And yet, there is another way. With a certain hidden technique, he says, it may be possible to force more materia into a single piece of gear than it would normally bear. He does not present it as a certainty, only as a dangerous possibility, one that tempts those who seek greater power.</p>
+      <p>Even so, Mutamix Bubblypots does not conceal the risk. This secret technique does not always succeed, and failure comes at a cost. What awaits you, he warns, is a test of nerve: your gear may endure and hold the added materia, or the materia may shatter into nothing. This is no art for the faint of heart.</p>
+    </div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Swynbroes <small class="muted">(Central Thanalan, X:23.9, Y:13.7)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row">Any Class or Job Lv. 19</div></div>`,
+    followq:`<div class="stack">
+      <div class="row">The following quests are included in the story below</div>
+      <div class="row">Waking the Spirit</div>
+      <div class="row">Melding Materia Muchly</div>
+    </div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'想いが生み出す力',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <div class="story-head">想いが生み出す力</div>
+      <p>スヴィンブルースは、まるで謎かけのようにあなたへ問いかける。命を持たぬ品にも、魂のようなものが宿ると言ったらどう思うか、と。彼が語るには、それは品そのものの魂ではなく、持ち主の魂が長く使い込まれるうちに武具へと移り、そこに留まったものなのだという。そうして武器や防具には使い手の霊的な力が蓄えられ、やがて深い絆が結ばれていく。</p>
+      <p>その蓄えられた力は、やがてマテリアという特別な結晶へと変えられる。装備品に宿った霊的な力を引き出し、結晶化したものこそがマテリアであり、それを武具に装着すれば、品の性質を高めることができるのだと彼は語る。</p>
+      <p>スヴィンブルースは、その仕組みに深く通じている様子で、マテリア化について学びたいのなら喜んで教えようと申し出る。その口ぶりには、自らの知識と技に対する確かな自負がにじんでいた。</p>
+      <p>あなたが学ぶ用意ができたと告げると、彼はさらに説明を続ける。マテリアとは、人の霊的な力が結晶となったものだが、その力の源は人の精神そのものにある。精神とは本来、常に揺らぎをはらむものゆえ、そこから生み出される結晶にも当然ばらつきが生じる。つまり、実際に手に取ってみるまで、その石がどのような性質を持つかはわからないのだという。</p>
+      <p>もっとも、マテリアはそれだけで大きな力を振るうわけではない。その力を引き出すには装備品へ装着しなければならず、その作業には職人の巧みな手先が必要になる。誰かに頼んで装着してもらうこともできるが、もし自らその術を身につけたいのなら、装着の技に長けたフ・ホバスを訪ねるとよい――そうスヴィンブルースはあなたに勧める。</p>
+
+      <div class="story-head">想いを伝える力</div>
+      <p>フ・ホバスは、あなたの準備ができていると知ると、まずマテリア装着で覚えておくべきこととして、装備品に備わった装着枠について語り始める。武器にも防具にも、それぞれ受け入れられるマテリアの数には限りがあり、その枠数こそが装着できる数を決めるのだという。</p>
+      <p>通常であれば、ひとつの装備品に装着できるマテリアの数は、その装着枠の数を超えることはない。フ・ホバスは、それがまず心得ておくべき基本だとあなたに教える。</p>
+      <p>だが同時に、世の中のあらゆることと同じように、そこにも例外は存在すると彼女はほのめかす。ただし、その知識はまだ先でよいものであり、今すぐ踏み込む必要はないのだと、落ち着いた調子で言い添える。</p>
+      <p>いずれ経験を積み、さらに先の技に目を向けるようになったなら、そのときはマスター・ミュタミクスに話を聞いてみるとよい――そう勧めたあと、フ・ホバスはあなたを送り出し、よき装着の手習いとなることを願う。</p>
+
+      <div class="story-head">禁断のマテリア装着</div>
+      <p>ミュタミクスは、いつもの妙な調子を交えながらも、あなたの腕前を見込んでいることを隠そうとしない。マテリア装着の技を十分に身につけたあなたになら、さらに先にある秘密の技を授けてもよい――そんな期待をにじませながら、語り始める。</p>
+      <p>彼の言うところでは、ふつう武器や防具に装着できるマテリアの数は多くない。装備品にはそれぞれ受け入れられる限りがあり、本来ならその範囲を越えて宿すことはできない。</p>
+      <p>だが、そこには常の理を外れた道もあるという。ある特別な技を用いれば、本来の限界を越えて、ひとつの装備品にさらに多くのマテリアを宿らせられるかもしれないのだと、ミュタミクスはあなたに打ち明ける。</p>
+      <p>もっとも、それは決して確かな成功を約束するものではない。彼は、その技がときに思いどおりに働かぬことも、はっきりと告げる。装備品が耐えて多くのマテリアを受け止めることもあれば、マテリアのほうが砕け散ってしまうこともある――ゆえにそれは、気の弱い者には到底向かぬ技なのだ。</p>
+    </div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> スヴィンブルース <small class="muted">（中央ザナラーン, X:23.9, Y:13.7）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row">いずれかのクラス・ジョブ Lv 19～</div></div>`,
+    followq:`<div class="stack">
+      <div class="row">以下のクエストは下記ストーリー内に収録されています</div>
+      <div class="row">想いを伝える力</div>
+      <div class="row">禁断のマテリア装着</div>
+    </div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'由心意鍛成的力量',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <div class="story-head">由心意鍛成的力量</div>
+      <p>Swynbroes 一開口，便向你拋出一個近乎不可思議的問題：若說連沒有生命的物品也能擁有靈魂，你會怎麼想？他隨即解釋，這並不是說那些物品本身真的生出了自己的靈魂，而是它們的主人在長久使用之中，將自身的精神力量留在了武器與防具之內。正因如此，人與裝備之間才會逐漸形成所謂的 spiritbond。</p>
+      <p>而那股積存在裝備中的精神力量，是可以被引導出來的。Swynbroes 告訴你，一旦將它轉化，就會成為名為 materia 的特殊結晶；而這種結晶，正可以裝著在裝備上，進一步強化武具原有的性質。</p>
+      <p>他談起這件事時顯得極有把握，顯然對 materia 化的原理與方法十分熟悉。若你想進一步理解其中的過程，他也很樂意親自教你。</p>
+      <p>當你表示自己已準備好開始學習後，Swynbroes 便繼續說明。materia 是個人精神力量的結晶，而這股力量既然源自人的心志，自然不可能始終穩定如一。正因為精神本身充滿變動，所以實際產出的 materia 也會有差異。換句話說，在你真正把那塊結晶握進手裡之前，誰也無法確定它究竟會具備什麼樣的性質。</p>
+      <p>不過，他也提醒你，materia 本身並不會平白發揮多少作用。若要真正引出它的力量，就必須把它裝著到裝備上，而這一步需要熟練工匠的巧手才能完成。你當然可以請別人代勞，但若你希望親手學會這門技術，那麼他建議你去見 F’hobhas，因為那正是她最擅長的領域。</p>
+
+      <div class="story-head">喚醒足以傳遞心意的力量</div>
+      <p>F’hobhas 見你已準備好開始，便俐落地把話題帶到 materia 裝著時最先該記住的一點：materia slots。她告訴你，每一件武器與防具，都有各自固定的裝著位置，而這些位置的數量，也就決定了那件裝備最多能承載多少 materia。</p>
+      <p>照常理來說，一件裝備能裝上的 materia，並不會超過它本身擁有的 slots 數量。這是裝著時最基本的規則，也是你眼下最先該記住的事。</p>
+      <p>不過，她也沒有把話說死。F’hobhas 提醒你，就和世上大多數事情一樣，這條規則並不是完全沒有例外。只是那樣的知識還不是你現在需要深入的領域，等到你累積了更多經驗之後，再去接觸也不遲。</p>
+      <p>她最後告訴你，若有一天你想進一步了解那些更深一層的技巧，便可以去找 Master Mutamix。說完之後，她爽快地讓你出發，也把一聲愉快的祝福留給你，彷彿正等著你親手踏進 materia 裝著的世界。</p>
+
+      <div class="story-head">大量進行禁忌魔晶石鑲嵌</div>
+      <p>Mutamix Bubblypots 用那種古怪又帶著嘶嘶聲的語氣迎接你，但他的意思其實十分明白。他看得出你已經具備了不錯的裝著本事，因此決定把一種更進一步的秘密技巧傳授給你。</p>
+      <p>他告訴你，照一般情況來說，一件武器或防具能承受的 materia 數量其實很有限。每件裝備原本都有自己的界限，通常只能容納少量 materia，不能無止境地繼續裝上去。</p>
+      <p>可是在常理之外，仍然存在另一條路。若能使用那種秘密的裝著技巧，原本只能承受少量 materia 的裝備，或許就有可能再容納更多。只是他說得很明白，這從來不是穩當無虞的事，而是一種帶著風險去逼近更高力量的做法。</p>
+      <p>Mutamix Bubblypots 也沒有刻意淡化其中的代價。他提醒你，這種秘密技巧有時並不會如願成功。到頭來，究竟是你的裝備能撐住、承載更多 materia，還是那些 materia 直接碎成一地殘片，都沒有人能事先保證。這不是膽怯之人能輕易承受的技術。</p>
+    </div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Swynbroes <small class="muted">(中央薩納蘭, X:23.9, Y:13.7)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row">只要任一職業達到等級 19 以上即可</div></div>`,
+    followq:`<div class="stack">
+      <div class="row">以下任務已收錄於下方故事中</div>
+      <div class="row">喚醒足以傳遞心意的力量</div>
+      <div class="row">大量進行禁忌魔晶石鑲嵌</div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
