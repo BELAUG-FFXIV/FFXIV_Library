@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>King of the Hull | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – King of the Hull (ARR Patch 2.3)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/Pm3Xbq0ysOk"
+              title="King of the Hull" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">King of the Hull</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`King of the Hull`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Bloezoeng stops you in Mor Dhona with the air of a man who has been waiting for exactly this moment. An old friend of his, he says, has sent word asking for your help with an important task. The matter is highly confidential, and though he refuses to reveal the man’s name, he hints that this client is no obscure figure in Limsa Lominsa. If you are willing to hear more, you are to go there and speak with a man named Denston instead.</p><p>At the Drowning Wench, Denston wastes no time. He speaks first of Mistbeard, the legendary pirate whose name is known throughout Limsa Lominsa, a man whose reach once threatened ships across every sea, even the golden fleet of Ul’dah. Then he tells you how, at the height of that infamy, Mistbeard vanished without a trace upon the Rhotano Sea. What remained behind him was not certainty, but rumor: whispers of a hidden treasure, waiting somewhere for the bold enough to seize it.</p><p>Before Denston can go further, his chief steps in and takes over the tale. He makes clear at once that he is not asking this as a representative of the Maelstrom, but as a private man. Then he tells you why the old legend has come alive again. South of Vylbrand lie the Cieldalaes, and near those remote islands is a stretch of sea forever wrapped in thick mist. Ships that stray into it vanish, and those few who survive speak of a hidden island that appears without warning and smashes vessels to ruin. From such stories, the legend of Hullbreaker Isle was born.</p><p>After the Calamity, however, the mist began to lift under certain conditions. On one such day, a merchant vessel drifted into the area by mistake and found a deserted isle. There, broken in a cove, lay the Haar—Mistbeard’s own flagship. The captain dared not linger long enough to search it, fearing the mist would close again, but the tale did not remain hidden after he returned to Limsa Lominsa. Word spread, and now treasure hunters everywhere are stirring once more.</p><p>That is why you are asked to go before them. From the wreck of the Haar, you are to retrieve one thing only: a golden coffer bearing Mistbeard’s crest. Denston explains that his chief cannot make the journey himself without drawing notice, and so the task falls to you. He ferries you from the Moraby Drydocks, watching the weather closely and timing your crossing for the moment when the mist parts. Once there, you are left to make your way through Hullbreaker Isle, find the wreck, and claim the coffer from within.</p><p>When you return alive and place the coffer in Denston’s hands, the truth is finally laid bare. Inside is no heap of treasure, but a mask—the secret of Mistbeard’s identity. Mistbeard, you learn, was never a single man. The name and the mask were passed down across generations to those deemed worthy, allowing the legend to endure. Yet now the last Mistbeard has chosen to end that line. Moved by one woman’s dream of a brighter future for Limsa Lominsa, he has resolved to cast both himself and his predecessors into history. So long as that mask exists, another pirate king could rise and rally hot-blooded Lominsans beneath his banner. For that reason, it must vanish forever. On this day, the pirate king Mistbeard is allowed to die at last, and with time, Denston says, the rumors will fade like the mist itself.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Bloezoeng <small class="muted">(Mor Dhona, X:22.1, Y:8.7)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-ultimate-weapon.html">The Ultimate Weapon</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 50</div><div class="row"><b>Unlock Dungeon</b> <a class="link" href="hullbreaker-isle.html">Hullbreaker Isle</a></div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="storming-the-hull.html">Storming the Hull</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'霧晴れしハルブレーカー',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>モードゥナであなたを待っていた男は、ようやく会えたと言わんばかりの様子で声をかけてくる。旧友から、ぜひあなたの力を借りたい極秘の用向きがあると伝言を預かっているという。相手の名は明かせないが、リムサ・ロミンサではよく知られた人物らしい。詳しい話を聞く気があるなら、まずはデンストンという男を訪ねてほしいと告げられる。</p><p>溺れた海豚亭で会ったデンストンは、挨拶もそこそこに本題へ入る。彼が語り始めたのは、伝説の海賊王ミストビアードのことだった。五つの海の船という船を震え上がらせ、ウルダハの黄金船団でさえその魔手から逃れられなかった男。だがその名声が絶頂にあったころ、彼はロターノ海で忽然と姿を消したという。そしてその後には、奪い集めた財宝がどこかに隠されているという噂だけが残った。</p><p>そこへ現れた黒渦団の要職にある男が、デンストンに代わって話を引き継ぐ。これは公の立場からの依頼ではなく、あくまで私的な頼みだとまず釘を刺したうえで、いま再び人々がその財宝を追い始めた理由を語る。ヴィルブランドの南、シェルダレー諸島の近海には、濃い霧に閉ざされた危険な海域がある。そこへ迷い込んだ船は姿を消し、わずかな生還者たちは、突如現れて船を粉々に砕く島の話を残した。そうして「ハルブレーカー・アイル」の伝説が生まれたのだという。</p><p>だが、第七霊災の後、その霧はある条件下で晴れるようになった。そしてある日、ひと隻の商船が誤ってその海域へ踏み込み、人気のない島へと流れ着く。その入り江で見つかったのは、砕けたまま横たわる「ハール」――ミストビアード自身の旗艦だった。船長は霧が再び閉じる前に戻ることを優先し、探索を断念したが、その発見はついに隠しきれなかった。たちまち噂は広がり、財宝を狙う者たちが各地で動き始めた。</p><p>だからこそ、あなたには彼らより先にハルブレーカー・アイルへ渡り、ハールの残骸からただひとつの品を持ち帰ってほしいのだという。それは、ミストビアードの紋章を刻んだ黄金の宝箱。依頼人自身が動けば目立ちすぎるため、その役目はあなたに託される。モラビー造船廠からデンストンの船で霧の晴れ間を縫って島へ渡り、あなたは島の奥へ進み、沈黙する旗艦の残骸の中からその宝箱をついに手に入れる。</p><p>そして無事に戻ったあなたの前で、その箱は開かれる。中にあったのは財宝ではなく、一枚の不気味な仮面だった。それこそがミストビアードの正体を示す秘密だったのである。ミストビアードとは、ひとりの男ではなかった。名も仮面も、ふさわしいと認められた者へ代々受け継がれ、伝説はそうして生き延びてきたのだ。だが、その最後の継承者は、リムサ・ロミンサによりよい未来をもたらそうとするひとりの女の願いに心を動かされ、この伝説を自ら終わらせることを選んだ。海賊を誇りとする古い生き方にしがみつく限り、この国に真の繁栄は来ない。その言葉に意味を見いだした彼は、自分と先代たちを歴史の中へ葬る決意をしたのだ。仮面が残れば、また新たなミストビアードが現れ、血気盛んな者たちがその旗の下に集うかもしれない。ゆえに仮面は二度と日の目を見てはならない。この日、海賊王ミストビアードはついに最後の息を引き取り、やがて財宝の噂も霧とともに薄れていくことになる。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ブルーツング <small class="muted">（モードゥナ, X:22.1, Y:8.7）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-ultimate-weapon.html">究極幻想アルテマウェポン</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 50～</div><div class="row"><b>ダンジョン開放</b> <a class="link" href="hullbreaker-isle.html">財宝伝説 ハルブレーカー・アイル</a></div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="storming-the-hull.html">波荒れしハルブレーカー</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'霧散之後破船者之王現身',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>在 Mor Dhona，Bloezoeng 一看到你，便像總算等到該等的人那樣迎上前來。他說自己收到了老朋友的消息，對方有一件重要任務需要你的幫忙。只是那是極機密的事，他不能直接說出那人的名字，只暗示那人在 Limsa Lominsa 是無人不知的角色。若你願意接下這件事，就先前往那座海都，去找一個叫 Denston 的男人。</p><p>到了 Drowning Wench 之後，Denston 幾乎不浪費半點時間，立刻切入正題。他先提起傳說中的海賊 Mistbeard──在 Limsa Lominsa，幾乎沒有人不知道這個名字。他的惡名曾遍及五海，就連 Ul’dah 的黃金船隊也沒能倖免。可就在他聲勢最盛的時候，Mistbeard 卻在 Rhotano Sea 上無聲無息地消失了。自那之後，世上留下的便只有另一個傳聞：他把掠奪而來的財寶藏在某處，正等著夠膽的人前去摘取。</p><p>就在 Denston 要繼續說下去時，他口中的「chief」現身了，並親自接過了後面的敘述。他先清楚表明，自己此番請託並非出於黑渦團的身分，而是純粹的私事。隨後，他告訴你，為何那個塵封已久的傳說如今又重新攪動人心。Vylbrand 南方的 Cieldalaes 一帶，有一片終年被濃霧包圍的危險海域，船隻一旦誤入，往往再也無法歸來。偶爾有少數倖存者漂上岸，口中都說起同一個傳聞：在霧中藏著一座會突然現身、將船隻撞得粉碎的島。於是，「Hullbreaker Isle」的傳說便這樣誕生了。</p><p>然而在第七靈災之後，那片霧海開始會在特定條件下短暫散開。有一次，一艘商船誤打誤撞闖了進去，最後竟在一座荒島的海灣中，看見了早已破碎擱淺的 Haar，那正是 Mistbeard 本人的旗艦。船長雖然非常想深入殘骸探查，但終究還是在霧重新聚攏之前，明智地先把船開回熟悉海域。只是這樣的發現終究不可能永久保密。回到 Limsa Lominsa 之後，消息還是傳了出去，於是各地的尋寶者又一次騷動起來。</p><p>也正因如此，你被託付了一項必須搶在眾人之前完成的任務。你要前往 Hullbreaker Isle，進入 Haar 的殘骸，帶回一件東西，一只刻有 Mistbeard 紋章的金色箱匣。Denston 也直說了，若由他的 chief 親自出面，反而太過引人注目，所以才需要你代行其事。之後，他在 Moraby Drydocks 準備好船，抓準霧散的時機把你送往那座傳說中的島，而你則獨自深入其中，終於將那只箱匣帶了回來。</p><p>當你平安回到 Limsa Lominsa，把箱匣交到 Denston 手中時，真正的答案也終於被揭開。那箱子裡裝著的不是財寶，而是一張面目猙獰的面具，那正是 Mistbeard 身分的秘密。原來，Mistbeard 從來不是單獨一個人。那個名字與那張面具，一代又一代地傳給被認為有資格承繼的人，於是傳說才能延續至今。但如今，最後一位 Mistbeard 已經為自己找到了新的意義：為了一名女子所描繪的、更光明的 Limsa Lominsa 未來，他決定親手終結這段歷史。海都本是由海賊建立的國家，許多人至今仍把掠奪與不受約束視為傳統；可若始終抱著那樣的傳統不放，Limsa Lominsa 就永遠不會迎來長久的繁榮。Mistbeard 看見了那番話中的道理，因此選擇把自己與歷代前人都一併送入歷史之中。只要那張面具還在，就可能再度誕生新的 Mistbeard，讓熱血的 Lominsan 再次聚集到海賊王的旗幟下。正因如此，面具不能再重見天日。就在這一天，海賊王 Mistbeard 終於迎來了最後的終結，而 Denston 也相信，隨著時間過去，關於財寶的傳聞終將像霧一樣慢慢散去。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Bloezoeng <small class="muted">(摩杜納, X:22.1, Y:8.7)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-ultimate-weapon.html">究極幻想：終極武器</a></div><div class="row">任一戰鬥／魔法職業（不含受限職業）Lv. 50</div><div class="row"><b>解鎖地城</b> <a class="link" href="hullbreaker-isle.html">尋寶傳說 Hullbreaker Isle</a></div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="storming-the-hull.html">強襲破艦島</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
