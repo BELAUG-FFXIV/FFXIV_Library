@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>How Low Can You Go | BELAUG · FFXIV Library</title>
+  <meta name="description" content="AlliedSociety – How Low Can You Go (ARR Patch 2.2)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/IdA45bVYSTk"
+              title="How Low Can You Go" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">How Low Can You Go</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`How Low Can You Go`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Gi Gu keeps you there and, once he is certain you will listen, finally lays bare the misery of the 789th. He tells you that kobold society is a merciless world where every order claws for survival. They dig for ore from dawn until dusk, and those who produce are rewarded with better digs and greater standing. Those who fail are scorned, cast aside, and left to endure the shame of falling behind.</p><p>He explains that the numbers carried by each order are not mere names, but marks of rank. The smaller the number, the greater the order. By that measure, the 789th stands at the very bottom. Driven from the tunnels and forced to labor in a barren vein, they are told to bring back more wealth if they wish to be welcomed home again. Yet this place yields almost nothing, while their kin in U’Ghamaro hoard riches so carelessly that even discarded scraps would be treasure to the 789th. In his desperation, Gi Gu begs you to go below and bring back anything at all.</p><p>When you return with even a few miserable fragments, Gi Gu receives them as though you had placed a fortune in his hands. The relief that floods his face is almost painful to see. Yet before he can steady himself, fear takes hold again. He begs you not to leave, for Zo Ga is coming. According to Gi Gu, Zo Ga is a brute who boasts of leading kobolds into a new age of prosperity, though in truth he values only his own power and tramples the weak without a thought.</p><p>So you remain hidden and watch. In time, Zo Ga arrives, flanked by attendants and carrying himself like a ruler inspecting subjects beneath contempt. Gi Gu greets him with trembling deference, but Zo Ga answers with mockery. He sneers at the 789th’s monthly haul, calls them sluggards, and declares that food and sleep are luxuries for kobolds who can pull their own weight. Then his cruelty deepens: unless they increase their yield a hundredfold, he will cut off their rations entirely. When Gi Gu protests that they are already weak and starving, Zo Ga coldly replies that if they cannot work, they may as well die—and that their bodies would at least make useful fuel.</p><p>By the time Zo Ga leaves, humiliation hangs over the dig like smoke. It is then that Skaetswys returns and learns what has happened. Gi Gu, still shaking, explains that Zo Ga leads the 13th and commands growing influence in U’Ghamaro. Few dare oppose him now. Yet the more Gi Gu speaks of helplessness, the angrier Skaetswys becomes. She cannot stomach such cowardice in the face of a tyrant, and before long she is openly declaring that she and you will bring Zo Ga to heel yourselves.</p><p>Gi Gu quails at the thought. Zo Ga terrifies him, but so too does the ferocity of the Roegadyn woman now standing before him. Even so, fear has brought the 789th nothing but misery. With nowhere left to turn, he pleads with you not to abandon them. And when you choose to stand with the 789th, he clings to that answer with all the hope he has left. In that wretched dig, amid shame, hunger, and dread, the first spark of resistance is finally born.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 789th Order Pickman Gi Gu <small class="muted">(Outer La Noscea, X:21.4, Y:18.0)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="highway-robbery.html">Highway Robbery</a></div><div class="row">Disciple of War or Magic Lv. 41</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="no-good-zo-gas-ambition.html">No-good Zo Ga’s Ambition</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'採掘地の懲りない面々',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ギ・グは、あなたがまだその場にいると知ると、胸の奥に押し込めていた第七八九団の悲惨な境遇をとうとう語り始める。コボルド族の社会は、ただ苦しいだけではない。生き残るために掘り、成果を差し出し、序列の中で踏みつけ合う、容赦のない世界なのだという。よい鉱脈を当て、十分な成果を上げた者には、よりよい採掘場と発言力が与えられる。だが結果を出せぬ者には、軽蔑と見捨てられる未来しか残されていない。</p><p>各団に付けられた数字は、ただの呼び名ではなく、そのまま地位を示すものだった。数字が小さいほど格が高く、第七八九団はその最底辺に置かれている。だからこそ彼らは坑道から追い立てられ、実りのない鉱脈へ押しやられたうえで、もっと掘れ、もっと富を持ち帰れ、そうすれば戻してやると言い渡されてきた。だがこの場所から得られるものはあまりにも乏しい。一方でウ・ガマロにいる同族たちは、捨てる屑でさえ第七八九団には宝に見えるほどの富を抱えている。追い詰められたギ・グは、どれほどみすぼらしいものでもよいから、採掘場から何か持ち帰ってほしいとあなたに懇願する。</p><p>あなたがわずかな欠片を持ち帰ると、ギ・グはまるで莫大な財を与えられたかのようにそれを抱え込む。その安堵は、見ているこちらが痛ましくなるほど切実だった。だが、彼がその喜びに浸る間もなく、別の恐れがすぐに彼を締めつける。ゾ・ガが来るのだという。ギ・グの言葉によれば、ゾ・ガは新たな繁栄の時代をもたらすと豪語しながら、実際には己の力しか顧みず、弱い者を踏みにじることしか知らぬ暴君だった。</p><p>あなたは身を潜め、その場を見守る。やがてゾ・ガは取り巻きを従え、見下しきった態度で採掘場へ現れる。ギ・グは震えながらへりくだって迎えるが、返ってくるのは嘲りだけだった。ゾ・ガは第七八九団の月ごとの採掘量を一目見ただけで怠け者と切り捨て、食事も睡眠も、自分の重みほど掘れる者にだけ許される贅沢だと言い放つ。そしてさらに残酷な命を下す。採掘量を百倍に増やせぬ限り、配給は断つというのだ。すでに飢えと衰弱に苦しんでいるとギ・グが訴えても、ゾ・ガは意にも介さない。働けぬのなら死ねばよい、お前たちの身体も燃料くらいにはなる、と冷たく言い捨てる。</p><p>ゾ・ガが去ったあと、採掘場には屈辱だけが重く残る。そこへ戻ってきたスケートスィスは、何があったのかを知るや否や怒りを露わにする。ギ・グは、ゾ・ガが第一三団を率い、ウ・ガマロでも日ごとに力を強めているのだと震えながら語る。もはや逆らえる者などいないのだと。だが、その諦めきった言葉は、かえってスケートスィスの気性に火を注ぐ。暴君に踏みにじられてなお縮こまる態度に、彼女は我慢がならない。やがて彼女は、あなたとともにゾ・ガを叩き伏せるとまで言い切る。</p><p>ギ・グはその言葉にいっそう怯える。ゾ・ガはもちろん恐ろしい。だが目の前のルガディンの女兵士の激しさも、彼には十分すぎるほどの脅威だった。それでも、怯えて耐えるだけでは何も変わらない。逃げ場も頼る先もないまま、彼はついにあなたへすがりつくように、第七八九団を見捨てないでほしいと願う。そしてあなたが彼らに手を貸すと決めたとき、ギ・グはその答えに残された希望のすべてを託す。屈辱と飢えと恐怖に満ちた採掘場で、ようやく小さな反抗の火が灯り始めるのだった。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ピックマン789 ギ・グ <small class="muted">（外地ラノシア, X:21.4, Y:18.0）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="highway-robbery.html">人造硝石強奪犯を追え</a></div><div class="row">ファイター ソーサラー Lv 41～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="no-good-zo-gas-ambition.html">ゾ・ガの野望を挫け</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'在礦場裡死性不改的那些傢伙',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Gi Gu 看見你還留在原地後，終於把第 789 團一直吞忍著的痛苦全說了出來。對他而言，kobold 的世界從來不是單純的辛勞，而是一個殘酷到令人窒息的地方。每天都得不停採掘、不停交出成果、不停掙扎著活下去。誰挖得出礦、繳得出成績，誰就能得到更好的採掘地，也能讓自己的聲音稍微被人聽見；可一旦做得不夠好，等著自己的就只有輕蔑、嫌棄，還有被整個族群拋到後頭的命運。</p><p>他告訴你，各個 kobold 團體身上的數字並不只是編號，而是地位的象徵。數字越小，地位越高。照這樣的規矩來看，第 789 團正是整個 kobold 社會最底層的一群。也因此，他們才會被從原本的坑道裡趕出去，被逼著在這條乾枯貧瘠的礦脈裡苦苦採掘，還得一再聽著上頭的人說，只要能再多帶回一些財富，就有資格回去。可這裡幾乎什麼都挖不出來。與此同時，U’Ghamaro 的同族卻富裕到連丟掉的東西都能成為第 789 團眼中的寶物。走投無路之下，Gi Gu 只好苦苦哀求你，哪怕只是替他們帶回一點點東西都好。</p><p>當你真的把那些零碎的礦料帶回來時，Gi Gu 卻像是接過了一筆了不得的財富一般，把它們緊緊抱在手裡。那股鬆了一口氣的模樣，幾乎叫人看了心酸。可他甚至來不及安心太久，另一層更深的恐懼又立刻壓了下來。因為 Zo Ga 很快就要到了。照 Gi Gu 所說，Zo Ga 是個自稱能帶領 kobold 走向新時代的傢伙，可他真正關心的從來只有自己。他把弱者當成可以隨意踩踏的東西，從不曾有過半點憐憫。</p><p>於是你依他的請求，先躲在暗處觀察。沒過多久，Zo Ga 果然帶著幾名隨從大搖大擺地走進採掘地，那副神氣，簡直像是在巡視一群根本不值得看上一眼的下屬。Gi Gu 顫抖著上前迎接，小心翼翼地奉承著對方，可換來的只有毫不留情的羞辱。Zo Ga 看了一眼第 789 團當月那點可憐的收穫，立刻把他們罵成一群懶鬼，還說食物和睡眠都是奢侈品，只有真正能挖出成果的 kobold 才配享有。接著，他又下了更殘忍的命令：除非第 789 團能把產量提高到一百倍，否則就別想再領到任何配給。當 Gi Gu 顫聲表示他們早已虛弱飢餓，再這樣下去真的會撐不住時，Zo Ga 卻只是冷酷地回說，若連活著都做不到，那死了也無妨，至少他們的身體還能拿去當爐火的燃料。</p><p>等 Zo Ga 一行人離開後，整片採掘地只剩下沉重得幾乎讓人喘不過氣的屈辱。就在這時，Skaetswys 回來了，也很快從 Gi Gu 口中得知剛才發生的一切。Gi Gu 顫抖著說，Zo Ga 領導著第 13 團，在 U’Ghamaro 的勢力一天比一天更大，如今幾乎已經沒有人敢站出來反抗他。可這種滿是絕望的說法，反而讓 Skaetswys 更加憤怒。她根本無法接受有人被這樣踐踏，卻還只是一味低頭退讓。沒過多久，她就乾脆挑明了說，既然沒有人敢收拾 Zo Ga，那她和你就親自去把他打垮。</p><p>Gi Gu 聽到這裡，自然嚇得幾乎連話都說不穩。Zo Ga 的可怕他比誰都清楚，可眼前這位氣勢驚人的 Roegadyn 女性軍官，同樣也讓他怕得發抖。然而，繼續害怕下去，並沒有替第 789 團換來任何轉機。他們沒有退路，也沒有可以倚靠的力量。最後，Gi Gu 只能把自己僅剩的希望全都壓在你身上，求你不要丟下他們不管。而當你決定站到第 789 團這一邊時，他幾乎像抓住了最後一絲救命的光。就在這片充滿羞辱、飢餓與恐懼的採掘地裡，一點微弱卻真實的反抗火光，終於慢慢亮了起來。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 789th Order Pickman Gi Gu <small class="muted">(外拉諾西亞, X:21.4, Y:18.0)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="highway-robbery.html">追查劫走合成硝石的犯人</a></div><div class="row">戰鬥或魔法職等級 41 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="no-good-zo-gas-ambition.html">粉碎 Zo Ga 的圖謀</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
