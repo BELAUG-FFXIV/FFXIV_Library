@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Highway Robbery | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – Highway Robbery (ARR Patch 2.2)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/taHG_kmKJrc"
+              title="Highway Robbery" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Highway Robbery</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Highway Robbery`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>At Maelstrom Command, you are stopped by an officer carrying urgent news. Not long ago, a convoy bound for Limsa Lominsa was ambushed under cover of darkness, and a large shipment of saltpeter was stolen. The culprits vanished before anyone could identify them, and that alone would be troubling enough—but saltpeter is essential to the making of firesand, and in the wrong hands it could mean devastation on a terrible scale.</p><p>The officer tells you that an investigation is already underway, led by an old comrade stationed in the field. Unable to leave his post himself, he asks you to travel west and lend your strength to the search. When you arrive, however, the lieutenant leading the inquiry is in no mood for pleasantries. Frustration is written plainly across her face, and though she bristles at the idea of needing help, she soon admits the truth: the stolen shipment is still missing, and the evidence gathered so far amounts to almost nothing.</p><p>What little she has managed to piece together suggests planning, discipline, and a swift escape through routes unknown to Maelstrom forces. Her own soldiers have turned up nothing, and so you search the area yourself. At last, you uncover a crooked pickaxe left behind near the scene. When you place it in her hands, she studies the crude tool and reaches a sudden conclusion. This was no ordinary bandit raid. The rough workmanship, the use of a mining implement, and the thieves’ suspicious interest in explosives all point to kobolds.</p><p>With that realization, you accompany her to the front line, where a commander is already occupied with a captured kobold. The prisoner tries to deny everything, but the moment the missing saltpeter is mentioned, panic gives him away. Pressed further, he blurts out that the theft was not the work of kobolds like him, but of another group living below. He names them as the 789th, a wretched and disreputable order dwelling beneath the cliffs.</p><p>The lieutenant asks permission to investigate at once, and with the commander’s warning about kobold bombs still hanging in the air, you descend with her to the dig. There, you find the stolen crates exactly where the captive suggested they would be. Yet before you can secure them, kobolds emerge and surround you. The tension tightens in an instant, and it seems a fight is inevitable.</p><p>Instead, the impossible happens. Faced with you and the lieutenant, the kobolds surrender without resistance and offer back the stolen goods. Even she is left staring in disbelief. She would not have objected to settling matters by force, but given how fragile relations already are, a bloodless recovery is more than anyone could have hoped for. She decides to oversee the return of the shipment and asks you to remain behind a little longer and learn what you can about these strange thieves.</p><p>When you speak to their trembling foreman, he introduces himself as Gi Gu and all but collapses under the weight of his own shame. Yes, the 789th stole the saltpeter, he admits, but not out of simple malice. His order, he says, had once lived quietly without troubling anyone, until they were driven from their tunnels and forced into this miserable place. He stops short of telling you everything, but his fear, exhaustion, and humiliation make one thing clear: this theft was born from desperation, and the trouble surrounding the 789th is not yet over.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Trachraet <small class="muted">(Limsa Lominsa Upper Decks, X:12.7, Y:12.8)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-pursuit-of-the-past.html">In Pursuit of the Past</a></div><div class="row">Disciple of War or Magic Lv. 41</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="how-low-can-you-go.html">How Low Can You Go</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'人造硝石強奪犯を追え',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>黒渦団司令部で、あなたはただならぬ報せを耳にする。つい先日、リムサ・ロミンサへ向かっていた輸送隊が夜陰に紛れて襲われ、大量の人造硝石が奪われたのだという。襲撃者は正体をつかませぬまま姿を消し、それだけでも十分に深刻だが、人造硝石は火薬の材料となる品だ。もし悪意ある者の手に渡れば、甚大な被害を招きかねない。</p><p>すでに現地では調査が始まっており、その指揮を執っているのは依頼主の旧友だという。彼自身は持ち場を離れられず、代わりにあなたへ助力を求める。そうして現地へ向かうと、調査を率いる女士官は苛立ちを隠そうともしない。助けなど要らぬと言わんばかりの勢いだったが、ほどなくして、手がかりがほとんど得られていない現実を認める。</p><p>現時点でわかっているのは、今回の襲撃が統率の取れた集団によるものであり、しかも彼らがこちらの知らぬ抜け道を熟知していたらしいということだけだった。部下たちも成果を挙げられず、あなたは自ら周囲を探ることになる。やがて現場近くで、ひどく歪んだつるはしを見つけ出す。あなたがそれを差し出すと、女士官は粗末な作りの道具を見つめ、ある確信に至る。これはただの追い剥ぎや盗賊の仕業ではない。採掘道具の使われ方と爆薬への執着から見て、犯人はコボルド族に違いない、と。</p><p>その推測を携え、あなたは前線基地へ向かう。そこでは司令官が、ひとりの捕虜となったコボルドを問い詰めていた。捕虜は必死に否定を重ねるが、奪われた人造硝石の話が出た途端、動揺を隠しきれなくなる。さらに追及されると、盗みを働いたのは自分たちではなく、崖の下に棲みつく別の集団だと言い張り、その名として「七八九団」を口にする。そこはひどく評判の悪い、落ちぶれた一団だという。</p><p>女士官はただちにその調査許可を願い出て、司令官からコボルドの爆弾には用心せよと釘を刺される。そうしてあなたは彼女とともに坑道へ向かい、捕虜の言葉どおり、奪われた木箱を見つけ出す。だが、回収に取りかかる間もなく、周囲からコボルドたちが姿を現し、あなたたちを取り囲む。空気は一気に張りつめ、戦いは避けられぬように思えた。</p><p>ところが、そこで起きたのはまったく予想外の出来事だった。コボルドたちは抵抗するどころか、あっさりと降伏し、盗んだ品を返すと言い出したのだ。女士官でさえ、その展開には言葉を失う。力ずくで片をつけることもできたはずだが、ただでさえ緊張をはらむ関係を思えば、流血なく品を取り戻せるに越したことはない。彼女は物資の搬送手配に戻ることを決め、あなたには少しこの場に残り、この奇妙な一団について探ってみてほしいと頼む。</p><p>やがてあなたが話を聞いた一団の頭目、ギ・グは、おびえきった様子で自らの非を認める。たしかに七八九団は人造硝石を盗んだ。だが、それはただ悪意からではなかったという。彼らは本来、誰にも迷惑をかけず静かに暮らしていたが、坑道から追い立てられ、この不自由な場所へ追いやられてしまったのだと。事情のすべてを語るには至らぬものの、その怯えと疲弊、そして深い屈辱は、この盗みが追い詰められた末の行為であったことを物語っていた。七八九団を巡る問題は、まだ始まったばかりだった。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> トラシュレート <small class="muted">（リムサ・ロミンサ：上甲板層, X:12.7, Y:12.8）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-pursuit-of-the-past.html">ストーンヴィジルに眠る翼</a></div><div class="row">ファイター ソーサラー Lv 41～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="how-low-can-you-go.html">採掘地の懲りない面々</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'追查劫走合成硝石的犯人',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>在 Maelstrom Command，你從一名軍官口中得知了一件棘手的事。不久前，一支正要前往 Limsa Lominsa 的運輸車隊在夜色中遭到伏擊，大批合成硝石當場被劫走。犯人出手又快又狠，等眾人回過神來時，早已連身影都不見了。更糟的是，合成硝石正是製作火砂的重要材料，一旦落入別有用心的人手中，後果勢必不堪設想。</p><p>軍方早已派人前往現地調查，而負責帶隊的，正是那名軍官多年的舊識。由於他本人無法離開職守，只能請你代為前去協助。可當你抵達現場時，那位率隊的女軍官顯然正被毫無進展的調查逼得滿腹火氣。她起初還不願承認自己需要幫忙，但沒過多久，還是坦白了現況：那批失竊的合成硝石依然下落不明，而他們目前握有的線索，幾乎等於沒有。</p><p>眼下唯一能確定的是，這場襲擊規模不小，犯人顯然訓練有素，而且能在轉眼間消失無蹤，代表他們多半掌握了 Maelstrom 不知道的通道。既然部下們始終一無所獲，你便親自著手搜索四周。最後，你在附近找到了一把歪斜破舊的鶴嘴鋤。女軍官接過去仔細端詳後，神情立刻變了。這不像是普通盜匪會留下的東西。粗糙的作工、採掘用具，以及對爆裂物異常明顯的興趣，讓她很快把懷疑指向 kobolds。</p><p>帶著這個推測，你跟她一同前往前線營地。那裡的指揮官正在審問一名被俘的 kobold。起初，那名俘虜還拚命否認，可一聽到失竊的合成硝石已經被查到，他立刻慌了手腳。再被逼問幾句後，他急忙改口，聲稱不是自己這一支幹的，而是住在下方另一群 kobolds 所為。照他的說法，那是一支名為 789th 的小隊，惡名昭彰，棲身在崖底下方。</p><p>女軍官隨即請求親自下去調查，而指揮官也只嚴厲叮囑你們務必要提防 kobolds 的炸彈。於是，你跟著她一路深入採掘地。正如那名俘虜所說，失竊的木箱果然就在裡面。可你們才剛確認目標，四周便冒出 kobolds，把你們團團包圍。氣氛瞬間繃緊，眼看一場衝突已經避無可避。</p><p>然而，接下來發生的事卻完全出乎意料。那些 kobolds 不但沒有動手，反而當場表示願意投降，甚至願意把失竊物資原封不動地交還出來。就連那位女軍官都愣住了。若真要動武，她本來也不會退縮；但如今 Limsa 與 kobolds 的關係本就緊張，能不流血地把東西帶回去，實在沒有比這更好的結果。她決定先回去安排物資運送，並要你暫時留在這裡，再多打聽一些這群古怪竊賊的情況。</p><p>之後，你見到了這支 kobold 小隊的領頭者 Gi Gu。面對你時，他整個人幾乎縮成一團，羞愧與膽怯全寫在臉上。他承認，789th 的確偷了那些合成硝石，但那並不是出於單純的惡意。照他所說，他們原本是一群只想安靜過日子的 kobolds，既不招惹別人，也沒有誰特地來招惹他們。直到最近，他們被迫從原先的坑道裡趕了出去，只能流落到這個充滿泥土與海水氣味的地方。雖然他沒有把所有內情一次說完，但你已經能清楚感覺到，這場盜竊背後並不只是單純的貪念，而是被逼到走投無路後的結果。789th 身上的麻煩，顯然還遠遠沒有結束。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Trachraet <small class="muted">(利姆薩・羅敏薩上層甲板, X:12.7, Y:12.8)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-pursuit-of-the-past.html">追尋過往，喚醒沉睡在 Stone Vigil 下的羽翼</a></div><div class="row">戰鬥或魔法職等級 41 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="how-low-can-you-go.html">在礦場裡死性不改的那些傢伙</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
