@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Good for What Ales You | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – Good for What Ales You (ARR Patch 2.2)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/abJ_I2ALWzc"
+              title="Good for What Ales You" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Good for What Ales You</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Good for What Ales You`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Dodozan is plainly flustered when you find him. A cask of ale has gone missing, and of all the goods to vanish, it had to be the one promised to a client who will not look kindly on delay. He dares not bring the matter to the Maelstrom or the Yellowjackets, fearing his customer would resent any official attention, and so he turns instead to you for a quieter sort of help.</p><p>He sends you to Fisherman’s Bottom to ask around, insisting that someone there must have seen what became of the cask. The answers you gather do not point to some furtive thief slipping away in secret. Rather, witness after witness describes a man carrying the ale openly toward the Astalicia, and another recalls a drunken fellow asking after the cask and stinking of rum and vomit. Before long, one detail becomes impossible to ignore: the man wore black, and that can mean only one thing in this part of Limsa Lominsa. The ale has ended up with the Bloody Executioners.</p><p>When you board the Astalicia, you find not a covert theft ring but a rowdy drunken scene. A young pirate, deep in his cups, is far more interested in a dance duel than in answering questions. The mood is absurd and disorderly, and before he says anything of value, you are forced to humor the revelry and dance with the crew. Only then, once he has accepted you as one of the moment’s companions, does the truth tumble out. He himself carried off Dodozan’s cask because the ship had already drunk through its own supply.</p><p>That confession brings his captain’s anger down on him at once. What had been treated as casual opportunism is named for what it is: taking advantage of a trader who does business with them without complaint. The captain is ashamed of the man’s conduct and, rather than deny the debt, places payment in your hands and asks you to settle the account on the crew’s behalf. Having shared in their dance, you are trusted to carry the gil back without incident.</p><p>When you return to Dodozan with the payment, he is relieved to see both you and the money arrive before matters worsen. He recognizes at once that the sum is the price he was owed, and when he hears it came from the pirates themselves, he is not especially shocked. He matter-of-factly admits that he is an Ul’dahn trader and will do business with anyone who can pay—pirates and princes alike. More than that, he already knows the sort of men these particular customers are. In his eyes, this little uproar is hardly the end of trade; if anything, it only means they will soon want another cask.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Dodozan <small class="muted">(Limsa Lominsa Lower Decks, X:7.5, Y:12.3)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row">Must complete one of the following Lv. 14 Main Scenario Quests, depending on your starting city-state</div><div class="row"><a class="link" href="a-mizzenmast-repast.html">Limsa Lominsa: A Mizzenmast Repast</a></div><div class="row"><a class="link" href="a-royal-reception.html">Ul’dah: A Royal Reception</a></div><div class="row"><a class="link" href="renewing-the-covenant.html">Gridania: Renewing the Covenant</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 50</div></div>`,
+    followq:`<div class="stack"><div class="row">None</div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'こっそりバッチリ愉快な踊り',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ドゥドゥザンは、ひどく気を揉んだ様子であなたに助けを求める。なくなったのは、ただの酒樽ではない。遅れを許さぬ相手に渡すはずだった大事な一樽であり、もし事を荒立てれば、取引そのものがこじれかねない。黒渦団や巴術士ギルドのような公的な手には頼れず、彼は表立たぬ聞き込みをあなたに託す。</p><p>あなたが漁師たちの集う一角で話を聞いて回ると、酒樽は人目を忍んで盗まれたのではなく、むしろ白昼堂々と運ばれていったことが見えてくる。目撃者たちは、樽を担いだ男がそのままアスタリシア号のほうへ向かったと語り、さらに別の者は、酒樽の中身を気にしていた酔っぱらいじみた男のことを思い出す。黒ずくめの海賊たちの船として知られるアスタリシア号へ、酒は最初から流れ着くべくして流れ着いたように思えてくる。アスタリシア号はリムサ・ロミンサの船として確認できる。</p><p>実際に船へ赴くと、そこにあったのは陰湿な悪事の気配ではなく、酒気と喧騒に満ちた馬鹿騒ぎだった。若い海賊はろくに足もとが定まらぬありさまで、まともな話より先に踊り勝負のほうが大事だと言い張る。あきれるほどくだらなく、けれど船の空気には妙な勢いがあり、あなたはまずその場の流れに合わせるしかない。そうしてひとしきり踊りを交わしたあと、ようやく男は胸の内をこぼし、自分こそがその酒樽を運び込んだ張本人だと認める。</p><p>理由は単純だった。船に積んであった酒を、彼らはもう飲み尽くしていたのである。だが、その軽率さを笑って済ませなかったのが船長だった。相手が黙って取り引きを続けてくれているからといって、好き勝手してよいはずがない。そう叱りつける船長の言葉には、海賊なりの筋の通し方があった。やがて船長は、代金をあなたに託し、酒樽の勘定をドゥドゥザンへ届けてほしいと頭を下げる。</p><p>あなたが代金を持ち帰ると、ドゥドゥザンはそれが本来受け取るはずだった額だとすぐに気づく。そして事情を聞いても取り乱すことはなく、自分はウルダハの商人だから、金さえ払うなら相手が海賊でも王侯でも構わないのだと、いかにも商売人らしく言ってのける。しかも今回の相手の気質もよく知っているらしく、このひと悶着で縁が切れるどころか、じきにまた新しい一樽を欲しがるだろうと見ている。騒ぎのあとに残ったのは損失ではなく、海都らしいしたたかな商いの続きだった。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ドゥドゥザン <small class="muted">（リムサ・ロミンサ：下甲板層, X:7.5, Y:12.3）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row">開始都市に応じて、以下いずれかの Lv.14 メインクエストをコンプリートしている必要があります</div><div class="row"><a class="link" href="a-mizzenmast-repast.html">リムサ・ロミンサ開始：ミズンマストの晩餐会</a></div><div class="row"><a class="link" href="a-royal-reception.html">ウルダハ開始：王宮の晩餐会</a></div><div class="row"><a class="link" href="renewing-the-covenant.html">グリダニア開始：大御霊祭り</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row">なし</div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'悄悄準備的歡快舞蹈',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Dodozan 一見到你，就像終於抓到能救急的人一樣慌忙開口。他丟掉的不是普通貨物，而是一桶答應要交給某位客人的麥酒，而那位客人顯然不是會容忍拖延的人。正因如此，他不敢把事情鬧到黑渦團或 Yellowjackets 那些正式渠道去，生怕對方更不高興，只好拜託你替他做一點不上檯面的調查。</p><p>你在 Fisherman’s Bottom 一帶問了一圈之後，很快就發現，這桶酒並不像一般失竊案那樣被偷偷搬走。有人明明白白看見一個男人扛起酒桶，直接往 Astalicia 那邊走去；另一人則想起，有個渾身酒氣、滿身嘔吐味的醉漢還特地來打聽那桶是不是麥酒。再加上第三個目擊者提到，那傢伙穿著黑衣，在這一帶，那幾乎就是不必再多說的暗示：這事多半和 Bloody Executioners 脫不了關係。</p><p>等你真正登上 Astalicia，看到的卻不是什麼精密掩飾的偷竊現場，而是一場酒氣沖天、吵鬧到近乎荒唐的海賊鬧劇。那名年輕的海賊早已喝得東倒西歪，比起回答你的問題，他顯然更在乎眼前那場莫名其妙的「dance duel」。你幾乎是被整艘船的氣氛捲了進去，只能先順著他們的興頭，陪著這群醉鬼跳上一場。直到他終於把你當成自己人，話才開始鬆口。那桶酒，確實是他親手從 Fisherman’s Bottom 扛回來的。</p><p>理由說穿了其實愚蠢得很，船上的酒早就被喝光了。他只是嘴饞，又懶得多想，便把原本該交付給 Dodozan 的那桶也一併搬上船。真正讓場面轉向的，是船長的怒斥。對方毫不掩飾自己的火氣，直言這種做法根本是在把願意和他們做生意的人當傻子耍。她沒有替手下辯解，也沒有裝作沒這回事，而是乾脆把應付的錢交給你，請你替他們把帳結清。這一刻，海賊的粗魯底下，反倒露出了一種屬於他們自己的規矩。</p><p>當你把那筆錢帶回去時，Dodozan 一眼就認出那正是自己原本該收到的價款。聽完事情的前後經過，他並沒有表現出太多意外，反倒只是很務實地說，自己本來就是來自 Ul’dah 的商人，只要對方拿得出 gil，無論是海賊還是王公貴族，在他眼裡都沒有本質上的差別。更何況，照他對這群人的了解，這點小衝突根本不至於讓買賣中斷；等風波一過，他們多半又會想再訂上一桶酒，好把這場鬧劇也一起喝進肚子裡。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Dodozan <small class="muted">(利姆薩・羅敏薩下層甲板, X:7.5, Y:12.3)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row">需先完成對應起始城邦的以下其中一個 Lv.14 主線任務</div><div class="row"><a class="link" href="a-mizzenmast-repast.html">Limsa Lominsa 起始：Mizzenmast 的晚餐會</a></div><div class="row"><a class="link" href="a-royal-reception.html">Ul’dah 起始：皇宮盛宴</a></div><div class="row"><a class="link" href="renewing-the-covenant.html">Gridania 起始：在大御靈祭中重新締結誓約</a></div><div class="row">任一戰鬥／魔法職業（不含受限職業）Lv. 50</div></div>`,
+    followq:`<div class="stack"><div class="row">無</div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
