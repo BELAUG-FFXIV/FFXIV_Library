@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Seeking Solace | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – Seeking Solace (ARR Patch 2.1)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/Fo-Sz_4HQ0s"
+              title="Seeking Solace" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Seeking Solace</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Seeking Solace`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Vorsaile Heuloix greets you with immediate relief, as though your arrival alone lightens a burden he has been carrying for days. He tells you that unusual movements among the sylphs have drawn his attention of late, and what first seemed merely curious has begun to feel troubling. Wanting to learn whether their intentions are harmless or dangerous, he sent a young researcher named Voyce to Little Solace. The man had promised that his intellect and survival skills would see him safely through the task, and for a time his reports arrived without fail. Then, three days ago, they stopped.</p><p>Though Vorsaile tries to speak with measured calm, his concern is plain. He can no longer ignore the possibility that Voyce has come to harm, and so he entrusts the matter to you. He asks you to travel to Little Solace, speak with the sylph Olmxio, and learn what has become of their missing man. The request is urgent, and his warning is no less so: the forest has grown more dangerous than ever.</p><p>When you arrive, Olmxio receives you with impatience rather than alarm. He has no patience for long explanations and seems openly baffled that anyone would go searching for a so-called scholar. In his eyes, there is nothing admirable about Voyce at all—only a clumsy, stumbling fool forever pestering others with absurd questions. Even so, once Olmxio realizes whom you seek, he guesses that the missing man has likely gone to bother the elder again, and sends you onward to Frixio.</p><p>Frixio welcomes you warmly, but the warmth quickly gives way to disbelief when he understands who you are asking about. To him as well, Voyce is no brilliant scholar, but a witless walking one with less sense than most. Three days earlier, he says, Voyce wandered off into the Sylphlands, muttering about research. Frixio admits that he knows little of scholarship, but he knows enough of that place to fear for any outsider who enters it, especially one so foolish and oblivious.</p><p>He then tells you what makes the danger worse. The Sylphlands were once the sylphs’ ancient home, but now they belong to the touched ones, and those sylphs are a threat not only to their own kin, but to walking ones as well. Frixio had tried to stop Voyce, yet the man would not listen. Olmxio, hearing this, all but declares the fool already dead, imagining him blasted and burned the moment he set foot there. He cannot understand why you would risk yourself for someone so hopeless, and even when he gives way and lets you go, it is only with a grim warning. Frixio’s voice is quieter, but no less troubled. Something is wrong in their homeland, he says. Even the trees speak of danger now, and the Elementals themselves warn that the forest is no longer safe.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Vorsaile Heuloix <small class="muted">(New Gridania, X:9.7, Y:11.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-pursuit-of-the-past.html">In Pursuit of the Past</a></div><div class="row">Disciple of War or Magic Lv. 42</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="voyce-of-concern.html">Voyce of Concern</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'仮宿を訪ねて',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ボルセル大牙佐は、あなたの姿を見るなり、強い安堵をにじませる。近ごろ、森を共にするシルフ族の動きに尋常ならざるものを感じており、その意図が善意によるものか悪意によるものかを見極めるため、ヴォイスという若い博物学者を仮宿へ送り込んだのだという。ヴォイスは自らの才覚と生存術に並々ならぬ自信を見せ、出立後もしばらくは定期的に報告を寄こしていた。だが、その便りは三日前を最後に、ぷつりと途絶えた。</p><p>ボルセル大牙佐は努めて冷静に話しているものの、胸中の不安は隠しきれていない。ヴォイスの身に何かあったのではないか――その懸念を振り払えず、彼はあなたに調査を託す。仮宿へ向かい、両者の仲立ちを務めてきたオルムシオを訪ね、行方知れずとなった男の消息を探ってほしいという。森はいま、かつてなく危うい。そう念を押しながら、彼はあなたを急ぎ送り出す。</p><p>仮宿であなたを迎えたオルムシオは、心配よりも面倒くささをあらわにする。学者を探していると聞いても、そんな賢い者は知らぬと突っぱね、思い当たるのは、そそっかしく、ぶつかってばかりで、くだらぬ問いをまき散らす厄介者くらいだと言い放つ。それでも話を続けるうちに、あなたの探している相手がその男なのだと気づき、ならばまた長老のもとへ押しかけたのだろうと見当をつける。あの男はいつも長老を困らせているのだと、あきれを隠そうともしない。</p><p>フリクシオはあなたを友として歓迎するが、探し人の名を聞いた途端、その歓迎に深いため息が混じる。彼にとってもヴォイスは、博識な研究者などではなく、羽虫ほどの分別も持たぬ愚かな歩く者にすぎなかった。三日前、その愚か者は研究だとぶつぶつ言いながら、シルフ領へふらふらと入り込んでいったという。学問のことはわからずとも、あの地が歩く者にとって危険であることだけは、フリクシオにはよくわかっていた。まして、あれほど思慮に欠ける者ならなおさらだった。</p><p>さらにフリクシオは、いまのシルフ領がどれほど危うい場所かを語る。そこはもともと彼らの古き故郷だったが、いまでは触れられた者たちの領分となっており、彼らはシルフ族にとっても歩く者にとっても脅威でしかない。引き止めようとはしたものの、ヴォイスの耳は聞くべき言葉をまるで受けつけなかった。事情を知ったオルムシオは、あの愚か者は火花と爆ぜる音の中で、とうに焼け焦げているだろうと吐き捨て、そんな者のために命を懸ける理由があるのかと本気で理解できずにいる。それでも、あなたの決意が揺るがぬと知ると、最後には道を塞がず、ただ厳しく警告する。フリクシオの声もまた重い。いまの故郷は何かがおかしい。木々に耳を澄ませば危険の気配が満ちており、精霊たちまでもが、この森の異変を告げているのだと。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ボルセル大牙佐 <small class="muted">（グリダニア：新市街, X:9.7, Y:11.1）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-pursuit-of-the-past.html">ストーンヴィジルに眠る翼</a></div><div class="row">ファイター ソーサラー Lv 42～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="voyce-of-concern.html">とある博物学者の苦悩</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'尋找棲身之處',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Vorsaile Heuloix 一看到你，就露出明顯安心了幾分的神情，像是終於等到了能託付此事的人。他告訴你，最近 sylphs 的動向有些異常，原本只是讓人留意的變化，如今卻越看越令人不安。為了查清那些舉動背後究竟是善意還是惡意，他派了一名叫 Voyce 的年輕研究者前往 Little Solace 調查。起初一切似乎還算順利，Voyce 持續送回報告，直到三天前，那些消息突然中斷了。</p><p>雖然 Vorsaile Heuloix 說話時仍努力保持鎮定，但你聽得出來，他其實已經無法忽視最糟的可能性。他擔心 Voyce 多半出了事，於是正式把這項調查交給你，請你立刻前往 Little Solace，去找長年擔任雙方中間人的 Olmxio，確認那名失聯研究者的下落。他最後還特地提醒你，如今森林裡潛伏的危險比平時更深，也更難預料，要你務必加快腳步，卻不能失去警覺。</p><p>你抵達 Little Solace 後，Olmxio 的反應與其說是擔心，不如說是明顯的不耐煩。他先是直截了當地表示，自己不認識什麼聰明人，接著又像是忽然想起了某個麻煩傢伙，改口說他倒是認識一個跌跌撞撞、老是問些蠢問題的傻瓜。在他眼裡，Voyce 根本不是什麼可靠的學者，而是個只會把別人惹得更頭痛的笨手笨腳之人。等他終於明白你找的正是那個人，便推測 Voyce 大概又跑去煩 elder one，也就是 Frixio 了。</p><p>Frixio 看到你回來，先以朋友的身分歡迎你，但一聽見你是在找 Voyce，那份和氣很快就摻進了濃濃的無奈。對他來說，Voyce 同樣不是什麼值得信賴的研究者，而是個腦袋糊塗、做事不知輕重的 walking one。三天前，Voyce 一邊胡言亂語地說著研究，一邊自己跑進了 Sylphlands。Frixio 坦白說，自己不懂什麼研究，但至少很清楚，那地方本來就不是 walking ones 該去的，更別說像 Voyce 那樣連危險都分不清的人。</p><p>接著，Frixio 把更令人不安的事也告訴了你。Sylphlands 原本是這些 sylphs 的古老家園，但如今那裡已經成了 touched ones 的地盤，而那些存在不只威脅 sylphs，也同樣威脅所有外來者。Frixio 曾試圖阻止 Voyce，可那人根本什麼都聽不進去。Olmxio 得知他竟然真的去了那裡之後，更是幾乎斷言他多半早已在爆炸與雷火之中變成焦黑屍體，甚至直說少了這個麻煩人物，大家也許還能省點心。可即使如此，當他看出你已經下定決心要去找人時，終究沒有再攔你，只留下沉重的警告。Frixio 的語氣則更低，也更不祥——這些日子，他們的故鄉明顯出了問題，就連樹木與 Elementals 都在發出危險將至的預兆。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Vorsaile Heuloix <small class="muted">(新格里達尼亞, X:9.7, Y:11.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-pursuit-of-the-past.html">追尋過往，喚醒沉睡在Stone Vigil下的羽翼</a></div><div class="row">戰鬥或魔法職等級 42 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="voyce-of-concern.html">自然學者的煩心事</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
