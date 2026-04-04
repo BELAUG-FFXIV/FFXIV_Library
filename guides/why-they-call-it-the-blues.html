@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Why They Call It the Blues | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – Why They Call It the Blues (SB Patch 4.5)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/MDrAzaIqFLY"
+              title="Why They Call It the Blues" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Why They Call It the Blues</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Why They Call It the Blues`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>When you return after learning Mind Blast, Martyn looks genuinely surprised that you mastered it so quickly, though he wastes no time putting that new spell to use. He tells you to meet him once again at Spineless Basin, and when you arrive, he makes no effort to disguise the truth. Yes, this round of “training” is also paid work. The only differences, he says, are that the payment has already been made, your targets are moles instead of hornets, and this time you need to take down two of them. When your reaction makes it clear what you think of that arrangement, he hastily adds that Mind Blast should help stop them in their tracks whenever you are outnumbered, and then sends you off before you can protest any further.</p><p>Even as the lesson begins, Latool Ja quietly observes how much Martyn has changed. The mask of the Great Azuro seems to appear more and more often now, not only before an audience, but even when no one is watching. To Latool Ja, it almost feels as though Martyn is beginning to prefer being that dazzling stage persona over being himself. Yet while those thoughts linger in the background, you carry out the task set before you, draw the moles out from underground, and put your new spell to practical use in battle.</p><p>By the time you finish, however, Martyn’s side of the arrangement has taken a sharp turn. Instead of greeting you with praise or payment, he is cornered by a group of debt collectors demanding more than he can pay. They remind him that while he may have returned the original sum, he was late—very late—and interest has piled on top of it. When you move to help, Martyn stops you at once. This is his mess, he insists, and he means to deal with it himself. In the end, he avoids violence not by fighting back, but by surrendering the very clothes off his back. The moneylenders leave with a warning and whatever dignity they have not stripped from him, while Martyn can only hold himself together with forced bravado.</p><p>Even then, he refuses to collapse into self-pity for long. He notices at once that you survived your own encounter with the moles, and tries to turn the moment into something resembling celebration as he heads back to Ul’dah. There, he admits that Royse was as displeased as expected to see him return without his proper costume, though fortunately a spare outfit was available. Unfortunately for him, its cost will be taken out of his wages, and what little relief that offers is quickly soured by the arrival of an unwelcome figure from his past.</p><p>Faced with your unspoken question after that tense reunion, Martyn finally explains himself. He and that former associate once studied foreign magicks together at the Arcanists’ Guild and traveled to the New World, where the Whalaqee taught them the ways of blue magic. But when they returned and their research was dismissed as impractical, their paths split. Martyn continued pursuing blue magic at enormous personal cost until debt nearly swallowed him whole, while the other man abandoned the work and built wealth elsewhere. Having said more than he intended, Martyn cuts himself short and points you toward the next step instead. You are to learn Faze. Becoming a blue mage is not easy, he says, and if you persist, you may one day become like him—before he catches himself and awkwardly admits that perhaps this is not the example you should strive to follow.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Martyn <small class="muted">(Ul’dah - Steps of Thal, X:12.5, Y:13.0)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="blue-collar-work.html">Blue Collar Work</a></div><div class="row">BLU Lv. 20</div><div class="row"><b>Required Action</b> Mind Blast</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="scream-blue-murder.html">Scream Blue Murder</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'青息吐息',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>マインドブラストを修得して戻ったあなたを見るなり、マーティンは予想より早かったと驚きをにじませる。だが、その感心もつかの間、彼は次の訓練の場として再びスピンレスベイスンを指定する。現地で待っていた彼は、今回は最初からごまかそうともしない。そう、今回の「訓練」もまた、金をもらって引き受けた仕事なのだという。違うのは、報酬が前払いであること、相手がスズメバチではなくモグラであること、そして倒す数が一匹ではなく二匹であることだけだった。あなたの視線に含まれた呆れを感じ取ったのか、彼はあわてて、数で押されそうなときこそマインドブラストが役に立つのだと付け加え、そのまま半ば追い立てるようにあなたを送り出す。</p><p>そのかたわらでラトージャは、最近のマーティンの変化を気にかけていた。グレート・アズーロの仮面をつける時間が、観客の前だけでなく、人目のないときや眠るときにまで増えているというのだ。ラトージャには、彼が少しずつ「マーティン」でいるよりも、「グレート・アズーロ」でいることを好むようになっているように見えていた。そんな違和感を胸に抱えつつも、あなたは地中に潜るモグラをおびき出し、新たに得た魔法を実戦のなかで使いながら、課された役目を果たしていく。</p><p>だが、あなたがその仕事を終えるころ、マーティンのほうは別の窮地に追い込まれていた。待っていたのは報酬でも労いでもなく、金を取り立てに来た者たちだった。元の借金は返したとしても、それが遅すぎた以上、利子まで含めて払ってもらわねば困る――そう冷たく迫られ、彼は逃げ場を失っていた。あなたが助けに入ろうとしても、これは自分の招いた厄介事だから自分で始末すると、彼はそれを止める。けれど青魔法で切り抜けることはせず、結局は身につけていた衣装まで差し出して、その場を収めるしかなかった。取り立て屋たちは辛うじて最低限の布だけは残して去り、マーティンはみじめさを笑い飛ばそうとするしかなかった。</p><p>それでも、彼は長く落ち込んでいる暇を自分に与えない。あなたがモグラとの戦いを無事に切り抜けたことに気づくと、何とかこの場を明るくまとめようとしながら、ウルダハへ戻ろうと言い出す。戻った先では案の定、衣装を失った姿で現れたことをロイズに咎められたらしく、幸いにも予備の衣装はあったものの、その代金は自分の取り分から差し引かれることになったという。ようやく着替えを済ませたそのとき、さらに彼の機嫌を曇らせるように、かつての知己が姿を現す。</p><p>その気まずい再会のあと、あなたの前でマーティンはようやく胸の内を明かす。彼とその男は、かつて巴術士ギルドでエオルゼアの外にある魔法を研究し、ともに新大陸へ渡って、青魔法を学んだ仲だった。だが帰還後、その研究は実用的ではないとして切り捨てられ、そこからふたりの道は分かれた。マーティンは私財を投げ打ってでも青魔法を追い続け、その果てに借金に追われる身となった一方で、相手は見切りをつけて別の商いで富を築いたのだという。そこまで語ったところで、彼は自分の弱音を振り払うように話を打ち切り、次に覚えるべき魔法としてフェーズを挙げる。青魔道士への道は決して楽ではない。だが続けていけば、いつか自分のようになれる――そう口にしたあとで、彼はふと我に返り、その最後の言葉だけは聞かなかったことにしたほうがいいと、気まずそうに言い直すのだった。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> マーティン <small class="muted">（ウルダハ：ザル回廊, X:12.5, Y:13.0）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="blue-collar-work.html">青は藍より出でて</a></div><div class="row">青魔道士 Lv 20～</div><div class="row"><b>受注に必要なアクション</b> マインドブラスト</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="scream-blue-murder.html">青雲の志</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'青魔的難言之苦',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>當你學會 Mind Blast 後回去找 Martyn，他明顯對你的進展比預想中還快這件事感到意外，但也立刻把這份成果拿去安排下一輪訓練。他要你再次前往 Spineless Basin，而等你真的到了那裡，他幾乎連掩飾都懶得掩飾了。沒錯，這次的「訓練」照樣也是接了委託來賺錢。不同的地方只有三個：報酬已經先收了、目標不是大黃蜂，而是鼴鼠，還有你這次得解決兩隻而不是一隻。眼看你的表情已經把心裡話全都寫了出來，Martyn 才趕緊補上一句，說 Mind Blast 在以寡敵眾時特別好用，然後便催著你趕快動身，不給你太多反駁的空間。</p><p>而在一旁看著這一切的 Latool Ja，卻忍不住注意到 Martyn 最近變得越來越奇怪。Great Azuro 的面具似乎不再只是在觀眾面前才出現，就連沒有人看見的時候，甚至連睡覺時，他都戴得越來越頻繁。對 Latool Ja 來說，那感覺就像 Martyn 漸漸比起做自己，更喜歡成為那個誇張耀眼的 Great Azuro。即便這股違和感一直揮之不去，你仍照著安排去做，把躲在地底下的鼴鼠引出來，並在實戰中施放新學會的魔法，完成他交給你的工作。</p><p>可是等你那邊告一段落，Martyn 這邊卻陷入了另一場更難堪的麻煩。等著他的不是稱讚，也不是分帳，而是一群上門討債的人。對方冷冷指出，他雖然還了原本借的錢，卻拖得太久，拖到連利息都早已累積上去。當你想上前幫忙時，Martyn 卻立刻阻止你，堅持這是他自己惹出來的爛攤子，也該由他自己收拾。只是最後，他並沒有靠 blue magic 擺平這些人，而是靠著把自己身上的衣服都交出去，才勉強換來對方暫時收手。那些放債者帶著警告離去，只留給他勉強遮身的布料，而 Martyn 也只能用逞強的口氣，硬把狼狽撐成若無其事。</p><p>即使如此，他也沒有讓自己沉進沮喪裡太久。一看到你平安解決了那些 mole，他立刻強打起精神，說不如回 Ul’dah 去「慶祝」一下。可回去之後，情況果然沒有變得更輕鬆。他承認 Royse 一見到他那副幾乎衣不蔽體的模樣，就相當不高興。雖然最後還是找到了備用服裝，但代價就是那筆費用要直接從他的工資裡扣掉。才剛把自己重新塞回體面的外表裡，他又立刻迎來另一個讓他臉色沉下去的人，一位來自過去的舊識。</p><p>在那場令人不快的重逢之後，Martyn 終於對你說出了更多內情。他和那個男人過去曾一起待在 Arcanists’ Guild，研究來自 Eorzea 之外的魔法，也一起前往 New World，向 Whalaqee 學習 blue magic。可是等他們帶著成果回來，這份研究卻被認為根本不切實際，資助也因此被切斷。從那時起，他們便走上完全不同的路。Martyn 仍執意追著 blue magic 不放，甚至不惜自掏腰包繼續遠行研究，最後幾乎把自己逼進債務深淵；而另一個人則在看出這條路賺不到錢之後果斷抽身，回到 Eorzea 去經營生意，轉眼便累積起可觀的財富。說到這裡，Martyn 像是突然察覺自己講得太多，便硬生生把話題拉回眼前，指定你接下來要去學會的法術是 Faze。成為 blue mage 從來就不是輕鬆的事，只要你肯繼續走下去，總有一天也會變得像他一樣，只是這句話才剛出口，他自己就先停了一下，尷尬地補上一句：最後那部分，你最好還是別學。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Martyn <small class="muted">(烏爾達哈：薩爾回廊, X:12.5, Y:13.0)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="blue-collar-work.html">青出於藍的差事</a></div><div class="row">青魔道士等級 20 以上</div><div class="row"><b>必須習得任務所需的招式</b> 精神衝擊</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="scream-blue-murder.html">青魔的壯志</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
