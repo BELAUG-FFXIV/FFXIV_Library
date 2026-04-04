@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Blue Gold | BELAUG · FFXIV Library</title>
+  <meta name="description" content="BlueMage – Blue Gold (SB Patch 4.5)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/Je5lT3njcIM"
+              title="Blue Gold" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Blue Gold</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Blue Gold`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>After you learn 1000 Needles, Latool Ja greets you not with relief, but with alarm. Something terrible has happened: Martyn has pushed himself too far and been badly injured. He had been warned again and again to rest, yet he refused to slow down, driven by his determination to secure medical aid for the Whalaqee even as his own body began to fail him. With Martyn confined to bed, Latool Ja can do little but worry—until an unexpected voice cuts in and offers a solution. The old associate who once studied blue magic alongside Martyn steps forward and offers to oversee your training in his place. Latool Ja, uneasy though he is, admits that you could still learn much from him, and so you are sent to meet this substitute mentor at Horizon’s Edge.</p><p>There, your temporary teacher wastes no time revealing the kind of man he has become. He explains that his company now works around ceruleum and machinery, and proudly presents a restored magitek vanguard as your next training target. Once the battle is done, however, the real lesson begins. He asks you not merely whether you can wield blue magic, but whether it still has any true place in the world. In his eyes, the age of sword and sorcery is fading. The Garleans grow stronger through technology, ceruleum fuels that progress, and those who cling to old arts are blind to the future taking shape around them. Then he turns the conversation toward you. If you ever wish to make a real difference, he says, there may be a place for you beside him.</p><p>When you return to Ul’dah, Martyn himself suddenly appears, injured but unwilling to remain in bed while someone else stands in his place. He insists that he cannot lie still while you work so hard to earn a place beside him in the arena. The moment quickly turns tense. His former companion speaks of the Whalaqee and asks the question Martyn never expected to hear: if he is trying so desperately to help them, why did he never ask for support? Martyn lashes out at once, convinced that a man who abandoned blue magic the moment it ceased to be profitable could never understand what loyalty to the Whalaqee truly means. Yet the answer he receives is not mockery, but an offer. With his resources, the medicine could be produced far faster, and more lives could be saved.</p><p>At last, Martyn relents. He agrees to entrust the medicine to that former colleague, who promises to deliver it personally once enough has been prepared for the Whalaqee. The arrangement is uneasy, and Martyn’s warning not to botch it carries all the strain of pride, doubt, and reluctant hope. Even after the man departs, Martyn cannot fully decide what to make of him. Perhaps there is some decency left in him after all. Perhaps not. And if he has taken such a sudden interest in your training, Martyn cannot help but wonder what he truly stands to gain. Still, for now, there is nothing to do but let the matter rest.</p><p>What Martyn can still give you is direction. Though he is forced back toward the infirmary, he refuses to leave your path to chance. He tells you the next spell you should seek is Glower, one of his personal favorites, and says that if you can master it, you should be ready to step into the Masked Carnivale at last. Until he recovers, you are to continue following Latool Ja’s lead. And so, with Martyn wounded, the Whalaqee’s fate tied to uncertain hands, and your own trial drawing near, your training presses onward all the same.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Martyn <small class="muted">(Ul’dah - Steps of Thal, X:12.5, Y:13.0)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="scream-blue-murder.html">Scream Blue Murder</a></div><div class="row">BLU Lv. 40</div><div class="row"><b>Required Action</b> 1000 Needles</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-real-folk-blues.html">The Real Folk Blues</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'青天の霹靂',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>一〇〇〇本の針を修得して戻ったあなたを迎えたラトージャは、安堵ではなく焦りをあらわにしていた。マーティンが無理を重ねた末、ひどい傷を負って倒れてしまったのだという。休めと何度言われても聞かず、ウァラキーのための治療をどうにか整えようとして、自分自身の身を顧みなかった結果だった。床に伏した彼に代わってあなたを導く者はいない――そう思われたところへ、かつてマーティンとともに青魔法を学んだ旧友が現れ、自分が代わりに面倒を見ようと申し出る。ラトージャも、胸中に引っかかるものを抱えながら、それでも彼から学べることは多いと認め、あなたはホライズンエッジへ向かうことになる。</p><p>そこで待っていた臨時の師は、いま自分がどんな道を歩んでいるのかを隠そうともしない。彼の会社は青燐水と機械に関わる仕事をしており、今回あなたが相手をするのも、修復した魔導ヴァンガードだという。だが、戦いのあとに語られた本題は別にあった。青魔法を使えるかどうかではなく、それがこの先の時代に本当に役立つのかどうか。彼の目には、剣と魔法の時代は終わりへ向かっている。帝国は技術によって力を増し、青燐水がその発展を支え、古い術にしがみつく者たちは大局を見失っているのだと。そう語ったうえで、彼はあなたに静かに誘いをかける。もし本当に世界を変えたいと思う日が来るなら、自分のもとにはその力を生かす場所があるのだと。</p><p>ウルダハへ戻ると、療養中のはずのマーティンが姿を現す。傷を負ってなお、あなたが懸命に進もうとしているのに、自分だけ寝ているわけにはいかないというのだ。再会はすぐに張り詰めた空気へ変わる。旧友は、ウァラキーを救うためにそこまでしているのなら、なぜ最初から自分を頼らなかったのかと問いかける。だがマーティンは即座に反発する。青魔法に金の匂いがなくなった途端、あっさり背を向けた相手が、いまさら何を語るのかと怒りをぶつける。それでも返ってきたのは嘲りではなく、協力の申し出だった。自分の持つ資源を使えば薬はもっと早く用意でき、救える命も増えるはずだというのである。</p><p>やがてマーティンは、その申し出を受け入れる。十分な量が整いしだい、自らウァラキーのもとへ薬を届けるという約束も交わされる。とはいえ、その合意は決して晴れやかなものではなかった。しくじるなというマーティンの言葉には、誇りも疑念も、ようやく差し出した信頼もすべて滲んでいた。相手が去ったあとも、彼の胸のうちは定まらない。もしかすると、あの男にもまだわずかな良心が残っているのかもしれない。だが同時に、なぜ急にあなたの訓練にまで首を突っ込んできたのか、その思惑を測りかねてもいた。結局のところ、いまは見守るしかないのだった。</p><p>それでも、マーティンがあなたに示せる道は残っている。再び療養に戻らねばならない身であっても、次に覚えるべき青魔法だけははっきり告げる。それはグラワー、彼自身も気に入っている魔法のひとつだった。それをものにできれば、いよいよマスクカーニバルに立つ備えが整うはずだと彼は言う。自分がしばらく動けないあいだは、これまでどおりラトージャの導きに従え――そう言い残し、マーティンは痛む体を引きずるようにして病床へ戻っていく。こうして、傷ついた師を背に、ウァラキーの命運を不確かな託宣の先へ預けながらも、あなたの修練は止まることなく続いていく。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> マーティン <small class="muted">（ウルダハ：ザル回廊, X:12.5, Y:13.0）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="scream-blue-murder.html">青雲の志</a></div><div class="row">青魔道士 Lv 40～</div><div class="row"><b>受注に必要なアクション</b> 針千本</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-real-folk-blues.html">二代目マスク・ザ・ブルー</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'青天霹靂',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>當你學會 1000 Needles 回來時，迎接你的不是平靜，而是 Latool Ja 幾乎掩不住的慌亂。Martyn 出事了，而且傷得不輕。明明大家早就勸過他不要再這樣硬撐下去，他卻始終不肯停手，一心只想替 Whalaqee 把醫療的事撐住，最後反而把自己逼到倒下。眼下他臥床不起，自然不可能再親自訓練你；就在 Latool Ja 為此焦急時，一個意想不到的人卻主動現身，表示願意暫時接手。那名曾與 Martyn 一同向 Whalaqee 學習 blue magic 的舊識，帶著自信甚至近乎輕慢的語氣，說自己完全有資格代替他的位置。Latool Ja 雖然心裡並不踏實，卻也只能承認，你或許確實能從這個人身上學到不少東西，於是你便依言前往 Horizon’s Edge。</p><p>到了那裡，你很快就明白，這位臨時導師早已和 Martyn 走上了完全不同的路。他毫不避諱地談起自己的公司、青燐水，以及各種與 magitek 有關的工作，甚至直接把一具修復過的魔導先鋒兵器當成你的訓練目標。可在戰鬥結束之後，他真正想說的，其實不是怎麼用 blue magic，而是這種力量是否還值得你繼續走下去。在他眼中，靠劍與魔法支撐的時代已經漸漸走到盡頭，Garlean Empire 憑藉技術不斷擴張，而推動這一切的核心正是 ceruleum。若還有人把時間耗在那些過去的遺物上，只會錯失真正正在成形的未來。說到最後，他甚至把話題轉到你身上，表示若你哪天真想在這個世界做出「真正的改變」，他那邊或許正需要像你這樣的人。</p><p>等你回到 Ul’dah，原本應該躺在病床上的 Martyn 卻硬是現身了。即使走路痛、呼吸也痛，他還是沒辦法接受自己什麼都不做，只能眼看著你努力往前。氣氛很快變得緊繃。那名舊識提起 Whalaqee 的事，反問 Martyn，既然他為了救人已經走到這一步，為何從一開始不來找自己幫忙。可 Martyn 對這句話毫不領情，甚至當場怒了起來。在他看來，當年研究經費一斷，對方就立刻對 blue magic 與曾經收留過他們的人失去興趣，如今再說什麼感激與援手，都只讓人覺得諷刺。然而，對方這次給出的卻不是譏笑，而是實際的提議：若由他出手，藥可以更快大量製成，也就能更快送去救更多 Whalaqee。</p><p>最後，Martyn 還是答應了。等藥量累積到足夠的程度後，那個人會親自把藥送去 Whalaqee 那邊。只是這份合作從頭到尾都帶著勉強。Martyn 口中那句別把事情搞砸，聽起來不像真正放下了戒心，更像是把不信任、難堪與最後一點不得不交出的希望一起壓進了話裡。即使對方離開後，他也依舊無法完全說服自己。也許那個人心裡確實還殘留著一點體面與良知，可他突然對你的訓練這麼上心，到底又圖的是什麼，Martyn 還是想不透。到了最後，他也只能把這份疑慮暫時壓下。</p><p>不過，就算他暫時無法再陪著你四處奔走，能給你的指引卻還沒有斷。Martyn 告訴你，接下來該去學會的法術是 Glower，那也是他自己格外喜歡的一招。只要你能掌握它，就差不多準備好踏進 Masked Carnivale 了。至於他還得回醫務室繼續養傷，暫時無法起身活動，接下來便要你先照著 Latool Ja 的安排前進。於是，在受傷的師父、仍未真正消散的疑慮，以及 Whalaqee 那邊尚未落定的命運之間，你的修行依舊沒有停下，反而一步步逼近真正的登場時刻。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Martyn <small class="muted">(烏爾達哈：薩爾回廊, X:12.5, Y:13.0)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="scream-blue-murder.html">青魔的壯志</a></div><div class="row">青魔道士等級 40 以上</div><div class="row"><b>必須習得任務所需的招式</b> 千根針</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-real-folk-blues.html">第二代戴著青魔面具的人</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
