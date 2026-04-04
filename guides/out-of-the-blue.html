@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Out of the Blue | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – Out of the Blue (SB Patch 4.5)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/uR-uvoL4eXQ"
+              title="Out of the Blue" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Out of the Blue</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Out of the Blue`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>A stern Yellowjacket stops you in Limsa Lominsa and, after sizing you up as an adventurer, asks for your help with a suspicious case. Reports have been coming in about a man calling himself a blue mage who has been selling soul crystals for a handsome sum. He claims they grant mystical powers, but too many angry customers have already walked away disappointed. Since magic is not the guard’s specialty, he wants you to determine whether the crystals are genuine or nothing more than a scam.</p><p>He lays out the matter plainly. If the crystals are fake, he will arrest the man for fraud, and you will be paid for assisting the investigation. If, against all expectations, they truly work, then you may even gain something useful from the whole affair. Having made up his mind, he tells you the suspect has been troubling passersby near Summerford Farms and asks you to meet him there.</p><p>When you arrive, the Yellowjacket tells you that you have come just in time, just as the man is about to begin his sales pitch. Before long, the suspect slips away, and the guard immediately moves after him, leading you onward toward the Moraby Drydocks. There, he shares what the guards have learned over the past few days: this man, Martyn, has been skulking about the docks and begging for scraps from the mess hall. For someone supposedly making easy gil from gullible adventurers, the story makes little sense, which only deepens the suspicion hanging over him.</p><p>The trail leads you farther still, all the way to the Salt Strand. The Yellowjacket is more convinced than ever that something underhanded is afoot, for he sees no innocent reason for Martyn to come to such a place. Yet when the two of you finally corner him, Martyn finds himself unable to offer any proof that words alone will settle the matter. Pressed from every side, he changes tactics at once and makes you an offer: he will give you a soul crystal, a full outfit, and a spellbook for free.</p><p>According to Martyn, that should settle everything. If you accept the gear and become a bona fide blue mage, then you yourself can stand as living proof that he has not been deceiving anyone. What began as an investigation into possible fraud turns unexpectedly into the moment you are handed the tools of an entirely new discipline. And after all the chasing and doubt, the stunned Yellowjacket can only look at you and ask the obvious question—did you truly learn any blue magic?</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Zealous Yellowjacket <small class="muted">(Limsa Lominsa Lower Decks, X:9.9, Y:11.0)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-ultimate-weapon.html">The Ultimate Weapon</a></div><div class="row">Disciple of War or Magic Lv. 50</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="blue-leading-the-blue.html">Blue Leading the Blue</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'青魔道士と名乗る男',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>リムサ・ロミンサで、あなたは生真面目な警備兵に呼び止められる。冒険者と見込まれたあなたに持ちかけられたのは、妙な詐欺まがいの調べものだった。最近、「青魔道士」と名乗る男が、持てば不思議な力を得られるという「ソウルクリスタル」を冒険者たちに高値で売りつけているという。だが、それを買った者たちからは不満の声ばかりが上がっており、警備兵はその品が本物なのか、ただの偽物なのかを確かめたいのだという。</p><p>魔法の真贋は自分の専門ではない。だからこそ、実際に見極められそうな冒険者として、あなたに協力してほしいのだと彼は言う。もし偽物なら詐欺の罪で男を捕らえ、あなたには相応の報酬が支払われる。もし万にひとつでも本物なら、あなたにとっても無駄足にはならないかもしれない。そうして話はまとまり、件の男がサマーフォード庄の近くで通行人に声をかけているという情報を頼りに、あなたはそこで落ち合うことになる。</p><p>現地に着くと、生真面目な警備兵は、ちょうど売り込みを始めるところだとあなたに告げる。だが、男はほどなくその場を離れ、あなたたちはすぐにあとを追うことになる。次に向かった先はモラビー造船廠だった。そこで警備兵は、ここ数日のあいだに集まった話を聞かせる。男――マーティンは、港のあたりをうろつき、食堂の残りものを恵んでもらっていたというのだ。冒険者を相手に大金を稼いでいるはずの男がそんな有様では、ますます話が怪しく思えてならなかった。</p><p>やがて足取りはソルトストランドへと続く。こんな場所まで来る以上、何か後ろ暗いことをしているに違いないと、生真面目な警備兵の疑いはいっそう強まっていく。だが、ついに追いつめられたマーティンは、言葉だけではもう切り抜けられないと悟ったのか、そこで思いがけない提案を持ち出した。ソウルクリスタルも、衣装も、魔導書も、すべて無料であなたに渡すというのである。</p><p>あなたがそれを受け取り、正式な青魔道士になれば、それ自体が自分の潔白の証明になる――マーティンはそう言って、疑いを晴らそうとする。詐欺の証拠を探していたはずのあなたは、気がつけば新たな力の入口へと立たされていた。こうして騒動の果てに残されたのは、半ば呆然とした生真面目な警備兵の、ただひとつの問いだった。本当に、あなたは青魔法を修得したのかと。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> 生真面目な警備兵 <small class="muted">（リムサ・ロミンサ：下甲板層, X:9.9, Y:11.0）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-ultimate-weapon.html">究極幻想アルテマウェポン</a></div><div class="row">ファイター ソーサラー Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="blue-leading-the-blue.html">マスク・ザ・ブルー誕生</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'自稱是青魔道士的男人',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>在 Limsa Lominsa，你被一名神情嚴肅的警備兵攔下。對方一眼看出你是冒險者，便立刻請你幫忙調查一件可疑的事。最近有人自稱是「blue mage」，到處向冒險者兜售所謂的 soul crystal，聲稱只要持有它，就能獲得各種神祕的力量。然而，買過的人接連抱怨受騙，顯然沒有人真的得到他口中的奇效。警備兵對魔法並不在行，因此希望你幫忙判斷，那些 crystal 到底是真貨，還是騙錢的把戲。</p><p>他把條件說得很清楚。若那些東西是假的，他就能以詐欺罪名逮捕那名男子，而你也會因協助調查得到合理報酬；若它們竟然真有其效，那麼這一趟對你來說也未必全無收穫。於是你答應協助，並依照線報前往 Summerford Farms，因為那名可疑人物正正在那裡向路人誇口推銷。</p><p>等你趕到時，警備兵告訴你，你來得正是時候，那名男子眼看就要開始兜售他的說詞。沒多久，對方又匆匆離開，你便跟著警備兵一路追了上去。你們先來到 Moraby Drydocks，而警備兵也把這幾天打聽到的情況告訴你。那個叫 Martyn 的男人最近一直在碼頭一帶鬼鬼祟祟地出沒，甚至還向食堂討剩飯。若他真像自己說的那樣，靠著向天真的冒險者賣東西賺進大筆 gil，這副模樣實在太不合理，只讓整件事顯得更加可疑。</p><p>接著，你們一路追到 Salt Strand。警備兵越看越覺得 Martyn 心裡有鬼，否則根本沒有理由特地跑到這種地方來。可等到你們終於把人堵住，Martyn 似乎也明白，光靠辯解已經不足以洗清嫌疑。於是他突然改口，乾脆提出一個新的辦法，他願意把 soul crystal、整套裝備，以及一本 spellbook 全都免費交給你。</p><p>按照他的說法，只要你收下這些東西，成為真正的 blue mage，你本身就會變成最直接的證明，足以說明他不是在騙人。原本只是陪同調查一場疑似詐欺的風波，最後卻變成你意外接下一套全新力量的開端。等一切追查暫時告一段落，連那名一路緊盯著他的警備兵也只能愣愣地望著你，問出那句最直接的話，你，真的學會 blue magic 了嗎？</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 熱心的黃甲兵 <small class="muted">(利姆薩・羅敏薩下層甲板, X:9.9, Y:11.0)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-ultimate-weapon.html">究極幻想：終極武器</a></div><div class="row">戰鬥或魔法職等級 50 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="blue-leading-the-blue.html">戴著青魔面具現身</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
