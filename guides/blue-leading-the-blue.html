@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Blue Leading the Blue | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – Blue Leading the Blue (SB Patch 4.5)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/ZOKiOCjEjO0"
+              title="Blue Leading the Blue" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Blue Leading the Blue</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Blue Leading the Blue`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>At Martyn’s urging, you turn your aim on Latool Ja and let loose a Water Cannon, if only to prove to the doubtful Yellowjacket that the lesson you paid for was not meaningless after all. Latool Ja braces himself with deep reluctance, while the others watch with a mixture of worry and curiosity. The spell lands exactly as Martyn promised. However much it hurts, it is enough to show that blue magic is real, and the Yellowjacket is finally forced to admit that the crystal was not an outright fraud.</p><p>That admission does not mean Martyn escapes unscathed. The Yellowjacket immediately rounds on him and declares that selling soul crystals without properly warning buyers of the risks is reckless to the point of negligence. Martyn will not be arrested today, but he is forbidden from peddling any more of his wares, and warned that one more offense will end with him behind bars. As the guard thanks you for your help and prepares to leave, Martyn can only stare in disbelief as the profit he had just begun to enjoy is snatched away from him.</p><p>Then, almost as if she has been waiting for the perfect moment, Royse steps forward with bright approval. What she sees is not a scandal, but a performance. Blue magic, she says, is neither black nor white, but something altogether different, and something that could dazzle an audience hungry for novelty. She introduces herself as the manager of an arena in Ul’dah where spectacle matters as much as combat, and explains that its appeal lies not in slaughter, but in carefully staged drama, showmanship, and striking personas. In her eyes, Martyn’s magic is exactly the kind of rarity she has been searching for.</p><p>Royse wastes no time making her offer. She wants Martyn to become the first contestant in the Masked Carnivale, a new attraction in which his blue magic will be tested against savage beasts before a paying crowd. Martyn initially recoils at the thought of reducing his hard-won art to mere entertainment, but the mention of wealthy patrons and generous earnings reaches him where argument cannot. The moment Royse adds that she will even pay him to oversee your training, his resistance crumbles. He may grumble about costumes and theatrics, but coin is coin, and he agrees to go with her.</p><p>Royse turns to you as well, for she has no intention of building this spectacle around Martyn alone. She asks whether you are willing to endure his training and prepare yourself for the greatest performance of your life. When you accept, she welcomes your decision with delight. Soon Martyn reappears in attire far grander than anything he would have chosen for himself, only to find Royse exulting in the dramatic image he now presents. To her, battle alone is not enough. A blue mage must also command the eye, the imagination, and the anticipation of the crowd.</p><p>With the arrangements in motion, Royse shares one final piece of practical news: despite Ul’dah’s restrictions on many beast tribes, the Mamool Ja are not named in the law, which means Gaheel Ja and Latool Ja may remain without trouble. After that, she entrusts you to Martyn’s care. Though he admits this was not at all the future he imagined, he accepts the role of mentor and sets you on your first true step. If you are to become a proper blue mage, then beasts themselves will be your teachers, and your spellbook will guide the way. He tells you to begin with Blood Drain, and explains that Gaheel Ja possesses totems infused with the aether of creatures from the New World—but such gifts are for later. First, you must prove that your courage can be matched by skill.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Martyn <small class="muted">(Lower La Noscea, X:19.3, Y:36.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="out-of-the-blue.html">Out of the Blue</a></div><div class="row">BLU Lv. 1</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="blue-collar-work.html">Blue Collar Work</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'マスク・ザ・ブルー誕生',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>マーティンにうながされ、あなたはラトージャへ向けて「水鉄砲」を放つことになる。半信半疑のまま見守っていた生真面目な警備兵に、これまでの騒ぎが無駄ではなかったと示すためだ。ラトージャはおそるおそる身構え、まわりの者たちも不安と興味の入り混じった目を向ける。やがて放たれた一撃は、マーティンの言葉どおり確かな力を伴って相手を打ち、痛みをもって青魔法の実在を証明した。これには警備兵も、ソウルクリスタルそのものがまったくの偽物ではなかったと認めざるを得なかった。</p><p>だが、それでマーティンの振る舞いまで許されたわけではない。生真面目な警備兵はすぐさま彼を問い詰め、危険性を十分に説明しないままソウルクリスタルを売りさばくのは、無責任どころか怠慢と呼ばれても仕方がないと厳しく言い渡す。今回は逮捕こそ免れたものの、今後いっさい品を売ることは禁じられ、次に同じような真似をすれば投獄するとまで警告される。あなたへの礼を述べて警備兵が去ろうとする一方で、ようやく利益が出はじめたと思っていたマーティンは、その場で愕然と立ち尽くすほかなかった。</p><p>そこへ現れたロイズは、いま目の前で起きた一連の出来事を、騒動ではなく見世物として見ていた。黒魔法でも白魔法でもない、新しく、人目を引く青魔法。それは観客の視線を集めるに足る、得がたい呼び物だと彼女は断言する。ウルダハで闘技場を取り仕切っているというロイズは、そこではただ勝ち負けを見せるのではなく、参加者がまとった役柄や演出によって戦いに劇的な魅力を添えているのだと語る。彼女にとって、マーティンの青魔法はまさに探し求めていた唯一無二の素材だった。</p><p>ロイズは間髪入れずに話を進め、マーティンに「マスクカーニバル」の最初の出演者にならないかと持ちかける。青魔法で獣たちと渡り合うその催しは、きっと大きな評判を呼ぶ――そう熱を込めて語られても、マーティンは当初、自分が苦労して会得した技を見世物にする気はないと取り合わない。だが、客は金を払って観に来ること、そのなかには裕福な者も多く、相応の報酬が見込めることを聞くと、彼の態度は見る見るうちに揺らいでいく。さらに、あなたの訓練役まで務めればその分の金も払うと言われ、ついに彼はぶつぶつ言いながらも承知する。</p><p>そしてロイズは、あなたにも目を向ける。マーティンひとりで終わるつもりなど、彼女には最初からなかった。これから先、彼の訓練に耐え、「人生最大の舞台」に立つ覚悟があるかと問われ、あなたがその誘いを受けると、ロイズは満足げに期待を寄せる。やがて、本人の趣味からはずいぶんとかけ離れた華やかな装いに包まれたマーティンが現れるが、ロイズはそんな彼の姿に大いに満足し、舞台に立つ者には力だけでなく、人目を奪う印象そのものが必要なのだと当然のように語る。</p><p>段取りを整えたロイズは、最後に実務的な知らせも残していく。ウルダハには多くの獣人の入市を禁じる法があるが、その条文にマムージャの名はなく、ガヒージャとラトージャは問題なく滞在できるのだという。そうして彼女が去ったあと、あなたを導く役目はマーティンに託される。思いもよらぬ成り行きではあったが、彼は師としてあなたを青魔道士の道へ進ませる覚悟を決める。青魔法を身につけるなら、教えてくれるのは獣そのものであり、進むべき先は青魔道書が示してくれる。まずは「ブラッドドレイン」を覚えろと彼は告げ、さらに新大陸の獣のエーテルを宿したトーテムをガヒージャが持ってきていることも教える。もっとも、それを託されるのはまだ先だ。いま必要なのは、勇気だけでなく、青魔道士としての力をあなた自身が証明することだった。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> マーティン <small class="muted">（低地ラノシア, X:19.3, Y:36.4）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="out-of-the-blue.html">青魔道士と名乗る男</a></div><div class="row">青魔道士 Lv 1～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="blue-collar-work.html">青は藍より出でて</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'戴著青魔面具現身',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>在 Martyn 的催促下，你只好把目標對準 Latool Ja，施放出 Water Cannon，好讓一路懷疑不休的警備兵親眼看看，先前那場折騰並非毫無意義。Latool Ja 帶著明顯的不安硬著頭皮站定，旁人也全都提心吊膽地望著你。當那道攻擊如 Martyn 所說確實擊中 Latool Ja 時，痛楚雖然真實，卻也同樣證明了 blue magic 的確存在。到了這一步，連原本滿腹質疑的警備兵，也不得不承認那枚 soul crystal 並不是徹頭徹尾的騙局。</p><p>可就算如此，Martyn 也沒有因此全身而退。警備兵立刻抓住他不放，嚴詞斥責他在販售 soul crystal 時，根本沒有好好說明其中的風險，這種做法輕則不負責任，重則根本近乎故意怠忽。這一次他雖然不會被逮捕，但從今以後再也不准繼續兜售那些貨物；若再被發現重操舊業，等待他的就是牢獄之災。警備兵向你道謝後準備離去，而 Martyn 則只能站在原地，眼睜睜看著自己好不容易才開始有起色的生意轉眼落空。</p><p>就在這時，Royse 帶著十足興味現身。她看中的不是這場風波，而是其中蘊含的表演性。既不是 black magic，也不是 white magic，而是截然不同、足以吸引所有目光的 blue magic——在她看來，這正是最能打動觀眾的新奇賣點。她自報家門，說自己在 Ul’dah 經營一座競技場，那裡真正販售的並不只是勝負，而是戲劇性、角色感，以及讓觀眾屏息以待的舞台效果。對她而言，Martyn 所擁有的這份力量，正是她一直在尋找的獨特招牌。</p><p>於是 Royse 立刻向 Martyn 提出邀請，希望他成為 Masked Carnivale 的第一位參賽者，在眾目睽睽之下以 blue magic 對抗各種凶猛野獸。Martyn 起初滿臉抗拒，顯然不願把自己辛苦學來的技藝拿去取悅觀眾。可是當 Royse 提到那些觀眾是會付錢入場的，而且其中不乏出手闊綽的有錢人時，他的態度很快就開始動搖。等到她進一步表示，若他願意順便負責訓練你，也同樣會另外給錢，Martyn 的堅持終究還是敗給了報酬，只能一邊嘀咕一邊接受。</p><p>Royse 當然也沒有打算漏掉你。她轉而詢問你，是否願意承受 Martyn 的訓練，為自己人生中最盛大的演出做準備。當你答應之後，她顯得格外滿意，彷彿早已認定你也會成為這場表演的一部分。沒過多久，Martyn 穿著一身遠比他平日作風更加誇張華麗的服裝重新出現，卻只換來 Royse 更加雀躍的讚賞。在她眼中，真正站上舞台的人不只要能戰，更要能奪走觀眾的視線，讓人從登場的那一刻起就無法移開目光。</p><p>等一切安排妥當後，Royse 還留下了一個意外的好消息。雖然 Ul’dah 的法律禁止多數 beast tribe 成員進入城內，但法條裡並沒有提到 Mamool Ja，因此 Gaheel Ja 和 Latool Ja 可以合法留下，不必擔心被驅逐。之後，她便把你交給 Martyn 照看。儘管這一切和他原本預想的人生完全不同，他仍接受了自己成為導師的事實，準備帶你正式踏上 blue mage 的道路。他告訴你，真正教會你 blue magic 的不會是他，而是那些兇猛的生物本身，而 spellbook 會指引你該去尋找什麼。你首先要學會的，是 Blood Drain。至於來自 New World、灌注了異獸乙太的圖騰，Gaheel Ja 手上也確實帶著一些，只是那還不是現在的你能輕易得到的東西。若你想獲得那些力量，接下來就得用自己的本事證明，你不只敢踏出第一步，也真的有資格繼續走下去。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Martyn <small class="muted">(低地拉諾西亞, X:19.3, Y:36.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="out-of-the-blue.html">自稱是青魔道士的男人</a></div><div class="row">青魔道士等級 1 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="blue-collar-work.html">青出於藍的差事</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
