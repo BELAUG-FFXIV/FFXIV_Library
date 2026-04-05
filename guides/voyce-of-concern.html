@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Voyce of Concern | BELAUG · FFXIV Library</title>
+  <meta name="description" content="AlliedSociety – Voyce of Concern (ARR Patch 2.1)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/jw_AB9t_kzI"
+              title="Voyce of Concern" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Voyce of Concern</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Voyce of Concern`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Olmxio stares at you in disbelief when you insist that you truly mean to go after the missing scholar. He had assumed you were joking, no more serious than the time he stole the fool’s undergarments for sport. To him, there is nothing worth saving in such a man. If it were up to him, he would leave the bumbling one to blunder into whatever fate awaited him. Even so, he tells you what he knows. Voyce wandered off toward Larkscall, somewhere between Little Solace and the home of the touched ones. Yet even as he points you on your way, Olmxio warns you not to rush blindly ahead. The trees themselves have eyes, he says, and what they see is carried back to the touched ones.</p><p>Following that lead, you find the scene already turned ugly. A frightened sylph gawks at you, wondering whether the one who scribbles letters might be the clever scholar others spoke of, but another answers with scorn before the thought can settle. No truly clever one, it says, would stumble so foolishly into their domain. There, in the middle of their mockery, Voyce is left panicking and pleading for help, convinced he is about to die. The threatening sylph does not even bother to hide its suspicion. It demands a confession, accusing him of sneaking into their home to abduct the podling of the Chosen One. Voyce can barely understand the words being hurled at him, and his confusion only makes them more certain of his guilt.</p><p>Before the danger can sharpen any further, your arrival changes the balance. Another sylph recognizes you from Little Solace and blurts out that you are no weak fool like Voyce, but a strong walking one. That is enough. The hostile sylphs withdraw, leaving Voyce behind alive, bruised more in spirit than in body. Once the immediate terror passes, he clings to gratitude and relief with almost dizzying speed. He thanks you profusely, marvels that the Order of the Twin Adder actually sent someone on his behalf, and then immediately begs that any further conversation wait until you are safely back at Little Solace. Whatever curiosity brought him here, the place now fills him with dread.</p><p>Back among allies, the scholar’s confidence begins to return, though only in the peculiar, fragile way that seems natural to him. He finally introduces himself properly as Voyce, a scholar of sylphic customs and lore—or rather, he admits with embarrassed honesty, a rather new student who boasted more than he should have when volunteering for the mission. Still, his fascination with the sylphs is real, and so is the discovery that drove him into danger. While thumbing through a tome borrowed from Stillglade Fane, he found an account of a legendary sylph said to hold power over the very fate of her people. He cannot help wondering if that figure might be the same Chosen One the hostile sylph mentioned. At that, Frixio speaks up. He knows the legend well. The Chosen One is the one who embodies the spirit of all trees that have ever lived, or ever will live, in the sylphs’ forest home. Once every thousand years, that being sprouts forth, leads the sylphs into a new era, and then returns to slumber. Such is the cycle of their people.</p><p>The meaning of it settles over all of you with growing unease. Voyce fumbles eagerly with the implications, trying to reckon the years and convince himself that the timing fits. Olmxio, however, reaches the more urgent fear first: if the rebirth of the Chosen One is near, then the touched ones may already be plotting around it. He dislikes the thought instantly and deeply. Voyce agrees in a burst of excitement, but his swelling determination quickly collapses under coughing, shivering, and exhaustion. For all his grand words, he is in no condition to protect anyone. Olmxio sees that plainly. If the Chosen One falls into the hands of the touched ones, he says, it could mean ruin for the sylphs of Little Solace. So while he turns his attention to safeguarding his own people, he places the search for the Chosen One in your hands instead. And as Voyce struggles to recover even enough breath to stand straighter, it is clear to everyone that this burden has now passed to you.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Olmxio <small class="muted">(East Shroud, X:22.4, Y:26.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="seeking-solace.html">Seeking Solace</a></div><div class="row">Disciple of War or Magic Lv. 42</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="pilfered-podlings.html">Pilfered Podlings</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'とある博物学者の苦悩',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>オルムシオは、あなたが本気であのそそっかしい学者を探しに行くつもりだと知ると、あきれたように目を細める。そんな話は冗談だと思っていたのだ。以前、自分があの男の下着を盗んでやったときと同じような、たわいもない悪ふざけだと。オルムシオには、あの男をわざわざ助けに行く理由がまるでわからない。自分なら、あのまま勝手に転び、勝手に困っていればいいと思うところだ。それでも、知っていることは教えてくれる。ヴォイスは、ここから触れられし者たちの住処へ向かう途中にあるラークスコールの方へ、ふらふらと向かっていったらしい。ただし、急いで助けに向かうにしても、軽率に飛び込んではならないとオルムシオは警告する。森の木々には目があり、そこで見たものは触れられし者たちへ伝わるのだと。</p><p>その言葉を胸に進んだ先で、あなたはすでに追い詰められているヴォイスを見つける。ひとりのシルフ族は、文字を書きつける歩く者を見て、皆が噂していた賢い者なのかと首をかしげる。だが、別のシルフ族はすぐに鼻で笑い、本当に賢い者がこんなにも間抜けに自分たちの縄張りへ迷い込むものかと切って捨てる。渦中のヴォイスは、ただ助けを求めて取り乱すばかりで、今にも食われるとでも信じているかのように怯えていた。相手はそんな怯えすら意に介さず、選ばれし者の幼生をさらいに来たのだろうと決めつけ、白状しろと迫る。ヴォイスには何を問われているのかすらよくわからず、その戸惑いがかえって疑いを深めてしまっていた。</p><p>だが、そこへあなたが現れたことで空気は変わる。別のシルフ族が、あなたを仮宿で見たことがあると叫び、あの愚かな男とは違う、強い歩く者だと告げる。そのひと言で、敵意はひとまず退いていく。触れられし者たちはヴォイスを残して立ち去り、彼はどうにか命を拾う。助かったと知った途端、ヴォイスは安堵と感謝を取り戻し、双蛇党が自分のためにわざわざ冒険者を差し向けてくれたのかと、半ば浮かれたように喜ぶ。もっと礼を言いたい気持ちはあるようだったが、それ以上に、この場所から一刻も早く離れたいという本音が勝っていた。話の続きは仮宿へ戻ってからにしてくれないかと、情けないほど素直に頼み込む。</p><p>仮宿へ戻ると、ヴォイスはようやく落ち着きを取り戻し、自分のことを改めて語り始める。シルフ族の風俗と伝承を研究する、グリダニア随一の学者――そう名乗ってはいるが、実のところ、その道ではまだ駆け出しで、任務に志願したときに少々大きく出すぎただけなのだと白状する。それでも、シルフ族への興味が本物であることに偽りはない。だからこそ、彼が危険を冒してまで追っていたのは、借り出した書物の中で見つけたひとつの伝承だった。そこには、一族の運命そのものを左右する力を持つという、伝説のシルフ族の存在が記されていた。ヴォイスは、それが先ほど耳にした「選ばれし者」ではないかと考える。するとフリクシオが、その伝説を知っていると静かに口を開く。選ばれし者とは、この森にかつて生き、そしてこれからも生きるすべての木々の魂をその身に宿す者。千年に一度芽吹き、新たな時代へ彼らを導いたのち、再び眠りにつく存在なのだという。</p><p>その話が意味するものは、皆の胸に重く落ちていく。ヴォイスは年数を数えようと浮き足立ち、その再誕の時が近いのではないかと興奮を隠せない。だが、オルムシオが先にたどり着いたのは、もっと差し迫った不安だった。もし選ばれし者の再生が近いのなら、触れられし者たちが何かを企んでいてもおかしくない。そう考えた瞬間、彼の表情は険しく曇る。ヴォイスも勢いよく同意するが、その熱意はすぐに咳と寒さに押し返され、立っているのもやっとの有様になってしまう。大きな言葉を並べはしても、彼にはこの危機から誰かを救う力などない――オルムシオには、それがはっきり見えていた。もし選ばれし者が触れられし者たちの手に落ちれば、仮宿のシルフ族は滅びかねない。だからこそ、仮宿の守りは自分が引き受け、選ばれし者を探す役目はあなたに託すと決める。咳き込むヴォイスがなお何かを言い募ろうとする傍らで、その重い使命は、静かにあなたの手へ渡されるのだった。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> オルムシオ <small class="muted">（黒衣森：東部森林, X:22.4, Y:26.4）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="seeking-solace.html">仮宿を訪ねて</a></div><div class="row">ファイター ソーサラー Lv 42～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="pilfered-podlings.html">「御子ちゃま」奪取計画</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'自然學者的煩心事',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Olmxio 聽見你竟然真的要去找那個笨手笨腳的學者時，臉上的反應不是感動，而是徹底的不敢置信。他原本還以為你是在開玩笑，就像上次他把那傢伙的內褲偷走時一樣，只是拿那個倒楣鬼尋開心罷了。在他看來，那種人就該讓他自己跌跌撞撞地闖禍，自己去承受後果，根本不值得別人特地跑去救。不過既然你不是說笑，他還是把自己知道的事告訴了你。Voyce 朝著 Larkscall 的方向去了，那裡正好位在 Little Solace 和 touched ones 棲地之間。可就算如此，Olmxio 仍特地警告你，別太快衝去救人。森林裡的樹木就像長了眼睛一樣，會把看到的一切傳給那些 touched ones，你若太過心急，反而更容易踏進對方設好的陷阱。</p><p>你照著線索找過去時，眼前已經是一場混亂。有人一看到你，就好奇地說，會寫字的 walking one 難道就是大家提過的那個聰明人嗎；可另一個 sylph 立刻嗤笑出聲，反問真正的聰明人怎麼可能蠢到跌進他們的地盤裡。至於被包圍的 Voyce，早就嚇得連聲音都發抖，只剩下求救的份，彷彿下一刻自己就要被活活吞掉。那些 sylphs 對他的恐懼毫不在意，只一口咬定他是偷偷潛進來，想綁走 Chosen One 的 podling 的人。Voyce 連對方在說什麼都還沒弄懂，結結巴巴地重複了幾個字，反而讓自己看起來更像心虛，場面也因此變得更危險。</p><p>就在這時，你的出現改變了局勢。另一名 sylph 認出了你，急忙告訴同伴，你曾出現在 Little Solace，而且和這個沒用的傢伙不同，是個真正強大的 walking one。只這一句話，就足以讓原本氣勢洶洶的那些 sylphs 暫時收手，轉身離開，把狼狽不堪的 Voyce 留了下來。等到危機一過，Voyce 幾乎是立刻從驚恐切換成了感激與慶幸，連聲對你道謝，還一副受寵若驚的模樣，為雙蛇黨竟然真的派人來找他而感到高興。只是這份興奮很快又被不安壓了下去。他嘴上還想多說幾句，身體卻已經先表明了真正的心情——這地方讓他寒毛直豎，他只想趕快離開。於是他拜託你，剩下的話能不能等回到 Little Solace 再繼續說。</p><p>回到較安全的地方後，Voyce 總算恢復了一點平常那種勉強撐起來的神氣，也終於正式向你介紹自己。他自稱是 Gridania 首屈一指、研究 sylph 風俗與傳承的學者，但話才說完沒多久，就自己承認那不過是志願接下任務時說得太滿了。其實他根本還是這方面的新手。只不過，他對 sylphs 的好奇與著迷倒不假，而讓他一路追到這裡來的，也正是某段令他無法放下的記載。他說，自己先前翻閱從 Stillglade Fane 借來的典籍時，讀到一段關於傳說 sylph 的文字。那名存在據說擁有足以左右整個族群命運的力量。Voyce 忍不住猜想，這或許正是剛才那些 sylphs 口中的 Chosen One。這時，Frixio 接過了話頭，表示自己知道那則傳說。所謂的 Chosen One，就是承載這片森林中過去與未來所有樹木意志的存在。每隔一千年，她便會再次萌發，帶領這一族走進新的時代，之後再度沉眠。那就是他們文明循環往復的方式。</p><p>這番話一出口，空氣裡的重量立刻變了。Voyce 興奮地開始計算年份，越算越覺得時機完全對得上；可 Olmxio 想到的卻是另一件更可怕的事——如果 Chosen One 的再生真的近了，那麼那些 touched ones 很可能早就已經在暗中打著她的主意。這個念頭讓他立刻不安起來。Voyce 也連忙附和，激動地說事情確實非同小可，可他的熱血沒撐多久，就又被咳嗽、寒意和虛弱打斷了。嘴上再怎麼說得了不起，他也明顯沒有能力真的去救誰。Olmxio 看得很清楚。如果 Chosen One 落入 touched ones 手中，Little Solace 很可能就會迎來毀滅。於是他不再把希望放在這個只會咳個不停的學者身上，而是把守護聚落的責任留給自己，將尋找 Chosen One 的重任正式託付給你。至於還在一旁勉強逞強的 Voyce，他的話聽起來已經更像是一種無力的陪襯。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Olmxio <small class="muted">(東部森林, X:22.4, Y:26.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="seeking-solace.html">尋找棲身之處</a></div><div class="row">戰鬥或魔法職等級 42 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="pilfered-podlings.html">奪回幼苗計畫</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
