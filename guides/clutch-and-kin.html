@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Clutch and Kin | BELAUG · FFXIV Library</title>
+  <meta name="description" content="AlliedSociety – Clutch and Kin (ARR Patch 2.2)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/m09QlHc24Bk"
+              title="Clutch and Kin" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Clutch and Kin</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Clutch and Kin`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Novv receives your question without surprise and calmly confirms what you already feared. Yes, the attack in the Strait of Merlthor was carried out by the Sahagin. More specifically, it was the work of the Coral Tridents, a violent and fanatical faction that resides in the Sapsa Spawning Grounds. Novv tells you that he and his clutch had hoped to stop them before they ever reached the vessel, but the currents did not favor them. What happened was not a triumph, but a failure—one that will only invite more bloodshed in the retaliation to come. He then makes one point clear: his people do not live with the Coral Tridents, nor do they follow the same path.</p><p>As he continues, Novv begins to explain the world from his side. Among the Sahagin, each group of clutchmates is led by a single clutchfather. The Indigo Matriarch, whom you might call their queen, entrusts each clutch of eggs only to the bravest and most seasoned warriors, and it is then the clutchfather’s duty to raise and instruct those young in the ways of their people. For that cycle to continue, however, the matriarch must have a safe place to bear offspring. That need, more than conquest or ambition, is why Novv’s clutch chose this land as their home. It pains him, then, that the Sapsa Spawning Grounds have become a center of unending conflict, when understanding might have offered another path.</p><p>Before he can finish, Seww rushes in, panicked and breathless, asking for Novv’s counsel. Novv rebukes him at once for his frantic manner, reminding him that a Sahagin should move with the current, not thrash against it. Seww then blurts out the real cause of his alarm: Pyuu, their sixth-youngest brother, has slipped out of the nursery without permission and gone to speak sense into the Coral Tridents. The thought leaves Novv grim and weary rather than shocked. Pyuu, he says, is soft-headed enough to try such a thing, and at a moment when he cannot leave the rest of the clutch unattended. Though he still does not know where you truly stand, he asks you for a boon all the same: save his foolish son.</p><p>Seww quickly places his trust in you because Novv has done the same. He explains that Pyuu is young, impulsive, and foolishly eager to put their teachings into practice. He truly believed he could reason with the Coral Tridents, never understanding how little patience such zealots would have for words. Seww fears that by now his brother has already reached the Landbase near North Tidegate, and that the reception awaiting him there will be no parley, but mockery and violence. When you find Pyuu, those fears have proven justified. The Coral Tridents have beaten him bloody before he could do more than open his mouth. Pyuu, bruised and shaken, can only confess that he wanted to live by the clutchfather’s teachings, and that he now expects punishment for his foolishness as well as pain for his wounds.</p><p>When you bring him back, Novv thanks you with unmistakable sincerity. Pyuu will be disciplined, he says, but what matters more is the greater truth now pressing upon his people. Many Sahagin still live peacefully in their city beneath the sea, yet their civilization is in slow and dangerous decline. To survive, they must come onto land to secure spawning grounds and build nurseries to raise their young. Their traditional grounds were destroyed in the Calamity, and so they were forced to seize a new home in western La Noscea. Novv understands why shorewalkers see only sudden invasion, yet insists that what looks like aggression is, in truth, a desperate struggle for survival. He does not pretend to love your kind, nor does he deny that many among the Sahagin welcome Leviathan and the drowning of shorewalkers. But he rejects war as the answer. The Coral Tridents seek only domination and slaughter, while he seeks another future—one in which both peoples might endure. In you, he sees the first stone of a bridge that does not yet exist, and he asks you to help him build it.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Novv <small class="muted">(Western La Noscea, X:16.7, Y:22.8)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="they-came-from-the-deep.html">They Came from the Deep</a></div><div class="row">Disciple of War or Magic Lv. 44</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-scarlet-bloodletter.html">The Scarlet Bloodletter</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'まほろばの血族',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ノォヴは、あなたの問いを静かに受け止め、この前のメルトール海峡での襲撃が、たしかにサハギン族によるものだったと認める。その実行役は「珊瑚の銛」と呼ばれる一派であり、サプサ産卵地に根を張る、過激で狂信的な連中なのだという。ノォヴたちは、あの者たちが船へ到達する前に止めたかった。だが潮の流れは味方せず、願いは叶わなかった。あの蛮行は誇るべき戦果ではなく、報復というさらなる暴力を呼び込む愚行でしかない。そう語ったうえで、ノォヴは、自分たちは産卵地の者たちとは別に暮らし、別の道を歩んでいるのだと告げる。</p><p>そして彼は、サハギン族の在り方を少しずつあなたに語り始める。彼らの社会では、ひとつの群れごとに、ひとりの育成父が導き手となる。いわば女王にあたる存在が卵を託し、その卵を預かった育成父は、孵った子らを育て、同胞としての教えを授ける。だが、その営みを続けるためには、子を産み落とし、育てるための安全な場所がどうしても必要になる。ノォヴたちがこの地を住処に選んだのも、支配や征服のためではなく、その営みを絶やさぬためだった。だからこそ、本来は命をつなぐ場であるはずの産卵地が、争いの中心となってしまった現状を、彼は深く惜しんでいた。</p><p>その話の途中で、セェウがひどく慌てた様子で駆け込んでくる。助言を求める叫びに対し、ノォヴはまず、その無様な慌てぶりをたしなめる。サハギン族たるもの、波に逆らってもがくのではなく、潮に乗って進むものだと。ようやく息を整えたセェウは、六番目の末弟であるピュウが、許しもなく育成地を飛び出し、「珊瑚の銛」を説得しに行ったのだと打ち明ける。ノォヴは驚くというより、頭の痛い現実を突きつけられたように嘆く。あの子はまだ若く、自分の鱗のやわらかさほどにも危うさを知らぬのだ。しかも今は、ほかの子らから目を離すわけにもいかない。だからこそ彼は、あなたに願う。立場の違いはまだ定かでなくとも、自分の愚かな息子を助けてほしいと。</p><p>セェウもまた、育成父があなたを信じたことを受けて、自らもその信を託す。ピュウは血気にはやる若い兄弟で、教えをそのまま実践しようとしてしまったのだという。話し合いによって道を開こうとしたのだろうが、「珊瑚の銛」がそんな言葉に耳を貸すはずもない。北の潮門へ続く陸路のあたりまで進んでいるだろうと聞かされ、あなたが駆けつけたときには、その不安はすでに現実となっていた。ピュウはろくに話し始める間もなく打ちのめされ、傷だらけになっていた。助け起こされた彼は、育成父の教えを実際に試してみたかっただけなのだと悔しそうに語る。だが、その思いは相手には何ひとつ届かず、残ったのは痛みと、これから受けるであろう叱責へのおびえだけだった。</p><p>ピュウを連れ帰ったあなたを、ノォヴは深い感謝とともに迎える。無謀な振る舞いには相応の罰が必要だとしながらも、彼の眼差しはさらに大きな問題へ向いていた。海底の都で静かに暮らす同胞も多いが、サハギン族の文明そのものは、いま緩やかで危うい衰退の中にある。種を存続させるには、陸へ出て産卵地を確保し、若い命を育てる育成地を築かねばならない。しかし、彼らが本来用いていた産卵地は霊災によって失われた。だからこそ、やむなく西ラノシアへ新たな居場所を求めたのだと、ノォヴは語る。ヒレなき者たちがそれを侵略と見るのは無理もない。それでも彼に言わせれば、それは生き延びるための必死のあがきだった。彼は、あなたたちを愛しているわけではないし、リヴァイアサンが招かれ、溺れた者たちが増えることに涙するような男でもない。だが、それでもなお、戦いこそが答えだとは思わない。「珊瑚の銛」が求めるのは支配と虐殺だけだが、自分は別の未来を望んでいる。あなたを、両者のあいだに架ける橋の最初の礎として見定め、その築きかけの希望に手を貸してほしいと願うのだった。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ノォヴ <small class="muted">（西ラノシア, X:16.7, Y:22.8）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="they-came-from-the-deep.html">深海より来たりしもの</a></div><div class="row">ファイター ソーサラー Lv 44～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-scarlet-bloodletter.html">海魔の名は潮騒に乗って</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'血脈與牽絆',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Novv 平靜地聽完你的問題，沒有迴避，也沒有粉飾，直接承認 Merlthor Strait 那場襲擊的確是 Sahagin 所為。不過，他也立刻告訴你，動手的並不是他這一支，而是名為 Coral Tridents 的那群人。那些人盤踞在 Sapsa Spawning Grounds，在同族眼中也是性情激烈、行事狂熱的一派。Novv 說，他們本想在對方登上那艘船之前加以阻止，只可惜當時海流不利，終究沒能趕上。對他而言，那場襲擊根本不是什麼值得誇耀的勝利，只會引來之後更加殘酷的報復。也正因如此，他明白地向你劃出界線，自己與自己的 clutch 並不住在那裡，也不追隨同樣的道路。</p><p>接著，Novv 開始把 Sahagin 的生活方式與延續之道，一點一點說給你聽。在他們的社會裡，每一群 clutchmates 都由一名 clutchfather 帶領。所謂的 Indigo Matriarch 只會把每一批卵託付給最勇敢、最老練的戰士，而那之後，撫養孩子、教導族群規矩，就成了 clutchfather 的責任。然而，要讓這個循環持續下去，前提是 matriarch 必須擁有安全的環境來孕育後代。Novv 一族會把這片土地當成家園，原因就在這裡。對他們而言，那不是單純的擴張，而是維繫族群命脈的必要之舉。也因此，他才會對 Sapsa Spawning Grounds 如今成了衝突中心這件事感到格外痛惜，如果岸上的人能多花一點時間理解他們，也許事情本來不必走到這一步。</p><p>就在他話還沒說完時，Seww 神色慌張地衝了進來，急著向 Novv 求助。Novv 先責備了他兩句，提醒他身為 Sahagin，不該這樣慌亂撲騰，而該像順著海流前進那樣沉穩。Seww 好不容易穩下來後，才說出真正讓他失措的原因，他們排行第六、年紀還小的弟弟 Pyuu，竟然擅自離開了 nursery，還說要去對 Coral Tridents 曉以大義。Novv 聽了，並沒有真的驚訝，反而像是更加沉重地認清了自己早就知道的事：那孩子還太年輕，也太天真，真的會去做這種不知死活的傻事。而偏偏現在，他又不能放下其他孩子不管。於是，他轉向你，坦白請求你幫這個忙，無論你們之間的立場究竟會走向哪裡，他都希望你能把自己那個愚蠢卻仍是家人的孩子救回來。</p><p>Seww 見 Novv 願意信你，也把同樣的信任交給你。他告訴你，Pyuu 一向衝動，總想把 clutchfather 教給他們的道理真正拿去實踐，這一次就是因為太認真地相信「可以靠談話說服對方」，才會獨自跑去找 Coral Tridents。可是在 Seww 看來，那些人根本不可能聽進任何道理，只會把 Pyuu 的誠意當成笑話，再用長矛把他釘死在地上。他推測 Pyuu 現在多半已經沿著 Landbase 往 North Tidegate 去了。等你趕到時，事情果然早已變成最糟的樣子。Pyuu 還沒來得及好好開口，就先被打得遍體鱗傷。你把他救下來後，他滿是狼狽地承認，自己只是想照著 clutchfather 的教誨去做一次看看，沒想到迎來的不是理解，而是一頓毒打。現在的他，不只得吞下這場失敗，還得回去面對自己魯莽行事的懲罰。</p><p>當你把 Pyuu 帶回去時，Novv 對你的感謝非常真切。他表示，Pyuu 的輕率行為當然會受到管教，但真正讓他無法忽視的，從來不是這一件小事，而是整個族群正在面對的困境。雖然仍有許多 Sahagin 平靜地生活在海底的城市裡，但他們的文明其實正一步步走向危險的衰退。為了延續族群，他們必須登上陸地，確保新的產卵地，建立新的育成地，好讓後代能平安長大。可是，他們原本的產卵地早已在 Calamity 中被摧毀殆盡，因此才不得不奪取 western La Noscea 作為新的棲身之所。</p><p>Novv 很清楚，岸上的人只會把這看成突然發起的侵略；但在他眼中，那其實只是瀕臨絕境的族群為了活下去所做的掙扎。他並不否認自己不喜歡 finless ones，也不掩飾自己對 Leviathan 召喚現世、讓更多岸上之人葬身海中的事並不會掉下眼淚。可是即使如此，他依然認定，戰爭不是出路。Coral Tridents 只想控制、煽動、屠殺一切不順從者；而他想要的，是另一種未來，一種能讓兩邊都繼續活下去的未來。因此，他把你的到來視為珍貴的契機，甚至視為那座尚未建成之橋的第一塊石頭，希望你能幫助他，幫助他的族人，也幫助這場原本只會一路沉向毀滅的衝突，出現一個不同的可能。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Novv <small class="muted">(西拉諾西亞, X:16.7, Y:22.8)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="they-came-from-the-deep.html">自深海而來</a></div><div class="row">戰鬥或魔法職等級 44 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-scarlet-bloodletter.html">海魔之名隨濤聲而來</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
