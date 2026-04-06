@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Triumphs We Share | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – The Triumphs We Share (HW Patch 3.3)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/UEIE6upnnUI"
+              title="The Triumphs We Share" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">The Triumphs We Share</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`The Triumphs We Share`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>When the Sultansworn elite stops before you, recognition flashes across his face almost at once. He blurts out your name in surprise and, with no small relief, declares that there could be no one better suited to help with the search. For a moment, he nearly says too much. Then Papashan’s strict warning about secrecy catches up to him, and he hurriedly tries to withdraw his words, insisting that they will find the lady on their own. Yet the truth has already settled in your mind. Beneath the disguise, beneath the hurried laughter and stolen breaths outside the palace, Nanamo had revealed how much the years had changed her. She had lost her father young, inherited rule before she was ready, and paid dearly for every lesson forced upon her. Though she had returned to the throne outwardly unbroken, she no longer wore her hopes with the same innocence as before.</p><p>In Revenant’s Toll, Alianne speaks to you without evasions. She says she had long suspected that Wilred’s death was the work of a Garlean spy hidden within the Crystal Braves, but at the time she could not be certain who was involved. That uncertainty was why she had wanted to speak with you in private before the banquet. She thought too long, she admits—too carefully, perhaps—and by the time she tried to arrange a meeting through Momodi, Laurentius had already seen enough to betray her. Soon after, she was summoned away, caught in Ilberd’s treachery, and imprisoned in the Rising Stones with others who remained loyal: Riol, Ephemie, Aergmhus. They were guarded and watched, perhaps in the hope that time or fear would break their resolve. Instead, when Raubahn’s execution drew most of the guards away, the few left behind were taken by surprise, and the prisoners fought their way free. Looking back, Alianne admits that things ended better than they had any right to. Even so, there are still nights when she lies awake wondering what might have changed if she had acted sooner, or more boldly. Yet she does not let that doubt consume her. What was broken can still, in large part, be rebuilt, and she clings to that truth with hard-earned determination.</p><p>At the Skysteel Manufactory, memory shifts into a brighter key. Biggs and Wedge greet you not with sorrow, but with the unshaken pride of men who survived disaster by laughing in its face and building something useful from the wreckage. They remember the sleepless nights in their little corner of the workshop, the field test of the manacutter, and the satisfaction of seeing their design succeed. Now that same design has been licensed for mass production, and soon the machinists of Ishgard will be turning out manacutters by the dozen. Adventurers are already lining up to place orders, they say, and even sky pirates have shown interest. Wedge imagines the Sea of Clouds full of their creations with the delight of a father watching his children go out into the world. Biggs, for all his bluster, is no different. Their work was never merely about machines. It was about answering impossible problems with stubborn ingenuity, and refusing to be beaten by hardship.</p><p>Then the memory darkens again. You pass through the place where storm winds once howled around you and where the path to Nidhogg’s sanctum was forced open by sheer resolve. Victory had come there, but not peace—not yet. Instead, in the wake of battle, darker truths had risen in a vision too terrible to ignore: the burden of inheritance, blood carrying old sins forward through generations, the past refusing to die simply because the present wished it gone. Some memories return as conversations. Others return as weight.</p><p>In Ishgard, Hilda and the people around her speak of change in plainer terms, but no less truly. Hilda says it still feels too soon to be calling these days the past, yet even she cannot deny how suddenly life has shifted. Symme remembers the first time he ever saw you and your companions near the aetheryte, with the House Fortemps manservant trying to steer you clear of the Brume. At the time, Alphinaud had looked to him like just another pampered little lord. Now all of them can only marvel at how much followed from those first impressions. Eudestand puts it most bluntly: what they have now is nothing like what came before. It is a rebirth. Hilda does not let that word soften the cost. Too many died to bring them to this peace. But because it was dearly bought, they owe it to themselves to make something of it—to improve the Brume, to build rather than resent, and to claim at last the place in Ishgard they had been denied for so long. The dream of revolution that once felt like a child’s fantasy has, somehow, become a seat at the table.</p><p>At Ok’ Zundu, remembrance takes on the shape of gratitude openly spoken. Lonu Vanu welcomes you with all the exuberance of one greeting not only a friend, but a living legend. They remember your victory over the false god and the freedom it won for the fledgling village of the Gundu, now able to grow without fear beneath the old shadow of Vundu oppression. Yet they also remember something earlier still: the first time you came among them and saved them from death at the hands of the black ones. To them, your many deeds have already passed into story, and story is its own kind of immortality. They promise that your name and your acts will be remembered and celebrated for as long as those tales are told.</p><p>When you next meet Y’mhitra, the past returns not as triumph, but as worry sharpened by love. She reminds you that it was not so very long ago that Y’shtola was drawn back from the Lifestream, though already that rescue feels as distant as something half-lost to time. Since then, Y’mhitra says, she has done her best to make new memories with her sister, speaking with her often on matters of learning and research. Yet beneath that routine concern lies a deeper fear. Y’shtola, unwilling to burden those around her, has been manipulating her own aether to compensate for the loss of her sight. Y’mhitra understands both her brilliance and her stubbornness, and that is exactly why she is afraid. The strain such a technique places upon the body is severe, and Y’shtola is entirely capable of ignoring her own limits if she decides the cause is worthy enough. Since she is unlikely to heed her sister’s warnings, Y’mhitra asks you instead: watch over her if you can.</p><p>And in Idyllshire, Slowfix meets you with exasperation spilling out before he can contain it. Governing a great goblin nation, he complains, is like trying to herd coeurls—each opinion pulling in a different direction, each voice insisting it alone understands the future. Yet even in his frustration, he remembers how different things once were, when the returning outsiders were met with venom and accusation, and goblins were dismissed as thieves. Slowfix says he saw, even then, that another path was possible. If people were given a place in society and a stake in its future, mutual understanding could grow where suspicion once stood. It is a thought that fits this whole journey more closely than he may know. Again and again, you have walked back through places shaped by fear, grief, resentment, and loss—only to find that what endures longest is not the wound itself, but what people chose to build after it.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Sultansworn Elite <small class="muted">(Ul’dah - Steps of Thal, X:11.4, Y:10.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-legacies-we-leave.html">The Legacies We Leave</a></div><div class="row">Disciple of War or Magic Lv. 60</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-burdens-we-bear.html">The Burdens We Bear</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'目に浮かびしは',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>近衛兵のひとりは、あなたの姿を見るなり、思わず声を上げる。これほど頼もしい助け手はいないとばかりに、探しものの事情を打ち明けかけるが、すぐにパパシャンから厳命されていた秘密厳守を思い出し、あわてて言葉を濁す。自分たちだけであの方を見つけると言い繕ってはみせるものの、あなたの胸にはすでに、つい先ほどのナナモの姿がよみがえっていた。幼くして父を失い、望む間もなく王座に就き、甘さの代償を何度も突きつけられてきた彼女。外見上は何ひとつ損なわれぬまま玉座へ戻ったとしても、その胸に宿るものは、かつての無垢な理想とは違っていた。あのひとときの変装と息抜きの裏にも、以前よりずっと深い思慮と用心深さが刻まれていたのだ。</p><p>レヴナンツトールであなたを迎えたアリアーヌは、遠回しな言い方をしなかった。ウィルレッドの死について、彼女は当時から、クリスタルブレイブ内に潜んでいたガレマールの間者の仕業ではないかと疑っていたという。だが、誰がどこまで関わっているのか確証が持てなかったからこそ、宴の前にあなたとふたりきりで話そうとしたのだ。慎重に進めすぎたのかもしれない、と彼女は悔やむ。モモディを通じて面会を取りつけようとしたときには、すでにローレンティスに見られていた。その後まもなく急な召集がかかり、彼女はイルベルドの裏切りに囚われる。ライジングストーンには、リオルやエフィミィ、エルグムスら、なお暁に忠実であろうとした者たちも閉じ込められていた。裏切り者たちは、時間をかければ自分たちも寝返るとでも思っていたのかもしれない。だが、ラウバーンの処刑に兵を割いたことで見張りが手薄になった夜、彼女たちはその隙を突いて脱出を果たす。いま振り返れば、あまりに都合よく事が収まったようにも思える。だからこそ彼女は、ときおり眠れぬ夜に考えてしまうのだ。もっと早く動けていたら、あるいはもっと思い切って伝えていたら、何か違っていたのではないかと。それでも彼女は、その悔いに呑まれはしない。壊れたものの大半は、まだ立て直せるのだと信じているからだ。</p><p>スカイスチール機工房では、記憶の色合いが少し明るく変わる。ビッグスとウェッジは、悲壮さよりも、困難を笑い飛ばして乗り越えてきた者らしい誇らしさであなたを迎える。工房の片隅で眠る間も惜しんで試作を重ねたことも、マナカッターの実地試験も、すべてがいまは胸を張れる思い出になっていた。その成果を受け、設計は量産を前提に供与され、やがてイシュガルドの機工士たちが次々とマナカッターを組み上げていくことになるのだという。すでに冒険者たちが注文に殺到し、空賊たちまで興味を示しているらしい。雲海を自分たちの機体が飛び交う光景を想像し、ウェッジはまるで我が子を世に送り出す父親のように目を輝かせる。ビッグスもまた、ぶっきらぼうに見えてその喜びを隠しきれてはいない。彼らにとって仕事とは、単に機械を作ることではなかった。解けぬように見える問題に知恵と執念で応え、どれほどの苦境に置かれても、打開の形を必ず見つけ出すことだったのだ。</p><p>だが、旅の途中には、再び胸を重くする場所もある。嵐のような風の中を切り開いて進み、ついにはニーズヘッグの聖域へ踏み入り、その刃をもって終止符を打ったあの地。そこではたしかに勝利をつかんだ。けれど、その勝利のあとに待っていたのは安堵ではなく、代々受け継がれてきた血と罪の真実を突きつける、暗く痛ましい幻だった。父から子へ、さらにその先へと渡されていくものは、誇りや名誉ばかりではない。過ちもまた、形を変えて残り続ける。思い出の中には、会話ではなく、ただ重さだけを残す場所もあるのだ。</p><p>イシュガルドへ戻れば、ヒルダたちはもっと率直な言葉で変化を語る。ヒルダは、過去を振り返るにはまだ早すぎる気もすると言いながらも、それでも自分たちの暮らしがどれほど急激に変わったかを思わずにはいられないという。シムメは、あなたたちが初めて大水晶の近くに現れた日のことを覚えていた。フォルタン家の執事に案内される一行を見て、とりわけアルフィノのことを、いかにも生意気な坊ちゃん貴族だと思ったのだと。けれど、その少年がのちに熾天の座の騎士たちと剣を交え、数々の戦いの只中へ身を投じることになるなど、あのとき誰が想像しただろう。ユーデスタンドは、いま自分たちが手にしているものは昔の続きではない、まるで生まれ変わりそのものだと言い切る。ヒルダは、その言葉を甘くは受け取らない。ここへ辿り着くために、多くの者が命を落としたのだから。だからこそ、この平和を無駄にはできないのだと彼女は言う。ブリュームをもっとましな場所にすること。青血の貴族たちをただ憎んで終わらぬこと。かつては子どもの空想のようにしか思えなかった変革が、いまや自分たちの席として現実になったのだから。</p><p>オク・ズンドでは、記憶は惜しみない感謝の言葉としてあなたに返ってくる。ロヌ・ヴァヌは、偽りの神を討ち、グンドゥの小さな村をヴンドゥの圧政から解き放った英雄として、あなたを大いに歓迎する。だが、彼らが忘れていないのは、その勝利だけではない。あなたが初めてここへ来たとき、黒き者たちの手から彼らを救ったこともまた、遠い過去ではあっても鮮やかに残っている。ひとつひとつの行いは、すでに語り継がれるべき物語となっていた。あなたの名も、その数々の働きも、祝福とともに記憶され続けるのだと、彼らはまっすぐに告げる。</p><p>ヤ・ミトラと会えば、過去は勝利の記念ではなく、愛情ゆえの不安としてよみがえる。ヤ・シュトラをライフストリームから救い戻したのは、つい昨日のことのようでもあり、もう遠い昔のようでもある。以来、ヤ・ミトラは姉と新たな思い出を重ねてきた。研究や学術の話題を交わし、以前と変わらぬように振る舞おうとする姉を支えながら。だが、彼女の胸には拭えぬ懸念がある。ヤ・シュトラは視力を失ったことを補うため、自らのエーテルを用いる術に頼っているのだという。周囲に負担をかけたくないという思いも、その意志の強さも理解している。だからこそ危ういのだと、ヤ・ミトラは言う。その技法が身体に与える負荷は大きく、しかもヤ・シュトラは必要とあれば、自分の限界すら顧みぬだろう。姉の忠告では届かぬとしても、同じ困難を越えてきたあなたの言葉なら、耳を傾けるかもしれない。どうか気にかけてやってほしいと、彼女は静かに頼むのだった。</p><p>そしてイディルシャイアでは、スローフィクスが感情を抑えきれぬまま愚痴をこぼす。偉大なるゴブリン国家を治めるというのは、意見の違うクァールたちをまとめて追い立てるようなものだと。だが、そんな苛立ちの奥にも、彼はかつてを忘れていなかった。はじめて帰ってきた外の者たちが、ゴブリンたちを盗人呼ばわりし、互いに毒を吐き合っていた頃のことを。それでもスローフィクスは、そのときから別の道がありうると見ていたのだという。共同体の一員として迎え入れ、繁栄に利害を共有する立場を与えれば、疑いはやがて理解へ変わりうるのだと。それは、この旅の終わりにふさわしい答えのようでもあった。恐れと悲しみ、怒りと損失によって形づくられた場所を巡ってきた果てに、なお最後に残るのは、傷そのものではなく、その後で人々が築こうとしたものだったのだから。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> 銀冑団の近衛騎士 <small class="muted">（ウルダハ：ザル回廊, X:11.4, Y:10.4）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-legacies-we-leave.html">旅の果て</a></div><div class="row">ファイター ソーサラー Lv 60～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-burdens-we-bear.html">友の微笑み</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'映入眼簾的榮光',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>當你被那名 Sultansworn Elite（王家直屬親衛中的精銳成員）叫住時，對方先是因為認出你而大吃一驚，接著又像抓到救命稻草一樣，立刻說這下再沒有比你更適合幫忙的人了。他幾乎就要把正在尋找的對象直接說出口，卻又在最後一刻想起 Papashan 的叮囑，急忙把話吞了回去，改口說他們自己會把那位小姐找回來。可該明白的事，你其實早已明白。短短片刻前還站在宮牆外、偷來一點自由呼吸的 Nanamo，那份從容底下早已不是從前的模樣。她年幼時便失去了父親，又在還來不及長大的時候被推上王位，這一路走來，天真與理想都被現實一點一點磨去。她表面上看來並未被那些風波真正擊垮，可重新坐回王座的人，早已比過去更聰明，也更警醒了。</p><p>你接著來到 Revenant’s Toll，在那裡見到了 Alianne。她沒有拐彎抹角，而是直接談起自己曾經一直放不下的那段過去。對於 Wilred 的死，她當時就已經隱隱懷疑，那是 Garlean 間諜混入 Crystal Braves 後動的手。只是她始終無法確定，到底哪些人牽涉其中，所以才一心想在宴會前找機會私下提醒你。她想了太久，也盤算得太久，最後終於決定透過 Momodi 安排見面時，卻已經被 Laurentius 看在眼裡。沒多久之後，她便收到緊急召集，只能前去，然後立刻落入 Ilberd 那群叛徒手中。她和 Riol、Ephemie、Aergmhus 等仍忠於 Scions 的人一起被關在 Rising Stones，對方把他們扣住，也許是想等著看他們會不會隨時間動搖。可事情並沒有照叛徒預想的方向走。等到 Ilberd 抽調大部分兵力去處決 Raubahn，留下來的守衛就變得太少了。於是有一天夜裡，他們抓住機會反擊，一舉脫身。如今 Alianne 回頭去想，也承認事情最後能那樣收場，簡直比應該得到的結局還要幸運。可即便如此，她依然會在夜深時忍不住想：若自己當時能更快一點、更果決一點，結果會不會不同。只是她也很清楚，一直沉溺在那種假設裡並沒有意義。至少現在他們還活著，而大多數曾被摧毀的東西，也都還有重建的可能。</p><p>到了 Skysteel Manufactory，整段旅程的情緒忽然輕快了起來。Biggs 和 Wedge 看見你時，神情裡沒有多少沉重，反而滿是那種熬過無數麻煩後反而更意氣風發的驕傲。他們提起以前在工房角落裡熬夜工作的日子，提起那場成功的實地測試，也提起如今已經正式授權量產的 manacutter 設計。照他們說，再過不久，Skysteel 的技師們就會一架接一架地把 manacutter 組裝出來，不只冒險者排著隊想訂，連 sky pirates 都已經聞風而來。Wedge 說，光是想像 Sea of Clouds 裡到處都是他們親手做出的飛行器，就有種像老父親看著孩子長大出門的得意；Biggs 雖然嘴硬，神情裡卻也藏不住同樣的高興。對他們來說，那些發明從來不只是機械，而是一次又一次在看似無解的困境前，硬是靠著技術與執拗闖出路來的證明。</p><p>然而，這條回望過去的路並不會一直停在明亮的地方。有些地方，光是經過，就足以讓胸口再次沉下去。你走過那片曾經風勢狂亂的高地，想起自己如何一路衝破險阻，闖進 Nidhogg 的聖域，最終親手將他斬落。可勝利之後等著你的，並不是單純的結束，而是一場令人窒息的揭露。那道視野裡浮出的黑暗真相，把一切都拉回到更久遠的過去：父輩留下的東西如何傳給子輩，舊血如何在新世代裡繼續流動，原初之罪又如何一代代延續。你明白，有些回憶不是靠誰的一句話才變得沉重，而是它本身就像石頭一樣，壓在心裡，怎麼都搬不開。</p><p>回到 Ishgard 後，迎接你的是 Hilda，以及那些一樣從 Brume 的舊日裡一路走到現在的人。Hilda 說，現在就開始懷舊，好像還有點太早了，可她也無法否認，有時只是照常走在 Brume 裡，都會突然意識到一切已經改變得多麼徹底。Symme 則想起第一次見到你和同伴的情景，那時你們還在 aetheryte 附近，由 House Fortemps 的管家帶著四處走動；他當時根本沒把你們當回事，尤其覺得 Alphinaud 看起來活脫脫就是個討人厭的小少爺。可後來發生的一切，誰也沒料到。Eudestand 更直接地說，現在這個世界和從前已經完全不是一回事，根本就是一次重生。Hilda 沒讓那句話變得太輕。她說，走到這一步，死掉的人實在太多了，這份和平不是白白落下來的。正因如此，他們才更該拼命把 Brume 變成更好的地方，而不是再把力氣浪費在一味敵視那些 blue bloods 上。曾經像童話一樣遙遠的翻轉，如今終於真的讓他們坐上了原本不屬於自己的那張桌子。</p><p>在 Ok’ Zundu，Lonu Vanu 對你的歡迎幾乎像陽光一樣直接又熱烈。他不只記得你討伐那位虛假的神，讓 Gundu 的新村子終於能在不受 Vundu 壓迫的情況下慢慢成長，也同樣記得你第一次來到這裡時，如何從 black ones 手中救下他們。對他們而言，你的許多事蹟早已不只是過去，而是足以被一次次講述下去的故事。你的名字與你做過的事，都理所當然值得被記住，也值得在往後的每一天繼續被慶賀。</p><p>再往後，你見到了 Y’mhitra。她提起 Y’shtola 時，語氣裡沒有誇耀，只有越來越掩不住的擔憂。她說，明明把 Y’shtola 從 Lifestream 救回來那件事還沒有過去太久，可人卻很容易連最珍貴的記憶都開始模糊。這段時間裡，她確實盡量和妹妹多相處，試著在日常裡留下新的回憶；兩人談的大多還是學術上的事，像 ancient Allagan technologies、primals、Ascians 等。可真正讓她放心不下的，是 Y’shtola 為了補足失明後的缺陷，一直在用自己的乙太去支撐感知。Y’mhitra 很清楚妹妹是什麼樣的人，也正因為太清楚，才知道這有多危險。那種技巧會對身體造成極大負擔，而 Y’shtola 一旦認定某件事有必要，便很可能會把自己的極限當成可以忽視的東西。她知道自己的勸告對妹妹而言未必有用，所以才轉而拜託你。你和她一起經歷過太多事，也許只有你的話，才有可能真正讓她停下來。</p><p>最後，你在 Idyllshire 遇見了 Slowfix。他一開口就滿是煩躁，抱怨治理一個偉大的 gobbie nation 怎麼會這麼困難，簡直像在趕一群彼此意見完全不同的 coeurls 一樣，誰都認為自己才知道這個國家的未來該怎麼走。可抱怨歸抱怨，他也記得從前的樣子。當初你們這些外來者剛回到 Idyllshire 時，彼此之間充滿敵意，有人張口就是把 gobbieflock 罵成盜賊。但 Slowfix 從那時起就相信，事情不一定只能走向對立。只要願意讓彼此真正成為這個社會的一部分，讓所有人都對共同的繁榮抱有利害與責任，理解就有可能慢慢取代猜忌。你一路走到這裡，忽然覺得這句話幾乎像替整趟旅程下了註腳。你走過的那些地方，全都曾被痛苦、憤怒、失去與不信任深深刻過痕；可真正留到最後的，往往不是傷口本身，而是人們在傷口之後，仍選擇重新建立起來的東西。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 銀冑團菁英騎士 <small class="muted">(烏爾達哈：薩爾回廊, X:11.4, Y:10.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-legacies-we-leave.html">旅程盡頭</a></div><div class="row">戰鬥或魔法職等級 60 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-burdens-we-bear.html">我們所承受的一切</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
