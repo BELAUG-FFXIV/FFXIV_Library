@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Burdens We Bear | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – The Burdens We Bear (HW Patch 3.3)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/hAzWIlJXOT4"
+              title="The Burdens We Bear" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">The Burdens We Bear</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`The Burdens We Bear`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Slowfix stops you in Idyllshire with urgent insistence and begs you to do your duty as one of the settlement’s citizens. South of the town, he says, there lives an old woman whose powerful magic has given shape to servants that keep driving off goblin scouts. Because you have dealt with her before, he believes you might persuade her to show mercy and call them back. With the words you have carried from your journey still echoing in your mind, you set out once more along the path of remembrance.</p><p>Matoya receives you with sharp-eyed amusement. She knows at once that you have come wanting something, and she is almost pleased you have had the sense not to bring the goblins with you. But when you speak for them, her patience vanishes. Their scouts, she says, were not innocent victims at all—they were trying to eat her servants, and only their luck spared them from a fitting answer. If they try again, she warns, she herself will see them fed to those same servants piece by piece. Then her scorn turns from the goblins to the reason you truly came. You are too young, she tells you, to be burying yourself in regrets, just as that boy was wrong to dwell on what should have happened to Minfilia. What matters is not the life that might have been, but the one that came to pass. The past will not bend for grief. You make your choice, and you do what must be done—that was how you stood before when you sought a path to Azys Lla, and that is what you must remember now.</p><p>When you return, Slowfix protests that goblins never go seeking trouble, though his indignant honesty does little to make the claim convincing. At the edge of the landing, however, your eye catches something far more quiet: a bouquet of fresh Nymeia lilies left behind as an offering to the dead. In that stillness, memory surges back. You see Ysayle falling toward the battleship through a sky bursting with fire, a crimson shower cast against cold clouds, and then the sudden blaze of azure light—faint, blinding, and at last broken into diamond fragments scattered to the winds.</p><p>You go on to Tiamat, and she greets you as one who has come to a place haunted by the condemned. In her madness, she says, she thought she saw her dead brood-brother in the skies, though reason told her it could not be so. When you speak, she comes to understand that what she beheld was not her brother returned, but his rancor clothed in mortal flesh—and that you were the one who delivered him to death. Yet she bears you no hatred. The hatred in her has long been chained to moments she cannot escape: the death of her beloved, and the sin of his resurrection. In love and rage alike, she confesses, she became no better than Nidhogg, seeking vengeance without end.</p><p>Midgardsormr answers her not with denial, but with quiet truth: she did renounce that path. Across the long ages, Tiamat says, time accomplished what she could not. Allag fell, its works crumbled, and she remained alone with the weight of her sins. She sees now the folly in condemning mankind’s lesser impulses when hatred drove her just as easily into the Ascians’ bargain. Midgardsormr bids her look again with unclouded eyes—at the man who strives to rise above his nature, and at how he and Hraesvelgr’s brood now lift their voices together in peace. He hopes that peace will become the first stone in a bulwark against the darkness to come. Tiamat does not yet join them, but neither does she reject the possibility. She will remain apart and watch, and time will judge whether this peace is fleeting or true. Before you depart, she reminds you that though it was right to come to her in contemplation, your road still stretches onward, and your battle is not yet won.</p><p>At the Aetherochemical Research Facility and beyond, remembrance leads you through the cost of all that came before. You recall the undying defiant even at the moment of death, the knights faithful to a cause already lost, and the archbishop fading into light as the end finally came for him. Only the eyes remained, and Estinien, seeking to keep them from the grasping hands of others, took them into his own and was bent to their will for a time. The journey that began at a friend’s request could only find its end in one final place. There, a shield still rests before the marker, and fresh lilies lie beneath it. You kneel in the northern cold and close your eyes for only a moment. When you rise again, the city still stands—and so do you.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Slowfix <small class="muted">(Idyllshire, X:7.5, Y:6.5)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-triumphs-we-share.html">The Triumphs We Share</a></div><div class="row">Disciple of War or Magic Lv. 60</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-end.html">The End</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'友の微笑み',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>イディルシャイアでスロウフィクスに呼び止められたあなたは、住人としての大事な務めを果たしてほしいと頼まれる。集落の南にある洞窟には、強力な魔法を操る老婆が住み、その使い魔たちがゴブリンの斥候を追い払っているのだという。これまでに何度もあの老婆とやり取りしてきたあなたなら、情に訴えて手を引かせられるはずだと、スロウフィクスは期待を込めて言う。かつての旅路をなぞるように、あなたは再び過去へ思いを向けながら歩き出す。</p><p>マトーヤは、あなたの来訪を皮肉まじりに迎える。用があって来たのはわかっているが、あの小さな連中を連れてこなかっただけましだと言い放ち、用件を促す。だが、ゴブリンたちのために口を開いた途端、彼女の声は険しさを増す。襲われたのは無抵抗な斥候ではなく、むしろ自分の使い魔を食べようとしていたのは向こうのほうだったのだと、彼女は容赦なく切り捨てる。もしまた同じことをすれば、今度こそ自分の手で使い魔の餌にしてやるとまで言い残す。</p><p>けれど、彼女の言葉はそこで終わらない。あなたが本当にここまで来た理由を見抜いたように、そんなに多くの後悔を抱えるには、あなたはまだ若すぎると告げる。そして、ミンフィリアに何が「あるべきだったか」を悔やんでも意味はないのだと、あの少年にも言いたいのだと続ける。大事なのは、実際に何が起きたかだけ。過去は過去であり、違う選択を願ったところで書き換わりはしない。あなたは選び、必要なことを果たすだけだ。アジス・ラーへ至る術を求めてここを訪れたあのときのあなたは、まさにそうやって前へ進んでいたのだと、マトーヤは突き放すように、それでいて確かな言葉で言い聞かせる。</p><p>戻ったあなたに、スロウフィクスはゴブリンたちは決して自分から厄介事を探したりしないのだと必死に訴える。だが、その言い分とは裏腹に、飛空艇の発着場の端であなたの目を引いたのは、もっと静かなものだった。そこに置かれていたのは、亡き者へ捧げられたばかりの新しいニメーヤリリーの花束。風の気配さえ薄いその場所で、あなたの胸にはあの日の光景が鮮やかによみがえる。戦艦へと落ちていくイゼルの周囲に無数の炎が咲き、冷たい雲を背に紅の星雨が散る。そして次の瞬間、かすかに生まれた蒼の光は眩いほどに広がり、砕け、ダイヤモンドのような欠片となって四方へ舞っていった。</p><p>やがてあなたはティアマットのもとを訪れる。彼女は、ここには断罪された者の妄執しか残っていないと語り、自らの狂気の中で、空に亡き兄弟の姿を見たのだと打ち明ける。それがあり得ぬことだとわかっていながらも、なお目にしてしまった幻。その正体が、死した兄弟そのものではなく、その怨念が人の身を借りて現れたものだったと知ったとき、彼女はそれを死へ送り返したのがあなたであったことも受け止める。けれど彼女は、あなたを恨まない。彼女の憎しみは、愛する者を失った瞬間と、その者を蘇らせてしまった罪とに結びついたまま、あまりにも長く留まり続けてきたからだ。愛に囚われ、怒りに歪み、自分もまたニーズヘッグと変わらぬ果てなき復讐を求めていたのだと、ティアマットは静かに認める。</p><p>それに応じたミドガルズオルムは、彼女がすでにその道を捨てたではないかと語りかける。幾千年という時の中で、ティアマットは、自分にはできなかったことを時そのものが成し遂げていくのを見てきた。アラグの民は滅び、その築いたものも朽ち果て、残された彼女はただ独り、自らの罪を思うしかなかった。人の卑小な欲を侮っていたはずの自分が、憎しみによってあまりにも容易くアシエンの誘いに乗ったことを、今の彼女は愚かさとして見つめている。ミドガルズオルムは、曇りなき目でもう一度見よと促す。己の性を超えようともがくあの男の姿を、そして彼とフレースヴェルグの眷属が、今や平和の歌を共に響かせていることを。その歌が、来たる闇に抗う礎となることを、自分は心から願っているのだと彼は言う。ティアマットはなおその外に留まり、時がこの平和を束の間のものとするのか、真実へ導くのかを見届けるつもりだという。そしてあなたには、ここへ思索のために来たことは間違いではなかったが、歩むべき道はなお続き、戦いもまだ終わってはいないと告げるのだった。</p><p>そして乙太学研究所に至り、あなたの追想はさらに失われた者たちへと向かう。不死なる者たちは死の間際まで抗い、信じようとせず、騎士たちもまた、とっくに失われた大義に最後まで忠実なまま倒れていった。肉体が光へ溶けてゆくなかで、大司教は自らを裁く者を見上げながら、ついに何を見たのかも知れぬまま終わりを迎えた。あとに残ったのは、あの眼だけだった。その呪われた宝珠を人の欲から遠ざけようとして、エスティニアンは自らの手でそれを掴み、そして一時、その意志に呑まれていった。友の願いから始まった旅は、華やかな凱旋と歓呼の果てに、結局ただひとつの場所へ辿り着くほかなかった。</p><p>そこには今も盾が墓標にもたれ、その下には新しい花が供えられている。あなたは北の冷たい風を胸いっぱいに吸い込み、静かに膝をついて目を閉じる。ほんのわずかな時をそうして過ごしたあと、再び立ち上がって見渡せば、街は変わらずそこにあり、あなたもまた、なお立っている。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> スローフィクス <small class="muted">（イディルシャイア, X:7.5, Y:6.5）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-triumphs-we-share.html">目に浮かびしは</a></div><div class="row">ファイター ソーサラー Lv 60～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-end.html">おわり</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'我們所承受的一切',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>在 Idyllshire，Slowfix 急急忙忙地攔下你，希望你以這座聚落一員的身分，幫忙處理一件非常重要的事。他告訴你，在聚落南邊的洞窟裡住著一名老婦人，她施展強大的魔法，造出了會驅趕哥布林斥候的使魔。因為你過去和那名老婦人打過不少交道，Slowfix 認為也許只有你，才能讓她稍微心軟一些，收回那些追逐哥布林的使魔。於是，你再次踏上這段帶著追憶意味的路，沿著曾經走過的足跡，回頭望向那些已經發生過的一切。</p><p>Matoya 見到你時，語氣裡帶著一如往常的尖銳與諷刺。她一眼就看出你是帶著目的而來，只是至少這次你沒有把那些小傢伙一起帶來，倒還算有點分寸。然而當你替哥布林開口時，她立刻冷笑起來。在她口中，那些所謂可憐又無辜的斥候，根本不是毫無來由地遭到攻擊，而是反過來打算吃掉她的使魔。她甚至直言，要不是自己還算手下留情，事情早就不只是驅趕這麼簡單。若他們還敢再犯，她會親手把那些傢伙一塊一塊餵給自己的使魔。</p><p>可她真正說中的，並不是哥布林的麻煩，而是你心裡一直放不下的事。Matoya 看著你，毫不客氣地說，你還太年輕，根本不該背著這麼多遺憾往前走。她也提起那個同樣執著於「事情本來應該如何發展」的少年，說無論 Minfilia 本來應該成為什麼模樣，都沒有任何意義。重要的只有實際發生過的事。過去就是過去，再多後悔，再多假設，都不會讓它改變。你只能做出選擇，然後去完成你該做的事。當初你為了前往 Azys Lla 而來到這裡時，正是抱著這樣的決心，如今也不該忘記。</p><p>回去之後，Slowfix 還在替哥布林們辯解，堅稱他們從來不是主動去惹事，只是麻煩總會自己找上門來。可在飛空艇停靠處的邊緣，真正讓你停下腳步的，卻是另一件安靜得多的東西。那裡放著一束新鮮的 Nymeia lilies，像是為逝者留下的祭奠。在那一瞬間，記憶再次鮮明地回到你眼前。你看見 Ysayle 朝戰艦墜落而去，四周綻開無數火光，像一場在冷漠雲層間灑落的赤紅流星雨。接著，蒼藍色的光芒出現了，起初微弱，隨後耀眼得令人無法直視，最後又在天際破碎，化作鑽石般的光屑，被風送往四方。</p><p>之後，你來到 Tiamat 面前。她稱你為 Hydaelyn 所選中的人，卻也直言，在這裡留下的只剩被定罪者的妄念。她說，在自己的瘋狂之中，她曾以為看見了早已死去的同胞兄弟出現在天際，明知那不可能，卻仍舊看見了那道身影。當你將真相告訴她時，她才逐漸明白，自己所見並不是死去的兄弟真正歸來，而是那份怨恨披著凡人的軀殼重現於世，而將那道身影送回死亡懷抱的人，正是你。即便如此，她並不怨恨你。她所有的恨意，早已和那兩個永遠無法分開的時刻糾纏在一起——摯愛的逝去，以及將他重新帶回世間的罪。她承認，自己和 Nidhogg 並沒有什麼不同。同樣因愛而執著，因怒而扭曲，也同樣曾追逐著沒有盡頭的復仇。</p><p>Midgardsormr 聽完後，只是平靜地提醒她，她其實早已捨棄了那條路。Tiamat 也承認，在漫長得近乎沒有盡頭的歲月裡，她親眼看著時間替她完成了她自己做不到的事。Allag 的人死去，他們留下的造物也一一崩毀，只剩她被困在漫長的孤獨中，反覆面對自己的罪。直到此刻，她才真正明白，自己曾經輕視人類那些卑微的欲望，卻又同樣輕易地被仇恨推著走，接受了 Ascians 的提議，是多麼愚蠢的一件事。Midgardsormr 要她再一次以不被迷霧遮蔽的眼睛去看──看看那個努力想超越自身本性的男人，也看看他如今如何與 Hraesvelgr 的眷屬一同唱起和平之歌。他真心希望，那份和平能成為未來抵擋黑暗的第一塊基石。Tiamat 沒有立刻追隨那份希望，但也沒有否定它。她選擇繼續留在這裡，保持距離，靜靜看著時間最終會證明，這份和平究竟只是短暫的幻影，還是真能留下來的東西。離開前，她也提醒你，來到她面前沉思並沒有錯，但你的路還遠遠沒有走完，你的戰鬥也仍未結束。</p><p>而當你走進 Aetherochemical Research Facility，記憶又一次把你帶回那些失去的人身邊。那些不死者直到死亡真正降臨時，依舊不肯相信，也不肯屈服；那些騎士則忠誠到最後一刻，哪怕他們守護的理由早已消逝。當大主教的身體逐漸化作光芒時，他望向裁定自己命運的存在，卻終究不知道自己究竟看見了什麼。一切到那時才終於結束。可真正留下來的，仍是那雙眼睛。為了不讓它們再落入貪婪的人手中，Estinien 親手將那受詛咒的寶珠帶走，也因此一度被它的意志所控制。</p><p>這趟旅程，原本就是因一位朋友的請託而開始。那麼在經歷了凱旋、歡呼，以及一切該有的榮耀之後，它最後也只能走向同一個終點。你來到那座墓標前，看見那面盾仍舊安放在那裡，下方還有新鮮的花束靜靜陪伴著它。你在北方冰冷的風中跪下，閉上雙眼，只讓自己停留片刻。等到再次站起身時，眼前的城市依然屹立不搖，而你也一樣，仍然站在這裡。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Slowfix <small class="muted">(伊迪爾郡, X:7.5, Y:6.5)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-triumphs-we-share.html">映入眼簾的榮光</a></div><div class="row">戰鬥或魔法職等級 60 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-end.html">完結</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
