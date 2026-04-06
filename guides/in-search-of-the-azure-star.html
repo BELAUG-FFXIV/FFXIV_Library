@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>In Search of the Azure Star | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – In Search of the Azure Star (EW Patch 6.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/vAccUpRhfi4"
+              title="In Search of the Azure Star" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">In Search of the Azure Star</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`In Search of the Azure Star`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>You come upon Jude just as he is lamenting that no one is there to help him. Startled by your sudden presence, he nearly jumps out of his skin before hurriedly apologizing for his nerves. Once he regains himself, he explains that he belongs to the Faculty of Astronomy and serves as the only remaining member of the Classical Astronomer’s Association. He stayed because he believed it would grant him free use of the association’s telescope, only to find that recent demands from the Forum have restricted its use, and worse still, that the telescope itself had already fallen into complete disrepair.</p><p>He tells you that he tried to have the instrument repaired, but no craftsman was willing to take the work. In his frustration, he attempted to restore it himself and only made the damage worse, to the point that nothing could be salvaged. Though he begins by apologizing that there is no longer any telescope left to fix, your words lead him to consider another possibility for the first time: rather than repairing the ruined one, perhaps he could make an entirely new instrument. The idea strikes him at once, and his despair gives way to sudden purpose.</p><p>His thoughts race immediately toward what might be possible. The finest modern lenses are far beyond his means, but if he abandons the dream of using the newest and most expensive components, then perhaps the association’s modest budget will still be enough to create something workable. Determined to find a way forward, he rushes to Noumenon in search of knowledge, pushing through his fear of crowded places for the sake of the stars he longs to study.</p><p>When you catch up to him there, Jude is visibly grateful that you have come to help. He admits that very few people have ever shown him genuine kindness, and that many who approached him in the past did so only to exploit his purse. Even so, he does not linger on bitterness for long. He asks you to search the shelves with him for books that explain how telescopes are made, hoping that somewhere among the tomes there will be something suited both to his needs and to the narrow limits of his funds.</p><p>Together, you uncover three promising works. The first describes observatories and grand telescopes on a scale fit only for national undertakings. The second is an exhaustive guide to astronomical telescopes, rich with detail yet still far too expensive for his circumstances. The third is different: a volume on the starlens, an ancient tool used by astronomers to read the stars, one that can be produced at a reasonable cost. Jude is skeptical at first. It does not even use a lens, and he cannot help wondering what value such an old device could still have in the present day. Yet it is within reach, and that alone is enough for him to seize upon the possibility. He asks if you will craft one for him, and when you agree, his gratitude is immediate and sincere.</p><p>At the workshop, Jude calculates that the funds should barely suffice to make the starlens, though doubt still weighs on him. Before long, that uncertainty is interrupted by the arrival of Jeromere, the childhood friend with whom he once spent long nights gazing at the stars. Jeromere mocks the lonely seriousness of Jude’s work and urges him instead toward a brighter, more social life in the Faculty of Literature, complete with poetry, tea, and even the promise of romance. But beneath the teasing lies concern. When Jeromere leaves, Jude explains that the two of them once saw a mysterious azure light in the sky and swore they would one day find it again. Jeromere entered the Faculty of Astronomy first, yet by the time Jude joined, he seemed to have abandoned both astronomy and that promise. Jude confesses that he had hoped to fulfill their shared dream, but without Jeromere to lead the way, he feels lost. Your encouragement steadies him. However uncertain he may be, he resolves that he must at least try, and at last he asks your name, ready to move forward with you at his side.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Jude <small class="muted">(Old Sharlayan, X:4.1, Y:9.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-faculty.html">The Faculty</a></div><div class="row">CRP, LTW, WVR Lv. 80</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-world-without-you.html">The World without You</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'蒼の星を探して',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>あなたが声をかけたとき、ジュードはちょうど、助けてくれる人がいればよいのにと嘆いているところでした。突然の気配にひどく驚いた彼は、すぐに取り乱したことを詫び、自分が魔法大学天文学部に所属し、古典天文学研究会に籍を置いていることを語り始めます。もっとも、その研究会は今や彼ひとりきりです。自由に望遠鏡を使えると思って残っていたのに、最近はフォーラムの要請による国家的な計画のため、思うように使うこともできなくなっていました。そればかりか、引き継いだ望遠鏡そのものも、すでにひどく壊れた状態だったのです。</p><p>修理を頼もうとしても、引き受けてくれる職人は現れませんでした。焦った彼は自分の手でどうにか直そうと試みますが、事態を悪化させることしかできず、ついには取り返しのつかない状態にしてしまいます。もはや修理すべき望遠鏡すら残っていないと彼は力なく詫びますが、あなたのひと言が、その行き詰まりに別の道を開きます。壊れたものを直せないのなら、新しく作ればよい。その発想はジュードの胸にまっすぐ届き、沈みかけていた気持ちに、再び小さな火がともります。</p><p>彼の考えはたちまち先へ進み始めます。評判の高い最新式のレンズは到底手が届きませんが、最上の部材にこだわらなければ、研究会に与えられたささやかな予算でも何とかなるかもしれない。そう考えた彼は、望遠鏡作りについて調べるため、書庫へと急ぎます。人の多い場所を何より苦手としているはずなのに、それでも星を見たいという思いが、彼を前へ進ませていました。</p><p>あなたがあとを追って書庫にたどり着くと、ジュードは助けに来てくれたことへ素直な感謝を示します。これまで自分に親切を向けてくれた人はほとんどおらず、近づいてきた人々の多くは、甘い言葉の裏で自分の財布目当てだったのだと、彼はどこか自嘲気味に打ち明けます。それでも彼はすぐに気持ちを切り替え、望遠鏡の構造や製作法が記された書物を一緒に探してほしいと頼みます。限られた予算の中で、自分にできる道を見つけるためでした。</p><p>やがて、あなたたちは三冊の有力な書物を見つけ出します。一冊目は観測所と巨大な望遠鏡について記したもので、その内容は見事でも、必要となる資金は国家事業に匹敵するものでした。二冊目は天体望遠鏡の百科全書で、細部に至るまで作り方が記されている一方、部材の費用があまりに高く、とても手が届きません。そして最後の一冊は、星見鏡という古の観測器具についてまとめた書物でした。レンズすら使わないその道具に、ジュードは最初こそ戸惑います。現代の天文学や光学の中で、そんな古い器具に何ができるのかと疑わずにはいられません。それでも、それは自分の手の届く範囲にあるものでした。その事実が、彼に決断を促します。どうかそれを作ってほしいと頼む彼の声には、切実な期待が込められていました。</p><p>工房へ移ると、ジュードは予算を計算し、ぎりぎりながら星見鏡を作れるはずだと口にします。けれど、その力が本当に自分の求めるものに届くのかという不安は拭えません。そこへ現れたのが、幼い頃からの友人ジェロメールでした。かつてふたりは夜空を見上げ、星を語り合っていたのに、今のジェロメールは天文学から離れ、文学部で詩や茶を楽しむ華やかな日々へとジュードを誘います。からかうような言葉の裏には、ひとりきりで塞ぎ込む彼を案じる気持ちもにじんでいました。ジェロメールが去ったあと、ジュードは十年前、ふたりで夜空の中に不思議な蒼い光を見つけ、それをいつかもう一度探し出そうと誓い合ったことを明かします。けれど先に天文学部へ進んだジェロメールは、いつしかその情熱も約束も置き去りにしてしまったようでした。ひとりでは何もできないのではないかという弱気を吐くジュードに、あなたは寄り添い、彼を支えます。すると彼は、自分に何ができるかはまだわからなくとも、少なくとも挑まなければならないと静かに決意し、ようやくあなたの名を尋ねます。こうして彼は、あなたとともに前へ進み始めるのでした。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ジュード <small class="muted">（オールド・シャーレアン, X:4.1, Y:9.1）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-faculty.html">魔法大学職員からのお願い</a></div><div class="row">木工師、革細工師、裁縫師 Lv 80～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-world-without-you.html">ともだち、いない</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'尋找藍色星辰',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你遇見 Jude 時，他正低聲嘆著，要是那個人此刻在這裡幫他就好了。你一出聲，他立刻被嚇得渾身一震，慌忙向你道歉，承認自己向來容易受驚。等他稍微鎮定下來後，他才告訴你，自己隸屬於魔法大學的天文學部，同時也是古典天文學研究會的成員。只是那個研究會如今只剩下他一個人。原本他留在那裡，只是因為以為能自由使用研究會的望遠鏡，沒想到最近因為 Forum（Old Sharlayan 的最高決策機關，負責制定國家政策）推動的國家級計畫，連望遠鏡的使用都受到限制，而等他真正接手之後，才發現那具望遠鏡早已老舊失修，幾乎到了無法挽回的地步。</p><p>他不是沒有想過找工匠修理，只是沒有人願意接下這份工作。焦急之下，他甚至試著自己動手修復，結果卻只讓情況變得更糟，直到再也沒有補救的可能。於是當他得知你是 Qih Aliapoh 介紹來的工匠時，只能帶著歉意告訴你，已經沒有任何還能修理的望遠鏡了。可你的回應，卻讓他第一次想到另一條路。既然壞掉的望遠鏡已經救不回來，那就乾脆重新做一具新的。這個念頭像是一下子打進了他心裡，原本幾乎被失望壓垮的神情，也終於重新亮起了一點光。</p><p>他的思緒很快就往前奔去。那些傳聞中精密又清晰的新式鏡片固然令人嚮往，但所需經費高得驚人，根本不是他能負擔的數字。可如果不執著於最新、最昂貴的部件，也許憑研究會目前那點微薄預算，仍有可能做出一具能用的觀測器材。想到這裡，Jude 立刻趕往 Noumenon，想從館藏中找出製作望遠鏡的資料。即使他明明那麼害怕人多的地方，想要再次仰望群星的念頭，還是硬生生推著他往前走。</p><p>等你追上他時，Jude 對你的到來流露出明顯的感激。他坦白說，過去真正對他釋出善意的人少得可憐，更多人接近他，不過是嘴上說得動聽，實際上只是看上了他的錢袋而已。不過他很快就收起那些陰影，把注意力放回眼前的事情上。他請你和他分頭翻找書架，希望能從那些古老典籍裡找出記載望遠鏡結構與製作方法的書，好讓自己在能力與預算的範圍內，找到一條真正可行的路。</p><p>最後，你們一共找到三本看似有希望的書。第一本記錄的是觀測所與大型望遠鏡，內容雖然精采，規模卻大得必須靠國家級經費才撐得起來。第二本是天文望遠鏡的百科全書，幾乎把製作細節鉅細靡遺地寫了下來，可上面列出的零件成本依然遠遠超過他手上的資金。直到翻開第三本書，事情才終於出現轉機。那是一本介紹 starlens（一種正在研製中的觀星裝置）的書，記載著古代天文學者曾使用這種器具來解讀星辰，而且製作成本還在他能負擔的範圍內。Jude 起初難掩遲疑，因為這種古老器具甚至不使用鏡片，他實在無法立刻相信，這樣的東西在今日的天文學與光學世界裡還能有多少價值。可即便如此，這已經是他真正搆得著的選擇了。於是他鄭重地請你替他製作，而你答應之後，他那份真切的感激幾乎藏也藏不住。</p><p>到了工坊，Jude 反覆盤算手上的經費，認為應該勉強足夠把 starlens 做出來。只是，它是否真能幫助自己追尋那個多年未解的目標，他心裡依舊沒有把握。就在這時，Jeromere 出現了。那是 Jude 從小一起長大的朋友，也是曾經陪他一起仰望星空的人。如今的 Jeromere 卻不再沉浸於天文學，而是勸他離開這份枯燥、孤獨又看不見回報的執著，轉去文學部過另一種更熱鬧、更輕盈的人生。那些帶著調笑的話語背後，其實也藏著對 Jude 的擔心。等 Jeromere 離開後，Jude 才把那段往事慢慢說出口。十年前，你眼前這兩個人曾在一次天文工坊裡，於夜空中發現一道神祕的藍色光芒，並相信那是某種未知的天體。即使後來魔法大學始終找不到那道光，他們仍曾約定，有朝一日一定要重新找到它。可是先一步進入天文學部的 Jeromere，卻在不知不覺間彷彿變成了另一個人，把那份熱情與誓言全都拋下。Jude 坦白說，自己原本正是為了完成那個共同的夢想才來到這裡，可沒有 Jeromere 在前方帶路，他就完全不知道自己是否還走得下去。你的鼓勵，讓他終於稍微站穩了腳步。即使他還不知道自己究竟能做到什麼，又能走到多遠，他也明白，自己至少必須試著踏出下一步。直到這時，他才終於開口詢問你的名字，並帶著一絲真正振作起來的神情，準備與你一起繼續走下去。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Jude <small class="muted">(舊薩雷安, X:4.1, Y:9.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-faculty.html">來自魔法大學的請託</a></div><div class="row">CRP, LTW, WVR Lv. 80</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-world-without-you.html">沒有你陪伴的世界</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
