@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Oaths We Swear | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – The Oaths We Swear (HW Patch 3.3)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/4f-xJqWcbIc"
+              title="The Oaths We Swear" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">The Oaths We Swear</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`The Oaths We Swear`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Higiri receives you with quiet gratitude and immediately entrusts you with a small but meaningful favor. She has prepared a special unguent for Raubahn, explaining that wounds as grievous as his must be tended every day, even long after they appear to have healed. She asks only that you deliver it to Commander Swift, who will make certain it reaches the Flame General. There is no exaggeration in the care she takes. Few shinobi, she says, possess the resolve to return to battle after suffering such a terrible injury, and even those who do must endure lingering pain and the difficult work of relearning their own bodies. If Raubahn suffers such aches, she hopes her medicine may grant him some measure of ease.</p><p>Swift accepts the unguent with thanks and, seeing you there, bids you wait a moment longer. A meeting has only just ended, he says, and Raubahn would surely wish to speak with you before returning to the palace. When Raubahn appears, he greets the delivery with rough amusement, laughing at the thought that he is now expected to tend his wounds daily like some fragile invalid. Yet the humor soon falls away. He knows why you have truly come. This is your journey of remembrance, and this stop leads him back to the moment you pulled him from the pit where Ilberd meant to leave him to die. That memory fills him not with triumph, but with shame. He speaks of Ilberd’s hatred, of how long it was allowed to fester unseen, and of the bitter belief that Raubahn had abandoned Ala Mhigo while building power and wealth in Ul’dah. He insists he did try to help his people, though Ilberd never saw it. In the end, it was not only Raubahn who paid for that failure of understanding, but the Scions as well. He breaks off before the anger can consume the moment entirely, yet his vow remains: whether today or tomorrow, a reckoning will come.</p><p>Your path then turns toward Gorgagne Mills, where a House Durendaire knight meets your arrival with surprise and a strange sense of timing. He explains that they have come to accept the surrender of several former heretics who once fought for Lady Iceheart. The promise of general amnesty has stirred resentment among the ranks, for not so long ago these very people were ambushing Ishgardian convoys. Even so, he says plainly that if the choice is between reconciliation and returning to violence, then reconciliation must be chosen. In the cellars below, one of the penitent heretics recognizes you at once. He remembers the amphitheatre, remembers how certain they all were, and how completely they believed that Ysayle was Saint Shiva reborn and had come to answer their prayers. When she finally told them the truth—that she was no savior, and that what they clung to was born from desperation and denial—they first took it as yet another test. Yet when they marched on Ishgard regardless, she stopped them from falling fully into ruin and pleaded with them to seek another way. Now, with their weapons lowered at last, the man tells you that she considered you a friend. Had things been different, perhaps friendship might have been possible for them as well. Then he leaves to surrender, carrying with him not certainty, but the hard, unfinished work of repentance.</p><p>From there you go on to Jantellot, who greets you first with outrageous theatrics, declaring that since you slew Nidhogg and ended the war, you have also ruined his livelihood. But the joke quickly gives way to laughter, and then to a truth far more revealing than the complaint. Peace, it turns out, has proven profitable. As ties with Hraesvelgr’s brood deepen and Ishgard’s interests in Dravania expand, more travelers are taking to the roads, and those travelers require protection. It may not bring the glory of dragon-slaying, he says, but it pays honestly and is far less likely to end in fiery death. Beneath the humor is a simple reality: not all who bear arms do so from hatred or duty. Some do it because no better path was ever offered to them. Give such people another way to live, and many will gladly take it. Jantellot’s words turn the end of war into something practical and human—not merely the silence of battle, but the beginning of other kinds of labor, other kinds of survival.</p><p>At last you come to Tailfeather, where Marcechamp remembers Ysayle not as a figure of legend, but as a person who once passed quietly through ordinary lives. He tells you how, five years earlier, they found her collapsed alone in the forest and carried her back to safety. For days after waking, she barely spoke at all, only stared at the sky as though nothing on the ground could hold her. And yet he remembers another side of her too—the woman she was in the years that followed, and the sudden day when she declared that she had found a truth that must be shared. Then she left, and for a time they heard nothing more, until stories spread of Lady Iceheart calling people from far and wide to hear her revelation. Some dismissed it, but Marcechamp never did. Deep down, he says, most people truly do want to do right by themselves and by others. They try. You have tried. And so did she. In that quiet conviction, your remembrance of the past is left not with easy absolution, but with a gentler understanding of how flawed, earnest hearts can still reach toward truth, even when they lose their way.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Higiri <small class="muted">(Mor Dhona, X:22.0, Y:5.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-paths-we-walk.html">The Paths We Walk</a></div><div class="row">Disciple of War or Magic Lv. 60</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-legacies-we-leave.html">The Legacies We Leave</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'雪踏みしめて',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ヒギリは、静かな礼とともに、ひとつの頼みをあなたに託す。彼女はラウバーンの療養のために特製の塗り薬を用意しており、あれほど深い傷は見た目の上で癒えたあとも、日々の手当てを欠かしてはならないのだという。それを不滅隊のスウィフトへ届けてほしいと、彼女は穏やかに頼む。忍びの中にも、あれほどの重傷を負いながら再び戦場へ戻れる者は多くない。技を身体に合わせ直す苦しみだけでなく、理由のつかぬ痛みに長く悩まされることもある。もしラウバーンにもそうした疼きが残っているのなら、この薬が少しでも助けになれば――そんな思いが、その小さな器には込められていた。</p><p>スウィフトは薬を受け取ると、その場であなたを帰そうとはしなかった。ちょうど今しがた会議が終わったばかりで、ラウバーンもきっとあなたと言葉を交わしたがるだろうと言う。ほどなく現れたラウバーンは、毎日これを塗れとは、まるで老人扱いだなと豪快に笑ってみせる。だが、その笑いは長く続かない。あなたがしているのは、ただの使いではなく、過去を辿る旅なのだと彼はすでに知っていた。そして今ここで向き合わされるのは、イルベルドに捨て置かれ、朽ちるままにされるはずだったあの底から、あなたが自分を引き上げた瞬間の記憶だった。そのことを思えば、胸に去来するのは勝利の感慨ではなく、自分の愚かさへの痛みだった。イルベルドの憎しみに気づけなかったこと。かつてはラウバーンがアラミゴ解放の先頭に立つと信じていた男が、歳月の果てに、自分を富と権勢に安住した裏切り者と見なすに至ったこと。ラウバーンは、何もしなかったわけではないと語る。だが、それは相手には届かなかった。そしてその行き違いの代償は、自分だけではなく暁にも及んだ。言葉を切ったあとに残るのは、それでもなお果たさねばならぬ清算への決意だった。今日ではなくとも、明日ではなくとも、必ず報いの時は来るのだと。</p><p>次にあなたが向かったゴルガニュ牧場では、デュランデル家の騎兵が、奇妙なめぐり合わせでもあるかのようにあなたを迎える。彼らは、かつて氷の巫女に従って戦った異端者たちの降伏を受け入れるためにここへ来ていた。彼女の信徒たちに大赦が与えられるかもしれないという噂は、兵のあいだに少なからぬ反発を生んでいる。ついこの前まで、彼らは補給隊を襲っていた相手なのだから当然でもあった。だがそれでも、その騎兵は言う。和解か、再び暴力へ戻るか。その二つを比べるのなら、自分は和解を選ぶのだと。地下にいる悔悟した異端者のひとりは、あなたを見るなり、かつて円形闘技場で会ったことを思い出す。彼らは当時、自分たちが何もかも理解していると信じていた。イゼルこそが聖シヴァの再来であり、自分たちを救うために現れた存在なのだと。だが彼女は、自らを救世主ではないと告げる。彼らの祈りは、絶望と否認から生まれた熱病の夢にすぎないのだと。それでも彼らはなおイシュガルドへ進もうとした。そんな彼らを、イゼルは破滅の縁から引き戻し、別の道を探せと訴えたのだという。いまようやく武器を置こうとしているその男は、イゼルがあなたを友と見なしていたと告げる。そして、もし違う運命がありえたのなら、自分たちもまた友になれたかもしれないと、静かに別れを告げるのだった。</p><p>その後に訪ねたジャンテローは、いかにも彼らしい大仰な芝居であなたを迎える。ニーズヘッグを討ち、千年の戦いを終わらせたせいで自分の商売まで潰したのだから、いっそとどめを刺してくれと大笑いしながら槍まで差し出してみせる。もちろん、それは冗談にすぎなかった。むしろ現実は逆で、平和は思いのほかよい稼ぎを連れてきたのだという。フレースヴェルグの眷属との結びつきが深まり、ドラヴァニアとの往来が増えるにつれて、道を行く旅人も目に見えて多くなった。旅人が増えれば護衛の仕事も増える。竜殺しのような名誉は得られずとも、炎に焼かれて死ぬ危険はずっと少なく、暮らしを立てるには十分だ。そこから彼が語るのは、戦う者の現実だった。剣を取る者がみな憎しみや使命感からそうするわけではない。ただ、他に生きる術がなかったからという者もいる。そうした者たちは、別の道を示されれば、喜んで武器を置き、よりましな生のために働くこともできるのだと。戦の終わりは、ただ敵が消えることではなく、人がようやく別の働き方を選べるようになることでもあった。</p><p>最後にたどり着いたテイルフェザーで、マルスシャンはイゼルのことを伝説や異名ではなく、かつて身近にいたひとりの人間として語る。五年前、彼らは森の中で、たったひとり昏睡した彼女を見つけ、ここへ運び帰って介抱したのだという。目を覚ましたあともしばらく、彼女はほとんど口を利かず、ただ空ばかり見つめていた。まるで地上にはもう何ひとつ、自分を引き留めるものがないように。だが、後に続いた歳月の中で、彼は彼女の別の姿も見ている。そしてある日突然、語らねばならぬ真実を見つけたと言い残して、彼女は去っていった。その後しばらく消息は絶え、やがて氷の巫女が真実を語ると呼びかけ、人々が各地から集まったという噂だけが届くようになった。あれに価値はなかったという者もいた。だがマルスシャンは違った。人は本当のところ、自分にも他人にも、正しくありたいと願っているものなのだと彼は言う。うまくいくとは限らない。それでも皆、そうあろうともがく。あなたもそうだったし、彼女もまたそうだったのだと。その言葉は、過ちを無条件に赦すものではない。ただ、道を違えた者の内にも、真実へ手を伸ばそうとした誠実さがたしかにあったのだと、静かに認めるものだった。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ヒギリ <small class="muted">（モードゥナ, X:22.0, Y:5.1）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-paths-we-walk.html">追憶行</a></div><div class="row">ファイター ソーサラー Lv 60～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-legacies-we-leave.html">旅の果て</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'在雪地立下的誓言',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Higiri 帶著一種安靜而認真的神情，把一個小小的請託交給你。她替 Raubahn 準備了一份特製的藥膏，因為像他那樣嚴重的傷，即使表面早已癒合，之後仍然需要每天仔細照護。她希望你順路把這份藥膏交給 Swift，再由他轉交給 Flame General Raubahn。她說，能在遭受那樣重的創傷後重返戰場的人，本來就極少；即使撐過來了，也往往得重新適應自己的身體，還會長時間忍受一些說不清原因的疼痛。若是 Raubahn 也正被那樣的後遺症折磨，她至少希望這份藥能替他減輕一點痛苦。</p><p>Swift 收下藥膏後，沒有立刻讓你離開，而是要你稍等片刻。會議才剛結束，他想 Raubahn 在回宮之前，大概也會想和你說上幾句。果然，Raubahn 一現身，先是帶著一點粗豪的笑意，拿每日擦藥這件事自嘲了幾句，像是不願讓自己看起來太過脆弱。可笑聲很快便淡了下去。他知道你不是單純來送東西的。這趟路，是你為了回望過去而走，而你此刻回到這裡，也等於重新站到了那個時刻前，站到你把他從 Ilberd 留下、等著腐爛至死的深坑裡救出來的那一刻前。對他來說，那段記憶帶來的不是解脫，而是羞愧。他直到現在仍無法不去想，自己當時竟然那樣看不見 Ilberd 心裡積壓已久的恨。Lolorito 告訴過他，Ilberd 並不是一開始就走到那一步；那個人曾經相信，自己總有一天會率領軍隊重返 Ala Mhigo。可年復一年過去，在 Ilberd 眼裡，Raubahn 只是成了在 Ul’dah 擁有財富、權勢與影響力，卻對故土苦難無所作為的人。Raubahn 說，那並不是事實，他不是沒有努力過，只是那些努力從未被看見。到頭來，這份錯失帶來的代價，也不只落在他自己身上，連 Scions 都替他的失敗付出了代價。他沒有把話說到底，但那股壓抑著的怒火與決心已經夠分明了，總有一天，該清算的事一定會被清算。</p><p>接著，你來到 Gorgagne Mills。House Durendaire 的騎士看見你時，先是意外，隨後又像覺得你會在這種時候出現，也許真有某種命運的意味。他告訴你，他們這次前來，是為了接受幾名曾追隨 Lady Iceheart 的異端者投降。近來關於大赦這些追隨者的傳聞，已在軍中激起不少不滿，畢竟就在不久前，這些人還在伏擊 Ishgard 的補給隊。可即便如此，他仍然說得很清楚：如果只能在和解與重回暴力之間二選一，那他寧可選和解。之後，你在地窖裡見到其中一名悔罪的異端者。對方一眼就認出了你，也想起了當初在 amphitheatre 的那一幕。那時的他們，曾經對許多事情深信不疑。他們相信 Ysayle 就是 Saint Shiva 再臨，相信自己的祈禱終於換來了救贖。可當她親口說出真相，說自己根本不是什麼救世主，說那些被他們奉為神意的東西，其實只是絕望與逃避催生出的幻夢時，他們最初甚至以為那只是另一場考驗。直到後來，他們仍執意向 Ishgard 進軍，而她卻在最後關頭把他們從徹底毀滅的邊緣拉了回來，要他們去找別的道路。如今，這些人終於準備放下武器。那名異端者臨走前對你說，Ysayle 曾把你視為朋友。如果命運稍微不同一點，也許你們原本也能成為朋友。這句話沒有替過去開脫，卻讓你真切感受到，有些人即使走錯了路，也並非從一開始就只會走向錯誤。</p><p>再往前走，你見到了 Jantellot。他還是一如既往地誇張，一開口就說你既然殺了 Nidhogg、結束了千年的戰爭，也等於順手斷了他的生計，不如乾脆連他一起殺了，還大方表示連自己的槍都可以借你。可這番鬧劇轉眼就變成了大笑，因為真正的情況其實完全相反。他告訴你，和平反而意外地很賺錢。隨著 Ishgard 和 Hraesvelgr 的 brood 之間的關係日漸穩定，Dravania 一帶的往來也逐漸增加，上路的人變多了，而有旅人，就會有護衛的需求。這種差事當然不會像屠龍那樣帶來爵位與榮耀，卻能實實在在地養活人，而且還不太容易以被火燒死作收。說笑之間，他其實點出了一件很直接的事：並不是每個拿起武器的人，都是因為仇恨，或者崇高責任才去打仗。有些人只是沒有更好的工作，沒有別的活路。若真給了他們另一條能過下去的路，他們也可以很樂意地把手裡的劍換成別的東西，或至少把力量交給更值得追隨的目標。你在他這裡看到的，是戰爭結束後另一種很真實的改變，不是詩意的和平，而是人終於有機會用不一樣的方法活下去。</p><p>最後，你抵達 Tailfeather，在那裡聽 Marcechamp 提起 Ysayle。和別人口中的 Lady Iceheart 不同，在他的記憶裡，她首先是個曾經被人從森林裡撿回來、躺在這裡養傷的人。五年前，他們在林中發現她時，她正陷在昏沉裡，身邊一個人也沒有。於是他們把她帶回來照料。她醒來之後，好幾天都沒怎麼說話，只是安靜地望著天空，彷彿地面上的一切都已經與她無關。可 Marcechamp 也記得後來的她，記得那些年裡她其實並不是不會笑，只是笑容總帶著某種很遠的東西。直到有一天，她忽然說，自己找到了必須傳出去的真相，然後就這麼離開了。再之後，才陸續有傳聞傳回來，說 Lady Iceheart 正四處呼喚人們去聽她所謂的真相。有些人覺得那一切毫無意義，但 Marcechamp 從不那麼想。他說，其實大多數人心底深處都想做對的事，想對得起自己，也想對得起別人。只是這件事從來都不容易。你一直在努力，而她也是。從他的話裡，你感受到的不是替誰洗白，而是一種更安靜的理解：有些人會犯下錯誤，甚至走得太遠，可那並不一定代表他們從來沒有真心想靠近正確的方向。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Higiri <small class="muted">(摩杜納, X:22.0, Y:5.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-paths-we-walk.html">一路走來的回憶</a></div><div class="row">戰鬥或魔法職等級 60 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-legacies-we-leave.html">旅程盡頭</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
