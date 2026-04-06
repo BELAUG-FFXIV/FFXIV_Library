@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Legacies We Leave | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – The Legacies We Leave (HW Patch 3.3)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/J-eZy6rGkdQ"
+              title="The Legacies We Leave" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">The Legacies We Leave</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`The Legacies We Leave`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Marcechamp catches himself after speaking of Ysayle for too long and gently turns the moment back to you. This journey, he reminds himself, is meant for your memories, not his. When he guesses that your next stop will be the Gnath, he cannot resist joking about the old days, rattling off the absurd collection of “incentives” once needed to earn passage among them. Yet the joke quickly gives way to fond disbelief. You are no stranger to that village now, and no such effort is needed anymore. Even so, the mention of those former labors brings back another memory for him too: the dragoon who once helped you gather fruit, and the strange, winding road by which trust was first won.</p><p>At Loth ast Vath, the Vath Storyteller receives you with solemn respect. Once, he says, those who lived beneath the Onemind would never have understood what it meant to return in search of memory. The Onemind does not forget, but those separated from it do, and that forgetting can be painful. Yet memory alone is not enough. It must be strained into words, then set down and preserved. That is why a chronicler matters. He tells you that your coming, your departure to face Ravana, and the days in which the young hunter trained beneath the old hunter have all been written into their record. Freed now from the will of the many, these Vath are shaping the first pages of a history that belongs to themselves, and they mean to pass it on to every new one who joins them.</p><p>From there you go to Anyx Trine, where Vidofnir welcomes you as Ysayle’s friend and a warrior among warriors. To her, looking back is no lesser wisdom than pressing on. Her people do not preserve remembrance through pilgrimage, nor through books, but through song. In song they keep the deeds of the dead alive and mark the turning of the ages. Once, it was a dirge of unbearable grief that stirred Nidhogg’s brood to war. That song has now fallen silent. In its place another is rising—one of hope rekindled, of war ended, of peace reborn. Vidofnir says she will sing of you and Ysayle from this day forward, so that neither of you will be forgotten. Even Nidhogg is still sung of, not in praise, but to guide his soul toward rest, because even he is not denied the peace that comes after struggle.</p><p>At Moghome, memory becomes lighter without losing its depth. Moglin greets you in astonishment, relieved that you have not come to burden him with yet another troublesome errand. Instead, he is delighted by the chance to reminisce and quickly fetches the friends who happen to be visiting. Kan-E-Senna greets your pilgrimage with quiet approval, calling it a final reflection upon the past so that you may face what lies ahead with a peaceful heart. She admits that when last you all stood there together, none of them—not even Estinien—could have imagined what was to follow. When she learned what had happened at Azys Lla, she feared him lost. Yet through your struggle, he was saved. Moglin, true to himself, reduces that near-tragedy to a practical observation: Estinien was always far too stubborn to die easily, even with a vengeful wyrm lodged in his mind. But Kan-E-Senna’s thoughts remain with what peace now demands. With Nidhogg gone, Ishgard and Dravania may finally turn toward the future, but only if they remember the cost of the past. Only remembrance can keep old mistakes from being repeated.</p><p>As you continue on, the memory of one quiet night rises before you with painful clarity. The warmth of Alphinaud’s fire, the scent of Ysayle’s stew, Moghan snoring softly on the grass—small comforts gathered against the cold. The next morning had seemed full of hope as you climbed and sounded the horn, yet what awaited at the summit crushed that hope beneath truths too bitter to bear. The past returns not only in great speeches and meetings, but in these intimate fragments: the smell of food, the snap of firewood, the stillness before the heart is broken by knowledge.</p><p>Your road leads at last to Ul’dah, where a familiar voice urgently calls you over. It is Nanamo in disguise, introducing herself once more as Lilira, and she wastes no time explaining why she slipped beyond the palace walls. So much has changed, she says, and so quickly that even now she struggles to make sense of it all. Yet one truth remains clear to her: she owes you more gratitude than words can measure. After waking, she learned everything from Papashan, and later heard Lolorito himself confess his regret and offer not only Teledji Adeledji’s wealth, but half his own fortune to the crown. She accepted it—not as absolution, but as a tool. She has chosen to direct that wealth first toward the refugees, who have suffered more than most, and she also offers funds to help restore the Scions, knowing that grave wrongs were done to you and yours. Even as she speaks, duty comes rushing after her in the voice of Papashan and the alarm of the Sultansworn. Yet for one brief moment longer, she resists returning at once. A ruler, she says, must sometimes see her people with her own eyes. So before she is found, she entrusts you with one last small task: delay her pursuers with a polite conversation, and grant her just a little more freedom beneath the open sky.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Marcechamp <small class="muted">(The Dravanian Forelands, X:31.9, Y:22.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-oaths-we-swear.html">The Oaths We Swear</a></div><div class="row">Disciple of War or Magic Lv. 60</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-triumphs-we-share.html">The Triumphs We Share</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'旅の果て',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>マルスシャンは、イゼルのことを語りすぎたと気づくと、少しばかり気まずそうに肩をすくめる。本来、これはあなた自身の思い出を辿る旅であって、自分の昔話に付き合わせるためのものではないのだと。次はグナース族のもとへ向かうのだろうと察すると、彼はかつて必要だった妙な手土産の数々を、冗談めかして並べ立てる。新鮮な果実に蜜、若い獣の肉まで山ほど必要だったあの頃とは違い、いまのあなたは、もう何の気遣いもなくあの里へ迎え入れられる。けれど、そう口にするうち、彼の中にもまた昔の光景がよみがえる。果実を採るために力を貸した竜騎士のことも、そのころはまだ、信頼ひとつ得るにも長い道のりが必要だったことも。</p><p>ロス・アト・ヴァスであなたを迎えた語り部は、深い敬意をもって言葉をかける。かつて群体の意志に結ばれていた頃の彼らには、記憶を求めて過去の道を辿るという感覚そのものが理解できなかっただろうという。ひとつの心は忘れない。だが、そこから離れた者たちは忘れる。そしてその忘却は、時にどうしようもなく胸を乱す。だからこそ、思い出すだけでは足りない。記憶を言葉にし、言葉を記録として刻まねばならないのだと、彼は語る。あなたがロス・アト・ヴァスへ来たこと、ラーヴァナを討つために旅立ったこと、そのあいだ若き狩人が老いた狩人のもとで鍛えられたこと――それらはすでに彼らの歴史として書き留められている。もはや多数の意志に縛られぬ彼らは、自らの手で新たな歴史の第一章を書き始め、その記憶を、これから加わる同胞たちにも伝えていこうとしていた。</p><p>アニドラス・アナムでは、ヴィゾーヴニルがイゼルの友として、また幾多の戦いを越えてきた勇士としてあなたを迎える。彼女にとって、過去を振り返ることは、未来へ進むことに劣らぬ知恵だった。ドラゴンたちは巡礼でも書物でもなく、歌によって死者の業績と時代の移ろいを語り継ぐ。かつてニーズヘッグの眷属を突き動かしたのは、深い悲しみに満ちた挽歌だった。だが、その歌はもはや響かない。いま空白を満たそうとしているのは、戦の終わりと平和の再生、そして再び灯った希望を歌う新たな調べだと、ヴィゾーヴニルは言う。そして彼女は、あなたとイゼルのことをこれからも歌い続けると誓う。誰も忘れぬように、誰もその名を失わぬように。ニーズヘッグについてさえ、なお歌は捧げられる。ただしそれは讃えるためではなく、彼の魂を安らかな眠りへ送るためであり、どれほどの憎しみを背負った者であろうと、最後には静けさを与えられるべきだという思いがそこにはあった。</p><p>モグモグホームに辿り着くと、空気は少しだけやわらかくなる。モグリンは、また厄介な頼まれ事でも持ち込まれるのではと身構えながらも、ただ昔を懐かしみに来たのだと知ると、心から嬉しそうに仲間たちを呼びに走る。そこへ現れたカヌ・エ・センナは、この旅を、曇りなき眼と穏やかな心で未来へ向かうための最後の省察なのだと、静かに讃える。最後にここへ立ったとき、この先に何が待つのかを誰ひとり想像できなかっただろうと、彼女は振り返る。とりわけエスティニアンの身に起きたことを知ったときには、もう救えないのではないかとさえ思った。だが、アルフィノからあなたの戦いと彼の救済を聞いたとき、不可能を成し遂げるあなたの力を改めて思い知ったのだという。モグリンはそれを、あの男はあまりに頑固で簡単には死にそうになかったと、いかにも彼らしく茶化してみせる。けれどカヌ・エ・センナが見つめているのは、その先だった。ニーズヘッグが去ったことで、イシュガルドとドラヴァニアの子らはようやく未来へ目を向けられる。だがその未来が同じ過ちを繰り返さぬためには、歴史と、その争いの中で失われた無数の命を忘れてはならないのだと。</p><p>その後、あなたの胸に浮かび上がるのは、もっと小さく、もっと静かな記憶だった。アルフィノが熾した焚き火のぬくもり。イゼルの煮込みから立ちのぼる食欲を誘う香り。草の上で眠り込んだモーグリのやわらかな寝息。あの夜も風は冷たく、翌朝には希望を胸に階を上り、角笛を吹いた。だが、頂に辿り着いた彼らを待っていたのは、到底受け止めきれぬほど苛烈な真実だった。思い出とは、大義や決断の場面だけでできているわけではない。火の爆ぜる音や食事の匂いのような、ごくささやかなものまでもが、過ぎ去った時間の重さをかえって鮮やかにしてしまうのだ。</p><p>そして旅路は、ウルダハへとあなたを導く。そこで不意にあなたを呼び止めたのは、変装したナナモだった。彼女は再びリリラと名乗りつつ、宮殿の外で束の間の息抜きをしていたのだと打ち明ける。短い時間のうちに、あまりにも多くのことが起こり、あまりにも多くのものが変わった。いまなお、そのすべてを整理しきれずにいるのだと彼女は言う。それでも、ひとつだけ確かなことがある。自分はあなたに、そして自分が大切に思う者たちのために尽くしてくれたあなたに、計り知れぬ恩を負っているということだった。目を覚ましたあと、パパシャンからすべてを聞かされ、さらにロロリトが自らの過ちを悔いて、テレジ・アデレジの資産と自分の私財の半分を王冠へ差し出したことも知った。彼女はその申し出を受け入れた。ただし、それは償いを金で済ませるためではない。国に山積する問題の中でも、とりわけ苦しんできた難民たちを最初に救うため、そしてまた、あなたたちに対してなされた非道への応答として、暁の再建を支えるために、その財を使いたいのだと語る。だが、そんなひとときも長くは続かない。パパシャンの声が響き、近衛兵たちが彼女を捜し始める。それでもなお、彼女はすぐには戻ろうとしない。為政者たる者、民が日々をどう生きているかを自らの目で見ねばならないのだと、そう言って。だからこそ彼女は、追ってくる近衛兵たちをしばし穏やかに引き留めてほしいと、最後の頼みをあなたに託す。ほんの少しだけ、王宮の外の空気を味わう時間を守るために。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> マルスシャン <small class="muted">（高地ドラヴァニア, X:31.9, Y:22.9）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-oaths-we-swear.html">雪踏みしめて</a></div><div class="row">ファイター ソーサラー Lv 60～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-triumphs-we-share.html">目に浮かびしは</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'旅程盡頭',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Marcechamp 像是忽然回過神來，帶著一點不好意思地收住了自己對 Ysayle 的追憶。他說，你來這裡是為了整理自己的記憶，不是為了聽他的往事。既然如此，你下一站大概就是 Gnath 了吧。話一出口，他又忍不住提起以前的事，像在打趣似地提醒你，當初若想好好和那些人來往，可還得先備齊一堆「見面禮」，新鮮的 caelumtree 果實、整罐的 landtrap 蜜，還有一大車嫩 nanka 肉。可話才說完，他自己就先笑你怎麼可能真的忘了，畢竟如今的你，早已不是當年那個得辛辛苦苦換取通行許可的人了。你現在本來就已經能自由進出他們的村子。只是說到這裡，他又自然想起了從前幫你採果的那位 dragoon，還有那段靠著一次又一次往來，才慢慢換來信任的時光。</p><p>來到 Loth ast Vath 之後，Vath Storyteller 用極其鄭重的態度迎接你。他說，若是在從前，他們根本不會理解你口中的這種事。那時候的他們活在 Onemind 之下；Onemind 不會遺忘，可一旦脫離了它，個體反而會失去記憶，而那種遺失，往往讓人難以承受。所以，光是記得還不夠，還得努力把記憶說出口，把它寫在紙上。這就是記錄者存在的意義。他告訴你，他們早已將你來到 Loth ast Vath 的事、你離開去討伐 Ravana 的事，以及你不在時，年輕獵手如何在老獵手身邊成長的事，全都寫進了屬於他們自己的記錄裡。對這群終於不再受眾意志束縛的 Vath 而言，那不只是回憶，而是新歷史真正開始的第一頁。他們會珍惜這些記錄，也會把它們講給將來新加入的同族聽，讓這段過去變成能被世代承接下去的東西。</p><p>之後你前往 Anyx Trine。Vidofnir 見到你時，仍以 Ysayle 的朋友、群戰士中的戰士來稱呼你。她說，回望過去本身就是一種智慧，是重新走過那些只記得一半的道路，再次辨認它們究竟如何蜿蜒。對龍族而言，這種事不是靠朝聖，也不是靠史家鍾愛的文字來完成，而是靠歌。她說，他們會用歌保存逝者的事蹟，也會用歌記錄歲月如何流轉。曾經，有一首滿懷極深悲傷的哀歌喚起了 Nidhogg 一族的行動；如今，那首歌已經不再響起。取而代之的，是另一首正在升起的新歌──一首關於希望重新點燃、關於戰爭終結、關於和平重生的歌。Vidofnir 說，從今以後，她會一直歌唱你和 Ysayle，好讓所有人都記得。甚至連 Nidhogg，如今也仍有人為他而歌。那不是讚頌，而是為了將他的靈魂送往安息之處。因為即使是他，也仍值得被給予平靜。</p><p>到了 Moghome，整段旅程的氣氛稍微鬆了些。Moglin 一看到你，就先誇張地大呼小叫，像是生怕你又要把什麼麻煩差事丟給他似的。可一聽說你只是來回味舊事，他馬上又樂了起來，還立刻跑去把剛好來訪的熟人們找來。很快，Kan-E-Senna 與 Kuplo Kopp 便出現在你面前。Kan-E-Senna 很欣賞你這場回顧往昔的旅程，認為這是一種最後的整理，好讓你能帶著更平靜的心與更清明的目光走向未來。她說，若回想起上次大家一同站在這裡的時候，恐怕沒有任何人能預料接下來會發生什麼，尤其是 Estinien 自己。當她得知 Azys Lla 發生的事時，甚至一度以為他已經回不來了。後來聽 Alphinaud 說起你如何奮戰、又如何把他救回來，她才再次想起，你向來就有把不可能變成現實的本事。Moglin 則在一旁插話，說那傢伙看起來本來就頑固得不像是會輕易死掉的人，只不過，腦袋裡住進一條滿懷怨恨的巨龍，想把它趕出去，也的確不是件容易事。Kan-E-Senna 沒有順著玩笑走太遠，而是把話帶回更深的地方。她說，隨著 Nidhogg 的消逝，Ishgard 和 Dravania 的子民終於能開始望向未來；可若想避免重蹈覆轍，就絕不能忘記歷史，也不能忘記那場衝突中失去的無數生命。唯有記得，人們才不會再次走回同樣的錯誤裡。</p><p>接著，回憶不再只是人物與對話，而是某一夜極安靜的片段重新浮上心頭。Alphinaud 的營火發出溫暖的劈啪聲，Ysayle 燉煮的食物飄來鹹香熱氣，Moghan 則躺在草地上睡得安穩，發出輕輕的鼾聲。那晚的風同樣寒冷，而第二天清晨，你們懷著希望登上階梯，吹響號角，以為終於能走到某個答案之前。可等你們真正抵達高處時，迎接你們的卻是沉重到令人幾乎無法承受的真相。你忽然明白，最難忘的記憶從來不只存在於那些轟烈的瞬間，也存在於這種平凡得幾乎不值一提的溫度、氣味與聲音裡。正因為它們曾經那樣真實，後來的失落才會更加刺痛。</p><p>最後，你的腳步把你帶往 Ul’dah。就在那裡，一道熟悉又刻意壓低的聲音匆匆把你叫住。原來是 Nanamo，她依舊用 Lilira 的身分做掩飾，笑著說你果然一眼就識破了她。她本來只是想偷偷離開宮殿透口氣，卻沒想到會在這裡遇見你，還看見你一臉若有所思地站在那裡。當她聽你說起這是一趟回顧過去的旅程後，便說自己完全能理解。這段時間裡發生的事太多，變化也來得太快，直到現在，她都還在努力梳理這一切。但有一件事她十分清楚，那就是自己欠了你極深的情。她說，醒來之後，Papashan 已經把整件事都告訴了她，可真正讓她難以消化的，卻是 Lolorito 親自前來表達悔意，甚至把 Teledji Adeledji 的全部資產與自己一半的財產交給王室處理。她接受了這筆財富，但不是為了把錯誤用金錢抹平，而是想把它用在真正需要的地方。經過長久思量，她決定先把幫助送給 refugee，因為在所有受苦的人裡，他們承受得最深。至於你和你的同伴所遭受的傷害，她也沒有試圖迴避。她坦白承認，自己對那些錯誤負有很大責任，因此也另外撥出資金，希望能幫助 Scions 重建。不過，她還來不及把話說完太久，Papashan 焦急的呼喊聲和 Sultansworn 搜尋她的動靜就已經逼近。明知道自己該回去了，她卻還是忍不住想再多偷一點宮牆之外的時間。畢竟，一個統治者若想理解自己的人民，就必須親眼看看他們平日是怎麼過活的。於是她乾脆把最後一個小任務託付給你，去和那些追來的護衛稍微寒暄幾句，替她拖延片刻，好讓她能再多享受一會兒這來之不易的自由。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Marcechamp <small class="muted">(龍堡參天高地, X:31.9, Y:22.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-oaths-we-swear.html">在雪地立下的誓言</a></div><div class="row">戰鬥或魔法職等級 60 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-triumphs-we-share.html">映入眼簾的榮光</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
