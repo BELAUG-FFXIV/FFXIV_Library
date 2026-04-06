@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Peace for Thanalan | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – Peace for Thanalan (ARR Patch 2.1)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/GgzIRmKpCC8"
+              title="Peace for Thanalan" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Peace for Thanalan</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Peace for Thanalan`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Swift entrusts you with a mission far greater than a simple assignment. Though the Amalj’aa had quieted for a time after Ifrit’s fall, they have begun to stir once more, and their kidnappings have grown both bolder and more frequent. Traders and travelers alike are being seized across southern Thanalan, and the situation has worsened so badly that the local garrisons have called for aid. You are sent to Little Ala Mhigo to report to Gisilbehrt and take part in a sustained campaign to stop the raids.</p><p>When you arrive, Gisilbehrt makes the scale of the threat plain. The Amalj’aa are no longer striking under cover of darkness, but raiding openly in full daylight, even targeting guarded caravans. Patrols alone will not be enough to contain them. He wants a decisive response, and soon. A merchant has already been spotted lingering on a trade route despite the danger, and you are ordered to hurry to the marked location before the Amalj’aa seize yet another victim.</p><p>You find the merchant still there, slow to grasp the urgency of the danger until the raiders reveal themselves. Yet before the assault can unfold as expected, another group intervenes. Amalj’aa warriors, their bodies marked with ash, descend upon the kidnappers and turn the ambush into a battle between kin. As one of the raiders falls, a masked Miqo’te condemns the dishonor of striking an enemy from behind. The leader of the ash-marked warriors introduces himself as Hamujj Gah, commander of the Brotherhood of Ash. He tells you that he and his followers are what remain of those among the Amalj’aa not yet consumed by fanaticism, and invites you to meet him at the Ring of Ash.</p><p>At the Ring of Ash, Hamujj Gah welcomes you into the home of his band of warriors. He explains that his brothers strive to live by the old ways, honoring their ancestors, their martial discipline, and the dignity due to worthy foes regardless of origin. When he catches the scent of brimstone about you, he realizes you are one of those said to have defeated Ifrit, and on that basis asks you to understand the curse that has overtaken their tempered kin. These fallen Amalj’aa have forgotten the code of their people. Rather than seek glory in battle, they abduct the weak and defenseless and offer them up for the cruel favor of a withered god. Of all their shameful deeds, it is these kidnappings that most enrage him, for there is no honor in preying upon the unarmed.</p><p>Hamujj Gah declares that he and his brothers are hunters, and that the Amalj’aa of Zanr’ak are now their prey. If you share his outrage, he bids you join their war against their own kin. Before the moment can settle, the masked Miqo’te objects openly, dismissing your past deeds and mocking your claim to have felled Ifrit. Hamujj Gah silences the protest, identifying the warrior as Loonh Gah and making clear that the decision is his alone. Though he accepts that you carry the mark of one who truly faced the Lord of the Inferno, he also warns that old triumphs will earn you little respect among his soldiers. Only action will prove your worth. With their enemy named and their resolve fixed, the Brotherhood turns its gaze toward Zanr’ak and the fight ahead.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Swift <small class="muted">(Ul'dah - Steps of Nald, X:8.4, Y:8.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-pursuit-of-the-past.html">In Pursuit of the Past</a></div><div class="row">Disciple of War or Magic Lv. 43</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="brotherhood-of-ash.html">Brotherhood of Ash</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'荒野に逆巻く騒擾',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>スウィフト大闘佐は、あなたに単なる任務では済まない務めを託します。イフリート討伐ののち、しばらくは鳴りを潜めていたアマルジャ族でしたが、再び活発に動き始め、さらには以前にも増して頻繁に人をさらうようになっていました。南ザナラーンでは、旅人も行商人もその脅威にさらされ、各地の駐屯地が増援を求めるほど事態は悪化しています。あなたはリトルアラミゴへ向かい、ギシルベールト少闘佐のもとで、この襲撃を止めるための長期行動に加わることになります。</p><p>現地で待っていたギシルベールト少闘佐は、いま起きている事態の深刻さを隠そうとしません。アマルジャ族はもはや夜陰に紛れて襲うだけではなく、白昼堂々と商隊にまで手を出しているのです。道の見回りを増やす程度では到底追いつかず、必要なのは断固たる反撃でした。折よく、危険を知らぬまま街道沿いで休んでいる商人がいるとの報せが届き、あなたは次の被害者を出さぬよう、急ぎその場へ向かいます。</p><p>あなたがたどり着いたとき、商人はまだ危機を十分に理解しておらず、襲撃者が現れて初めて慌て始めます。ところが、その場で起きたのは予想していた救出劇ではありませんでした。灰に身を染めたアマルジャ族の戦士たちが突如として現れ、さらいを企てた同胞へ刃を向けたのです。倒れゆく敵を前に、仮面のミコッテは背を向けた相手を討つ卑劣さを咎めます。その直後、灰の戦士たちを率いるハムジ・ガーが名乗りを上げ、自らを「灰の一党」の長だと告げます。彼は、熱に呑まれ狂信へ堕ちた同胞たちの中で、なお理性を保っている者たちの生き残りなのだと言い、あなたを灰の陣営へ招きます。</p><p>灰の陣営でハムジ・ガーは、そこが自らの兵たちの拠点であると語ります。彼らは祖先の血を重んじ、武を磨き、砂漠の遊牧民と戦士としての古き在り方を守り続けていました。そして、出自を問わず、力と誇りを備えた者には正当な敬意を払います。やがて彼は、あなたから漂う硫黄の気配に気づき、イフリートを討った者のひとりではないかと見抜きます。だからこそ、熱に堕ちた同胞に降りかかった呪いを知ってほしいのだと、彼は言葉を続けます。あの者たちは、アマルジャ族を律する掟も、戦士の死に宿る栄誉も忘れてしまいました。弱き者、無防備な者をさらい、古き神の棘ある祝福と引き換えに捧げるばかりです。なかでも彼の怒りを最もかき立てるのは、その誘拐でした。武器を持たぬ者を襲って、そこにいかなる勝利があるのかと、彼は強く憤ります。</p><p>ハムジ・ガーは、自分と兄弟たちは狩人であり、ザンラクにうずくまる堕ちたアマルジャ族こそ討つべき獲物なのだと断言します。あなたが同じ怒りを抱くなら、この同族戦争に加われと彼は呼びかけます。しかし、その場が静まる間もなく、先ほどの仮面のミコッテが異を唱えます。イフリートを討ったというあなたの武勲を真っ向から疑い、そのような自称の英雄は何人も見てきたと嘲ります。ハムジ・ガーはその兵をルーン・ガーと呼び、自分の決定に口を挟むなと制しました。あなたが真に炎獄の君主と戦った者であることは、自分が保証するとしながらも、過去の栄光だけでは兵たちの敬意は得られぬとも告げます。行いによって己を示せ――そうして一党は、無力な者を食いものにするザンラクのアマルジャ族へと、揺るがぬ敵意を向けるのでした。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> スウィフト大闘佐 <small class="muted">（ウルダハ：ナル回廊, X:8.4, Y:8.9）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-pursuit-of-the-past.html">ストーンヴィジルに眠る翼</a></div><div class="row">ファイター ソーサラー Lv 43～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="brotherhood-of-ash.html">灰燼を成す者</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'荒野中翻湧的動亂',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Swift 將一項遠不只是普通任務的重責交到你手中。自從 Ifrit 被討伐後，Amalj’aa 原本一度沉寂下來，卻又再次開始蠢動，而且綁架事件比過去更加頻繁，也更加猖獗。如今在 southern Thanalan 一帶，不只是過路旅人，連行商與商隊都成了目標，情勢惡化到當地駐軍不得不請求增援。於是你奉命前往 Little Ala Mhigo，向 Gisilbehrt 報到，準備展開一場必須持續推進的反制行動，阻止這些掠奪與擄人的襲擊。</p><p>抵達當地後，Gisilbehrt 毫不掩飾目前局勢的嚴峻。Amalj’aa 已不再只是趁夜行動，而是連白天都敢公然出手，甚至連有護衛隨行的商隊也照樣下手。這已經不是單靠加強巡邏就能壓下去的騷亂，而是必須盡快給出明確而果斷的回擊。就在你抵達前不久，斥候才回報有名商人正停在貿易路線旁歇息，絲毫沒有意識到自己正暴露在危險之中。你因此立刻趕往標記地點，想在下一名受害者出現之前先一步阻止災禍發生。</p><p>等你找到那名商人時，他果然還待在原地，起初甚至沒把危險真正放在心上，直到襲擊者現身才終於慌了手腳。只是，這場襲擊並沒有照著你預想的樣子發展。另一批 Amalj’aa 戰士突然出現，他們身上沾著灰燼，轉眼便與那些綁匪般的同族交戰起來。就在戰局翻轉之際，一名戴著面具的 Miqo’te 斥責那種從背後下手的作法有失祖先榮光。而帶領這群灰燼戰士的人，則向你報上自己的名字，Hamujj Gah。他自稱是 Brotherhood of Ash（由 Hamujj Gah 率領的 Amalj’aa 戰士團體，反對同族狂熱派綁架弱者，試圖恢復 Amalj’aa 原有的戰士榮耀） 的首領，並告訴你，如今仍未被狂熱吞沒、還保有理智與信念的 Amalj’aa，所剩下的便只有他們這些人。隨後，他邀請你前往 Ring of Ash 與他會面。</p><p>來到 Ring of Ash 後，Hamujj Gah 向你說明，這裡正是他與部下們棲身的據點。他們追求的是古老戰士之道，重視祖先留下的血脈、武藝與榮耀，也願意對真正值得尊重的對手報以敬意，不論對方出身何處。很快，他便從你身上聞到了硫磺般的氣息，進而意識到，你或許正是那些曾擊倒 Ifrit 的英雄之一。正因如此，他希望你能理解如今降臨在那些狂熱同族身上的詛咒。那些墮落的 Amalj’aa 已經遺忘了約束族人的準則，也遺忘了身為戰士在戰死中應得的榮耀。他們不再追求堂堂正正的戰鬥，而是專挑弱者與手無寸鐵的人下手，將那些人擄走，獻給那位衰老古神，以換取殘酷而帶刺的恩典。在 Hamujj Gah 看來，這些綁架行徑最令他無法容忍，因為對毫無反抗之力的人出手，根本不配稱作勝利。</p><p>Hamujj Gah 說，他與自己的兄弟們是獵人，而盤踞在 Zanr’ak 的那些墮落 Amalj’aa，如今便是他們要追獵的獵物。若你也同樣憤怒，他便邀你加入這場同族之戰。然而話音才落，那名戴面具的 Miqo’te 便當場出聲反對，對你曾擊敗 Ifrit 的說法嗤之以鼻，甚至譏諷你不過是殺了隻將熄的小火精，便自以為打倒了地獄之王。Hamujj Gah 出聲制止，喚那名戰士為 Loonh Gah，明白表示這項決定只能由他來下。雖然他願意以你的氣息為證，承認你確實曾與 Lord of the Inferno 交戰，但他也同時提醒你，過去的功績並不足以讓 Brotherhood of Ash 的戰士真正接納你。你必須靠行動證明自己，才有可能改變他們看待你的方式。而在敵人已明、決意也已定下之後，這群戰士的目光，便一同投向了 Zanr’ak，以及前方那場真正的戰鬥。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Swift <small class="muted">(烏爾達哈：納爾迴廊, X:8.4, Y:8.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-pursuit-of-the-past.html">追尋過往，喚醒沉睡在Stone Vigil 下的羽翼</a></div><div class="row">戰鬥或魔法職等級 43 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="brotherhood-of-ash.html">化為灰燼之人</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
