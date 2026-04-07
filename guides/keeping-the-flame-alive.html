@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Keeping the Flame Alive | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Keeping the Flame Alive (HW Patch 3.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/vxtCZN2I4NE"
+              title="Keeping the Flame Alive" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Keeping the Flame Alive</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Keeping the Flame Alive`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Alphinaud cannot hide his disgust as the truth of Ilberd’s cruelty settles into place. Raubahn’s ties to Halatali are known to all, and to choose that place for the execution can only have been deliberate. It is not enough for Ilberd to dispose of the man he betrayed—he must also drag him back to a place heavy with memory and meaning, and turn it into a stage for humiliation. Yet there is no time to linger on outrage. Hozan urges you onward at once, warning that General Aldynn may be executed at any moment. You must enter Halatali, break through his captors, and free him before the chance is lost.</p><p>Inside, another ally arrives. Yugiri asks forgiveness for her delay, and Alphinaud greets her with open relief. She tells him that she is glad to see resolve restored to his eyes, and he, in turn, admits how lost he had once been. For a time, he says, he had truly lost his way, but with the help of his comrades he has found his purpose again and means never to cast it aside. Yugiri then explains that since your escape from Ul’dah, she and her fellow shinobi have shadowed the Crystal Braves in hopes of discovering what became of the Scions. They have yet to uncover any useful trace, but Alphinaud does not rebuke her. Raubahn is friend enough that none of you could abandon him now, and so Yugiri swiftly gives her orders: while Hozan draws the guards away from the entrance with Doware and Higiri, the three of you will go inside and see the rescue through yourselves.</p><p>The deeper you press into Halatali, the more wrong the silence begins to feel. There is no sign of the usual Coliseum presence, and that emptiness itself becomes ominous. At last you find Raubahn, but relief dies almost as quickly as it rises. He is bound fast within a magitek restraint, and Yugiri dares not force it open for fear the device has been trapped. Alphinaud recalls hearing of such mechanisms and concludes that the Crystal Braves must hold the key. Before you can search, however, Yuyuhase steps forward and makes the matter plain. There is no need to look, he says, and with oily mockery he declares that you are merely victims of harsh economic realities. The poison already loosed into the chamber, he promises, will soon carry you all into death.</p><p>What follows leaves no room for hesitation. Raubahn, barely able to speak through the poison, urges you to flee and save yourselves, but neither Alphinaud nor Yugiri yields. The mist chokes the air and even stifles Yugiri’s healing, while beasts are drawn toward the chamber as if summoned by the spreading corruption. You force your way onward, cut through the danger, and strike at the source of the poison. When at last the mist clears, the path forward opens with it. Then come the Crystal Braves themselves, astonished that poison failed where treachery had not. You bring them down, seize the key from their hands, and race it back to Raubahn before his strength can ebb away entirely.</p><p>Even freed, Raubahn is in no condition to stand for long, and Yugiri urges haste. Yet before you can quit the place, Ilberd appears. He mocks your success, praising the Warrior of Light for overcoming every contrivance placed in the way, then casts aside all pretence. If you mean to continue opposing him, he says, he will cut you down as he has cut down the rest. The battle that follows is bitter. Ilberd calls the Scions the sultana’s assassins and commands the Crystal Braves to arms. Yuyuhase fights to survive, Laurentius confesses he was never any hero, and around you your companions begin to falter under the strain. Even so, the tide turns. Ilberd is driven back, and though he escapes, he leaves behind more than fury. In the clash of words that follows, Alphinaud presses the point none of you can ignore: if Lolorito has still not publicly announced the sultana’s death, then perhaps the truth is not death at all. He dares at last to say what hope has begun to suggest—that Her Grace may yet live.</p><p>You have no time to test that hope within Halatali itself. Outside at Sandgate, Yugiri confirms that Raubahn is safe, while Doware reports that the guards have been subdued and no further movement has been seen. Ilberd and his followers must have fled by another route. It is then that a dark-clad stranger appears and addresses both General Aldynn and Scions of the Seventh Dawn. Alphinaud demands his name, but the man offers only a message: his mistress is a friend, and for your safety you are to go to the Waking Sands, where Urianger waits together with others sympathetic to your cause. Alphinaud verifies the tale through linkpearl, and so you entrust the wounded Raubahn to the stranger’s carriage and make for Vesper Bay.</p><p>At the Waking Sands, the shape of the truth finally begins to emerge. Urianger welcomes you as friends delivered from treachery, and there Raubahn is reunited with Pipin and Papashan. But the greater revelation comes from Dewlala, head of the Order of Nald’thal and a member of the Syndicate. She states it plainly: the sultana yet lives. In her telling, all of you were ensnared by an elaborate deception designed to eliminate Teledji Adeledji. Teledji, she believes, plotted Nanamo’s assassination on his own, but Lolorito discovered the scheme and bent it to his own purposes. By manipulating Raubahn into killing Teledji, he removed both of his foremost rivals at once while keeping suspicion from himself. And Nanamo survived because Lolorito willed it so: through one of his agents in her service, the deadly poison was replaced with a draught that induced a deathlike sleep before it could ever reach her lips.</p><p>Raubahn is left reeling, shamed by how completely he was used and sickened by the thought that Nanamo still lies hidden away somewhere beyond his reach. Yet Dewlala does not speak only to wound him. Though Lolorito’s hands are unclean, she says, he had no wish to depose the sultana; he values stability too highly for that. What matters now is not vengeance alone, but restoration. Ul’dah must be brought back into balance, and Raubahn must do what only he can do—find Nanamo, return to her side, and help restore the future she sought for her people. When all is said and done, Alphinaud reflects that much remains unresolved, but rescuing Raubahn was the first indispensable step. And for that step, he gives thanks to you.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Hozan <small class="muted">(Eastern Thanalan, X:13.8, Y:29.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-search-of-raubahn.html">In Search of Raubahn</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 51</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="to-siege-or-not-to-siege.html">To Siege or Not to Siege</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'ラウバーン奪還作戦',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>アルフィノは、イルベルドの悪辣さにあらためて怒りを隠せなかった。ラウバーンとハラタリ修練所の因縁は広く知られている。その場所を処刑の舞台に選んだのが偶然であるはずがない。裏切った相手をただ葬るだけでは足りず、記憶と意味の染みついた地へあえて引きずり戻し、さらなる辱めを与えようとしているのだ。それでも憤っている暇はない。ホウザンは、一刻も早く中へ入るようあなたに促す。炎将軍は今にも処刑されかねない。手遅れになる前にハラタリ修練所へ踏み込み、捕らわれたラウバーンを救い出さねばならなかった。</p><p>その中で新たな助けが合流する。遅参を詫びたユウギリに、アルフィノは安堵をにじませて応えた。ユウギリは、彼の瞳に再び決意の光が戻ったことを喜び、アルフィノもまた、かつて自分がどれほど道を見失っていたかを認める。だが仲間たちの支えによって、彼はようやく進むべき道を取り戻したのだという。ユウギリは続けて、ウルダハ脱出以来、自らと忍びの仲間たちが暁の所在を探るべく、クリスタルブレイブの動向を追い続けてきたことを明かす。いまだ決定的な情報は得られていないが、アルフィノはそのことを責めはしない。ラウバーンもまた見捨てることのできない友であり、今は救出に全力を尽くすのみだった。そこでユウギリは、ホウザンに入口の兵を引きつける役目を命じ、ドワレとヒギリを伴わせる。そのあいだに、あなたとアルフィノ、そして彼女自身の三人で中へ踏み込むのだ。</p><p>ハラタリ修練所の奥へ進むにつれ、その静けさは不吉さへと変わっていく。闘技場の気配があまりにも薄く、それ自体が異常の兆しのように思えた。やがて見つけたラウバーンは、喜ぶ間もなく、魔導仕掛けの拘束具に繋がれていた。ユウギリは、それが罠である可能性を恐れ、力任せに壊すことをためらう。アルフィノは、その種の装置について聞き及んでおり、鍵はクリスタルブレイブが持っているはずだと判断する。だが探索に移る前に、ユユハセが姿を現し、すべてを嘲るように告げた。鍵を探す必要はない、と。彼はあなたたちを、厳しい経済事情の犠牲者にすぎないと皮肉りながら、すでに放たれた毒がまもなく死へ導くのだと冷ややかに言い放つ。</p><p>そこから先は、ためらっている余地などなかった。毒に侵され、かすれた声しか出せないラウバーンは、自分を捨てて逃げろと告げるが、アルフィノもユウギリも足を止めない。毒霧は空気を満たし、ユウギリの癒やしすら妨げ、さらに魔物までも引き寄せていた。あなたは道を切り開き、迫る脅威を退けながら、毒霧の発生源を断つ。やがて霧が晴れるとともに、閉ざされていた道も開かれていく。そこへ現れたのは、毒で仕留め損ねたことに狼狽するクリスタルブレイブたちだった。あなたは彼らを打ち倒し、ついに鍵を奪い取る。そしてラウバーンの命の灯が消えてしまう前に、その鍵を手に急ぎ引き返すのだった。</p><p>ようやく拘束を解かれても、ラウバーンはなお立っていられるほどの余力を残してはいなかった。ユウギリは一刻も早い離脱を促す。だがその矢先、イルベルドが姿を現す。彼は、どんな仕掛けも乗り越えてしまう光の戦士を嘲るように称えたあと、もはや隠すことなく刃を向ける。まだ抗うつもりなら、ほかの者たちと同じように斬り捨てるだけだ、と。続く戦いは激しかった。イルベルドは、暁こそ女王毒殺の犯人だと叫び、クリスタルブレイブに号令を下す。ユユハセは生き残るために必死で、ローレンティスは自分が英雄などではないと吐き捨てる。味方もまた次第に力を削がれていくが、それでも戦局は崩れない。ついにイルベルドは退き、逃亡する。だがその後に残ったのは怒りだけではなかった。言葉を交わすなかで、アルフィノは誰も見過ごせない一点を突く。もしロロリトが今なお女王の死を公表していないのなら、そもそも本当に死が起きたのかどうかさえ疑わしいのではないか。彼はようやく、その希望を口にする。陛下は、まだ生きているのかもしれないと。</p><p>その希望の真偽を、ハラタリ修練所の中で確かめることはできない。外へ出たサンドゲートで、ユウギリはラウバーンの無事を告げ、ドワレは入口の兵を制圧し、その後も不審な動きはなかったと報告する。ならば、イルベルドたちは別の出口から逃れたのだろう。そこへ、黒衣の男が現れ、ラウバーン将軍と暁の血盟の名を口にする。アルフィノが素性を問うても、男は主の名を伏せたまま、自分は善意の伝言を届けに来たのだと告げるだけだった。安全のため、暁の砂へ向かってほしい。そこにはウリエンジェと、あなたたちに同情的な者たちが待っているという。アルフィノはリンクパールを通じてその話が真実であることを確かめ、深手を負ったラウバーンを男の用意した馬車に託し、あなたたち自身もまたベスパーベイへ向かう。</p><p>暁の砂で、ついに事の真相が輪郭を帯び始める。裏切りから生還した友を迎えるように、ウリエンジェはあなたたちを迎え、そこでラウバーンはピピン、そしてパパシャンと再会する。だが、もっとも大きな衝撃をもたらしたのは、ナルザル教団の総長でありシンジケートの一員でもあるデュララの言葉だった。女王は生きている――彼女はそう断言する。彼女の見立てでは、あなたたちは皆、テレジ・アデレジを排除するために仕組まれた、きわめて巧妙な謀略に巻き込まれていた。ナナモ女王の暗殺計画そのものはテレジ単独の企てだったのだろう。だが、その計画を察知したロロリトは、それを自らに都合よく利用した。そしてラウバーンにテレジを討たせることで、最大の競争相手ふたりを一度に失脚させながら、自身は疑いの外に立ち続けたのだという。しかも女王が生き延びたのは、ロロリトがそう望んだからだった。彼の息のかかった侍女が、毒杯を致死ではなく仮死に近い眠りをもたらす薬へとすり替えていたのである。</p><p>ラウバーンは、自分がどれほど見事に利用されたかを思い知り、さらにナナモが今もどこかに隠されているという現実に打ちのめされる。だが、デュララの言葉は彼を責めるためだけのものではなかった。たしかにロロリトの手は清くない。だが彼は女王を廃することまでは望んでおらず、秩序と安定の価値を誰よりも理解しているのだと彼女は言う。今、優先すべきは報復だけではない。ウルダハに均衡を取り戻さねばならない。そしてラウバーンには、彼にしか果たせない役目がある。ナナモを救い出し、再びその傍らに立ち、彼女が民のために思い描いた未来を支えることだ。すべてが解決したわけではない。それでもアルフィノは、ラウバーンを救い出したことがウルダハの混乱を正すための最初の、そして決定的な一歩だったと認める。そしてその一歩をともに踏み出してくれたあなたへ、静かに感謝を告げるのだった。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ホウザン <small class="muted">（東ザナラーン, X:13.8, Y:29.2）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-search-of-raubahn.html">ラウバーンを追って</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 51～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="to-siege-or-not-to-siege.html">冒険者たちの決断</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'拯救 Raubahn 大作戰',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Alphinaud 對 Ilberd 的憎惡，到了這時已經幾乎無法壓下。General Aldynn 與 Halatali 的淵源人盡皆知，而 Ilberd 偏偏選中這個地方來安排行刑，絕不可能只是偶然。對他而言，似乎只是殺死自己背叛的人還不夠，還要把對方拖回那個充滿象徵意味的地方，讓羞辱與痛苦也一併完成。只是，再深的怒意也不能耽誤眼前的事。Hozan 立刻催促你出發，因為時間已經所剩無幾。General Aldynn 隨時都可能被處決，你必須立刻進入 Halatali，從那些人的手中把他救出來。</p><p>進入之後，另一位盟友也趕到了。Yugiri 為自己的遲來道歉，Alphinaud 看見她時，神情裡明顯多了幾分鬆動。Yugiri 說，她很高興再次在他眼中看見那道堅定的光，而 Alphinaud 也坦白承認，自己先前確實一度迷失得很深。只是，在同伴的幫助下，他終於重新找回了方向，也不打算再讓那份決意從手中滑落。接著，Yugiri 告訴你們，自從你們逃離 Ul’dah 之後，她與其他 shinobi 便一路暗中追蹤 Crystal Braves，希望找到 Scions of the Seventh Dawn 的下落。雖然到現在仍未得到真正有用的消息，但 Alphinaud 並沒有責怪她。對你們而言，General Aldynn 同樣是不能放棄的朋友。於是 Yugiri 很快作出安排，要 Hozan 帶著 Doware 與 Higiri 去引開入口附近的守衛，而你、Alphinaud 與她自己則親自深入其中，完成這場救援。</p><p>越往 Halatali 深處前進，四周那種異樣的安靜就越讓人不安。從競技場一路走來，竟幾乎看不見半個人影，而這種空蕩本身反而比混亂更像凶兆。終於，你們找到了 General Aldynn，但那一瞬間的鬆懈很快便被新的危機取代。他被某種 magitek 拘束在原地，Yugiri 不敢貿然強行破壞，因為那東西很可能設有陷阱。Alphinaud 想起自己曾聽說過類似裝置，立刻判斷出 Crystal Braves 手中應該握有解開它的鑰匙。可就在你們準備分頭尋找時，Yuyuhase 卻主動現身，帶著那種令人作嘔的輕慢，彷彿在欣賞一場早已註定的戲。他說，你們根本不需要再找了，還把你們譏諷成所謂嚴酷經濟情勢下的犧牲品，因為這座房間中的毒霧，很快就會把你們全部送進死亡。</p><p>從那一刻起，一切都不再容許猶豫。General Aldynn 幾乎連話都說不完整了，仍勉強要你們別管他、立刻逃走，但無論是 Alphinaud 還是 Yugiri 都沒有退開半步。毒霧迅速瀰漫，不只讓呼吸變得困難，也讓 Yugiri 的治療受到了阻礙，甚至還把周遭的野獸都吸引了過來。你只能一路強行突破，在混亂中找出毒霧的來源並將其切斷。當霧氣終於開始散去，原本被阻絕的道路也隨之打開。接著現身的，是那些原以為毒霧足以替他們完成一切的 Crystal Braves。他們驚愕於你們竟然還活著，但已經太遲了。你將他們擊倒，從他們手中奪下鑰匙，再以最快的速度帶回 General Aldynn 身邊，只為在他徹底失去意識之前，把那副拘束從他身上解開。</p><p>然而，就算脫離了束縛，General Aldynn 也早已虛弱不堪，Yugiri 立刻催促你們撤離。偏偏就在這時，Ilberd 現身了。他像是在讚嘆又像是在嘲弄，說無論多麼精巧的安排，到了 Warrior of Light 面前似乎都顯得不堪一擊。可那樣的話語並不是稱讚，而是對下一場衝突的宣告。若你們還要繼續妨礙他，他就會像除掉其他人一樣，把你們一併斬倒。接下來的戰鬥激烈而混亂。Ilberd 高聲指稱你們是殺害 Sultana 的兇手，要 Crystal Braves 全部出手；Yuyuhase 只想著怎樣才能活下去，Laurentius 則在混戰中承認自己從來都不是什麼英雄。你身邊的同伴也逐漸到了極限，但即使如此，局勢終究還是被你們撐了下來。Ilberd 被逼退，雖然還是成功逃走，卻留下了一個再也無法忽視的疑點。Alphinaud 當場指出，若 Lolorito 到現在仍未向大眾宣布 Sultana 的死訊，那麼事情恐怕根本不像你們原先所相信的那樣。到了這時，他終於把那份近乎不敢出口的希望說了出來——Her Grace，或許還活著。</p><p>只是，Halatali 並不是適合繼續談下去的地方。來到外頭的 Sandgate 後，Yugiri 先確認了 General Aldynn 的安全，Doware 也前來回報，說入口的守衛都已依照命令壓制，之後再沒有任何新的動靜。看來 Ilberd 與他的手下，是從其他出口脫身了。就在這時，一名 dark stranger 忽然出現在你們面前，點名要見 General Aldynn 與 Scions of the Seventh Dawn。Alphinaud 立刻追問他的身分，可對方只說自己的主人是友非敵，並奉命帶來善意的訊息。為了你們的安全，他要你們立刻前往 Waking Sands，因為 Urianger 正在那裡等著你們，還有其他同樣願意幫助你們的人。Alphinaud 透過 linkpearl 確認了這番話並非陷阱，於是你們便把虛弱的 General Aldynn 交給對方預備好的馬車，讓他先被安全送走，而你們自己也隨後趕往 Vesper Bay。</p><p>到了 Waking Sands，原本支離破碎的真相，終於開始慢慢拼回完整的樣子。Urianger 迎接你們時，語氣中有著劫後餘生般的深切感慨，而在那裡，General Aldynn 也終於見到了 Pipin 與 Papashan。只是，真正徹底改變一切的，卻是 Dewlala 的出現。這位 Order of Nald’thal 的領袖，同時也是 Syndicate 的一員，而她一開口便說出最令人震動的事實：Sultana 還活著。依她所言，你們所有人都被捲入了一場極其周密的騙局，而這場騙局的目的，是為了除掉 Teledji Adeledji。她認為，意圖刺殺 Nanamo 的計畫本來的確是 Teledji 單獨策劃的，但 Lolorito 事先察覺了這件事，並反過來利用那個局面為自己謀利。他讓 Raubahn 親手殺死 Teledji，於是一舉除去自己最主要的兩個對手，卻又讓自己始終停留在嫌疑之外。至於 Nanamo 之所以能活下來，也正是因為 Lolorito 不希望她真的死去，在她身邊服侍的人之中，有人暗中聽命於他，並在毒酒送到主人唇邊之前，以手法將致命毒物換成了只會讓人陷入近似死亡沉睡的藥劑。</p><p>這番真相讓 General Aldynn 一時之間幾乎無法承受。他為自己竟被利用到如此地步而感到羞愧，也因為知道 Nanamo 如今仍被藏在某處而無法平靜。但 Dewlala 並不是單純要用這些話來刺傷他。她同時也說得很明白：雖然 Lolorito 絕對不算清白，可他並沒有打算真正推翻 Sultana，因為他太清楚局勢穩定的價值。眼下最重要的，並不只是報仇，而是讓 Ul’dah 恢復平衡。至於 General Aldynn，也必須去完成只有他能做到的事，把 Nanamo 救回來，再次站到她的身邊，去守住她曾經想為人民帶來的未來。事情當然還遠遠沒有結束，但 Alphinaud 也明白，能夠把 General Aldynn 從 Halatali 救出，本身就是讓 Ul’dah 走回正軌的第一步，而且是絕對不可缺少的一步。於是在最後，他把那份最真切的感謝，鄭重地留給了你。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Hozan <small class="muted">(東薩納蘭, X:13.8, Y:29.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-search-of-raubahn.html">追查 Raubahn 的下落</a></div><div class="row">任一戰鬥／魔法職業（不含受限職業）Lv. 51</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="to-siege-or-not-to-siege.html">攸關去留的抉擇</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
