@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Disclosure | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Disclosure (HW Patch 3.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/hS2rshFu32Q"
+              title="Disclosure" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Disclosure</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Disclosure`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Haurchefant tells you that the black chocobo is only a token, and that the truer reward is the clearing of your companions’ names. Alphinaud and Tataru will be released once a few remaining formalities are settled, and he intends to see to those matters himself. Until then, he asks you to return to Fortemps Manor, where Count Edmont is already waiting and will surely wish to speak of all that has transpired.</p><p>Back at the manor, the mood is brighter than it has been in some time. Artoirel admits that though he was not present at the trial, he has already heard how magnificently you carried yourself there. Emmanellain, half in jest and half in admiration, wonders whether you mean to make yourself the talk of Ishgard, for if so, you are succeeding beyond all doubt. Honoroit, more reserved as ever, simply says that he is glad to see you safe and well.</p><p>When Edmont receives you, his relief is unmistakable. He speaks as though Halone Herself has once more watched over you, guiding you to victory and restoring your companions’ freedom. Artoirel confesses that he truly did fear for your safety, though he hurriedly insists this was not because he doubted your skill, but because he knew well the strength of those who stood against you. Even so, he admits that you continue to surpass every expectation. Emmanellain can scarcely contain his excitement, marveling that you defeated two of the Heavens’ Ward before the eyes of Ishgard’s elite.</p><p>That moment of celebration is cut short when a steward of House Fortemps arrives in haste with a message from the Vault: the archbishop himself requests your presence. Surprise ripples through the room at once. A personal summons from so exalted a figure is no small matter, and Edmont urges you not to delay. A priest will be waiting outside the Vault to escort you within. Though Alphinaud and Tataru have yet to return from the Tribunal, Edmont assures you they will be looked after in your absence.</p><p>At the Vault, you are led inside with due ceremony and presented before Archbishop Thordan VII by Aymeric. The archbishop receives you with grave courtesy. He says he has heard much of your deeds, and that the lord commander has praised you without reservation. He then offers a personal apology for the wrong done to your companions, acknowledging that their accusation and mistreatment came of Ishgard’s own negligence, born from zeal carried too far. When he turns to Ser Zephirin, the knight can do little but admit that the Heavens’ Ward acted upon false information, and that Ser Grinnaux pressed charges before the truth was known.</p><p>Yet Thordan does not summon you merely to apologize. After dismissing Zephirin so that you may speak alone, he reveals a darker truth: he has met with the Ascians and even received them as guests. They offered Ishgard power to continue its war against the dragons, but he insists he has never meant to become their servant. Instead, he claims to have listened, feigned sympathy, and waited for the proper moment, seeking to learn their purpose so that he might oppose them when the time comes. He tells you this because, in his eyes, there is nothing in all the world the Ascians fear more than the Warrior of Light. If they are to be cast out, he says, then you and Ishgard must act together and seize Eorzea back from their grasp.</p><p>When you return to Fortemps Manor and recount all that you heard, Alphinaud is first relieved, then deeply unsettled. A formal apology from the archbishop is one thing; the open admission of dealings with the Ascians is quite another. To Alphinaud, it is proof that their ambitions have reached even Ishgard, and that new primals will surely arise before long. Bereft of so many allies, he struggles to see how you can hope to answer such threats. Then Tataru suddenly remembers the dreadful rumor she heard while seeking word of the Scions: General Raubahn is to be executed for crimes against the sultanate. At once the matter becomes urgent. If Raubahn dies, Alphinaud says, you will lose not only a steadfast ally, but the one man who might hold the sultana’s assassins to account. Haurchefant may have counseled patience, yet this is one danger that cannot be allowed to run its course. Raubahn must be saved.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Haurchefant <small class="muted">(The Pillars, X:13.6, Y:8.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="divine-intervention.html">Divine Intervention</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 50</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="flame-general-affairs.html">Flame General Affairs</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'教皇トールダン7世',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>オルシュファンは、黒チョコボも悪くはないが、あなたの働きに対する真の報いは仲間たちの無実が認められたことだと語る。アルフィノとタタルは、いくつかの細かな手続きが済みしだい解放される予定であり、その後始末は自分が責任をもって進めるつもりだという。それまでのあいだ、あなたにはフォルタン伯爵邸へ戻り、先に帰還しているエドモン・ド・フォルタン伯爵と今日の出来事を振り返ってほしいと頼む。</p><p>邸宅へ戻ると、そこには久しくなかったほど穏やかな空気が流れていた。決闘裁判には立ち会えなかったアルトアレールも、父からあなたの活躍を聞いており、その姿はまさに見事だったと率直に称える。エマネランは、イシュガルド中の噂の的になるつもりなのかと半ば冗談めかして口にしながらも、その言葉には隠しきれない感嘆がにじんでいた。オノロワは控えめながら、あなたが無事であることを心から喜んでいると告げる。</p><p>やがてエドモン・ド・フォルタン伯爵があなたを迎えると、その表情には安堵がはっきりと浮かんでいた。ハルオーネが再びあなたに微笑み、勝利へ導き、仲間たちを解き放ってくれたのだと彼は語る。アルトアレールもまた、あなたの力を疑っていたわけではないと前置きしつつ、それでも相対した敵の力を知っていたからこそ、身を案じていたのだと打ち明ける。それでもなお、あなたは彼の予想を超え続けてきた。エマネランは、蒼天騎士団のふたりをイシュガルドの名だたる者たちが見守るなかで打ち破ったのだから、今まであなたに目を向けていなかった者も、これからはそうはいかないだろうと興奮を隠せない。</p><p>その和やかな時間は、フォルタン家の執事が慌ただしく駆け込んできたことで終わりを告げる。聖ヴァル大聖堂から使いが届き、教皇猊下が直々にあなたを召しているというのだ。部屋の空気は一変し、その場にいた誰もがその重みを理解する。教皇からの直接の召喚は大いなる名誉であり、しかも近頃の情勢を思えば、ためらう理由はないと伯爵は言う。大聖堂の外では神官があなたを待っており、名乗れば中へ案内される手はずも整えられていた。アルフィノとタタルはまだ審問所から戻っていないが、そのことは自分たちに任せてほしいと伯爵は請け負う。</p><p>聖ヴァル大聖堂に到着したあなたは、厳かな礼遇とともに中へ導かれ、アイメリクによって教皇トールダン七世の前へと進み出る。教皇は重々しい威厳をたたえながらも、礼を尽くしてあなたを迎え、これまでの数々の功績を耳にしていること、そして総長からも惜しみない賛辞を聞いていることを告げる。そして彼は、あなたの仲間たちが異端の罪を着せられ、侮辱を受けた件について、みずから詫びの言葉を口にする。それはイシュガルドを守る者たちの過失であり、熱意が行き過ぎた末の怠慢だったという。教皇に促されたゼフィランは、蒼天騎士団が誤った情報を受け取り、さらにグリノーが真実の確認を待たずして告発に踏み切ったことを認めるほかなかった。</p><p>だが、教皇があなたを呼んだ理由は謝罪だけではなかった。ゼフィランを下がらせ、ふたりきりになると、彼はさらに深い真実を明かす。自分はアシエンと面会し、客として迎え入れたことすらあるのだと。彼らは竜との戦いを続けるための力をイシュガルドへ差し出したが、教皇は決して彼らの手先になるつもりはないと言い切る。むしろ彼は、彼らの言葉に耳を貸すふりをし、その思想に同調するそぶりを見せながら、真の目的を探り、やがて来るべき衝突に備えてきたのだと語る。そしてそのことをあなたに伝えたのは、この世でアシエンが最も恐れているのが光の戦士の力だからだという。あの忌まわしい侵入者たちを排し、エオルゼアをその支配から奪い返すためには、あなたとイシュガルドが手を取り合わねばならない。そうしてこそ、永続する平和への道が開けるのだと、彼は静かに語りかける。</p><p>フォルタン伯爵邸へ戻り、その一部始終を伝えると、アルフィノはまず安堵し、次いで深い衝撃を受ける。教皇による正式な謝罪だけでも十分に重い出来事だが、アシエンとの接触をあれほどあからさまに認めたことは、それ以上に看過できない。アルフィノは、彼らの野望がすでにイシュガルドにまで及んでいることを悟り、新たな蛮神の出現ももはや時間の問題だと見る。多くの仲間を失った今、その脅威にどう立ち向かえばよいのか、彼には容易に答えが出せない。するとタタルが、暁の血盟の消息を探っていたときに耳にした恐ろしい噂を思い出す。ラウバーン局長が王政に対する罪を問われ、処刑されるというのだ。その知らせによって、状況は一気に切迫したものとなる。もしラウバーンを失えば、頼もしい味方をひとり失うだけでなく、ナナモ陛下暗殺の真相を追及できる唯一の人物までも失うことになる。オルシュファンの慎重であれという助言はもっともだったが、この件にかぎっては一刻の猶予もない。ラウバーンを救わなければならない。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> オルシュファン <small class="muted">（イシュガルド：上層, X:13.6, Y:8.1）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="divine-intervention.html">蒼天の騎士</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="flame-general-affairs.html">ウルダハの今</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'真相揭曉',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Haurchefant 告訴你，黑色陸行鳥固然珍貴，但你這次真正得到的報償，是同伴們終於洗清了罪名。Alphinaud 與 Tataru 只差幾道小小的正式手續便能獲釋，而這些收尾工作，他會親自處理。在那之前，他希望你先回到 Fortemps Manor。Count Edmont 已經先一步回去了，想必也正等著和你好好談談今天發生的一切。</p><p>回到 Fortemps Manor 時，宅邸中的氣氛終於不像先前那樣壓抑。Artoirel 雖然沒有親眼見到決鬥審判，卻已從父親口中聽說你的表現，並毫不掩飾地稱讚你令人驚嘆。Emmanellain 半開玩笑地問你是不是打算成為全城議論的中心，因為若你真有此意，那你確實做得非常成功。Honoroit 則依舊含蓄，只是靜靜地說，看到你平安無事，他由衷感到高興。</p><p>等 Count Edmont 見到你時，那份安心更是清清楚楚地寫在臉上。他說，是 Halone 再一次向你露出了微笑，引導你走向勝利，也讓你的同伴重獲自由。Artoirel 也坦白承認，他確實曾為你的安危擔心，雖然他很快補上一句，這並不是因為懷疑你的實力，而是因為他太清楚你所面對的敵人有多強。即便如此，你還是一再超出他的預想。Emmanellain 更是掩不住興奮，直說你竟在 Ishgard 上流眾人的注視下擊敗了兩名蒼天騎士團成員，從今以後，那些原本還沒真正注意到你的人，也不可能再忽視你了。</p><p>然而，這份難得的輕鬆很快就被打斷了。House Fortemps 的執事匆匆趕來，帶來來自 the Vault 的消息——教皇猊下親自召見你。房裡的氣氛瞬間一變，所有人都明白，來自如此高位者的私人傳喚絕非尋常小事。Count Edmont 也立刻要你不要耽擱，盡快前去；外頭已有神官等候，只要報上身份，便會帶你入內。至於尚未從 Tribunal 回來的 Alphinaud 與 Tataru，他則要你不必擔心，他們回來後自會有人照料。</p><p>到了 the Vault，你在莊重的迎接下被帶入其中，又由 Aymeric 親自引見到教皇 Thordan VII 面前。教皇以嚴肅而周全的禮數接待了你，先表示自己早已聽聞你一路走來的諸多事蹟，Lord Commander 也對你讚譽有加。隨後，他親口向你道歉，承認你的同伴被誤指為異端、又遭受羞辱，乃是 Ishgard 守護者一方的失職，是過度熱忱所導致的偏差。當他轉而詢問 Zephirin 時，對方也只能低頭承認，蒼天騎士團當時確實是基於錯誤情報行事，而 Ser Grinnaux 更是在真相尚未查明前便倉促提出控訴。</p><p>但教皇召你前來，並不只是為了致歉。等 Zephirin 退下之後，他才進一步向你揭露更令人不安的事實——他曾與 Ascians 接觸，甚至曾將他們當作賓客接待。那些帶來混亂與紛爭的人，曾向 Ishgard 提出力量，好讓這個國家能繼續對抗龍族；但教皇強調，他從未打算成為對方的傀儡。他之所以沒有當面拒絕，而是選擇暫時聽其言、順其意，只是為了看清他們真正的目的，並為終將來臨的衝突預作準備。而他之所以把這些事告訴你，是因為在他看來，這世上沒有任何力量比光之戰士更讓 Ascians 畏懼。若想把這群可憎的闖入者從 Eorzea 驅逐出去，就必須由你與 Ishgard 攜手合作，合力將這片土地從他們手中奪回，才有可能開闢出真正長久的和平。</p><p>當你回到 Fortemps Manor，將教皇所說的一切轉告 Alphinaud 後，他先是鬆了一口氣，隨後又被這番真相震住。正式道歉本身已經足夠罕見，但教皇竟如此坦率地承認自己曾與 Ascians 往來，這件事的分量顯然更重。對 Alphinaud 來說，這意味著他們的野心也已伸入 Ishgard，而新的蠻神遲早還會再次出現。如今失去了那麼多盟友，你們究竟還能憑什麼去應對接下來的威脅，他一時也無法給出答案。就在這時，Tataru 忽然想起自己先前打探 Scions 下落時聽見的可怕傳聞——Raubahn 將軍即將因涉嫌危害王政而被處刑。這一刻，事情再也無法拖延。Alphinaud 立刻明白，若 Raubahn 一死，你們失去的不只是堅定的盟友，更是唯一可能追查 Nanamo 遇刺真相、追究兇手責任的人。Haurchefant 先前勸你們務必克制，那番提醒並沒有錯，但眼前這件事已經容不得再等。你們必須去救 Raubahn。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Haurchefant <small class="muted">(神意之地, X:13.6, Y:8.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="divine-intervention.html">來自蒼天騎士的干預</a></div><div class="row">任一戰鬥／魔法職業（不含受限職業）Lv. 50</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="flame-general-affairs.html">關於烏爾達哈的現況</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
