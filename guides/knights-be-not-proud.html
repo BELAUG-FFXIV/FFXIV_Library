@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Knights Be Not Proud | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Knights Be Not Proud (HW Patch 3.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/GtKCsZdjHuc"
+              title="Knights Be Not Proud" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Knights Be Not Proud</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Knights Be Not Proud`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>The House Durendaire knights tell Artoirel that they will see to everything from here. If any heretics are still hiding nearby, they mean to hunt them out without delay. With the search now in capable hands, Artoirel decides there is no reason to remain, and leads you back through the frozen highlands toward Falcon’s Nest. After so much pursuit across ice and snow, he tells you that you have earned at least a few quiet hours by a warm fire.</p><p>When you return, Redwald welcomes both of you with open relief. He is plainly glad to see you safe, but that relief quickly gives way to astonishment when he learns what happened. Before any reinforcements could arrive, you had already tracked the heretics down and slain them yourselves. Even in a land hardened by war, that is no small feat.</p><p>Artoirel does not hide his satisfaction. He says that your success marks real progress in driving the heretics from these lands, and he intends to report as much to both his father and the Holy See. Redwald readily agrees, adding that this achievement should stand as proof of what Houses Durendaire and Fortemps might accomplish if they continue to work together rather than apart.</p><p>With the task nearly finished, Artoirel asks whether Redwald and his knights can manage the rest. Redwald answers at once that they can. In the short time you have spent in Falcon’s Nest, he says, you and Artoirel have achieved far more than he ever expected, and he cannot in good conscience ask any more of either of you. He urges you to return to Ishgard with his gratitude, and Artoirel accepts his words with quiet courtesy.</p><p>Even after the formal exchange is done, Redwald continues to reflect on what your deeds may mean. To him, your work is more than a victory over heretics. It is also proof that Ishgard weakens itself by shutting foreigners out. Men and women like you, he says, would make the nation far stronger if only it would allow them a place within it.</p><p>Back at Fortemps Manor, Artoirel finally speaks without reserve. He admits that from the very beginning, he doubted both your intentions and your ability. The stories surrounding you had always sounded too grand to believe, yet Haurchefant insisted they were true and pleaded with his father to take you under House Fortemps’s protection. Artoirel confesses that this alone stirred bitterness in him, for Haurchefant was the living reminder of his father’s one indiscretion, and not everyone in the family could forgive that. When the moment came at Camp Riversmeet and one of you had to pursue the heretics alone, he told himself he was testing you, but in truth part of him hoped you would fail. Instead, you accepted the burden without protest or fear, found the enemy, faced them alone, and returned alive. In that moment, Artoirel could deny it no longer: Haurchefant had judged you rightly from the start. The fault had been Artoirel’s own weakness, not yours, and he gives you his word that he will never doubt you again.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Artoirel <small class="muted">(Coerthas Western Highlands, X:31.8, Y:12.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="at-the-end-of-our-hope.html">At the End of Our Hope</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 50</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="divine-intervention.html">Divine Intervention</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'目の曇り、今は晴れ',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>デュランデル家の騎士は、この場の後始末は自分たちに任せてほしいとアルトアレールに告げる。もし近くにまだ異端者が潜んでいるなら、すぐにでも探し出して討つつもりなのだという。現場が騎士たちの手に委ねられた今、アルトアレールはこれ以上ここに留まる理由はないと判断し、あなたを伴ってファルコンネストへと引き返す。氷と雪の中を長く追跡した後なのだから、暖かな火のそばでしばし休むくらいは許されるだろうと、彼は言う。</p><p>ファルコンネストへ戻ると、レッドワルド卿はあなたとアルトアレールの無事な姿に心から安堵する。だが、その安堵はすぐに驚きへと変わる。援軍が到着するより早く、あなたが自ら異端者を追い詰め、討ち果たしたと知ったからだ。戦乱の続く土地とはいえ、それは並大抵の働きではなかった。</p><p>アルトアレールは、その成果を率直に誇る。今回の一件によって、この地から異端者を一掃するための大きな前進があったと彼は確信しており、そのことを父にも教皇庁にも報告するつもりでいた。レッドワルド卿もまた同意し、フォルタン家とデュランデル家が協力を重ねれば何を成し遂げられるのか、その証として上の者たちに示せるだろうと語る。</p><p>任務の大半が片づいた今、アルトアレールは残りを任せても問題ないかと問う。レッドワルド卿は迷いなくうなずき、ここファルコンネストに滞在したわずかな間に、あなたとアルトアレールが想像以上の成果を挙げたのだと認める。もはやこれ以上、厚意に甘えて二人を引き留めるわけにはいかない。感謝とともにイシュガルドへ戻ってほしいという言葉に、アルトアレールは静かに礼を返した。</p><p>形式ばったやり取りが終わった後も、レッドワルド卿の思いはそこに留まらない。あなたの働きは、ただ異端者を退けたというだけではない。異邦の者を閉め出し続けることが、イシュガルドにとっていかに愚かなことかを示すものでもあると、彼は言う。あなたのように懸命に力を尽くす者たちを受け入れることができれば、この国はさらに強くなれるはずだった。</p><p>やがてフォルタン伯爵邸へ戻ると、アルトアレールはついに飾らぬ言葉で胸の内を明かす。彼は当初から、あなたの動機にも力量にも疑いを抱いていたのだという。あなたにまつわる噂は広まるほどに現実離れして聞こえ、とても信じがたいものだった。だが、オルシュファンはそれらがすべて真実だと信じ、あなたをフォルタン家の庇護下に置くよう父に願い出た。アルトアレールは、そのこと自体に複雑な感情を抱いていた。オルシュファンは父のただ一度の過ちの名残であり、その存在を素直に受け入れられない者は家の中にもいたからだ。キャンプ・リバーズミートで負傷した騎士を見つけたとき、異端者を単独で追う者が必要になると、彼はすぐに悟った。その役目をあなたに託したのは試練のつもりだと自分に言い聞かせながら、心のどこかでは失敗を望んでいたのだと彼は認める。だが、あなたは不平ひとつ口にせず、恐れも見せず、その務めを引き受けた。そして実際に敵を追い詰め、たったひとりで対峙し、生きて戻ってきた。その事実を前にして、オルシュファンの見立てが最初から正しかったのだと、アルトアレールは認めるほかなかった。あなたを疑ったのは、あなたの弱さではなく、自分自身の弱さゆえだったのだと。だからこそ彼は、もう二度とあなたを疑わないと、はっきり言葉にして誓う。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> アルトアレール <small class="muted">（クルザス西部高地, X:31.8, Y:12.1）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="at-the-end-of-our-hope.html">足跡が導く再会</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="divine-intervention.html">蒼天の騎士</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'如今終於看清一切',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>House Durendaire 的騎士向 Artoirel 表示，接下來的事交給他們處理即可。若這附近還有異端者躲藏，他們很快就會把人全都搜出來。既然現場已經由騎士們接手，Artoirel 也認為沒有繼續停留的必要，便帶著你一同返回 Falcon’s Nest。一路在冰雪之中追蹤至此，他說，你也該在溫暖的火光旁好好休息幾個小時了。</p><p>回到 Falcon’s Nest 後，Redwald 明顯鬆了一口氣，真心為你和 Artoirel 平安歸來而高興。可這份安心很快又化作驚訝。因為在援軍抵達之前，你竟已經獨自追上異端者，並親手將他們擊倒。即使是在長年戰亂的土地上，這樣的戰果也絕不尋常。</p><p>Artoirel 並不掩飾自己的滿意。他認為，這次行動已讓驅逐此地異端者的目標向前邁出了一大步，而他也打算將這份成果如實稟報給父親與教皇廳。Redwald 立刻表示贊同，並說這正好能讓上位者看清，若 House Fortemps 與 House Durendaire 能持續合作，究竟能做到多少事。</p><p>如今任務已大致完成，Artoirel 便詢問 Redwald 與他的騎士們是否足以接手剩下的一切。Redwald 毫不遲疑地答應，並坦言在你們停留 Falcon’s Nest 的短短時間裡，你和 Artoirel 所完成的事，遠遠超出他的預想。他無法再心安理得地繼續勞煩你們，只希望你們帶著他的謝意返回 Ishgard，而 Artoirel 也平靜地接受了這份感謝。</p><p>等到場面的寒暄結束後，Redwald 心中想到的卻不只是這一場勝利。對他而言，你的表現不只是證明異端者可以被擊退，也同樣說明 Ishgard 一味排斥外來者，是多麼短視而愚蠢的做法。像你這樣肯真正出力的人若能被這個國家接納，Ishgard 本可以變得更加強大。</p><p>回到 Fortemps Manor 後，Artoirel 終於不再遮掩，坦白說出了自己的真心話。他承認，從一開始，他就懷疑你的動機，也懷疑你的能力。關於你的傳聞流傳得太過誇張，聽起來幾乎不像真事，可 Haurchefant 卻始終堅稱那些全都屬實，甚至親自向父親請求，讓 House Fortemps 成為你的庇護者。光是這件事，就已在 Artoirel 心中激起了難以言說的複雜情緒。因為對他而言，Haurchefant 正是父親唯一一次失誤所留下的痕跡，而這份存在，並非家中每一個人都能坦然接受。當時在 Camp Riversmeet，看到那名受傷的騎士時，Artoirel 立刻就明白，你們之中必定得有一人獨自去追擊異端者。他把這份責任交給你，表面上說服自己那只是一場試煉，但他也終於承認，在內心更深的地方，他其實曾盼望你會失敗。然而你沒有。你毫無怨言地接下這份危險的任務，沒有退縮，也沒有流露出半點畏懼，最後更真的追上敵人，獨自面對，並活著回來。直到那一刻，Artoirel 才終於無法再否認，Haurchefant 從一開始就是對的。真正有問題的，從來不是你的力量，而是他自己的狹隘與軟弱。因此他親口向你承諾，從今以後，他再也不會懷疑你。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Artoirel <small class="muted">(庫爾札斯西部高地, X:31.8, Y:12.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="at-the-end-of-our-hope.html">循著足跡再相會</a></div><div class="row">任一戰鬥／魔法職業（不含受限職業）Lv. 50</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="divine-intervention.html">來自蒼天騎士的干預</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
