@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Flame General Affairs | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Flame General Affairs (HW Patch 3.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/NC0Ko3xb8I4"
+              title="Flame General Affairs" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Flame General Affairs</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Flame General Affairs`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Tataru can barely hide her distress. She confesses that she should have told you sooner about General Raubahn’s impending execution, but the chaos surrounding the trial left no room to think clearly, and now all she can do is hope that you are not already too late. Alphinaud shares her urgency, yet refuses to let panic guide your next move. Charging blindly into Ul’dah would accomplish nothing. Before any rescue can be attempted, he says, you must first learn the true state of affairs within the sultanate.</p><p>To that end, he directs you not toward Ul’dah, but to Limsa Lominsa. While you were occupied elsewhere, he acted as an intermediary in trade negotiations between House Fortemps and a Lominsan consortium, and through that chance contact he succeeded in reaching the Admiral. The result is a rare blessing in a bleak hour: Merlwyb has pledged her full cooperation in any effort to save Raubahn. Confident that your presence will strengthen that alliance still further, Alphinaud asks you to accompany him to meet her aboard the Bridge.</p><p>When you arrive, the Admiral receives you with unmistakable relief. Though she had never expected you to find sanctuary within Ishgard, she was heartened to learn that you had survived at all. Alphinaud then voices the question that has lingered since your flight from Ul’dah: why had the charges against the Scions never been publicly declared? Merlwyb answers plainly. At Marshal Tarupin’s urging, she and the Elder Seedseer pressed the Syndicate to suppress the accusations until undeniable proof could be produced. Without such proof, she argues, the people would never have accepted so outrageous a claim against those who had saved the realm.</p><p>Yet this is not the only truth she reveals. Before the banquet, she and the Elder Seedseer were summoned in secret by the sultana herself. There, Nanamo confided her intention to abdicate and clear the way for the creation of an Ul’dahn republic. She knew such a declaration could throw the nation into turmoil, and so she sought outside support to help Raubahn preserve order during the transition. As Alphinaud pieces together the implications, a new possibility begins to emerge from the ruin: if her death has still not been announced, and the authorities claim only that she is recovering from illness, then perhaps the truth of what happened that night is not as simple as it first seemed.</p><p>Even so, the danger surrounding Raubahn remains immediate. Alphinaud cannot ignore one troubling inconsistency: if his enemies truly meant to dispose of him, why had they left him alive for so long? Merlwyb confirms that he was once held in the Marasaja Pit, but has since been moved to an unknown location. Stranger still, he was not taken away by the Brass Blades, but by soldiers clad in blue. Alphinaud at once understands what that means. The Crystal Braves are involved, and whatever bargain once bound them to Lolorito now appears to be fraying.</p><p>Merlwyb makes clear that she cannot send Lominsan troops into Ul’dah without risking the collapse of the Eorzean Alliance itself. If Raubahn is to be rescued, the task must fall to you and your companions. Alphinaud accepts that burden without hesitation, declaring that because he founded the Crystal Braves, he must also answer for the havoc they have wrought. As a first step, Merlwyb directs you to a Doman contact hiding among the workers of Revenant’s Toll. There, Higiri greets you with visible relief and tells you what happened in your absence: even as the victory banquet was underway, the Crystal Braves seized the Rising Stones by force. A handful of Domans escaped in the confusion and have remained behind ever since, watching the mutineers and waiting for your return. Now, at last, they are ready to repay their debt and stand beside you.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Alphinaud <small class="muted">(Fortemps Manor, X:6.1, Y:6.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="disclosure.html">Disclosure</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 51</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="in-search-of-raubahn.html">In Search of Raubahn</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'ウルダハの今',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>タタルは不安を隠しきれないまま、ラウバーン将軍の処刑についてもっと早く知らせるべきだったと悔やんでいた。だが、裁判の混乱のさなかでは、それすら思うようにできなかったのだという。今となっては、まだ間に合うことを祈るしかない。アルフィノもまた一刻を争う状況だと認めつつ、焦りに任せてウルダハへ飛び込むべきではないと告げる。救出の策を立てるためには、まず王政国家の現状を正しく把握しなければならないのだと。</p><p>そのために、彼が向かうべき場所として示したのはウルダハではなく、リムサ・ロミンサだった。あなたが別の用向きに追われているあいだ、アルフィノはフォルタン家とリムサの商会との交易交渉で仲介役を務め、その機会を利用して提督へ連絡を取っていたのである。そうして得られたのは、この苦境の中では貴重すぎるほどの助力だった。メルウィブ提督は、ラウバーン救出のためであれば全面的に協力すると約したのだ。さらにアルフィノは、あなたの存在が味方を奮い立たせることをよく知っているからこそ、ともに提督に会ってほしいと願う。</p><p>艦橋で迎えたメルウィブは、あなたたちの無事を心から喜んでいた。イシュガルドで庇護を得るとは予想していなかったが、生き延びたと知っただけでも救われたのだという。そこへアルフィノは、ウルダハを脱して以来ずっと胸に引っかかっていた疑問を口にした。なぜ暁の血盟にかけられた嫌疑は、公にされなかったのか。メルウィブは、その理由を隠さず語る。タルピン元帥の進言を受け、彼女とカヌ・エ・センナは、動かぬ証拠が見つかるまで血盟の罪を公表しないよう、シンジケートに強く求めたのだ。確たる証もなく、国を救った者たちにそのような大罪を着せれば、民衆が黙ってはいないと考えたのである。</p><p>だが、提督が明かした真実はそれだけではなかった。晩餐会の少し前、彼女とカヌ・エ・センナは、ナナモ女王から密かに呼び出されていたのだ。そこで女王は、自ら退位を宣言し、ウルダハ共和国樹立への道を開くつもりだと打ち明けた。その決断が国に大きな混乱を招きかねないことを、女王自身もよく理解していた。だからこそ、移行の混乱の中でラウバーンが秩序を守れるよう、ふたりに支えを求めたのだという。その話を受けてアルフィノが思考を巡らせるうちに、ひとつの可能性が浮かび上がる。もし女王の死がいまだ公表されず、病に伏しているとだけ説明されているのなら、あの夜に起きたことの真相は、まだ見えているものとは違うのかもしれない。</p><p>それでも、ラウバーンに迫る危機が去ったわけではない。アルフィノはなお、ひとつの不自然さを見逃せずにいた。本当に敵が彼を排除するつもりなら、なぜこれほど長く生かしておいたのか。メルウィブによれば、ラウバーンは当初マラサジャ処刑場に拘束されていたが、最近になって別の場所へ移されたという。しかも彼を連れ去ったのは黄銅刃団ではなく、青い装束の兵士たちだった。その言葉を聞いた瞬間、アルフィノはすべてを悟る。クリスタルブレイブが関わっている。そして、ロロリトと彼らのあいだに結ばれていたはずの関係にも、すでに綻びが生じているのだろう。</p><p>メルウィブは、リムサの兵をウルダハへ送り込むことはできないとはっきり告げる。それはエオルゼア同盟の崩壊を招き、下手をすれば戦に発展しかねないからだ。ラウバーンを救えるとすれば、それはあなたたち自身しかいない。アルフィノはその責務をためらわず引き受けた。クリスタルブレイブを創設したのは自分であり、彼らの犯した過ちの責任もまた自分が負うべきだと。そこで提督は、最初の手がかりとして、レヴナンツトールで働くドマの協力者を訪ねるよう勧める。そこで再会したヒギリは、あなたの無事を目にして安堵をあらわにし、不在のあいだに起きたことを語った。祝宴の最中、クリスタルブレイブは暁の石の家を急襲し、力ずくで制圧したのだという。混乱のなかで逃れたわずかなドマの仲間たちは、その後もずっと反乱者たちを見張りながら、あなたの帰還を待ち続けていた。今こそ彼らは、その恩に報いるため、あなたとともに立とうとしていた。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> アルフィノ <small class="muted">（フォルタン伯爵邸, X:6.1, Y:6.2）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="disclosure.html">教皇トールダン7世</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 51～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="in-search-of-raubahn.html">ラウバーンを追って</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'關於烏爾達哈的現況',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Tataru 幾乎掩不住心中的焦急。她懊悔自己沒有更早把 General Raubahn 即將被處刑的消息告訴你，只是先前審判的混亂接連壓了下來，讓她連開口的時機都錯過了。到了現在，她能做的也只剩下祈禱，希望一切還沒有太遲。Alphinaud 同樣明白事態緊迫，卻也沒有讓慌亂支配判斷。他提醒你，若在毫無準備的情況下直接闖進 Ul’dah，根本救不了任何人。要擬定救出 General Raubahn 的辦法，首先得弄清楚如今的 Ul’dah 究竟變成了什麼模樣。</p><p>因此，他提出的去處並不是 Ul’dah，而是 Limsa Lominsa。就在你忙於別處時，Alphinaud 一直以 Fortemps Manor 與 Lominsan 商業同盟之間的中間人身分奔走，也正是在那段交涉之中，他得到機會把消息送到 Admiral 那裡。結果比任何人想像的都更值得慶幸：Merlwyb 已經明確承諾，只要有機會救出 General Raubahn，她願意全力配合。Alphinaud 也坦白地說，凡是你親自現身的地方，盟友總會更有勇氣，因此他早已把你一併算進這場會面之中，要你與他一同前往艦橋。</p><p>在艦橋見到你們時，Merlwyb 的神情裡有著毫不掩飾的寬慰。她原本沒有料到你們竟能在 Ishgard 找到容身之處，但光是知道你們平安活了下來，就已足以令她安心。接著，Alphinaud 問出了自從逃離 Ul’dah 之後便始終盤旋心頭的疑問：既然你們被指控犯下那樣的罪行，為何 Scions of the Seventh Dawn 的罪名始終沒有被公開？Merlwyb 沒有迴避。她直言，在 Marshal Tarupin 的催促下，她與 Elder Seedseer 曾一同向 Syndicate 施壓，要求他們在拿出無可辯駁的證據之前，不得將那些指控公諸於世。理由很簡單，若在毫無鐵證的情況下，就把拯救國家的功臣說成罪人，人民絕不可能平靜接受。</p><p>然而，Merlwyb 接著說出的，才是真正讓局勢變得更加複雜的內情。就在那場晚宴之前不久，她與 Elder Seedseer 曾被 Sultana 私下召見。那一次，Nanamo 親口告訴她們，自己打算宣布退位，好為 Ul’dah 建立共和政體鋪路。她並非不知道這樣的決定會把整個國家推向混亂，正因如此，她才希望 Raubahn 在政局轉變之際能獲得外部支援，以維持城內的秩序。當 Alphinaud 將這些線索重新拼湊起來時，一個連他自己都不敢輕易相信的可能性慢慢浮現出來。若直到現在，當局仍沒有正式宣布 Sultana 的死訊，只對外聲稱她因病靜養，那麼那一夜發生的一切，或許並不像最初看來那樣已成定局。</p><p>只是，這並不代表 General Raubahn 已經脫離危險。Alphinaud 仍有一個疑問遲遲無法放下——若敵人真的只想除掉他，為何又要把他活著留到現在？Merlwyb 說，General Raubahn 起初一直被關在 Marasaja Pit，但最近已被轉移到不明地點。更奇怪的是，把他帶走的並不是 Brass Blades，而是一群身穿藍衣的士兵。Alphinaud 幾乎立刻便明白了那代表什麼。Crystal Braves 牽涉其中，而他們與 Lolorito 之間原本維持的安排，如今恐怕也已經開始出現裂痕。</p><p>Merlwyb 說得很清楚，她不能派 Limsa Lominsa 的軍隊進入 Ul’dah。那樣做不只會毀掉 Eorzean Alliance，甚至很可能直接引發戰火。若要救出 General Raubahn，這件事終究只能由你們自己去完成。Alphinaud 沒有逃避，反而立刻把這份責任攬到自己身上。他承認，既然 Crystal Braves 是由他創立，那麼他們如今造成的一切混亂與罪責，也理當由他來承擔。於是，Merlwyb 指引你們前往 Revenant’s Toll，去尋找一名潛伏在廚房裡的 Doma 聯絡人。當你在那裡見到 Higiri 時，她眼中的寬慰幾乎無法言說。她告訴你，就在勝利晚宴進行的同時，Crystal Braves 已經突然倒向另一邊，強行奪下 Rising Stones。混亂之中，只有少數 Doma 同伴得以悄悄脫身。從那之後，他們便一直留在 Revenant’s Toll，一面監視那些叛變者，一面等待你的歸來。如今，你終於回到這裡，而他們也已準備好，盡其所能地與你並肩前行。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Alphinaud <small class="muted">(福爾唐伯爵邸, X:6.1, Y:6.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="disclosure.html">真相揭曉</a></div><div class="row">任一戰鬥／魔法職業（不含受限職業）Lv. 51</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="in-search-of-raubahn.html">追查 Raubahn 的下落</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
