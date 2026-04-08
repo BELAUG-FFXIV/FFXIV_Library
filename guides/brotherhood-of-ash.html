@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Brotherhood of Ash | BELAUG · FFXIV Library</title>
+  <meta name="description" content="AlliedSociety – Brotherhood of Ash (ARR Patch 2.1)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/4me8Jjs05XI"
+              title="Brotherhood of Ash" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Brotherhood of Ash</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Brotherhood of Ash`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Hamujj Gah speaks of a time before the Amalj’aa were consumed by zealotry, when they roamed the plains as proud nomads and measured their worth in open battle. He tells you that among his people, age once brought not fear, but honor: seasoned warriors would journey to the holy land and meet death with clear eyes, offering their time-worn souls to the sacred flames. To him, the fanatics who now bow before a god in search of borrowed strength have abandoned that path completely. They do not seek mastery over themselves, only power without merit, and he despises them for it. Then word arrives that the Flamefangs are moving against new prey, and Hamujj Gah turns to you at once, calling on you to show the Brotherhood the strength of your steel.</p><p>At his command, you are introduced to Loonh Gah, a warrior whose body may be Miqo’te, but whose spirit, in Hamujj Gah’s eyes, burns as fiercely as any Amalj’aa’s. He makes it clear that within the Brotherhood, tribe, clan, and gender mean nothing beside the pursuit of martial perfection. Loonh Gah, however, receives the order with open resentment. She questions why she was chosen to accompany you and speaks as though certain you will prove a fraud. Even so, Hamujj Gah silences her protest, and she obeys, if only barely. When you meet her on the field, she has already felled a scout and warns you that the rest of the raiders are close behind.</p><p>Together, you defend a terrified merchant from the raiding party. The battle ends swiftly in your favor, and the shaken salesman thanks you for saving his life, admitting he had dismissed the rumors of Amalj’aa kidnappings as little more than traders’ gossip. Even in gratitude, however, he curses the beastmen and thinks first of how much it will cost him to hire guards next time. Loonh Gah remains cold. Rather than praise your victory, she curtly tells you to return, as though she had expected you to die there after all.</p><p>Back with the Brotherhood, Loonh Gah finally says what lies beneath her hostility. She acknowledges that you are no novice in battle, but insists that skill alone is not enough. The Brotherhood of Ash, she explains, stands apart as a band of hardened warriors who fight a grinding war against the zealots devoted to the holy land. Among those enemies, none earn more hatred than the Flamefangs, who take particular pleasure in kidnapping the weak and defenseless. To destroy their ambitions and strike down their leaders is, to her, not merely strategy but duty. Yet even as she speaks of true Amalj’aa honor, she lashes out when she senses your doubt, furious at the thought that you might see her as anything less than one of them.</p><p>When you report back, Hamujj Gah tells you that word of your deeds has already spread through the camp. None now doubt your strength, nor that you are capable of standing beside them against their fallen kin. He asks whether their cause speaks to your heart and whether you will unleash your fury alongside the Brotherhood. If you agree, he welcomes you as one whose warrior spirit is true, saying that though you and his people may differ in many ways, the enemy you seek to cast down is the same. And so he calls for a shared vow: that the fire of the Flamefangs must not be allowed to burn unchecked.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Hamujj Gah <small class="muted">(Southern Thanalan, X:23.9, Y:14.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="peace-for-thanalan.html">Peace for Thanalan</a></div><div class="row">Disciple of War or Magic Lv. 43</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="ranger-rescue.html">Ranger Rescue</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'灰燼を成す者',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ハムジュ・ガは、アマルジャ族が狂信へと堕ちるよりも前、広大な平原をさすらう誇り高き遊牧の戦士であった時代を語る。行く手を阻む者があれば、それを武の技量を示す好機として受けて立つ――それが彼らの在り方だった。さらに彼は、年老いた戦士たちが聖地を巡礼し、避けられぬ死と正面から向き合うという古き習わしを口にする。鍛え抜かれた魂を聖なる炎へ投じ、己の肉体を灰へ還すことこそ誉れであるというのだ。ゆえに、神へすがり、己の持たぬ力を乞う者たちを、彼は心の底から軽蔑していた。そうしてその最中、敵が新たな獲物を狙っているとの報せが届き、ハムジュ・ガはあなたへ、その刃を灰の団のために振るうよう求める。</p><p>そこで彼があなたへ引き合わせたのが、ルーン・ガという戦士だった。その身はミコッテであっても、その魂にはどのアマルジャ兵にも劣らぬ激しい炎が宿っているのだと、ハムジュ・ガは断言する。灰の団にとって重要なのは、ただ武における完成を求める闘争であり、部族も血筋も性別も意味を持たない。だが、当のルーン・ガはその命令を素直には受け入れない。なぜ自分があなたに付き従わねばならないのかと露骨に不満を示し、あなたを偽りの戦士として見抜いてやるとさえ言い放つ。それでも命令は覆らず、彼女は不承不承ながらも戦場へ赴く。</p><p>待ち受けていた場所では、怯えきった商人が助けを求めていた。ルーン・ガはすでに斥候をひとり倒しており、残る一団もほどなく現れると告げる。やがて襲撃者たちが押し寄せるが、あなたはこれを打ち破り、商人を救い出す。命拾いした男は深く感謝しつつも、これまで耳にしていたアマルジャ族による拉致の噂を、商売敵の脅し文句だと高をくくっていたことを明かす。だが助かった直後でさえ、彼の口から出るのは次から護衛を雇う費用への愚痴であり、アマルジャ族への悪態だった。いっぽうルーン・ガは、あなたの勝利にも素直な敬意を示さず、死ぬものと思っていたと吐き捨てるように言い、陣へ戻るぞとだけ告げる。</p><p>灰の団のもとへ戻ると、ルーン・ガはようやく胸の内をあらわにする。あなたが戦いにおいて未熟ではないことは認めながらも、それだけで認めるつもりはないのだという。ハムジュ・ガに率いられた灰の団は、聖地に取り憑かれた狂信者たちを相手に、消耗戦を続ける精鋭の集団だった。なかでも“炎牙衆”は、弱き者をさらうことにもっとも執着する一派であり、灰の団からとりわけ深い憎しみを向けられている。彼らの野望を砕き、その頭を討つことこそ、真のアマルジャの戦士を名乗る者すべての務めなのだと彼女は語る。だがその言葉の端々には、あなたに軽んじられることへの怒りと、自らの在り方を疑われることへの激しい反発がにじんでいた。</p><p>そしてハムジュ・ガのもとへ戻ると、すでにあなたの戦いぶりは陣中へ広まっていた。誰ひとりとして、あなたの腕前を疑う者はいない。猛る神を討ったその力は、いまや灰の団の耳にも確かに届いていた。もしこの戦いの大義があなたの胸にも響くのなら、どうか彼らとともに怒りを解き放ってほしい――そうハムジュ・ガは願う。あなたが応じれば、彼はそれを真の戦士の心だと称え、たとえ多くの違いがあろうとも、打ち倒すべき敵は同じだと語る。そして炎牙衆に死を誓おう、その炎は決して燃え広がらせてはならぬのだと、力強く宣言する。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ハムジ・ガー <small class="muted">（南ザナラーン, X:23.9, Y:14.2）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="peace-for-thanalan.html">荒野に逆巻く騒擾</a></div><div class="row">ファイター ソーサラー Lv 43～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="ranger-rescue.html">孤独なる復讐</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'灰燼中的同道',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Hamujj Gah 對你說起 Amalj’aa 過去的樣子。那時，他們還只是遊走於 Paglth’an 廣闊原野上的遊牧戰士；若有人膽敢阻擋去路，他們便欣然迎戰，把那視為磨練武藝的機會。長久以來，Amalj’aa 一直有一項古老傳統：年老的戰士會踏上前往 Zanr’ak 的朝聖之路，親自面對死亡的逼近，將歷經歲月淬鍊的靈魂投入聖火，讓肉身最終歸於灰燼。對 Hamujj Gah 而言，那才是真正的榮耀。也因此，他無法容忍 Zahar’ak 那些怯懦之徒竟然畏懼死亡，不去磨練自己的意志，反而向神祇卑躬屈膝，乞求自己根本不配擁有的力量。在他眼中，那不是追求強大，而是卑劣的依附；真正通往偉大的道路，只能是挑戰比自己更強的對手，並在過程中征服自身的缺陷。就在這時，敵人來襲的消息傳來，Hamujj Gah 也隨即把目光轉向你，要你在戰場上證明自己的實力，讓 Brotherhood of Ash（Amalj’aa 內部反對狂信派、奉行古老戰士之道的武鬥集團）親眼看見你是否配得上這場戰鬥。</p><p>接著，他把 Loonh Gah 介紹給你。雖然她有著 Miqo’te 的外表，但 Hamujj Gah 明白表示，在 Brotherhood of Ash 之中，真正重要的從來不是部族、血統或性別，而是是否懷有足以與任何 Amalj’aa 戰士相比的熾烈鬥志。可 Loonh Gah 顯然不覺得你值得她陪同出戰。她當場質疑，為何偏偏要由自己負責這件事，甚至語帶譏刺地認定，你很快就會露出騙子的真面目。即便如此，Hamujj Gah 一聲喝斥便壓下她的反抗，她也只能不情不願地服從命令，叫你到指定地點與她會合，還冷冷地說，希望你的慘叫不會持續太久。</p><p>到了埋伏地點後，你們發現一名商人正驚慌失措地求救。Loonh Gah 已經先一步解決掉前方的斥候，也從敵人留下的記號看出，這次面對的確實是 Flamefangs（隸屬於 Zanr’ak Amalj’aa、尤其熱衷綁架與掠奪的一支好戰派系）。她要你立刻就位、準備武器，因為其餘襲擊者很快就會追上來。不久後，敵人果然現身，而你也毫不遲疑地迎戰，迅速擊退了那群掠奪者。死裡逃生的商人一邊向你道謝，一邊心有餘悸地承認，自己雖然早就聽說 Amalj’aa 又開始在商路上擄人，卻一直以為那只是同行散播的風聲，想藉此把人嚇離這條路。可即使剛剛才撿回一命，他腦中首先盤算的，依舊是下次經過這裡時得花多少錢僱用護衛，嘴裡也不忘咒罵那些獸人。Loonh Gah 對此毫無興趣，也沒有因你的表現就立刻改觀，只冷冷丟下一句，她原本還以為你會死在這裡，接著便要你隨她返回 Ring of Ash。</p><p>回到營地後，Loonh Gah 終於把心裡真正的想法說得更明白一些。她承認，你不是戰場上的雛鳥，這點已經很清楚；但她並不打算因此就輕易認同你，因為實力之外，還有意志是否足夠堅定這個問題。她告訴你，Brotherhood of Ash 是由精銳戰士組成的戰團，在 Hamujj Gah 的率領下，持續對抗那些盤踞於聖地、走向狂信的 Zanr’ak Amalj’aa（以 Zanr’ak 為據點、背離古老戰士傳統並轉而崇拜 primal 的 Amalj’aa 勢力）。而你方才面對的 Flamefangs，正是 Zanr’ak Amalj’aa 之中尤其令人憎惡的一支。他們比其他人更沉迷於綁架弱者，也更讓 Brotherhood of Ash 深惡痛絕。對 Loonh Gah 而言，粉碎這些人的野心、斬殺他們的領袖，不只是作戰目標，而是所有仍願意自稱真正 Amalj’aa 戰士之人都必須肩負的責任。可即使她如此強硬地說著，也仍反覆警告你不要太深地介入他們的戰爭，因為在她眼中，這不是外人可以隨便插手的事。當她察覺你似乎不為所動，甚至懷疑她是否也不算真正的 Amalj’aa 時，更是立刻被激得怒火翻湧，像是在拚命捍衛某種早已被人質疑太久的身分。</p><p>當你回去向 Hamujj Gah 報告時，你的戰果早已傳遍整個營地。如今再也沒有人懷疑你的實力，也沒有人懷疑，那雙曾斬落狂暴神祇的手，確實有資格站上他們的戰場。於是 Hamujj Gah 再一次鄭重地問你：如果這份理念也在你心中引起共鳴，你是否願意與 Brotherhood of Ash 並肩，把怒火一同傾瀉向共同的敵人？若你答應，他便會坦率地承認，雖然你與他們在許多地方並不相同，但想要擊倒的對象卻是一致的。因此，他邀你一起立下誓言，要讓 Flamefangs 懼怕你們的到來，要讓那股本不該繼續燃燒的火焰徹底熄滅。若你拒絕，他也只是帶著遺憾接受，明白你有自己的道路要走；即便此刻無法同行，他向你提出的邀請，依舊不會改變。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Hamujj Gah <small class="muted">(南薩納蘭, X:23.9, Y:14.2)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="peace-for-thanalan.html">荒野中翻湧的動亂</a></div><div class="row">戰鬥或魔法職等級 43 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="ranger-rescue.html">為復仇而孤身前行</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
