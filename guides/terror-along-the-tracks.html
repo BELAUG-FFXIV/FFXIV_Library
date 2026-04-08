@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Terror along the Tracks | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – Terror along the Tracks (DT Patch 7.41)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/d_1t1EYM8Ls"
+              title="Terror along the Tracks" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Terror along the Tracks</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Terror along the Tracks`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>The Cosmoliner engineer stops you in visible distress and pleads for your help before fear can rob him of the courage to speak. He reminds you how unforgiving Oizys can be to cross without the aid of the Cosmoliner, and insists that the initiative’s success depends utterly upon the transportation network remaining safe and reliable. Yet for all the importance of regular inspections, he confesses that he can no longer bring himself to carry them out. Someone claimed to have seen a strange pale figure chasing them while riding the Cosmoliner, and from that rumor a nightmare has taken shape in his mind. Some call it the vengeful ghost of a Voyager. Others imagine some unholy fusion of man and sandworm. Whatever form the tale takes, it always ends the same way: with a horror no cosmoboard can outrun.</p><p>Too frightened to face the route himself, he begs you to conduct the inspection in his stead. The stations in question lie along the westernmost line, from Cape Geras to northern Erg Eris—the very stretch said to be haunted by the mysterious figure. Though he can barely bring himself to say so aloud, he sends you on your way with obvious relief, hoping that if you begin at Cape Geras and ride north, you will be able to check every required point.</p><p>At the first station, everything appears to be functioning as it should. You search the surrounding area as well, but nothing resembling the rumored figure reveals itself. Farther along, at Erg Eris, you find that the replacement lamp is lit, though there is otherwise no sign of trouble. As for the so-called pale figure, the only notable presence is a Loporrit nearby, hardly the sort of sight to inspire mortal terror. Even so, the silence of the route does little to dispel the unease left behind by such stories.</p><p>At the final inspection point, your nerves are tested at last. A dark stain catches your eye, and for one sharp instant it seems horribly like a bloody handprint. But when you look more closely, the dreadful vision dissolves into something far more ordinary: a smear of dirt and nothing more. By then it is clear that you have followed the exact route named in the rumor and found neither ghost nor monstrous sandworm. Whatever gave rise to the tale, it has left no evidence behind.</p><p>When you return to Terra Firma, the engineer anxiously demands to know whether you saw anything that would shatter the mind or send you fleeing for your life. When you tell him otherwise, he is left bewildered, unable to decide what could have inspired such vivid reports. Yet beneath that confusion, he remembers why his work matters too much to abandon. The Cosmoliner is not merely a way to move from place to place—it also carries the rainbow crystal’s power across the star, making it possible to regulate conditions in dangerous environments high above the ground or deep below the surface. Because those conditions constantly shift, the stations must be installed and removed as needed, with care for the land around them. The dangers of the work are already more than enough without adding imagined specters to the list. Still, the simple fact that you returned unharmed gives him hope. Perhaps next time, if he can only shut out the terrors conjured by his own imagination, he may manage to do the job himself.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Cosmoliner Engineer <small class="muted">(Oizys, X:15.9, Y:24.0)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="memorys-orbit.html">Memory's Orbit</a></div><div class="row">Disciples of the Land or Hand Lv. 10</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-managers-power.html">A Manager’s Power</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'恐怖のオイジュス探検',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>コスモライナー技師は、取り乱した様子であなたを呼び止め、どうか少しだけ時間を割いてほしいと懇願します。オイジスの各地を巡ってきたあなたならよくわかるはずだと、彼は震える声で言います。この星をコスモライナーの助けなしに移動することが、どれほど過酷で危険なことかを。そして、その輸送網が安定して機能し続けるかどうかが、調査計画全体の成否を左右すると言っても過言ではないのだと。だからこそ定期点検は欠かせない。けれど、いざ現地へ出ようとすると、どうしても目を開けていられないほど恐ろしくなってしまうのでした。</p><p>発端は、コスモライナーに乗っていた者が、奇妙な白い影に追いかけられたと語ったことでした。その噂はたちまち尾ひれをつけて広がり、ある者はヴォイジャーの怨霊だと言い、またある者は人とサンドウォームが交じり合った悍ましい怪物だと言います。そして誰もが口をそろえて、それは一度見たが最後、決して逃げ切れない存在なのだと語るのでした。臆病だと罵られてもかまわないから、自分の代わりに点検へ行ってほしい――そう頼み込む彼は、西端の路線、ケープ・ジェラスからエルグ・エリス北部にかけての各停留所を調べてきてほしいとあなたに託します。よりにもよって、その白い影が出ると噂されている区間そのものでした。</p><p>あなたがまず向かったケープ・ジェラスの停留所は、幸いにも異常なく稼働していました。周囲にも目を配りますが、白い影らしきものはどこにも見当たりません。続いて訪れたエルグ・エリスでは、交換を要することを示すランプが点灯していたものの、それ以外に大きな問題はありませんでした。噂の白い影といえば、そこにいたのはただひとりのレポリットだけで、とても命の危険を感じるような相手には思えません。それでも、何も起きない静けさの中に、かえって噂の不気味さが残り続けます。</p><p>最後の点検地点では、ついにひやりとさせられます。目に飛び込んできたのは、まるで血のついた手形のように見える痕でした。けれど息をのんで確かめてみれば、それはただの土の汚れにすぎません。そうして、噂で指定された経路を一通り確認しても、幽霊も怪物もついに現れませんでした。少なくとも今回の点検に限っていえば、その怪談を裏づけるものは何ひとつ見つからなかったのです。</p><p>テラ・ファーマへ戻ると、技師はあなたの無事な姿に心から安堵しつつ、何か正気を失いそうな光景や命がけの逃走劇はなかったのかと、おそるおそる尋ねます。何もなかったと知ると、あれほど鮮明な噂はいったい何から生まれたのかと首をかしげますが、やがて自分の仕事の重みを改めて口にします。コスモライナーの仕組みは移動手段を提供するだけではなく、レインボークリスタルの力を星中へ行き渡らせる導管でもあるのでした。浮遊する大地の上や地下深くのような危険な環境ほど調整が重要であり、そのため各停留所は周囲への影響を最小限に抑えつつ、必要に応じて設置や撤去ができるよう作られています。もともと危険の多い仕事なのだから、そこへ亡霊の幻まで加わってはたまらない。それでも、あなたが無事に戻ってきたことはひとつの希望でした。いつか自分が再び現地へ赴くとき、せめて心の中の恐怖だけでも閉め出すことができれば――そうすれば、また前へ進めるかもしれないと、彼はようやく思えるようになったのでした。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> コスモライナーの技師 <small class="muted">（惑星オイジュス, X:15.9, Y:24.0）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="memorys-orbit.html">辿る砂星の記憶</a></div><div class="row">クラフター ギャザラー Lv 10～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-managers-power.html">プロジェクトマネージャーの懸命なお仕事</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'軌道上的驚險探查',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>那名 Cosmoliner 工程師一見到你，便像抓住了最後一根救命稻草似地把你叫住，顫聲請你務必聽他說完。他告訴你，你走遍了這顆星球的各個角落，想必最清楚不靠 Cosmoliner 穿越 Oizys 會有多麼艱難又危險。對整個遠征計畫而言，這套運輸系統是否穩定可靠，幾乎足以左右一切成敗。也正因如此，定期巡檢本該是絕不能省略的工作。可是只要一想到得親自出去檢查那些站點，他就連眼睛都快不敢睜開，彷彿只要往前一步，就會真的撞見某種不該存在的東西。</p><p>事情的開端，其實只是一則流言。有人聲稱，自己搭乘 Cosmoliner 時，曾看見一個詭異的蒼白身影在後方追趕。從那之後，各種駭人的說法便一發不可收拾地傳開。有人說那是 Voyager 的幽靈，也有人說那是人與 sandworm 混雜而成的駭人怪物，但無論細節怎麼變，所有人都說那東西一旦出現，便是你生命中最後看到的景象，就連 cosmoboard 也不可能逃得過它的追逐。他承認自己膽小也無妨，只求你替他去完成這趟巡檢。需要檢查的站點位於最西側的路線，從 Cape Geras 一直到 Erg Eris 北方，而那恰恰就是傳聞中那道蒼白身影出沒的區域。</p><p>你先從 Cape Geras 開始著手檢查。那裡的 Cosmoliner 車站幸好運作正常，周圍也沒有任何異樣。你仔細環顧四周，卻始終沒看見任何符合傳聞描述的蒼白身影。之後來到 Erg Eris，你發現車站裡亮起了「需要更換」的燈號，不過除此之外，整體狀況仍算穩定。至於那道讓人聞風喪膽的白影，現場倒確實有一名 Loporrit，但顯然不至於構成什麼致命威脅。一路上的平靜，並沒有立刻消除那則流言的陰影，反倒讓人更清楚感受到，恐懼往往會自己替空白補上最可怕的形狀。</p><p>直到最後一處檢查點，你才終於被某個畫面狠狠嚇了一跳。映入眼簾的痕跡乍看之下竟像是一道血手印，讓人幾乎瞬間全身繃緊。可等你定下神來仔細確認，才發現那不過只是抹開的污泥而已。走完了整條指定路線之後，別說幽靈，連什麼異形 sandworm 都沒有出現。至少就你這次親自檢查的結果來看，那則傳聞依舊沒有任何能夠被證實的依據。</p><p>回到 Terra Firma 後，Cosmoliner 工程師看見你平安無事地站在面前，幾乎像是撿回了一條命般鬆了口氣。他急著追問你一路上是否真的什麼駭人的景象都沒遇上，也沒有發生任何奪命逃亡。得知你毫髮無傷後，他反而開始困惑，究竟是什麼樣的經歷，才會催生出那麼生動又逼真的謠言。可不管流言是真是假，他終究明白自己不能永遠被恐懼困住。Cosmoliner 系統的重要性從來不只是運送人員而已，它同時也是 rainbow crystal 力量在整顆星球上延伸流動的管道。正因如此，許多車站都不得不設置在危險地帶，無論是漂浮陸塊之上，還是深入地下的環境，都需要這套系統來調節條件。而且這些環境並非一成不變，所以每一處站點都必須能夠依需求快速設置與撤除，並盡可能減少對周遭環境的干擾。光是這份工作本身就已經充滿風險，他實在不希望還得把「幽靈現身」也算進變數之中。不過，至少你平安歸來這件事，終究替他留下了一點希望。也許下一次，當他再次踏上巡檢路線時，只要能先把自己腦海中那些過於可怕的想像關上，他就還有辦法繼續走下去。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Cosmoliner Engineer <small class="muted">(Oizys, X:15.9, Y:24.0)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="memorys-orbit.html">追尋沙星的記憶</a></div><div class="row">生產職或採集職 10級以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-managers-power.html">經理的全力奮戰</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
