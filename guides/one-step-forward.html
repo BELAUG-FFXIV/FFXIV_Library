@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>One Step Forward | BELAUG · FFXIV Library</title>
+  <meta name="description" content="DoHDoL – One Step Forward (EW Patch 6.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/MEL1KQmvnFY"
+              title="One Step Forward" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">One Step Forward</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`One Step Forward`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Jude immediately draws you into the next step of the work and asks for another vital component for the starlens (an experimental star-observing device). He explains that this telescope relies on highly specialized magic, and while he understands the theory behind it, the amount of power required is far beyond what he can produce alone. With quiet urgency, he asks you to craft aetherial amplifiers for him, then thanks you with deep sincerity, saying that you have done more than help build the starlens—you have encouraged him at every step.</p><p>When the amplifiers are complete, Jude is overjoyed. With these in hand, he says, he should finally be able to channel enough magic to operate the starlens. When you deliver your work, he is full of admiration, calling it absolutely perfect and gazing at it with awe. The sight of it seems to make the device feel more real than ever, and the two of you stand only a little farther from completion.</p><p>Not long after, Jude looks over the latest delivery and says that nearly all the necessary parts are finally in place. At that moment, Jeromere arrives with several members of the poetry group he had mentioned before. Jude is thrown into a panic at first, convinced strangers have appeared to extort money from him, but Jeromere quickly explains that they have only come so everyone can be introduced. The others greet Jude warmly, and though he is visibly shaken just by being addressed, Jeromere presses on as though this were the most natural thing in the world.</p><p>One of the students invites you to attend one of their poetry gatherings as well, and Jeromere proudly urges Jude to join them for a visit to the Last Stand. Jude tries to reason with himself, telling himself that Jeromere is only trying to help because he knows Jude has no friends and wants to draw him out of his shell. Even so, when the invitation is placed before him, Jude refuses. He apologetically explains that he is in the middle of producing the starlens and says perhaps another time. Jeromere protests and warns that only regret lies ahead if Jude continues down this path, but when Jude asks how he can say that so certainly, Jeromere falters and abruptly decides it is time to leave.</p><p>After they are gone, Jude exhales in exhaustion and admits that meeting new people is draining, though he is also rather proud of himself. He says that in the past, he would have been so nervous that even the thought of speaking might have made him faint. When you tell him he did well and that he is improving, Jude says it is all thanks to your support, and that because of you he has truly begun to blossom. He is startled to realize that he even managed to speak up for himself. Even so, he quickly turns back to the work at hand and says the finish line is now close. The starlens is almost complete, but before going any further, there is still one thing he needs to confirm. He asks you to come back when you next have time, and in his own peculiar way declares that, thanks to you, the chocobo in his heart has transformed into a mighty hobgoblin.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Jude <small class="muted">(Old Sharlayan, X:5.3 Y:7.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="poetry-recital.html">Poetry Recital</a></div><div class="row">CRP, LTW, WVR Lv. 85</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-ten-year-promise.html">A Ten-year Promise</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'小さな一歩',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ジュードは、さっそく次の工程に取りかかろうと言って、あなたに星見鏡のための重要な部品をもうひとつ作ってほしいと頼む。彼によれば、この望遠鏡を動かすには高度に特化した魔法が必要で、その仕組み自体は理解していても、必要となる魔力の量は自分ひとりでは到底まかないきれないのだという。そうして彼は、エーテル増幅部材を製作してほしいと丁寧に願い、あなたが星見鏡の製作を手伝ってくれているだけでなく、自分をずっと励まし続けてくれていることに、心から感謝していると伝える。</p><p>増幅部材が完成すると、ジュードは目に見えて喜ぶ。これがあれば、ついに星見鏡を動かすのに十分な魔力を流し込めるはずだと語り、納品された品を前にして、それが完璧だと感嘆する。その出来栄えに見惚れるように見つめながら、彼はその美しさに素直な驚きを漏らす。星見鏡の完成は、いまや手の届くところまで近づいていた。</p><p>やがてジュードは、今回の納品分を確認し終え、組み立てに必要な部品がほとんど揃ったと話す。そこへジェロメールが現れ、以前話していた詩の会の仲間たちを連れてきた。見知らぬ人々を前にしたジュードは、脅し取るつもりで来たに違いないと大慌てになるが、ジェロメールはすぐに彼らは自分と一緒であり、顔合わせのために連れてきただけだと説明する。仲間たちは気さくにジュードへ声をかけるが、話しかけられただけで動揺してしまう彼の様子をよそに、ジェロメールは当然のように場を進めていく。</p><p>ひとりの学生は、あなたにも気が向いたら詩の集まりに来てほしいと誘い、ジェロメールはそのままラストスタンドへ行こうとジュードにも勧める。ジュードは、ジェロメールが自分に友達がいないことを気にして、殻を破らせようとしてくれているのだと自分に言い聞かせる。それでも彼は、その誘いを受け入れることはできなかった。いまは星見鏡の製作の途中なのだと、申し訳なさそうに断り、また別の機会にと答える。ジェロメールはそれではいけないと食い下がり、このままでは後悔しか待っていないと言うが、どうしてそこまで言い切れるのかと問われると、言葉を失い、そのまま仲間たちを連れて立ち去ってしまう。</p><p>そのあと、ジュードは深く息をつき、人と会うのはやはりひどく疲れると漏らす。だが同時に、今回は自分でも少し誇らしいのだという。以前なら、話すことを考えただけでも気を失っていたかもしれないほど緊張していたはずだからだ。あなたがよくやった、成長していると伝えると、ジュードは、それもすべてあなたのおかげだと語り、あなたに支えられたことで本当に花開き始めたのだと打ち明ける。そして、自分がきちんと自分の意思を口にできたことに、あらためて驚く。それでも彼はすぐに気持ちを切り替え、星見鏡の完成までもうあと少しだと告げる。ただ、その前にどうしても確かめておきたいことがひとつあるらしい。次に時間があるとき、また会いに来てほしいと頼みながら、あなたのおかげで自分の心の中のチョコボは、今やたくましいホブゴブリンへと変わったのだと、彼らしい言い回しで喜びを表す。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ジュード <small class="muted">（オールド・シャーレアン, X:4.1 Y:9.1）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="poetry-recital.html">吟じます</a></div><div class="row">木工師、革細工師、裁縫師 Lv 85～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-ten-year-promise.html">10年前の約束</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'邁出向前的一步',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Jude 一見到你，就立刻把話題帶進下一個步驟，請你再為 starlens（一種正在研製中的觀星裝置）製作另一個重要零件。他解釋，這種望遠鏡的運作需要極為特殊的魔法，雖然他明白其中原理，但實際需要的魔力量卻遠遠超出他一個人所能負擔的範圍。因此，他懇切地請你替他製作乙太增幅部材，並由衷感謝你不只是在幫助他完成 starlens，也一路陪著他、鼓勵著他走到現在。</p><p>當增幅部材完成後，Jude 顯得十分欣喜。他說，有了這些部材之後，自己應該終於能夠引導出足夠的魔力來啟動 starlens。當你把成品交給他時，他毫不掩飾地稱讚那是完美的作品，甚至帶著近乎看得入神的神情凝望著它，驚嘆它的美麗。到了這一步，starlens 似乎終於不再只是構想，而是真正一步步朝完成靠近。</p><p>沒過多久，Jude 看完最新一批交付品後，表示組裝所需的零件幾乎都已經備齊。就在這時，Jeromere 帶著他之前提過的詩會成員來到這裡。突然面對一群陌生人，Jude 當場慌了神，甚至以為這些人是來向自己勒索錢財的，急著想去通報 Studium 的守衛。不過 Jeromere 很快就解釋，他們只是自己帶來見面的朋友，並不是來惹麻煩的。那群人也主動向 Jude 打招呼，而 Jude 光是被人直接搭話，就已經緊張得不知所措。</p><p>其中一名學生也順勢邀請你，有興趣的話不妨改天去參加他們的讀詩會。Jeromere 更進一步，熱情地邀 Jude 一起去 Last Stand 坐坐。Jude 一邊在心裡努力說服自己，告訴自己 Jeromere 只是知道他沒有朋友，才會想幫忙把他從封閉的殼裡帶出來；可即使如此，真的面對邀請時，他還是無法答應。他帶著歉意表示，自己現在正忙著製作 starlens，也許改天再說。Jeromere 聽了相當不滿，直言如果 Jude 繼續這樣走下去，最後等著他的只會是後悔。可當 Jude 追問他為何能那樣篤定時，Jeromere 卻一下子說不出話來，只能匆匆帶著其他人離開。</p><p>等人都走了之後，Jude 深深嘆了一口氣，坦白說和陌生人見面實在很消耗心力。不過，即使如此，他也忍不住為自己感到有些驕傲，因為換作以前，光是想到要開口說話，他都可能緊張到直接昏過去。當你告訴他，他做得很好，而且確實正在進步時，Jude 立刻把這一切都歸功於你，說正是因為有你的持續支持，他才能真正慢慢綻放開來。直到這時，他才突然意識到，自己方才竟然真的為自己說出了想說的話。只是他很快又把心思拉回眼前的工作，告訴你終點已經近在眼前，starlens 很快就會完成。不過，在繼續之前，還有一件事是他無論如何都想先確認的。他請你等下次有空時再來見他，最後又用他特有的方式開心地表示：多虧了你，他心中的陸行鳥，如今已經變成了一隻強而有力的 Hobgoblin。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Jude <small class="muted">(舊薩雷安, X:4.1 Y:9.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="poetry-recital.html">詩歌朗誦</a></div><div class="row">CRP, LTW, WVR Lv. 85</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-ten-year-promise.html">十年前許下的約定</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
