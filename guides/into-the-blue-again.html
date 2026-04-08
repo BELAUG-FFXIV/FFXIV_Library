@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Into the Blue Again | BELAUG · FFXIV Library</title>
+  <meta name="description" content="Blue Mage – Into the Blue Again (SB Patch 4.5)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/VgMfcUpFz1s"
+              title="Into the Blue Again" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Into the Blue Again</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story" class="tab-panel active"></div>
+          <div id="panel-acq" class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:'Into the Blue Again',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>When you next meet Martyn, he is more full of himself than ever. Between his performances at the Celestium and the running of the newly founded Blue Mages’ Guild, he claims to have had no shortage of work. Yet for all his bluster, the truth beneath it is plain enough: the guild he long dreamed of has finally become real. More and more adventurers have begun chasing after blue magic, buying his soul crystals, and throwing themselves at cactuars and other beasts in the hope of learning the art. Martyn basks in every bit of it, and with the Great Azuro’s fame still rising, he speaks as if his dream has at last taken root in the world.</p><p>That new popularity is made impossible to ignore when two of his students rush in and all but throw themselves at you. They are far more dazzled by Azuro the Second than by the guildmaster standing right in front of them, and their admiration quickly turns into pleas to become your apprentices instead. Martyn drives them off in wounded indignation, but not before their reaction makes one thing painfully clear: blue magic is no longer some strange curiosity on the edge of attention. It has become something people desire, imitate, and chase after with open excitement.</p><p>Before long, Martyn pulls you to the Celestium to watch him perform. He has chosen a monstrous kronprinz behemoth as his opponent, determined not to be overshadowed by your own recent rise. In the arena, he proves he still has the power to astonish. Spell after spell pours forth with practiced flair, and even such a brutal beast cannot endure the barrage. The crowd roars for the Great Azuro, and when the spectacle is over, Martyn is quick to savor both the applause and your reaction. Yet beneath the pride, there is also something more tangible: he has grown stronger. Between the arena and the guild, he has somehow found time to journey as far as Ishgard and return with new spells of his own.</p><p>That performance, Royse soon reveals, has achieved more than applause alone. She summons you and Martyn to the Miners’ Guild, where she introduces a new patron: Fyrgeiss, a member of the Syndicate and the chairman of Amajina & Sons Mineral Concern. Having seen Martyn’s battle for himself, he no longer dismisses the Masked Carnivale as a frivolous sideshow. Instead, he declares blue magic to be a spectacle unlike any other and agrees to provide the Celestium with financial backing. Once he departs, Royse explains the practical truth behind her delight. The arena’s success has brought in crowds, but keeping its ever-growing menagerie alive and fed is ruinously expensive. If the performances are to grow larger and more thrilling, they will need deeper pockets than ticket sales alone can provide.</p><p>Martyn listens to all this with a mixture of wonder and calculation. If Amajina & Sons is willing to support the Celestium, perhaps one day the Blue Mages’ Guild might also benefit from such patronage. But before he can indulge that thought too far, he turns his attention back to you. Royse is almost certain to pit both of you against even more dangerous foes in future performances, and he has no intention of letting you be caught unprepared. So he adds more entries to your spellbook and points you northward, toward Ishgard, where he himself sought greater power. There, he says, you should begin by learning Northerlies.</p><p>In the end, the moment leaves you standing at the meeting point of Martyn’s many ambitions. The Great Azuro still chases applause. The guildmaster still dreams of building blue magic into something larger. Royse wants ever grander spectacles. Wealthy patrons now circle close, drawn by profit and novelty alike. And you, having already risen from pupil to performer, are now being sent farther afield to sharpen your art once more. Martyn even admits that before long, your command of blue magic may rival his own, enough that he is already thinking of putting you to work training the next wave of apprentices. But first you must survive Ishgard, where the frozen wilds are as merciless as anything the arena could throw at you.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Martyn <small class="muted">(Ul’dah - Steps of Thal, X:12.5, Y:13.0)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="turning-over-a-blue-leaf.html">Turning Over a Blue Leaf</a></div><div class="row"><a class="link" href="litany-of-peace.html">Litany of Peace</a></div><div class="row">BLU Lv. 50</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="something-borrowed-something-blue.html">Something Borrowed, Something Blue</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'蒼天のフロンティア',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>次にマーティンのもとを訪れると、彼は以前にも増して得意げな様子を見せる。セレスティウムでの出演に加え、新たに立ち上げた青魔道士ギルドの運営まで抱え込み、忙しいにもほどがあると言わんばかりだ。だが、その大仰な態度の奥には、長く思い描いてきた願いがついに形になったという実感があった。青魔法を学びたい者たちは、彼のソウルクリスタルを求め、各地でサボテンダーや魔物に挑みながら、少しでもその技に近づこうとしている。グレート・アズーロとしての名声が広がるなか、彼にとっては、ようやく自分の夢が現実のものとして根を下ろし始めたのだった。</p><p>その熱狂ぶりは、すぐに別の形でもあなたの前に現れる。ふたりの弟子が駆け寄ってきたかと思えば、ギルドマスターであるマーティンを差し置いて、あなたに弟子入りしたいと目を輝かせるのだ。二代目マスク・ザ・ブルーとしてのあなたの存在は、それほどまでに強い憧れを集めていた。憤慨したマーティンは彼らを追い払うが、その様子からもはっきり見えてくる。青魔法はもはや、一部の物好きだけが面白半分に追うような珍技ではない。人を惹きつけ、真似したいと思わせ、夢中で追わせるだけの力を持つものになっていた。</p><p>ほどなくして、マーティンはあなたをセレスティウムへ連れていく。今度の相手は巨大なクロンプリンツ・ベヒーモス。弟子に負けていられるかと言わんばかりに、自ら選んだ強敵だった。舞台に立った彼は、まだ自分が観客を驚かせる力を失っていないことを、これでもかと見せつける。慣れた口上のあと、次々と放たれる青魔法は獣王すら圧倒し、観客席はグレート・アズーロの勝利に大きく沸き返る。戦いを終えた彼は当然のように喝采を受け止めながらも、その裏で自らの成長にも確かな手応えを感じていた。ギルド運営と舞台の合間を縫ってイシュガルドへまで赴き、新たな青魔法をいくつも身につけて帰ってきたのだ。</p><p>だが、その成果は歓声だけに留まらなかった。やがてロイズに呼ばれ、あなたとマーティンは採掘師ギルドへ向かうことになる。そこで紹介されたのは、砂蠍衆の一員であり、アマジナ鉱山社の総裁でもあるフィルガイスだった。彼はマーティンとクロンプリンツ・ベヒーモスの一戦を目の当たりにし、これまでマスクカーニバルを軽薄な余興と見ていた認識を改めたという。青魔法は他に類を見ない見世物であり、十分に支援する価値がある――そう判断した彼は、セレスティウムへの出資を約束する。フィルガイスが去ったあと、ロイズはその意味を打ち明ける。観客は増えても、闘技場で飼う魔物たちの維持費、とりわけ餌代が利益を大きく食い潰しているのだ。今後さらに危険で珍しい魔物を揃え、催しを大きくしていくには、入場料だけでは到底足りなかった。</p><p>その話を聞いたマーティンの胸には、驚きと打算が同時に浮かぶ。もしアマジナ鉱山社がセレスティウムを支えるのなら、いずれ青魔道士ギルドにも追い風が吹くかもしれない。もっとも、そんな思いに浸ってばかりもいられない。ロイズが今後さらに危険な相手を用意してくるのは目に見えている以上、あなたも備えを整えねばならなかった。そこで彼は、新たな記述を青魔道書に加え、自分の足跡を追うようにイシュガルドへ向かえと勧める。次に学ぶべきは「猛吹雪」。雪都の厳しい寒気そのものを叩きつけるような、その一撃だった。</p><p>こうしてあなたは、マーティンのいくつもの欲望と希望が交わる場所に立つことになる。グレート・アズーロとして喝采を浴びたい気持ち。ギルドマスターとして青魔法を広めたい願い。ロイズが求める、さらに刺激的な舞台。そして新たな出資者たちが見出した商機。そうしたものすべてのなかで、あなた自身もまた、弟子から舞台の担い手へと変わりつつあった。マーティンはそのことを認め、遠からずあなたの青魔法は自分に肩を並べるだろうとさえ口にする。いずれは弟子たちの指導まで任せたい――そんな未来をほのめかしながらも、まずはイシュガルドで無事に帰ってこいと送り出す。雪原をうろつく魔物たちは、闘技場の猛獣に劣らぬ苛烈さで牙をむいてくるのだから。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> マーティン <small class="muted">（ウルダハ：ザル回廊, X:12.5, Y:13.0）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="turning-over-a-blue-leaf.html">藍より青し</a></div><div class="row"><a class="link" href="litany-of-peace.html">最期の咆哮</a></div><div class="row">青魔道士 Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="something-borrowed-something-blue.html">さらなる可能性</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'再次邁向蒼天',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>當你再次去見 Martyn 時，他那副神氣又得意的模樣，比以前還更明顯。這陣子他一邊忙著在 Celestium（Ul’dah 的表演競技場，以觀眾娛樂性為主，常安排鬥技與戲劇化演出） 登台演出，一邊又顧著自己終於開起來的 Blue Mages’ Guild（Martyn 正在籌辦、希望在 Eorzea 推廣 blue magic 的公會），嘴上雖然說事情多得做不完，語氣裡卻藏不住那份滿足。對他來說，這不只是又多了一份差事，而是那個他幾乎掛在嘴邊說了一輩子的夢，終於真的有了輪廓。現在愈來愈多冒險者開始追著 blue magic 跑，搶著買他的 soul crystal，也四處和 cactuar（一種常見於沙地地帶、擅長針刺攻擊的魔物）之類的魔物交手，只為了能學會這門技藝。隨著 Great Azuro 的名聲愈傳愈開，Martyn 也總算親眼看見，自己死抓著不肯放的東西，真的開始在 Eorzea 站穩了腳步。</p><p>這股熱潮很快就直接衝到你面前。兩名公會學徒一看到你，整個人都亮了起來，張口閉口都是想拜你為師，幾乎完全忘了真正的 guildmaster（公會主持者／負責人）就站在旁邊。Martyn 當場又氣又惱地把人趕走，可這一幕反而讓事情變得更清楚了。如今的 blue magic，早就不只是少數人半信半疑地偷偷摸索的古怪把戲，而是真的成了會讓人嚮往、會讓人主動追逐，甚至願意把未來押上去的東西。對眾人而言，你也早已不只是 Martyn 的 apprentice，而是那個曾在競技場上親手證明過自己的人。</p><p>沒多久，Martyn 就帶著你去看他在 Celestium 的演出。這一次，他特地挑了一頭凶暴又龐大的 kronprinz behemoth 當對手，擺明了不想讓自己被你最近的風頭蓋過去。可等他真正站上舞台後，也確實拿出了足以讓全場再次屏息的本事。熟練的法術一波接著一波砸下去，連那樣龐大的魔物都撐不住，最後只能倒在 Great Azuro 的攻勢之下。觀眾席瞬間爆出震耳欲聾的歡呼，而 Martyn 當然把這一切照單全收，還不忘帶著幾分得意來問你看得如何。只是這份自信並不是空的。為了讓自己的 blue magic 更進一步，他甚至一路跑到 Ishgard，從那裡學回了新的法術，讓自己的手牌比以前更豐富。</p><p>而這場演出帶來的結果，也遠遠不只是掌聲而已。之後，Royse 把你和 Martyn 一起叫去 Miners’ Guild，並在那裡介紹了一位新人物給你們認識，Fyrgeiss（Ul’dah 權勢核心「the Syndicate」的一員，同時也是 Amajina & Sons Mineral Concern 的領袖）。這位財力驚人的大人物親眼看過 Martyn 與 kronprinz behemoth 的那場戰鬥後，徹底改變了自己對 Masked Carnivale（blue mage 專用的表演型鬥技舞台）的看法。原本他以為那不過是偏離正統鬥技場精神的浮誇消遣，可現在，他卻親口承認，blue magic 的表演性與衝擊力確實無可取代，甚至決定提供資金，支持 Celestium 之後的運作。至於他所掌管的 Amajina & Sons Mineral Concern（Ul’dah 的大型礦業公司，經營礦產、建材、貨運與倉儲等事業），也因此成了這場合作背後最有力的支持者。等他離開後，Royse 才把背後更現實的原因說清楚。Masked Carnivale 雖然愈來愈受歡迎，可那些 pit fiend 的飼養與餵食成本，幾乎快把賺進來的錢吞光了。若還想不斷換上更危險、更稀奇的魔物，讓觀眾持續買帳，那就需要遠遠超過門票收入的資金。</p><p>對 Martyn 而言，這當然不只是 Celestium 的好消息，也讓他忍不住開始想到自己的 Blue Mages’ Guild。若連 Amajina & Sons 都願意投資這種表演型的 blue magic，也許有一天，他那個公會也有機會得到真正的支撐。不過，在這樣的念頭真正成形之前，他還是很快把注意力拉回了你身上。Royse 既然已經有了資金撐腰，接下來替你們安排的對手恐怕只會愈來愈危險。為了不讓你在舞台上被打得措手不及，Martyn 乾脆替你的 spellbook 補上更多條目，並要你沿著他才剛走過的路，親自去一趟 Ishgard。既然都到了那裡，最適合先學會的法術，當然就是 Northerlies。當局勢熱得快要失控時，沒有什麼比一陣冰冷刺骨的寒氣更適合拿來壓住場面的了。</p><p>走到這裡，你其實已經站在 Martyn 許多念頭交會的中心。Great Azuro 還想繼續贏得掌聲，公會創辦人也仍想把 blue magic 傳得更遠；Royse 想要的是更驚險、更賺錢的舞台，而那些富有的支持者也開始從中看見商機。至於你，則是在不知不覺之間，從最初那個跟著學習的人，慢慢變成了另一個真正能站在舞台中央的人。Martyn 甚至坦白說，再過不久，你的 blue magic 也許就會和他不相上下，到時候他還想把訓練新學徒的工作丟給你分擔。只是，在談到那麼遠的未來之前，你首先得平安從 Ishgard 回來。那片雪原上的魔物，可不是會對闖入者手下留情的東西。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Martyn <small class="muted">(烏爾達哈：薩爾回廊, X:12.5, Y:13.0)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="turning-over-a-blue-leaf.html">青出於藍</a></div><div class="row"><a class="link" href="litany-of-peace.html">和平禱歌</a></div><div class="row">青魔道士等級 50 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="something-borrowed-something-blue.html">開啟更多可能</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
