@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Memory's Orbit | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – Memory's Orbit (DT Patch 7.41)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/7PT4NTbzdRA"
+              title="Memory's Orbit" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Memory's Orbit</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Memory's Orbit`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>After all the work you have done on Oizys, Searchingway greets you with warm gratitude, half teasing you for enduring the star’s sudden shifts in gravity and half marveling at how much you have helped both Terra Firma and the broader expedition. Before long, Namingway returns as well, delighted to announce that he has finished assigning names to nearly everything in sight without suffering any gravitational mishaps along the way. When Searchingway points out how each world Namingway names carries its own distinct thematic character, Namingway eagerly seizes the chance to explain how he chose to define Oizys, and soon draws you along on a tour of the star.</p><p>He begins at Terra Firma, deep within the ruined stone city that now serves as your base. Once, he says, this place must have been a thriving community, full of families and movement before the anomalies tore it apart. That thought weighs on him more than he first expected. When Searchingway told him about this world, he feared that any name he gave it would always fall short of the one it once truly bore. Yet as he reflects on it now, he realizes that was never the point. Just as Etheirys and Hydaelyn can both hold truth depending on who speaks the name and how, Oizys, too, can mean something in the present. It need not erase what came before. It only needs to become part of how this world is known now.</p><p>From there he leads you outward, turning each striking feature of the land into something newly legible through the names he has chosen. The great western stone wall becomes the Shielding Wall, for it stands between the city and the anomaly and seems to have spared the ruins from even worse ruin. Its eastern counterpart, beyond which nothing lies but wasteland, becomes the Falsifying Wall, a name given to something that promises more than it truly offers. He shows you the Unmoored Anchor, a mountain that links drifting stone to steadier ground despite being cast loose itself, and points out the Magnetic Horizon to the south, where the sea’s strange properties keep the sky from filling with more water than stone. Everywhere on Oizys, beauty and instability exist side by side, and Namingway clearly delights in giving language to both.</p><p>At Shadefleet, you linger together over the terrifying wonder of the landscape. Namingway is pleased not only that you see what he sees, but that the place seems to move your heart as deeply as it does his own. Once the tour draws to a close, his thoughts turn inward. He speaks of the Voyagers and how dearly he wishes they were still here to tell you what these places once felt like to them, not merely what they were called. From there his reflection turns to his own past. He admits that during the hundred years he wandered Etheirys, he kept to the shadows and spoke to very few people, convinced that his solitary way of learning was somehow best. Now he can only wonder how much more he might have understood had he listened more closely to others in their own words. Even so, he does not dwell in regret. That lonely struggle belongs to another time, and with the Final Days behind you, he has chosen to devote himself fully to this new dream. Whether he is naming something for the first time or the hundredth, he means to give every discovery the best of himself.</p><p>When you return to camp with him, Searchingway is delighted to hear that the tour was a success. More importantly, progress has been made on restoring the Euhedron, and the moment the two of you arrive at Desert Burrow, the data transfer from the structure has just concluded. What first appears to be nothing more than a dazzling swirl of lights quickly begins to suggest something far more significant. Searchingway notices that the pattern resembles the arrangement of the star system, and that the curved line threading through it may indicate a trajectory. Dylise and the others begin to suspect that what lies before you is a navigational chart—one that may have been designed to use the orbital planes of stars as a means of acceleration.</p><p>That possibility leads to a more startling conclusion still. If the Voyagers truly mastered gravitational magicks on such a scale, then perhaps they did not perish here at all. Perhaps they left this star by choice. Yet the implications are sobering. To launch a vessel along such a path would have required enormous force, and if such departures were repeated, the gravity of the star itself may well have suffered for it. Even so, the discovery changes everything. Searchingway is already thinking ahead to the next destination, while the research teams begin analyzing the coordinates in hopes of determining exactly where the Voyagers went. Namingway can hardly contain his excitement at the thought that you may pursue them at last. Searchingway, for his part, makes his intention plain: once the next set of coordinates is known, he wants both of you aboard with him when the initiative takes its next great leap.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Searchingway <small class="muted">(Oizys, X:17.1, Y:22.8)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="mission-of-gravity.html">Mission of Gravity</a></div><div class="row">Disciples of the Land or Hand Lv. 10</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-managers-prudence.html">A Manager’s Prudence</a></div><div class="row"><a class="link" href="terror-along-the-tracks.html">Terror along the Tracks</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'辿る砂星の記憶',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>オイジスでの働きを終えたあなたを、サーチングウェイは心からの感謝とともに迎えます。ときおり起こる重力の乱れに振り回されながらも、テラ・ファーマだけでなく調査全体にまで多大な貢献をしてくれたのだと、彼は嬉しそうに語ります。そこへネーミングウェイも戻ってきて、この地のほとんどすべてに無事名前をつけ終えたことを誇らしげに報告しました。場所ごとに異なる趣を込めて名づけているのだろうとサーチングウェイに言われると、ネーミングウェイは待っていましたとばかりに目を輝かせ、あなたをオイジス案内へと連れ出します。</p><p>案内の始まりは、拠点であるテラ・ファーマでした。かつて石造りの大都市だったこの場所には、家々が並び、今とは比べものにならないほど多くの営みがあったはずだと、ネーミングウェイは静かに語ります。だからこそ、この星に名を与えることには最初ためらいもありました。サーチングウェイからこの星の話を聞いたとき、自分の考えたどんな名前も、かつて本当に呼ばれていた名には及ばないのではないかと恐れていたのです。けれど今は、その考え方自体が傲慢だったのだとわかっています。失われた名を置き換える必要などない。かつての名があることと、今ここで新たな意味を持つ名が生まれることは、互いを損なうものではないのだと。エーテリスとハイデリンがそうであるように、オイジスもまた、今を生きる者たちにとって確かな意味を持ちうる名前になれるのです。</p><p>やがて彼は、土地のひとつひとつに込めた思いを語りながら、あなたを危うくも美しい風景の中へ導いていきます。西にそびえる巨大な岩壁は、都市と異常現象のあいだに立ちはだかり、遺構を守ってきたように見えることから「シールディング・ウォール」と名づけられました。対して東側の岩壁の向こうに広がるのは荒れ果てた不毛の地ばかりで、その姿にふさわしく「ファルシファイング・ウォール」と呼ばれます。重力発生装置の助けを借りて漂う岩々と大地をつなぐ山は「アンムアード・アンカー」。さらに南へ目を向ければ、海そのものの不思議な性質によって空が石ばかりにならずに済んでいる「マグネティック・ホライズン」が広がっています。オイジスという星では、どの景色にも美しさと不安定さが同居しており、ネーミングウェイはその両方を言葉にすることへ深い喜びを見いだしているのでした。</p><p>シェイドフリートで景色を見渡すひととき、ネーミングウェイはあなたがこの風景に同じように心を動かされていることを嬉しく思います。けれどその感動は、やがて彼をもっと遠い過去へと向かわせました。ヴォイジャーたちが今もここにいてくれたなら、この場所にどんな名を与え、どんな思いでそれを口にしていたのかを聞けたかもしれない。そう考えるうちに、彼の思いは自分自身の百年にも及ぶ歩みへと移っていきます。エーテリスを巡っていたあの長い年月、自分は影に隠れ、ほんのわずかな相手としか言葉を交わさず、それこそが最上の学び方だと思い込んでいました。けれど今では、相手自身の言葉を通して知ろうとしていたなら、どれほど多くを学べただろうかと痛感しています。それでも彼は、もはや過ぎ去った孤独に囚われようとはしません。終末もすでに乗り越えられた今、自分にできることはこの新しい夢を追い続けることなのだと、強く心を定めています。最初の名であれ百番目の名であれ、見つけたものすべてに自分の最善を注ぎたい――それこそが誇りにつながるのだと、彼はまっすぐに語ります。</p><p>あなたたちが拠点へ戻ると、サーチングウェイは案内が実り多いものになったと聞いて大いに喜びます。さらにそのあいだに、ユーヘドロンの復旧作業にも大きな進展があったと告げられ、あなたたちはすぐにデザート・バロウへ向かいます。ちょうどその場では装置からのデータ転送が終わったところで、目の前には渦を巻くような光の模様が浮かび上がっていました。一見するとただ美しいだけの光景にも見えますが、サーチングウェイはそれが星系の配置に酷似していることに気づき、そこに描かれた曲線が何らかの航路を示しているのではないかと考えます。ディライズたちもまた、それが各星の軌道面を加速に利用するための航行図である可能性を見いだしていきます。</p><p>そこから導かれた仮説は、さらに衝撃的なものでした。もしヴォイジャーたちが、これほど大規模な重力魔法を使いこなしていたのだとすれば、彼らはこの星で滅びたのではなく、自らの意志で旅立ったのかもしれないのです。もっとも、その代償は決して小さくありません。たとえ小さな船であっても、この軌道を実現するには途方もない力が必要であり、もしそれを繰り返していたのなら、星そのものの重力に深刻な影響が及んでいたはずでした。それでも、この発見がすべてを変えたことに違いはありません。研究班は座標の解析へとただちに取りかかり、ヴォイジャーたちがどこへ向かったのかを探ろうとします。ついに彼らの子孫を追えるかもしれないという可能性に、ネーミングウェイは胸を躍らせます。そしてサーチングウェイもまた、次の座標が判明したときには、ぜひあなたたちふたりとともに次なる大跳躍へ向かいたいのだと、はっきり言葉にするのでした。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> サーチングウェイ <small class="muted">（惑星オイジュス, X:17.1, Y:22.8）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="mission-of-gravity.html">重力への探究</a></div><div class="row">クラフター ギャザラー Lv 10～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-managers-prudence.html">プロジェクトマネージャーの聡明なお仕事</a></div><div class="row"><a class="link" href="terror-along-the-tracks.html">恐怖のオイジュス探検</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'追尋沙星的記憶',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>在 Oizys 忙碌了這麼久之後，Searchingway 帶著真心的感謝迎接你，一邊打趣你大概連上下顛倒的重力變化都體驗夠了，一邊由衷承認你替 Terra Firma 與整個遠征前線做出了多少貢獻。沒過多久，Namingway 也回來了，開心地報告自己已經替這顆星球上大多數事物都安上了名字，而且這次幾乎沒再鬧出任何重力意外。當 Searchingway 提起，Namingway 在每顆新星上似乎都會用一套獨特的命名主題去描繪那裡的特質時，Namingway 顯然正等著有人問起這件事，於是立刻興致勃勃地邀你同行，展開一場專屬於 Oizys 的巡禮。</p><p>他先帶你從 Terra Firma 看起。這座如今成為據點的石造遺跡，在他眼中顯然不只是廢墟而已。那些成片聚集的住處、以及規模最大的遺構，都在訴說這裡曾經是一座充滿人聲與生活痕跡的繁盛城市，只是在異常現象撕裂一切之後，才變成了如今這副模樣。也正因如此，Namingway 最初其實對為這顆星球命名感到遲疑。從 Searchingway 第一次提起這裡開始，他便擔心，無論自己想出的名字多麼貼切，都不可能真正取代它曾經擁有的名字。可到了現在，他反而明白了，那份執著本身才是自以為是。過去真正的名字並不會因為新名字的出現而消失；就像 Etheirys 與 Hydaelyn 一樣，不同的名字都可以承載不同時代的人對同一個世界的理解。於是，Oizys 這個名字也不必去取代什麼，它只需要在現在，為這顆星球賦予新的意義就夠了。</p><p>接著，他帶著你一路走過這片危險卻迷人的地景，把那些原本只是壯觀景象的事物，一一變成可以被理解、被記住的存在。西側高聳的石壁，被他命名為 Shielding Wall，因為它正好隔在城市與異常現象之間，像是一道屏障，讓這片遺跡得以比其他地方保存得更完整。至於東方那道石壁之外，只剩下一片荒蕪廢土，因此他乾脆為它取名為 Falsifying Wall，把那種看似有所承諾、實則什麼也沒有的感覺直接寫進名字裡。連接漂浮岩塊與較穩固大地的山體，成了 Unmoored Anchor；而南方那片名為 Magnetic Horizon 的海域，則因其自身奇異的磁性，讓天空不至於被海水填滿，反倒成了石塊懸浮的舞台。對 Namingway 來說，Oizys 的動人之處從來不只是風景本身，而是這裡每一處景色都同時擁有美麗與危險，而他想做的，就是替這一切找到最能映照其本質的語言。</p><p>當你們抵達 Shadefleet，並肩眺望這顆星球最驚心動魄的一面時，Namingway 很高興你也感受到了這片景色真正觸動人心的力量。可在這份共鳴之後，他的思緒卻慢慢沉進了更遙遠的過去。他說，自己多希望 Voyagers 仍然存在，這樣你們不只可以知道他們當年為這些地方取了什麼名字，還能明白那些名字在他們口中與心中究竟承載著怎樣的重量。說著說著，他也想起了自己在 Etheirys 度過的那一百年。那時的他總是躲在陰影裡，只和極少數人有過短暫往來，並且深信那樣的方式才是最理想的研究與觀察之道。可如今再回頭看，他才真正明白，若當初自己願意透過別人的話語去認識他們，也許能學到的東西會遠比想像中更多。不過，那段孤身掙扎的歲月早已過去，Final Days 也因你和你的同伴而被跨越。對他而言，更重要的是此刻自己還能成就什麼。正因如此，他才加入這項計畫，並下定決心，不論是一個事物的第一個名字，還是第一百個名字，他都要全力以赴，讓自己有朝一日能真正為自己的貢獻感到驕傲。</p><p>等你們回到據點時，Searchingway 一聽說這場巡禮十分成功，便露出了欣慰的笑容。而更重要的是，在你們外出的這段時間裡，Euhedron 的修復也取得了重大進展。於是你們很快趕往 Desert Burrow，正好趕上裝置完成資料轉移的那一刻。映入眼簾的是一片旋轉閃爍的光芒，起初看來像是某種單純華麗的殘留影像，可 Searchingway 很快察覺，這些光點的排列其實與整個星系的布局極其相似，而其中那條彎曲的線，更像是在指示某種航行軌跡。隨著觀察深入，Dylise 也開始推測，這很可能不是單純的紀錄，而是一張導航圖，一張利用各顆星球軌道平面作為加速手段的航路圖。</p><p>這個推論所指向的答案，比任何人原本設想的都更加震撼。若 Voyagers 真有能力施展如此規模的重力魔法，那麼他們很可能根本不是在這顆星球上滅亡，而是主動離開了這裡。只是，這樣的離去絕不可能毫無代價。就連最小型的船隻，要沿著這樣的軌跡高速出發，也得動用極為龐大的力量；若他們真的反覆進行這樣的旅程，那麼整顆星球的重力本身，恐怕也會因此受到影響。即便如此，這項發現仍讓一切都出現了新的方向。研究團隊立刻準備進一步分析座標，想弄清楚 Voyagers 究竟航向了哪裡。想到或許終於能追上他們、甚至接觸到他們的後裔，Namingway 幾乎壓抑不住興奮。而 Searchingway 也毫不掩飾自己的決心，等下一組座標一確定下來，他希望你和 Namingway 都能與他一起登上旅程，迎向這項計畫的下一次巨大躍進。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Searchingway <small class="muted">(Oizys, X:17.1, Y:22.8)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="mission-of-gravity.html">探索重力的使命</a></div><div class="row">生產職或採集職 10級以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-managers-prudence.html">管理者的審慎判斷</a></div><div class="row"><a class="link" href="terror-along-the-tracks.html">軌道上的驚險探查</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
