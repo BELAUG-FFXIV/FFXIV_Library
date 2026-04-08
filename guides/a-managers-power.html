@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A Manager’s Power | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – A Manager’s Power (DT Patch 7.41)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/jD7gjD_vj-8"
+              title="A Manager’s Power" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">A Manager’s Power</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`A Manager’s Power`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Mumukko approaches you with the breezy confidence of someone who already knows the answer before asking. The initiative has recently begun distributing two new types of equipment to its contributors, and early reception has been promising. Even so, development was costly, and she has no intention of taking success for granted simply because she approved the proposal herself. If she expects others to be held accountable for their judgments, then her own decisions must be examined no less carefully. To that end, she asks you to gather honest impressions from those already using the new gear, trusting that they will speak more freely to you than they would to management.</p><p>At Terra Firma, you soon find a researcher delighted with the new powersuit. To her, its most impressive feature is the enhancement of physical strength. Even someone more accustomed to books than manual labor can now move heavy cargo with ease, which she notes is no small blessing for the people of Sharlayan. Beyond that, the suit offers a wide range of other useful functions, each apparently shaped by suggestions from the crew themselves. In her eyes, the initiative’s investment has already proven worthwhile, and she sounds certain that others wearing the suit must feel much the same.</p><p>Another worker gives you a more practical evaluation, though it is no less enthusiastic. The helm, she says, is especially well designed: spacious enough to fit her ears comfortably, while its filter provides clean air even in hazardous environments. What pleases her most, however, is that the helm can also be worn on its own when a task requires greater delicacy than the full suit allows. That flexibility strikes her as the clearest sign that the equipment was made with real thought for the people expected to use it. She quickly guesses that Mumukko sent you, and makes sure you carry back a glowing verdict.</p><p>The final reaction you witness is of a very different sort. There, Shootingway is busy directing someone fully immersed in a dramatic performance. Clad in the star admiral attire, the wearer has transformed himself into a self-proclaimed dark vizier, reveling in visions of galactic power, crimson light, and cosmic dominion. Shootingway explains, not without a trace of embarrassment, that this particular outfit has found favor with a certain intensely devoted group, and that some workers enjoy unwinding by surrendering themselves to the fantasy it inspires. What began as equipment distribution has, in this case, become something closer to theatrical possession, and the enthusiasm it stirs is impossible to mistake.</p><p>When you return, Mumukko listens closely to everything you have learned. The praise for the powersuit convinces her at once that the project deserves wider production. As for the star admiral attire, she asks whether it may be too ostentatious, but the answer she receives suggests something more complicated than simple excess. The costume may be extravagant, even absurd, yet it clearly lifts spirits. She reveals that it originates from a spacefaring opera popular in Labyrinthos, and though she had doubted its practical value, its supporters had been so passionate that the initiative ultimately chose to indulge them. Curious at last, she decides to try it on for herself. The effect is immediate and unforgettable. Commandingway recoils in alarm, Phasingway is left unsettled by how perfectly it suits her, and Mumukko, now fully embracing the role, declares with delighted authority that whatever anyone might say of her ordinarily, none would dare defy the Cosmic Executive.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Mumukko <small class="muted">(Oizys, X:18.2, Y:24.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-managers-prudence.html">A Manager’s Prudence</a></div><div class="row"><a class="link" href="terror-along-the-tracks.html">Terror along the Tracks</a></div><div class="row">Disciples of the Land or Hand Lv. 10</div></div>`,
+    followq:`<div class="stack"><div class="row">To be continued</div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'プロジェクトマネージャーの懸命なお仕事',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ムムッコは、尋ねるまでもなく時間があるだろうと言わんばかりの調子で、あなたに新たな頼みごとを持ちかけます。最近、調査計画ではふたつの新型装備を協力者たちへ配布し始めており、今のところ反応は上々とのことでした。けれど、それらの開発には決して小さくない費用がかかっています。しかも導入を承認したのはムムッコ自身でした。だからこそ、他人の判断ばかりを吟味して自分の決定を省みないようでは管理者失格だと、彼女はきっぱり言います。率直な意見を集めるため、実際に装備を使っている者たちに話を聞いてきてほしい――それが今回あなたに託された役目でした。</p><p>テラ・ファーマで最初に出会った研究員は、新しい強化装備を心から気に入っていました。とりわけありがたいのは、身体能力を補助してくれる機能だと言います。筋力とは縁遠い書物好きであっても、重い荷をたやすく運べるようになるのだから、シャーレアンの者にとってこれほど助かるものはないと、彼女は笑います。しかもこの装備にはほかにもさまざまな機能が備わっており、その多くが現場の声を取り入れて実装されたのだと誇らしげに語ります。これほど役立つものなら、調査計画が導入を決めたのも当然だと、彼女は強く信じているようでした。</p><p>別の作業員もまた、高く評価していましたが、その視点はより実用的でした。特に優れているのは頭部装備だと言い、耳がきちんと収まる余裕があり、有害な環境でも清浄な空気を送り続けてくれる点を挙げます。しかも、繊細な手作業が求められる場面では、全身装備を用いず頭部装備だけを着用できるのが何より見事だと力を込めます。その柔軟さこそ、本当に使う者のことを考えて作られた証だと感じているのでした。あなたがムムッコの使いであることにもすぐ気づき、ぜひともこの好意的な感想を持ち帰ってほしいと念を押します。</p><p>けれど、最後に目にした反応は、実用性とはまったく異なる熱気を帯びていました。そこではシューティングウェイが、ある装いを身にまとった協力者に向けて熱心に声をかけていました。その人物はすっかり役になりきり、自らを闇の宰相と名乗り、銀河の力をその身に宿したかのように振る舞っています。深紅の帳越しに全宇宙のエーテルが見えるのだと豪語するその姿は、もはや装備の試用というより演技そのものでした。シューティングウェイは少し困ったように、しかしどこか楽しげに、この衣装にはひときわ熱烈な支持者たちがいるのだと説明します。仕事のあとに悪の宇宙支配者ごっこへ没頭する者までいるほどで、その熱狂ぶりは見間違えようもありませんでした。</p><p>報告を聞いたムムッコは、まず強化装備の評判に満足し、即座に量産の手配を進めると決めます。一方で、華美な衣装のほうについては少しばかり慎重でした。あまりにも仰々しすぎるのではないかと確かめますが、あなたの話からは、単なる奇抜さではなく士気を高める力があることが伝わってきます。その衣装はラヴィリンソスで熱心な人気を誇る宇宙歌劇に由来するもので、実用面には懐疑的だったものの、あまりにも要望が強く、結局は導入せざるを得なかったのだと彼女は明かします。ならば自分でも着てみるべきだと考えたのでしょう。いざ身につけた途端、その迫力は周囲を圧倒しました。コマンディングウェイは悲鳴まじりにたじろぎ、フェージングウェイは似合いすぎて逆に恐ろしいと戸惑います。けれどムムッコ本人はすっかりご満悦で、普段の自分には構わなくとも、この宇宙の重役に逆らえる者などいないと、高らかに言い放つのでした。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ムムッコ <small class="muted">（惑星オイジュス, X:18.2, Y:24.4）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-managers-prudence.html">プロジェクトマネージャーの聡明なお仕事</a></div><div class="row"><a class="link" href="terror-along-the-tracks.html">恐怖のオイジュス探検</a></div><div class="row">クラフター ギャザラー Lv 10～</div></div>`,
+    followq:`<div class="stack"><div class="row">つづく</div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'經理的全力奮戰',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Mumukko 用一種彷彿彼此早有默契的口吻向你開口，說她雖然根本不必問，但你手上現在應該正好有空。最近，遠征團隊開始向成員配發兩種新裝備，而到目前為止，大家的反應似乎都相當不錯。只是，這些裝備的開發花費不小，既然當初拍板同意提案的人正是她自己，她就更不能只審視別人的判斷，卻對自己的決策輕輕放過。於是，她希望你替她去訪問那些正在使用新裝備的人，收集更坦白、更不受管理層影響的意見，好讓她真正確認這筆投入是否值得。</p><p>你在 Terra Firma 先遇見了一位對新式 powersuit 讚不絕口的研究員。她認為這套裝備最實用的地方，就是能夠大幅補強使用者的力量。就算是平常只會埋首書堆、幾乎沒有什麼臂力的人，如今也能輕鬆搬動沉重貨物，這對向來不擅長勞力工作的 Sharlayan 學者來說，顯然是極大的幫助。不只如此，這套裝備還整合了其他各式各樣的功能，而且其中不少都來自全體成員的實際意見。對她來說，這樣的成果已經足以證明，遠征團隊在這項裝備上的投資完全沒有白費。</p><p>之後你又聽見另一位工作人員從不同角度給出了同樣正面的評價。她特別喜歡這套裝備的頭盔，因為裡面的空間足夠寬敞，能讓耳朵舒適地安放其中，而過濾裝置也能在有毒環境裡提供乾淨、可以安心呼吸的空氣。不過最讓她驚喜的，還是當工作需要更細膩操作時，這頂頭盔甚至能夠脫離整套裝備單獨使用。那種靈活度讓她覺得，這不只是新裝備而已，而是真正從使用者角度出發所誕生的設計。她很快就猜到是 Mumukko 派你來打聽，還特地要你回去轉告她：大家都非常喜歡這套裝備。</p><p>只是，最後一組你觀察到的回饋，與其說是實用心得，不如說更像某種過度投入的熱情現場。Shootingway 正興奮地指揮著一名全心沉浸在角色裡的穿戴者，而對方穿上的，正是 star admiral attire。那人自稱是黑暗宰相，說自己在這身打扮下掌握了整個銀河的力量，透過那片猩紅色的視野，甚至能看見每一顆星辰噴湧而出的乙太。Shootingway 有些不好意思地向你解釋，這套服裝在部分支持者之間有著異常強烈的吸引力，有些人甚至會在工作結束後，靠著扮演邪惡宇宙支配者來紓解壓力。從那股完全停不下來的投入感來看，這套服裝引發的反應，顯然遠比單純「喜歡」還要更進一步。</p><p>當你把這些意見帶回去後，Mumukko 先是聽得十分滿意，尤其 powersuit 使用者給出的回饋，立刻讓她認定這是一筆值得的投資，甚至當場決定安排量產。至於那套 star admiral attire，她本來還有些懷疑，擔心它是不是浮誇過頭，可從你轉述的情況來看，它至少確實能提振士氣。她於是坦言，這套服裝原本出自 Labyrinthos 一部擁有狂熱支持者的宇宙歌劇，雖然她一開始並不相信它對遠征計畫真有什麼價值，但因為主張導入的人實在太過熱切，最後也只能答應。說著說著，她竟乾脆決定親自穿上試試。結果那畫面一出現，周圍的人立刻全都招架不住。Commandingway 當場被嚇得大叫，Phasingway 則因為她穿起來實在太合適，反而感到一陣說不出的不安。可 Mumukko 顯然對這種效果十分滿意，甚至帶著近乎愉快的威壓感宣布：別人或許平時可以對 Mumukko 愛理不理，但面對這位 Cosmic Executive，誰也別想膽敢違抗。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Mumukko <small class="muted">(Oizys, X:18.2, Y:24.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="a-managers-prudence.html">管理者的審慎判斷</a></div><div class="row"><a class="link" href="terror-along-the-tracks.html">軌道上的驚險探查</a></div><div class="row">生產職或採集職 10級以上</div></div>`,
+    followq:`<div class="stack"><div class="row">未完待續</div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
