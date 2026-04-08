@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Turning Over a Blue Leaf | BELAUG · FFXIV Library</title>
+  <meta name="description" content="BlueMage – Turning Over a Blue Leaf (SB Patch 4.5)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/QXZZ9GsFjXY"
+              title="Turning Over a Blue Leaf" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Turning Over a Blue Leaf</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Turning Over a Blue Leaf`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>After defeating Whastrach in the arena, you return to Ul’dah to a flood of relief, gratitude, and disbelief. Latool Ja can hardly contain his excitement, Ceadda thanks you from the bottom of his heart, and Martyn praises you with all the force of someone who has just watched his apprentice do what he himself could not. Royse, too, is delighted—not only because the performance exceeded every expectation, but because your victory settles the wager. As promised, she will withdraw her funding from the ceruleum mine project. For a brief moment, it seems the conflict over Lapis Canyon has truly come to an end.</p><p>Then Whastrach speaks, and the tension shifts again. He reveals that he has no intention of clinging to the role of villain any longer. He admits defeat, abandons his claim to Lapis Canyon, and says that both Martyn and Ceadda have reminded him of something he had lost sight of. If ceruleum can be found elsewhere in the New World without violating sacred ground, then that is the path he will pursue instead. Royse has already agreed to fund another expedition, and Whastrach even asks Ceadda to come with him as a guide so that he does not repeat the same mistake. Ceadda accepts—not out of trust, but so he can keep Whastrach away from the lands of the Whalaqee and steer him toward places no one has claimed.</p><p>With the danger to Lapis Canyon lifted, the mood finally begins to soften. Ceadda bids you farewell with heartfelt gratitude and promises that you will always be welcome among the Whalaqee if you ever cross the Indigo Deep. Royse, however, has no intention of letting you vanish into distant lands. Now that you have triumphed as Azuro the Second, she insists that the Masked Carnivale still needs you. There are crowds to thrill, beasts to defeat, and gil to earn. Martyn grumbles at once that after all his effort to recover and squeeze back into costume, it is you who have become Royse’s favorite. Yet even he cannot deny the truth: the epidemic is over, his obligations have changed, and there is still money to be made.</p><p>Once the others settle, Martyn turns toward the future in earnest. The fame surrounding the Great Azuro and Azuro the Second has spread word of blue magic farther than ever before. The same Arcanists’ Guild that once dismissed his research may no longer be able to ignore it. Out of that thought, a new ambition takes shape. Martyn begins talking about founding a Blue Mages’ Guild—not only to spite the old colleagues who rejected him, but to spread the knowledge of blue magic across Eorzea. To do that, he will need capital, which gives him every reason to continue performing as the Great Azuro a while longer. And as he says this, he makes one thing clear: there is room in the Celestium for both of you.</p><p>Your path as a blue mage does not end with this victory. Rather, it opens into something larger: a future in which the art you learned from beasts, hardship, and spectacle may one day grow beyond a single performer, a single arena, or a single master. For now, Ul’dah still has a stage waiting, Martyn still has grand ideas, and your spellbook is still far from full. But after everything that has happened, you no longer stand at the threshold of blue magic. You are already part of its story.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Maudlin Latool Ja <small class="muted">(Ul’dah - Steps of Thal, X:12.5, Y:13.0)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-real-folk-blues.html">The Real Folk Blues</a></div><div class="row">BLU Lv. 50</div><div class="row"><a class="link" href="dirty-rotten-azulmagia.html">Completion of Dirty Rotten Azulmagia</a></div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="into-the-blue-again.html">Into the Blue Again</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'藍より青し',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>闘技場でヴァストラッハを打ち破ったあなたがウルダハへ戻ると、そこには安堵と感謝と驚きが入り混じった空気が満ちていた。ラトージャは興奮を隠しきれず、シーダは心から礼を述べ、マーティンもまた、自分の弟子が成し遂げた勝利を誇らしげに称える。ロイスも、この上なく上機嫌だった。舞台として見事だっただけでなく、賭けの決着もついたからだ。約束どおり、彼女は青の谷の青燐水採掘計画への出資を引き揚げるという。こうしてようやく、青の谷を巡る争いも終わりを迎えたかに見えた。</p><p>だが、そこでヴァストラッハが口を開き、場の空気はもう一度静かに張り詰める。彼はもはや悪役を演じ続けるつもりはないと告げ、自らの敗北を認めたうえで、青の谷への執着を断つと言い切る。そして、マーティンとシーダのおかげで、自分が見失っていたものを思い出したのだと続ける。新大陸にはまだ手つかずの地が広く残っている。聖地を踏みにじらずとも青燐水を得る道はあるはずで、ロイスも次の遠征への出資を約束しているという。さらに彼は、同じ過ちを繰り返さぬためにも、案内役としてシーダに同行を願い出る。シーダは完全に信じたわけではない。それでも、ワラキ族の土地から彼を遠ざけ、誰のものでもない土地へ導けるのならと、その申し出を受け入れる。</p><p>青の谷に迫っていた危機が退くと、ようやく皆の緊張もほどけていく。シーダは深い感謝を込めて別れを告げ、いつかインディゴディープを越えて新大陸へ来ることがあれば、ワラキ族のもとへ迎えると約束する。だがロイズは、あなたをそんなふうに遠くへ送り出すつもりなど毛頭ない。二代目マスク・ザ・ブルーとして見事に勝ち残った以上、マスクカーニバルにはまだまだあなたが必要だというのだ。観客を熱狂させ、魔物を打ち倒し、そして金を稼ぐ。その役目はまだ終わっていない。マーティンは、自分がようやく回復して衣装まで着直したというのに、すっかり主役の座を奪われたと不満を漏らす。だが疫病も終息し、これから先は自分の意思で動けるのだと思えば、結局は彼もまた、その流れを受け入れていた。</p><p>やがてマーティンは、もっと先のことへ思いを巡らせはじめる。グレート・アズーロと二代目マスク・ザ・ブルーの活躍によって、青魔法の名はこれまでになく広く知られるようになった。かつて自分の研究を退けた巴術士ギルドの者たちも、もはや見て見ぬふりはできまい――そんな思いから、彼の胸には新たな野心が芽生える。青魔道士ギルドを作るのだ。昔の仲間たちを見返したい気持ちもあるが、それ以上に、青魔法の知識をエオルゼアへ広めたいという願いがある。そのためには、まず元手が要る。だからこそ彼は、もうしばらくグレート・アズーロとして稼ぎ続ける気でいた。そして当然のように、セレスティウムには自分だけでなく、あなたの立つ場所もあるのだと告げる。</p><p>あなたの青魔道士としての歩みは、この勝利で終わるわけではない。むしろここから、もっと大きな物語へとつながっていく。獣から学び、苦難を越え、舞台の上で証明してきたその力は、もはや一人の師、一つの闘技場、一度きりの見世物に収まるものではない。ウルダハにはまだあなたを待つ舞台があり、マーティンにはまだ実現したい夢があり、青魔道書にもまだ埋めるべき余白が残っている。そうして今、あなたはもう青魔法の入口に立つ者ではなく、その歴史の一部となっていた。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> 泣男のラトージャ <small class="muted">（ウルダハ：ザル回廊, X:12.5, Y:13.0）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-real-folk-blues.html">二代目マスク・ザ・ブルー</a></div><div class="row">青魔道士 Lv 50～</div><div class="row"><a class="link" href="dirty-rotten-azulmagia.html">悪の青魔道士「アポカリョープス」</a></div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="into-the-blue-again.html">蒼天のフロンティア</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'青出於藍',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>當你在競技場上擊敗 Whastrach 之後，回到 Ul’dah 時，迎接你的是壓抑不住的震驚、鬆了一口氣的安心，還有真心實意的感謝。Latool Ja 幾乎不敢相信你真的贏了，Ceadda 也激動地向你道謝，因為你守住了 Lapis Canyon。Martyn 更是毫不掩飾自己的得意與驕傲，直說你替他狠狠出了這一口氣。Royse 也對這場演出滿意得不能再滿意，並依照事先說好的約定，宣布從今天起撤回對 ceruleum（Eorzea 中的重要能源資源，可作為魔導技術、兵器與各類機械運作的燃料）礦場開發計畫的資助。到了這一刻，原本懸在 Whalaqee 頭上的威脅，總算真正被擋了下來。</p><p>可就在眾人以為事情終於落幕時，Whastrach 卻又突然開口，先是假裝自己還沒輸，轉眼又像是把那副反派模樣徹底放下。他坦白承認自己輸了，也表示會就此停止對 Lapis Canyon 的打算，不再執著於那片土地。他說，是 Martyn、Ceadda，還有你，讓他重新想起自己不該走到這一步。New World 那麼廣闊，想取得 ceruleum，本來就不必非得踩進別人的聖地不可。Royse 也已答應出資下一次遠征，而 Whastrach 甚至主動邀請 Ceadda 同行，希望由他帶路，好讓自己別再重犯同樣的錯誤。Ceadda 並不是輕易原諒了他，只是如果能親自盯著他、把他帶離 Whalaqee 的土地，並引去那些無人宣稱所有權的地方，那麼這趟同行至少還有意義。</p><p>隨著 Lapis Canyon 的危機真正解除，整件事的氣氛也終於慢慢緩和下來。Ceadda 懷著深深的感激向你道別，並告訴你，若有一天你真的跨越 Indigo Deep，Whalaqee 一定會歡迎你前去停留。然而 Royse 可沒打算就這麼放你離開。既然你已經在這場對決中一戰成名，她當然不可能放過這樣的招牌。觀眾還等著看你，野獸還等著被你擊倒，錢也還等著被你賺進來。Martyn 當場忍不住抱怨，自己好不容易才養好傷，又硬把戲服重新穿回去，結果 Royse 現在最看重的人竟然成了你。但就算嘴上再怎麼不甘心，他心裡也清楚，疫病已經結束，先前那場拚命總算告一段落，接下來也確實該開始替自己打算下一步。</p><p>也正是在這個時候，Martyn 的目光開始真正往更遠的地方看去。Great Azuro 和第二代 Azuro 的名號，已經讓 blue magic 在 Ul’dah，甚至更廣的地方成了話題。那些當初在 Arcanists’ Guild 裡對他嗤之以鼻的人，如今恐怕再也不能假裝沒看見了。於是，一個新的念頭在他心裡迅速成形：他想建立 Blue Mages’ Guild。一部分是想狠狠打那些當年否定他研究的人一巴掌，但更重要的，還是想把 blue magic 的知識真正散播到 Eorzea 各地。當然，這種事說起來簡單，做起來就得先有一大筆錢。也因此，他很快就替自己找到了最現實的理由，繼續以 Great Azuro 的身份登台演出，繼續賺錢。而在他眼裡，Celestium 的舞台也從來不只屬於他一個人，你同樣有資格站在那裡。</p><p>你的這場勝利，並不是 blue mage 之路的終點，反而更像是真正踏進這段故事之後的起點。一路走來，你學到的不只是從野獸身上奪來的法術，也是在混亂、欺瞞、表演、選擇與對立之中，一點一點站穩自己的方式。現在的你，早已不只是旁觀 Martyn 與 blue magic 的人。Ul’dah 仍有舞台在等你，Martyn 也還有他那個看似荒唐、其實又認真得不能再認真的夢，而你的 spellbook 也遠遠還沒有填滿。走到這裡，你已經不再只是站在 blue magic 門口的人，而是它接下來要走向哪裡的一部分。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Maudlin Latool Ja <small class="muted">(烏爾達哈：薩爾迴廊, X:12.5, Y:13.0)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="the-real-folk-blues.html">第二代戴著青魔面具的人</a></div><div class="row">青魔道士等級 50 以上</div><div class="row"><a class="link" href="dirty-rotten-azulmagia.html">Completion of Dirty Rotten Azulmagia</a></div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="into-the-blue-again.html">再次邁向蒼天</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
