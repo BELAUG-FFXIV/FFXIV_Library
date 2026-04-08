@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Promised Star | BELAUG · FFXIV Library</title>
+  <meta name="description" content="DoHDoL – The Promised Star (EW Patch 6.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/nkyWk8yseZE"
+              title="The Promised Star" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">The Promised Star</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`The Promised Star`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Jude tells you that, thanks to your help, the completion of the starlens is finally within reach. He says that without you at his side, he surely would have given up before this journey had truly begun—not only the search for the Azure Star, but also the courage to face Jeromere and ask why he left astronomy behind. Words, he says, are not enough to express what your support has meant to him. And now, standing at the final stretch, he asks one last favor of you: to craft the wand needed to channel magic into the starlens.</p><p>When you deliver the finished wand, Jude is overjoyed. He says it is perfect, and now that every necessary part is in place, all that remains is to begin the search for the Azure Star. He timidly asks whether you will join him when that time comes, then admits there is one other person he wishes could be there as well. Even knowing there is no guarantee the Azure Star truly exists, he cannot bring himself to leave Jeromere out of a dream they have shared for ten years. To not even ask, he says, would itself feel like a betrayal.</p><p>You go to find Jeromere, only to arrive in the middle of another uneasy exchange among the poetry club students. One of them, still flushed with self-satisfaction over the writing utensils you once crafted, remarks that they have at last begun to win someone’s interest. But the mood quickly changes when Jude appears and directly invites Jeromere to witness the first search with the completed starlens. Jeromere refuses at once, unable to face the possibility of disappointing him again. Another student, however, cuts in sharply and mocks the entire dream, sneering that ten years spent searching for a star no one else could find was a pathetic waste, and that only a fool would throw away the best years of life chasing something imagined.</p><p>Those words strike Jude harder than any insult aimed at himself. For once, he does not retreat. He steps forward in anger and tells the student that neither he nor anyone else has the right to ridicule what they pursued. Let them threaten him or laugh at him if they please—he will not allow them to strip him of his dream. Even Jeromere is stunned, saying he has never seen Jude speak up this way before. Jude admits his heart is still pounding, but he could not stay silent after everything Jeromere had poured into that dream. In the end, when Jude asks him once more to stand beside him, Jeromere relents. He agrees to come, though he says this will be the last time.</p><p>Together, you meet again under the night sky. Jude finishes assembling the starlens and begins the search just as he and Jeromere had once done long ago. At first, the stars appear with astonishing clarity, but the Azure Star is nowhere among them. Jeromere, unsurprised, praises the craftsmanship of the starlens while insisting that no instrument—however advanced—can reveal what does not exist. But Jude refuses to accept that conclusion yet. He remembers the amplifier and pushes onward, insisting the star is there before your eyes. Then, at last, it appears. The Azure Star shines out once more, undeniable and real. Jeromere can only stare, overcome by the truth he had abandoned too soon, and tells Jude that he is extraordinary.</p><p>Back at the Studium, the wonder of that discovery still hangs in the air. Jude thanks you with all his heart, saying that because of you, the work of ten long years was not wasted. Jeromere, now stripped of the false image he had wrapped himself in, admits that changing his outward appearance never changed who he truly was. Together, the two of them begin thinking through what the rediscovery means. Because the starlens captures aether rather than ordinary starlight, they realize it succeeded where conventional telescopes failed. Jeromere reasons that the cheap crystal lens they used as children may once have allowed them to catch the star’s aether during a rare peak in its cycle.</p><p>If that is true, then the Azure Star may be only the beginning, and there may be many more stars beyond reach of ordinary observation. Filled with fresh wonder, Jude urges Jeromere to continue searching beside him and to breathe life once more into the dream the two boys made ten years ago. And when the time comes to part, he says that though your journey together was brief, it changed everything. Beneath the same sky, he will remember you always as a true and treasured friend.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Jude <small class="muted">(Old Sharlayan, X:5.3 Y:7.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="an-astronomical-growth.html">An Astronomical Growth</a></div><div class="row">CRP, LTW, WVR Lv. 90</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-meeting-of-minds.html">The Meeting of Minds</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'約束の星',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ジュードは、あなたのおかげで星見鏡の完成がついに見えてきたのだと、深い感謝をこめて語る。蒼の星を探すことだけではない。なぜジェロメールが天文学から離れたのか、その理由と向き合うことさえ、あなたがそばにいてくれなければ自分にはできなかったはずだと言う。そして言葉では言い尽くせない礼を述べたうえで、最後の願いを口にする。星見鏡へ魔力を流し込むために必要な杖を、どうか作ってほしいのだと。</p><p>完成した杖を受け取ったジュードは、その出来栄えに心から喜ぶ。これで必要な部材はすべて揃い、あとは蒼の星を探すだけだと、声を弾ませる。だがその瞬間に、彼は少しだけためらいを見せる。あなたにはもちろん立ち会ってほしい。けれど本当は、もうひとり、その場にいてほしい相手がいるのだという。蒼の星が本当に存在する保証はない。それでも十年ものあいだ共有してきた夢なのだから、ジェロメールに声すらかけないのは、それ自体が裏切りになってしまう。そう考えたジュードは、彼を呼びに行く決意を固める。</p><p>あなたがジェロメールを訪ねると、詩の集まりの面々は相変わらず騒がしい。かつてあなたが作った筆記具に気をよくした学生は、浮かれた様子で自分の進展を語る。だが、そこへ現れたジュードが、完成した星見鏡で蒼の星を探し始める場に立ち会ってほしいとジェロメールへまっすぐ頼んだことで、空気は一変する。ジェロメールは、もうこれ以上ジュードを失望させたくないのだと、すぐには応じようとしない。すると別の学生が口を挟み、誰にも見つけられなかった星を十年も追い続けたなど無駄以外の何ものでもないと、あざけるように言い放つ。</p><p>その侮辱に、ジュードはついに耐えきれなくなる。これまでの彼なら飲み込んでいたはずの怒りを、今度ははっきりと言葉にした。自分たちの夢を笑う権利など、誰にもない。脅されようと嘲られようと、この夢だけは決して奪わせない。そう言い切る彼の姿に、ジェロメールさえも驚きを隠せない。ジュード自身も胸の高鳴りを抑えきれずにいたが、それでも、ジェロメールがその夢へ注いできたものを思えば、黙っていることはできなかったのだという。その真っ直ぐな思いに押されるようにして、ジェロメールはついに折れる。これきりだと釘を刺しながらも、彼はジュードとともに空を見上げることを受け入える。</p><p>やがて三人は夜空のもとに集い、ジュードは完成した星見鏡を手に観測を始める。十年前と同じように空へ向けられた装置は、驚くほど鮮明に星々を映し出す。だが、その中に蒼の星の姿はない。ジェロメールは、星見鏡そのものの出来栄えには感嘆しながらも、存在しないものはどれほど優れた技術でも捉えられないのだと告げる。それでもジュードは諦めない。増幅部材の存在を思い出し、まだ終わってはいないと食い下がる。そして次の瞬間、ついにそれは姿を現す。蒼の星はたしかにそこにあった。かつての記憶でも幻でもなく、今、目の前で本当に輝いている。その光を見つめながら、ジェロメールは自分があまりにも早く諦めてしまったことを思い知り、ジュードへ静かに賛嘆を向ける。</p><p>魔法大学へ戻ったあとも、その発見の余韻は消えない。ジュードは、十年越しの努力が無駄にならなかったのはすべてあなたのおかげだと、あらためて礼を述べる。いっぽうジェロメールも、外見を変えたところで自分の内側までは変えられなかったのだと認める。そしてふたりは、なぜ星見鏡だけが蒼の星を捉えられたのかを考え始める。星見鏡は星の光ではなく、そのエーテルを捉える装置であること。子どものころ使っていた安価な水晶の玩具のレンズもまた、そのエーテルを偶然拾い上げていた可能性があること。もしさらに、蒼の星のエーテルが周期的に強まる性質を持つのだとすれば、あの夜だけ特別な条件が重なっていたことにも説明がつく。</p><p>そうしてふたりは、この発見が蒼の星だけに留まらず、これまで見えなかった星々の存在までも示しているのかもしれないと気づく。ジェロメールに再びともに歩もうと呼びかけるジュードの声には、十年前に交わした願いを、今こそ本当の未来へつなげようとする確かな熱が宿っていた。そして別れのとき、短くも実りある時間をともに過ごしたあなたへ、ジュードはこれからも同じ星空の下でその絆を忘れないと告げる。あなたはこれから先も、彼にとってかけがえのない大切な友なのだ。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ジュード <small class="muted">（オールド・シャーレアン, X:4.1 Y:9.1）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="an-astronomical-growth.html">ジュードの成長</a></div><div class="row">木工師、革細工師、裁縫師 Lv 90～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-meeting-of-minds.html">繋がる想い</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'那顆約定的星星',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Jude 滿懷感激地告訴你，多虧有你，starlens（一種正在研製中的觀星裝置）終於已經近在完成之前。他說，如果沒有你一直陪在身邊，自己大概在旅程真正開始之前就已經放棄了。不只是追尋 Azure Star，連鼓起勇氣去面對 Jeromere、問清楚他為何離開天文這件事，他恐怕都做不到。對他而言，單靠幾句話早已不足以表達心中的感謝。而現在，既然終點就在眼前，他也向你提出最後一個請求——要啟動 starlens，還需要一支能夠導入魔力的魔杖，他希望那最後的關鍵也能由你親手完成。</p><p>當你把最後的魔杖交給他時，Jude 幾乎難掩激動。他說，這次真的齊全了，所有需要的部件都已經到位，接下來剩下的就只有一件事，那就是親手去尋找 Azure Star。說到這裡，他又露出一絲遲疑。他當然希望你能與他同行，但除此之外，還有另一個人，他也真心希望能在場。即使現在仍無法保證 Azure Star 真的存在，他還是想再次邀 Jeromere 一起看著自己邁出這一步。畢竟，那是他們兩人共享了整整十年的夢想；若連開口邀請都沒有，就像是親手背叛了那段歲月一樣。</p><p>當你再度去找 Jeromere 時，詩會那群人依舊聚在一起。先前那位自信過頭的學生，還在得意洋洋地說著自己靠那套書寫用具終於重新吸引了別人的注意。可是，等 Jude 出現，並當著所有人的面誠懇邀請 Jeromere 來見證 starlens 完成後的第一次觀測，氣氛很快就變了。Jeromere 低聲拒絕，說自己不能再讓 Jude 失望一次。沒想到，旁邊另一名學生卻毫不客氣地插嘴，譏諷他們竟然把人生中最好的十年拿去追逐一顆誰也找不到的星，簡直愚蠢透頂；若那東西真存在，天文學部最頂尖的學者早就該發現了。</p><p>這一次，Jude 沒有再把怒意吞回去。那些話像是直接刺中了他心底最不能被踐踏的地方。他當場反駁，說無論是對方還是任何人，都沒有資格拿他們的夢想來譏笑。對方要威脅他也好、嘲弄他也好，他都絕不會讓任何人奪走自己的夢。那份激烈甚至連 Jeromere 都看得怔住了，因為這是他從未見過的 Jude。Jude 自己也承認，心臟直到現在還跳得厲害，可是一想到 Jeromere 這些年到底為那顆星付出了多少，他就再也無法沉默。也正因如此，當他再次向 Jeromere 伸出邀請時，Jeromere 終於不再拒絕。他雖然仍說這會是最後一次，卻還是答應陪他走到那裡。</p><p>不久之後，你們一同來到夜空之下，Jude 帶著完成的 starlens 開始了觀測。裝置調整到與十年前相近的位置後，眼前的星空清晰得令人屏息，可其中卻依舊看不見 Azure Star。Jeromere 雖然讚嘆 starlens 本身的成果，卻仍認為，再先進的技術也不可能讓不存在的事物顯現出來。然而 Jude 不願就此停下。他想起增幅部材的用途，堅持還有一步沒有走完。就在那一刻，Azure Star 終於再次出現在你們眼前。那不是兒時的錯覺，也不是遙遠記憶中的幻影，而是真正存在、真正發光的一顆星。Jeromere 望著那道光，整個人都陷入震動之中，只能低聲承認，是自己太早放棄了，而 Jude 所做到的事，遠比他以為的還要了不起。</p><p>回到 Studium 後，那份震撼依舊沒有散去。Jude 再一次向你道謝，說若不是有你在，這十年來的追尋也許真的會落得一場空。Jeromere 則也終於承認，自己以為只要改變外在模樣，就能把過去與失落一併甩開，但到頭來，真正的自己從來沒有變過。接著，兩人開始重新思索，為何 starlens 能做到傳統望遠鏡做不到的事。因為 starlens 所捕捉的不是星光，而是星體本身的乙太；而兒時那具用來玩耍的簡陋水晶鏡片，或許也正因為帶有那樣的性質，才讓他們曾經偶然捕捉到 Azure Star 的存在。如果再進一步推想，Azure Star 的乙太釋放也許本就會隨週期而產生強弱變化，那麼十年前那一夜，便可能正好是它最明亮的瞬間。</p><p>若這個推論成立，那麼被重新發現的就不只是 Azure Star 而已，而是整片夜空中還有更多從未被真正看見的星辰。Jude 聽到這裡，立刻再次向 Jeromere 發出邀請，希望兩人今後能繼續並肩，把十年前那兩個孩子的夢真正延續下去。等到要與你道別時，他語帶不捨，卻也真心地說，雖然你們共同走過的時間不算長，卻讓一切都結出了結果。往後，只要抬頭望向同一片天空，他就會記得這段與你一同走過的旅程，而你也會永遠是他心中珍貴而真實的朋友。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Jude <small class="muted">(舊薩雷安, X:4.1 Y:9.1)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="an-astronomical-growth.html">Jude 的過往與成長</a></div><div class="row">CRP, LTW, WVR Lv. 90</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="the-meeting-of-minds.html">心意交會</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
