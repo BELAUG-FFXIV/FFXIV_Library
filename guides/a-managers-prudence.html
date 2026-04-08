@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A Manager’s Prudence | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – A Manager’s Prudence (DT Patch 7.41)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/qbZ0a0wkmOQ"
+              title="A Manager’s Prudence" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">A Manager’s Prudence</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`A Manager’s Prudence`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Mumukko greets you with her usual bright confidence and wastes no time getting to the point. Councilor Y’adebh has submitted her report to the Forum, and not only has the initiative won official support, it has secured an increase in funding as well. Yet that welcome success comes with a complication. In reviewing the team’s working conditions, the councilor identified two members whose health is now at risk from overwork. Passion may drive brilliant work, Mumukko says, but if allowed to burn without pause, it will reduce talent itself to ash. And so, however unwilling the culprits may be, something must be done.</p><p>Because ordinary rest is not something your tireless colleagues can be trusted to choose on their own, the Forum has sent two special mammets known as vicarious vacationers. Their purpose is as practical as it is absurd: assess fatigue, review work logs, and push exhausted workers toward healthier habits. Mumukko places them in your care and gives you your assignment. You are to deliver one each to Dylise and Justa, the two most overworked contributors on Oizys, and somehow ensure that both of them accept the intervention willingly before stronger measures become necessary.</p><p>You first find Dylise in the middle of another discussion, seemingly as absorbed as ever in the work before her. When you hand over the mammet, she initially tries to dismiss the concern, insisting that the data analysis must come first and that she has merely been passing the time while awaiting a reply from the Phaenna observation team. But the vicarious vacationer immediately cuts through her excuses, detecting clear signs of strain. Even Commandingway, only then realizing how badly things have gone, is horrified to learn that she has gone without sleep for several nights in a row. Dylise admits that one fascinating discovery after another kept her pushing forward, yet at last she recognizes the reality before her: she is on the verge of collapse, and if she falls, her burden will only be passed on to the rest of her team. Reluctantly, she yields to her mortal limits and agrees to rest.</p><p>Justa’s reaction is quieter, but no less revealing. When the mammet reports that she has been working for six consecutive bells, she is startled into recognizing how far she has slipped. She accepts the message with sincere gratitude and reflects that such concern would have been unthinkable in the Ist Legion, where endless labor was simply expected until the mission was done. Without a strict schedule to restrain her, she realizes she has fallen back into those old habits, losing herself too easily in her work. There is also a deeper satisfaction that makes stepping away difficult: the technology she now repurposes once served the imperial army, and salvaging it so that it may aid mankind instead of destroy it gives her work a meaning she cannot lightly put aside. Even so, she understands the warning and asks that Mumukko be told the message has been received.</p><p>When you return, Mumukko is pleased to learn that both workers proved open to persuasion. Her satisfaction sharpens at once into managerial resolve when she hears how long Dylise has gone without sleep under Commandingway’s watch. She makes it clear that while the team’s schedule is reasonable, the sheer scale of Oizys and the boundless ambition of the expedition tempt people to overextend themselves. Their enthusiasm is admirable, but precisely because of that, management must keep a closer eye on them. No short-term gains, she insists, are worth sacrificing long-term sustainability. Rest is no longer to be treated as a suggestion. The mammets are only the beginning; new systems will be enforced, records will be watched, and anyone trying to push beyond authorized limits will find no mercy waiting for them. And with that stern promise made, she adds that if any others on Oizys are found to be in similar need of rescue, she will be sure to send them straight into your capable hands.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Mumukko <small class="muted">(Oizys, X:18.2, Y:24.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="memorys-orbit.html">Memory's Orbit</a></div><div class="row"><a class="link" href="a-managers-delegation.html">A Manager’s Delegation</a></div><div class="row">Disciples of the Land or Hand Lv. 10</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-managers-power.html">A Manager’s Power</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'プロジェクトマネージャーの聡明なお仕事',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ムムッコは、いつものように明るい調子であなたを迎えると、すぐに本題へと入ります。ヤーデブ評議員は予定どおりフォーラムへ報告を提出し、その結果、調査計画は正式な支持を得ただけでなく、予算の増額まで認められました。ですが、その朗報には見過ごせない問題も含まれていました。評議員は現場の労働環境を調べる中で、働きすぎによって健康を損ねかけている者がふたりいると見抜いていたのです。情熱はかけがえのない力ではあっても、燃やし続ければ才能そのものを灰に変えてしまう――そう評された以上、放置するわけにはいきませんでした。</p><p>けれど、当の本人たちは仕事から離れようとしません。だからこそフォーラムは、疲労の兆候を調べ、作業記録を監視し、健全な生活を促すための特製マメット、「代理休暇員」をふたつ送り込んできました。ムムッコはそれをあなたに託し、オイジスでもっとも酷使されているふたり、ディライズとジュスタに手渡して、納得のうえで受け入れさせてほしいと頼みます。力ずくで休ませることもできなくはないものの、それでは反発を招くだけです。まずは穏やかに説得するほかありませんでした。</p><p>あなたが最初に向かった先で、ディライズはいつもどおり仕事のさなかにありました。代理休暇員を差し出しても、彼女は気遣いには感謝しつつ、いまはデータ解析が最優先なのだと言って受け流そうとします。フェーナ観測班からの返答を待つあいだ、コマンディングウェイと少し話していただけだと、自分は平気だと言い張ろうとするのです。けれど代理休暇員はすぐにその無理を見抜き、動悸や血圧の異常を指摘します。そこで初めて、コマンディングウェイも彼女が何日も眠らずに働き続けていたことを知り、愕然とします。ディライズは、次から次へと興味深い発見が続いたせいで止まれなかったのだと認めながらも、このままでは自分が倒れ、そのしわ寄せが仲間に及ぶだけだと悟ります。そうしてついに、自らの限界を認め、休息を受け入れるのでした。</p><p>一方のジュスタは、より静かに、しかし同じくらい深くその言葉を受け止めました。代理休暇員から、自分が六刻ものあいだ休みなく動き続けていたと告げられると、彼女はようやく自分の状態を振り返ります。そして、こうして休むよう促されること自体が、自分にはどこか新鮮なのだと打ち明けました。第一区軍団にいた頃は、任務が終わるまで働き続けるのが当然で、そこに気遣いなど存在しなかったのです。厳格な予定に縛られない今、気づけば昔の癖が戻り、情熱のままに没頭してしまっていました。それに加えて、彼女には仕事を手放しがたい理由もあります。帝国軍のために使われていた技術を拾い上げ、破壊ではなく人のために役立つものへ変えていくことには、彼女にとって特別な意味がありました。それでも彼女は忠告の重みを理解し、ムムッコにはきちんと伝えてほしいとあなたに頼みます。</p><p>拠点へ戻ったあなたから報告を聞いたムムッコは、ふたりが説得に応じたと知って満足げにうなずきます。ですが、ディライズがどれほど無茶をしていたかを知るや否や、その矛先は即座に管理体制へと向かいました。オイジスでの計画には無理のない進行表があるにもかかわらず、この果てしない星と尽きぬ探究心が、誰も彼もを必要以上に働かせようとしてしまうのです。だからこそ、熱意が強い者たちほど、管理する側がしっかり目を光らせなければならない。短期的な成果のために、長く続けられる働き方を損なってはならないのだと、ムムッコはきっぱり言い切ります。休養はもはや任意ではありません。代理休暇員はその第一歩にすぎず、今後は規則を整え、記録を監督し、必要なら容赦なく従わせるつもりでした。そして最後には、もしオイジスで他にも助けを必要とする者を見つけたなら、そのときもまたあなたのもとへ案内すると、どこか頼もしげに言い添えるのでした。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ムムッコ <small class="muted">（惑星オイジュス, X:18.2, Y:24.4）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="memorys-orbit.html">辿る砂星の記憶</a></div><div class="row"><a class="link" href="a-managers-delegation.html">プロジェクトマネージャーの意義あるお仕事</a></div><div class="row">クラフター ギャザラー Lv 10～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-managers-power.html">プロジェクトマネージャーの懸命なお仕事</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'管理者的審慎判斷',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Mumukko 一見到你，就用那種熟門熟路的口氣把話題直接拉進正題。Y’adebh 議員已經照計畫把報告提交給 Forum，而 Forum 不僅正式表態支持這項計畫，還批准了追加預算。這本該是再好不過的消息，可 Y’adebh 在調查現場工作環境時，看得比所有人都更仔細。她指出，隊伍裡有兩個人的健康已經被工作逼到了危險邊緣。照她的說法，再珍貴的熱情若永遠燃燒不停，最終也只會把才華本身燒成灰燼。既然問題已經被明確指出來，現在就不能再裝作沒看見。</p><p>偏偏最麻煩的地方就在於，那兩個人根本不可能乖乖自己停下來休息。於是 Forum 乾脆送來兩台專門用來代替人催促休假的 mammet，名叫 vicarious vacationer，能夠檢測疲勞、監看工作紀錄，順便全力推動健康作息。Mumukko 將這兩台 mammet 交給你，請你把它們分別送到 Oizys 目前最過勞的兩名成員，Dylise 與 Justa 手上，還得想辦法讓她們心甘情願接受。若真的不行，強行把人從工作崗位上拖走也不是辦不到，但那種從上往下硬壓的管理方式只會激起反感。所以現在，得先從看似溫和的勸說開始。</p><p>你先找到的是 Dylise。她依舊埋首於工作之中，彷彿眼前的一切都比自己的身體更值得優先處理。當你把 vicarious vacationer 交給她時，她雖然感謝你的關心，卻立刻表示資料分析才是現在最重要的事，自己只是趁著等待 Phaenna 觀測小組回覆的空檔，和 Commandingway 稍微聊了幾句而已。可話才剛說完，頭暈的徵兆便已經掩飾不住，而 mammet 也毫不客氣地當場指出她心悸與血壓異常的狀況。直到這時，連 Commandingway 都終於驚覺，Dylise 竟然已經好幾個夜晚幾乎沒睡。Dylise 承認，這段時間一個接一個的新發現實在太吸引人，讓她根本不願停下來，但她也明白，如果自己真的倒下，最後只會把更多工作全丟給團隊其他人。想到這裡，她終於勉強承認了身為凡人的極限，答應先去休息。</p><p>接著，你將另一台 mammet 送到 Justa 那裡。她的反應沒有 Dylise 那麼激烈，卻同樣讓人看見過度投入已經成了多深的習慣。當 vicarious vacationer 告訴她，自己已經連續運作了六個 bells，她甚至一時不敢相信。可在短暫愣住之後，她並沒有抗拒，反而平靜地接受了這份提醒。她坦白說，在過去的 Ist Legion 裡，從來沒有人會這樣體貼地提醒自己該停下來休息；那裡要求的只有不眠不休地完成任務。如今少了嚴格時程約束，她才發現自己又不知不覺回到了從前那種模式，只要一投入熱愛的事情，就很容易把自己徹底埋進去。而讓她更難以放手的，是工作本身帶來的意義。她現在改造的這台裝置，原本曾是帝國軍用來運作的技術，而她將它從 Empire 崩潰後被棄置的土地上回收回來，如今終於能讓它不再服務毀滅，而是轉而為人類帶來幫助。即使如此，她也明白自己若不保持清醒，這份意義終究無法延續下去，因此請你回去告訴 Mumukko，她確實已經聽進去了。</p><p>當你回到 Terra Firma 報告結果時，Mumukko 對兩人願意接受這套安排顯得相當滿意。但一聽到 Dylise 竟在 Commandingway 眼皮底下熬了那麼久，她的態度立刻從安心轉為嚴肅。她坦白說，計畫本身其實早已有一套合理的進度安排，也有固定回報到 Etheirys 的節奏；只是 Oizys 這片幾乎沒有盡頭的星空，和整個遠征團隊驚人到近乎失控的熱情，總讓大家忍不住去做超出必要範圍的事。正因如此，管理層才更不能放任這種投入無限制地持續下去。再怎麼漂亮的短期成果，也不值得拿長遠的可持續性去交換。從今以後，休養將不再只是口頭建議。這些 mammet 只是第一步，接下來還會建立更完整的制度來督促所有人遵守；她當然希望大家願意自發配合，但若真的有人還想硬撐、造假紀錄，等著他們的就不會有任何寬容。說到最後，Mumukko 的語氣甚至帶上了一點近乎愉快的威脅意味。而在那之後，她又若無其事地補上一句，若 Oizys 上還有其他需要幫助的人，她一定會親自把他們送到你面前。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Mumukko <small class="muted">(Oizys, X:18.2, Y:24.4)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="memorys-orbit.html">追尋沙星的記憶</a></div><div class="row"><a class="link" href="a-managers-delegation.html">經理的委派之道</a></div><div class="row">生產職或採集職 10級以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="a-managers-power.html">經理的全力奮戰</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
