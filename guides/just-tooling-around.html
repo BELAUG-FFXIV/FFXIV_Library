@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Just Tooling Around | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – Just Tooling Around (ARR Patch 2.2)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/0ElFqsdHOLY"
+              title="Just Tooling Around" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Just Tooling Around</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Just Tooling Around`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Guiding Star introduces himself without hesitation, and from a single look he judges that you are an Armorer. He tells you that he has set his sights on nothing less than complete mastery over every craft and every gathering discipline, and that he has been wandering the realm in pursuit of that goal. Yet for all his travels, Revenant’s Toll has become a dangerous temptation to him—not because it delays his journey, but because it makes him want to stay.</p><p>He says he had already heard that the Adventurers’ Guild was supporting this settlement, but what greets him here has exceeded all expectation. Talent is gathering in this place in such abundance that even one devoted to roaming cannot help but feel drawn in. In his eyes, this camp is no mere stop along the road, but a place where dedication and skill are converging into something remarkable.</p><p>He turns that sharp attention on you next. He says your hands alone tell him enough: you are no stranger to effort, and no novice fumbling your way through hard work. He sees an adept before him, someone who has already earned a place among those who shape their craft through discipline rather than words.</p><p>And if that is true, then your tools ought to reflect it. He asks to see the implement you rely upon, and when you oblige, he studies it closely. What he finds is impressive, just as he expected—yet not beyond expectation. There is no cruelty in the judgment, but neither does he soften it. He believes you are already skilled enough to deserve something finer, something better matched to the touch of one of your standing.</p><p>That is why he directs you to Talan. The man may be prickly, he warns, but few toolsmiths in the realm can rival his workmanship, and his stock is well worth your notice. Talan will not simply hand such things over, of course, and you may need to bring him a few valuables in exchange, but Guiding Star clearly has no doubt that such demands will be within your reach.</p><p>Before he lets you go, he offers one last piece of counsel. If you truly mean to walk the lonely road toward mastery, then you should ask Talan about his tomes as well—his so-called “cookbooks,” filled with some of the most intricate recipes you will ever encounter. In the end, Guiding Star leaves you with a simple belief: every crafter is governed by three forces—tool, skill, and curiosity—and he hopes you will flourish in all of them.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Guiding Star <small class="muted">(Mor Dhona, X:21.9, Y:6.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row">Disciples of the Land or Hand Lv. 50</div></div>`,
+    followq:`<div class="stack"><div class="row">None</div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'一流の道具',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>ガイディング・スターは、ためらいもなく名乗りを上げると、ひと目見ただけであなたが甲冑師だと見抜く。彼は、あらゆる製作と採集の技を完全に極めることを目標に掲げ、そのために各地を旅してきたのだと語る。だが、そんな彼にとってさえ、レヴナンツトールは危うい誘惑になっていた。ただ足を止める場所なのではなく、このまま留まりたくなるほどの魅力を持つ土地だったのだ。</p><p>彼は、冒険者ギルドがこの地を後押ししているという話は耳にしていたという。しかし、実際に訪れてみれば、その噂をはるかに超える才能がこのキャンプへ流れ込んでいた。各地から腕利きが集まり、技と熱意がひとつの場所へ引き寄せられている。その光景に、旅を続けてきた彼でさえ心を強く動かされていた。</p><p>そして、その鋭い眼差しはあなたへ向けられる。手を見ればわかる、と彼は言う。あなたは骨を惜しまず働くことを恐れず、修練を積み重ねてきた者だと。言葉を重ねずとも、その手にはすでに確かな熟練が刻まれており、ただの見習いではないことは明らかだった。</p><p>それほどの腕前を持つなら、それに見合う道具を持っていてしかるべきだと彼は続ける。そうして、あなたの使い慣れた主道具を見せてほしいと求める。彼はそれをじっくりと見つめた末に、期待どおりに見事な品だと認めながらも、それ以上ではないと率直に言い切る。けれどそれは貶めるためではなく、あなたほどの使い手には、もっとふさわしい道具があるはずだという確信からだった。</p><p>そこで彼は、タランのもとを訪ねるよう勧める。気難しいところはあるが、道具鍛冶としては一流であり、取りそろえも見事だという。ただし、そうした品をただで手に入れられるとは思わないほうがいい。いくつか品を用意して交換する必要があるかもしれないが、あなたほどの実力があれば、その程度の手間は乗り越えられると彼は信じて疑わない。</p><p>さらに彼は、もし本当に極みへ続く孤独な道を歩むつもりなら、タランの秘伝書にも目を向けるべきだと語る。彼が「おれの料理本」と呼ぶそれには、これまで見たこともないような複雑な製法が収められているという。最後にガイディング・スターは、工匠を導くものは道具、技量、そして好奇心の三つだと静かに言い置き、そのすべてにおいてあなたが栄えることを願う。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ガイディング・スター <small class="muted">（モードゥナ, X:21.9, Y:6.9）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row">クラフター ギャザラー Lv 50～</div></div>`,
+    followq:`<div class="stack"><div class="row">なし</div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'尋找頂尖工具',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Guiding Star 一開口便乾脆地報上名字，接著只看了你一眼，就判斷出你是一名鎧甲匠。他說，自己追求的並不是某一門技藝的熟練，而是要將所有製作與採集之道徹底鑽研到極致。為了這個目標，他始終在 Eorzea 各地遊歷不止。然而，即便是像他這樣習慣漂泊的人，也不得不承認，Revenant’s Toll 對他有種難以抗拒的誘惑——不是讓人懈怠，而是讓人忍不住想停下腳步，留下來。</p><p>他早就聽說過 Adventurers’ Guild 正在支援這片土地，可真正來到這裡之後，眼前湧入的才能仍遠遠超出了他的預想。這裡聚集的，不只是來來去去的冒險者，而是一群真正在各自領域磨練技術、懷抱志向的人。對一個以精進為志的人而言，這樣的地方本身就足以構成強烈的吸引。</p><p>很快地，他的注意力便落到你身上。他說，光是看你的手，就知道你不是會因辛苦而退縮的人。你早已習慣與勞作為伴，也不是還在門外徘徊的新手。那雙手裡累積下來的，不只是經驗，更是屬於熟手的沉穩與分量。</p><p>既然如此，你手中的工具自然也該配得上你的本事。於是他請你拿出自己慣用的主工具讓他看看。當你照做之後，他仔細端詳了一番，承認那確實是一件不錯的東西，與他原本預期的一樣出色——但也僅止於此。他的話雖然直白，卻不是輕視，而是因為他認定，像你這樣的熟手，理當擁有更適合自己的工具，擁有真正配得上這份技巧的東西。</p><p>所以，他要你去找 Talan。Guiding Star 提醒你，那個人脾氣或許不算好，但若論手藝，放眼整個 realm 也少有人能與之相比，而他手上的收藏更是值得一看。當然，Talan 不會平白把那些東西交給你，你多半得準備幾樣東西作為交換。不過在 Guiding Star 看來，這種程度的麻煩，對你而言根本算不上阻礙。</p><p>在你離開之前，他又補上最後一句勸告。若你真的打算踏上那條通往極致、也注定有些孤獨的道路，那麼除了工具之外，也該向 Talan 求取他的那些書冊——那些被他戲稱為「食譜」的秘傳書，裡頭記載著你所能見到最複雜的一些配方。最後，Guiding Star 像是在總結一條再簡單不過的道理：工匠始終受三樣事物支配，工具、技藝，以及好奇心。而他真心希望，你能在這三者之中都不斷前行。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Guiding Star <small class="muted">(摩杜納, X:21.9, Y:6.9)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row">生產或採集職 50級以上</div></div>`,
+    followq:`<div class="stack"><div class="row">無</div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
