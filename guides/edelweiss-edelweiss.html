@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Edelweiss, Edelweiss | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – Edelweiss, Edelweiss (ARR Patch 2.4)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/1jgdtHcfKTE"
+              title="Edelweiss, Edelweiss" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Edelweiss, Edelweiss</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Edelweiss, Edelweiss`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>In Limsa Lominsa, you are stopped by J’nasshym, who wastes little time in sizing you up as someone unlikely to refuse tedious work. She asks you to carry a parcel on behalf of the Brugaire Consortium to the Dutiful Sisters of the Edelweiss, a group that prefers to keep its presence in the city discreet. Whatever they do, she says, their services have recently proven valuable enough to merit both this gift and the Consortium’s sincere thanks.</p><p>Following her directions, you make your way down toward Fisherman’s Bottom and arrive at the Sisters’ so-called convent. The man guarding the entrance, Lonwoerd, makes it clear at once that idle visitors are not welcome. Yet the moment you present the parcel and explain where it came from, his mood changes completely. He opens it without hesitation and finds walnut bread, ginger cookies, and finger sandwiches from the Bismarck inside.</p><p>The reaction is far warmer than the place’s solemn front might suggest. Lonwoerd is openly delighted by the contents and remarks that the Consortium certainly knows how to show appreciation. He adds, with little embarrassment, that some of the Sisters possess formidable appetites, and that he had better save a few bites for himself before bringing the rest inside. For all the talk of reflection and meditation, the gratitude is received with unmistakable pleasure.</p><p>Before sending you on your way, he tells you to let J’nasshym know that they will be there whenever her employer has need of them again. The words are simple, but they leave behind the sense that this hidden establishment serves a purpose far more practical than the quiet language surrounding it would imply. Whatever mask the place wears, it is clearly tied to the city in ways not meant to be spoken aloud.</p><p>When you return to the Octant and report back, J’nasshym seems fully satisfied. She promises to pass the Sisters’ sentiments on to her superior, then answers your curiosity with a knowing calm. Someone of your experience, she says, has likely already seen through the facade. For a business like theirs, the Sisters’ presence in Limsa Lominsa is deeply reassuring. If you remain in the city long enough, you will likely discover why—and if you have both the skill and the stomach for something unconventional, you may even wish to seek them out yourself.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> J’nasshym <small class="muted">(Limsa Lominsa Lower Decks, X:10.0, Y:11.3)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row">Any Class or Job Lv. 1</div></div>`,
+    followq:`<div class="stack"><div class="row">None</div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'商会から商会へ',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>リムサ・ロミンサで、あなたはブリュゲール商会の職員に呼び止められる。彼女は、あなたを雑用を押しつけやすそうな相手と見込んだのか、ほとんど前置きもなく頼みごとを持ちかけてくる。それは、街ではあまり表立って名を知られていない「エーデルワイスの勤勉なる姉妹たち」へ、商会からの感謝を込めた小包を届けてほしいというものだった。詳しい事情は多く語られないが、彼女たちの働きが最近の商会にとって大いに助けになったことだけは、はっきりとうかがえた。</p><p>教えられたとおり、あなたはフィッシャーマンズ・ボトム近くにある彼女たちの「修道院」へ向かう。入口に立つ門番は、用もない者ならさっさと立ち去れと、いかにも近寄りがたい態度を見せる。だが、小包がブリュゲール商会からのものだとわかった途端、その空気はあっさりと変わった。彼はその場で包みを開け、中からくるみパンやジンジャークッキー、さらにビスマルクのサンドイッチまで見つけて、声を弾ませる。</p><p>その反応は、この場所がまとっていた厳かな顔つきとはずいぶんかけ離れていた。商会の連中は礼の尽くし方をよくわかっていると門番は機嫌よく言い、姉妹たちの中には驚くほど食欲旺盛な者もいるのだと、半ばあきれたように付け加える。そして中へ運ぶ前に、自分の分も少し取っておかねばならないと、悪びれもせず口にする。静かな瞑想と内省の場を思わせる表向きとは裏腹に、そこには妙に人間くさい温度が満ちていた。</p><p>やがて彼は、今後また雇い主が必要とすることがあれば、こちらはいつでも応じると伝えてほしいとあなたに託す。その短い言葉の奥には、この隠された一角が、街のどこか深い部分と確かにつながっている気配があった。穏やかな看板の陰に隠されているのは、ただ静かな祈りの営みだけではないのだと、あなたはぼんやりと感じ取る。</p><p>オクタントへ戻って報告すると、職員は満足そうにうなずき、姉妹たちの言葉を上司へ伝えると言う。そして、彼女たちが何をしているのかと問うあなたに、彼女は意味ありげな落ち着きで応じる。あなたほどの冒険者なら、すでにその見せかけの向こう側に気づいているのではないか、と。自分たちのような商いをする者にとって、あの姉妹たちがこの街にいることは、何より心強いのだという。リムサ・ロミンサにもうしばらく留まっていれば、やがてその理由も見えてくるだろうし、もし腕に覚えがあり、常識外れなことにもためらいがないのなら、いずれあなた自身で門を叩いてみてもよいのかもしれなかった。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> ブルゲール商会 ジャ・ナッシム <small class="muted">（リムサ・ロミンサ：下甲板層, X:10.0, Y:11.3）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row">いずれかのクラス・ジョブ Lv 1～</div></div>`,
+    followq:`<div class="stack"><div class="row">なし</div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'各家商會之間',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>在 Limsa Lominsa，J’nasshym 攔下了你，幾乎沒怎麼拐彎抹角，就把你看成了那種很適合被差去跑雜事的人。她要你替 Brugaire Consortium 送一個包裹，交給 Dutiful Sisters of the Edelweiss (表面上以「修道院」作為掩護、低調駐留在 Limsa Lominsa 的女性組織。她們對外不張揚身分，但實際提供的並不是單純宗教性的服務，而是與城市地下秩序、情報、特殊委託相關的工作。從相關任務內容可看出，她們與 Brugaire Consortium 這類商業勢力之間有合作關係，在港都中扮演某種不便明說、卻相當實用的角色)。她並不意外你可能沒聽過這個名字，因為那群「姊妹」在 Limsa Lominsa 一向不喜歡張揚自己的存在。不過，有一件事她說得很明白，她們提供的特殊服務，最近才剛讓 Consortium (Brugaire Consortium 是 Limsa Lominsa 一帶活躍的商業勢力之一) 受了益，因此這份包裹與其中的謝意，都必須親自送到。</p><p>照著她的指示，你一路來到 Fisherman’s Bottom 附近，找到那座被稱作「修道院」的地方。守在門口的 Lonwoerd 一開始語氣相當不客氣，直說若沒有正事，就別站在這裡礙事。可當你把包裹交到他手上，並表明這是 Brugaire Consortium 送來的謝禮後，他的態度立刻就變了。他當場拆開包裹，看見裡頭裝著 walnut bread、ginger cookies，還有幾份來自 Bismarck 的 finger sandwiches。</p><p>方才還故作嚴肅的門口氣氛，頓時被一股毫不掩飾的喜悅沖淡了。Lonwoerd 顯然對這些餐食十分滿意，甚至直白地說 Consortium 那群人很懂得該怎麼表達感謝。他接著又半開玩笑似地補上一句，說有些 Sisters 的胃口大得驚人，所以在把東西送進去之前，他最好先替自己留幾口。這座地方表面上披著沉思與靜修的外衣，可眼前這份反應，卻讓那層外衣顯得沒有那麼單純。</p><p>在你離開前，Lonwoerd 要你回去告訴 J’nasshym，只要她的上司往後還有需要，他們隨時都在。這句話說得平淡，卻讓你更清楚地感覺到，這個隱身在港都角落的地方，與 Limsa Lominsa 的某些地下秩序之間，顯然有著不便明說的聯繫。那塊安靜低調的招牌背後，藏著的從來不只是表面上的平和而已。</p><p>等你回到 The Octant 向 J’nasshym 回報後，她對結果顯得十分滿意，並表示會把 Sisters 的意思轉達給上司。至於你追問她們究竟提供什麼樣的服務，她只是帶著一種若有深意的平靜回答你。像你這樣的冒險者，想必多少已經看出了那層表象後面的真相。對像 Brugaire Consortium 這樣的生意而言，Sisters 能夠存在於這座城市裡，本身就是一件讓人安心的事。她還說，若你繼續待在 Limsa Lominsa，早晚會親自明白其中緣由；而如果你對自己的本事夠有信心，也不介意接觸一些不那麼尋常的事，那麼總有一天，你或許也會想自己主動走向那扇門。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> J’nasshym <small class="muted">(利姆薩・羅敏薩下層甲板, X:10.0, Y:11.3)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row">只要任一職業達到等級 1 以上即可</div></div>`,
+    followq:`<div class="stack"><div class="row">無</div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
