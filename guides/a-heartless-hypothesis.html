@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A Heartless Hypothesis | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – A Heartless Hypothesis (EW Patch 6.15)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/I4ogoy8N52I"
+              title="A Heartless Hypothesis" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">A Heartless Hypothesis</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`A Heartless Hypothesis`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>At the harbor, a bespectacled technician greets you with open astonishment and no small amount of delight. He explains that he helped design the Ragnarok, and that its flight logs are now being analyzed in detail. Though your voyage to Ultima Thule was undertaken to save your star and countless others, the journey also brought back records of places and phenomena beyond anything scholars had imagined. Among those records, however, was a transmission of unknown origin—an audio message in a language no one has been able to decipher. Believing that the moment of discovery may finally be at hand, he asks whether you would accompany him to Thaumazein, so that one of the Ragnarok’s original passengers might be present when the mystery is unraveled.</p><p>When you arrive, the technicians’ hoped-for collaborators soon appear: Biggs and Wedge of Garlond Ironworks. Biggs is startled to find you there, but says the matter concerns you more than you may realize. The intercepted message, he explains, was played for the small Omega model that travels with Alpha—the toy originally built by the Ironworks. From there, an extraordinary truth emerges. Omega speaks, confirming that its consciousness survives within the diminutive frame. It is no threat, it says; this body is weaker than that of a mortal infant, and if this form is destroyed, its awareness will vanish with it. In the instant before its annihilation in the rift, it reexamined its directives and reached a new conclusion: if it is to continue evolving, it must keep seeking the “heart” and “strength of soul” that mortals possess.</p><p>When asked about the intercepted transmission, Omega identifies the language at once as pan-galactic basic, a tongue once used across many worlds its people conquered. Yet it refuses to translate the message without conditions. Having scanned the report on the Final Days, Omega now knows that Alphatron was destroyed after Sir’s meeting with Meteion, and that the concept of dynamis must somehow be involved. What it cannot understand is why the Omicrons, beings without “heart,” were not immune to its effects, nor why Sir desired oblivion. To pursue that contradiction, Omega asks for your aid. It wants your interpretation of the parts of the report that still defy its calculations, judging you the ideal guide because you witnessed ultimate despair firsthand and overcame it with immeasurable heart. Though Biggs apologizes for the burden, you agree, and Omega proposes that you visit the places it wishes to understand. The first destination is Radz-at-Han, where it hopes to determine why some people transformed during the Final Days while others did not.</p><p>In Radz-at-Han, Omega begins by questioning those who lived through the catastrophe. Mahti speaks of confusion, of burning skies, screams, and neighbors whose homes still stand empty after whole families vanished. When Omega remarks that clearing away Khalzahl’s belongings seems like an appropriate redistribution of resources, she gently explains that what is terrible is not the practical act itself, but the grief of seeing the traces of a vivid life packed away after that life was suddenly extinguished. A young boy then recalls how you once led him to safety, how he was present when Vrtra spoke, and how he now hopes one day to help restore the city. Omega initially tries to impose a clean logic upon his survival, only to find that the boy neither possessed secret strength nor lacked fear. A melancholy man offers yet another angle: he chose to flee to the moon, while his sister remained behind, and though he insists his decision was reasonable, his words reveal uncertainty, guilt, and unresolved pain. Each testimony resists Omega’s tidy conclusions. When it asks how “strength of heart” should be understood, you point out that perhaps the answer lies in the conflict itself rather than in any simple rule, and Omega accepts that it must continue learning.</p><p>The next stage of the inquiry leads you to Djinabaha, whose survival seems particularly troubling to Omega because Khalzahl, who bore similar burdens, did not endure. Djinabaha cannot offer a grand answer. He wonders whether focusing on protecting the workshops kept him from falling into panic, but admits that Khalzahl must have felt the same responsibility. The comparison yields no certainty, only a deeper sense that unseen factors are at work. At Djinabaha’s request, you then seek out Nashvan. Upon seeing you, he is overcome by memory. He recalls the moment people began turning into beasts, the sight of his afflicted son, the monstrous horror looming over the boy, and the terror that froze his heart. He remembers fleeing only because your companion’s words rang in his ears again and again, urging him to run for their sake and his own. Even after surviving, he says, he lost the will to work and nearly lost the will to live. What brought him back was not instinct, but sorrow itself: the grief of seeing the world continue to turn without his son and without Ahewann made him realize that he must live on to remember them.</p><p>That answer leaves Omega unsettled in a way no battle ever did. It can identify sorrow as an emotion born when mortal ideals fail, yet it cannot reconcile how the same sorrow that once crippled Nashvan later became the force that saved him from ruin. Nor can it derive a stable formula from the people of Radz-at-Han: those with similar lives, duties, and convictions did not meet the Final Days in the same way. When you suggest that there may have been no pattern at all—that the transformations were not a pure measure of inner fortitude, but the result of factors too chaotic to reduce to a rule—Omega pauses, then accepts the theory as a provisional conclusion. It has not solved the mystery of the heart. If anything, your journey through these testimonies has only shown it how much further it has to go. Even so, Omega chooses to continue, and expects you to remain beside it as it deepens its education in all the contradictions of mortal feeling.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Bespectacled Technician <small class="muted">(Old Sharlayan, X:10.9, Y:14.3)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="endwalker.html">Endwalker</a></div><div class="row"><a class="link" href="to-kweh-under-distant-skies.html">To Kweh under Distant Skies</a></div><div class="row">Disciple of War or Magic Lv. 90</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="goodbye.html">Goodbye, ε̆│̆│Δ</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'心を持たぬ者は思考する',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>港であなたに声をかけてきた眼鏡の技術者は、驚きと喜びを隠しきれない様子だった。彼はラグナロクの設計に携わったひとりであり、いままさにその航行記録の解析が進められているのだという。ウルティマ・トゥーレへの旅は星々を救うためのものだったが、その過程で持ち帰られた記録は、これまで夢想することしかできなかった遠き場所や出来事の痕跡でもあった。そのなかに、発信源不明の音声らしき通信がひとつ混じっていたが、いかなる学者も、その言語を解読できずにいた。ついに謎が解き明かされるかもしれない今、その瞬間にラグナロクの乗員だったあなたにも立ち会ってほしいと、彼はサウマゼインへの同行を願い出る。</p><p>あなたが向かった先には、やがてガーロンド・アイアンワークスのビッグスとウェッジが現れる。そこで明かされたのは、アルファとともに行動している小さなオメガ模型に、その謎の通信を聞かせたという事実だった。そして、信じがたいことに、その模型の中からオメガ自身が応答する。意識はこの小さな筐体に残存しているが、戦闘能力は人の赤子にも及ばず、この躯体が壊れれば、その認識もまた完全に失われるのだとオメガは告げた。もはやあなたの星を脅かす存在ではない。だが、裂け目の中で滅びる寸前、オメガは自らの指令を見直し、進化し続ける存在であるためには、人が持つ「心」や「魂の強さ」を学び続けなければならないと結論づけたのだという。</p><p>やがて本題が持ち出されると、オメガはその通信の言語を即座に汎銀河共通語だと断定する。かつて自分たちが征服した数多の世界で比較的広く用いられていた言葉だという。しかし、翻訳に応じるには条件があるとオメガは告げた。終末の報告書を読み取り、アルファトロンがシールとメーティオンの邂逅の果てに滅んだことも、そこにダイナミスが関わっていることも、理論上は理解した。だが、心を持たぬはずのオミクロンがなぜその影響を免れず、なぜシールが消滅を望んだのか、その一点だけがどうしても計算に合わない。その矛盾を解くため、オメガはあなたに協力を求める。絶望の只中を実際に歩み、なおそれを乗り越えたあなたこそが、心という不可視の性質を説明する最適な存在だと判断したのだ。こうしてあなたは、終末の諸相を理解するための旅に同行し、まずはラザハンで、なぜ変異した者としなかった者がいたのかを探ることになる。</p><p>ラザハンに着くと、オメガは終末を生き延びた者たちに次々と話を聞き始める。マティは、燃える空と悲鳴の記憶、そして一家ごと消えて今も空き家のまま残る家々のことを語る。カールザルの遺品を片づけるのは資源の再配分として合理的だとオメガが述べると、彼女は、それ自体が問題なのではなく、情熱と夢に満ちていたひとつの人生の痕跡が箱に詰められていく光景こそが耐え難いのだと静かに言い返す。続いて出会った少年は、かつてあなたが安全な場所へ導いたこと、ヴリトラの言葉をその場で聞いたこと、そしていつか自分もこの街のために働きたいと願っていることを語る。オメガは彼の生存に明快な理屈を与えようとするが、少年は恐怖を抱えていただけで、特別な力など持っていなかった。さらに、月へ逃れようとした男は、自分の判断は合理的だったとしながらも、故郷を離れようとしたことへの迷いや、残った妹とのあいだに生じた軋みを隠しきれない。どの証言も、オメガの求める単純な法則には収まらなかった。心の強さとは何かと問うオメガに、あなたは、その答えはむしろ矛盾や葛藤の中にこそあるのかもしれないと示し、オメガは学びを続ける必要を認める。</p><p>次にあなたたちが向かったのは、カールザルと似た立場にありながら生き残ったジナバハのもとだった。工房を守ることに意識を集中させていたから取り乱さずに済んだのかもしれないと彼は言うが、カールザルもまた同じ責任を背負っていたはずだとも認める。その比較から得られたのは答えではなく、なお見えない何かが関わっているという感触だけだった。そこであなたは、ジナバハに頼まれてナシュヴァンを訪ねる。あなたの姿を見た彼は、かつての惨事を思い出して声を震わせる。獣へと変わっていく人々、自らの息子に迫る巨大な怪物、凍りついたように動けなかった自分の心。逃げ延びることができたのは、仲間の叫びが耳に残り、あなたたちのためにも自分のためにも走れという言葉を繰り返し胸の中で唱えたからだと彼は語る。生き延びたあとも仕事をする気力すら失っていたが、彼を立ち上がらせたのは本能ではなく悲しみそのものだった。息子やアヘワンを失ってもなお世界が回り続けていると知ったとき、その現実があまりにも悲しかったからこそ、自分が生きて彼らを覚えていなければならないのだと思えたのだと。</p><p>その答えは、どんな戦いよりも深くオメガを揺さぶる。理想が叶わなかったときに生じる感情として悲しみを認識することはできても、その悲しみがかつて人を打ち砕きながら、のちには立ち上がらせる力にもなり得るという事実を、オメガはうまく整合できない。また、ラザハンで得た証言を突き合わせても、似た境遇や責務を持つ者たちが同じ結末を迎えたわけではなかった。そこであなたが、そもそも変異には明確な規則など存在せず、個々の心の強弱だけでは測れない要因が絡み合っていたのではないかと告げると、オメガはしばし沈黙したのち、その仮説を暫定的な結論として受け入れる。心の謎はなお解けないままだった。だが、だからこそオメガは歩みを止めず、相反する感情に満ちた人のあり方を、これからもあなたの隣で学び続けようとするのだった。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> 魔導船の設計技師 <small class="muted">（オールド・シャーレアン, X:10.9, Y:14.3）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="endwalker.html">暁月のフィナーレ</a></div><div class="row"><a class="link" href="to-kweh-under-distant-skies.html">翼に夢を</a></div><div class="row">ファイター ソーサラー Lv 90～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="goodbye.html">グッバイ・＊＊＊</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'不具心者亦會思考',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>在港口時，那位戴著眼鏡的技術員一看到你，便露出又驚又喜的神情。他告訴你，自己曾是負責設計 Ragnarok（由 Sharlayan 與 Garlond Ironworks 等人共同打造、用來前往 Ultima Thule 的星際航行船） 的團隊成員之一，而現在眾人正開始仔細整理這艘船留下的飛行紀錄。你前往 Ultima Thule 的旅程，原本是為了拯救自己的星球與無數其他世界，但那趟航程同時也帶回了大量珍貴資料，那些過去只存在於想像中的地方與事件，如今都留下了真實的痕跡。就在這些紀錄之中，研究人員發現了一段來源不明的傳訊，似乎是一則音訊訊息，卻沒有人能辨認其中的語言。他相信，解開謎團的時刻或許終於到了，因此誠懇邀請你同行前往 Thaumazein，讓身為 Ragnarok 原始乘客之一的你，也能親自見證這一刻。</p><p>當你抵達後，前來會合的是來自 Garlond Ironworks 的 Biggs 與 Wedge。Biggs 一見到你便十分驚訝，接著又表示，這件事其實比你想像中還要與你有關。他們把那段無法解讀的傳訊播放給一直跟在 Alpha 身邊的小型 Omega 模型聽，而結果遠遠超出所有人的預料。那具小小的模型竟然開口說話，並由 Omega 親自承認，自己的意識如今正存在於這副微小的軀體之中。它明確表示，這副身體的性能甚至比不上凡人的嬰兒，若此身毀壞，它現有的認知也會隨之消失，因此它對你與這顆星球已不構成威脅。然而，在裂隙中迎來毀滅前的最後一瞬，它重新檢視了自己的指令，並得出新的結論：若想作為不斷進化的存在繼續前行，它就必須繼續追尋你們口中的「heart」，以及那份屬於靈魂的力量。</p><p>當話題回到那段神秘傳訊時，Omega 立刻辨認出那是以 pan-galactic basic（一種泛銀河通用語言） 傳送的訊息，那是它們曾征服過的諸多世界中，相對廣泛使用的一種共通語言。然而，Omega 並不願無條件協助翻譯。它已透過終末報告得知，Alphatron（Omega 的母星） 已在 Sir（Omicrons 的領袖 Stigma-1） 與 Meteion 相遇之後的餘波中遭到毀滅，也開始理解 dynamis（會對強烈情感產生反應的能量） 這個概念理應與那一切有關。可是真正令它無法計算的，是 Omicrons（Omega 所屬的外星機械文明） 這種本不具「heart」的種族，為何沒有免於其影響；更無法理解的是，Sir 為何會向 Meteion 表達希望停止存在的願望。為了追查這個矛盾，Omega 要求你協助它，替那些仍令它演算出錯的報告內容提供來自外部的詮釋。它判斷，你親身經歷了多處極限絕望，又以難以估量的「heart」擊敗過它，因此你是最適合的人選。於是，在 Biggs 與 Wedge 半是無奈半是拜託的期待下，你答應陪它踏上這場求解之旅，而它首先想釐清的，就是 Final Days（由極端情緒與 dynamis 引發的大災厄） 在 Radz-at-Han 發生時，為何有些人變異了，有些人卻沒有。</p><p>抵達 Radz-at-Han 後，Omega 開始逐一詢問那些曾活過那場災厄的人。Mahti 談起燃燒的天空、四起的尖叫，以及如今仍空著的鄰居房屋，因為整個家庭都已消失不見。當 Omega 冷靜地表示，清理 Khalzahl 的住處、讓空屋重新被利用，從資源配置的角度來看十分合理時，她輕聲告訴它，可怕的從來不是整理房子這件事本身，而是眼睜睜看著一個原本充滿熱情與夢想的人，只剩下被裝進箱子裡的遺物。之後，一名男孩認出了你，想起你曾在混亂中引導他前往安全之處，也想起自己後來在廣場上聽見 Vrtra 的演說。他說自己現在無法像從前那樣無憂無慮地玩耍了，但也因此更希望將來長大後能為這座城市盡一份力。Omega 試圖替他的倖存找出明確邏輯，卻發現他既沒有什麼特殊力量，也不是不曾害怕。接著，一名心情鬱結的男子又帶來另一種答案：他原本打算為了逃離瘋狂而前往月球，卻因為最後沒有成行而回到此地，如今又和選擇留下的妹妹關係緊張。他一方面相信自己當時的決定合乎理性，一方面卻又無法否認其中的動搖、愧疚與痛苦。這一連串證言，全都與 Omega 原先想像的清楚規則相互衝突。當它問你，所謂「heart 的強度」究竟該如何理解時，你提醒它，也許答案正藏在那些彼此衝突的感受本身之中，而不是任何單一的判準。</p><p>接著，你們又去見了 Djinabaha。對 Omega 而言，Djinabaha 與 Khalzahl 有許多相似之處，卻一人生還、一人喪命，這正是它難以理解的部分。Djinabaha 只能試著猜測，也許是自己當時一心只想保住工坊，因此沒有陷入徹底恐慌；可他同時也承認，Khalzahl 想必同樣懷抱著守住一切的責任感。這樣的比較仍舊無法導向一個乾脆的答案，只讓那個看不見的差異顯得更加真實。之後，在 Djinabaha 的請託下，你前去見 Nashvan。Nashvan 一看到你，記憶便立刻湧上心頭。他想起當時人們一個接一個變成野獸，想起自己的兒子也遭到波及，想起那頭龐大的怪物逼近孩子時，自己整顆心都像結冰一般動彈不得。他記得自己之所以還能逃命，只因你同伴留下的那句話始終在耳邊回響，要他為了他們，也為了自己，無論如何都得跑下去。縱使活了下來，他後來也曾失去工作的意志，甚至幾乎失去活下去的意志。然而，真正把他從停滯中拉回來的，並不是求生本能，而是悲傷本身。當他抬起頭，看見即使失去了兒子與 Ahewann，世界仍舊照常轉動時，正因那份現實太過令人悲痛，他才明白，自己必須活下去，替他們記住這一切。</p><p>這個答案讓 Omega 陷入比任何戰鬥都更深的困惑。它能辨識 sorrow，是凡人在理想無法實現時產生的情感，卻無法理解為何同樣的 sorrow，曾經能讓 Nashvan 幾近崩潰，後來又反而成了支撐他再次站起來的力量。同樣地，它也始終無法從 Radz-at-Han 的倖存者之間歸納出穩定規律：處境相似、職責相似、心志看似也相近的人，並沒有迎來相同的結果。於是，當你提出另一種可能，也許那些變異從一開始就不存在可以被簡化為單一道理的模式，也不是單純依照個體內在強弱來決定，Omega 沉默片刻，最終接受這項推論，將它視為自己在這一部分調查中的暫定結論。它依然沒有真正解開「heart」的本質，但正因如此，它也更加清楚自己還必須繼續學下去。而在這段旅程裡，它顯然已經決定，要繼續讓你陪著它，一步一步理解凡人心中那些永遠無法被輕易化約的矛盾與重量。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 魔導船設計技師 <small class="muted">(Old Sharlayan, X:10.9, Y:14.3)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="endwalker.html">曉月的終焉</a></div><div class="row"><a class="link" href="to-kweh-under-distant-skies.html">追尋蒼穹彼方的那聲 Kweh</a></div><div class="row">戰鬥或魔法職等級 90 以上</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="goodbye.html">向＊＊＊說再見</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
