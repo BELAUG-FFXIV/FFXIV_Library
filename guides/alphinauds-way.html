@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Alphinaud’s Way | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Alphinaud’s Way (HW Patch 3.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/OEbNLulAZvk"
+              title="Alphinaud’s Way" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Alphinaud’s Way</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Alphinaud’s Way`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>The bells of the Observatorium ring out across Ishgard, and the mood at Fortemps Manor shifts at once. Haurchefant declares that Ishgard’s knights will stand and fight to shield her people until the very end. Tataru can only ask what will become of the city, and of all of you within it. Even the anxious words around you make one truth impossible to ignore: if the Horde comes in force, Ishgard will face ruin under siege.</p><p>Outside, Alphinaud speaks plainly of the danger before you. Ishgard can scarcely endure another assault of this scale. Even if her knights manage to repel the dragons, the cost in lives will be devastating. Tataru sees no room for hope in that. Men and dragons are not creatures who sit together and speak. Yet Alphinaud reminds her that there are rare exceptions, and from that thought he draws the only path left to you. If Iceheart can be persuaded to stand between both sides, then perhaps there remains a chance to halt Nidhogg before the slaughter begins.</p><p>That fragile hope is immediately tested by reality. Estinien steps forward and says that if there is to be a meeting, he will accompany you. Even with an intermediary, Nidhogg may be too lost to bloodrage to heed reason. Still, the attempt itself may buy Ishgard precious time to prepare. And if words fail completely, Estinien does not hide the harsher possibility: with the power of the Eye and the strength of the Warrior of Light, Nidhogg might be slain outright. Alphinaud accepts his help, but insists that his lance remain the last resort. Estinien agrees, while warning that too much must not be revealed to Aymeric, lest the lord commander be accused of dealings with heretics.</p><p>Once the course is chosen, there is no time to hesitate. Alphinaud asks Tataru to remain at Fortemps Manor and inform Count Edmont of your decision. The Scions of the Seventh Dawn, he says, will do everything in their power to ensure that Ishgard and her people survive what is coming. You then go with Alphinaud and Estinien to seek Aymeric’s aid, because all hope of parley will be lost if the Holy See launches a preemptive strike before your plan can begin.</p><p>You find Aymeric already immersed in preparations for a siege, strengthening the city’s defenses and ordering that the ballistas be made ready. Even so, he receives you without hostility. Alphinaud asks much of him while revealing very little: he requests that Aymeric restrain the Holy See from attacking first while your plan is set in motion. Aymeric is willing to support anything that may spare Ishgardian lives, but he wants cause enough to justify that trust. Estinien answers by offering his own lance in support of the endeavor and by pointing out how empty the calls for a glorious counterattack truly are. In the end, Aymeric yields. He will support you, and within the Holy See he will do what he can.</p><p>With that promise secured, the way forward finally opens. Yet Alphinaud wastes no breath on relief. History shows that the Dravanians will strike the moment their gathering reaches the necessary strength. Before that happens, you must find Iceheart, win her cooperation, and seek a parley with Nidhogg himself. Time is already slipping away. Elsewhere, however, another will moves toward the same coming battle for entirely different reasons. In the Vault, Archbishop Thordan VII does not speak of preserving lives, but of destroying dragons, drowning heretics in blood, and rewarding the Ascian allies who aided him. When Zephirin voices concern, Thordan answers only with conviction. As for you and Estinien, he leaves you to your roles. On every side, the next step toward war has already begun.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Alphinaud <small class="muted">(Fortemps Manor, X:6.1, Y:6.0)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="to-siege-or-not-to-siege.html">To Siege or Not to Siege</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 51</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="in-search-of-iceheart.html">In Search of Iceheart</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'アルフィノの策',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>アドネール占星台の警鐘が鳴り響いた瞬間、フォルタン伯爵邸を満たしていた空気は一変する。オルシュファンは、たとえ最後のひとりになろうとも、イシュガルドの騎士は民を守るために戦い抜くと断言する。タタルは、この街がどうなってしまうのか、そして自分たちがどうなるのかを案じずにはいられない。周囲に広がる不安の声は、やがて来たる包囲戦が皇都にどれほどの破滅をもたらしうるかを、否応なく突きつけてくる。</p><p>外に出たあと、アルフィノは目前の危機をまっすぐに言葉にする。イシュガルドは、これほどの襲撃をもう一度まともに受け止められるほど余裕のある状態ではない。たとえ騎士たちが竜の軍勢を退けたとしても、その代償はあまりにも大きいはずだ。タタルには、そこから先の希望が見えない。人と竜が向かい合って語り合うなど、到底ありえないように思えるからだ。それでもアルフィノは、わずかな例外があると告げる。そしてその例外として、イゼルの存在に最後の可能性を託そうとする。</p><p>だが、そのか細い望みの前に立つ現実もまた重い。もし会談の場を設けるというのなら、自分も同行するとエスティニアンは申し出る。たとえ仲介役がいたとしても、ニーズヘッグが怒りに飲まれ、理を受け入れぬ可能性は高い。それでも、その試み自体がイシュガルドに備える時間を与えるかもしれない。さらに彼は、言葉が完全に届かなかったときの結末も隠そうとはしない。竜の眼の力と、光の戦士たるあなたの力があれば、ニーズヘッグを討ち果たすことも不可能ではないかもしれない。アルフィノはその助力を受け入れつつも、槍を振るうのは最後の最後だけだと念を押す。エスティニアンもまたそれを受け入れ、そのうえで、アイメリクに計画の詳細を軽々しく明かすべきではないと忠告する。</p><p>方針が定まった以上、ためらっている時間はない。アルフィノはタタルにフォルタン伯爵邸へ残るよう頼み、エドモン・ド・フォルタン伯爵へ決断を伝えてほしいと託す。暁の血盟は、イシュガルドとその民を生き延びさせるため、持てる力のすべてを尽くすのだと。こうしてあなたはアルフィノ、エスティニアンとともに、次なる一手を成り立たせるためにアイメリクの協力を求めに向かう。聖教庁が先に動けば、交渉の望みは始まる前に消えてしまうからだ。</p><p>神殿騎士団総長のもとを訪れると、アイメリクはすでに包囲戦への備えに追われていた。城防を固め、バリスタの整備を命じ、長期戦に備える指揮を執っている。それでも彼はあなたたちを拒まない。アルフィノは多くを明かせぬまま、それでも先制攻撃を控えるよう聖教庁へ働きかけてほしいと頼む。アイメリクは、イシュガルドの民の血を少しでも救えるなら力を貸したいと考える一方で、それに値するだけの理由を求める。そこへエスティニアンが自らの槍を差し出し、この企てに加わっていること自体が答えだと示す。無謀な反攻よりは、少なくともニーズヘッグの進軍を遅らせる望みがある。そうしてついに、アイメリクは協力を約束する。</p><p>その支えを得て、あなたたちはようやく前へ進めるようになる。だがアルフィノは安堵に浸らない。ドラヴァニア勢は、群れが十分な規模に達した瞬間に襲いかかると歴史が告げている。その前に、あなたたちはイゼルを見つけ、協力を取りつけ、さらにニーズヘッグとの対話の場を探らねばならない。時間はすでに尽きかけている。一方そのころ、ヴォールトではまったく異なる意志が同じ戦いへ向かっていた。教皇トールダン7世は、民を守るためではなく、竜を滅ぼし、異端者を血に沈め、助力したアシエンたちに報いるために戦おうとしている。ゼフィランが不安を口にしても、教皇は確信を崩さない。あなたとエスティニアンについても、それぞれの役割を果たさせればよいと切り捨てる。戦いが始まる前から、すでに誰もが自らの意志に従って動き始めていた。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> アルフィノ <small class="muted">（フォルタン伯爵邸, X:6.1, Y:6.0）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="to-siege-or-not-to-siege.html">冒険者たちの決断</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 51～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="in-search-of-iceheart.html">イゼルを探して</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'Alphinaud 的盤算',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>當 Observatorium 的警鐘響徹 Ishgard 時，Fortemps Manor 裡原本還勉強維持的平靜也立刻崩解了。Haurchefant 毫不遲疑地表示，就算必須戰到最後一刻，Ishgard 的騎士們也會守住自己的人民。Tataru 卻無法不去想，這座城市接下來會變成什麼模樣，你們又會迎來什麼樣的命運。四周此起彼落的不安，讓一件事變得再清楚不過：一旦 Horde（大規模集結、準備對城市發動總攻的龍族軍勢）真正壓境，Ishgard 將迎來一場足以摧毀一切的圍城。</p><p>來到屋外後，Alphinaud 把這份危機說得更直接。Ishgard 幾乎已經沒有餘裕，再承受一次同等規模的襲擊。就算騎士團最後能把巨龍逼退，所付出的傷亡也會是無法承受的代價。Tataru 看不見這裡面還有什麼希望。對她來說，人與龍之間根本不存在可以坐下來對話的基礎。然而 Alphinaud 仍指出，並不是完全沒有例外。也正因如此，他把最後那一線可能押在 Iceheart 身上，希望她能成為雙方之間的中間人，讓這場屠戮在真正開始之前，還有被阻止的機會。</p><p>但這個看似脆弱的希望，立刻就被更沉重的現實包圍。Estinien 表示，如果真要與對方會面，他會親自同行。即使有中間人，Nidhogg 也很可能早已被怒火徹底吞沒，根本不會願意聽任何道理。可就算如此，這場嘗試本身仍有價值，因為它至少可能替 Ishgard 爭取到一點準備時間。同時，Estinien 也沒有隱瞞另一條更殘酷的路。若言語終究失敗，那麼憑藉 Eye 的力量與身為 Warrior of Light 的你，直接討伐 Nidhogg 也不是全無可能。Alphinaud 接受他的幫助，卻明確表示，長槍只能是最後手段。Estinien 也因此提醒他，對 Aymeric 不能透露太多細節，否則那位 lord commander（Aymeric, Ishgard 軍事與城防的主要統率者）很可能會被指控與異端者有所牽連。</p><p>既然已經選定方向，就再也沒有拖延的空間了。Alphinaud 請 Tataru 留在 Fortemps Manor，把你們的決定轉告 Count Edmont de Fortemps。Scions of the Seventh Dawn 會盡自己所有力量，確保 Ishgard 與她的人民能撐過即將到來的危機。於是你與 Alphinaud、Estinien 一同動身，前往尋求 Aymeric 的協助。因為只要 Holy See 在你們行動之前先一步發動攻擊，那麼原本還可能成立的交涉，便會在開始前徹底崩毀。</p><p>見到 Aymeric 時，他早已全心投入即將來臨的守城準備之中。他下令重新檢查防線，確保 ballista（部署於城防上的大型弩砲）狀況良好，也要備足能支撐長期包圍戰的彈藥。即便如此忙碌，他仍願意聽完你們的請求。Alphinaud 所要求的，是一種幾乎建立在信任上的支持：在無法說明全部內容的情況下，希望 Aymeric 能說服 Holy See 暫時不要先發制人。Aymeric 並非不願幫助你們，他只是希望自己所支持的事，至少值得這份風險。這時，Estinien 直接以自己的立場表明支持，也指出那些高喊光榮反攻的人，能給出的只有赴死，卻沒有真正的勝算。最終，Aymeric 答應站在你們這邊，並承諾會在 Holy See 內為你們盡力周旋。</p><p>有了這份承諾，你們總算得以前進。然而 Alphinaud 並沒有因此鬆懈。他知道，歷史早已證明，一旦 Dravanians 集結到足夠規模，就會立刻展開攻勢。在那之前，你們必須找到 Iceheart，說服她合作，再設法與 Nidhogg 進行談判。時間已經不站在你們這一邊。可就在你們朝這個目標前進時，另一處也有另一股意志，正朝同一場戰爭走去。在 The Vault，Archbishop Thordan VII 所想的不是如何保住人民，而是如何毀滅巨龍、以鮮血淹沒異端者，並在事成之後回報那些曾協助他的 Ascian（與其合作、各懷盤算的Ascian 勢力）聯盟。即使 Zephirin 對此提出疑慮，Thordan 也只是以所謂的信念回應。至於你與 Estinien，他則冷冷地認為，你們只要各自完成被安排好的角色就夠了。戰火尚未真正落下，但每一方都已經朝自己的目的開始行動。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Alphinaud <small class="muted">(Fortemps Manor, X:6.1, Y:6.0)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="to-siege-or-not-to-siege.html">攸關去留的抉擇</a></div><div class="row">任一戰鬥／魔法職業（不含受限職業）Lv. 51</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="in-search-of-iceheart.html">尋找 Iceheart 的下落</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
