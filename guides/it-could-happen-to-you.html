@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>It Could Happen to You | BELAUG · FFXIV Library</title>
+  <meta name="description" content="SideFeature – It Could Happen to You (ARR Patch 2.51)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/HOt2qVXi3j8"
+              title="It Could Happen to You" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">It Could Happen to You</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`It Could Happen to You`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>A fashionably dressed young man fusses over the prizes his manservant is carrying, warning him not to break anything unless he means to have the cost taken from his wages. When you look his way, he turns to you with obvious satisfaction and boasts that the stack is no small fortune in winnings—every bit of it earned by his own hand at the Gold Saucer.</p><p>When he realizes you have not heard of the place, he reacts with theatrical disbelief. To hear him tell it, the Gold Saucer is the sultanate’s newest and finest entertainment venue, the very place everyone ought to know. He paints the picture eagerly for you: chocobo races thundering down the course, Triple Triad tables filled with challengers, and countless other diversions besides. More than that, he insists that a person with any sense can leave richer than they arrived, and that there is no better cure for the burdens of a tiring day.</p><p>He cannot resist adding one more temptation before catching himself and letting the rest hang in the air, as if the Gold Saucer ought to speak for itself. By then, he is already convinced he knows what is on your mind. With a grin full of confidence, he presses on, certain that you are wondering how you might see all those wonders for yourself.</p><p>Still basking in his good fortune, he decides that your day should be as lucky as his. As it happens, he has a spare golden airship ticket, and with all the magnanimity of a man pleased with himself, he offers it to you as a gift. He tells you to present it to the attendant at the landing, and promises that the next airship will carry you straight toward revelry and riches.</p><p>Even in his generosity, he makes room for one last boast. Should your paths ever cross again at the Triple Triad tables, he warns, you should expect no mercy from him. When you speak to him again, he only repeats that the ticket will see you to the Saucer soon enough, and laughingly offers his apologies in advance for the defeat he imagines he will deal you there.</p><p>At the airship landing, the receptionist for flights bound for the Manderville Gold Saucer asks to inspect your ticket before anything else. Once she confirms that everything is in order, her manner remains calm and professional as she informs you that an airship will depart shortly before the next bell. With your passage ready to be reserved, the way to that glittering world of games and spectacle quietly opens before you.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Well-heeled Youth <small class="muted">(Ul’dah - Steps of Nald, X:9.6, Y:9.0)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="limsa-lominsa-the-lominsan-envoy.html">Limsa Lominsa: The Lominsan Envoy</a></div><div class="row"><a class="link" href="the-uldahn-envoy.html">Ul’dah: The Ul'dahn Envoy</a></div><div class="row"><a class="link" href="gridania-the-gridanian-envoy.html">Gridania: The Gridanian Envoy</a></div><div class="row">Any Class or Job Lv. 15</div></div>`,
+    followq:`<div class="stack"><div class="row">To be updated</div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'いざ、魅惑の遊技場へ',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>羽振りのいい若者は、従者に運ばせている景品の山を見やり、ひとつでも壊せば給金から差し引くぞと芝居がかった調子で言い放ちます。あなたが足を止めると、彼は得意げに胸を張り、その抱えきれぬほどの景品は、みずからゴールドソーサーで勝ち得た戦利品なのだと誇らしげに語ります。</p><p>あなたがその名を知らないと知るや、彼は時代に乗り遅れているとでも言いたげに大げさに驚き、ゴールドソーサーこそウルダハが誇る最新にして最高の娯楽の殿堂なのだと熱弁します。チョコボレースで駆け抜ける鳥たちの迫力、トリプルトライアドで競い合う駆け引き、そしてそれ以外にも尽きぬ楽しみがあるのだと、彼の言葉はとどまるところを知りません。しかも、要領さえわかっていれば、入ったときよりも懐を豊かにして帰れるのだと、彼は自信たっぷりに言い切ります。</p><p>さらに彼は、もうひとつの魅力をほのめかしてみせたかと思うと、あとは自分の目で確かめるほうがいいと、含みを持たせて笑います。そうして、あなたがどうすればその華やかな世界を味わえるのか知りたがっているに違いないと、半ば決めつけるように話を進めていきます。</p><p>幸運に酔いしれている彼は、今日のつきが自分だけのものである必要はないと言わんばかりに、予備の黄金の飛空艇券をあなたへ差し出します。気前よく贈り物だと言い、ランディングにいる制服姿の係員へそれを見せれば、次の飛空艇で歓楽と富の待つ場所へ向かえるのだと教えてくれます。</p><p>もっとも、その親切のあとにも彼の気取りは変わりません。もし今後、トリプルトライアドの卓で顔を合わせることがあっても、そのときは容赦する気などないのだと、冗談めかしながらも得意げに言い残します。そして改めて話しかけても、その券さえ見せればすぐゴールドソーサーへ着けると繰り返し、そこであなたを負かすことになるかもしれないと笑い飛ばします。</p><p>やがてウルダハのランディングで、マンダヴィル・ゴールドソーサー行きの受付を務める搭乗窓口 エリエノラが、まず搭乗券を確認したいと静かに求めます。あなたが差し出した券を確かめた彼女は、まもなく次の鐘の少し前に飛空艇が出る予定だと告げ、席を手配しようかと丁寧に問いかけます。そうして、きらびやかな遊技場へ続く道が、いよいよあなたの前にひらかれていきます。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> 羽振りのいい若者 <small class="muted">（ウルダハ：ナル回廊, X:9.6, Y:9.0）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="limsa-lominsa-the-lominsan-envoy.html">リムサ・ロミンサ：森都と砂都と</a></div><div class="row"><a class="link" href="the-uldahn-envoy.html">ウルダハ： 海都と森都と</a></div><div class="row"><a class="link" href="gridania-the-gridanian-envoy.html">グリダニア：海都と砂都と</a></div><div class="row">いずれかのクラス・ジョブ Lv 15～</div></div>`,
+    followq:`<div class="stack"><div class="row">更新予定</div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'前往遊樂園',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>一名打扮體面的年輕人正盯著僕從手上那一大堆獎品，還煞有其事地警告對方，要是摔壞了哪一件，就得從薪水裡扣。當你看向他時，他立刻露出志得意滿的神情，炫耀那一整疊戰利品全是他親自在 Gold Saucer 贏來的成果，說那可不是一筆小收穫。</p><p>得知你竟然沒聽過 Gold Saucer，他像是聽見了什麼不可思議的事一樣，誇張地感嘆你實在太跟不上時代。接著，他興致高昂地向你描述那裡的熱鬧景象：在 chocobo 競賽裡沿著賽道狂奔的身影、在 Triple Triad 桌前彼此較勁的挑戰者，還有數也數不完的娛樂與消遣。更重要的是，他信誓旦旦地說，只要你知道該怎麼玩，離開時就能比進去時更富有，彷彿再沒有哪個地方比那裡更適合讓人甩開疲憊與煩悶。</p><p>說到興頭上，他又故意拋出另一個誘人的理由，卻沒有把話說死，只留下一抹意味深長的笑，像是要你親自去見識那份魅力。到了這時，他幾乎已經篤定你心裡在想什麼，認定你一定正好奇，究竟要怎麼樣才能親身體驗 Gold Saucer 的種種精彩。</p><p>在這份好運的餘韻裡，他決定把幸運也分給你一點。正好他手邊還有一張多出來的金色飛空艇票，便帶著那種對自己相當滿意的慷慨，把它當作禮物送給你。他告訴你，只要把票交給飛空艇起降處那位穿制服的接待員，就能搭上下一班飛空艇，前往那個充滿歡樂與財富的地方。</p><p>不過，就算表現得大方，他的得意也絲毫沒有收斂。他還不忘先放話，若你們日後在 Triple Triad 的牌桌前再碰面，他可絕不會手下留情。之後你再與他交談，他也只是笑著重申，只要拿著那張票去辦理登記，你很快就能抵達 Gold Saucer，而要是到時真在牌桌上相遇，他恐怕得先為你的敗北道歉了。</p><p>到了飛空艇起降處後，負責前往 Manderville Gold Saucer 航班接待的 Elyenora 先請你出示票券，說要在辦理之前先完成確認。等她檢查無誤後，便以一貫平穩而正式的口吻告訴你，飛空艇會在下一次報時前不久出發，並詢問是否要替你保留座位。就在這樣平靜的問候之中，通往那座華麗遊樂殿堂的大門，也正式向你敞開。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> 闊綽的年輕人 <small class="muted">(烏爾達哈：納爾迴廊, X:9.6, Y:9.0)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="limsa-lominsa-the-lominsan-envoy.html">利姆薩・羅敏薩：啟程前往森都與砂都</a></div><div class="row"><a class="link" href="the-uldahn-envoy.html">烏爾達哈：啟程前往海都與森都</a></div><div class="row"><a class="link" href="gridania-the-gridanian-envoy.html">格里達尼亞：啟程前往海都與砂都</a></div><div class="row">只要任一職業達到等級 15 以上即可</div></div>`,
+    followq:`<div class="stack"><div class="row">待更新</div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
