@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>To Siege or Not to Siege | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – To Siege or Not to Siege (HW Patch 3.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/DneBxVvCspc"
+              title="To Siege or Not to Siege" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">To Siege or Not to Siege</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`To Siege or Not to Siege`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Papashan thanks you with unfeigned emotion for rescuing General Raubahn. To see him reduced to such a gaunt and ragged state is painful enough; to imagine all that he suffered in captivity is worse. Yet neither Papashan nor Pipin would have you linger there out of concern for him. Pipin promises that his father will be cared for, and that if any news is uncovered regarding Her Grace’s whereabouts, you will be told at once. Dewlala, too, makes her position plain. Matters here are now in her hands, and you are free to turn your attention to the next crisis pressing upon you.</p><p>That crisis announces itself almost immediately. Alphinaud receives a call from Tataru and learns that another assault is brewing. The Dravanians are preparing to renew their siege of the Holy See, and whatever fragile pause Ishgard had been granted is coming to an end. Though he is deeply reluctant to turn away while the sultana’s fate remains unresolved, Alphinaud knows you do not yet possess the proof needed to act openly upon Dewlala’s claims. For the moment, he resolves to leave the investigation in the hands of Marshal Tarupin and the others, and to return to Ishgard with all possible haste.</p><p>When you reach Fortemps Manor, the mood there leaves little room for doubt. Tataru apologizes for cutting short your reunion with Raubahn, but explains that the city is awash with rumors of another Dravanian attack, and Haurchefant has been desperate to reach you. Inside, the tension is shared by all. Artoirel speaks as one who has heard the warning and knows what it means. Emmanellain, for all his usual manner, has no comforting word to offer. Count Edmont receives you with grave restraint, while Haurchefant thanks you for returning so swiftly and confirms what the tolling bells of the Observatorium already suggest: the Dravanians gather once more for war.</p><p>Edmont does not summon you to demand service. Instead, he offers you a choice. When you first came to Ishgard, he gave you his protection, and he will not lightly ask you to risk yourselves in yet another conflict not your own. If he cannot guarantee your safety within his city, then he can scarcely accept your aid, much less request it. So he places the matter before the Scions plainly: remain in a besieged Ishgard, or seek sanctuary elsewhere. But the question strikes at something deeper in Alphinaud. He has fled enough. He has hidden enough. If the Scions are to shine the light of dawn, he says, they must do so where others can see it—not crouched in safety while their allies stand alone beneath a darkening sky.</p><p>When he turns to you and asks your will, the moment ceases to be merely strategic. It becomes a declaration of what kind of path you will walk next. Whatever uncertainty still clings to Ul’dah, whatever truths remain buried around Nanamo’s fate, another trial has already arrived at Ishgard’s gates. And so, with war gathering once more over the Holy See, you are forced to decide whether to remain beside those who sheltered you—or turn away before the storm breaks in full.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Alphinaud <small class="muted">(The Waking Sands, X:6.1, Y:6.0)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="keeping-the-flame-alive.html">Keeping the Flame Alive</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 51</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="alphinauds-way.html">Alphinaud’s Way</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'冒険者たちの決断',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>パパシャンは、ラウバーン将軍を救い出してくれたことに、心の底から礼を述べる。やつれ、身なりも乱れた将軍の姿を見るだけでも胸が痛むのに、その身にどれほどの苦難が降りかかっていたのかと思えば、なおさらだった。だが彼もピピンも、ラウバーンのためにここへ留まる必要はないと言う。父のことは自分が責任を持って看るとピピンは約し、もし陛下の居場所に関する情報が得られれば、真っ先に知らせると告げる。デュララもまた、この場の取り仕切りは自分が引き受けると断言し、あなたたちには、より差し迫った務めに向かってよいと促した。</p><p>その差し迫った危機は、ほどなくして姿を現す。アルフィノのリンクパールに入ったタタルからの連絡が、それを告げた。ドラヴァニア軍勢が再び教皇庁包囲のため動き始めたというのだ。イシュガルドに与えられていたわずかな猶予は、もはや尽きようとしていた。アルフィノは、王女の行方をこのままにしておくことに強い後ろめたさを抱きながらも、デュララの話を今すぐ表立って動くための証拠はまだ足りないと理解していた。だからこそ、タルピン元帥たちに調査を委ね、自分たちは急ぎイシュガルドへ戻るべきだと決断する。</p><p>フォルタン伯爵邸へ戻ると、そこに満ちる空気は、事態の深刻さを何より雄弁に物語っていた。タタルは、ラウバーン将軍との再会を途中で断ち切ることになった非礼を詫びつつも、街にはすでにドラヴァニアの再侵攻の噂が溢れ、オルシュファンがどうしてもあなたたちに会いたがっていたのだと説明する。邸内では、誰もが切迫した面持ちで待っていた。アルトアレールは警鐘の意味を理解しており、エマネランもまた軽口では済まされぬ状況を口にする。エドモン伯爵は重々しく迎え、オルシュファンは急ぎ戻ってきてくれたことに感謝しながら、観測所の鐘が告げたとおり、ドラヴァニア勢が再び戦支度を整えていると明かすのだった。</p><p>だが、エドモン伯爵はあなたたちに戦いを強いるために呼び戻したのではなかった。むしろ彼は、最初にイシュガルドへ来たとき、自らがあなたたちに保護を約したことを思い起こさせる。もしこの都であなたたちの安全すら守れないのなら、助力を受け入れることも、それを求めることもできないというのだ。ゆえに彼は、暁に選択を委ねる。包囲されようとするイシュガルドに残るのか、それとも別の避難先を探すのか。だが、その問いはアルフィノの胸の内に別の思いを呼び起こしていた。逃げ続けることには、もう飽きたのだ。もし暁が暁の光を掲げるのなら、それは人々の目の届く場所であるべきで、仲間たちを残して安全な穴に潜むような形であってはならないと、彼は言い切る。</p><p>そしてアルフィノがあなたに意思を問うたとき、その場は単なる戦術上の相談ではなくなる。それは、この先どのような道を選ぶのかを示す問いへと変わっていた。ウルダハに残された謎も、ナナモ女王を巡る真実も、まだ解き明かされたわけではない。それでも、イシュガルドの門前にはすでに新たな試練が迫っている。あなたは、かつて身を寄せることを許してくれた者たちの傍らに残るのか、それとも嵐が本格的に襲いかかる前に背を向けるのか、その決断を下さねばならなかった。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> アルフィノ <small class="muted">（砂の家, X:6.1, Y:6.0）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="keeping-the-flame-alive.html">ラウバーン奪還作戦</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 51～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="alphinauds-way.html">アルフィノの策</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'攸關去留的抉擇',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>Papashan 真心誠意地向你道謝，感謝你把 General Raubahn 從那樣的絕境中救了回來。光是看見他如今消瘦憔悴、衣容凌亂的模樣，就已足夠讓人心痛，更別說去想像他在囚禁之中到底承受了多少折磨。只是，無論是 Papashan 還是 Pippin，都不希望你因為 General Raubahn 而繼續在這裡停留。Pippin 向你保證，父親接下來會有人妥善照顧；若他們查到任何與 Her Grace 下落有關的消息，也一定會第一時間通知你。Dewlala 也明白表示，這裡的事將由她接手處理，而你現在應該去面對其他更緊迫的局勢。</p><p>那個更緊迫的危機，幾乎立刻就來了。Alphinaud 接到 Tataru 的聯絡後，神情很快沉了下去。Dravanians（以 Nidhogg 為首、反覆進攻 Ishgard 的龍族勢力）正在準備再次包圍 Holy See，Ishgard 好不容易得到的短暫喘息，轉眼又要被新的戰火吞沒。即使 Alphinaud 內心極不願在這時對 Sultana 的處境撒手不管，他也很清楚，眼下仍缺乏足以讓你們依照 Dewlala 那番話立刻採取行動的證據。既然如此，這件事就只能先交給 Marshal Tarupin 與其他人繼續調查，而你們則必須盡快返回 Ishgard。</p><p>當你們回到 Fortemps Manor 時，整座宅邸籠罩的氣氛，已經把情勢說得再清楚不過。Tataru 一見到你們，便先為打斷你與 General Raubahn 的重逢道歉，但她也立刻解釋，如今整座城裡都充滿了另一場 Dravanian 攻擊即將到來的傳聞，Haurchefant 更是急著想見你們。走進宅邸後，每個人的神情都寫滿了緊迫。Artoirel 聽見 Observatorium（Ishgard 設在 Coerthas 的觀測設施，負責觀測天象與周邊動向，也肩負警戒 Dravanian Horde 的前線監視職能）的鐘聲後，便知道這絕不是能被忽視的警訊；Emmanellain 即使語氣仍帶著他慣有的樣子，也說不出半句真正稱得上好消息的話。Count Edmont 則沉著地迎接你們，而 Haurchefant 在感謝你如此迅速趕回來之後，也正式說明了眼前的現實，Dravanians 又一次集結，準備對 Ishgard 發動戰爭。</p><p>然而，Count Edmont 把你們叫回來，並不是為了要求你們再替 Ishgard 承擔一次本不屬於自己的戰爭。相反地，他想起了你們初到 Ishgard 時，自己曾親口允諾過要提供庇護。若如今連你們在這座城中的安全都無法保證，那麼他便沒有立場接受你們的援手，更沒有資格主動向你們開口請求。因此，他把選擇交還給 Scions of the Seventh Dawn（由 Minfilia 集結的組織，致力於對抗 primal 威脅、調查異常事件，並守護 Eorzea 的和平）。你們可以留在即將被圍攻的 Ishgard，也可以趁還有時間時另尋避難之處。只是，這個問題落到 Alphinaud 心上時，喚起的已不只是謹慎，而是一種再也不想退避的疲憊。他坦白說，自己已經厭倦了不斷逃跑。若 Scions of the Seventh Dawn 要成為照亮黎明的那道光，就該站在人們看得見的地方，而不是躲在某個安全角落裡，任由盟友獨自面對天空壓下來的黑影。</p><p>當 Alphinaud 轉頭問你打算怎麼做時，這一刻便不再只是單純的戰術抉擇，而更像是一種對未來道路的表態。Ul’dah 的真相還沒有完全揭開，Nanamo 的下落也仍埋在重重迷霧之中，但另一場危機已經先一步抵達 Ishgard 的門前。你無法同時停留在所有地方，也不可能等一切都明朗之後才作出決定。於是，在新的 siege 即將降臨 Holy See 之際，你終究必須回答，是要留下來，站在那些曾經庇護你的人身邊，一起迎向這場風暴；還是在戰火真正墜落之前，轉身離去。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Alphinaud <small class="muted">(The Waking Sands, X:6.1, Y:6.0)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="keeping-the-flame-alive.html">拯救 Raubahn 大作戰</a></div><div class="row">任一戰鬥／魔法職業（不含受限職業）Lv. 51</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="alphinauds-way.html">Alphinaud 的盤算</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
