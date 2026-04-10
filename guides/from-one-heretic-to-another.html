@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>From One Heretic to Another | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – From One Heretic to Another (HW Patch 3.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/qkKcPvoDelk"
+              title="From One Heretic to Another" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">From One Heretic to Another</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`From One Heretic to Another`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>The search stalls until the scattered letters can be made to speak. Alphinaud admits, with some embarrassment, that the beast caught him off guard so badly that his hands still shake too much to weave spells. Estinien fares little better in his own way: the patrol has yielded nothing of worth, and its leader had more to say about frozen limbs than about Lady Iceheart. That leaves only one path before you. The letters found at Gorgagne Mills must contain the clue you need, or else you will be left to wander the snowfields hoping blind chance leads you to her.</p><p>Expedition Leader confirms what all of you have already begun to suspect. Before the white beasts mauled his comrades, his party uncovered what appeared to be correspondence. They had no chance to study it properly while fighting to survive, but he is convinced the pages contain more than idle greetings between isolated heretics. If Lady Iceheart is to be found, then her followers’ dealings may yet point the way. The search changes shape at once: no longer a hunt through snow and rumor alone, but a careful gathering of whatever traces the heretics left behind.</p><p>So the three of you begin to collect the scattered letters. Alphinaud finds several and urges you to build a respectable stack, hoping that Expedition Leader will be able to draw some secret from the pages once enough of them are assembled. Yet even this simple task becomes an irritation under the circumstances. The neat pile that once lay before the farmhouse has been thrown into disorder by the struggle, and Estinien’s patience wears thin as the search drags on through snow and confusion.</p><p>At last, enough pages are gathered. Added to the letters found by Alphinaud and Estinien, the collection grows to more than a dozen. Expedition Leader examines them and begins to piece together their meaning. Every page records dealings between the heretics of Gorgagne Mills and their allies in the Akh Afah Amphitheatre. The requests are practical and unadorned—food, clothing, provisions of every kind. But that plainness is exactly what gives them weight. These are not the relics of a refuge long abandoned. Iceheart’s followers are still making use of ruins you had believed empty.</p><p>What you gain is not Iceheart herself, not yet, but something almost as important: proof that the trail still lives. The path ahead remains uncertain, buried under snow and secrecy, yet the letters pull it back into view. The ruins are not silent. The network around Iceheart still breathes, still moves, still leaves marks behind for those patient enough to follow them.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Expedition Leader <small class="muted">(Coerthas Western Highlands, X:31.7, Y:12.0)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-search-of-iceheart.html">In Search of Iceheart</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 51</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="sounding-out-the-amphitheatre.html">Sounding Out the Amphitheatre</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'異端者の遺した物',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>探索は、散らばった書簡が口を開くまで前へ進まない。アルフィノは、あの獣に不意を突かれたせいで、いまだに魔法を織れるほど手の震えが収まらないと悔しげに認める。エスティニアンの聞き込みも成果は乏しく、巡回隊長から得られたのは、凍えた手足の話ばかりだった。そうなれば残された道はひとつしかない。ゴルガニュ牧場で見つかった手紙の中に手がかりを見いだすか、さもなくば雪原をさまよい、イゼルへ通じる偶然を祈るしかないのだ。</p><p>Expedition Leader は、あなたたちの推測を裏づけるように語る。白い獣に仲間が襲われる前、調査隊は確かに何通もの書簡を見つけていた。だが牙と爪の猛襲を前に、中身を詳しく確かめる余裕はなかった。それでも彼は、あの手紙が孤立した異端者同士の他愛ない挨拶だけで終わるはずがないと見ている。もしイゼルの居場所へ至る糸口があるのなら、それは彼女に連なる者たちのやり取りの中にこそ残されているはずだった。</p><p>こうしてあなたたちは、散乱した書簡をかき集めることになる。アルフィノもいくつかを見つけ出し、ある程度まとまった数をそろえようとあなたに促す。数が集まれば、Expedition Leader もそこから何かを読み解けるかもしれない。だが、その作業は思いのほか骨が折れる。もともと整然と積まれていたはずの手紙は、獣との乱戦ですっかり散り散りになっており、エスティニアンですら苛立ちを隠せないまま、雪の中を探し回ることになる。</p><p>やがて十分な枚数が集まり、アルフィノとエスティニアンが拾い集めた分を合わせれば、書簡は十通以上になっていた。Expedition Leader はそれらに目を通し、少しずつ意味をつなぎ合わせていく。そこに記されていたのは、ゴルガニュ牧場の異端者たちと、アク・アファー円形劇場にいる仲間たちとのやり取りだった。求められているのは食料や衣服、そしてさまざまな生活物資。飾り気のない内容だからこそ、その事実は重い。放棄されたと思われていた廃墟には、今もなおイゼルの一派が出入りしているのだ。</p><p>まだイゼルその人へは届かない。だが、あなたたちはそれに近いものを手に入れる。追跡の糸は、まだ切れてはいないという確かな証だ。道の先はなお雪と沈黙に閉ざされている。それでもこの書簡は、見えかけては消えていた足跡を、再びあなたたちの前へと引き戻してくれる。イゼルへ通じる道は、まだこの地のどこかで息づいている。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> 調査隊の騎兵隊長 <small class="muted">（クルザス西部高地, X:31.7, Y:12.0）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-search-of-iceheart.html">イゼルを探して</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 51～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="sounding-out-the-amphitheatre.html">円形劇場の激闘</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'異端所留下的線索',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>在找到新的線索之前，搜索幾乎陷入停滯。Alphinaud 帶著幾分懊惱承認，那頭怪物出現得太突然，直到現在他的雙手都還抖得厲害，根本沒辦法好好施展魔法。Estinien 那邊的結果也沒好到哪裡去，他從巡邏隊長口中聽來的，幾乎只有哪一邊的手腳凍得最慘，對 Lady Iceheart 的去向毫無幫助。於是，擺在你們面前的路只剩下一條：要嘛從 Gorgagne Mills 找到的那些信件裡讀出線索，要嘛就在雪原裡漫無方向地尋找，把一切都交給運氣。</p><p>Expedition Leader 的話，讓你們更加確定這些信件的重要性。在那些白色野獸撲上來、重傷他同伴之前，他們的確找到了一批看似書信往來的紀錄。只是當時情勢太危急，所有人都忙著在尖牙與利爪之下保住性命，根本沒有餘裕細看內容。但在他看來，那些信紙裡寫的，絕不只是孤單的異端者彼此問安而已。若 Lady Iceheart 的去向真有跡可循，那麼線索多半就藏在這些往來記錄之中。</p><p>於是，你、Alphinaud 和 Estinien 開始著手收集四散的信件。Alphinaud 自己也找到了一些，並催促你盡量把數量湊到足夠可觀，好讓 Expedition Leader 能從這些零碎文字裡整理出有用的東西。可原本看似單純的工作，做起來卻相當惱人。那些本來整齊堆放在農舍附近的信紙，早已在先前的混戰中被打散得七零八落，連 Estinien 都在搜尋途中顯得越來越不耐。</p><p>等到信件終於收得差不多時，再加上 Alphinaud 與 Estinien 找回來的部分，總數已經超過十封。Expedition Leader 逐一檢視之後，慢慢把其中的意思拼湊出來。這些頁面記錄的，正是 Gorgagne Mills 的異端者與 Akh Afah Amphitheatre 同夥之間的往來。內容裡提到的不是什麼高深機密，而是食物、衣物與各種生活物資。也正因為如此，這件事反而更加明確：你們原本以為早已廢棄的遺跡，其實依然有人使用，而 Lady Iceheart 的追隨者顯然還留在那裡活動。</p><p>你們還沒有直接找到 Lady Iceheart，但至少得到了一件同樣關鍵的事實——這條線索並沒有中斷。前方的道路依舊被風雪與隱匿層層遮掩，可這些信件已經重新把她留下的痕跡帶回你們眼前。那些看似沉寂的遺跡並沒有真正死去；沿著 Lady Iceheart 延伸出去的聯繫，仍然在某處持續運作，也仍然會留下能被追上的痕跡。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Expedition Leader <small class="muted">(Coerthas Western Highlands, X:31.7, Y:12.0)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="in-search-of-iceheart.html">尋找 Iceheart 的下落</a></div><div class="row">任一戰鬥／魔法職業（不含受限職業）Lv. 51</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="sounding-out-the-amphitheatre.html">圓形劇場激戰</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
