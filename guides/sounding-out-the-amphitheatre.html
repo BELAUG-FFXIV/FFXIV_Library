@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sounding Out the Amphitheatre | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Sounding Out the Amphitheatre (HW Patch 3.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/OqrTRZrNMS4"
+              title="Sounding Out the Amphitheatre" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Sounding Out the Amphitheatre</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Sounding Out the Amphitheatre`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>Once the letters are pieced together, the trail sharpens at last. Expedition Leader finds repeated requests for food, clothing, and every kind of daily provision, enough to make one conclusion unavoidable: Iceheart’s followers still dwell within ruins you had thought abandoned. Estinien explains that “Akh Afah,” taken from the dragons’ tongue, means something close to “Eternal Circle,” and says it is little wonder the heretics would return to such a place. When Alphinaud hears the name Akh Afah Amphitheatre, he immediately recalls what happened there before—the place where you witnessed the primal Shiva’s manifestation. The destination is no longer uncertain. It is only distant. The amphitheatre lies beyond a dangerous expanse of ice and snow, and the road to it is no easy one.</p><p>Alphinaud refuses to let distance halt you. He places his hope in the Aethernet, recalling that Moenbryda recreated the Akh Afah beacon after Lady Iceheart destroyed it. At the time, everyone believed the resulting aetheryte would only function for a short while. Yet if the heretics of Gorgagne Mills have truly remained in regular contact with their fellows at the amphitheatre, then the beacon may still be active even now. He proposes that you make at once for the aetheryte within Snowcloak. Estinien agrees that the route should be possible. After the tunnels were cleared, House Durendaire stationed soldiers at the western highlands entrance, but they will not bar your passage. The way forward opens not through certainty, but through a fragile chain of trust in what still may remain.</p><p>As you make for the tunnels, the journey stirs old memories. Alphinaud asks whether you remember the first time you ventured into this place in search of Lady Iceheart. To him, it already feels like an age ago, a time when he still believed himself commander of the Crystal Braves. Estinien notices the change in him at once. The moment you arrive at the wall, Alphinaud’s face loses its color, and Estinien dryly wonders whether your young lord fears meeting the heretics within their own lair. Around you, the men stationed there speak of slow progress and lingering danger. Not all the rats have left the nest, one says. Yet passage is granted, and Alphinaud steadies himself. If the Akh Afah beacon still functions, then you may reach your destination in moments. Still, he warns, even if Shiva herself does not await you, the welcome is unlikely to be warm. Heretics with your shared history are not likely to greet unexpected visitors with open arms.</p><p>The Akh Afah Amphitheatre rises before you as an ancient and imposing structure, enduring across ages you can scarcely imagine. Yet there is little time to dwell on its grandeur. Its occupants reveal themselves at once, and hostility answers your arrival before words can take root. Alphinaud tries to stay the violence, declaring that you come under the flag of parley and wish only to speak with their mistress in hopes of brokering peace. But the heretics see only enemies before them. To them, you are Ishgard’s hounds, and no plea can erase the fact that you stand beside Estinien, the dragonslayer whose name alone destroys any trust Alphinaud hoped to win. Even Alphinaud is forced to admit that words have failed before they truly began. The clash becomes unavoidable.</p><p>The battle strips away any last illusion that this path might be simple. The heretics fight with savage conviction, and in the midst of the struggle Estinien realizes the truth with horror and grim recognition: they partake of dragon blood. Alphinaud can scarcely believe that such a transformation is possible, yet the proof stands before him in flesh and fury. When Louistiaux of the First Line appears, the ferocity of their faith takes on an even more terrible shape. What confronts you here is not merely devotion, but a willingness to surrender body and soul alike in pursuit of it. By the time the fighting ends, the surviving heretics flee toward a place they call the Cinders.</p><p>Lady Iceheart herself is nowhere to be seen, and Alphinaud regrets that no one could be stopped long enough for questioning. Estinien dismisses the loss. The heretics’ path is already clear enough: they are making for the Cinders, and so must you. When Alphinaud asks what that name means, Estinien explains that it likely refers to the Dreaming Dragon, an island-like mass in the frozen lake of Ashpool. Five centuries ago, he says, an Azure Dragoon fought a dragon of colossal size there. When the beast was finally brought to the brink of death, an entire chapter of Holy See sorcerers forced it into a magical slumber. In time, ash and cinders fell upon the sleeping form until it was buried beneath gray, and later ice sealed it over. Alphinaud listens with fascination, then presses to continue without delay. Yet before you advance upon that frozen beast, Estinien insists on one more stop. At Twinpools, the Convictors have made camp, and their leader Jantellot may know something useful—if not of Iceheart herself, then of the heretics you may soon face.</p><p>At the Convictory, your reception is rough, almost mocking. The men there wear hardship openly, and Jantellot judges Alphinaud at a glance as too frail to last long in the wilds. Yet Estinien cuts through that scorn at once, declaring that he has seen this supposedly fragile youth fell heretics with a flick of his wrist. The moment Jantellot realizes who stands before him, his tone changes entirely. Faced with the Azure Dragoon himself, he offers an apology and names himself leader of the Convictors, a fellow slayer of dragons. As for Lady Iceheart, he knows her only by reputation and cannot claim to have seen her or her followers. Still, he admits that his men are not always diligent in their reports, and suggests that you question them yourselves. It is not the certainty you sought, but once again it is enough to carry you onward. In this frozen land, every step toward the truth must be earned piece by piece.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Alphinaud <small class="muted">(Coerthas Western Highlands, X:31.5, Y:11.6)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="from-one-heretic-to-another.html">From One Heretic to Another</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 51</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="camp-of-the-convictors.html">Camp of the Convictors</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'円形劇場の激闘',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>書簡をつなぎ合わせた先で、ようやく行き先がはっきりと形を帯びる。Expedition Leader が読み取ったのは、食料や衣服、さまざまな生活物資を求める記述の数々だった。それだけで十分だった。放棄されたと思われていた廃墟には、いまなおイゼルの追随者たちが身を寄せている。エスティニアンは「アク・アファー」という名が竜の言葉で、おおよそ「永遠の輪」を意味すると説明し、異端者たちがそこへ舞い戻ろうとしたのも不思議ではないと言う。アルフィノがその名を聞いて思い起こすのは、かつてあなたがシヴァの顕現を目にしたアク・アファー円形劇場そのものだった。行き先は定まった。ただ、そこへ至る道のりはあまりにも遠い。円形劇場は、危険な氷雪地帯の向こう側にあるのだ。</p><p>それでもアルフィノは足を止めない。彼が望みを託したのはエーテルネットだった。かつてイゼルに破壊されたアク・アファーの転送網中継点を、モーンブリダが再現したことを彼は思い出す。当時は、その結果生まれたエーテライトも一時的にしか機能しないと考えられていた。だが、ゴルガニュ牧場の異端者たちが円形劇場にいる仲間と継続して連絡を取っていたのなら、その転送先はいまもなお生きているかもしれない。アルフィノは、急ぎスノークローク内のエーテライトへ向かおうと提案する。エスティニアンも、その道は通れるはずだと応じる。トンネルが制圧されたあと、デュランデル家は西部高地側の入口に兵を置いたが、あなたたちの行く手を阻むことはない。確信ではなく、まだ残っているはずの可能性を信じて、あなたたちは先へ進む。</p><p>坑道へ向かう道すがら、かつての記憶が自然とよみがえる。アルフィノは、あなたが初めてイゼルを追ってこのトンネルへ足を踏み入れたときのことを覚えているかと問いかける。彼にとってそれは、もはや遠い昔のことのように思える。当時の自分は、まだクリスタルブレイブの総帥であると信じていたのだと。壁際へ着いた瞬間、アルフィノの顔色がさっと失われたのを見て、エスティニアンは、異端者たちの巣へ踏み込むのが怖くなったのかと皮肉めいた声をかける。周囲では、坑道の調査は西側入口から進められているものの、まだ完全には終わっていないと兵たちが語る。どうやら、巣穴から去っていない鼠もいるらしい。それでも通行は許され、アルフィノも気持ちを立て直す。もしアク・アファーの転送網中継点がまだ機能しているなら、目的地まではほんの一瞬だ。もっとも、たとえシヴァ本人が待ち受けていないとしても、異端者たちがよそ者を快く迎えるとは思えない。まして、あなたたちには彼らとの因縁がある。</p><p>アク・アファー円形劇場は、幾時代を耐え抜いてきたのかと思わせるほど壮大な姿であなたたちを迎える。だが、その威容に見入る間もなく、この地に潜む者たちが姿を現す。アルフィノは、武器を収めるよう呼びかけ、自分たちは交渉の旗のもとに来たのであり、和平を取り持つために彼らの主と話したいだけなのだと訴える。けれども、異端者たちにとってあなたたちはただのイシュガルドの犬でしかない。しかも傍らには竜殺しエスティニアンがいる。その事実だけで、どんな言葉も信じるに値しないものとなってしまう。エスティニアンの名は彼らの警戒を決定的なものにし、アルフィノも、もはや戦いを避ける術はないと悟る。</p><p>そして始まった戦いは、この道が決して穏やかなものではないことを容赦なく突きつけてくる。異端者たちは狂信にも似た執念で襲いかかり、その最中にエスティニアンは重い事実を見抜く。彼らは竜の血を口にしているのだ。アルフィノは、その血が本当にここまで人を変えてしまうのかと愕然とするが、目の前にあるのは否定しようのない現実だった。さらに第一陣のルイストーが現れたことで、その信仰の危うさは一層露わになる。ここにあるのは単なる忠誠ではない。肉体も魂も差し出すことをいとわぬ、極端な信奉だ。戦いの果てに、生き残った異端者たちは「燃えさし」へ退いていく。</p><p>イゼルの姿はどこにも見えず、アルフィノは、せめて誰かひとりでも問い質せればよかったのにと悔やむ。だがエスティニアンは、それでも行き先は十分に見えていると言う。異端者たちは「燃えさし」へ向かった。ならば、あなたたちもそこへ向かうだけだ。アルフィノがその名の意味を問うと、エスティニアンは、それはおそらくアッシュプールの凍てついた湖のただ中に横たわる島のような存在、「眠れる竜」を指す異端者たちなりの呼び名だろうと説明する。五百年ほど昔、その地で当代の蒼の竜騎士が巨大な竜と戦い、激闘の末に瀕死へ追い込んだという。だが完全には討てず、聖教庁の魔道士たち一団がその竜を魔法で眠りにつかせた。その後、灰と燃えさしが降り積もって巨体を覆い尽くし、さらに長い年月のうちに厚い氷がその上を閉ざした。アルフィノはその話に強く心を引かれつつも、急がねばならないと気を引き締める。だが、その凍れる巨獣へ近づく前に、エスティニアンはもう一か所立ち寄りたい場所があると言う。ツインプールに陣を敷くコンビクター、その長ジャンテロットが何か役立つ情報を持っているかもしれないからだ。</p><p>コンビクトリーで待っていたのは、荒々しく、どこか人を試すような出迎えだった。そこにいる者たちは皆、この極寒の地で生きる厳しさをそのまま身にまとっている。ジャンテロットもまた、アルフィノをひと目見ただけで、この野に出れば三日も持たずに屍をさらすだろうと見下す。だがエスティニアンは即座にその侮りを断ち切り、この「ひ弱な」若者が、手首ひとつ払うように異端者を屠るのを見たことがあると告げる。目の前にいるのが蒼の竜騎士その人だと気づいた瞬間、ジャンテロットの態度は一変する。彼は無礼を詫び、自らをコンビクターを率いる者、そして同じく竜を狩る者だと名乗る。イゼルについては、その名を聞いたことこそあれ、本人やその一派を見たわけではない。だが部下たちは報告がいささか杜撰なこともあると認め、必要ならあなたたち自身で彼らに話を聞くとよいと勧める。求めていた確かな答えではない。それでも、またひとつ先へ進むには十分な手がかりだった。この凍てつく大地では、真実へ至る一歩一歩を、そうして拾い集めていくしかないのだ。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> アルフィノ <small class="muted">（クルザス西部高地, X:31.5, Y:11.6）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="from-one-heretic-to-another.html">異端者の遺した物</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 51～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="camp-of-the-convictors.html">嗚呼、聖フィネア連隊</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'圓形劇場激戰',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>等這些信件真正被拼湊起來之後，前方的方向終於開始變得清晰。Expedition Leader 從裡面讀出的，是一封又一封索取食物、衣物與各種生活物資的要求。光是這一點，就已經足夠說明現況：你們原本以為早就被放棄的那些遺跡，其實仍然住著 Lady Iceheart 的追隨者。Estinien 接著說明，「Akh Afah」是龍語，大致帶有「永恆之環」的意思，異端者會選擇回到那裡，也就不難理解了。當 Alphinaud 聽見 Akh Afah Amphitheatre 這個名字時，也立刻想起那正是你曾親眼目睹 primal Shiva 顯現的地方。如此一來，目的地終於確定了，只是那裡距離遙遠，隔著一大片危險的冰雪地帶，絕不是能輕易抵達的所在。</p><p>Alphinaud 並不打算因此停下腳步。他把希望寄託在 Aethernet 上，想起 Moenbryda 曾在 Lady Iceheart 毀掉 Akh Afah beacon 之後，成功重建了那個傳送節點。當時所有人都以為，重新生成的 aetheryte 只能暫時維持運作而已。但如果 Gorgagne Mills 的異端者一直都有和圓形劇場那邊的同夥保持聯繫，那麼那個節點現在也許仍然能用。於是他提議你們立刻前往 Snowcloak 內的 aetheryte。Estinien 也認為這條路應該行得通。那些地道被清理之後，House Durendaire 已經在 western highlands 的入口部署了士兵，但他們不會阻擋你們通行。於是你們只能把信心寄託在這條仍可能存在的通路上，帶著並不完整的把握繼續前進。</p><p>前往坑道的途中，也自然勾起了過去的記憶。Alphinaud 問你，還記不記得第一次為了尋找 Lady Iceheart 而走進這些地道的時候。對他而言，那彷彿已經是很久以前的事了，那時候的他，還真心相信自己是 Crystal Braves 的指揮者。可一抵達牆邊，Estinien 就注意到他臉色驟然發白，還語帶嘲諷地問，他是不是在害怕要進入異端者自己的巢穴。駐守在那裡的人則告訴你們，從西側入口展開的勘查進度依然緩慢，看來並不是所有老鼠都已經離開巢穴。儘管如此，你們仍被允許進入。Alphinaud 也勉強穩住心神，表示只要 Akh Afah beacon （通往 Akh Afah 的傳送節點）依然可用，你們很快就能抵達目的地。不過就算不至於再見到 primal Shiva 本人，你們也最好做好準備，因為那些異端者絕不可能熱烈歡迎像你們這樣的不速之客，尤其是你們和他們之間，本就有過太多前嫌。</p><p>當 Akh Afah Amphitheatre 真正出現在眼前時，它古老而壯觀得令人一時說不出話來，彷彿已經在這片土地上矗立了無數歲月。但你們沒有太多時間停下來感嘆。這裡的居住者很快便現身，而迎接你們的，首先不是談話，而是濃烈的敵意。Alphinaud 急忙要求對方停手，表明你們是帶著停戰交涉的意圖而來，只想見見他們的主子，試著促成和平。然而對那些異端者來說，站在眼前的只是一群 Ishgard 的走狗。無論 Alphinaud 的話語多麼克制，都不足以抹去另一個事實：你們是和屠龍者 Estinien 一起出現的。光是這一點，就已經讓任何信任徹底失去可能。連 Alphinaud 最後也只能無奈承認，這場衝突已經沒有迴避的餘地了。</p><p>接下來的戰鬥，毫不留情地把這條路的殘酷攤在你們面前。異端者帶著近乎瘋狂的信念撲上來，而在交鋒之中，Estinien 很快便察覺到真正可怕的事實：他們飲下了龍血。Alphinaud 幾乎無法相信，dragon blood（龍族之血，會對凡人的身體與意志造成劇烈改變）竟然真的能帶來如此可怕的變化，可眼前的一切根本不容否認。當 Louistiaux of the First Line 現身時，這份信仰的危險性也進一步被推到極致。你們面對的不只是忠誠，而是一群願意連肉體與靈魂都一併獻出去的人。等戰鬥結束後，殘存的異端者便朝著他們口中的「Cinders」撤退。</p><p>可 Lady Iceheart 的身影依舊沒有出現。Alphinaud 遺憾地表示，若能設法抓住其中一人問話就好了。Estinien 卻不認為這有多重要，因為對方的去向其實已經很清楚了。他們前往了「Cinders」，那你們也只能跟上去。當 Alphinaud 詢問那個名字究竟代表什麼時，Estinien 解釋，那多半是異端者對 Dreaming Dragon 的稱呼——那是在 Ashpool 結冰湖面中央、如同一座島般橫臥著的存在。大約五百年前，當代的 Azure Dragoon 曾在那裡與一頭巨大無比的龍交戰。經過一場慘烈的廝殺之後，那條龍雖然被逼到瀕死，卻沒有真正死去，而是被 Holy See 的整整一支魔道士部隊強行施下魔法沉睡。後來，灰燼與燃燒後的碎屑不斷落在那條沉眠之龍的身上，最終把牠整個覆蓋起來，再經過漫長歲月，又在表面形成了厚重的冰層。Alphinaud 聽完這段往事後，只想更快動身前往那座灰燼之島。然而在真正靠近那頭冰封巨獸之前，Estinien 堅持還要先去另一個地方。Twinpools 的 Convictors 已經扎營，他們的首領 Jantellot 或許知道一些對你們有用的消息。</p><p>到了 The Convictory 之後，迎接你們的態度並不客氣，甚至帶著明顯的輕蔑。那裡的人都把這片酷寒荒野的粗礪直接刻在言行裡，Jantellot 也不例外。他只看了 Alphinaud 一眼，就斷言這個看起來過於單薄的少年若丟進荒野，恐怕三天內就會死得乾乾淨淨。但 Estinien 立刻打斷了這份輕視，直言自己曾親眼看過這個「瘦弱」的年輕人只用手腕一揮，就能擊倒異端者。當 Jantellot 意識到站在自己面前的人正是 Azure Dragoon 本人時，態度立刻完全改變。他連忙賠罪，自報身分為 Convictors 的首領，也是同樣獵殺巨龍的人。至於 Lady Iceheart，他只聽過她的名聲，卻沒真正見過她或她的手下。不過他也承認，自己部下在回報事情時常常有些鬆散，所以若你們願意，不妨親自去 camp 裡問問其他人。這依然不是你們最想要的明確答案，但已經足夠讓你們再往前推進一步。在這片凍結的大地上，通往真相的每一步，本來就只能靠這樣一點一點地拼出來。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Alphinaud <small class="muted">(Coerthas Western Highlands, X:31.5, Y:11.6)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="from-one-heretic-to-another.html">異端所留下的線索</a></div><div class="row">任一戰鬥／魔法職業（不含受限職業）Lv. 51</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="camp-of-the-convictors.html">定罪營地</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
