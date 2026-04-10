@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Camp of the Convictors | BELAUG · FFXIV Library</title>
+  <meta name="description" content="MSQ – Camp of the Convictors (HW Patch 3.0)">
+  <link rel="icon" href="../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/oX85g0sdlFU"
+              title="Camp of the Convictors" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Camp of the Convictors</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"    class="tab-panel active"></div>
+          <div id="panel-acq"      class="tab-panel"></div>
+          <div id="panel-unlockq"  class="tab-panel"></div>
+          <div id="panel-followq"  class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'EN',
+    pageTitle:`Camp of the Convictors`,
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more', readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true"><p>The camp offers little dignity and even less usefulness at first. One man jokes that the cold is sharper than Lady Iceheart’s frost-rimed soul, only to be rebuked by another who can scarcely keep watch for dragon wings through the noise of his chatter. Estinien, hearing this exchange, mutters that he may have been mistaken to seek wisdom from such pups. Yet Alphinaud does not let his frustration turn him away. Tedious though this task may be, he says, one of these people may still know something that could spare you days of blind searching. So you begin asking questions, one by one, hoping that beneath the noise and carelessness there may still be a useful scrap of truth.</p><p>What you find at first is mostly indifference. One woman dismisses the matter outright, saying she has enough trouble feeding and clothing the fools around her without concerning herself with what folk do out in the wilds. One of the rougher men says he knows of no heretics and has no intention of keeping count of every passing face in camp. Another, prouder of his trade, admits freely that a heretic could pass right under his nose without his noticing. He hunts dragons, he says, and only the great ones in the sky matter to him. From Jantellot you receive no firm answer either. He has not seen Lady Iceheart himself, though he suggests that among the Convictors, one of the other dragonslayers may have heard something worth your time.</p><p>At last, one of them proves willing to speak in earnest. Pierriquet is no proud hunter and makes no attempt to sound like one. He introduces himself as a soldier by trade, though not much of one by his own reckoning, and admits that he did not take up the spear out of any love for bloodshed. He was ordered into service by Ser Jantellot’s father, and as long as the wages keep coming, he has learned not to be too particular about the work. In his plain and weary honesty, the camp around him begins to make more sense. Not every man there chose this life. Many endure it because there was never much choice to begin with.</p><p>From that truth, another follows. Pierriquet explains that plenty of lowborn lads pressed into service begin to grumble before they have even seen a second battle. Once bitterness takes hold, it does not take much for the heretics to turn their heads. From what he has heard, the promise of freedom alone is often enough. Alphinaud quickly grasps what that means. If such promises can reach men already worn down by duty and resentment, then it is no wonder Lady Iceheart’s following grew so swiftly. Her cause does not spread by zeal alone, but by offering escape to those who have long felt trapped.</p><p>Pierriquet’s final piece of knowledge gives your search its first real direction. Some companions of his, he says, swallowed the heretics’ words whole and went off to the western highlands to light a signal fire. That, apparently, is how one proves sincerity to them. Send up purple smoke, and the heretics will come to you. Estinien’s response is immediate and dry as winter itself. If that is so, then he is minded to start a fire. What had seemed another dead end suddenly becomes a path. The trap has not yet been set, but already you can feel the search shifting from questions to action.</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Alphinaud <small class="muted">(Coerthas Western Highlands, X:16.9, Y:22.7)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="sounding-out-the-amphitheatre.html">Sounding Out the Amphitheatre</a></div><div class="row">Any Disciple of War or Magic (excluding limited jobs) Lv. 51</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="purple-flame-purple-flame.html">Purple Flame, Purple Flame</a></div></div>`
+  },
+  JP:{
+    langLabel:'JP',
+    pageTitle:'嗚呼、聖フィネア連隊',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示', readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true"><p>駐屯地で最初に耳に入ってくるのは、品のない軽口と、それをたしなめる怒声だった。ひとりは、イゼルの凍てついた魂より寒いなどと冗談を飛ばし、もうひとりは、その無駄口のせいで竜影を見張る耳まで狂わされると吐き捨てる。そんなやり取りを聞いたエスティニアンは、こんな若造どもに知恵を求めたのは間違いだったかもしれぬと呆れ気味に漏らす。それでもアルフィノは、ここで手を引こうとはしない。たしかに骨の折れる聞き込みではあるが、この者たちの誰かが、何日もの捜索を省くような情報を握っているかもしれない。そう信じて、あなたはひとりひとりに話を聞いて回ることになる。</p><p>だが、最初に返ってくるのは、役に立たぬ言葉ばかりだった。ある女は、 camp の連中に食事と衣服を行き渡らせるだけで手一杯だと言い、荒野で誰が何をしていようと自分の知ったことではないと突き放す。粗野な男は、異端者など知らぬし、 camp を出入りする者すべてに目を配るつもりもないと言う。別の弓兵は、異端者が鼻先を通っても気づかないだろうと平然と笑い、自分が狙うのは空を舞う大きな竜だけだと豪語する。ジャンテロットにしても、イゼル本人を見たことはなく、ただ仲間の誰かが何かを知っているかもしれぬと示唆するに留まる。期待したほどの成果は、すぐには得られない。</p><p>そんななかで、ようやく真面目に口を開く者が現れる。ピエリケは、自分を兵士だと名乗りながらも、大した兵ではないとあっさり認める。もともと槍を取ったのも、人を刺したいからではなかった。ジャンテロットの父に命じられたから従っただけで、今は賃金さえ払われるなら与えられた仕事をこなすだけだという。気負いも見栄もないその語り口からは、この camp にいる者たちの現実が少しずつ浮かび上がってくる。ここにいるすべての者が、自ら望んでこの道を選んだわけではないのだ。</p><p>そして、その現実の先にこそ、異端者たちが入り込む余地があった。身分の低い若者の中には、二度目の戦いを経験する前から不満を漏らし始める者も少なくないという。不公平だという思いに囚われた者ほど、異端者たちの言葉に揺さぶられやすい。ピエリケが聞いたところでは、自由になれるという単純な約束だけで心を動かされることもあるらしい。アルフィノはその話を聞き、イゼルがいかにして短期間で支持を広げたのかを悟る。彼女の一派が人を集めたのは、熱狂だけによってではない。行き場のない者に、逃げ道のような希望を差し出していたからだ。</p><p>やがてピエリケは、ようやく捜索を前へ進める具体的な話を口にする。彼の仲間の中にも、異端者の甘言を鵜呑みにし、西部高地へ信号の火を上げに向かった者たちがいたという。それが仲間入りの本気を示す方法らしい。紫の煙を上げれば、異端者たちのほうから近づいてくる。エスティニアンはその話を聞くなり、では火を起こすとしようかと、冬の空気のように乾いた調子で言い放つ。聞き込みはようやく、無駄話の積み重ねから、次の行動へと形を変え始める。行き止まりに見えた道の先に、ようやく踏み出すべき一歩が現れたのだった。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>クエスト発行</b> アルフィノ <small class="muted">（クルザス西部高地, X:16.9, Y:22.7）</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="sounding-out-the-amphitheatre.html">円形劇場の激闘</a></div><div class="row">ファイター ソーサラー (リミテッドジョブを除く) Lv 51～</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="purple-flame-purple-flame.html">千年の裏切り</a></div></div>`
+  },
+  ZH:{
+    langLabel:'ZH',
+    pageTitle:'定罪營地',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文', readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true"><p>你們在營地裡最先聽見的，不是什麼有用的情報，而是一連串沒什麼營養的鬥嘴。有人拿 Lady Iceheart 冰霜覆身的靈魂來開玩笑，說天氣冷得比她還誇張，結果立刻被另一人嫌棄，抱怨他的廢話吵得自己連遠處有沒有 dragon wings 的動靜都聽不清。聽著這些對話，Estinien 冷冷丟下一句，說自己或許根本不該來向這群毛頭小子討什麼智慧。可 Alphinaud 並不打算因此放棄。他承認這確實是件相當乏味的差事，但只要這些人當中有一個真的見過異端者，就可能替你們省下好幾天毫無方向的搜索。於是，你只能耐著性子，一個接一個地問下去。</p><p>起初得到的，大多只是冷淡和敷衍。有人直接表示，自己光是忙著餵飽、照料營地裡這些愛擺架子的傢伙就夠頭痛了，根本沒空去管外頭那些人在荒野裡做什麼。有人則不耐煩地說，自己怎麼可能去記住每一個進進出出的人。還有一名弓兵乾脆承認，就算異端者從自己眼前走過，他恐怕也不會發現，因為他只關心天上那些真正值得獵殺的大型龍族，根本不把地上亂跑的人放在眼裡。連 Jantellot 也只能說，自己沒親眼見過 Lady Iceheart，但 Convictors 四處追蹤獵物，也許有其他人聽過什麼消息。你們想要的答案，始終沒有立刻出現。</p><p>直到 Pierriquet 願意真正坐下來說話，事情才終於有了些變化。他並不像其他人那樣急著裝出什麼了不起的模樣，反而先坦白，自己雖然算是個士兵，卻也說不上多像樣。他拿起長槍，從來不是因為喜歡殺人，而只是因為 Ser Jantellot 的父親下了命令。只要薪水還有照發，他也不怎麼挑自己究竟被派去做什麼。正因為他說得這麼直接，這座營地的另一面反而慢慢顯露出來。不是每個待在這裡的人，都是出於自願才成為戰士的；有很多人，只是被推著走到了這一步。</p><p>而也正是在這樣的人心裡，異端者才有了可趁之機。Pierriquet 說，很多出身低微、被硬逼著服役的年輕人，甚至還沒撐到第二場戰鬥，就已經開始抱怨命運的不公平。一旦這種念頭在心裡越積越深，異端者便很容易趁虛而入。據他所知，光是一句「你可以得到自由」，往往就足以讓那些人心動。Alphinaud 聽到這裡，也立刻明白了 Lady Iceheart 為什麼能在這麼短的時間內迅速壯大勢力。她能吸引追隨者，靠的並不只是信仰或煽動，而是把一條看似能逃離現狀的路，擺到了那些早就被逼得喘不過氣的人面前。</p><p>最後，Pierriquet 終於說出了真正能讓你們往前走的一條線索。他提到，自己有些同伴曾經把異端者那套說詞全盤吞下，接著便動身前往 western highlands 點起 signal fire（用來向遠方傳遞訊號的火光）。那似乎就是向異端者表明自己真心想加入他們的方法。只要升起紫色煙霧，那些傢伙自然就會主動找上門。Estinien 聽完後，只淡淡回了一句，既然如此，那他倒想點一把火看看。直到這一刻，原本只是漫無目的的探問，才終於真正轉成了下一步行動。看似走不通的路，也總算露出了能夠繼續追下去的方向。</p></div><div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack"><div class="row"><b>Quest Giver</b> Alphinaud <small class="muted">(Coerthas Western Highlands, X:16.9, Y:22.7)</small></div></div>`,
+    unlockq:`<div class="stack"><div class="row"><a class="link" href="sounding-out-the-amphitheatre.html">圓形劇場激戰</a></div><div class="row">任一戰鬥／魔法職業（不含受限職業）Lv. 51</div></div>`,
+    followq:`<div class="stack"><div class="row"><a class="link" href="purple-flame-purple-flame.html">千年的背叛</a></div></div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle.replace(/&#39;/g,"'");
+  langToggle.textContent = `🌐 ${t.langLabel}`;
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+      repo: 'BELAUG-FFXIV/FFXIV_Library',
+      repoId: 'R_kgDOPyh4Kw',
+      category: 'General',
+      categoryId: 'DIC_kwDOPyh4K84CwPjL',
+      theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
