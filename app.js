@@ -640,6 +640,7 @@ function applyLangUI(lang) {
   if (q) q.placeholder = dict.searchPH;
   if (itemsSuffixEl && dict.itemsSuffix) itemsSuffixEl.textContent = ` ${dict.itemsSuffix}`;
   if (subscribeCta && dict.subscribeCta) subscribeCta.textContent = dict.subscribeCta;
+  if (supportBtn && dict.supportCta) supportBtn.textContent = dict.supportCta;
 
   refillSelect(categorySel, dict.categories, true);
   refillSelect(expacSel, dict.expansions, true);
