@@ -588,7 +588,7 @@ JP: {
       { value: 'DoHDoL',         label: '生產／採集職任務' },
       { value: 'AlliedSociety',  label: '友好部族任務' },
       { value: 'SideFeature',    label: '支線／功能開放任務' },
-      { value: 'BlueMage',       label: '青魔法' },
+      { value: 'BlueMage',       label: '青魔道士' },
       { value: 'Hildibrand',     label: '希爾迪布蘭德奇譚' },
       { value: 'Seasonal',       label: '季節／特別活動' },
       { value: 'GoldSaucer',     label: '金碟遊樂場' },
