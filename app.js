@@ -469,7 +469,7 @@ Every entry also has a message board where you can share your thoughts and conne
       { value: 'Seasonal',       label: 'Seasonal / Special Events' },
       { value: 'GoldSaucer',     label: 'Gold Saucer' },
       { value: 'BGM',            label: 'BGM' },
-      { value: 'TreasureHunt',   label: 'Treasure Hunt' }
+      { value: 'TreasureHunt',   label: 'Treasure Hunt' },
       { value: 'CollMount',      label: 'Collection (Mount)' },
       { value: 'CollWeapon',     label: 'Collection (Weapon)' },
       { value: 'CollTool',       label: 'Collection (Crafting/Gathering Tools)' },
@@ -529,7 +529,7 @@ Every entry also has a message board where you can share your thoughts and conne
       { value: 'Seasonal',       label: 'シーズナル／スペシャルイベント' },
       { value: 'GoldSaucer',     label: 'ゴールドソーサー' },
       { value: 'BGM',            label: 'BGM' },
-      { value: 'TreasureHunt',   label: 'トレジャーハント' }
+      { value: 'TreasureHunt',   label: 'トレジャーハント' },
       { value: 'CollMount',      label: 'コレクション（マウント）' },
       { value: 'CollWeapon',     label: 'コレクション（武器）' },
       { value: 'CollTool',       label: 'コレクション（クラフター／ギャザラーツール）' },
@@ -589,7 +589,7 @@ Every entry also has a message board where you can share your thoughts and conne
       { value: 'Seasonal',       label: '季節／特別活動' },
       { value: 'GoldSaucer',     label: '金碟遊樂場' },
       { value: 'BGM',            label: 'BGM' },
-      { value: 'TreasureHunt',   label: '藏寶圖' }
+      { value: 'TreasureHunt',   label: '藏寶圖' },
       { value: 'CollMount',      label: '蒐集（坐騎）' },
       { value: 'CollWeapon',     label: '蒐集（武器）' },
       { value: 'CollTool',       label: '蒐集（製作／採集工具）' },
