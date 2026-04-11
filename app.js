@@ -469,6 +469,7 @@ Every entry also has a message board where you can share your thoughts and conne
       { value: 'Seasonal',       label: 'Seasonal / Special Events' },
       { value: 'GoldSaucer',     label: 'Gold Saucer' },
       { value: 'BGM',            label: 'BGM' },
+      { value: 'TreasureHunt',   label: 'Treasure Hunt' }
       { value: 'CollMount',      label: 'Collection (Mount)' },
       { value: 'CollWeapon',     label: 'Collection (Weapon)' },
       { value: 'CollTool',       label: 'Collection (Crafting/Gathering Tools)' },
@@ -528,6 +529,7 @@ Every entry also has a message board where you can share your thoughts and conne
       { value: 'Seasonal',       label: 'シーズナル／スペシャルイベント' },
       { value: 'GoldSaucer',     label: 'ゴールドソーサー' },
       { value: 'BGM',            label: 'BGM' },
+      { value: 'TreasureHunt',   label: 'トレジャーハント' }
       { value: 'CollMount',      label: 'コレクション（マウント）' },
       { value: 'CollWeapon',     label: 'コレクション（武器）' },
       { value: 'CollTool',       label: 'コレクション（クラフター／ギャザラーツール）' },
@@ -587,6 +589,7 @@ Every entry also has a message board where you can share your thoughts and conne
       { value: 'Seasonal',       label: '季節／特別活動' },
       { value: 'GoldSaucer',     label: '金碟遊樂場' },
       { value: 'BGM',            label: 'BGM' },
+      { value: 'TreasureHunt',   label: '藏寶圖' }
       { value: 'CollMount',      label: '蒐集（坐騎）' },
       { value: 'CollWeapon',     label: '蒐集（武器）' },
       { value: 'CollTool',       label: '蒐集（製作／採集工具）' },
@@ -597,11 +600,11 @@ Every entry also has a message board where you can share your thoughts and conne
     expansions: [
       { value: '',    label: '全部資料片' },
       { value: 'ARR', label: '新生艾奧傑亞（ARR）' },
-      { value: 'HW',  label: '蒼天的伊修加德（HW）' },
-      { value: 'SB',  label: '紅蓮的解放者（SB）' },
-      { value: 'SHB', label: '漆黑的反叛者（SHB）' },
-      { value: 'EW',  label: '曉月的終焉（EW）' },
-      { value: 'DT',  label: '黃金的遺產（DT）' },
+      { value: 'HW',  label: '蒼天伊修加爾德（HW）' },
+      { value: 'SB',  label: '紅蓮解放者（SB）' },
+      { value: 'SHB', label: '漆黑反叛者（SHB）' },
+      { value: 'EW',  label: '曉月之終途（EW）' },
+      { value: 'DT',  label: '黃金遺產（DT）' },
     ],
     patches: [
       { value: '',    label: '全部 Patch' },
