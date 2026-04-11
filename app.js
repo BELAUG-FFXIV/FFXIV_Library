@@ -27,6 +27,7 @@ const activeTags   = document.getElementById('activeTags');
 const themeToggle  = document.getElementById('themeToggle');
 const langToggle   = document.getElementById('langToggle');
 const subscribeCta = document.getElementById('subscribeCta');
+const supportBtn   = document.getElementById('supportBtn');
 
 /* =========================
    推薦影片設定
