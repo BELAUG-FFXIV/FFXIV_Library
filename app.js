@@ -28,6 +28,7 @@ const themeToggle  = document.getElementById('themeToggle');
 const langToggle   = document.getElementById('langToggle');
 const subscribeCta = document.getElementById('subscribeCta');
 const supportBtn   = document.getElementById('supportBtn');
+const supportNote  = document.getElementById('supportNote');
 
 /* =========================
    推薦影片設定
