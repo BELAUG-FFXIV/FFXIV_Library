@@ -645,6 +645,7 @@ function applyLangUI(lang) {
   if (itemsSuffixEl && dict.itemsSuffix) itemsSuffixEl.textContent = ` ${dict.itemsSuffix}`;
   if (subscribeCta && dict.subscribeCta) subscribeCta.textContent = dict.subscribeCta;
   if (supportBtn && dict.supportCta) supportBtn.textContent = dict.supportCta;
+  if (supportNote && dict.supportNote) supportNote.textContent = dict.supportNote;
 
   refillSelect(categorySel, dict.categories, true);
   refillSelect(expacSel, dict.expansions, true);
