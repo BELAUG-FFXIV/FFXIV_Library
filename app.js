@@ -444,6 +444,7 @@ EN: {
   langLabel: 'EN',
   subscribeCta: '🔔 Subscribe',
   supportCta: '☕ Support BELAUG’s ongoing journey',
+  supportNote: 'A small gesture that helps this story archive continue to grow.',
     tagline: `<b>FFXIV Library</b> is an extension of my YouTube channel.<br>
 Here you’ll find additional story details — quest records, background notes, and elements that couldn’t be fully shown in each video.<br>
 Every entry also has a message board where you can share your thoughts and connect with fellow travelers.`,
@@ -505,6 +506,7 @@ JP: {
   langLabel: 'JP',
   subscribeCta: '🔔 チャンネル登録',
   supportCta: '☕ BELAUG の続いていく旅を応援する',
+  supportNote: 'この物語のアーカイブが少しずつ育っていくための、小さな後押しです。',
     tagline: `<b>FFXIV Library</b> は、私の YouTube チャンネルを補完する資料館です。<br>
 映像だけでは伝えきれない物語の細部──クエスト記録や背景設定などをここに収めています。<br>
 各ページにはメッセージボードもあり、感じたことを旅人同士で共有できます。`,
@@ -566,6 +568,7 @@ JP: {
   langLabel: 'ZH',
   subscribeCta: '🔔 訂閱頻道',
   supportCta: '☕ 支持 BELAUG 持續前行的旅程',
+  supportNote: '讓這座故事資料館能慢慢繼續成長的一點小小力量。',
     tagline: `<b>FFXIV Library</b> 是我 YouTube 頻道的延伸資料館。<br>
 這裡收錄了更多在影片中無法完整呈現的內容──任務紀錄、背景資料與細節補充。<br>
 每部影片下方也設有留言板，歡迎留下你的想法與感受，與其他旅人一同分享。`,
