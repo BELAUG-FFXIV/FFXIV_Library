@@ -610,7 +610,7 @@ Every entry also has a message board where you can share your thoughts and conne
     startCard3Desc: 'ゲーム内の楽曲に関する記録、使用背景、コレクションページを探せます。',
     startCard3Link: 'ライブラリを見る ↓',
 
-    startCard4Badge: 'Side',
+    startCard4Badge: 'Side Quest',
     startCard4Title: 'サイドストーリー',
     startCard4Desc: 'サブクエスト、機能コンテンツ、そして主線の外側に広がる物語をたどります。',
     startCard4Link: 'ライブラリを見る ↓',
@@ -708,7 +708,7 @@ Every entry also has a message board where you can share your thoughts and conne
     startCard3Desc: '查找遊戲內音樂相關條目、登場背景與各類收藏整理頁面。',
     startCard3Link: '前往資料庫 ↓',
 
-    startCard4Badge: 'Side',
+    startCard4Badge: 'Side Quest',
     startCard4Title: '支線故事',
     startCard4Desc: '探索支線任務、功能型內容，以及主線之外延伸出的各種故事。',
     startCard4Link: '前往資料庫 ↓',
