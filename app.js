@@ -11,7 +11,7 @@ const state = {
   category: '',
   expac: '',
   patch: '',
-  sort: 'addedDesc', // 預設：新增順序（新 → 舊）
+  sort: 'addedDesc',
 };
 
 const grid         = document.getElementById('grid');
@@ -29,6 +29,43 @@ const langToggle   = document.getElementById('langToggle');
 const subscribeCta = document.getElementById('subscribeCta');
 const supportBtn   = document.getElementById('supportBtn');
 const supportNote  = document.getElementById('supportNote');
+
+/* homepage new blocks */
+const taglineEl        = document.getElementById('tagline');
+const miniLinkStart    = document.getElementById('miniLinkStart');
+const miniLinkBrowse   = document.getElementById('miniLinkBrowse');
+
+const heroPanelKicker  = document.getElementById('heroPanelKicker');
+const heroPanelTitle   = document.getElementById('heroPanelTitle');
+const heroPanelDesc    = document.getElementById('heroPanelDesc');
+
+const startHereKicker  = document.getElementById('startHereKicker');
+const startHereTitle   = document.getElementById('startHereTitle');
+const startHereSub     = document.getElementById('startHereSub');
+
+const startCard1Badge  = document.getElementById('startCard1Badge');
+const startCard1Title  = document.getElementById('startCard1Title');
+const startCard1Desc   = document.getElementById('startCard1Desc');
+const startCard1Link   = document.getElementById('startCard1Link');
+
+const startCard2Badge  = document.getElementById('startCard2Badge');
+const startCard2Title  = document.getElementById('startCard2Title');
+const startCard2Desc   = document.getElementById('startCard2Desc');
+const startCard2Link   = document.getElementById('startCard2Link');
+
+const startCard3Badge  = document.getElementById('startCard3Badge');
+const startCard3Title  = document.getElementById('startCard3Title');
+const startCard3Desc   = document.getElementById('startCard3Desc');
+const startCard3Link   = document.getElementById('startCard3Link');
+
+const startCard4Badge  = document.getElementById('startCard4Badge');
+const startCard4Title  = document.getElementById('startCard4Title');
+const startCard4Desc   = document.getElementById('startCard4Desc');
+const startCard4Link   = document.getElementById('startCard4Link');
+
+const browseKicker     = document.getElementById('browseKicker');
+const browseTitle      = document.getElementById('browseTitle');
+const itemsSuffixEl    = document.getElementById('itemsSuffix');
 
 /* =========================
    推薦影片設定
@@ -436,20 +473,55 @@ clearBtnEl?.addEventListener('click', () => {
    I18N + LANGUAGE SWITCH
    ========================= */
 const LANG_KEY = 'ffxiv-lib-lang';
-const taglineEl     = document.getElementById('tagline');
-const itemsSuffixEl = document.getElementById('itemsSuffix');
 
 const i18n = {
-EN: {
-  langLabel: 'EN',
-  subscribeCta: '🔔 Subscribe',
-  supportCta: '☕ Support BELAUG’s ongoing journey',
-  supportNote: 'A small gesture that helps this story archive continue to grow.',
+  EN: {
+    langLabel: 'EN',
+    subscribeCta: '🔔 Subscribe',
+    supportCta: '☕ Support BELAUG’s ongoing journey',
+    supportNote: 'A small gesture that helps this story archive continue to grow.',
+
     tagline: `<b>FFXIV Library</b> is an extension of my YouTube channel.<br>
-Here you’ll find additional story details — quest records, background notes, and elements that couldn’t be fully shown in each video.<br>
+Here you’ll find additional story details, quest records, background notes, and elements that could not be fully shown in each video.<br>
 Every entry also has a message board where you can share your thoughts and connect with fellow travelers.`,
+
+    heroPanelKicker: 'A quiet place to explore the many stories of FFXIV',
+    heroPanelTitle: 'Stories, battles, music, and memories — gathered in one quiet archive.',
+    heroPanelDesc: 'Browse by expansion, category, patch, and tags, then continue into story pages, battle records, and music archive entries.',
+
+    miniLinkStart: 'Start Here',
+    miniLinkBrowse: 'Browse Library',
+
+    startHereKicker: 'Start Here',
+    startHereTitle: 'Choose a path into the archive',
+    startHereSub: 'A gentle starting point for new visitors before entering the full library grid.',
+
+    startCard1Badge: 'MSQ',
+    startCard1Title: 'Main Story',
+    startCard1Desc: 'Follow the central journey across expansions and major patch arcs.',
+    startCard1Link: 'Explore the library ↓',
+
+    startCard2Badge: 'Battle',
+    startCard2Title: 'Raids & Trials',
+    startCard2Desc: 'Browse battle archives, questlines, and related records across raid content.',
+    startCard2Link: 'Explore the library ↓',
+
+    startCard3Badge: 'BGM',
+    startCard3Title: 'BGM Archive',
+    startCard3Desc: 'Find music-focused entries, context notes, and collection pages across the game.',
+    startCard3Link: 'Explore the library ↓',
+
+    startCard4Badge: 'Side Quest',
+    startCard4Title: 'Side Stories',
+    startCard4Desc: 'Explore side quests, feature content, and stories beyond the main path.',
+    startCard4Link: 'Explore the library ↓',
+
+    browseKicker: 'Browse Library',
+    browseTitle: 'Search by title, series, category, expansion, or patch',
+
     searchPH: 'Search title, series, tags, chapter…',
     itemsSuffix: 'items',
+
     sortOptions: [
       { value: 'addedDesc', label: 'Added order (New → Old)' },
       { value: 'addedAsc',  label: 'Added order (Old → New)' },
@@ -468,7 +540,7 @@ Every entry also has a message board where you can share your thoughts and conne
       { value: 'DoHDoL',         label: 'DoH & DoL Quests' },
       { value: 'AlliedSociety',  label: 'Allied Society Quests' },
       { value: 'SideFeature',    label: 'Side / Feature Quests' },
-      { value: 'BlueMage',       label: 'Blue Mage' }, 
+      { value: 'BlueMage',       label: 'Blue Mage' },
       { value: 'Hildibrand',     label: 'Hildibrand Adventures' },
       { value: 'Seasonal',       label: 'Seasonal / Special Events' },
       { value: 'GoldSaucer',     label: 'Gold Saucer' },
@@ -502,14 +574,50 @@ Every entry also has a message board where you can share your thoughts and conne
     clear: 'Clear filters',
   },
 
-JP: {
-  langLabel: 'JP',
-  subscribeCta: '🔔 チャンネル登録',
-  supportCta: '☕ BELAUG の続いていく旅を応援する',
-  supportNote: 'この物語のアーカイブが少しずつ育っていくための、小さな後押しです。',
+  JP: {
+    langLabel: 'JP',
+    subscribeCta: '🔔 チャンネル登録',
+    supportCta: '☕ BELAUG の続いていく旅を応援する',
+    supportNote: 'この物語のアーカイブが少しずつ育っていくための、小さな後押しです。',
+
     tagline: `<b>FFXIV Library</b> は、私の YouTube チャンネルを補完する資料館です。<br>
-映像だけでは伝えきれない物語の細部──クエスト記録や背景設定などをここに収めています。<br>
+映像だけでは伝えきれない物語の細部、クエスト記録、背景メモ、補足要素をここに整理しています。<br>
 各ページにはメッセージボードもあり、感じたことを旅人同士で共有できます。`,
+
+    heroPanelKicker: 'FF14 に広がる数多くの物語を、静かにたどるための場所。',
+    heroPanelTitle: '物語、戦い、音楽、そして旅の記憶を、ひとつの静かなアーカイブに。',
+    heroPanelDesc: '拡張パッケージ、カテゴリ、パッチ、タグから探し、その先のストーリーページ、バトル記録、BGMアーカイブへ進めます。',
+
+    miniLinkStart: 'ここから探す',
+    miniLinkBrowse: 'ライブラリを見る',
+
+    startHereKicker: 'ここから探す',
+    startHereTitle: 'アーカイブへ進む入口を選ぶ',
+    startHereSub: 'ライブラリ全体へ進む前に、初めて訪れる方がゆるやかに始められる入口です。',
+
+    startCard1Badge: 'MSQ',
+    startCard1Title: 'メインストーリー',
+    startCard1Desc: '各拡張パッケージと主要パッチを通して、物語の中心となる旅路をたどります。',
+    startCard1Link: 'ライブラリを見る ↓',
+
+    startCard2Badge: 'Battle',
+    startCard2Title: 'レイド＆討滅戦',
+    startCard2Desc: 'レイド関連の戦闘記録、クエストライン、関連アーカイブをたどれます。',
+    startCard2Link: 'ライブラリを見る ↓',
+
+    startCard3Badge: 'BGM',
+    startCard3Title: 'BGMアーカイブ',
+    startCard3Desc: 'ゲーム内の楽曲に関する記録、使用背景、コレクションページを探せます。',
+    startCard3Link: 'ライブラリを見る ↓',
+
+    startCard4Badge: 'Side',
+    startCard4Title: 'サイドストーリー',
+    startCard4Desc: 'サブクエスト、機能コンテンツ、そして主線の外側に広がる物語をたどります。',
+    startCard4Link: 'ライブラリを見る ↓',
+
+    browseKicker: 'ライブラリを見る',
+    browseTitle: 'タイトル、シリーズ、カテゴリ、拡張、パッチから探す',
+
     searchPH: 'タイトル・シリーズ・タグ・章… を検索',
     itemsSuffix: '件',
     sortOptions: [
@@ -530,7 +638,7 @@ JP: {
       { value: 'DoHDoL',         label: 'クラフター・ギャザラークエスト' },
       { value: 'AlliedSociety',  label: '友好部族クエスト' },
       { value: 'SideFeature',    label: 'サブクエスト／コンテンツ開放' },
-      { value: 'BlueMage',       label: '青魔道士' }, 
+      { value: 'BlueMage',       label: '青魔道士' },
       { value: 'Hildibrand',     label: '事件屋ヒルディブランド' },
       { value: 'Seasonal',       label: 'シーズナル／スペシャルイベント' },
       { value: 'GoldSaucer',     label: 'ゴールドソーサー' },
@@ -564,14 +672,50 @@ JP: {
     clear: '条件をクリア',
   },
 
- ZH: {
-  langLabel: 'ZH',
-  subscribeCta: '🔔 訂閱頻道',
-  supportCta: '☕ 支持 BELAUG 持續前行的旅程',
-  supportNote: '讓這座故事資料館能慢慢繼續成長的一點小小力量。',
+  ZH: {
+    langLabel: 'ZH',
+    subscribeCta: '🔔 訂閱頻道',
+    supportCta: '☕ 支持 BELAUG 持續前行的旅程',
+    supportNote: '讓這座故事資料館能慢慢繼續成長的一點小小力量。',
+
     tagline: `<b>FFXIV Library</b> 是我 YouTube 頻道的延伸資料館。<br>
-這裡收錄了更多在影片中無法完整呈現的內容──任務紀錄、背景資料與細節補充。<br>
-每部影片下方也設有留言板，歡迎留下你的想法與感受，與其他旅人一同分享。`,
+這裡整理了影片中無法完整呈現的故事細節、任務記錄、背景補充與相關內容。<br>
+每個條目下方也設有留言板，歡迎留下你的想法，與其他旅人一起分享。`,
+
+    heroPanelKicker: '靜靜探索 FFXIV 眾多故事的一處角落。',
+    heroPanelTitle: '故事、戰鬥、音樂與旅途中的記憶，都被收進這座安靜的資料館。',
+    heroPanelDesc: '你可以依資料片、分類、版本與標籤瀏覽，再繼續前往故事頁、戰鬥記錄與 BGM 檔案頁面。',
+
+    miniLinkStart: '從這裡開始探索',
+    miniLinkBrowse: '瀏覽資料庫',
+
+    startHereKicker: '從這裡開始探索',
+    startHereTitle: '選擇一條進入資料館的路徑',
+    startHereSub: '這裡是一個較輕鬆的起點，讓初次來訪的人在進入完整資料庫前，先找到適合的方向。',
+
+    startCard1Badge: 'MSQ',
+    startCard1Title: '主線故事',
+    startCard1Desc: '沿著各資料片與主要版本篇章，追隨整段旅程的核心主線。',
+    startCard1Link: '前往資料庫 ↓',
+
+    startCard2Badge: 'Battle',
+    startCard2Title: '團本與討滅戰',
+    startCard2Desc: '瀏覽與團本內容相關的戰鬥記錄、任務線與延伸整理。',
+    startCard2Link: '前往資料庫 ↓',
+
+    startCard3Badge: 'BGM',
+    startCard3Title: 'BGM 檔案',
+    startCard3Desc: '查找遊戲內音樂相關條目、登場背景與各類收藏整理頁面。',
+    startCard3Link: '前往資料庫 ↓',
+
+    startCard4Badge: 'Side',
+    startCard4Title: '支線故事',
+    startCard4Desc: '探索支線任務、功能型內容，以及主線之外延伸出的各種故事。',
+    startCard4Link: '前往資料庫 ↓',
+
+    browseKicker: '瀏覽資料庫',
+    browseTitle: '依標題、系列、分類、資料片或版本搜尋',
+
     searchPH: '搜尋標題、系列、標籤、章節…',
     itemsSuffix: '項內容',
     sortOptions: [
@@ -640,7 +784,42 @@ function applyLangUI(lang) {
   if (!dict) return;
 
   if (langToggle) langToggle.textContent = `🌐 ${dict.langLabel}`;
+
   if (taglineEl) taglineEl.innerHTML = dict.tagline;
+  if (heroPanelKicker) heroPanelKicker.textContent = dict.heroPanelKicker;
+  if (heroPanelTitle) heroPanelTitle.textContent = dict.heroPanelTitle;
+  if (heroPanelDesc) heroPanelDesc.textContent = dict.heroPanelDesc;
+
+  if (miniLinkStart) miniLinkStart.textContent = dict.miniLinkStart;
+  if (miniLinkBrowse) miniLinkBrowse.textContent = dict.miniLinkBrowse;
+
+  if (startHereKicker) startHereKicker.textContent = dict.startHereKicker;
+  if (startHereTitle) startHereTitle.textContent = dict.startHereTitle;
+  if (startHereSub) startHereSub.textContent = dict.startHereSub;
+
+  if (startCard1Badge) startCard1Badge.textContent = dict.startCard1Badge;
+  if (startCard1Title) startCard1Title.textContent = dict.startCard1Title;
+  if (startCard1Desc) startCard1Desc.textContent = dict.startCard1Desc;
+  if (startCard1Link) startCard1Link.textContent = dict.startCard1Link;
+
+  if (startCard2Badge) startCard2Badge.textContent = dict.startCard2Badge;
+  if (startCard2Title) startCard2Title.textContent = dict.startCard2Title;
+  if (startCard2Desc) startCard2Desc.textContent = dict.startCard2Desc;
+  if (startCard2Link) startCard2Link.textContent = dict.startCard2Link;
+
+  if (startCard3Badge) startCard3Badge.textContent = dict.startCard3Badge;
+  if (startCard3Title) startCard3Title.textContent = dict.startCard3Title;
+  if (startCard3Desc) startCard3Desc.textContent = dict.startCard3Desc;
+  if (startCard3Link) startCard3Link.textContent = dict.startCard3Link;
+
+  if (startCard4Badge) startCard4Badge.textContent = dict.startCard4Badge;
+  if (startCard4Title) startCard4Title.textContent = dict.startCard4Title;
+  if (startCard4Desc) startCard4Desc.textContent = dict.startCard4Desc;
+  if (startCard4Link) startCard4Link.textContent = dict.startCard4Link;
+
+  if (browseKicker) browseKicker.textContent = dict.browseKicker;
+  if (browseTitle) browseTitle.textContent = dict.browseTitle;
+
   if (q) q.placeholder = dict.searchPH;
   if (itemsSuffixEl && dict.itemsSuffix) itemsSuffixEl.textContent = ` ${dict.itemsSuffix}`;
   if (subscribeCta && dict.subscribeCta) subscribeCta.textContent = dict.subscribeCta;
@@ -650,7 +829,6 @@ function applyLangUI(lang) {
   refillSelect(categorySel, dict.categories, true);
   refillSelect(expacSel, dict.expansions, true);
   refillSelect(patchSel, dict.patches, true);
-
   if (dict.sortOptions) refillSelect(sortSel, dict.sortOptions, true);
 
   if (sortSel && sortSel.value) state.sort = sortSel.value;
