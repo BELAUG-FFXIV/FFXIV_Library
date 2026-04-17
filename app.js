@@ -783,7 +783,17 @@ function applyLangUI(lang) {
   const dict = i18n[lang];
   if (!dict) return;
 
-  if (langToggle) langToggle.textContent = `🌐 ${dict.langLabel}`;
+  if (langToggle) {
+  langToggle.innerHTML = `
+    <svg class="lang-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <path d="M3 12h18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M12 3a13 13 0 0 1 0 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M12 3a13 13 0 0 0 0 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+    <span>${dict.langLabel}</span>
+  `;
+}
 
   if (taglineEl) taglineEl.innerHTML = dict.tagline;
   if (heroPanelKicker) heroPanelKicker.textContent = dict.heroPanelKicker;
