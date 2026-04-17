@@ -476,7 +476,7 @@ const LANG_KEY = 'ffxiv-lib-lang';
 
 const i18n = {
   EN: {
-    langLabel: 'EN',
+    langLabel: 'English',
     subscribeCta: '🔔 Subscribe',
     supportCta: '☕ Support BELAUG’s ongoing journey',
     supportNote: 'A small gesture that helps this story archive continue to grow.',
@@ -575,7 +575,7 @@ Every entry also has a message board where you can share your thoughts and conne
   },
 
   JP: {
-    langLabel: 'JP',
+    langLabel: '日本語',
     subscribeCta: '🔔 チャンネル登録',
     supportCta: '☕ BELAUG の続いていく旅を応援する',
     supportNote: 'この物語のアーカイブが少しずつ育っていくための、小さな後押しです。',
@@ -673,7 +673,7 @@ Every entry also has a message board where you can share your thoughts and conne
   },
 
   ZH: {
-    langLabel: 'ZH',
+    langLabel: '繁體中文',
     subscribeCta: '🔔 訂閱頻道',
     supportCta: '☕ 支持 BELAUG 持續前行的旅程',
     supportNote: '讓這座故事資料館能慢慢繼續成長的一點小小力量。',
