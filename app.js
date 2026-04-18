@@ -785,7 +785,12 @@ function applyLangUI(lang) {
 
 if (langToggle) {
   langToggle.innerHTML = `
-    <img class="lang-icon-img" src="img/icons/lan.png" alt="" aria-hidden="true">
+    <svg class="lang-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/>
+      <path d="M3 12h18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+      <path d="M12 3a12 12 0 0 1 0 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+      <path d="M12 3a12 12 0 0 0 0 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+    </svg>
     <span>${dict.langLabel}</span>
   `;
 }
