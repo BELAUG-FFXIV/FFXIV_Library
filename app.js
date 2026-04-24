@@ -453,6 +453,18 @@ categorySel?.addEventListener('change', e => {
   applyFilters();
 });
 
+pageJumpBtn?.addEventListener('click', () => {
+  const page = parseInt(pageJumpInput?.value, 10);
+  jumpToPage(page);
+});
+
+pageJumpInput?.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const page = parseInt(pageJumpInput?.value, 10);
+    jumpToPage(page);
+  }
+});
+
 expacSel?.addEventListener('change', e => {
   state.expac = e.target.value;
   applyFilters();
