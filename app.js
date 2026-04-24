@@ -16,6 +16,8 @@ const state = {
 
 const grid         = document.getElementById('grid');
 const pager        = document.getElementById('pager');
+const pageJumpInput = document.getElementById('pageJumpInput');
+const pageJumpBtn   = document.getElementById('pageJumpBtn');
 const resultCount  = document.getElementById('resultCount');
 const q            = document.getElementById('q');
 const categorySel  = document.getElementById('category');
