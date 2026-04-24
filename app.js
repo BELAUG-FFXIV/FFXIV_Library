@@ -281,7 +281,12 @@ function render() {
 
   const pages = Math.ceil(state.filtered.length / state.perPage);
   renderPagerUI(pages);
-
+   
+if (pageJumpInput) {
+  pageJumpInput.min = 1;
+  pageJumpInput.max = pages || 1;
+  pageJumpInput.value = state.page;
+}
   grid.querySelectorAll('[data-play]').forEach(btn => {
     btn.addEventListener('click', () => {
       const ytId  = btn.dataset.play;
