@@ -261,6 +261,15 @@ function renderPagerUI(totalPages) {
   pager.appendChild(makeBtn('›', Math.min(totalPages, state.page + 1), { disabled: state.page === totalPages, ariaLabel: 'Next page' }));
   pager.appendChild(makeBtn('»', totalPages, { disabled: state.page === totalPages, ariaLabel: 'Last page' }));
 }
+function jumpToPage(page) {
+  const totalPages = Math.ceil(state.filtered.length / state.perPage);
+  if (!Number.isFinite(page)) return;
+  if (page < 1 || page > totalPages) return;
+
+  state.page = page;
+  render();
+  grid?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 
 function render() {
   resultCount.textContent = state.filtered.length;
