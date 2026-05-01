@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>The Dusk Vigil | BELAUG · FFXIV Library</title>
-  <meta name="description" content="FFXIV HW 3.0 Dungeon — The Dusk Vigil（廃砦捜索 ダスクヴィジル / 暮衛堡）：故事概要、需求條件、解鎖任務與後續任務，附影片。">
+  <meta name="description" content="FFXIV HW 3.0 Dungeon — The Dusk Vigil（廃砦捜索 ダスクヴィジル / 冰雪廢堡暮衛塔）：故事概要、需求條件、解鎖任務、後續任務、BGM，附影片。" />
   <link rel="icon" href="../img/favicon.ico" />
   <style>
     :root { --bg:#fff8e6; --card:#ffffff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
@@ -17,26 +17,44 @@
     .home{border:1px solid var(--border); background:#fff; padding:4px 8px; border-radius:8px; text-decoration:none; color:var(--fg); font-weight:800}
     .home:hover{background:#fffef8}
     .right{display:flex; align-items:center; gap:8px}
-    .icon-btn{background:none; border:none; cursor:pointer; font-size:14px; padding:6px 10px; border-radius:8px}
+    .icon-btn{background:none; border:none; cursor:pointer; font-size:14px; padding:6px 10px; border-radius:8px; color:var(--fg)}
     .icon-btn:hover{background:#fff; border:1px solid var(--border)}
+    #langToggle{display:inline-flex; align-items:center; gap:6px; white-space:nowrap; font-weight:600}
+    .lang-icon{width:17px; height:17px; display:block; flex:0 0 auto; opacity:.9}
     .main{padding:20px 0 40px}
     .grid{display:grid; grid-template-columns:1.1fr 1fr; gap:20px; align-items:start;}
-    @media (max-width:900px){ .grid{grid-template-columns:1fr} .video-wrap{position:relative; padding-top:56.25%} .video-wrap iframe{position:absolute; inset:0; width:100%; height:100%} }
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative; padding-top:56.25%}
+      .video-wrap iframe{position:absolute; inset:0; width:100%; height:100%}
+    }
     .card{background:var(--card); border:1px solid var(--border); border-radius:16px; box-shadow:0 4px 14px rgba(0,0,0,.05)}
     .card .hd{padding:14px 16px; border-bottom:1px solid var(--border); font-weight:700}
     .card .bd{padding:16px}
     .video-card .bd{padding:0}
     .video-card iframe{width:100%; height:420px; border:0; display:block; border-radius:16px}
+
     .tabs{display:flex; gap:8px; padding:12px 12px 0; flex-wrap:wrap}
     .tab-btn{background:#fff; border:1px solid var(--border); color:var(--fg); border-radius:999px; padding:8px 14px; cursor:pointer; font-weight:600}
     .tab-btn[aria-selected="true"]{border-color:var(--accent); color:#fff; background:var(--accent)}
     .tab-panel{display:none}
     .tab-panel.active{display:block}
+
     .stack{display:flex; flex-direction:column; gap:10px}
     .stack .row{padding:12px 14px; border:1px dashed var(--border); border-radius:12px; background:#fffdf6}
-    .muted{color:var(--muted)}
+
     .link{color:#0b60d8; text-decoration:none}
     .link:hover{text-decoration:underline}
+
+    .row-flex{
+      display:flex;
+      align-items:baseline;
+      gap:18px;
+      justify-content:flex-start;
+      flex-wrap:wrap;
+    }
+    .row-flex .label{font-weight:800}
+    .row-flex .value{margin-left:0; white-space:nowrap}
   </style>
 </head>
 <body>
@@ -46,14 +64,13 @@
         <a class="home" href="../index.html">🏠 Home</a>
       </div>
       <div class="right">
-        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">English</button>
       </div>
     </nav>
   </header>
 
   <main class="container main">
     <div class="grid">
-      <!-- 左：影片 -->
       <section class="card video-card">
         <div class="bd">
           <div class="video-wrap">
@@ -62,7 +79,6 @@
         </div>
       </section>
 
-      <!-- 右：標題 + Tabs -->
       <section class="card">
         <div class="hd" id="pageTitle">The Dusk Vigil</div>
         <div class="tabs" role="tablist">
@@ -70,15 +86,15 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="req">Requirements</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlock">Follow-Up Quest</button>
-          <!-- 新增：Comments -->
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="bgm">BGM</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
           <div id="panel-story" class="tab-panel active"></div>
+          <div id="panel-req" class="tab-panel"></div>
           <div id="panel-acq" class="tab-panel"></div>
-          <div id="panel-req" class="tab-panel"></div> <!-- 修正結構 -->
           <div id="panel-unlock" class="tab-panel"></div>
-          <!-- 新增：留言面板 -->
+          <div id="panel-bgm" class="tab-panel"></div>
           <div id="panel-comments" class="tab-panel">
             <div id="giscus_container" style="min-height:320px;"></div>
           </div>
@@ -92,71 +108,87 @@
 
     const i18n = {
       EN:{
-        langLabel:'EN',
+        langLabel:'English',
         pageTitle:'The Dusk Vigil',
-        tabs:{story:'Story', req:'Requirements', acq:'Unlock Quest', unlock:'Follow-Up Quest', comments:'Comments'},
-        story:`<p>In the days following the Calamity, western Coerthas was abandoned by the knights of Ishgard, save for the Dusk Vigil, whose defenders refused to withdraw. Since then, the fortress has only fallen further into disrepair, and her garrison has long since been presumed dead.</p>
-        <p>Unlike most Ishgardians, who would sooner put the tragic episode behind them, Father Wealdtheow would have you enter the forsaken fortress and reclaim a priceless treasure: an ice rondel set in the helm of a sculpture within the Vigil’s chapel. A simple request, perhaps, but if experience has taught you anything, such tasks are anything but…</p>`,
+        tabs:{story:'Story', req:'Requirements', acq:'Unlock Quest', unlock:'Follow-Up Quest', bgm:'BGM', comments:'Comments'},
+        story:`<p>In the days following the Calamity, western Coerthas was abandoned by the knights of Ishgard, save for the Dusk Vigil, whose defenders refused to withdraw. Since then, the fortress has fallen ever deeper into ruin, and its garrison has long been presumed dead.</p>
+<p>Unlike most Ishgardians, who would rather leave this tragedy buried in the past, Father Wealdtheow asks you to enter the forsaken fortress and recover a priceless treasure: an ice rondel set into the helm of a sculpture within the chapel of the Vigil. It may sound like a simple request, but if experience has taught you anything, such tasks rarely remain simple for long…</p>`,
         req:`<div class="stack">
-          <div class="row"><strong>Players:</strong> 1–4 players (1 Tank, 1 Healer, 2 DPS)</div>
-          <div class="row"><strong>Class/Job:</strong> Disciples of War or Magic</div>
-          <div class="row">※ Limited jobs can participate only in a preformed party meeting party size requirements or an unrestricted party, and if duty rules allow.</div>
-          <div class="row"><strong>Level:</strong> 51 (Sync from 52)</div>
-          <div class="row"><strong>Average Item Level:</strong> 100</div>
-          <div class="row">※ While synced, all item stats are adjusted.</div>
+          <div class="row">1–4 Players (1 Tank, 1 Healer, 2 DPS)</div>
+          <div class="row">Class: Disciples of War or Magic</div>
+          <div class="row">※ Limited jobs can participate only in a preformed party meeting party size requirements or an unrestricted party, and only if duty rules allow.</div>
+          <div class="row">Level: 51 (Sync from 52)</div>
+          <div class="row">Avg. Item Level: 100</div>
           <div class="row">※ Role and item level restrictions are lifted for parties meeting minimum size requirements.</div>
         </div>`,
         acq:`<div class="stack">
-          <div class="row"><a class="link" href="#">For All the Nights to Come</a></div>
+          <div class="row">For All the Nights to Come｜廃砦捜索 ダスクヴィジル｜冰雪廢堡暮衛塔</div>
         </div>`,
         unlock:`<div class="stack">
-          <div class="row">N/A</div>
+          <div class="row">None</div>
+        </div>`,
+        bgm:`<div class="stack">
+          <div class="row row-flex">
+            <span class="label">Dungeons I No. 30</span>
+            <span class="value"><a class="link" href="bgm-descent.html">Descent</a></span>
+          </div>
         </div>`
       },
 
       JP:{
-        langLabel:'JP',
+        langLabel:'日本語',
         pageTitle:'廃砦捜索 ダスクヴィジル',
-        tabs:{story:'ストーリー', req:'必要条件', acq:'開放クエスト', unlock:'後続クエスト', comments:'コメント'},
-        story:`<p>第七霊災によって、クルザス西部は厳しい寒冷地へと変貌し、イシュガルドの騎士たちによって放棄された。しかし、「ダスクヴィジル」の守備隊だけは撤退を拒み、要塞に留まったのだった。</p>
-        <p>あれから時が流れ、要塞は朽ち果て、駐屯していた兵もすでに全滅したと見なされている。多くのイシュガルド市民がこの悲劇に蓋をして生きるなか、神父ウィールドセオは、礼拝堂の彫像に収められた「氷のロンドレット」という宝を取り戻してほしいと願い出る。一見単純な頼みだが、幾多の経験が語る通り、簡単な仕事ほど……裏があるものだ。</p>`,
+        tabs:{story:'ストーリー', req:'必要条件', acq:'開放クエスト', unlock:'後続クエスト', bgm:'ＢＧＭ', comments:'コメント'},
+        story:`<p>霊災の後、クルザス西部高地はイシュガルドの騎士たちに放棄されました。ただひとつ、撤退を拒んだ守備隊が残る廃砦、ダスクヴィジルを除いて。以来、その砦は荒廃の一途をたどり、駐屯していた兵たちも、とうの昔に命を落としたものと考えられています。</p>
+<p>多くのイシュガルド人がその悲劇を過去のものとして忘れようとする中、ウィールドシオ神父はあなたに、見捨てられた砦へ踏み入り、貴重な宝を取り戻してほしいと願います。それは、ダスクヴィジルの礼拝堂にある彫像の兜にはめ込まれた氷の円形飾り。頼みそのものは単純に聞こえるかもしれませんが、これまでの経験が教えているはずです。こうした仕事ほど、決して一筋縄ではいかないものだと……。</p>`,
         req:`<div class="stack">
-          <div class="row"><strong>プレイヤー数：</strong>1～4人（タンク1／ヒーラー1／DPS2）</div>
-          <div class="row"><strong>クラス／ジョブ：</strong>ファイター／ソーサラー</div>
-          <div class="row">※ リミテッドジョブは、規定人数の事前結成パーティまたは制限解除パーティかつ規定が許可する場合のみ参加可。</div>
-          <div class="row"><strong>レベル：</strong>51（シンク：52）</div>
-          <div class="row"><strong>平均アイテムレベル：</strong>100</div>
-          <div class="row">※ シンク中は全装備ステータスが調整されます。</div>
-          <div class="row">※ 最低人数を満たすパーティではロール／IL制限が解除されます。</div>
+          <div class="row">1～4人用 (TANK:1/HEALER:1/DPS:2)</div>
+          <div class="row">クラス ファイター ソーサラー</div>
+          <div class="row">※リミテッドジョブは規定人数パーティもしくは「制限解除」状態かつ許可されているコンテンツに参加できます。</div>
+          <div class="row">レベル 51～52</div>
+          <div class="row">※レベル上限を超えた場合はレベルシンクされます。</div>
+          <div class="row">平均アイテムレベル 100～</div>
+          <div class="row">※規定人数の場合は自由なロール構成かつ、アイテムレベルに関わらず参加できます。</div>
         </div>`,
         acq:`<div class="stack">
-          <div class="row"><a class="link" href="#">廃砦捜索 ダスクヴィジル</a></div>
+          <div class="row">For All the Nights to Come｜廃砦捜索 ダスクヴィジル｜冰雪廢堡暮衛塔</div>
         </div>`,
         unlock:`<div class="stack">
-          <div class="row">N/A</div>
+          <div class="row">なし</div>
+        </div>`,
+        bgm:`<div class="stack">
+          <div class="row row-flex">
+            <span class="label">Dungeons I No. 30</span>
+            <span class="value"><a class="link" href="bgm-descent.html">堕落</a></span>
+          </div>
         </div>`
       },
 
       ZH:{
-        langLabel:'ZH-TW',
-        pageTitle:'暮衛堡',
-        tabs:{story:'故事概要', req:'需求條件', acq:'解鎖任務', unlock:'後續任務', comments:'留言'},
-        story:`<p>第七靈災過後，Ishgard 的騎士團撤離了整個 Coerthas 西部，唯獨 The Dusk Vigil 的守軍拒絕撤出，選擇孤身堅守。此後，這座堡壘逐漸荒廢，駐軍也早被視為全數喪生。</p>
-        <p>多數 Ishgard 人寧可遺忘這段傷痛往事，但 Father Wealdtheow 卻希望你深入這座被遺棄的要塞，取回一件無價之寶——一顆鑲嵌於禮拜堂雕像頭盔中的「冰之圓徽」。表面上只是個簡單的請託，但正如歷次經驗所示，越是看似簡單的任務，往往隱藏著難以預測的危機……</p>`,
+        langLabel:'繁體中文',
+        pageTitle:'冰雪廢堡暮衛塔',
+        tabs:{story:'故事概要', req:'需求條件', acq:'解鎖任務', unlock:'後續任務', bgm:'BGM', comments:'留言'},
+        story:`<p>Calamity 之後，Coerthas 西部被 Ishgard 的騎士們放棄，只有 Dusk Vigil 的守備隊拒絕撤離，仍留在那座要塞之中。自那以後，這座堡壘日漸荒廢，駐守其中的士兵也早已被認為全數喪命。</p>
+<p>與大多數 Ishgard 人不同，Father Wealdtheow 並不打算將這段悲劇埋入過去。他希望你進入那座被遺棄的堡壘，取回一件無價的寶物——鑲嵌在 Dusk Vigil 禮拜堂雕像頭盔上的冰之圓飾。這請求聽起來或許單純，但若過去的經驗曾教會你什麼，那就是這類任務往往不會如此簡單……。</p>`,
         req:`<div class="stack">
-          <div class="row"><strong>人數：</strong>1–4 人（1 坦克／1 治療／2 輸出）</div>
-          <div class="row"><strong>職業：</strong>戰鬥職業／魔法職業</div>
-          <div class="row">※ 限定職業僅能在事先組成符合人數條件的隊伍，或以無限制規則參加，且需符合任務規則允許的情況。</div>
-          <div class="row"><strong>等級：</strong>51（同步至 52）</div>
-          <div class="row"><strong>平均裝備品級：</strong>100</div>
-          <div class="row">※ 同步時，所有裝備數值將自動調整。</div>
-          <div class="row">※ 當隊伍僅達最低人數時，角色定位與裝備品級限制將解除。</div>
+          <div class="row">1～4 人參加（1 名防護職能、1 名治療職能、2 名進攻職能）</div>
+          <div class="row">職業：戰鬥精英／魔法導師</div>
+          <div class="row">※ 特職只能以符合人數需求的固定隊伍，或解除限制隊伍參加，且必須在該任務規則允許的情況下。</div>
+          <div class="row">等級：51（52 起同步）</div>
+          <div class="row">平均品級：100</div>
+          <div class="row">※ 符合最低人數需求的隊伍，將解除職能與平均品級限制。</div>
         </div>`,
         acq:`<div class="stack">
-          <div class="row"><a class="link" href="#">永夜將臨</a></div>
+          <div class="row">For All the Nights to Come｜廃砦捜索 ダスクヴィジル｜冰雪廢堡暮衛塔</div>
         </div>`,
         unlock:`<div class="stack">
-          <div class="row">N/A</div>
+          <div class="row">無</div>
+        </div>`,
+        bgm:`<div class="stack">
+          <div class="row row-flex">
+            <span class="label">Dungeons I No. 30</span>
+            <span class="value"><a class="link" href="bgm-descent.html">墮落</a></span>
+          </div>
         </div>`
       }
     };
@@ -164,34 +196,34 @@
     const langToggle = document.getElementById('langToggle');
     const pageTitle  = document.getElementById('pageTitle');
     const tabBtns    = [...document.querySelectorAll('.tab-btn')];
+
     const panels = {
-      story : document.getElementById('panel-story'),
-      acq   : document.getElementById('panel-acq'),
-      req   : document.getElementById('panel-req'),
-      unlock: document.getElementById('panel-unlock'),
-      comments: document.getElementById('panel-comments') // 新增
+      story   : document.getElementById('panel-story'),
+      req     : document.getElementById('panel-req'),
+      acq     : document.getElementById('panel-acq'),
+      unlock  : document.getElementById('panel-unlock'),
+      bgm     : document.getElementById('panel-bgm'),
+      comments: document.getElementById('panel-comments')
     };
 
     function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+
     function applyLang(lang){
       const t = i18n[lang] || i18n.EN;
       pageTitle.textContent = t.pageTitle;
-      langToggle.textContent = `🌐 ${t.langLabel}`;
+      langToggle.innerHTML = '<svg class="lang-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M3 12h18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 3a12 12 0 0 1 0 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 3a12 12 0 0 0 0 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span>'+t.langLabel+'</span>';
       tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
       const activeBtn = tabBtns.find(b=>b.getAttribute('aria-selected')==='true') || tabBtns[0];
       renderPanel(activeBtn.dataset.tab, lang);
-      // 若目前就在留言分頁，切語言後重載 giscus
       if (activeBtn && activeBtn.dataset.tab === 'comments') loadGiscusForCurrentLang();
     }
 
-    // 不覆寫留言容器；進入留言分頁時載入 giscus
     function renderPanel(key, lang){
       const t = i18n[lang] || i18n.EN;
       Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
       panels[key].classList.add('active');
-
       if (key !== 'comments') {
-        panels[key].innerHTML = t[key];
+        panels[key].innerHTML = t[key] || '';
       } else {
         loadGiscusForCurrentLang();
       }
@@ -214,7 +246,6 @@
 
     applyLang(getLang());
 
-    /* === Giscus：單一 Comments 分頁，隨語言切換 === */
     const GISCUS_CFG = {
       repo: 'BELAUG-FFXIV/FFXIV_Library',
       repoId: 'R_kgDOPyh4Kw',
@@ -222,20 +253,22 @@
       categoryId: 'DIC_kwDOPyh4K84CwPjL',
       theme: 'preferred_color_scheme'
     };
+
     function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+
     function loadGiscusForCurrentLang(){
       const mount = document.getElementById('giscus_container');
       if (!mount) return;
-      mount.innerHTML = ''; // 清掉舊 iframe/script
-      const langCode = getLang(); // EN / JP / ZH
+      mount.innerHTML = '';
+      const langCode = getLang();
       const s = document.createElement('script');
       s.src = 'https://giscus.app/client.js';
       s.setAttribute('data-repo', GISCUS_CFG.repo);
       s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
       s.setAttribute('data-category', GISCUS_CFG.category);
       s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
-      s.setAttribute('data-mapping', 'specific');                   // 使用固定 term
-      s.setAttribute('data-term', location.pathname + '｜' + langCode); // 每語言各自一串
+      s.setAttribute('data-mapping', 'specific');
+      s.setAttribute('data-term', location.pathname + '｜' + langCode);
       s.setAttribute('data-reactions-enabled', '1');
       s.setAttribute('data-emit-metadata', '0');
       s.setAttribute('data-input-position', 'bottom');
