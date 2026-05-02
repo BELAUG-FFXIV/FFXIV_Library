@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>The Pool of Tribute | BELAUG · FFXIV Library</title>
-  <meta name="description" content="FFXIV SB 4.0 Trial — The Pool of Tribute：故事概要、需求條件、解鎖任務與後續任務，附影片。">
+  <meta name="description" content="FFXIV SB 4.0 Trial — The Pool of Tribute（スサノオ討滅戦 / 須佐之男殲滅戰）：故事概要、需求條件、解鎖任務、後續任務、BGM，附影片。" />
   <link rel="icon" href="../img/favicon.ico" />
   <style>
     :root { --bg:#fff8e6; --card:#ffffff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
@@ -17,26 +17,44 @@
     .home{border:1px solid var(--border); background:#fff; padding:4px 8px; border-radius:8px; text-decoration:none; color:var(--fg); font-weight:800}
     .home:hover{background:#fffef8}
     .right{display:flex; align-items:center; gap:8px}
-    .icon-btn{background:none; border:none; cursor:pointer; font-size:14px; padding:6px 10px; border-radius:8px}
+    .icon-btn{background:none; border:none; cursor:pointer; font-size:14px; padding:6px 10px; border-radius:8px; color:var(--fg)}
     .icon-btn:hover{background:#fff; border:1px solid var(--border)}
+    #langToggle{display:inline-flex; align-items:center; gap:6px; white-space:nowrap; font-weight:600}
+    .lang-icon{width:17px; height:17px; display:block; flex:0 0 auto; opacity:.9}
     .main{padding:20px 0 40px}
     .grid{display:grid; grid-template-columns:1.1fr 1fr; gap:20px; align-items:start;}
-    @media (max-width:900px){ .grid{grid-template-columns:1fr} .video-wrap{position:relative; padding-top:56.25%} .video-wrap iframe{position:absolute; inset:0; width:100%; height:100%} }
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative; padding-top:56.25%}
+      .video-wrap iframe{position:absolute; inset:0; width:100%; height:100%}
+    }
     .card{background:var(--card); border:1px solid var(--border); border-radius:16px; box-shadow:0 4px 14px rgba(0,0,0,.05)}
     .card .hd{padding:14px 16px; border-bottom:1px solid var(--border); font-weight:700}
     .card .bd{padding:16px}
     .video-card .bd{padding:0}
     .video-card iframe{width:100%; height:420px; border:0; display:block; border-radius:16px}
+
     .tabs{display:flex; gap:8px; padding:12px 12px 0; flex-wrap:wrap}
     .tab-btn{background:#fff; border:1px solid var(--border); color:var(--fg); border-radius:999px; padding:8px 14px; cursor:pointer; font-weight:600}
     .tab-btn[aria-selected="true"]{border-color:var(--accent); color:#fff; background:var(--accent)}
     .tab-panel{display:none}
     .tab-panel.active{display:block}
+
     .stack{display:flex; flex-direction:column; gap:10px}
     .stack .row{padding:12px 14px; border:1px dashed var(--border); border-radius:12px; background:#fffdf6}
-    .muted{color:var(--muted)}
+
     .link{color:#0b60d8; text-decoration:none}
     .link:hover{text-decoration:underline}
+
+    .row-flex{
+      display:flex;
+      align-items:baseline;
+      gap:18px;
+      justify-content:flex-start;
+      flex-wrap:wrap;
+    }
+    .row-flex .label{font-weight:800}
+    .row-flex .value{margin-left:0; white-space:nowrap}
   </style>
 </head>
 <body>
@@ -46,14 +64,13 @@
         <a class="home" href="../index.html">🏠 Home</a>
       </div>
       <div class="right">
-        <button id="langToggle" class="icon-btn" aria-label="切換語言">🌐 EN</button>
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">English</button>
       </div>
     </nav>
   </header>
 
   <main class="container main">
     <div class="grid">
-      <!-- 左：影片 -->
       <section class="card video-card">
         <div class="bd">
           <div class="video-wrap">
@@ -62,7 +79,6 @@
         </div>
       </section>
 
-      <!-- 右：標題 + Tabs -->
       <section class="card">
         <div class="hd" id="pageTitle">The Pool of Tribute</div>
         <div class="tabs" role="tablist">
@@ -70,15 +86,15 @@
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="req">Requirements</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Unlock Quest</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlock">Follow-Up Quest</button>
-          <!-- 新增：Comments 分頁按鈕 -->
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="bgm">BGM</button>
           <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
         </div>
         <div class="bd">
           <div id="panel-story" class="tab-panel active"></div>
-          <div id="panel-acq" class="tab-panel"></div>
           <div id="panel-req" class="tab-panel"></div>
+          <div id="panel-acq" class="tab-panel"></div>
           <div id="panel-unlock" class="tab-panel"></div>
-          <!-- 新增：留言面板 -->
+          <div id="panel-bgm" class="tab-panel"></div>
           <div id="panel-comments" class="tab-panel">
             <div id="giscus_container" style="min-height:320px;"></div>
           </div>
@@ -92,65 +108,90 @@
 
     const i18n = {
       EN:{
-        langLabel:'EN',
+        langLabel:'English',
         pageTitle:'The Pool of Tribute',
-        tabs:{story:'Story',req:'Requirements',acq:'Unlock Quest',unlock:'Follow-Up Quest',comments:'Comments'},
-        story:`<p>Your efforts to wreak havoc on the Isle of Zekki and draw the Red Kojin away from their imperial masters have exceeded all expectations. Unfortunately, for reasons beyond your knowing, two of the sacred treasures stored in the isle’s vault “reacted” to the presence of the Yasakani-no-Magatama, summoning forth from the aether the great kami Susano─a primal by another name. How fortunate that you had the wisdom and foresight to invite several of your fellow adventurers on this journey to the Far East, and how kind they were to agree to help you torment the Red Kojin, for no single warrior, no matter how blessed or powerful, could ever hope to slay a primal on own, despite what some wandering minstrels would have you believe.</p>`,
+        tabs:{story:'Story', req:'Requirements', acq:'Unlock Quest', unlock:'Follow-Up Quest', bgm:'BGM', comments:'Comments'},
+        story:`<p>Your efforts to disrupt the Isle of Zekki and draw the Red Kojin away from their imperial masters have succeeded beyond expectation. Yet in the chaos, something unforeseen occurred: two sacred treasures stored within the island’s vault reacted to the Yasakani-no-Magatama, calling forth from the aether the great kami Susano—a being who, by any other name, is a primal.</p>
+<p>Fortunately, you had the wisdom to bring several fellow adventurers with you on this journey to the Far East. Their willingness to help you harry the Red Kojin has now become more vital than ever, for no single warrior, no matter how gifted, blessed, or powerful, could hope to defeat a primal alone—whatever certain wandering minstrels may claim.</p>`,
         req:`<div class="stack">
-          <div class="row">1 to 8 players (2 Tanks, 2 Healers, 4 DPS)</div>
+          <div class="row">1-8 Players (2 Tanks, 2 Healers, 4 DPS)</div>
           <div class="row">Class: Disciples of War or Magic</div>
-          <div class="row">※ Limited jobs can participate only in a preformed party meeting party size requirements or an unrestricted party, and if duty rules allow.</div>
+          <div class="row">* Limited jobs can participate only in a preformed party meeting party size requirements or an unrestricted party, and if duty rules allow.</div>
           <div class="row">Level: 63 (Sync from 64)</div>
-          <div class="row">※ While synced, all item stats are adjusted.</div>
-          <div class="row">※ Role and item level restrictions are lifted for parties meeting minimum size requirements.</div>
+          <div class="row">Additional Loot Rules Unavailable</div>
+          <div class="row">Explorer Mode Unavailable</div>
+          <div class="row">* Role and item level restrictions are lifted for parties meeting minimum size requirements.</div>
         </div>`,
         acq:`<div class="stack">
-          <div class="row"><a class="link" href="#">The Lord of the Revel</a></div>
+          <div class="row">The Lord of the Revel</div>
         </div>`,
         unlock:`<div class="stack">
-          <div class="row"><a class="link" href="#">Tide Goes in, Imperials Go Out</a></div>
+          <div class="row">Tide Goes in, Imperials Go Out</div>
+        </div>`,
+        bgm:`<div class="stack">
+          <div class="row row-flex">
+            <span class="label">Trials No. 25</span>
+            <span class="value"><a class="link" href="bgm-revelation.html">Revelation</a></span>
+          </div>
         </div>`
       },
 
       JP:{
-        langLabel:'JP',
+        langLabel:'日本語',
         pageTitle:'スサノオ討滅戦',
-        tabs:{story:'ストーリー',req:'必要条件',acq:'開放クエスト',unlock:'後続クエスト',comments:'コメント'},
-        story:`<p>ゼッキ島で暴れ回り、赤甲羅のコウジン族を帝国の支配から引き離す──あなたの行動は期待以上の成果を上げた。だが、不運にも島の宝物庫に眠っていた二つの神器が「八尺瓊勾玉」の存在に反応し、アシェンより偉大なる神「スサノオ」を呼び降ろしてしまったのだ。<br>幸いにも、あなたは東方への旅にあたり仲間の冒険者たちを誘っていた。彼らの助力がなければ、いかに祝福されし強者といえども、ただ一人で「蛮神」を討ち倒すことなど不可能である──吟遊詩人の歌がどう語ろうとも。</p>`,
+        tabs:{story:'ストーリー', req:'必要条件', acq:'開放クエスト', unlock:'後続クエスト', bgm:'ＢＧＭ', comments:'コメント'},
+        story:`<p>ゼッキ島で混乱を引き起こし、紅玉衆から赤誠組を引き離そうとしたあなたの働きは、期待以上の成果を上げました。しかし、その最中に思いもよらぬ事態が起こります。島の宝物庫に納められていたふたつの神器がヤサカニノマガタマに反応し、エーテルの中から偉大なる神、スサノオを呼び出してしまったのです。それは、名を変えた原初の存在にほかなりません。</p>
+<p>幸いにも、あなたは極東への旅に幾人もの仲間の冒険者を伴っていました。赤誠組を翻弄するために力を貸してくれた彼らの存在は、今や何よりも重要なものとなります。どれほど祝福され、どれほど強大な戦士であろうとも、たったひとりで原初の存在を討つことなどできないのです。たとえ、どこかの吟遊詩人がそれらしく語ったとしても。</p>`,
         req:`<div class="stack">
-          <div class="row">8人用コンテンツ（タンク2／ヒーラー2／DPS4）</div>
-          <div class="row">参加条件：ファイター／ソーサラー</div>
-          <div class="row">※ パーティ人数の条件を満たす事前結成パーティ、または制限解除パーティで、かつコンテンツルールで許可されている場合のみ、リミテッドジョブも参加可能です。</div>
-          <div class="row">レベル：63（シンク：64）</div>
-          <div class="row">※ シンク中はすべてのアイテムステータスが調整されます。</div>
-          <div class="row">※ 最低人数を満たすパーティでは、ロールおよびアイテムレベルの制限が解除されます。</div>
+          <div class="row">1～8人用 (TANK:2/HEALER:2/DPS:4)</div>
+          <div class="row">クラス ファイター ソーサラー</div>
+          <div class="row">※リミテッドジョブは規定人数パーティもしくは「制限解除」状態かつ許可されているコンテンツに参加できます。</div>
+          <div class="row">レベル 63～64</div>
+          <div class="row">※レベル上限を超えた場合はレベルシンクされます。</div>
+          <div class="row">ロットルール変更非対応</div>
+          <div class="row">「自由探索での参加」非対応</div>
+          <div class="row">※規定人数の場合は自由なロール構成かつ、アイテムレベルに関わらず参加できます。</div>
         </div>`,
         acq:`<div class="stack">
-          <div class="row"><a class="link" href="#">豪神スサノオ</a></div>
+          <div class="row">豪神スサノオ</div>
         </div>`,
         unlock:`<div class="stack">
-          <div class="row"><a class="link" href="#">ひとときの凪</a></div>
+          <div class="row">ひとときの凪</div>
+        </div>`,
+        bgm:`<div class="stack">
+          <div class="row row-flex">
+            <span class="label">Trials No. 25</span>
+            <span class="value"><a class="link" href="bgm-revelation.html">啓示</a></span>
+          </div>
         </div>`
       },
 
       ZH:{
-        langLabel:'ZH',
-        pageTitle:'須佐之男討滅戰',
-        tabs:{story:'故事概要',req:'需求條件',acq:'解鎖任務',unlock:'後續任務',comments:'留言'},
-        story:`<p>你在 Zekki 島上製造混亂，成功將 Red Kojin 從帝國主人的掌控下引開，成果遠超預期。然而，不幸的是，島上寶庫中兩件聖物竟對 Yasakani-no-Magatama 的存在產生「共鳴」，自以太中召喚出了偉大神明──Susano，也就是另一種意義上的原初存在。<br>所幸你在啟程前往東方之時，明智地邀請了幾位冒險者同伴同行；也幸運他們願意助你一臂之力，共同對抗 Red Kojin。畢竟，無論何等強大的戰士，都不可能憑一己之力擊敗原初存在──縱然吟遊詩人會編織出另一番傳說。</p>`,
+        langLabel:'繁體中文',
+        pageTitle:'須佐之男殲滅戰',
+        tabs:{story:'故事概要', req:'需求條件', acq:'解鎖任務', unlock:'後續任務', bgm:'BGM', comments:'留言'},
+        story:`<p>你在 Zekki Isle 製造混亂、引開 Red Kojin 與其帝國主人的行動，成果遠遠超出預期。然而，在這場混亂之中，發生了你無法預料的事：島上寶物庫裡保存的兩件神聖寶物，受到 Yasakani-no-Magatama 的存在影響而產生反應，從乙太中召喚出了偉大的 kami Susano——換句話說，那正是一尊 primal。</p>
+<p>幸好你在這趟 Far East 旅程中，早已邀請了幾位冒險者同伴同行。他們願意協助你折騰 Red Kojin，如今成了極其關鍵的助力。因為無論一名戰士多麼受到祝福、多麼強大，也不可能獨自討伐 primal——不管某些四處流浪的吟遊詩人把故事說得多麼誇張。</p>`,
         req:`<div class="stack">
-          <div class="row">1–8 人（2 坦克、2 治療、4 輸出）</div>
-          <div class="row">職業：戰鬥職業</div>
-          <div class="row">※ 僅限滿足隊伍人數需求的預組隊伍，或在允許的情況下使用無限制隊伍時，限制職業才可參加。</div>
-          <div class="row">等級：63（同步 64）</div>
-          <div class="row">※ 同步時，所有裝備屬性將被調整。</div>
-          <div class="row">※ 當隊伍滿足最低人數時，角色定位與裝備等級限制將被解除。</div>
+          <div class="row">1～8 人參加（2 名防護職能、2 名治療職能、4 名進攻職能）</div>
+          <div class="row">職業：戰鬥精英／魔法導師</div>
+          <div class="row">※ 特職只能以符合人數需求的固定隊伍，或解除限制隊伍參加，且必須在該任務規則允許的情況下。</div>
+          <div class="row">等級：63（64 起同步）</div>
+          <div class="row">無法設定追加戰利品規則</div>
+          <div class="row">無法使用探索模式</div>
+          <div class="row">※ 符合最低人數需求的隊伍，將解除職能與平均品級限制。</div>
         </div>`,
         acq:`<div class="stack">
-          <div class="row"><a class="link" href="#">豪神須佐之男</a></div>
+          <div class="row">豪神须佐之男</div>
         </div>`,
         unlock:`<div class="stack">
-          <div class="row"><a class="link" href="#">片刻的風平浪靜</a></div>
+          <div class="row">片刻的風平浪靜</div>
+        </div>`,
+        bgm:`<div class="stack">
+          <div class="row row-flex">
+            <span class="label">Trials No. 25</span>
+            <span class="value"><a class="link" href="bgm-revelation.html">啟示</a></span>
+          </div>
         </div>`
       }
     };
@@ -158,24 +199,34 @@
     const langToggle = document.getElementById('langToggle');
     const pageTitle  = document.getElementById('pageTitle');
     const tabBtns    = [...document.querySelectorAll('.tab-btn')];
+
     const panels = {
-      story : document.getElementById('panel-story'),
-      acq   : document.getElementById('panel-acq'),
-      req   : document.getElementById('panel-req'),
-      unlock: document.getElementById('panel-unlock'),
-      comments: document.getElementById('panel-comments') // 新增
+      story   : document.getElementById('panel-story'),
+      req     : document.getElementById('panel-req'),
+      acq     : document.getElementById('panel-acq'),
+      unlock  : document.getElementById('panel-unlock'),
+      bgm     : document.getElementById('panel-bgm'),
+      comments: document.getElementById('panel-comments')
     };
 
     function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
 
-    // 進入 comments 才載入 giscus；不要覆寫留言容器
+    function applyLang(lang){
+      const t = i18n[lang] || i18n.EN;
+      pageTitle.textContent = t.pageTitle;
+      langToggle.innerHTML = '<svg class="lang-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M3 12h18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 3a12 12 0 0 1 0 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 3a12 12 0 0 0 0 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span>'+t.langLabel+'</span>';
+      tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+      const activeBtn = tabBtns.find(b=>b.getAttribute('aria-selected')==='true') || tabBtns[0];
+      renderPanel(activeBtn.dataset.tab, lang);
+      if (activeBtn && activeBtn.dataset.tab === 'comments') loadGiscusForCurrentLang();
+    }
+
     function renderPanel(key, lang){
       const t = i18n[lang] || i18n.EN;
       Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
       panels[key].classList.add('active');
-
       if (key !== 'comments') {
-        panels[key].innerHTML = t[key];
+        panels[key].innerHTML = t[key] || '';
       } else {
         loadGiscusForCurrentLang();
       }
@@ -196,20 +247,8 @@
       applyLang(next);
     });
 
-    function applyLang(lang){
-      const t = i18n[lang] || i18n.EN;
-      pageTitle.textContent = t.pageTitle;
-      langToggle.textContent = `🌐 ${t.langLabel}`;
-      tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
-      const activeBtn = tabBtns.find(b=>b.getAttribute('aria-selected')==='true') || tabBtns[0];
-      renderPanel(activeBtn.dataset.tab, lang);
-      // 若停在留言分頁，切語言後重載 giscus
-      if (activeBtn && activeBtn.dataset.tab === 'comments') loadGiscusForCurrentLang();
-    }
-
     applyLang(getLang());
 
-    /* === Giscus：單一 Comments 分頁，隨語言切換 === */
     const GISCUS_CFG = {
       repo: 'BELAUG-FFXIV/FFXIV_Library',
       repoId: 'R_kgDOPyh4Kw',
@@ -217,12 +256,14 @@
       categoryId: 'DIC_kwDOPyh4K84CwPjL',
       theme: 'preferred_color_scheme'
     };
+
     function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+
     function loadGiscusForCurrentLang(){
       const mount = document.getElementById('giscus_container');
       if (!mount) return;
       mount.innerHTML = '';
-      const langCode = getLang(); // EN / JP / ZH
+      const langCode = getLang();
       const s = document.createElement('script');
       s.src = 'https://giscus.app/client.js';
       s.setAttribute('data-repo', GISCUS_CFG.repo);
