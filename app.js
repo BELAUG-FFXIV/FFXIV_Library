@@ -768,7 +768,7 @@ Every entry also has a message board where you can share your thoughts and conne
       { value: 'AlliedSociety',  label: '友好部族任務' },
       { value: 'SideFeature',    label: '支線／功能開放任務' },
       { value: 'BlueMage',       label: '青魔道士' },
-      { value: 'Hildibrand',     label: '希爾迪布蘭德奇譚' },
+      { value: 'Hildibrand',     label: '非著名調查員' },
       { value: 'Seasonal',       label: '季節／特別活動' },
       { value: 'GoldSaucer',     label: '金碟遊樂場' },
       { value: 'BGM',            label: 'BGM' },
