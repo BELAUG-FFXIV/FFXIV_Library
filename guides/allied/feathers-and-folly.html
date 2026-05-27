@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Feathers and Folly | BELAUG · FFXIV Library</title>
+  <meta name="description" content="AlliedSociety – Feathers and Folly (ARR Patch 2.1)">
+  <link rel="icon" href="../../img/favicon.ico" />
+  <style>
+    :root { --bg:#fff8e6; --card:#fff; --fg:#222; --muted:#666; --border:#e5e1d8; --accent:#e11d48; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans TC","Noto Sans JP",Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .container{max-width:1080px;margin:0 auto;padding:0 16px}
+    .site-header{border-bottom:1px solid var(--border);background:#fff9edb3;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .left{display:flex;align-items:center;gap:12px}
+    .home{border:1px solid var(--border);background:#fff;padding:4px 8px;border-radius:8px;text-decoration:none;color:var(--fg);font-weight:800}
+    .home:hover{background:#fffef8}
+    .right{display:flex;align-items:center;gap:8px}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:6px 10px;border-radius:8px;color:var(--fg)}
+    .icon-btn:hover{background:#fff;border:1px solid var(--border)}
+    #langToggle{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;font-weight:600}
+    .lang-icon{width:17px;height:17px;display:block;flex:0 0 auto;opacity:.9}
+
+    .main{padding:20px 0 40px}
+    .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .video-wrap{position:relative;padding-top:56.25%}
+      .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%}
+    }
+
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700}
+    .card .bd{padding:16px}
+    .video-card .bd{padding:0}
+    .video-card iframe{width:100%;height:420px;border:0;display:block;border-radius:16px}
+
+    .tabs{display:flex;gap:8px;padding:12px 12px 0;flex-wrap:wrap}
+    .tab-btn{background:#fff;border:1px solid var(--border);color:var(--fg);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+    .tab-btn[aria-selected="true"]{border-color:var(--accent);color:#fff;background:var(--accent)}
+
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .tab-panel.scroll-panel{
+      max-height:420px;
+      overflow-y:auto;
+      padding-right:8px;
+      scrollbar-gutter:stable;
+    }
+    .tab-panel.scroll-panel p:first-child{margin-top:0}
+    .tab-panel.scroll-panel p:last-child{margin-bottom:0}
+
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .stack .row{padding:12px 14px;border:1px dashed var(--border);border-radius:12px;background:#fffdf6}
+    .row b{display:inline-block;min-width:130px}
+    .muted{color:var(--muted)}
+    .link{color:#0b60d8;text-decoration:none}
+    .link:hover{text-decoration:underline}
+
+    .clamp{position:relative; max-height:360px; overflow:hidden}
+    .clamp[data-collapsed="false"]{max-height:none}
+    .clamp[data-collapsed="true"]::after{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+      background:linear-gradient(to bottom, rgba(255,255,255,0), var(--card)); pointer-events:none;
+    }
+    .expand-wrap{ margin-top:12px; }
+    .expand-btn{
+      display:inline-block; padding:8px 14px; border-radius:10px;
+      background:var(--card); border:1px solid var(--border); cursor:pointer; font-weight:600;
+    }
+    .expand-btn:hover{ background:#fffef8; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="container nav">
+      <div class="left">
+        <a class="home" href="../../index.html">🏠 Home</a>
+      </div>
+      <div class="right">
+        <button id="langToggle" class="icon-btn" aria-label="切換語言">English</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main">
+    <div class="grid">
+      <section class="card video-card">
+        <div class="bd">
+          <div class="video-wrap">
+            <iframe id="ytFrame" src="https://www.youtube.com/embed/MrKa2gtyhmE"
+              title="Feathers and Folly" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd" id="pageTitle">Feathers and Folly</div>
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" role="tab" aria-selected="true"  data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="acq">Acquisition</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="unlockq">Unlock Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="followq">Follow-Up Quest</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        </div>
+        <div class="bd">
+          <div id="panel-story"   class="tab-panel active scroll-panel"></div>
+          <div id="panel-acq"     class="tab-panel"></div>
+          <div id="panel-unlockq" class="tab-panel"></div>
+          <div id="panel-followq" class="tab-panel"></div>
+          <div id="panel-comments" class="tab-panel">
+            <div id="giscus_container" style="min-height:320px;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const LANG_KEY = 'ffxiv-guide-lang';
+const i18n = {
+  EN:{
+    langLabel:'English',
+    pageTitle:'Feathers and Folly',
+    tabs:{ story:'Story', acq:'Acquisition', unlockq:'Unlock Quest', followq:'Follow-Up Quest', comments:'Comments' },
+    readMore:'Show more',
+    readLess:'Show less',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Olmxio brings both good news and terrible news. Diluxio and the Chosen One’s podling have finally been found, but the sprouting ritual has already begun. If the Chosen One opens her eyes under Diluxio’s care, he will become her nurturing one, the first face she recognizes after birth. With her power guided by the touched ones and Ramuh, Little Solace, Gridania, and far more than either may be placed in danger.</p>
+      <p>Frixio asks you for one final favor: enter the heart of the touched ones’ lair and rescue the podling before the Chosen One sees Diluxio’s face. Voyce tries to volunteer, desperate to make amends for all the trouble his foolishness has caused Little Solace, but Frixio refuses to endanger both him and you. Yet Voyce will not be dismissed so easily. Soon after, a “chocobo” named Voco appears, loudly declaring himself the fleetest foot in the Twelveswood and your loyal steed for the coming rescue. Everyone sees through the disguise, but the danger leaves no time to argue, and Frixio can only ask you to keep the feathered fool from making matters worse.</p>
+      <p>With Voco at your side, you press through the frightening forest toward the Seedbed. His bravado wavers whenever danger stirs, but he follows, determined in his own ridiculous way to help save the Chosen One. Together, you reach the ritual site, where the podling waits and Diluxio prepares to claim the future of sylphkind for himself.</p>
+      <p>Diluxio welcomes your arrival as though inviting you to witness the end of the world as you know it. He intends to raise the Chosen One as the weapon of a new era, one with no place for walking ones, imperial ones, or traitorous ones who befriend them. When he threatens to roast the “chocobo” as well, Voyce finally reveals himself beneath the feathers. His disguise buys the moment needed to seize the podling, proving that even the bumbling one can play the hero when it matters.</p>
+      <p>The escape is desperate. Diluxio and his followers pursue you through the Sylphlands, determined to reclaim the Chosen One. Voyce runs until his strength gives out, then entrusts the podling to you with melodramatic words of sacrifice. Bearing the heavy burden alone, you carry the Chosen One back toward Little Solace, pushing through danger and exhaustion until she is safely returned.</p>
+      <p>In Little Solace, Voyce reappears very much alive, his recovery surprisingly swift once relieved of the podling’s weight. He jokes that he has learned several lessons from his near-death experiences: avoid the Sylphlands, leave heavy burdens to adventurers, and keep close watch on one’s journal and undergarments. Then, before all gathered sylphs, the Chosen One finally awakens. Frixio introduces himself as elder of Little Solace and welcomes her into their family, offering a home of peace and tranquility. The Chosen One accepts, and with her first choice made, a new cycle begins.</p>
+      <p>Frixio thanks you for making this future possible. Because of your bravery, the Chosen One has chosen him as her nurturing one, and Little Solace can begin building a peaceful future for sylphkind and walking ones alike. Voyce promises to report your deeds to Vorsaile Heuloix, though by the time the message reaches Gridania, his own role has grown impressively heroic. Vorsaile laughs at the embellishment, but confirms that Voyce still credited your support, especially the clever “chocobo” ruse, and rewards you for helping secure peace in Little Solace.</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>Quest Giver</b> Olmxio <small class="muted">(East Shroud, X:22.4, Y:26.4)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="idle-hands.html">Idle Hands</a></div>
+      <div class="row">Any Class or Job <small class="muted">Lv. 48</small></div>
+      <div class="row">Friendly Reputation (Tier 3) <small class="muted">(510/510) with the sylphs</small></div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="call-of-the-wild-immortal-flames.html">Call of the Wild (Immortal Flames)</a></div>
+      <div class="row"><a class="link" href="call-of-the-wild-maelstrom.html">Call of the Wild (Maelstrom)</a></div>
+      <div class="row"><a class="link" href="call-of-the-wild-twin-adder.html">Call of the Wild (Twin Adder)</a></div>
+    </div>`
+  },
+
+  JP:{
+    langLabel:'日本語',
+    pageTitle:'奇跡の目撃者',
+    tabs:{ story:'ストーリー', acq:'入手方法', unlockq:'開放クエスト', followq:'後続クエスト', comments:'コメント' },
+    readMore:'全文を表示',
+    readLess:'折りたたむ',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>オルムシオは、よい知らせと恐ろしく悪い知らせを同時に持ってきます。ディルクシオと「選ばれし者」のポドリングはついに見つかりましたが、すでに芽吹きの儀式が始まっていました。「選ばれし者」がディルクシオのもとで目覚め、最初にその顔を見てしまえば、彼が育ての親となってしまいます。その力が敵対するシルフたちとラムウの教えに導かれれば、シルフの仮宿も、グリダニアも、それだけでは済まないほど大きな危機にさらされるのです。</p>
+      <p>フリクシオは、あなたに最後の頼みを託します。敵対するシルフたちの巣の奥深くへ入り、「選ばれし者」がディルクシオの顔を見る前にポドリングを救い出してほしいというのです。ボイスは、自分も行くと名乗り出ます。これまでの浅はかな英雄ごっこがシルフの仮宿に災いを招いたことを償いたいのです。しかしフリクシオは、善意は認めながらも、彼が同行すればあなたも彼自身も危険にさらすだけだと拒みます。それでもボイスは引き下がりません。やがて、ヴォコと名乗る「チョコボ」が現れ、黒衣森で最も足の速い高貴なるチョコボとして、あなたの忠実な乗騎になると高らかに宣言します。誰の目にも正体は明らかでしたが、言い争っている時間はなく、フリクシオはせめてその羽だらけの厄介者が事態をさらに悪化させないよう、あなたに頼むしかありませんでした。</p>
+      <p>ヴォコを連れ、あなたは恐ろしい森を抜けて芽吹きの地へ向かいます。危険な気配が近づくたびに、その勇ましい言葉は揺らぎますが、それでも彼は彼なりに「選ばれし者」を救おうと必死についてきます。やがてあなたたちは、儀式の場へ到着します。そこにはポドリングがあり、ディルクシオはシルフ族の未来を自分の手で握ろうとしていました。</p>
+      <p>ディルクシオは、あなたが世界の終わりを目撃するのにちょうどよい時に来たと嘲ります。彼は「選ばれし者」を新しい時代のための力として育てるつもりでした。その時代には、歩く者も、帝国の者も、それらと友になる裏切り者も居場所を持たず、すべて滅ぼされるべきだと考えていたのです。さらに彼が「チョコボ」を焼いて食べようとしたとき、羽の下からボイスが正体を現します。その奇妙な変装は、ポドリングを奪い返すための一瞬を生み、役立たずと呼ばれ続けた彼も、大事な時には英雄になれるのだと示します。</p>
+      <p>脱出は必死のものとなります。ディルクシオとその配下は、ポドリングを取り戻そうとシルフ領の中を追ってきます。ボイスは力の限り走りますが、ついに足が動かなくなり、芝居がかった言葉で自分の犠牲を嘆きながら、ポドリングをあなたに託します。あなたは重いポドリングをひとりで抱え、危険と疲労を乗り越えながら、シルフの仮宿へと急ぎ戻ります。</p>
+      <p>シルフの仮宿では、ボイスがすっかり無事な姿で現れます。ポドリングの重みから解放された途端、驚くほど早く回復したのだと彼は語ります。数々の死にかけた経験から、シルフ領には近づかないこと、重い荷物は冒険者に任せること、そして日記と下着から目を離さないことを学んだのだと笑います。やがて、集まったシルフたちの前で「選ばれし者」がついに目覚めます。フリクシオは自らをシルフの仮宿の長老と名乗り、彼女を家族として迎え入れ、平和と安らぎに満ちた家を築きたいと告げます。「選ばれし者」はその願いに応え、こうして新たな巡りが始まります。</p>
+      <p>フリクシオは、この未来を可能にしたあなたへ感謝します。あなたの勇気によって、「選ばれし者」は彼を育ての親として選び、シルフの仮宿はシルフと歩く者が共に生きる平和な未来へ踏み出すことができました。ボイスは、あなたの働きをボルセル大牙佐に詳しく報告すると約束しますが、その報告がグリダニアへ届くころには、彼自身の活躍もずいぶん勇ましく語られていました。ボルセル大牙佐はその大げさな内容に笑いながらも、ボイスがあなたの助け、特に見事なチョコボ作戦の功績をきちんと認めていたことを伝え、シルフの仮宿の未来を守った働きに報いてくれます。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>クエスト発行</b> オルムシオ　黒衣森：東部森林 <small class="muted">(X:22.4, Y:26.4)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="idle-hands.html">悪い子シルフの意趣返し</a></div>
+      <div class="row">いずれかのクラス・ジョブ <small class="muted">Lv 48～</small></div>
+      <div class="row">シルフ族「仮宿のシルフ」の友好関係をランク3「友好」にする</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="call-of-the-wild-immortal-flames.html">新たな蛮族事件（不滅隊）</a></div>
+      <div class="row"><a class="link" href="call-of-the-wild-maelstrom.html">新たな蛮族事件（黒渦団）</a></div>
+      <div class="row"><a class="link" href="call-of-the-wild-twin-adder.html">新たな蛮族事件（双蛇党）</a></div>
+    </div>`
+  },
+
+  ZH:{
+    langLabel:'繁體中文',
+    pageTitle:'奇蹟的見證者',
+    tabs:{ story:'故事概要', acq:'取得方式', unlockq:'解鎖任務', followq:'後續任務', comments:'留言' },
+    readMore:'展開全文',
+    readLess:'收合內容',
+    story:`<div class="clamp" data-collapsed="true">
+      <p>Olmxio 帶來了好消息，也帶來了糟糕透頂的消息。好消息是，他們終於找到 Diluxio 和 Chosen One 的 podling；壞消息是，發芽儀式已經開始。如果 Chosen One 在 Diluxio 身邊睜開眼睛，他就會成為她出生後第一個認定的養育者。若她的力量受到 tempered sylph 與 Ramuh 的教導引導，Little Solace、Gridania，甚至更廣大的土地都可能陷入危險。</p>
+      <p>Frixio 請你完成最後一個請求：潛入 tempered sylph 巢穴深處，在 Chosen One 看見 Diluxio 的臉之前救回 podling。Voyce 想要同行，因為他知道自己過去半吊子的英雄行為只為 Little Solace 帶來麻煩與痛苦，想要彌補這一切。Frixio 承認他的善意，卻拒絕讓他同行，因為他只會讓你和自己都陷入危險。可是 Voyce 沒有真正放棄。不久後，一隻自稱 Voco 的 chocobo 出現，高聲宣稱自己是 Twelveswood 中最快的腳步，也是陪伴你拯救 sylph 的忠誠坐騎。眾人都看穿這場偽裝，但眼下沒有時間爭辯，Frixio 只能請你盡量別讓這隻長羽毛的麻煩製造者把事情弄得更糟。</p>
+      <p>你帶著 Voco 穿越令人不安的森林，前往 Seedbed。每當危險接近，他的豪言壯語就會動搖，但他仍用自己荒唐又認真的方式跟著你，想要拯救 Chosen One。最後，你們抵達儀式所在之地，看見 podling 正在那裡，而 Diluxio 則準備親手奪取 sylph 一族的未來。</p>
+      <p>Diluxio 嘲笑你來得正好，可以親眼見證你所熟悉的世界迎來終結。他打算將 Chosen One 培養成開創新時代的力量；在那個新時代裡，不會有 walking ones、imperial ones，也不會有與他們為友的背叛者。所有不是 sylph 的存在都將滅亡，他們的血將灌溉森林。當 Diluxio 甚至威脅要把那隻「chocobo」烤來吃時，Voyce 終於從羽毛偽裝下現身。這場滑稽的偽裝成功爭取到奪回 podling 的一瞬間，也證明這個總是闖禍的人，在關鍵時刻仍能成為英雄。</p>
+      <p>逃離 Sylphlands 的過程十分艱難。Diluxio 與他的手下緊追不捨，誓要奪回 Chosen One。Voyce 拼命奔跑，直到雙腿再也支撐不住，才用誇張得近乎悲壯的語氣把 podling 託付給你，請你不要為他的犧牲哭泣。接著，你獨自抱起沉重的 podling，在追兵、疲憊與危險之間前進，將 Chosen One 帶回 Little Solace。</p>
+      <p>在 Little Solace，Voyce 很快又完好無事地出現了。他說，一旦不再背負 podling 的重量，自己的恢復速度竟然驚人地快。經過這麼多次差點喪命的經驗，他學到了幾件事：遠離 Sylphlands、重物交給冒險者，以及最重要的，隨時看好自己的筆記本和內衣。接著，在所有 sylph 的注視下，Chosen One 終於醒來。Frixio 以 Little Solace 長老的身分迎接她加入這個家庭，並表示希望與她一起建立和平安寧的家。Chosen One 接受了他的願望，新的循環也因此開始。</p>
+      <p>Frixio 感謝你讓這個未來成為可能。因為你的勇敢，Chosen One 選擇了他作為養育者，Little Solace 也能開始為 sylph 與 walking ones 建立和諧共處的未來。Voyce 承諾會把你的事蹟詳細報告給 Vorsaile Heuloix，不過等報告傳到 Gridania 時，他自己的英勇表現也被寫得相當壯大。Vorsaile Heuloix 笑著表示不必擔心，因為 Voyce 仍然有把功勞歸給你，尤其是那場巧妙的 chocobo 偽裝；因此，他代表 Gridania 感謝你在這次事件中的協助，並讓你留在城中好好休息。</p>
+    </div>
+    <div class="expand-wrap"><button class="expand-btn" data-role="expand"></button></div>`,
+    acq:`<div class="stack">
+      <div class="row"><b>任務發布</b> 歐姆希奧，黑衣森林東部林區 <small class="muted">(X:22.4, Y:26.4)</small></div>
+    </div>`,
+    unlockq:`<div class="stack">
+      <div class="row"><a class="link" href="idle-hands.html">壞風精靈的復仇</a></div>
+      <div class="row">只要任一職業達到等級 48 以上即可</div>
+      <div class="row">與風精靈族的「暫留地風精靈」之間的關係程度到達3級「友好」</div>
+    </div>`,
+    followq:`<div class="stack">
+      <div class="row"><a class="link" href="call-of-the-wild-immortal-flames.html">蠻族之風再起（不滅隊）</a></div>
+      <div class="row"><a class="link" href="call-of-the-wild-maelstrom.html">蠻族之風再起（黑渦團）</a></div>
+      <div class="row"><a class="link" href="call-of-the-wild-twin-adder.html">蠻族之風再起（雙蛇黨）</a></div>
+    </div>`
+  }
+};
+
+const langToggle  = document.getElementById('langToggle');
+const pageTitle   = document.getElementById('pageTitle');
+const tabBtns     = [...document.querySelectorAll('.tab-btn')];
+const panels = {
+  story:  document.getElementById('panel-story'),
+  acq:    document.getElementById('panel-acq'),
+  unlockq:document.getElementById('panel-unlockq'),
+  followq:document.getElementById('panel-followq'),
+  comments: document.getElementById('panel-comments')
+};
+
+function getLang(){ return localStorage.getItem(LANG_KEY) || 'EN'; }
+function applyLang(lang){
+  const t = i18n[lang] || i18n.EN;
+  pageTitle.textContent = t.pageTitle;
+  langToggle.innerHTML = '<svg class="lang-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M3 12h18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 3a12 12 0 0 1 0 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 3a12 12 0 0 0 0 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span>'+t.langLabel+'</span>';
+  tabBtns.forEach(btn => { btn.textContent = t.tabs[btn.dataset.tab]; });
+  const activeBtn = tabBtns.find(b => b.getAttribute('aria-selected')==='true') || tabBtns[0];
+  renderPanel(activeBtn.dataset.tab, lang);
+}
+
+function wireClamp(panelEl, t){
+  const clamp = panelEl.querySelector('.clamp');
+  const btn = panelEl.querySelector('[data-role="expand"]');
+  if(!clamp || !btn) return;
+  function setLabel(){
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    btn.textContent = collapsed ? t.readMore : t.readLess;
+  }
+  setLabel();
+  btn.addEventListener('click', ()=>{
+    const collapsed = clamp.getAttribute('data-collapsed') !== 'false';
+    clamp.setAttribute('data-collapsed', collapsed ? 'false' : 'true');
+    setLabel();
+  });
+}
+
+function renderPanel(key, lang){
+  const t = i18n[lang] || i18n.EN;
+  Object.keys(panels).forEach(k => panels[k].classList.remove('active'));
+  panels[key].classList.add('active');
+  if (key !== 'comments') panels[key].innerHTML = t[key];
+  if (key === 'story') wireClamp(panels[key], t);
+  if (key === 'comments') loadGiscusForCurrentLang();
+}
+
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    renderPanel(btn.dataset.tab, getLang());
+  });
+});
+
+langToggle.addEventListener('click', ()=>{
+  const cur = getLang();
+  const next = cur==='EN' ? 'JP' : (cur==='JP' ? 'ZH' : 'EN');
+  localStorage.setItem(LANG_KEY, next);
+  applyLang(next);
+});
+
+applyLang(getLang());
+
+const GISCUS_CFG = {
+  repo: 'BELAUG-FFXIV/FFXIV_Library',
+  repoId: 'R_kgDOPyh4Kw',
+  category: 'General',
+  categoryId: 'DIC_kwDOPyh4K84CwPjL',
+  theme: 'preferred_color_scheme'
+};
+function uiLang(code){ return code==='JP' ? 'ja' : (code==='ZH' ? 'zh-TW' : 'en'); }
+function loadGiscusForCurrentLang(){
+  const mount = document.getElementById('giscus_container');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const langCode = getLang();
+  const s = document.createElement('script');
+  s.src = 'https://giscus.app/client.js';
+  s.setAttribute('data-repo', GISCUS_CFG.repo);
+  s.setAttribute('data-repo-id', GISCUS_CFG.repoId);
+  s.setAttribute('data-category', GISCUS_CFG.category);
+  s.setAttribute('data-category-id', GISCUS_CFG.categoryId);
+  s.setAttribute('data-mapping', 'specific');
+  s.setAttribute('data-term', location.pathname + '｜' + langCode);
+  s.setAttribute('data-reactions-enabled', '1');
+  s.setAttribute('data-emit-metadata', '0');
+  s.setAttribute('data-input-position', 'bottom');
+  s.setAttribute('data-lang', uiLang(langCode));
+  s.setAttribute('data-theme', GISCUS_CFG.theme);
+  s.setAttribute('crossorigin', 'anonymous');
+  s.async = true;
+  mount.appendChild(s);
+}
+</script>
+</body>
+</html>
