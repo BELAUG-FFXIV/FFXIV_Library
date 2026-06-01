@@ -72,7 +72,32 @@ const itemsSuffixEl    = document.getElementById('itemsSuffix');
 /* =========================
    推薦影片設定
    ========================= */
+/* ==========================
+   推薦影片設定
+========================== */
 let featuredVideo = null;
+
+async function loadFeaturedVideo(){
+  try{
+    const res = await fetch('data/featured.json?v=20260602-1');
+
+    if(!res.ok){
+      throw new Error('Failed to load featured.json');
+    }
+
+    const data = await res.json();
+
+    if(!data || data.enabled === false){
+      featuredVideo = null;
+      return;
+    }
+
+    featuredVideo = data;
+  }catch(err){
+    console.warn('Featured video disabled:', err);
+    featuredVideo = null;
+  }
+}
 
 /* =========================
    主題切換（亮/暗）
