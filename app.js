@@ -72,14 +72,7 @@ const itemsSuffixEl    = document.getElementById('itemsSuffix');
 /* =========================
    推薦影片設定
    ========================= */
-const featuredVideo = {
-  ytId: "rSE9mxzvSg8",
-  title: {
-    EN: "⭐ Featured: Relax at Sunset in Shirogane",
-    JP: "⭐ おすすめ：シロガネの夕暮れでくつろいで",
-    ZH: "⭐ 推薦影片：在 Shirogane 靜謐的海岸邊，迎接寧靜的夜晚"
-  }
-};
+let featuredVideo = null;
 
 /* =========================
    主題切換（亮/暗）
