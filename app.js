@@ -396,18 +396,34 @@ function cardHTML(it) {
    ========================= */
 function renderFeatured() {
   const box = document.getElementById('featured');
-  if (!box || !featuredVideo) return;
+  if (!box) return;
+
+  if (!featuredVideo || featuredVideo.enabled === false || !featuredVideo.ytId) {
+    box.innerHTML = '';
+    box.hidden = true;
+    return;
+  }
+
+  box.hidden = false;
 
   const lang  = getLang();
-  const title = featuredVideo.title?.[lang] || featuredVideo.title?.EN || '⭐ Featured';
+  const title = featuredVideo.title?.[lang] || featuredVideo.title?.EN || featuredVideo.title?.ZH || featuredVideo.title?.JP || '⭐ Featured';
+
+  const safeTitle = String(title).replace(/[&<>"']/g, m => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[m]));
 
   box.innerHTML = `
     <div class="featured-card">
-      <h2 class="section-title">${title}</h2>
+      <h2 class="section-title">${safeTitle}</h2>
       <div class="video-wrapper">
         <iframe
           src="https://www.youtube.com/embed/${featuredVideo.ytId}"
-          title="${title}" width="100%" height="315" frameborder="0"
+          title="${safeTitle}" width="100%" height="315" frameborder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowfullscreen></iframe>
       </div>
