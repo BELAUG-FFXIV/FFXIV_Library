@@ -69,9 +69,6 @@ const browseKicker     = document.getElementById('browseKicker');
 const browseTitle      = document.getElementById('browseTitle');
 const itemsSuffixEl    = document.getElementById('itemsSuffix');
 
-/* =========================
-   推薦影片設定
-   ========================= */
 /* ==========================
    推薦影片設定
 ========================== */
@@ -79,7 +76,7 @@ let featuredVideo = null;
 
 async function loadFeaturedVideo(){
   try{
-    const res = await fetch('data/featured.json?v=20260602-1');
+    const res = await fetch('data/featured.json?v=' + Date.now());
 
     if(!res.ok){
       throw new Error('Failed to load featured.json');
