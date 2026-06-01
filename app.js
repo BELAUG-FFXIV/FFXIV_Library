@@ -125,9 +125,11 @@ themeToggle?.addEventListener('click', () => {
 /* =========================
    載入資料
    ========================= */
-fetch('data/library.json')
-  .then(r => r.json())
-  .then(json => {
+Promise.all([
+  loadFeaturedVideo(),
+  fetch('data/library.json').then(r => r.json())
+])
+  .then(([_, json]) => {
     state.data = (json.items || []).map((it, idx) => deriveFields({ ...it, _addedIndex: idx }));
 
     if (sortSel && sortSel.value) state.sort = sortSel.value;
