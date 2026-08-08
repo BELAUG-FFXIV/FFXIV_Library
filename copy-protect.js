@@ -79,7 +79,8 @@
       }
     }
 
-    if (e.ctrlKey && e.altKey && key === 'b') {
+    if ((e.ctrlKey || e.metaKey) && e.altKey && (e.code === 'KeyB' || key === 'b')) {
+      e.preventDefault();
       const next = !isOwnerMode();
       localStorage.setItem(OWNER_KEY, String(next));
       syncOwnerModeAttr();
