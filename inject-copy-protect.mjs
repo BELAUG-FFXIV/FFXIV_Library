@@ -6,9 +6,11 @@ const GUIDES_DIR = path.join(ROOT, 'guides');
 
 const VERSION = '1';
 
+let total = 0;
 let changed = 0;
-let skipped = 0;
+let alreadyProtected = 0;
 let warned = 0;
+let missingAfter = [];
 
 function toWebPath(fromFileDir, targetFile) {
   let rel = path.relative(fromFileDir, targetFile).replaceAll(path.sep, '/');
@@ -29,6 +31,8 @@ function walk(dir) {
 
     if (!entry.isFile() || !entry.name.endsWith('.html')) continue;
 
+    total++;
+
     const fileDir = path.dirname(full);
 
     const cssHref = `${toWebPath(fileDir, path.join(ROOT, 'copy-protect.css'))}?v=${VERSION}`;
@@ -42,6 +46,11 @@ function walk(dir) {
 
     const hasCopyProtectCss = html.includes('copy-protect.css');
     const hasCopyProtectJs = html.includes('copy-protect.js');
+
+    if (hasCopyProtectCss && hasCopyProtectJs) {
+      alreadyProtected++;
+      return;
+    }
 
     if (!hasCopyProtectCss) {
       if (html.includes('</head>')) {
@@ -61,12 +70,17 @@ function walk(dir) {
       }
     }
 
+    const finalHasCss = html.includes('copy-protect.css');
+    const finalHasJs = html.includes('copy-protect.js');
+
+    if (!finalHasCss || !finalHasJs) {
+      missingAfter.push(path.relative(ROOT, full));
+    }
+
     if (html !== original) {
       fs.writeFileSync(full, html, 'utf8');
       changed++;
       console.log(`Updated: ${path.relative(ROOT, full)}`);
-    } else {
-      skipped++;
     }
   }
 }
@@ -79,7 +93,15 @@ if (!fs.existsSync(GUIDES_DIR)) {
 walk(GUIDES_DIR);
 
 console.log('');
-console.log(`Done.`);
+console.log('Done.');
+console.log(`Total HTML scanned: ${total}`);
 console.log(`Updated: ${changed} files`);
-console.log(`Skipped: ${skipped} files`);
+console.log(`Already protected: ${alreadyProtected} files`);
 console.log(`Warnings: ${warned}`);
+console.log(`Missing after scan: ${missingAfter.length}`);
+
+if (missingAfter.length) {
+  console.log('');
+  console.log('Files still missing copy protect:');
+  missingAfter.forEach(file => console.log(`- ${file}`));
+}
