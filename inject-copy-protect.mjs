@@ -49,7 +49,7 @@ function walk(dir) {
 
     if (hasCopyProtectCss && hasCopyProtectJs) {
       alreadyProtected++;
-      return;
+      continue;
     }
 
     if (!hasCopyProtectCss) {
