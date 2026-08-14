@@ -65,6 +65,17 @@ const startCard4Title  = document.getElementById('startCard4Title');
 const startCard4Desc   = document.getElementById('startCard4Desc');
 const startCard4Link   = document.getElementById('startCard4Link');
 
+const exploreKicker      = document.getElementById('exploreKicker');
+const exploreTitle       = document.getElementById('exploreTitle');
+const exploreSub         = document.getElementById('exploreSub');
+const exploreItem1Title  = document.getElementById('exploreItem1Title');
+const exploreItem1Desc   = document.getElementById('exploreItem1Desc');
+const exploreItem2Title  = document.getElementById('exploreItem2Title');
+const exploreItem2Desc   = document.getElementById('exploreItem2Desc');
+const exploreItem3Title  = document.getElementById('exploreItem3Title');
+const exploreItem3Desc   = document.getElementById('exploreItem3Desc');
+const exploreClosing     = document.getElementById('exploreClosing');
+
 const browseKicker     = document.getElementById('browseKicker');
 const browseTitle      = document.getElementById('browseTitle');
 const itemsSuffixEl    = document.getElementById('itemsSuffix');
@@ -577,6 +588,17 @@ Every entry also has a message board where you can share your thoughts and conne
     startCard4Desc: 'Explore side quests, feature content, and stories beyond the main path.',
     startCard4Link: 'Explore the library ↓',
 
+    exploreKicker: 'How to Explore BELAUG',
+    exploreTitle: 'One page can lead to an entire path',
+    exploreSub: 'BELAUG is built as a connected FFXIV library. Follow the story in sequence, use tags to find similar entries, or move between different kinds of related content.',
+    exploreItem1Title: 'Follow the Story',
+    exploreItem1Desc: 'Continue through the entries before and after a page to follow questlines, battle series, and story arcs in order.',
+    exploreItem2Title: 'Explore by Tags',
+    exploreItem2Desc: 'Select a tag beneath any card to find other entries that share the same type, theme, or feature.',
+    exploreItem3Title: 'Discover Connections',
+    exploreItem3Desc: 'Move between stories, quests, battles, BGM, mounts, and other related records to explore the same world from different angles.',
+    exploreClosing: 'Start anywhere — each path is designed to lead naturally into the next part of the library.',
+
     browseKicker: 'Browse Library',
     browseTitle: 'Search by title, series, category, expansion, or patch',
 
@@ -679,6 +701,17 @@ Every entry also has a message board where you can share your thoughts and conne
     startCard4Desc: 'サブクエスト、機能コンテンツ、そして主線の外側に広がる物語をたどります。',
     startCard4Link: 'ライブラリを見る ↓',
 
+    exploreKicker: 'BELAUG の歩き方',
+    exploreTitle: 'ひとつのページから、物語と記録のつながりへ',
+    exploreSub: 'BELAUG は、各ページが互いにつながる FFXIV ライブラリです。物語を順番にたどることも、タグから同じ特徴のコンテンツを探すことも、関連する別の記録へ広げていくこともできます。',
+    exploreItem1Title: '物語をたどる',
+    exploreItem1Desc: 'ページの前後につながる項目から、クエストライン、バトルシリーズ、物語の流れを順番にたどれます。',
+    exploreItem2Title: 'タグから探す',
+    exploreItem2Desc: '各カード下部のタグを選ぶと、同じ種類・テーマ・特徴を持つコンテンツをまとめて探せます。',
+    exploreItem3Title: 'つながりを広げる',
+    exploreItem3Desc: 'ストーリー、クエスト、バトル、BGM、マウントなど、異なる記録を関連性から行き来し、別の角度から FFXIV をたどれます。',
+    exploreClosing: 'どこから始めても、次の記録へ自然につながっていくライブラリです。',
+
     browseKicker: 'ライブラリを見る',
     browseTitle: 'タイトル、シリーズ、カテゴリ、拡張、パッチから探す',
 
@@ -779,6 +812,17 @@ Every entry also has a message board where you can share your thoughts and conne
     startCard4Title: '支線故事',
     startCard4Desc: '探索支線任務、功能型內容，以及主線之外延伸出的各種故事。',
     startCard4Link: '前往資料庫 ↓',
+
+    exploreKicker: '如何探索 BELAUG',
+    exploreTitle: '從一個頁面，走進彼此相連的故事與內容',
+    exploreSub: 'BELAUG 是一座彼此相連的 FFXIV Library。你可以依序沿著故事前後閱讀、透過標籤尋找同類內容，也能從不同類型的關聯記錄繼續延伸探索。',
+    exploreItem1Title: '沿著故事繼續',
+    exploreItem1Desc: '透過頁面前後相連的條目，依序追尋任務線、戰鬥系列與故事脈絡，不必在看完一頁後重新尋找下一段。',
+    exploreItem2Title: '透過標籤探索',
+    exploreItem2Desc: '點選每張卡片下方的標籤，就能找到具有相同類型、主題或特色的其他內容，從另一個方向瀏覽 Library。',
+    exploreItem3Title: '從關聯延伸',
+    exploreItem3Desc: '故事、任務、戰鬥、BGM、坐騎與其他記錄彼此串聯，讓你能從不同角度繼續探索同一個 FFXIV 世界。',
+    exploreClosing: '從任何一個入口開始，都能自然走向下一段內容。',
 
     browseKicker: '瀏覽資料庫',
     browseTitle: '依標題、系列、分類、資料片或版本搜尋',
@@ -896,6 +940,17 @@ if (langToggle) {
   if (startCard4Title) startCard4Title.textContent = dict.startCard4Title;
   if (startCard4Desc) startCard4Desc.textContent = dict.startCard4Desc;
   if (startCard4Link) startCard4Link.textContent = dict.startCard4Link;
+
+  if (exploreKicker) exploreKicker.textContent = dict.exploreKicker;
+  if (exploreTitle) exploreTitle.textContent = dict.exploreTitle;
+  if (exploreSub) exploreSub.textContent = dict.exploreSub;
+  if (exploreItem1Title) exploreItem1Title.textContent = dict.exploreItem1Title;
+  if (exploreItem1Desc) exploreItem1Desc.textContent = dict.exploreItem1Desc;
+  if (exploreItem2Title) exploreItem2Title.textContent = dict.exploreItem2Title;
+  if (exploreItem2Desc) exploreItem2Desc.textContent = dict.exploreItem2Desc;
+  if (exploreItem3Title) exploreItem3Title.textContent = dict.exploreItem3Title;
+  if (exploreItem3Desc) exploreItem3Desc.textContent = dict.exploreItem3Desc;
+  if (exploreClosing) exploreClosing.textContent = dict.exploreClosing;
 
   if (browseKicker) browseKicker.textContent = dict.browseKicker;
   if (browseTitle) browseTitle.textContent = dict.browseTitle;
