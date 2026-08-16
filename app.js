@@ -553,16 +553,16 @@ const i18n = {
   EN: {
     langLabel: 'English',
     subscribeCta: '🔔 Subscribe',
-    supportCta: '☕ Support BELAUG’s ongoing journey',
-    supportNote: 'A small gesture that helps this story archive continue to grow.',
+    supportCta: '🌟 Support BELAUG Library',
+    supportNote: 'A small gesture that helps this trilingual story archive continue to grow.',
 
-    tagline: `<b>FFXIV Library</b> is an extension of my YouTube channel.<br>
-Here you’ll find additional story details, quest records, background notes, and elements that could not be fully shown in each video.<br>
-Every entry also has a message board where you can share your thoughts and connect with fellow travelers.`,
+    tagline: `<b>BELAUG</b> is a trilingual Final Fantasy XIV story archive for players who want to revisit the world, characters, music, and memories of FFXIV.<br>
+Rather than simply listing quest dialogue, each entry reorganizes quests and scenes into readable story records, preserving context, narrative flow, character motivation, and atmosphere.<br>
+Explore MSQ, side stories, raids, dungeons, trials, BGM, collections, and other adventure records in English, 日本語, and 繁體中文, with links to immersive no-commentary video records.`,
 
-    heroPanelKicker: 'A quiet place to explore the many stories of FFXIV',
-    heroPanelTitle: 'Stories, battles, music, and memories — gathered in one quiet archive.',
-    heroPanelDesc: 'Browse by expansion, category, patch, and tags, then continue into story pages, battle records, and music archive entries.',
+    heroPanelKicker: 'A quiet place to explore the stories of FFXIV',
+    heroPanelTitle: 'Readable story records, battles, music, and memories — gathered across languages.',
+    heroPanelDesc: 'Browse by expansion, category, patch, and tags, then continue into story pages, battle records, music archives, and linked immersive videos.',
 
     miniLinkStart: 'Start Here',
     miniLinkBrowse: 'Browse Library',
@@ -669,16 +669,16 @@ Every entry also has a message board where you can share your thoughts and conne
   JP: {
     langLabel: '日本語',
     subscribeCta: '🔔 チャンネル登録',
-    supportCta: '☕ BELAUG の続いていく旅を応援する',
-    supportNote: 'この物語のアーカイブが少しずつ育っていくための、小さな後押しです。',
+    supportCta: '🌟 BELAUG Library を支援',
+    supportNote: 'この三言語ストーリーアーカイブを続けていくための、小さな応援になります。',
 
-    tagline: `<b>FFXIV Library</b> は、私の YouTube チャンネルを補完する資料館です。<br>
-映像だけでは伝えきれない物語の細部、クエスト記録、背景メモ、補足要素をここに整理しています。<br>
-各ページにはメッセージボードもあり、感じたことを旅人同士で共有できます。`,
+    tagline: `<b>BELAUG</b> は、FFXIV の物語、キャラクター、音楽、旅の記憶をもう一度たどりたいプレイヤーのための、三言語対応ストーリーアーカイブです。<br>
+クエストの台詞をただ並べるのではなく、それぞれの出来事を読みやすい物語記録として整理し、前後の流れ、登場人物の動機、場面の空気、物語としてのつながりを残しています。<br>
+メインクエスト、サイドストーリー、レイド、ダンジョン、討伐・討滅戦、BGM、コレクション、その他の冒険記録を、English／日本語／繁體中文で探すことができ、各ページは無実況の没入型動画記録とも連動しています。`,
 
-    heroPanelKicker: 'FF14 に広がる数多くの物語を、静かにたどるための場所。',
-    heroPanelTitle: '物語、戦い、音楽、そして旅の記憶を、ひとつの静かなアーカイブに。',
-    heroPanelDesc: '拡張パッケージ、カテゴリ、パッチ、タグから探し、その先のストーリーページ、バトル記録、BGMアーカイブへ進めます。',
+    heroPanelKicker: 'FFXIV の物語を静かにたどる場所',
+    heroPanelTitle: '物語記録、戦い、音楽、旅の記憶を、言語を越えてひとつのアーカイブへ。',
+    heroPanelDesc: '拡張パッケージ、カテゴリ、パッチ、タグから探し、物語ページ、戦闘記録、音楽アーカイブ、そして連動する没入型動画へ進むことができます。',
 
     miniLinkStart: 'ここから探す',
     miniLinkBrowse: 'ライブラリを見る',
@@ -784,16 +784,16 @@ Every entry also has a message board where you can share your thoughts and conne
   ZH: {
     langLabel: '繁體中文',
     subscribeCta: '🔔 訂閱頻道',
-    supportCta: '☕ 支持 BELAUG 持續前行的旅程',
-    supportNote: '讓這座故事資料館能慢慢繼續成長的一點小小力量。',
+    supportCta: '🌟 支持 BELAUG Library',
+    supportNote: '一份小小的支持，能幫助這座三語劇情資料庫繼續成長。',
 
-    tagline: `<b>FFXIV Library</b> 是我 YouTube 頻道的延伸資料館。<br>
-這裡整理了影片中無法完整呈現的故事細節、任務記錄、背景補充與相關內容。<br>
-每個條目下方也設有留言板，歡迎留下你的想法，與其他旅人一起分享。`,
+    tagline: `<b>BELAUG</b> 是一個三語 Final Fantasy XIV 劇情資料庫，為想重溫 FFXIV 世界、角色、音樂與旅途記憶的玩家而整理。<br>
+這裡不是單純羅列任務對話，而是將任務、事件與場景整理成可閱讀的劇情檔案，保留前後脈絡、角色動機、情緒轉折、場景氛圍與故事連貫性。<br>
+你可以用 English／日本語／繁體中文探索主線任務、支線故事、團隊任務、副本、討伐戰、BGM、收藏與各類冒險紀錄，並連結到對應的沉浸式無旁白影片。`,
 
-    heroPanelKicker: '靜靜探索 FFXIV 眾多故事的一處角落。',
-    heroPanelTitle: '故事、戰鬥、音樂與旅途中的記憶，都被收進這座安靜的資料館。',
-    heroPanelDesc: '你可以依資料片、分類、版本與標籤瀏覽，再繼續前往故事頁、戰鬥記錄與 BGM 檔案頁面。',
+    heroPanelKicker: '一個安靜探索 FFXIV 故事的地方',
+    heroPanelTitle: '劇情、戰鬥、音樂與旅途記憶，在不同語言之間被整理成一座安靜的 archive。',
+    heroPanelDesc: '你可以依照資料片、分類、版本與標籤瀏覽內容，進入劇情頁面、戰鬥紀錄、音樂檔案，以及對應的沉浸式影片。',
 
     miniLinkStart: '從這裡開始探索',
     miniLinkBrowse: '瀏覽資料庫',
