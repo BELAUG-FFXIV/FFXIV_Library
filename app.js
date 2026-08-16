@@ -670,7 +670,7 @@ Explore MSQ, side stories, raids, dungeons, trials, BGM, collections, and other 
     langLabel: '日本語',
     subscribeCta: '🔔 チャンネル登録',
     supportCta: '🌟 BELAUG Library を支援',
-supportNote: 'この三言語ストーリーアーカイブを続けていくための、小さな応援になります。',
+supportNote: 'この三言語対応ストーリーアーカイブを続けていくための、小さな応援になります。',
 
 tagline: `<b>BELAUG</b> は、FFXIV の物語、キャラクター、音楽、旅の記憶をもう一度たどりたいプレイヤーのための、三言語対応ストーリーアーカイブです。<br>
 クエストの台詞をただ並べるのではなく、それぞれの出来事を読みやすい物語記録として整理し、前後の流れ、登場人物の動機、場面の雰囲気、物語としてのつながりを残しています。<br>
